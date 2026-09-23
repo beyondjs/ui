@@ -2,7 +2,7 @@
 
 `@beyond-js/ui` is Beyond's shared interface package: the canonical design tokens, framework-free DOM components, a React adapter over the same components and one stylesheet. It serves products written in React (Delegate) and in plain JavaScript DOM classes (the family reference, Branding) with one behavior implementation.
 
-**Status: version 0.1.1, implemented and verified locally, not published.** 0.1.1 corrects four defects that product adoptions found in 0.1.0 (see the [evidence](docs/reviews/2026-09-23/implementation-evidence.md#011-corrections)); its token set is unchanged and keeps its own version, 0.1.0. The package is distributed as a vendored tarball that consumers install from their own `tools/` directory. It is not on a registry. Branding consumes its tokens. No product consumes its components yet: adoption in Delegate, Branding and the other products is separate, later work. The [implementation evidence](docs/reviews/2026-09-23/implementation-evidence.md) records what ran and what is not established.
+**Status: version 0.1.2, implemented and verified locally, not published.** 0.1.1 corrected four defects that product adoptions found in 0.1.0 (see the [evidence](docs/reviews/2026-09-23/implementation-evidence.md#011-corrections)), and 0.1.2 corrects the React `Dialog`, which closed itself under `StrictMode` (see [0.1.2 corrections](docs/reviews/2026-09-23/implementation-evidence.md#012-corrections)); its token set is unchanged and keeps its own version, 0.1.0. The package is distributed as a vendored tarball that consumers install from their own `tools/` directory. It is not on a registry. Branding consumes its tokens. No product consumes its components yet: adoption in Delegate, Branding and the other products is separate, later work. The [implementation evidence](docs/reviews/2026-09-23/implementation-evidence.md) records what ran and what is not established.
 
 ## What it contains
 
@@ -20,8 +20,8 @@ The [component catalog](docs/components.md) describes each component, its option
 
 Prerequisite: Node.js 22.21.1 or later.
 
-1. In this repository, `npm install` once, then `npm run pack:consumers -- <consumer directory>`. That runs `npm pack`, writes `dist-pack/beyond-ui-<version>.tgz` (currently `beyond-ui-0.1.1.tgz`) with its `sha512` integrity beside it, and copies the tarball into `<consumer directory>/tools/`.
-2. In the consumer, declare `"@beyond-js/ui": "file:tools/beyond-ui-0.1.1.tgz"` (a dependency, or a devDependency when a bundler builds the product) and run `npm install`.
+1. In this repository, `npm install` once, then `npm run pack:consumers -- <consumer directory>`. That runs `npm pack`, writes `dist-pack/beyond-ui-<version>.tgz` (currently `beyond-ui-0.1.2.tgz`) with its `sha512` integrity beside it, and copies the tarball into `<consumer directory>/tools/`.
+2. In the consumer, declare `"@beyond-js/ui": "file:tools/beyond-ui-0.1.2.tgz"` (a dependency, or a devDependency when a bundler builds the product) and run `npm install`.
 3. Import the two stylesheets once, then the components:
 
 ```js

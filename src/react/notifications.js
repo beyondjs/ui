@@ -2,7 +2,7 @@ import React from 'react';
 import { NotificationEntry as Entry } from '../dom/notifications/entry.js';
 import { NotificationInbox as Inbox } from '../dom/notifications/inbox.js';
 import { Toaster } from '../dom/toaster.js';
-import { h, useInstance, useLatest, useSync } from './hooks.js';
+import { h, living, useInstance, useLatest, useSync } from './hooks.js';
 
 const { forwardRef, useImperativeHandle, useLayoutEffect, useMemo, useState } = React;
 
@@ -105,8 +105,11 @@ export function useToaster(labels) {
 		const made = new Toaster({ labels });
 		made.mount(document.body);
 		setToaster(made);
-		return () => made.destroy();
+		return () => {
+			made.destroy();
+			setToaster(current => (current === made ? null : current));
+		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [JSON.stringify(labels ?? {})]);
-	return useMemo(() => ({ show: (message, options) => toaster?.show(message, options), clear: () => toaster?.clear() }), [toaster]);
+	return useMemo(() => ({ show: (message, options) => living(toaster)?.show(message, options), clear: () => living(toaster)?.clear() }), [toaster]);
 }

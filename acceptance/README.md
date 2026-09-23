@@ -5,7 +5,7 @@
 ## What a run does
 
 1. `npm pack` into a temporary directory (the `prepack` build runs first) and prints the tarball's `sha512` integrity.
-2. Prepares three consumers, each a temporary project whose path contains a space: `dom` (the plain DOM page), `react19` (the React page on React 19.3.0) and `react18` (the same page on React 18.3.1). Each installs the tarball and its React version with `npm install`, copies `fixtures/`, and bundles its page with esbuild, which resolves `@beyond-js/ui`, `@beyond-js/ui/react` and both stylesheets through the package's `exports`. Nothing is read from this checkout's `src/`.
+2. Prepares three consumers, each a temporary project whose path contains a space: `dom` (the plain DOM page), `react19` (the React page on React 19.3.0) and `react18` (the same page on React 18.3.1). Each installs the tarball and its React version with `npm install`, copies `fixtures/`, and bundles its pages with esbuild (the React consumers have two), which resolves `@beyond-js/ui`, `@beyond-js/ui/react` and both stylesheets through the package's `exports`. Nothing is read from this checkout's `src/`.
 3. Serves each consumer from a static server on an ephemeral port and opens Google Chrome (Playwright's `chrome` channel, headless). Every check opens its own browser context, so viewport, color scheme, reduced motion and touch never leak between checks.
 4. Prints one line per check and consumer and a final count; exits with 1 when any check fails. Temporary projects, servers and the browser are removed on success and on failure.
 
@@ -17,10 +17,10 @@ Prerequisites: Node.js 22.21.1 or later, `npm install` in this repository, netwo
 
 - `run.mjs`: the run described above.
 - `support/`: `consumer.mjs` (temporary consumer projects), `server.mjs` (static server), `browser.mjs` (Chrome and small assertions), `words.mjs` (visible copy per fixture language).
-- `checks/`: the checks, grouped by area: `keyboard.mjs` (action menu, dialog, busy confirmation, prompt), `picker.mjs`, `notifications.mjs` (including the bounded "N+" count, "View all" closing the panel and, in React, closing it through the ref), `help.mjs` (help, tooltip, touch, focused form) and `presentation.mjs` (reduced motion, themes, 320 px, 200 % zoom, a long dialog whose body scrolls, collection, teardown, Spanish copy). Each check names the consumers it applies to.
+- `checks/`: the checks, grouped by area: `keyboard.mjs` (action menu, dialog, busy confirmation, prompt), `picker.mjs`, `notifications.mjs` (including the bounded "N+" count, "View all" closing the panel and, in React, closing it through the ref), `help.mjs` (help, tooltip, touch, focused form), `strict.mjs` (on React 19 and 18, a dialog mounted open and one opened by a button stay open under the external-store provider, keep what is typed, survive a store change and report only the person's closing) and `presentation.mjs` (reduced motion, themes, 320 px, 200 % zoom, a long dialog whose body scrolls, collection, teardown, Spanish copy). Each check names the consumers it applies to.
 - `fixtures/`: the physical consumer pages.
   - `dom/`: a plain JavaScript page that creates, mounts and destroys DOM components, in English (the package defaults).
-  - `react/`: a React page using `@beyond-js/ui/react` inside `StrictMode`, with Spanish copy passed through `labels` (`labels.js`), as a localized product does.
+  - `react/`: a React page using `@beyond-js/ui/react` inside `StrictMode`, with Spanish copy passed through `labels` (`labels.js`), as a localized product does; and `store.html` (`store.jsx`), dialogs under `StrictMode` inside a provider that reads an external store with `useSyncExternalStore`, as products' language and session providers do.
   - `data/`: the fictional sources both pages use: people for the picker (45, one disabled), requests for the collection, the clauses of a long dialog (`terms.js`, EN and ES), and a notification adapter with modes selected by `?notices=` (`ready`, `empty`, `failed`, `unavailable`, `partial`, `bound`); `ready` answers as a product relay (`unavailable`), `partial` and `bound` as Beyond Projects (`sources`, and `more` at a bound of 2).
   - `page.css`: page layout only; component styles come from the package.
 

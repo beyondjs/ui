@@ -11,6 +11,7 @@ import { checks as picker } from './checks/picker.mjs';
 import { checks as notifications } from './checks/notifications.mjs';
 import { checks as help } from './checks/help.mjs';
 import { checks as presentation } from './checks/presentation.mjs';
+import { checks as strict } from './checks/strict.mjs';
 
 /**
  * Browser acceptance of the packed package: `npm pack` → three consumers installed from the tarball
@@ -20,7 +21,7 @@ import { checks as presentation } from './checks/presentation.mjs';
 class Acceptance {
 	#root = fileURLToPath(new URL('..', import.meta.url));
 	#consumers = [new Consumer('dom', 'dom'), new Consumer('react19', 'react', '19.3.0'), new Consumer('react18', 'react', '18.3.1')];
-	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation];
+	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict];
 	#filter = process.argv[2] ?? '';
 
 	async run() {

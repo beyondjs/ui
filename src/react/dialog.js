@@ -3,41 +3,55 @@ import ReactDOM from 'react-dom';
 import { Dialog as Modal } from '../dom/dialog.js';
 import { FocusedForm as Submission } from '../dom/form.js';
 import { confirm, prompt, alert } from '../dom/questions.js';
-import { h, useLatest } from './hooks.js';
+import { h, living, useLatest } from './hooks.js';
 
 const { useLayoutEffect, useMemo, useRef, useState } = React;
 
 /**
  * A modal dialog driven by the DOM `Dialog` class: React renders `children` into its body and
- * `actions` into its footer. `open` opens and closes it; `onClose(value)` reports a dismissal or a
- * `close(value)` from inside. `busy` makes it non-dismissible.
+ * `actions` into its footer. `open` opens and closes it; `onClose(value)` reports only the person
+ * dismissing it or a `close(value)` from inside. `busy` makes it non-dismissible.
+ *
+ * The adapter reports the results of the dialog it holds and nothing else: closing it through `open`,
+ * replacing it when a shaping prop changes, unmounting it and React's development double mount (which
+ * destroys the first instance, and under React 18 may render it once more) never call `onClose`, and a
+ * destroyed dialog is never opened.
  */
 export function Dialog({ open, title, description = null, busy = false, escape = true, backdrop = false, size = 'medium', labels, onClose, actions = null, children }) {
-	const [modal, setModal] = useState(null);
+	const [state, setState] = useState(null);
+	const held = useRef(null);
+	const round = useRef(null);
 	const closing = useLatest(onClose);
-	const quiet = useRef(false);
+	const modal = living(state);
 	useLayoutEffect(() => {
 		const made = new Modal({ title, description, escape, backdrop, size, labels: { close: labels?.close } });
-		setModal(made);
-		return () => made.destroy();
+		held.current = made;
+		setState(made);
+		return () => {
+			if (held.current === made) held.current = null;
+			setState(current => (current === made ? null : current));
+			made.destroy();
+		};
 		// Title and busy are updated in place; these options shape the element itself.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [description, escape, backdrop, size, labels?.close]);
 	useLayoutEffect(() => {
-		if (!modal) return;
+		if (!modal || modal !== held.current) return;
 		modal.title = title;
 		modal.busy = busy;
 		modal.footer.hidden = !actions;
 	});
 	useLayoutEffect(() => {
-		if (!modal) return;
+		if (!modal || modal !== held.current) return;
 		if (open && !modal.shown) {
+			// Each opening is one round; a round closed through `open` or by destruction reports nothing.
+			const current = { quiet: false };
+			round.current = current;
 			modal.open().then(value => {
-				if (quiet.current) quiet.current = false;
-				else closing.current?.(value);
+				if (!current.quiet && held.current === modal) closing.current?.(value);
 			});
 		} else if (!open && modal.shown) {
-			quiet.current = true;
+			if (round.current) round.current.quiet = true;
 			modal.busy = false;
 			modal.close(null);
 		}

@@ -42,6 +42,7 @@ export interface DialogProps {
 	backdrop?: boolean;
 	size?: 'small' | 'medium' | 'large';
 	labels?: { close?: string };
+	/** The person dismissed it (null) or `close(value)` ran inside; never a close through `open`, a replacement or an unmount. */
 	onClose?: (value: unknown) => void;
 	actions?: ReactNode;
 	children?: ReactNode;
@@ -151,5 +152,6 @@ export function NotificationInbox(props: {
 	labels?: Copy;
 }): ReactElement;
 export function useToaster(labels?: Copy): { show(message: string, options?: { tone?: 'success' | 'info' | 'warning' | 'danger'; detail?: string; duration?: number }): (() => void) | undefined; clear(): void };
+/** `[host, instance]`; `instance` is null until mounted and whenever the rendered instance is already destroyed. */
 export function useInstance<T extends Component>(create: () => T, deps: unknown[], options?: { place?: boolean }): [RefObject<HTMLElement | null>, T | null];
 export type { Ref };

@@ -17,14 +17,18 @@ export class Browser {
 		return this.#browser.version();
 	}
 
-	/** Opens a consumer page in a new context and waits until the fixture is ready. */
-	async open(consumer, { query = '', ...options } = {}) {
+	/**
+	 * Opens a consumer page in a new context and waits until the fixture is ready. `file` names
+	 * another page of the fixture than `index.html`; such a page only has to declare itself ready.
+	 */
+	async open(consumer, { query = '', file = null, ...options } = {}) {
 		const context = await this.#browser.newContext({ viewport: { width: 1280, height: 900 }, ...options });
 		const page = await context.newPage();
 		const errors = [];
 		page.on('pageerror', error => errors.push(error.message));
-		await page.goto(`${consumer.url}${query}`);
-		await page.waitForFunction(() => window.fixture?.ready && document.querySelector('.bui-header') && document.querySelector('.bui-picker'));
+		await page.goto(`${consumer.url(file ?? undefined)}${query}`);
+		if (file) await page.waitForFunction(() => window.fixture?.ready);
+		else await page.waitForFunction(() => window.fixture?.ready && document.querySelector('.bui-header') && document.querySelector('.bui-picker'));
 		return { page, context, errors };
 	}
 

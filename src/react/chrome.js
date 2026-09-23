@@ -73,7 +73,10 @@ export function Tooltip({ text, children }) {
 		if (!trigger) return undefined;
 		const made = new Hint(trigger, { text });
 		setHint(made);
-		return () => made.destroy();
+		return () => {
+			made.destroy();
+			setHint(current => (current === made ? null : current));
+		};
 	}, []);
 	useSync(hint, current => (current.text = text), [text]);
 	return h('span', { ref: holder, className: 'bui-tooltip-anchor' }, children);
