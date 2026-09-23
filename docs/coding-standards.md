@@ -77,4 +77,6 @@ A review rejects a change that adds a file of more than 400 lines, or that adds 
 
 ## Accepted exceptions
 
-None. This repository has no source implementation yet. The shared sections above match the Beyond Suite standard; future exceptions must name their files, reasons and boundaries here.
+None. Every source file is within the 300-line target, which `tests/sources.test.mjs` enforces. The shared sections above match the Beyond Suite standard; future exceptions must name their files, reasons and boundaries here.
+
+Names that belong to frameworks are not exceptions: the React adapter uses React's prop conventions (`onChange`, `onClose`, `onSubmit`), hook names (`useConfirm`, `useInstance`) and `useState` setters (`setBusy`), and DOM code calls platform APIs by their own names. The DOM classes take the same callbacks as lower-case options (`onchange`, `onclose`).

@@ -1,0 +1,195 @@
+/* The searchable entity picker: chosen chips, search, filters, the listbox and its states. */
+.bui-picker {
+	display: grid;
+	gap: var(--space-2);
+	min-width: 0;
+}
+.bui-picker-chosen {
+	display: grid;
+	gap: var(--space-1);
+}
+.bui-picker-count {
+	margin: 0;
+	font-size: var(--text-small);
+	color: var(--color-text-muted);
+}
+.bui-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-1);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.bui-chips[hidden] {
+	display: none;
+}
+.bui-chip {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1);
+	max-width: 100%;
+	padding: 2px 2px 2px var(--space-2);
+	border: 1px solid var(--color-border-strong);
+	border-radius: var(--radius-control);
+	background: var(--color-surface-sunken);
+	font-size: var(--text-small);
+}
+.bui-chip-label {
+	overflow-wrap: anywhere;
+}
+.bui-chip-problem {
+	border-color: var(--color-warning);
+	background: var(--color-warning-surface);
+}
+.bui-chip-reason {
+	flex-basis: 100%;
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+}
+.bui-chip-remove {
+	display: inline-grid;
+	place-items: center;
+	width: var(--bui-target);
+	height: var(--bui-target);
+	min-width: 28px;
+	min-height: 28px;
+	padding: 0;
+	border: 0;
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: var(--color-text-muted);
+	cursor: pointer;
+}
+.bui-chip-remove:hover {
+	background: var(--color-surface);
+	color: var(--color-text);
+}
+.bui-chip-remove .bui-icon {
+	width: 14px;
+	height: 14px;
+}
+
+.bui-picker-bar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+}
+.bui-picker-search {
+	position: relative;
+	flex: 1 1 12rem;
+	display: flex;
+	min-width: 0;
+}
+.bui-picker-search > .bui-icon {
+	position: absolute;
+	left: var(--space-2);
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--color-text-muted);
+	pointer-events: none;
+}
+.bui-picker-search > .bui-input {
+	padding-left: calc(var(--space-2) + 24px);
+}
+
+.bui-picker-list {
+	max-height: 18rem;
+	margin: 0;
+	padding: var(--space-1);
+	overflow-y: auto;
+	list-style: none;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	background: var(--color-surface);
+}
+.bui-picker-list:empty {
+	display: none;
+}
+.bui-picker-list[aria-busy='true'] {
+	opacity: 0.7;
+}
+.bui-option {
+	display: grid;
+	grid-template-columns: 20px 1fr;
+	gap: var(--space-2);
+	align-items: start;
+	min-height: var(--bui-target);
+	padding: var(--space-2);
+	border-radius: var(--radius-control);
+	cursor: pointer;
+}
+.bui-option:hover {
+	background: var(--color-surface-sunken);
+}
+.bui-option-active {
+	background: var(--color-surface-sunken);
+	outline: 2px solid var(--color-focus);
+	outline-offset: -2px;
+}
+.bui-option-mark {
+	display: inline-grid;
+	place-items: center;
+	width: 18px;
+	height: 18px;
+	margin-top: 2px;
+	border: 1px solid var(--color-border-strong);
+	border-radius: 4px;
+	background: var(--color-surface);
+	color: transparent;
+}
+.bui-picker:not(.bui-picker-multiple) .bui-option-mark {
+	border-radius: var(--radius-round);
+}
+.bui-option-mark .bui-icon {
+	width: 14px;
+	height: 14px;
+}
+.bui-option[aria-selected='true'] {
+	background: var(--color-surface-selected);
+}
+.bui-option[aria-selected='true'] .bui-option-mark {
+	border-color: var(--color-action);
+	background: var(--color-action);
+	color: var(--color-on-action);
+}
+.bui-option[aria-disabled='true'] {
+	color: var(--color-text-muted);
+	cursor: not-allowed;
+}
+.bui-option-text {
+	display: grid;
+	min-width: 0;
+}
+.bui-option-label {
+	overflow-wrap: anywhere;
+}
+.bui-option-description,
+.bui-option-reason {
+	font-size: var(--text-small);
+	color: var(--color-text-muted);
+}
+.bui-option-reason {
+	font-style: italic;
+}
+
+.bui-picker-foot {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+	min-height: var(--bui-target);
+}
+.bui-picker-status {
+	flex: 1 1 auto;
+	margin: 0;
+	font-size: var(--text-small);
+	color: var(--color-text-muted);
+}
+.bui-picker-problem {
+	color: var(--color-danger);
+}
+.bui-picker-foot [hidden] {
+	display: none;
+}

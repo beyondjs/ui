@@ -1,0 +1,26 @@
+/** English defaults of the notification entry and inbox; consumers replace any entry through `labels`. */
+export const defaults = {
+	title: 'Notifications',
+	button: ({ count }) => (count === null || count === undefined ? 'Notifications' : count === 0 ? 'Notifications, none unread' : `Notifications, ${count} unread`),
+	loading: 'Loading notifications…',
+	empty: 'No notifications yet.',
+	caught: 'You are all caught up.',
+	failure: 'Notifications could not be loaded.',
+	retry: 'Try again',
+	unavailable: 'Notifications are unavailable right now. Your work is not affected; try again later.',
+	partial: ({ products }) => `Some products could not be reached (${products}). Their notifications are hidden until they answer.`,
+	all: 'View all notifications',
+	everything: 'Mark all as read',
+	mark: 'Mark as read',
+	unmark: 'Mark as unread',
+	unread: 'Unread',
+	gone: 'This item is no longer available to you.',
+	update: 'That change could not be saved. Try again.',
+	more: 'Load more',
+	show: 'Show',
+	every: 'All',
+	product: 'Product',
+	products: 'All products',
+	updates: ({ count }) => `${count} updates`,
+	hide: 'Hide earlier updates'
+};

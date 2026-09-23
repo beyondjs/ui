@@ -1,0 +1,174 @@
+/* Fields, inputs, native selects, choices, help and tooltips. */
+.bui-field,
+.bui-choices {
+	display: grid;
+	gap: var(--space-1);
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+.bui-field-label {
+	padding: 0;
+	font-size: var(--text-small);
+	font-weight: var(--weight-medium);
+	color: var(--color-text);
+}
+.bui-field-optional {
+	font-weight: var(--weight-light);
+	color: var(--color-text-muted);
+}
+.bui-field-hint,
+.bui-choice-note {
+	margin: 0;
+	font-size: var(--text-small);
+	color: var(--color-text-muted);
+}
+.bui-field-error {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+	margin: 0;
+	font-size: var(--text-small);
+	color: var(--color-danger);
+}
+.bui-field-error[hidden] {
+	display: none;
+}
+
+.bui-input,
+.bui-select-control {
+	width: 100%;
+	min-width: 0;
+	min-height: var(--bui-control);
+	padding: 0 var(--space-3);
+	border: 1px solid var(--color-border-strong);
+	border-radius: var(--radius-control);
+	background: var(--color-surface);
+	color: var(--color-text);
+	font: inherit;
+	font-size: var(--text-body);
+}
+.bui-textarea {
+	min-height: calc(var(--bui-control) * 3);
+	padding: var(--space-2) var(--space-3);
+	resize: vertical;
+}
+.bui-input::placeholder {
+	color: var(--color-text-muted);
+}
+.bui-field-invalid .bui-input,
+.bui-input[aria-invalid='true'] {
+	border-color: var(--color-danger);
+}
+.bui-input:focus-visible,
+.bui-select-control:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 1px;
+}
+
+.bui-select {
+	position: relative;
+	display: inline-grid;
+	min-width: 0;
+	max-width: 100%;
+}
+.bui-select-control {
+	appearance: none;
+	padding-right: calc(var(--space-3) + 22px);
+	cursor: pointer;
+}
+.bui-select > .bui-icon {
+	position: absolute;
+	right: var(--space-2);
+	top: 50%;
+	transform: translateY(-50%);
+	pointer-events: none;
+	color: var(--color-text-muted);
+}
+
+.bui-choices-list {
+	display: grid;
+	gap: var(--space-1);
+}
+.bui-choice {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	align-items: center;
+	column-gap: var(--space-2);
+	min-height: var(--bui-target);
+}
+.bui-choice input {
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	accent-color: var(--color-action);
+}
+.bui-choice label {
+	font-size: var(--text-body);
+	cursor: pointer;
+}
+.bui-choice-note {
+	grid-column: 2;
+}
+.bui-choice-disabled label {
+	color: var(--color-text-muted);
+	cursor: not-allowed;
+}
+
+/* Help: a toggle next to what it explains; the explanation flows in the layout. */
+.bui-help {
+	display: inline;
+	position: static;
+	vertical-align: middle;
+}
+.bui-disclosure-help {
+	min-height: var(--bui-target);
+	min-width: var(--bui-target);
+	padding: 0;
+	border: 0;
+	border-radius: var(--radius-round);
+	background: transparent;
+	color: var(--color-link);
+}
+.bui-disclosure-help:hover,
+.bui-disclosure-help[aria-expanded='true'] {
+	background: var(--color-surface-sunken);
+}
+.bui-help-panel {
+	position: static;
+	display: block;
+	max-width: min(40rem, 100%);
+	margin: var(--space-1) 0 var(--space-2);
+	padding: var(--space-3);
+	border: 1px solid var(--color-border);
+	border-left: 3px solid var(--color-info);
+	border-radius: var(--radius-control);
+	background: var(--color-info-surface);
+	box-shadow: none;
+	font-size: var(--text-small);
+	line-height: var(--leading-small);
+}
+.bui-help-panel p + p {
+	margin-top: var(--space-2);
+}
+.bui-help-panel p {
+	margin: 0;
+}
+
+.bui-tooltip {
+	position: fixed;
+	z-index: 40;
+	max-width: min(18rem, calc(100vw - 16px));
+	padding: var(--space-1) var(--space-2);
+	border-radius: var(--radius-control);
+	background: var(--color-family-bar);
+	color: var(--color-family-text);
+	font-size: var(--text-small);
+	line-height: var(--leading-small);
+	box-shadow: var(--elevation-menu);
+	animation: bui-enter var(--motion-quick) var(--motion-ease);
+}
+.bui-tooltip[hidden] {
+	display: none;
+}

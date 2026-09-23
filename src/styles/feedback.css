@@ -1,0 +1,185 @@
+/* Status, badges, counts, callouts, loading, skeletons and empty states. */
+.bui-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: var(--text-small);
+	font-weight: var(--weight-medium);
+	color: var(--color-text);
+}
+.bui-status-dot {
+	width: 8px;
+	height: 8px;
+	flex: none;
+	border-radius: var(--radius-round);
+	background: var(--color-text-muted);
+}
+.bui-status-success .bui-status-dot {
+	background: var(--color-success);
+}
+.bui-status-warning .bui-status-dot {
+	background: var(--color-warning);
+}
+.bui-status-danger .bui-status-dot {
+	background: var(--color-danger);
+}
+.bui-status-info .bui-status-dot,
+.bui-status-progress .bui-status-dot {
+	background: var(--color-info);
+}
+.bui-status-progress .bui-status-dot {
+	animation: bui-pulse 1.2s ease-in-out infinite;
+}
+
+.bui-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 1px 7px;
+	border: 1px solid var(--color-border-strong);
+	border-radius: var(--radius-control);
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	letter-spacing: var(--tracking-label);
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+.bui-badge-info {
+	border-color: currentColor;
+	background: var(--color-info-surface);
+	color: var(--color-info);
+}
+.bui-badge-success {
+	border-color: currentColor;
+	background: var(--color-success-surface);
+	color: var(--color-success);
+}
+.bui-badge-warning {
+	border-color: currentColor;
+	background: var(--color-warning-surface);
+	color: var(--color-warning);
+}
+.bui-badge-danger {
+	border-color: currentColor;
+	background: var(--color-danger-surface);
+	color: var(--color-danger);
+}
+
+.bui-count {
+	display: inline-grid;
+	place-items: center;
+	min-width: 18px;
+	height: 18px;
+	padding: 0 5px;
+	border-radius: var(--radius-round);
+	background: var(--color-action);
+	color: var(--color-on-action);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	line-height: 1;
+}
+.bui-count[hidden] {
+	display: none;
+}
+
+.bui-callout {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: var(--space-3);
+	padding: var(--space-3) var(--space-4);
+	border: 1px solid var(--color-border);
+	border-left: 3px solid var(--color-info);
+	border-radius: var(--radius-control);
+	background: var(--color-info-surface);
+	color: var(--color-text);
+}
+.bui-callout > .bui-icon {
+	margin-top: 2px;
+	color: var(--color-info);
+}
+.bui-callout-success {
+	border-left-color: var(--color-success);
+	background: var(--color-success-surface);
+}
+.bui-callout-success > .bui-icon {
+	color: var(--color-success);
+}
+.bui-callout-warning {
+	border-left-color: var(--color-warning);
+	background: var(--color-warning-surface);
+}
+.bui-callout-warning > .bui-icon {
+	color: var(--color-warning);
+}
+.bui-callout-danger {
+	border-left-color: var(--color-danger);
+	background: var(--color-danger-surface);
+}
+.bui-callout-danger > .bui-icon {
+	color: var(--color-danger);
+}
+.bui-callout-body {
+	display: grid;
+	gap: var(--space-1);
+	min-width: 0;
+}
+.bui-callout-title,
+.bui-callout-text {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+.bui-callout-title {
+	font-weight: var(--weight-medium);
+}
+.bui-callout-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	margin-top: var(--space-1);
+}
+
+.bui-loading {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-2);
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+}
+.bui-skeleton {
+	display: grid;
+	gap: var(--space-2);
+	padding: var(--space-2) 0;
+}
+.bui-skeleton-line {
+	display: block;
+	height: 12px;
+	border-radius: var(--radius-control);
+	background: var(--color-surface-sunken);
+	animation: bui-pulse 1.4s ease-in-out infinite;
+}
+.bui-skeleton-line:nth-child(3n + 1) {
+	width: 90%;
+}
+.bui-skeleton-line:nth-child(3n + 2) {
+	width: 72%;
+}
+.bui-skeleton-line:nth-child(3n) {
+	width: 55%;
+}
+
+.bui-empty {
+	display: grid;
+	justify-items: start;
+	gap: var(--space-2);
+	padding: var(--space-6) var(--space-4);
+	border: 1px dashed var(--color-border-strong);
+	border-radius: var(--radius-base);
+}
+.bui-empty-title {
+	margin: 0;
+	font-weight: var(--weight-medium);
+}
+.bui-empty-body {
+	margin: 0;
+	color: var(--color-text-muted);
+}

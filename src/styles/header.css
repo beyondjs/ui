@@ -1,0 +1,197 @@
+/* The shared family header and the notification entry, panel and inbox. */
+.bui-header {
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2) var(--space-4);
+	min-height: var(--layout-family);
+	padding: var(--space-1) var(--space-4);
+	background: var(--color-family-bar);
+	color: var(--color-family-text);
+}
+.bui-header a {
+	color: inherit;
+	text-decoration: none;
+}
+.bui-header :focus-visible {
+	outline-color: var(--color-family-marker);
+}
+.bui-header-start {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+}
+.bui-header-brand {
+	display: inline-flex;
+	align-items: center;
+	min-height: var(--bui-target);
+	font-weight: var(--weight-medium);
+}
+.bui-header-brand img,
+.bui-header-brand svg {
+	display: block;
+	height: 21px;
+	width: auto;
+}
+.bui-header-toggle {
+	display: none;
+	place-items: center;
+	width: var(--bui-target);
+	height: var(--bui-target);
+	padding: 0;
+	border: 0;
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+}
+.bui-header-toggle:hover,
+.bui-header .bui-disclosure-bell:hover {
+	background: var(--overlay-lift);
+}
+.bui-header-external .bui-header-toggle {
+	display: inline-grid;
+}
+.bui-header-context {
+	flex: 1 1 auto;
+	min-width: 0;
+	color: var(--color-family-muted);
+	font-size: var(--text-small);
+}
+.bui-crumbs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.bui-crumbs li {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-1);
+	min-width: 0;
+}
+.bui-crumbs a,
+.bui-crumbs span[aria-current] {
+	overflow-wrap: anywhere;
+}
+.bui-crumbs [aria-current] {
+	color: var(--color-family-text);
+}
+.bui-header-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-1);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.bui-header-links a {
+	display: inline-flex;
+	align-items: center;
+	min-height: var(--bui-target);
+	padding: 0 var(--space-2);
+	border-radius: var(--radius-control);
+	font-size: var(--text-small);
+}
+.bui-header-links a:hover {
+	background: var(--overlay-lift);
+}
+.bui-header-links a[aria-current] {
+	box-shadow: inset 0 -2px 0 var(--color-family-marker);
+}
+.bui-header-end {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	margin-left: auto;
+}
+@media (max-width: 767px) {
+	.bui-header-has-nav .bui-header-toggle {
+		display: inline-grid;
+	}
+	.bui-header-has-nav .bui-header-nav {
+		order: 10;
+		flex-basis: 100%;
+	}
+	.bui-header-has-nav:not([data-expanded]) .bui-header-nav {
+		display: none;
+	}
+	.bui-header-links {
+		flex-direction: column;
+	}
+	.bui-header-context {
+		order: 5;
+		flex-basis: 100%;
+	}
+}
+
+/* Notification entry */
+.bui-disclosure-bell {
+	position: relative;
+	gap: 0;
+	border: 0;
+	background: transparent;
+	color: inherit;
+}
+.bui-disclosure-bell .bui-count {
+	position: absolute;
+	top: 0;
+	right: 0;
+	transform: translate(25%, -15%);
+}
+.bui-notify .bui-disclosure-panel {
+	width: min(24rem, calc(100vw - 2 * var(--space-4)));
+	padding: var(--space-3);
+	color: var(--color-text);
+}
+@media (max-width: 480px) {
+	.bui-notify {
+		position: static;
+	}
+	.bui-notify .bui-disclosure-panel {
+		left: var(--space-4);
+		right: var(--space-4);
+		width: auto;
+	}
+}
+.bui-notify-frame {
+	display: grid;
+	gap: var(--space-2);
+}
+.bui-notify-title {
+	margin: 0;
+	font-size: var(--text-title-3);
+	font-weight: var(--weight-medium);
+}
+.bui-notify-status {
+	margin: 0;
+	font-size: var(--text-small);
+	color: var(--color-text-muted);
+}
+.bui-notify-status:empty {
+	display: none;
+}
+.bui-notify-body {
+	max-height: min(24rem, 60dvh);
+	overflow-y: auto;
+}
+.bui-notify-foot {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-2);
+	padding-top: var(--space-2);
+	border-top: 1px solid var(--color-border);
+}
+.bui-notify-all {
+	display: inline-flex;
+	align-items: center;
+	min-height: var(--bui-target);
+	color: var(--color-link);
+	font-size: var(--text-small);
+}

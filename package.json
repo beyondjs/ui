@@ -1,0 +1,72 @@
+{
+	"name": "@beyond-js/ui",
+	"version": "0.1.0",
+	"description": "Beyond's shared interface components: design tokens, framework-free DOM components, a React adapter and one stylesheet",
+	"type": "module",
+	"license": "UNLICENSED",
+	"engines": {
+		"node": ">=22.21.1"
+	},
+	"sideEffects": [
+		"*.css"
+	],
+	"exports": {
+		".": {
+			"types": "./types/dom.d.ts",
+			"default": "./src/dom/index.js"
+		},
+		"./dom": {
+			"types": "./types/dom.d.ts",
+			"default": "./src/dom/index.js"
+		},
+		"./react": {
+			"types": "./types/react.d.ts",
+			"default": "./src/react/index.js"
+		},
+		"./tokens": {
+			"types": "./types/tokens.d.ts",
+			"default": "./src/foundations/index.js"
+		},
+		"./tokens.css": "./dist/tokens.css",
+		"./tokens.json": "./dist/tokens.json",
+		"./styles.css": "./dist/styles.css",
+		"./package.json": "./package.json"
+	},
+	"files": [
+		"src/",
+		"types/",
+		"dist/tokens.css",
+		"dist/tokens.json",
+		"dist/styles.css"
+	],
+	"scripts": {
+		"build": "node tools/build.mjs",
+		"prepack": "node tools/build.mjs",
+		"test": "node tools/build.mjs && node --test \"tests/*.test.mjs\"",
+		"types": "tsc -p tests/fixtures/types/tsconfig.json",
+		"acceptance": "node acceptance/run.mjs",
+		"pack:consumers": "node tools/pack.mjs"
+	},
+	"peerDependencies": {
+		"react": "^18.2.0 || ^19.0.0",
+		"react-dom": "^18.2.0 || ^19.0.0"
+	},
+	"peerDependenciesMeta": {
+		"react": {
+			"optional": true
+		},
+		"react-dom": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@types/react": "19.3.0",
+		"@types/react-dom": "19.3.0",
+		"esbuild": "0.28.2",
+		"happy-dom": "20.14.5",
+		"playwright-core": "1.63.0",
+		"react": "19.3.0",
+		"react-dom": "19.3.0",
+		"typescript": "7.0.2"
+	}
+}

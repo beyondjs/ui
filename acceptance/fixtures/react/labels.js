@@ -1,0 +1,56 @@
+/** Spanish copy the React fixture passes, as a product localizes the shared components. */
+export const es = {
+	notifications: {
+		title: 'Notificaciones',
+		button: ({ count }) => (count === null || count === undefined ? 'Notificaciones' : count === 0 ? 'Notificaciones, ninguna sin leer' : `Notificaciones, ${count} sin leer`),
+		loading: 'Cargando notificaciones…',
+		empty: 'Todavía no hay notificaciones.',
+		caught: 'Estás al día.',
+		failure: 'No se pudieron cargar las notificaciones.',
+		retry: 'Reintentar',
+		unavailable: 'Las notificaciones no están disponibles ahora. Tu trabajo no se ve afectado.',
+		partial: ({ products }) => `Algunos productos no respondieron (${products}).`,
+		all: 'Ver todas las notificaciones',
+		everything: 'Marcar todas como leídas',
+		mark: 'Marcar como leída',
+		unmark: 'Marcar como no leída',
+		unread: 'Sin leer',
+		gone: 'Este elemento ya no está disponible.',
+		update: 'No se pudo guardar el cambio.',
+		more: 'Cargar más',
+		show: 'Mostrar',
+		every: 'Todas',
+		product: 'Producto',
+		products: 'Todos los productos',
+		updates: ({ count }) => `${count} novedades`,
+		hide: 'Ocultar novedades anteriores'
+	},
+	picker: {
+		placeholder: 'Escribe para buscar',
+		chosen: 'Elegidos',
+		count: ({ count }) => (count === 1 ? '1 elegido' : `${count} elegidos`),
+		none: 'Nada elegido',
+		attention: ({ count }) => (count === 1 ? '1 requiere atención' : `${count} requieren atención`),
+		remove: 'Quitar {label}',
+		loading: 'Cargando…',
+		shown: ({ shown }) => `${shown} resultados`,
+		total: '{shown} de {total}',
+		empty: ({ query }) => (query ? `Sin resultados para “${query}”.` : 'Nada coincide con los filtros.'),
+		nothing: 'Todavía no hay nada para elegir.',
+		failure: 'No se pudieron cargar las opciones.',
+		retry: 'Reintentar',
+		more: 'Cargar más',
+		disabled: 'No disponible',
+		stale: 'Ya no disponible',
+		ineligible: 'No elegible',
+		unavailable: 'No disponible'
+	},
+	questions: { accept: 'Confirmar', cancel: 'Cancelar', ok: 'Entendido', close: 'Cerrar', failure: 'No funcionó. Reintenta o cancela.' },
+	header: { header: 'Beyond', context: 'Dónde estás', nav: 'Producto', open: 'Abrir navegación', close: 'Cerrar navegación' },
+	help: { name: 'Ayuda: {topic}' },
+	collection: {
+		search: 'Buscar {label}', placeholder: 'Buscar', all: 'Todos', loading: 'Cargando…', failure: 'No se pudo cargar la lista.', retry: 'Reintentar', empty: 'Todavía no hay nada.',
+		matches: ({ query }) => (query ? `Sin resultados para “${query}”.` : 'Nada coincide con los filtros.'), clear: 'Limpiar búsqueda y filtros', pages: 'Páginas de {label}',
+		range: '{first}–{last} de {total}', page: 'Página {page}', of: 'página {page} de {pages}', previous: 'Anterior', next: 'Siguiente'
+	}
+};

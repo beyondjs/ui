@@ -1,37 +1,49 @@
 # Architecture and decisions
 
-## Current boundary
+## Boundary
 
-UI is a documentation-only library scaffold. It has no public package name, module API, runtime, renderer, build pipeline or delivery format. The owner-selected responsibility is reusable cross-product UI: header/navigation building blocks, typography and color foundations, tokens, controls, dialogs and motion. Products retain their domain behavior, resource authorization and navigation policy; reusable building blocks do not decide who may enter a product or perform an operation.
+UI owns reusable cross-product interface: design tokens, header and navigation building blocks, controls, fields, pickers, dialogs, collections, feedback, motion and the presentation of suite notifications. Products keep their domain behavior, resource authorization, navigation policy and copy: a component never decides who may enter a product or perform an operation, and never performs a business action. Branding keeps the navigable family model, journeys, experience proposals and the evidence of what products implement.
 
-Branding remains the broader navigable family model, functional journeys, user experience and evidence of what products implement versus what is pending. Its current implementation uses Vite, JavaScript DOM classes, shared chrome and plain-data foundations. Delegate is an intended React consumer. UI must be consumable by both; adaptation, lifecycle, styling and distribution contracts require design and execution before a compatibility claim is made.
+The package is `@beyond-js/ui`, version 0.1.0. It is implemented and verified locally (see [validation](validation.md) and the [implementation evidence](reviews/2026-09-23/implementation-evidence.md)); it is not published, and no product consumes its components yet. Branding consumes its tokens.
+
+## Structure
+
+- `src/foundations/`: the canonical token data and `TokenSheet` (public module `@beyond-js/ui/tokens`). Plain data with no browser, bundler or framework dependency.
+- `src/dom/`: the DOM core (`@beyond-js/ui/dom`, also the package root). Each component is a class that owns its element in `#private` state, mounts with `mount(parent)` and releases everything with `destroy()`: the element, listeners registered on `document` or other targets (`Component.listen`) and timers (`Component.later`). Larger components are composed of collaborators in their own directory (`picker/`: `Search`, `Selection`, `ResultList`; `collection/`: `Loader`, `Table`; `notifications/`: `Feed`, `NoticeList`, `Actions`, `Panel`, `Moment`).
+- `src/react/`: the React adapter (`@beyond-js/ui/react`). Interactive components create the DOM class in a layout effect, place its element in a host React renders and destroy it on unmount; React content goes into component slots through portals (dialog body and footer, header slots, collection cells, help and disclosure panels). Simple elements (buttons, status, badges, callouts, loading, skeletons, fields, choices, selects) are rendered by React with the same markup and classes as the DOM builders, which a test compares.
+- `src/styles/`: the component stylesheets, concatenated by `tools/build.mjs` into `dist/styles.css`; `dist/tokens.css` is generated from the token data.
+- `types/`: hand-written declarations for every public module.
 
 ## Decisions
 
-| Topic | State |
-| --- | --- |
-| Shared components and foundations owned by UI | Owner-selected direction; not implemented |
-| Branding family model and experience evidence | Retained in Branding |
-| Canonical tokens | Existing Branding `src/foundations/`; no extraction or duplicate copy |
-| React and plain DOM consumption | Required future consumer boundaries; unverified |
-| Renderer, adapters, packaging and public names | Open; no exclusive React architecture or mandatory Web Components |
-| Branding rename or merge | Floated, not selected; no action authorized |
-| Product redesign and shared adoption | Approved September 23 next implementation scope; documentation-only baseline remains |
+| Topic | Decision | Reason |
+| --- | --- | --- |
+| Renderer | Framework-free DOM core with a React adapter over it | One behavior implementation for the plain DOM consumer (Branding) and the React consumer (Delegate); neither React-only nor Web Components |
+| Adapter rendering | Interactive components are driven by the DOM classes; simple elements are rendered by React with identical markup | Behavior such as focus, busy dismissal and paging is written once; simple markup stays idiomatic React |
+| Source format | Plain ESM JavaScript, hand-written `.d.ts`; only the stylesheets are generated | No compile step between source and consumer; TypeScript consumers are checked by `npm run types` |
+| Distribution | `npm pack` tarball vendored in each consumer's `tools/` (`file:tools/beyond-ui-<version>.tgz`) | Consumption from an installed artifact, never a sibling path, following the suite's `dev-orchestrator` pattern; no publication is authorized |
+| Tokens | Canonical in this package from 0.1.0 (`src/foundations/`), moved unchanged from Branding with `provenance` (origin `branding/src/foundations`, suite revision `4c47733631efa4f16fd04ebcb2867de5dbd5b8f1`); `status` stays `proposed` | The versioned extraction the scope allows; one canonical copy. A test proves the generated sheet is byte-identical to Branding's earlier output. The move approves no value |
+| Branding consumption | Branding's `src/foundations/` re-exports `@beyond-js/ui/tokens` from the vendored tarball | Branding keeps its import paths and holds no copy |
+| Theming | Token custom properties per theme under `data-beyond-mode`, then `prefers-color-scheme` | The attribute the Beyond products already use |
+| Copy | Every component takes `labels`; entries are strings with `{placeholders}` or functions for plurals and word order | Products localize (EN/ES); English is only the default |
+| Notifications | Components read a consumer adapter shaped after `beyond-notifications/1` (`summary`, `list`, `read`, `unread`, `open`) and keep no item text after the view that showed it | Projects owns aggregation and read state; products own relays, permissions and destinations |
+| Unit DOM | happy-dom for Node's test runner | It implements `<dialog>`, constraint validation and events, which jsdom lacks in part; layout, focus rings and real keys are proved in Chrome |
+| Branding rename or merge | Not selected | Unchanged owner position |
 
 ## Approved implementation acceptance
 
 1. Inspect both consumers and select public contracts that support them; keep product policy outside the components.
-2. Design a deliberate token extraction with one canonical source, provenance and versioning. Until executed, retain Branding as canonical. Existing foundation aesthetics and interaction proposals still await owner approval.
+2. Design a deliberate token extraction with one canonical source, provenance and versioning (executed at 0.1.0; see Decisions). Existing foundation aesthetics and interaction proposals still await owner approval.
 3. Implement components with explicit ownership, cleanup, accessibility, keyboard/focus behavior and reduced-motion behavior. Select distribution and adapters through demonstrated consumption in React and plain DOM.
 4. Add public-contract tests, real consumer fixtures and installed/exported acceptance. Demonstrate both consumers before reporting integration.
 5. Apply the family-reference synchronization policy as product-visible changes are commissioned. Update Branding's affected representations and evidence in that assignment; onboarding does not modify simulated journeys.
 
-The September 23 owner decision commissions the next implementation scope described below. This documentation change implements no components and grants no commit, publication, deployment or data-migration authority.
+Steps 1 to 4 are implemented for the package itself; consumer adoption and the product browser results of step 4 remain with each product's assignment. No commit, publication, deployment or data-migration authority follows from the implementation.
 
 
 ## September 23 shared experience scope
 
-Implement reusable public components actually consumed by Delegate React and Branding plain DOM, including a common header. Select renderer/adapters/distribution through real consumption; do not force an exclusively React architecture or Web Components. Branding tokens remain canonical until actual versioned extraction; never maintain competing canonical copies. No Branding rename/merge is selected and no blanket approval of its older proposals is implied.
+Implement reusable public components actually consumed by Delegate React and Branding plain DOM, including a common header. Select renderer/adapters/distribution through real consumption; do not force an exclusively React architecture or Web Components. The versioned token extraction is executed: tokens are canonical in this package from 0.1.0 and Branding re-exports them; never maintain competing canonical copies. No Branding rename/merge is selected and no blanket approval of its older proposals is implied.
 
 Required components/patterns include shared header/navigation primitives, buttons/actions/menus, fields/validation, checkbox/radio, finite selects and searchable single/multi-entity pickers, dialogs/confirmations/focused forms, tooltips and persistent essential help, compact collections/search/filter/paging, loading/error/status/feedback and motion. Essential help must remain accessible on touch and by keyboard, not only hover/native title. Native finite selects may remain where usable; searchable entity collections require appropriate behavior and scale. Selection across filters/pages, counts, loading, no matches, failure, stale/ineligible selection and permission loss need clear contracts; authorization remains in each product.
 

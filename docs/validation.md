@@ -1,24 +1,26 @@
 # Validation
 
-## Current workflow
+Run the checks that match a change. Every command runs from the repository root after `npm install` (Node.js 22.21.1 or later).
 
-UI has documentation only. No dependencies, compiler, loader, browser application, test runner, build or CLI exist. There are no unit, integration or acceptance commands to execute and no permanent executable fixtures yet. `npm install`, `npm test`, `npm run build` and `npm run dev` are not supported workflows. Documentation inspection needs Git and a text editor; checks may use any available Markdown link checker.
+| Level | Command | Runner and DOM | What a pass proves |
+| --- | --- | --- | --- |
+| Contract and unit | `npm test` | `tools/build.mjs`, then Node's test runner (`node --test tests/*.test.mjs`) over happy-dom | Token extraction (byte-identical sheet against `tests/fixtures/branding-tokens-0.1.0.css`, provenance, contrast), source conventions (file length, no color literal in styles, documented classes, portable content), and the public contract of every DOM component and of the React adapter on React 19: success, negative and recovery cases, imported through the package's own `exports` |
+| Declarations | `npm run types` | TypeScript 7 (`tsc`, bundler resolution, `react-jsx`) over `tests/fixtures/types/` | A typed plain DOM consumer and a typed React consumer compile against `types/*.d.ts` |
+| Installed browser acceptance | `npm run acceptance` | `npm pack`, three consumers installed from the tarball (plain DOM, React 19.3.0, React 18.3.1), esbuild bundles, Google Chrome through `playwright-core` | The artifact consumers install works in a real browser: keyboard, focus, Escape, busy dialogs, picker selection across pages and filters, no matches, error retry, notification states, tooltip and help on keyboard and touch, reduced motion, both themes, 320 px, 200 % zoom, touch targets, teardown and Spanish copy. See [acceptance](../acceptance/README.md) |
 
-For documentation changes, validate local links and anchors, English and portability, the thin `CLAUDE.md` bridge, the shared coding/documentation standard copies and `git diff --check`. With an unborn branch, inspect untracked documents too: a clean diff does not check them. Confirm `git status --short --branch`, `git symbolic-ref HEAD` and `git for-each-ref` preserve the original state apart from intended files. Do not stage files just to validate them.
+happy-dom is a development dependency because the unit contract needs `<dialog>`, constraint validation and events in Node; it does not lay out, draw focus rings or dispatch real key sequences, so those are asserted only in Chrome. The React adapter's unit tests run on React 19; React 18 is exercised in the browser acceptance.
 
-Within Beyond Suite, verify `git check-ignore -v ui/README.md` selects `/ui/`, `git ls-files -- ui` is empty and UI resolves its own Git root. Check its repository and startup inventory entries. Root/suite list, dry-run, start, readiness and shutdown checks are inapplicable: UI owns no service or selector profile. Shared launcher archives and adapter-consumer registration are likewise inapplicable. No fake server is needed to close onboarding.
+A pass is package evidence only. It is not adoption by a product, not a product browser result, not screen-reader output and not hosted behavior. Record product results in the product's own evidence.
 
-See [onboarding evidence](reviews/2026-09-23/onboarding.md) for executed results. Documentation checks establish neither component behavior nor consumer integration.
+## Test organization
 
-## Test organization for implementation
+- `tests/`: contract and unit tests (`*.test.mjs`), `tests/support/page.mjs` (the happy-dom page) and `tests/fixtures/` (physical fixtures with their [guide](../tests/fixtures/README.md): the token baseline, data sources and the typed consumers).
+- `acceptance/`: the installed browser journey, with its [guide](../acceptance/README.md), `support/`, `checks/` and `fixtures/` (the plain DOM and React consumer pages and their fictional data).
+- Substantive examples are files with their real extensions; tests assert outcomes through public modules. Harnesses copy fixtures into unique temporary directories whose paths contain a space, await readiness rather than fixed delays, and remove every directory, server and browser they started, on success and on failure. Nothing stops unrelated services.
+- Do not regenerate `tests/fixtures/branding-tokens-0.1.0.css`: it is the extraction baseline. A deliberate token change is a new token version with its own evidence.
 
-The README must expose actual commands, prerequisites, expected results and fixtures when implementation adds them. Document contract/unit, integration and complete acceptance levels separately, naming the compiler, loader and browser actually exercised.
+UI is not compiled by Packages or Engine, so `beyond test` and the utilities validation do not apply. It owns no service, port or selector profile; root and suite launch checks are inapplicable.
 
-- Put contract/unit and integration tests in `tests/` (or a documented `test/` convention), complete installed/composed/exported journeys in `acceptance/`, physical examples under the consuming area's `fixtures/`, and harness infrastructure under `support/`. Each fixture group and acceptance entry needs its own guide.
-- Keep source examples, harnesses and assertions distinct. Store substantive applications, modules, components, manifests, styles and assets as readable files with their real extensions; do not hide them in strings, encoded maps or source generators. Small primitive inputs, expected values, protocol payloads and short edits may remain inline. Necessary generation cases such as stress inputs must document why and how to reproduce them.
-- Copy mutable fixtures to unique temporary directories before editing; retain immutable originals. Allocate ports, support paths with spaces, await readiness rather than fixed delays, and clean up owned processes/directories on success and failure. Never stop unrelated services.
-- Import what consumers import and assert outcomes, diagnostic codes, failure and recovery. Keep fixtures out of production discovery/distribution unless acceptance explicitly verifies their inclusion. Preserve scenario identities and assertions during migrations.
-- For Packages-compiled Beyond modules, use `beyond test`; public module tests are named `<module>.test.ts` beside the module directory, with cross-package tests under `tests/`. Engine-compiled implementation modules use checkout-level `tests/` with utilities validation supplying compiler servers and loader. Ordinary Node/browser tests need not use that runner. Select and document the applicable boundary when UI's authoring model is chosen.
-- React and plain DOM consumer tests must cover real supported artifacts, accessible behavior, cleanup, styles and motion; a fixture pass is not product or hosted acceptance. Record independent checks separately from integrated journeys.
+## Documentation changes
 
-No exceptions or runtime test results exist for this scaffold. Implementation remains responsible for adding and executing these checks, including standalone installation and both shared-launcher paths if a runnable showcase is commissioned.
+Validate local links and anchors, English and portability, the thin `CLAUDE.md` bridge, the shared coding and documentation standard copies, and `git diff --check`, including untracked files.

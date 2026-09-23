@@ -1,19 +1,50 @@
 # Beyond UI
 
-The owner-approved next [implementation scope](docs/architecture.md#september-23-shared-experience-scope) requires actual React/DOM consumption, a shared header, common interaction patterns and notification presentation with cross-suite adoption. This is a concrete implementation mandate for the next assignment; the repository remains a documentation-only scaffold today.
+`@beyond-js/ui` is Beyond's shared interface package: the canonical design tokens, framework-free DOM components, a React adapter over the same components and one stylesheet. It serves products written in React (Delegate) and in plain JavaScript DOM classes (the family reference, Branding) with one behavior implementation.
 
-Beyond UI owns reusable cross-product interface components and foundations: shared header and navigation building blocks, typography, colors and tokens, inputs, buttons, dialogs and motion.
+**Status: version 0.1.0, implemented and verified locally, not published.** The package is distributed as a vendored tarball that consumers install from their own `tools/` directory. It is not on a registry. Branding consumes its tokens. No product consumes its components yet: adoption in Delegate, Branding and the other products is separate, later work. The [implementation evidence](docs/reviews/2026-09-23/implementation-evidence.md) records what ran and what is not established.
 
-**Status: documentation-only library scaffold.** There is no component implementation, package manifest, dependency installation, build, test runner, CLI or development server yet. No package is published and no product consumes UI. No installation command or `npm run dev` is available. The repository needs only Git and a text editor for its current documentation workflow.
+## What it contains
 
-## Ownership and consumers
+| Public module | Contents |
+| --- | --- |
+| `@beyond-js/ui` and `@beyond-js/ui/dom` | DOM component classes: `Button`, `ActionMenu`, `Disclosure`, `Field`, `Choices`, `Select`, `Picker`, `Dialog`, `confirm`/`prompt`/`alert`, `FocusedForm`, `Tooltip`, `Help`, `Collection`, `Toaster`, `Header`, `NotificationEntry`, `NotificationInbox`, and the builders `status`, `badge`, `callout`, `loading`, `skeleton` |
+| `@beyond-js/ui/react` | The React 18/19 adapter: the same components as React components and hooks (`useConfirm`, `useBusy`, `useToaster`) |
+| `@beyond-js/ui/tokens` | The canonical token data (`tokens`, with version, `status` and provenance), `TokenSheet` and `Contrast` |
+| `@beyond-js/ui/tokens.css` | The generated token custom properties, both themes (`data-beyond-mode`, then the system preference) |
+| `@beyond-js/ui/styles.css` | Every component style (`bui-` classes), using token custom properties only |
 
-UI is intended to support both Delegate's React application and Branding's plain JavaScript DOM views. Its rendering and distribution architecture remains open; neither an exclusively React implementation nor Web Components has been selected.
+The [component catalog](docs/components.md) describes each component, its options, states and usage guidance. [Architecture](docs/architecture.md) records the decisions.
 
-Branding remains the navigable model of the entire Beyond family, its functional journeys, experience proposals and evidence of implemented versus pending behavior. Its existing `src/foundations/` remains the canonical token source until an explicit extraction is implemented. UI does not carry a second token copy. A merge or rename of Branding has not been selected.
+## Consume it
+
+Prerequisite: Node.js 22.21.1 or later.
+
+1. In this repository, `npm install` once, then `npm run pack:consumers -- <consumer directory>`. That runs `npm pack`, writes `dist-pack/beyond-ui-0.1.0.tgz` with its `sha512` integrity beside it, and copies the tarball into `<consumer directory>/tools/`.
+2. In the consumer, declare `"@beyond-js/ui": "file:tools/beyond-ui-0.1.0.tgz"` (a dependency, or a devDependency when a bundler builds the product) and run `npm install`.
+3. Import the two stylesheets once, then the components:
+
+```js
+import '@beyond-js/ui/tokens.css';
+import '@beyond-js/ui/styles.css';
+import { Dialog, Picker } from '@beyond-js/ui';          // plain DOM
+import { Dialog, Picker, useConfirm } from '@beyond-js/ui/react'; // React
+```
+
+React consumers need `react` and `react-dom` 18.2 or later (peer dependencies). TypeScript declarations ship with every module. Every component takes a `labels` option (a `labels` prop in React) for its copy; products pass their own language, and English is only the default.
 
 ## Work here
 
-Read [AGENTS.md](AGENTS.md), [architecture and decisions](docs/architecture.md), [coding standards](docs/coding-standards.md) and [validation](docs/validation.md). The validation guide distinguishes today's documentation checks from future contract, integration and acceptance tests. [Onboarding evidence](docs/reviews/2026-09-23/onboarding.md) records the initial repository inspection and executed checks.
+Read [AGENTS.md](AGENTS.md), [architecture](docs/architecture.md), [coding standards](docs/coding-standards.md) and [validation](docs/validation.md).
 
-Maintained guides belong in `docs/`, dated evidence in `docs/reviews/`, and temporary assignments in [docs-temp](docs-temp/README.md). No sibling checkout is required to understand these guides. In Beyond Suite, UI is registered as a library scaffold and deliberately has no selector service, port or shared-launcher dependency.
+| Command | What it does |
+| --- | --- |
+| `npm run build` | Writes `dist/tokens.css`, `dist/tokens.json` and `dist/styles.css` (also run by `npm test` and `npm pack`) |
+| `npm test` | Contract and unit tests with Node's test runner over happy-dom |
+| `npm run types` | Compiles typed plain DOM and React consumers against the declarations |
+| `npm run acceptance` | Packs the package, installs it into a plain DOM, a React 19 and a React 18 consumer and runs the browser checks in the installed Google Chrome |
+| `npm run pack:consumers -- <dir>…` | Packs for vendoring and copies the tarball into consumers |
+
+UI is a library: it has no development server, no port and no suite selector service. The acceptance pages under `acceptance/fixtures/` are a test harness, not an application.
+
+Maintained guides belong in `docs/`, dated evidence in `docs/reviews/`, and temporary assignments in [docs-temp](docs-temp/README.md).

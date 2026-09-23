@@ -1,0 +1,30 @@
+/* Layout of the fixture pages only; every component style comes from the package. */
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+	font-size: var(--text-body);
+	line-height: var(--leading-body);
+}
+main {
+	display: grid;
+	gap: var(--space-8);
+	max-width: var(--layout-content);
+	margin: 0 auto;
+	padding: var(--space-6) var(--space-4);
+}
+section {
+	display: grid;
+	gap: var(--space-3);
+	min-width: 0;
+}
+.row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	align-items: center;
+}

@@ -1,0 +1,153 @@
+/* Compact collections: tools, the table with rows as links, and the pager. */
+.bui-collection {
+	display: grid;
+	gap: var(--space-3);
+	min-width: 0;
+}
+.bui-collection-tools {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: var(--space-3);
+}
+.bui-collection-search {
+	display: grid;
+	gap: var(--space-1);
+	flex: 1 1 14rem;
+	min-width: 0;
+}
+.bui-collection-filter {
+	display: grid;
+	gap: var(--space-1);
+	min-width: 0;
+}
+.bui-collection-body:focus {
+	outline: none;
+}
+.bui-collection-body:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+}
+.bui-collection-body[aria-busy='true'] .bui-table {
+	opacity: 0.6;
+}
+
+.bui-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--text-small);
+}
+.bui-table th,
+.bui-table td {
+	height: var(--bui-row);
+	padding: var(--space-2) var(--space-3);
+	border-bottom: 1px solid var(--color-border);
+	text-align: left;
+	vertical-align: middle;
+}
+.bui-table thead th {
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	letter-spacing: var(--tracking-label);
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+.bui-table tbody th {
+	font-weight: var(--weight-medium);
+}
+.bui-table .bui-numeric {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+.bui-table-links tbody tr {
+	position: relative;
+}
+.bui-table-links tbody tr:hover {
+	background: var(--color-surface-sunken);
+}
+.bui-row-link {
+	color: var(--color-link);
+	text-decoration: none;
+}
+.bui-row-link:hover {
+	text-decoration: underline;
+}
+/* The whole row opens the detail; the link itself stays the one focusable target. */
+.bui-row-link::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+}
+.bui-table-links tbody tr:has(.bui-row-link:focus-visible) {
+	outline: 2px solid var(--color-focus);
+	outline-offset: -2px;
+}
+.bui-row-link:focus-visible {
+	outline: none;
+}
+.bui-table-links a:not(.bui-row-link),
+.bui-table-links button {
+	position: relative;
+	z-index: 1;
+}
+
+.bui-pager {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-2);
+}
+.bui-pager-summary {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+}
+
+@media (max-width: 640px) {
+	.bui-table thead {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+	}
+	.bui-table,
+	.bui-table tbody,
+	.bui-table tr,
+	.bui-table th,
+	.bui-table td {
+		display: block;
+		width: 100%;
+	}
+	.bui-table tbody tr {
+		padding: var(--space-2) 0;
+		border-bottom: 1px solid var(--color-border);
+	}
+	.bui-table tbody th,
+	.bui-table tbody td {
+		height: auto;
+		padding: var(--space-1) var(--space-2);
+		border: 0;
+	}
+	.bui-table tbody td::before {
+		content: attr(data-label);
+		display: block;
+		color: var(--color-text-muted);
+		font-size: var(--text-label);
+		letter-spacing: var(--tracking-label);
+		text-transform: uppercase;
+	}
+	.bui-table .bui-numeric {
+		text-align: left;
+	}
+	.bui-pager {
+		justify-content: center;
+	}
+	.bui-pager-summary {
+		order: -1;
+		flex-basis: 100%;
+		text-align: center;
+	}
+}
