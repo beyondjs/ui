@@ -45,12 +45,50 @@ export const checks = [
 			await view.context.close();
 			view = await browser.open(consumer, { query: '?notices=partial' });
 			await view.page.locator('#inbox', { hasText: copy.partial }).waitFor();
-			expect(!(await view.page.locator('#inbox').textContent()).includes('1.4.0'), 'hidden product items are not shown');
+			const inbox = await view.page.locator('#inbox').textContent();
+			expect(!inbox.includes('1.4.0'), 'hidden product items are not shown');
+			expect(inbox.includes(copy.named) && !inbox.includes('(cdn)'), `the unreachable product is named by its display name: ${inbox.slice(0, 200)}`);
+			await bell(view.page).click();
+			await panel(view.page).getByText(copy.partial).waitFor();
+			expect((await panel(view.page).textContent()).includes(copy.named), 'the panel names it too');
 			await view.context.close();
 			view = await browser.open(consumer, { query: '?notices=empty' });
 			await bell(view.page).click();
 			await panel(view.page).getByText(copy.empty).waitFor();
 			await view.context.close();
+		}
+	},
+	{
+		name: 'entry: a count that stopped at the summary bound reads N+ and says so',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			const { page } = await browser.open(consumer, { query: '?notices=bound' });
+			const copy = words[consumer.language];
+			await page.locator('.bui-notify .bui-count:not([hidden])').waitFor();
+			const shown = await page.locator('.bui-notify .bui-count').textContent();
+			expect(shown === '2+', `bounded count: ${shown}`);
+			const name = await bell(page).getAttribute('aria-label');
+			expect(name.includes('2') && name.includes(copy.bound), `the accessible name says it is a lower bound: ${name}`);
+		}
+	},
+	{
+		name: 'entry: View all closes the panel, returns focus to the bell and routes to the inbox',
+		consumers: ['dom', 'react19', 'react18'],
+		async run(browser, consumer) {
+			const { page } = await browser.open(consumer);
+			const copy = words[consumer.language];
+			await bell(page).click();
+			await panel(page).locator('.bui-notice').first().waitFor();
+			await panel(page).getByRole('link', { name: copy.view }).click();
+			await page.waitForFunction(() => location.hash === '#/notifications');
+			expect(!(await panel(page).isVisible()), 'the panel closed');
+			expect(await page.evaluate(() => document.activeElement === document.querySelector('.bui-notify > button')), 'focus is on the bell');
+			if (consumer.language !== 'es') return;
+			await bell(page).click();
+			await panel(page).locator('.bui-notice-open').first().focus();
+			await page.evaluate(() => window.fixture.entry.current.close());
+			expect(!(await panel(page).isVisible()), 'React closes the panel through the ref');
+			expect(await page.evaluate(() => document.activeElement === document.querySelector('.bui-notify > button')), 'focus inside the panel returned to the bell');
 		}
 	},
 	{

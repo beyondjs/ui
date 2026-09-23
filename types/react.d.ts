@@ -2,7 +2,7 @@
 import type { ReactNode, ReactElement, Ref, RefAttributes, ForwardRefExoticComponent, FormHTMLAttributes, ButtonHTMLAttributes, SelectHTMLAttributes, MouseEvent as ReactMouseEvent, RefObject } from 'react';
 import type { Copy, NotificationAdapter, Notice } from './notifications.js';
 import type { Tone, MenuItem, ChoiceOption, SelectOption, PromptOptions, QuestionOptions, Crumb, CollectionState, InboxState, PickerChoice, PickerSource, Component } from './dom.js';
-export type { Copy, NotificationAdapter, Notice, NoticePage, NoticeRequest, NoticeSummary } from './notifications.js';
+export type { Copy, NotificationAdapter, Notice, NoticePage, NoticeRequest, NoticeSource, NoticeSummary } from './notifications.js';
 export { confirm, prompt, alert } from './dom.js';
 
 export function Icon(props: { name: string }): ReactElement;
@@ -117,7 +117,17 @@ export function ActionMenu(props: { label?: string | null; name?: string | null;
 export function Help(props: { topic: string; text?: string | string[]; labels?: Copy; children?: ReactNode }): ReactElement;
 export function Tooltip(props: { text: string; children: ReactElement }): ReactElement;
 
-export interface NotificationEntryHandle { refresh(): void; readonly count: number | null }
+export interface NotificationEntryHandle {
+	refresh(): void;
+	/** Opens the panel. */
+	open(): void;
+	/** Closes the panel; focus inside it returns to the bell. */
+	close(): void;
+	readonly count: number | null;
+	/** Whether the count stopped at the summary's bound (shown as "N+"). */
+	readonly more: boolean;
+	readonly expanded: boolean;
+}
 export interface NotificationEntryProps {
 	adapter: NotificationAdapter;
 	href?: string | null;

@@ -4,12 +4,12 @@
 
 UI owns reusable cross-product interface: design tokens, header and navigation building blocks, controls, fields, pickers, dialogs, collections, feedback, motion and the presentation of suite notifications. Products keep their domain behavior, resource authorization, navigation policy and copy: a component never decides who may enter a product or perform an operation, and never performs a business action. Branding keeps the navigable family model, journeys, experience proposals and the evidence of what products implement.
 
-The package is `@beyond-js/ui`, version 0.1.0. It is implemented and verified locally (see [validation](validation.md) and the [implementation evidence](reviews/2026-09-23/implementation-evidence.md)); it is not published, and no product consumes its components yet. Branding consumes its tokens.
+The package is `@beyond-js/ui`, version 0.1.1 (0.1.0 with the corrections product adoptions found; token set still 0.1.0). It is implemented and verified locally (see [validation](validation.md) and the [implementation evidence](reviews/2026-09-23/implementation-evidence.md)); it is not published, and no product consumes its components yet. Branding consumes its tokens.
 
 ## Structure
 
 - `src/foundations/`: the canonical token data and `TokenSheet` (public module `@beyond-js/ui/tokens`). Plain data with no browser, bundler or framework dependency.
-- `src/dom/`: the DOM core (`@beyond-js/ui/dom`, also the package root). Each component is a class that owns its element in `#private` state, mounts with `mount(parent)` and releases everything with `destroy()`: the element, listeners registered on `document` or other targets (`Component.listen`) and timers (`Component.later`). Larger components are composed of collaborators in their own directory (`picker/`: `Search`, `Selection`, `ResultList`; `collection/`: `Loader`, `Table`; `notifications/`: `Feed`, `NoticeList`, `Actions`, `Panel`, `Moment`).
+- `src/dom/`: the DOM core (`@beyond-js/ui/dom`, also the package root). Each component is a class that owns its element in `#private` state, mounts with `mount(parent)` and releases everything with `destroy()`: the element, listeners registered on `document` or other targets (`Component.listen`) and timers (`Component.later`). Larger components are composed of collaborators in their own directory (`picker/`: `Search`, `Selection`, `ResultList`; `collection/`: `Loader`, `Table`; `notifications/`: `Feed`, `NoticeList`, `Actions`, `Panel`, `Moment`, `Reach`).
 - `src/react/`: the React adapter (`@beyond-js/ui/react`). Interactive components create the DOM class in a layout effect, place its element in a host React renders and destroy it on unmount; React content goes into component slots through portals (dialog body and footer, header slots, collection cells, help and disclosure panels). Simple elements (buttons, status, badges, callouts, loading, skeletons, fields, choices, selects) are rendered by React with the same markup and classes as the DOM builders, which a test compares.
 - `src/styles/`: the component stylesheets, concatenated by `tools/build.mjs` into `dist/styles.css`; `dist/tokens.css` is generated from the token data.
 - `types/`: hand-written declarations for every public module.
@@ -28,6 +28,8 @@ The package is `@beyond-js/ui`, version 0.1.0. It is implemented and verified lo
 | Copy | Every component takes `labels`; entries are strings with `{placeholders}` or functions for plurals and word order | Products localize (EN/ES); English is only the default |
 | Notifications | Components read a consumer adapter shaped after `beyond-notifications/1` (`summary`, `list`, `read`, `unread`, `open`) and keep no item text after the view that showed it | Projects owns aggregation and read state; products own relays, permissions and destinations |
 | Unit DOM | happy-dom for Node's test runner | It implements `<dialog>`, constraint validation and events, which jsdom lacks in part; layout, focus rings and real keys are proved in Chrome |
+| Versions | The package version and the token set version (`tokens.version`) are independent: 0.1.1 is a package correction and the token set stays 0.1.0 | A token set changes only with a deliberate, evidenced token change; consumers re-vendor for component fixes without a token change |
+| Notification summary | The adapter summary accepts `more` (a bounded count, shown "N+") and `sources: [{ product, state }]` beside `unavailable` | Beyond Projects answers `{ unread, more, sources }`; product relays keep the earlier shape |
 | Branding rename or merge | Not selected | Unchanged owner position |
 
 ## Approved implementation acceptance

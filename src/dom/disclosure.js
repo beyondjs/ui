@@ -6,7 +6,8 @@ import { Ids } from './core/ids.js';
  * A button that shows and hides a panel: the disclosure pattern.
  *
  * It traps nothing: Tab moves on normally. Escape and the button close the panel and return focus to
- * the button; a press outside closes it without moving focus. The panel works the same with a mouse,
+ * the button; a press outside closes it without moving focus. Closing it from code returns focus to
+ * the button when focus was inside the panel, so it is never left on a hidden element. The panel works the same with a mouse,
  * a keyboard and touch, which is what essential help and header panels need. Help, the account slot
  * and the notification entry are built on it.
  */
@@ -76,13 +77,21 @@ export class Disclosure extends Component {
 		this.#panel.hidden = false;
 		this.#button.setAttribute('aria-expanded', 'true');
 		this.#release = this.listen(this.#element.ownerDocument, 'pointerdown', event => {
-			if (!this.#element.contains(event.target)) this.close(false);
+			if (!this.#element.contains(event.target)) this.#shut(false);
 		});
 		this.#onchange?.(true);
 	}
 
-	/** Closes the panel; `refocus` returns focus to the button. */
+	/**
+	 * Closes the panel; `refocus` returns focus to the button, as does focus that was inside the
+	 * panel.
+	 */
 	close(refocus = false) {
+		if (!this.#open) return;
+		this.#shut(refocus || this.#panel.contains(this.#element.ownerDocument.activeElement));
+	}
+
+	#shut(refocus) {
 		if (!this.#open) return;
 		this.#open = false;
 		this.#panel.hidden = true;

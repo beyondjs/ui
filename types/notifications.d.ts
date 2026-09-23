@@ -12,20 +12,33 @@ export interface Notice {
 	group?: string | null;
 }
 
+/** One product's reach in a Beyond Projects answer; `unavailable` means its items are hidden. */
+export interface NoticeSource {
+	product: string;
+	state: 'available' | 'unavailable' | (string & {});
+}
+
 export interface NoticeSummary {
 	/** False when the aggregation cannot be reached or is not configured. */
 	available?: boolean;
-	/** Unread count, or null when unknown. */
+	/** Unread count, or null when unknown. Beyond Projects counts up to a bound (0–99). */
 	unread?: number | null;
-	/** Products whose items are hidden because they did not answer. */
+	/** True when counting stopped at the bound: the count is shown as "N+". */
+	more?: boolean;
+	/** Products whose items are hidden because they did not answer (a product relay's shape). */
 	unavailable?: string[];
+	/** Each product's reach (Beyond Projects' shape); `state: 'unavailable'` is the partial signal. */
+	sources?: NoticeSource[];
 }
 
 export interface NoticePage {
 	available?: boolean;
 	items: Notice[];
 	next?: unknown;
+	/** Products whose items are hidden because they did not answer (a product relay's shape). */
 	unavailable?: string[];
+	/** Each product's reach (Beyond Projects' shape); `state: 'unavailable'` is the partial signal. */
+	sources?: NoticeSource[];
 }
 
 export interface NoticeRequest {

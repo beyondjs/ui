@@ -14,7 +14,12 @@ export class Panel {
 	#retry;
 	#labels;
 
-	constructor({ labels, id, href, onview, retry, everything }) {
+	/**
+	 * @param {object} options
+	 * @param {(event: MouseEvent) => void} options.view runs on a plain primary click of "View all";
+	 *   a click that opens elsewhere (a modifier key or another button) is left to the browser
+	 */
+	constructor({ labels, id, href, view, retry, everything }) {
 		this.#heading = `${id}-title`;
 		this.#retry = retry;
 		this.#labels = labels;
@@ -26,9 +31,8 @@ export class Panel {
 					href,
 					class: 'bui-notify-all',
 					onclick: event => {
-						if (!onview || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
-						event.preventDefault();
-						onview(event);
+						if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+						view(event);
 					}
 				}, [labels.text('all')])
 			: null;

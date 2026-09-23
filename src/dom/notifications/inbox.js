@@ -157,7 +157,7 @@ export class NotificationInbox extends Component {
 		}
 		// Items marked read stay listed until the next load, so "Mark as unread" can undo at once.
 		const items = feed.items;
-		const partial = feed.missing.length ? callout({ tone: 'warning', title: words.text('partial', { products: feed.missing.join(', ') }) }) : null;
+		const partial = this.#list.partial(feed.missing);
 		const empty = el('div', { class: 'bui-empty' }, [el('p', { class: 'bui-empty-title', text: words.text(this.#state.state === 'unread' ? 'caught' : 'empty') })]);
 		NoticeList.keep(this.#body, () => fill(this.#body, [partial, items.length ? this.#list.render(items) : empty]));
 	}

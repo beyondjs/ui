@@ -1,7 +1,8 @@
 /** English defaults of the notification entry and inbox; consumers replace any entry through `labels`. */
 export const defaults = {
 	title: 'Notifications',
-	button: ({ count }) => (count === null || count === undefined ? 'Notifications' : count === 0 ? 'Notifications, none unread' : `Notifications, ${count} unread`),
+	button: ({ count, more }) => (count === null || count === undefined ? 'Notifications' : count === 0 ? 'Notifications, none unread' : more ? `Notifications, ${count} or more unread` : `Notifications, ${count} unread`),
+	badge: ({ count, more }) => (more ? `${count}+` : count > 99 ? '99+' : String(count)),
 	loading: 'Loading notifications…',
 	empty: 'No notifications yet.',
 	caught: 'You are all caught up.',

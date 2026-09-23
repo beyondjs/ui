@@ -96,6 +96,33 @@ test('NotificationEntry shows the count and Header carries it in its slot', asyn
 	assert.equal(host.querySelector('.bui-header-end .who').textContent, 'Ana');
 });
 
+test('NotificationEntry closes on View all with onView and from its ref', async () => {
+	const notices = new Notices();
+	const ref = React.createRef();
+	const views = [];
+	const bell = () => host.querySelector('.bui-notify > button');
+	const panel = () => host.querySelector('.bui-notify .bui-disclosure-panel');
+	await render(h(ui.NotificationEntry, { ref, adapter: notices.adapter, href: '#/inbox', onView: () => views.push(ref.current.expanded) }));
+	await page.until(() => ref.current?.count === 3);
+	await act(async () => bell().click());
+	await page.until(() => panel().querySelector('.bui-notice'));
+	assert.equal(ref.current.expanded, true);
+	await act(async () => panel().querySelector('.bui-notify-all').click());
+	assert.deepEqual(views, [false], 'closed before the product routes');
+	assert.equal(panel().hidden, true);
+	assert.ok(document.activeElement === bell(), 'focus is back on the bell');
+	await act(async () => ref.current.open());
+	await page.until(() => panel().querySelector('.bui-notice'));
+	panel().querySelector('.bui-notice-open').focus();
+	await act(async () => ref.current.close());
+	assert.equal(ref.current.expanded, false);
+	assert.equal(panel().hidden, true, 'the product closes it from React');
+	assert.ok(document.activeElement === bell(), 'focus inside the panel returns to the bell');
+	assert.equal(panel().querySelector('.bui-notice'), null, 'no item text is kept');
+	await act(async () => ref.current.close());
+	assert.equal(ref.current.expanded, false, 'closing a closed entry changes nothing');
+});
+
 test('FocusedForm renders its busy state and ignores a second submission', async () => {
 	let release;
 	let sent = 0;

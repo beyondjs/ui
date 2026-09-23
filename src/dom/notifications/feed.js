@@ -1,10 +1,13 @@
+import { Reach } from './reach.js';
+
 /**
  * Reading pages of notifications through the consumer's adapter.
  *
  * The adapter follows `beyond-notifications/1` as the product relays it:
- * `list({ state, product, cursor, limit })` resolves `{ items, next, unavailable?, available? }`.
+ * `list({ state, product, cursor, limit })` resolves `{ items, next, unavailable?, sources?, available? }`.
  * `available: false` means the aggregation itself cannot be reached (for example Projects is not
- * configured); `unavailable` names products whose items are hidden because they did not answer.
+ * configured); `unavailable` (product ids) or `sources` entries with `state: 'unavailable'` name
+ * products whose items are hidden because they did not answer (see `Reach`).
  * Only the latest request publishes. Nothing is kept once `clear()` runs, so no private text
  * outlives the view that showed it.
  */
@@ -90,7 +93,7 @@ export class Feed {
 			}
 			this.#items = append ? [...this.#items, ...(answer?.items ?? [])] : [...(answer?.items ?? [])];
 			this.#next = answer?.next ?? null;
-			this.#missing = answer?.unavailable ?? [];
+			this.#missing = Reach.missing(answer);
 			this.#state = 'ready';
 		} catch (error) {
 			if (sequence !== this.#sequence) return false;

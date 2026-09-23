@@ -1,7 +1,9 @@
 /**
  * A notification adapter for the fixture pages, in one of the modes a check selects with
  * `?notices=`: `ready` (default), `empty`, `failed` (every call fails until `recover()`),
- * `unavailable` (aggregation not configured) and `partial` (CDN did not answer).
+ * `unavailable` (aggregation not configured), `partial` (CDN did not answer) and `bound` (the
+ * summary stops counting at 2, `more: true`). `ready` answers as a product relay (`unavailable`);
+ * `partial` and `bound` answer as Beyond Projects does (`sources: [{ product, state }]`).
  */
 export class Notices {
 	#mode;
@@ -28,6 +30,11 @@ export class Notices {
 		return this.#mode === 'partial' ? ['cdn'] : [];
 	}
 
+	get #reach() {
+		if (this.#mode !== 'partial' && this.#mode !== 'bound') return { unavailable: this.#hidden };
+		return { sources: ['delegate', 'cdn', 'projects'].map(product => ({ product, state: this.#hidden.includes(product) ? 'unavailable' : 'available' })) };
+	}
+
 	get adapter() {
 		const wait = () => new Promise(resolve => setTimeout(resolve, 80));
 		const guard = async () => {
@@ -38,14 +45,16 @@ export class Notices {
 			summary: async () => {
 				await guard();
 				if (this.#mode === 'unavailable') return { available: false };
-				return { unread: this.#visible.filter(item => !item.read).length, unavailable: this.#hidden };
+				const unread = this.#visible.filter(item => !item.read).length;
+				if (this.#mode === 'bound') return { unread: Math.min(unread, 2), more: unread > 2, ...this.#reach };
+				return { unread, ...this.#reach };
 			},
 			list: async ({ state, product, cursor, limit }) => {
 				await guard();
 				if (this.#mode === 'unavailable') return { available: false, items: [] };
 				const found = this.#visible.filter(item => (state === 'all' || !item.read) && (!product || item.product === product));
 				const start = cursor ?? 0;
-				return { items: found.slice(start, start + limit).map(item => ({ ...item })), next: start + limit < found.length ? start + limit : null, unavailable: this.#hidden };
+				return { items: found.slice(start, start + limit).map(item => ({ ...item })), next: start + limit < found.length ? start + limit : null, ...this.#reach };
 			},
 			read: async target => {
 				await guard();

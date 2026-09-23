@@ -23,8 +23,11 @@ function useAdapter(adapter) {
 
 /**
  * The header notification entry, driven by the DOM `NotificationEntry` class. A change of `labels`,
- * `locale`, `products`, `href`, `limit` or `interval` creates a new entry (memoize `labels`). The ref
- * exposes `refresh()` for products that learn of new notifications themselves.
+ * `locale`, `products`, `href`, `limit` or `interval` creates a new entry (memoize `labels`).
+ * "View all" closes the panel, returns focus to the bell and then calls `onView` (or follows `href`).
+ * The ref exposes `refresh()` for products that learn of new notifications themselves, `open()` and
+ * `close()` for products that close the panel themselves (for example on a route change; focus
+ * inside the panel returns to the bell), and the read-only `count`, `more` and `expanded`.
  */
 export const NotificationEntry = forwardRef(function NotificationEntry({ adapter, href = null, onOpen = null, onView = null, products = {}, locale, limit = 6, interval = 0, labels }, ref) {
 	const stable = useAdapter(adapter);
@@ -44,7 +47,24 @@ export const NotificationEntry = forwardRef(function NotificationEntry({ adapter
 			}),
 		[stable, href, JSON.stringify(products), locale, limit, interval, labels, Boolean(onOpen), Boolean(onView)]
 	);
-	useImperativeHandle(ref, () => ({ refresh: () => entry?.refresh(), get count() { return entry?.count ?? null; } }), [entry]);
+	useImperativeHandle(
+		ref,
+		() => ({
+			refresh: () => entry?.refresh(),
+			open: () => entry?.open(),
+			close: () => entry?.close(),
+			get count() {
+				return entry?.count ?? null;
+			},
+			get more() {
+				return entry?.more ?? false;
+			},
+			get expanded() {
+				return entry?.expanded ?? false;
+			}
+		}),
+		[entry]
+	);
 	return h('div', { ref: host, className: 'bui-host' });
 });
 

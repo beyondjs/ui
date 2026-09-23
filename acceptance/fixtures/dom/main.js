@@ -7,6 +7,7 @@ import { Header, NotificationEntry, NotificationInbox, Button, ActionMenu, Dialo
 import { People, teams } from '../data/people.js';
 import { rows, states } from '../data/rows.js';
 import { Notices } from '../data/notices.js';
+import { terms, clauses } from '../data/terms.js';
 
 const params = new URLSearchParams(location.search);
 const notices = new Notices(params.get('notices'));
@@ -19,7 +20,7 @@ const builder = element => ({ element, destroy: () => element.remove() });
 const section = id => document.getElementById(id);
 const products = { delegate: 'Delegate', cdn: 'CDN', projects: 'Projects' };
 
-const entry = keep(new NotificationEntry({ adapter: notices.adapter, href: '#/notifications', products, onopen: destination => (location.hash = destination.slice(1)) }));
+const entry = keep(new NotificationEntry({ adapter: notices.adapter, href: '#/notifications', products, onopen: destination => (location.hash = destination.slice(1)), onview: () => (location.hash = '/notifications') }));
 keep(new Header({
 	brand: { label: 'Beyond', href: '#/' },
 	context: [{ label: 'Northwind', href: '#/o/northwind' }, { label: 'Storefront', current: true }],
@@ -32,10 +33,14 @@ const toaster = keep(new Toaster()).mount(document.body);
 const row = el => (section('actions').append(el), el);
 const plain = keep(new Dialog({ title: 'Rename area', description: 'Members see the new name.', backdrop: true, children: [keep(new Field({ label: 'Name', value: 'Billing' })).element] }));
 plain.actions = [keep(new Button({ label: 'Close', onclick: () => plain.close('closed') })).element];
+const paragraph = text => Object.assign(document.createElement('p'), { textContent: text });
+const long = keep(new Dialog({ title: terms.en.title, children: clauses('en').map(paragraph) }));
+long.actions = [keep(new Button({ label: terms.en.accept, variant: 'primary', onclick: () => long.close('accepted') })).element];
 const actions = document.createElement('div');
 actions.className = 'row';
 row(actions).append(
 	keep(new Button({ label: 'Open dialog', onclick: () => plain.open().then(value => log.push(`dialog:${value}`)) })).element,
+	keep(new Button({ label: terms.en.open, onclick: () => long.open().then(value => log.push(`terms:${value}`)) })).element,
 	keep(new Button({ label: 'Delete project', variant: 'danger', onclick: async () => log.push(`confirm:${await confirm({ title: 'Delete project?', message: 'This cannot be undone.', tone: 'danger', accept: 'Delete', work: () => fixture.work(), explain: error => `Not deleted: ${error.message}` })}`) })).element,
 	keep(new Button({ label: 'Name area', onclick: async () => log.push(`prompt:${await prompt({ title: 'New area', label: 'Area name', messages: { valueMissing: 'Name the area.' } })}`) })).element,
 	keep(new ActionMenu({ label: 'More', name: 'More actions', items: [{ label: 'Duplicate', run: () => log.push('menu:duplicate') }, { label: 'Archive', disabled: true, reason: 'Only owners archive' }, { label: 'Toast', run: () => toaster.show('Saved') }] })).element,

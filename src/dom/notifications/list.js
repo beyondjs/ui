@@ -1,6 +1,6 @@
 import { el, content } from '../core/element.js';
 import { Ids } from '../core/ids.js';
-import { hidden } from '../feedback.js';
+import { callout, hidden } from '../feedback.js';
 
 /**
  * Draws notification items for the entry panel and the inbox.
@@ -37,6 +37,16 @@ export class NoticeList {
 	render(items) {
 		const groups = this.#grouped ? NoticeList.groups(items) : items.map(item => [item]);
 		return el('ul', { class: 'bui-notices' }, groups.map(group => this.#entry(group)));
+	}
+
+	/**
+	 * The warning that some products could not be reached, naming each by its display name (the id
+	 * when the product gave none); null when every product answered.
+	 */
+	partial(missing) {
+		if (!missing.length) return null;
+		const products = missing.map(id => this.#products[id] ?? id).join(', ');
+		return callout({ tone: 'warning', title: this.#labels.text('partial', { products }) });
 	}
 
 	/** Items in order, with those that share a `group` gathered after the first (latest) of them. */

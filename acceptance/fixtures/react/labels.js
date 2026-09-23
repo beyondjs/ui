@@ -2,7 +2,8 @@
 export const es = {
 	notifications: {
 		title: 'Notificaciones',
-		button: ({ count }) => (count === null || count === undefined ? 'Notificaciones' : count === 0 ? 'Notificaciones, ninguna sin leer' : `Notificaciones, ${count} sin leer`),
+		button: ({ count, more }) => (count === null || count === undefined ? 'Notificaciones' : count === 0 ? 'Notificaciones, ninguna sin leer' : more ? `Notificaciones, ${count} o más sin leer` : `Notificaciones, ${count} sin leer`),
+		badge: ({ count, more }) => (more ? `${count}+` : count > 99 ? '99+' : String(count)),
 		loading: 'Cargando notificaciones…',
 		empty: 'Todavía no hay notificaciones.',
 		caught: 'Estás al día.',

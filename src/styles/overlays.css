@@ -1,4 +1,6 @@
-/* Dialogs, questions and toasts. Only floating things cast a shadow. */
+/* Dialogs, questions and toasts. Only floating things cast a shadow.
+   A dialog never grows past the viewport: its body scrolls on its own while the title, description
+   and actions stay in view. Only on very short viewports does the whole dialog scroll instead. */
 .bui-dialog {
 	width: min(36rem, calc(100vw - 2 * var(--space-4)));
 	max-height: calc(100dvh - 2 * var(--space-4));
@@ -28,6 +30,7 @@
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
+	flex: none;
 	gap: var(--space-3);
 	padding: var(--space-4) var(--space-4) 0 var(--space-5);
 }
@@ -40,19 +43,26 @@
 	overflow-wrap: anywhere;
 }
 .bui-dialog-description {
+	flex: none;
 	margin: var(--space-2) var(--space-5) 0;
 	color: var(--color-text-muted);
 	font-size: var(--text-small);
 }
 .bui-dialog-body {
+	flex: 1 1 auto;
+	min-height: 0;
 	display: grid;
+	align-content: start;
 	gap: var(--space-3);
 	padding: var(--space-4) var(--space-5);
+	overflow-y: auto;
+	overscroll-behavior: contain;
 }
 .bui-dialog-body:empty {
 	display: none;
 }
 .bui-dialog-actions {
+	flex: none;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: flex-end;
@@ -84,6 +94,12 @@
 	.bui-dialog-actions {
 		flex-direction: column-reverse;
 		align-items: stretch;
+	}
+}
+@media (max-height: 20rem) {
+	.bui-dialog-body {
+		flex: none;
+		overflow: visible;
 	}
 }
 

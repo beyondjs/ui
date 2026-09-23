@@ -1,6 +1,6 @@
 /** Types of `@beyond-js/ui/dom` (also the package root): the framework-free components. */
 import type { Copy, NotificationAdapter, Notice } from './notifications.js';
-export type { Copy, NotificationAdapter, Notice, NoticePage, NoticeRequest, NoticeSummary } from './notifications.js';
+export type { Copy, NotificationAdapter, Notice, NoticePage, NoticeRequest, NoticeSource, NoticeSummary } from './notifications.js';
 
 export type Tone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 export type Content = string | Node;

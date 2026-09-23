@@ -206,3 +206,25 @@ test('feedback builders carry words, not only color', () => {
 	assert.equal(ui.loading('Cargando…').getAttribute('role'), 'status');
 	assert.equal(ui.skeleton(2).getAttribute('aria-hidden'), 'true');
 });
+
+test('Disclosure closed from code returns focus to its button only when focus was inside the panel', t => {
+	const outside = document.createElement('input');
+	const inside = document.createElement('button');
+	const disclosure = new ui.Disclosure({ label: 'Account', children: [inside] }).mount(document.body);
+	t.after(() => disclosure.destroy());
+	document.body.append(outside);
+	disclosure.open();
+	outside.focus();
+	disclosure.close();
+	assert.ok(document.activeElement === outside, 'focus elsewhere stays where it is');
+	disclosure.open();
+	inside.focus();
+	disclosure.close();
+	assert.equal(disclosure.expanded, false);
+	assert.ok(document.activeElement === disclosure.button, 'focus is not left on a hidden element');
+	disclosure.open();
+	inside.focus();
+	outside.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+	assert.equal(disclosure.expanded, false, 'a press outside closes');
+	assert.ok(document.activeElement !== disclosure.button, 'and leaves focus to the press');
+});

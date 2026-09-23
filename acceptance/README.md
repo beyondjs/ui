@@ -17,15 +17,15 @@ Prerequisites: Node.js 22.21.1 or later, `npm install` in this repository, netwo
 
 - `run.mjs`: the run described above.
 - `support/`: `consumer.mjs` (temporary consumer projects), `server.mjs` (static server), `browser.mjs` (Chrome and small assertions), `words.mjs` (visible copy per fixture language).
-- `checks/`: the checks, grouped by area: `keyboard.mjs` (action menu, dialog, busy confirmation, prompt), `picker.mjs`, `notifications.mjs`, `help.mjs` (help, tooltip, touch, focused form) and `presentation.mjs` (reduced motion, themes, 320 px, 200 % zoom, collection, teardown, Spanish copy). Each check names the consumers it applies to.
+- `checks/`: the checks, grouped by area: `keyboard.mjs` (action menu, dialog, busy confirmation, prompt), `picker.mjs`, `notifications.mjs` (including the bounded "N+" count, "View all" closing the panel and, in React, closing it through the ref), `help.mjs` (help, tooltip, touch, focused form) and `presentation.mjs` (reduced motion, themes, 320 px, 200 % zoom, a long dialog whose body scrolls, collection, teardown, Spanish copy). Each check names the consumers it applies to.
 - `fixtures/`: the physical consumer pages.
   - `dom/`: a plain JavaScript page that creates, mounts and destroys DOM components, in English (the package defaults).
   - `react/`: a React page using `@beyond-js/ui/react` inside `StrictMode`, with Spanish copy passed through `labels` (`labels.js`), as a localized product does.
-  - `data/`: the fictional sources both pages use: people for the picker (45, one disabled), requests for the collection, and a notification adapter with modes selected by `?notices=` (`ready`, `empty`, `failed`, `unavailable`, `partial`).
+  - `data/`: the fictional sources both pages use: people for the picker (45, one disabled), requests for the collection, the clauses of a long dialog (`terms.js`, EN and ES), and a notification adapter with modes selected by `?notices=` (`ready`, `empty`, `failed`, `unavailable`, `partial`, `bound`); `ready` answers as a product relay (`unavailable`), `partial` and `bound` as Beyond Projects (`sources`, and `more` at a bound of 2).
   - `page.css`: page layout only; component styles come from the package.
 
 Each page exposes `window.fixture` so checks can switch a source into failure and call a complete teardown.
 
 ## What a pass proves and does not
 
-A pass proves the installed artifact works in Chrome for these fixture pages: exports and stylesheets resolve, keyboard, focus and Escape behave, busy dialogs hold, the picker keeps choices across pages and filters, notification states are stated, reduced motion, both themes, 320 px width, 200 % zoom (approximated as a 640 CSS px viewport at device scale 2) and touch targets, and that teardown releases the components' document listeners. It does not prove adoption by any product, other browsers, screen reader output, or a real notification service: the adapters are fixtures.
+A pass proves the installed artifact works in Chrome for these fixture pages: exports and stylesheets resolve, keyboard, focus and Escape behave, busy dialogs hold, the picker keeps choices across pages and filters, notification states are stated (unreachable products by display name, a bounded count as "N+"), "View all" closes the panel, long dialogs scroll their body with title and actions in view, reduced motion, both themes, 320 px width, 200 % zoom (approximated as a 640 CSS px viewport at device scale 2) and touch targets, and that teardown releases the components' document listeners. It does not prove adoption by any product, other browsers, screen reader output, or a real notification service: the adapters are fixtures.

@@ -68,6 +68,39 @@ export const checks = [
 		}
 	},
 	{
+		name: 'long dialog: the body scrolls while the title and actions stay in view at 320px and 200% zoom',
+		consumers: ['dom', 'react19', 'react18'],
+		async run(browser, consumer) {
+			const copy = words[consumer.language];
+			for (const options of [{ viewport: { width: 320, height: 568 } }, { viewport: { width: 640, height: 450 }, deviceScaleFactor: 2 }]) {
+				const { page, context } = await browser.open(consumer, options);
+				await page.getByRole('button', { name: copy.terms }).click();
+				const dialog = page.getByRole('dialog');
+				await dialog.waitFor();
+				// Measure the settled dialog, after its entering animation.
+				await page.evaluate(() => Promise.all(document.querySelector('dialog[open]').getAnimations().map(animation => animation.finished)));
+				const measure = () => page.evaluate(() => {
+					const dialog = document.querySelector('dialog[open]');
+					const body = dialog.querySelector('.bui-dialog-body');
+					const box = selector => dialog.querySelector(selector).getBoundingClientRect();
+					return { body: { scroll: body.scrollHeight, client: body.clientHeight, top: body.scrollTop, overflow: getComputedStyle(body).overflowY }, dialog: { scroll: dialog.scrollHeight, client: dialog.clientHeight }, head: box('.bui-dialog-head').top, actions: box('.bui-dialog-actions').bottom, height: innerHeight, width: document.documentElement.scrollWidth > innerWidth + 1 };
+				});
+				const before = await measure();
+				const size = JSON.stringify({ ...options.viewport, before });
+				expect(before.body.scroll > before.body.client && /auto|scroll/.test(before.body.overflow), `the body scrolls on its own: ${size}`);
+				expect(before.dialog.scroll <= before.dialog.client + 1, `the dialog itself does not scroll: ${size}`);
+				expect(before.head >= 0 && before.actions <= before.height, `title and actions are in view: ${size}`);
+				expect(!before.width, `no sideways scroll: ${size}`);
+				await page.locator('dialog[open] .bui-dialog-body').evaluate(body => body.scrollTo(0, body.scrollHeight));
+				const after = await measure();
+				expect(after.body.top > 0 && after.head === before.head && after.actions === before.actions, `scrolling moves only the body: ${JSON.stringify(after)}`);
+				await page.getByRole('button', { name: copy.agree }).click();
+				await dialog.waitFor({ state: 'hidden' });
+				await context.close();
+			}
+		}
+	},
+	{
 		name: 'collection: rows are links, paging reports state, no matches can be cleared',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {

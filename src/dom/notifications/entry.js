@@ -10,6 +10,7 @@ import { Feed } from './feed.js';
 import { NoticeList } from './list.js';
 import { Actions } from './actions.js';
 import { Panel } from './panel.js';
+import { Reach } from './reach.js';
 
 /**
  * The header entry to a person's notifications: a bell button with the unread count and a panel of
@@ -17,10 +18,14 @@ import { Panel } from './panel.js';
  *
  * The count comes from `adapter.summary()` and is hidden whenever it is unknown: before it loads,
  * after a failure and while notifications are unavailable, so a stale or invented number is never
- * shown. The panel loads when opened and forgets its items when closed. It states loading, empty,
- * failure with retry, unavailable (for example when the product runs without Beyond Projects) and
- * partial results (some products did not answer), and offers "Mark all as read" and a link to the
- * full inbox. Nothing here performs a business action.
+ * shown. A summary with `more: true` counted up to its bound, so the count reads "N+"; without it,
+ * counts past 99 read "99+". A summary naming unreachable products (`unavailable`, or `sources` in
+ * `state: 'unavailable'`) marks the entry `data-state="partial"`. The panel loads when opened and
+ * forgets its items when closed. It states loading, empty, failure with retry, unavailable (for
+ * example when the product runs without Beyond Projects) and partial results naming the products
+ * that did not answer by their display names, and offers "Mark all as read" and "View all", which
+ * closes the panel before the browser or the product (`onview`) goes to the full inbox. Nothing
+ * here performs a business action.
  */
 export class NotificationEntry extends Disclosure {
 	#adapter;
@@ -31,6 +36,8 @@ export class NotificationEntry extends Disclosure {
 	#panel;
 	#limit;
 	#count = null;
+	#more = false;
+	#missing = [];
 	#stamp = null;
 
 	/**
@@ -38,7 +45,7 @@ export class NotificationEntry extends Disclosure {
 	 * @param {{summary: Function, list: Function, read: Function, unread: Function, open: Function}} options.adapter
 	 * @param {string} [options.href] the address of the full inbox
 	 * @param {(destination: string, item: object) => void} [options.onopen] navigates to an opened item
-	 * @param {(event: MouseEvent) => void} [options.onview] takes over the inbox link (applications that route themselves)
+	 * @param {(event: MouseEvent) => void} [options.onview] takes over the inbox link (applications that route themselves); the panel is already closed
 	 * @param {Record<string,string>} [options.products] display names by product id
 	 * @param {string} [options.locale] language of relative times
 	 * @param {number} [options.limit] items in the panel (default 6)
@@ -56,7 +63,13 @@ export class NotificationEntry extends Disclosure {
 		const go = onopen ?? (destination => this.element.ownerDocument.defaultView.location.assign(destination));
 		const actions = new Actions({ adapter, feed: this.#feed, onopen: (destination, item) => { this.close(false); go(destination, item); }, changed: () => this.#changed(), say: key => this.#panel.say(words.text(key)) });
 		this.#list = new NoticeList({ labels: words, moment: new Moment(locale), products, actions });
-		this.#panel = new Panel({ labels: words, id: Ids.next('bui-notify'), href, onview, retry: () => this.#load(), everything: () => this.#everything() });
+		const view = event => {
+			this.close(true);
+			if (!onview) return;
+			event.preventDefault();
+			onview(event);
+		};
+		this.#panel = new Panel({ labels: words, id: Ids.next('bui-notify'), href, view, retry: () => this.#load(), everything: () => this.#everything() });
 		fill(this.panel, [this.#panel.element]);
 		this.panel.setAttribute('aria-labelledby', this.#panel.heading);
 		this.refresh();
@@ -68,6 +81,16 @@ export class NotificationEntry extends Disclosure {
 		return this.#count;
 	}
 
+	/** Whether the count stopped at the summary's bound (shown as "N+"). */
+	get more() {
+		return this.#more;
+	}
+
+	/** Product ids the last summary named as unreachable. */
+	get missing() {
+		return [...this.#missing];
+	}
+
 	/** Reads the unread count again. */
 	async refresh() {
 		let summary = null;
@@ -77,12 +100,16 @@ export class NotificationEntry extends Disclosure {
 			summary = null;
 		}
 		if (this.destroyed) return;
-		const known = summary && summary.available !== false && Number.isInteger(summary.unread);
+		const reached = Boolean(summary) && summary.available !== false;
+		const known = reached && Number.isInteger(summary.unread);
 		this.#count = known ? summary.unread : null;
-		this.element.dataset.state = !summary ? 'failed' : summary.available === false ? 'unavailable' : 'ready';
+		this.#more = known && summary.more === true;
+		this.#missing = reached ? Reach.missing(summary) : [];
+		this.element.dataset.state = !summary ? 'failed' : !reached ? 'unavailable' : this.#missing.length ? 'partial' : 'ready';
+		const values = { count: this.#count, more: this.#more };
 		this.#badge.hidden = !this.#count;
-		this.#badge.textContent = this.#count > 99 ? '99+' : String(this.#count ?? '');
-		this.button.setAttribute('aria-label', this.#labels.text('button', { count: this.#count }));
+		this.#badge.textContent = this.#count ? this.#labels.text('badge', values) : '';
+		this.button.setAttribute('aria-label', this.#labels.text('button', values));
 	}
 
 	destroy() {
@@ -119,7 +146,7 @@ export class NotificationEntry extends Disclosure {
 		if (feed.state === 'loading') return this.#panel.show([loading(words.text('loading'))], false);
 		if (feed.state === 'unavailable') return this.#panel.show([callout({ tone: 'info', title: words.text('unavailable') })], false);
 		if (feed.state === 'failed') return this.#panel.failed(words.text('failure'));
-		const partial = feed.missing.length ? callout({ tone: 'warning', title: words.text('partial', { products: feed.missing.join(', ') }) }) : null;
+		const partial = this.#list.partial(feed.missing);
 		const body = feed.items.length ? this.#list.render(feed.items) : el('p', { class: 'bui-empty-title', text: words.text('empty') });
 		NoticeList.keep(this.panel, () => this.#panel.show([partial, body], feed.items.some(item => !item.read)));
 	}

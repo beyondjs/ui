@@ -86,7 +86,9 @@ export interface NotificationEntryOptions {
 	adapter: NotificationAdapter;
 	href?: string | null;
 	onopen?: ((destination: string, item: Notice) => void) | null;
+	/** Takes over "View all" for applications that route themselves; the panel is already closed. */
 	onview?: ((event: MouseEvent) => void) | null;
+	/** Display names by product id, also used to name unreachable products. */
 	products?: Record<string, string>;
 	locale?: string;
 	limit?: number;
@@ -95,7 +97,12 @@ export interface NotificationEntryOptions {
 }
 export class NotificationEntry extends Disclosure {
 	constructor(options: NotificationEntryOptions);
+	/** The unread count shown, or null while unknown. */
 	readonly count: number | null;
+	/** Whether the count stopped at the summary's bound (shown as "N+"). */
+	readonly more: boolean;
+	/** Product ids the last summary named as unreachable. */
+	readonly missing: string[];
 	refresh(): Promise<void>;
 }
 
