@@ -52,6 +52,7 @@ const picker = keep(new Picker({
 	hint: 'Search by name; choices stay while you filter or load more.',
 	source: people.source,
 	name: 'people',
+	all: true,
 	selected: [{ id: 'gone', label: 'Former member', state: 'stale', reason: 'Left the organization' }],
 	filters: [{ name: 'team', label: 'Team', options: teams }],
 	onchange: items => log.push(`picked:${items.length}`)

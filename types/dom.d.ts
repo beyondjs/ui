@@ -165,6 +165,8 @@ export interface QuestionOptions {
 	cancel?: string;
 	ok?: string;
 	tone?: 'primary' | 'danger';
+	/** Which button starts focused: Cancel for a danger, Accept otherwise, unless set */
+	focus?: 'cancel' | 'accept';
 	work?: (value: unknown) => Promise<unknown>;
 	explain?: (error: unknown) => string;
 	restore?: HTMLElement | null;

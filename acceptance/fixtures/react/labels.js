@@ -28,6 +28,7 @@ export const es = {
 	},
 	picker: {
 		placeholder: 'Escribe para buscar',
+		all: 'Elegir todos los mostrados',
 		chosen: 'Elegidos',
 		count: ({ count }) => (count === 1 ? '1 elegido' : `${count} elegidos`),
 		none: 'Nada elegido',

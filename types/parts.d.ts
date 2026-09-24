@@ -16,6 +16,8 @@ export interface PickerOptions {
 	hint?: Content | null;
 	limit?: number;
 	delay?: number;
+	/** Offers choosing every result shown that can be chosen (multiple pickers only) */
+	all?: boolean;
 	onchange?: ((selected: PickerChoice[]) => void) | null;
 	labels?: Copy;
 }

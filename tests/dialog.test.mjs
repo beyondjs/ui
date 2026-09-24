@@ -112,6 +112,20 @@ test('confirm resolves true or false; a danger confirmation focuses the safe cho
 	assert.equal(document.querySelector('dialog'), null);
 });
 
+test('focus: cancel starts on Cancel without danger styling, and a danger may ask for Accept', async () => {
+	const asked = ui.confirm({ title: 'Publish V3 to Production?', accept: 'Publish', focus: 'cancel' });
+	assert.equal(document.activeElement.textContent, 'Cancel');
+	const publish = [...document.querySelectorAll('dialog button')].find(button => button.textContent === 'Publish');
+	assert.equal(publish.classList.contains('bui-button-danger'), false);
+	assert.equal(publish.classList.contains('bui-button-primary'), true);
+	page.key(document.querySelector('dialog'), 'Escape');
+	assert.equal(await asked, false);
+	const danger = ui.confirm({ title: 'Remove?', tone: 'danger', focus: 'accept', accept: 'Remove' });
+	assert.equal(document.activeElement.textContent, 'Remove');
+	page.key(document.querySelector('dialog'), 'Escape');
+	assert.equal(await danger, false);
+});
+
 test('confirm with work stays busy, keeps a failure in the dialog, and resolves after a retry', async () => {
 	let attempts = 0;
 	let release;

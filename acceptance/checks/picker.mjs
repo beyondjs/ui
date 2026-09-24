@@ -31,6 +31,27 @@ export const checks = [
 		}
 	},
 	{
+		name: 'picker: "all" adds every result shown that can be chosen, then leaves until more are shown',
+		consumers: ['dom', 'react19', 'react18'],
+		async run(browser, consumer) {
+			const { page } = await browser.open(consumer);
+			const copy = words[consumer.language];
+			await page.waitForFunction(() => document.querySelectorAll('#picking [role="option"]').length === 20);
+			const all = page.locator('#picking').getByRole('button', { name: copy.pickAll });
+			await all.click();
+			// The 19 enabled results shown (Person 03 is disabled) and the stale choice the page starts with.
+			const text = await count(page);
+			expect(text.includes(`20 ${copy.selected}`), `twenty chosen, got “${text}”`);
+			expect(!(await all.isVisible()), 'nothing left to add among the results shown');
+			expect(await page.evaluate(() => document.activeElement?.getAttribute('role')) === 'combobox', 'focus returns to the search field');
+			await page.locator('#picking').getByRole('button', { name: copy.loadMore }).click();
+			await page.waitForFunction(() => document.querySelectorAll('#picking [role="option"]').length === 40);
+			await all.waitFor();
+			const log = await page.evaluate(() => window.fixture.log);
+			expect(log.includes('picked:20'), `one change for the whole addition, log ${log}`);
+		}
+	},
+	{
 		name: 'picker: no matches is stated; a failing source offers retry and recovers',
 		consumers: ['dom', 'react19', 'react18'],
 		async run(browser, consumer) {

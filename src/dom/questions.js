@@ -52,8 +52,9 @@ export class Question {
 			children: form ? [form] : body,
 			actions: form ? [] : buttons
 		});
-		// A prompt starts in its field; a danger confirmation on the least destructive choice.
-		const first = this.#field ? this.#field.control : danger && cancel ? cancel.element : this.#accept.element;
+		// A prompt starts in its field; a confirmation on Cancel when it is a danger or asks for it with `focus: 'cancel'`.
+		const safe = cancel && (options.focus ? options.focus === 'cancel' : danger);
+		const first = this.#field ? this.#field.control : safe ? cancel.element : this.#accept.element;
 		first.setAttribute('data-autofocus', '');
 	}
 
@@ -104,7 +105,8 @@ function pick(source, keys) {
 
 /**
  * Asks for confirmation. Resolves true when accepted (after `work` succeeded) and false otherwise.
- * Options: `title`, `message`, `accept`, `cancel`, `tone: 'danger'`, `work`, `explain`, `labels`.
+ * Options: `title`, `message`, `accept`, `cancel`, `tone: 'danger'`, `focus: 'cancel' | 'accept'` (Cancel
+ * for a danger, Accept otherwise), `work`, `explain`, `labels`.
  */
 export async function confirm(options) {
 	const answer = await new Question('confirm', options).ask();

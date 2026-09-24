@@ -62,7 +62,7 @@ function App() {
 				</section>
 				<section id="picking" aria-labelledby="picking-title">
 					<h2 id="picking-title">Selector</h2>
-					<Picker ref={picker} label="Personas del lote" hint="Busca por nombre." source={people.source} name="people" labels={es.picker} filters={useMemo(() => [{ name: 'team', label: 'Equipo', options: teams }], [])} selected={useMemo(() => [{ id: 'gone', label: 'Antiguo miembro', state: 'stale', reason: 'Dejó la organización' }], [])} onChange={items => log.push(`picked:${items.length}`)} />
+					<Picker ref={picker} label="Personas del lote" hint="Busca por nombre." source={people.source} name="people" all labels={es.picker} filters={useMemo(() => [{ name: 'team', label: 'Equipo', options: teams }], [])} selected={useMemo(() => [{ id: 'gone', label: 'Antiguo miembro', state: 'stale', reason: 'Dejó la organización' }], [])} onChange={items => log.push(`picked:${items.length}`)} />
 				</section>
 				<section id="listing" aria-labelledby="listing-title">
 					<h2 id="listing-title">Colección</h2>

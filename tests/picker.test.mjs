@@ -59,6 +59,41 @@ test('keyboard: arrows set the active option, Enter chooses, disabled options ex
 	assert.deepEqual(picker.value, ['p2']);
 });
 
+test('"all" adds every result shown that can be chosen, keeps earlier choices, and leaves when nothing is left', async () => {
+	const changes = [];
+	const all = picker => picker.element.querySelector('.bui-picker-all');
+	const picker = new Picker({ label: 'People', source: new People().source, limit: 20, delay: 0, all: true, labels: { all: 'Seleccionar todo lo mostrado' }, onchange: items => changes.push(items.length) }).mount(document.body);
+	await settle(picker);
+	assert.equal(all(picker).hidden, false);
+	assert.equal(all(picker).textContent, 'Seleccionar todo lo mostrado');
+	type(picker, 'Person 41');
+	await page.until(() => options(picker.element).length === 1);
+	options(picker.element)[0].click();
+	type(picker, '');
+	await page.until(() => options(picker.element).length === 20);
+	await settle(picker);
+	all(picker).focus();
+	all(picker).click();
+	assert.equal(picker.value.length, 20, 'the 19 enabled results shown plus the earlier choice from another query');
+	assert.ok(picker.value.includes('p41') && picker.value.includes('p20') && !picker.value.includes('p3'), 'a disabled result is never added');
+	assert.equal(picker.element.querySelector('.bui-picker-count').textContent, '20 selected');
+	assert.equal(all(picker).hidden, true, 'nothing left to add on this page');
+	assert.equal(document.activeElement, picker.control, 'focus returns to the search field');
+	assert.deepEqual(changes, [1, 20]);
+	picker.element.querySelector('.bui-picker-foot .bui-button-quiet:not(.bui-picker-all)').click();
+	await settle(picker);
+	assert.equal(all(picker).hidden, false, 'offered again once more results are shown');
+});
+
+test('"all" is not offered by a single picker or without asking for it', async () => {
+	const single = new Picker({ label: 'Owner', multiple: false, all: true, source: new People().source, delay: 0 }).mount(document.body);
+	const plain = new Picker({ label: 'People', source: new People().source, delay: 0 }).mount(document.body);
+	await settle(single);
+	await settle(plain);
+	assert.equal(single.element.querySelector('.bui-picker-all'), null);
+	assert.equal(plain.element.querySelector('.bui-picker-all'), null);
+});
+
 test('a single picker replaces its one choice', async () => {
 	const picker = new Picker({ label: 'Owner', multiple: false, source: new People().source, delay: 0 }).mount(document.body);
 	await settle(picker);

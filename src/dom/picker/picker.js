@@ -33,6 +33,7 @@ export class Picker extends Component {
 	#inputs;
 	#retry;
 	#more;
+	#all;
 	#name;
 	#onchange;
 	#filters = [];
@@ -47,8 +48,9 @@ export class Picker extends Component {
 	 * @param {Array<{id: string, label: string, state?: string, reason?: string}>} [options.selected]
 	 * @param {Array<{name: string, label: string, options: Array<{value: string, label: string}>}>} [options.filters]
 	 * @param {string} [options.name] submits the chosen ids with a form as hidden inputs
+	 * @param {boolean} [options.all] offers choosing every result shown that can be chosen (multiple only)
 	 */
-	constructor({ label, source, multiple = true, selected = [], filters = [], name = null, hint = null, limit = 20, delay = 250, onchange = null, labels = {} }) {
+	constructor({ label, source, multiple = true, selected = [], filters = [], name = null, hint = null, limit = 20, delay = 250, all = false, onchange = null, labels = {} }) {
 		super();
 		this.#labels = new Labels(defaults, labels);
 		this.#name = name;
@@ -77,6 +79,7 @@ export class Picker extends Component {
 		this.#list = new ResultList({ id: `${id}-list`, label, multiple, input: this.#input, onchoose: index => this.#choose(this.#list.item(index)) });
 		this.#retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', hidden: true, onclick: () => this.#search.retry() }, [icon('refresh'), el('span', { text: this.#labels.text('retry') })]);
 		this.#more = el('button', { type: 'button', class: 'bui-button bui-button-quiet bui-button-small', hidden: true, onclick: () => this.#search.page() }, [el('span', { text: this.#labels.text('more') })]);
+		this.#all = multiple && all ? el('button', { type: 'button', class: 'bui-button bui-button-quiet bui-button-small bui-picker-all', hidden: true, onclick: () => this.#choose(...this.#open()) }, [el('span', { text: this.#labels.text('all') })]) : null;
 		this.#search = new Search({ source, limit, onchange: () => this.#render() });
 		this.#element = el('div', { class: `bui-picker${multiple ? ' bui-picker-multiple' : ''}` }, [
 			el('label', { for: `${id}-input`, class: 'bui-field-label' }, [content(label)]),
@@ -84,7 +87,7 @@ export class Picker extends Component {
 			el('div', { class: 'bui-picker-chosen' }, [this.#count, this.#chips]),
 			el('div', { class: 'bui-picker-bar' }, [el('span', { class: 'bui-picker-search' }, [icon('search'), this.#input]), ...this.#filter(filters)]),
 			this.#list.element,
-			el('div', { class: 'bui-picker-foot' }, [this.#status, this.#retry, this.#more]),
+			el('div', { class: 'bui-picker-foot' }, [this.#status, this.#retry, this.#all, this.#more]),
 			this.#inputs
 		]);
 		this.#draw();
@@ -169,12 +172,20 @@ export class Picker extends Component {
 		}
 	}
 
-	#choose(item) {
-		if (!item || item.disabled) return;
-		this.#selection.toggle(item);
+	// Several items are added together (the "all" action); one item is toggled.
+	#choose(...items) {
+		const usable = items.filter(item => item && !item.disabled);
+		if (!usable.length) return;
+		if (items.length > 1) this.#selection.add(usable);
+		else this.#selection.toggle(usable[0]);
 		this.#list.mark(id => this.#selection.has(id));
 		this.#draw();
 		this.#onchange?.(this.selected);
+	}
+
+	/** The results shown that can be chosen and are not chosen yet. */
+	#open() {
+		return this.#search.items.filter(item => !item.disabled && !this.#selection.has(item.id));
 	}
 
 	#draw() {
@@ -187,6 +198,15 @@ export class Picker extends Component {
 		fill(this.#chips, this.#selection.chips(this.#labels, id => this.#drop(id)));
 		this.#chips.hidden = !size;
 		fill(this.#inputs, this.#selection.inputs(this.#name));
+		this.#offer();
+	}
+
+	// "Select all shown" is offered while there is something left to add; focus never falls out of the picker.
+	#offer() {
+		if (!this.#all) return;
+		const focused = this.#all.ownerDocument.activeElement === this.#all;
+		this.#all.hidden = !(this.#search.state === 'ready' && this.#open().length);
+		if (focused && this.#all.hidden) this.#input.focus();
 	}
 
 	// Removing a chip moves focus to the next chip, or to the search field when none is left.
@@ -210,6 +230,7 @@ export class Picker extends Component {
 		this.#more.hidden = !(search.state === 'ready' && search.more);
 		this.#more.toggleAttribute('data-busy', search.state === 'more');
 		if (focused && this.#more.hidden) this.#input.focus();
+		this.#offer();
 		this.#status.textContent = this.#describe(search, query);
 		this.#status.classList.toggle('bui-picker-problem', search.state === 'failed');
 	}

@@ -14,6 +14,7 @@ export const defaults = {
 	failure: 'The choices could not be loaded.',
 	retry: 'Try again',
 	more: 'Load more',
+	all: 'Select all shown',
 	disabled: 'Not available',
 	stale: 'No longer available',
 	ineligible: 'Not eligible',

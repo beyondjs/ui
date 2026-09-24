@@ -4,7 +4,7 @@
 
 UI owns reusable cross-product interface: design tokens, header and navigation building blocks, controls, fields, pickers, dialogs, collections, feedback, motion and the presentation of suite notifications. Products keep their domain behavior, resource authorization, navigation policy and copy: a component never decides who may enter a product or perform an operation, and never performs a business action. Branding keeps the navigable family model, journeys, experience proposals and the evidence of what products implement.
 
-The package is `@beyond-js/ui`, version 0.1.2 (0.1.0 with the corrections product adoptions found in 0.1.1 and 0.1.2; token set still 0.1.0). It is implemented and verified locally (see [validation](validation.md) and the [implementation evidence](reviews/2026-09-23/implementation-evidence.md)); it is not published, and no product consumes its components yet. Branding consumes its tokens.
+The package is `@beyond-js/ui`, version 0.1.3 (0.1.0 with the corrections product adoptions found in 0.1.1 and 0.1.2, and two options Delegate asked for in 0.1.3; token set still 0.1.0). It is implemented and verified locally (see [validation](validation.md) and the implementation evidence of [0.1.0 to 0.1.2](reviews/2026-09-23/implementation-evidence.md) and [0.1.3](reviews/2026-09-24/implementation-evidence.md)); it is not published. Every product vendors it and owns its adoption; Branding consumes its tokens and DOM components.
 
 ## Structure
 
@@ -28,7 +28,7 @@ The package is `@beyond-js/ui`, version 0.1.2 (0.1.0 with the corrections produc
 | Copy | Every component takes `labels`; entries are strings with `{placeholders}` or functions for plurals and word order | Products localize (EN/ES); English is only the default |
 | Notifications | Components read a consumer adapter shaped after `beyond-notifications/1` (`summary`, `list`, `read`, `unread`, `open`) and keep no item text after the view that showed it | Projects owns aggregation and read state; products own relays, permissions and destinations |
 | Unit DOM | happy-dom for Node's test runner | It implements `<dialog>`, constraint validation and events, which jsdom lacks in part; layout, focus rings and real keys are proved in Chrome |
-| Versions | The package version and the token set version (`tokens.version`) are independent: 0.1.1 and 0.1.2 are package corrections and the token set stays 0.1.0 | A token set changes only with a deliberate, evidenced token change; consumers re-vendor for component fixes without a token change |
+| Versions | The package version and the token set version (`tokens.version`) are independent: 0.1.1 and 0.1.2 are package corrections, 0.1.3 adds two options, and the token set stays 0.1.0 | A token set changes only with a deliberate, evidenced token change; consumers re-vendor for component fixes without a token change |
 | Notification summary | The adapter summary accepts `more` (a bounded count, shown "N+") and `sources: [{ product, state }]` beside `unavailable` | Beyond Projects answers `{ unread, more, sources }`; product relays keep the earlier shape |
 | Branding rename or merge | Not selected | Unchanged owner position |
 

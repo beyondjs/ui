@@ -80,6 +80,7 @@ export interface PickerProps {
 	hint?: string | null;
 	limit?: number;
 	delay?: number;
+	all?: boolean;
 	labels?: Copy;
 }
 export const Picker: ForwardRefExoticComponent<PickerProps & RefAttributes<PickerHandle>>;

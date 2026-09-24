@@ -52,6 +52,14 @@ export class Selection {
 		return true;
 	}
 
+	/** Adds every item not chosen yet (a multiple picker only). Returns how many were added. */
+	add(items) {
+		if (!this.#multiple) return 0;
+		const fresh = items.filter(item => !this.#items.has(String(item.id)));
+		for (const item of fresh) this.#items.set(String(item.id), { id: String(item.id), label: item.label, description: item.description ?? null });
+		return fresh.length;
+	}
+
 	remove(id) {
 		this.#items.delete(String(id));
 	}
