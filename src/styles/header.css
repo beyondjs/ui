@@ -143,7 +143,7 @@
 	right: 0;
 	transform: translate(25%, -15%);
 }
-.bui-notify .bui-disclosure-panel {
+.bui-notify :is(.bui-disclosure-panel, .bui-disclosure-leaving) {
 	width: min(24rem, calc(100vw - 2 * var(--space-4)));
 	padding: var(--space-3);
 	color: var(--color-text);
@@ -152,7 +152,7 @@
 	.bui-notify {
 		position: static;
 	}
-	.bui-notify .bui-disclosure-panel {
+	.bui-notify :is(.bui-disclosure-panel, .bui-disclosure-leaving) {
 		left: var(--space-4);
 		right: var(--space-4);
 		width: auto;

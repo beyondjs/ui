@@ -143,7 +143,8 @@
 	cursor: pointer;
 }
 .bui-menu,
-.bui-disclosure-panel {
+.bui-disclosure-panel,
+.bui-disclosure-leaving {
 	position: absolute;
 	top: calc(100% + var(--space-1));
 	z-index: 20;
@@ -177,6 +178,11 @@
 .bui-menu[hidden],
 .bui-disclosure-panel[hidden] {
 	display: none;
+}
+/* The picture of a panel that just closed: it eases out where the panel was, then is removed. */
+.bui-disclosure-leaving {
+	pointer-events: none;
+	animation: bui-leave var(--motion-quick) var(--motion-ease) forwards;
 }
 .bui-menu-item {
 	display: flex;

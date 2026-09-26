@@ -79,6 +79,12 @@
 		transform: translateY(var(--bui-enter-from, 4px));
 	}
 }
+@keyframes bui-leave {
+	to {
+		opacity: 0;
+		transform: translateY(var(--bui-enter-from, 4px));
+	}
+}
 
 /* Nothing moves for a person who asked for reduced motion; state changes stay visible as text. */
 @media (prefers-reduced-motion: reduce) {
