@@ -63,7 +63,7 @@ export interface MenuItem {
 	tone?: 'danger' | null;
 }
 export class ActionMenu extends Component {
-	constructor(options: { label?: Content | null; name?: string | null; items: Array<MenuItem | null | false>; align?: 'start' | 'end'; glyph?: string | null });
+	constructor(options: { label?: Content | null; name?: string | null; items: Array<MenuItem | null | false>; align?: 'start' | 'end'; glyph?: string | null; placement?: 'auto' | 'below' | 'above' });
 	readonly expanded: boolean;
 	set items(items: Array<MenuItem | null | false>);
 	open(index?: number): void;

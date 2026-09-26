@@ -76,7 +76,7 @@
 @keyframes bui-enter {
 	from {
 		opacity: 0;
-		transform: translateY(4px);
+		transform: translateY(var(--bui-enter-from, 4px));
 	}
 }
 

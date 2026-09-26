@@ -24,6 +24,41 @@ export const checks = [
 		}
 	},
 	{
+		name: 'action menu at the bottom of the viewport: opens above its button, inside the viewport, and scrolls nothing (click, ArrowDown, ArrowUp)',
+		consumers: ['dom', 'react19', 'react18'],
+		async run(browser, consumer) {
+			const { page } = await browser.open(consumer, { viewport: { width: 1280, height: 600 } });
+			const copy = words[consumer.language];
+			const button = page.getByRole('button', { name: copy.more });
+			// The page is scrolled until the menu button sits just above the bottom edge of the viewport
+			// (with room added before it, so any page can scroll that far).
+			const before = await button.evaluate(node => {
+				document.body.style.paddingTop = '100vh';
+				window.scrollBy(0, node.getBoundingClientRect().bottom - innerHeight + 6);
+				return window.scrollY;
+			});
+			for (const way of ['click', 'ArrowDown', 'ArrowUp']) {
+				if (way === 'click') await button.click();
+				else {
+					await button.focus();
+					await page.keyboard.press(way);
+				}
+				const state = await page.evaluate(() => {
+					const list = document.querySelector('#actions [role="menu"]');
+					const box = list.getBoundingClientRect();
+					return { scroll: scrollY, top: box.top, bottom: box.bottom, left: box.left, right: box.right, anchor: list.previousElementSibling.getBoundingClientRect().top, width: innerWidth, height: innerHeight, focus: document.activeElement.getAttribute('role') };
+				});
+				expect(state.focus === 'menuitem', `${way}: an item takes focus, got ${state.focus}`);
+				expect(state.scroll === before, `${way}: the page did not scroll (${before} → ${state.scroll})`);
+				expect(state.bottom <= state.anchor, `${way}: the list (${state.top}–${state.bottom}) opens above its button (top ${state.anchor})`);
+				expect(state.top >= 0 && state.left >= 0 && state.right <= state.width, `${way}: the list stays inside the ${state.width}×${state.height} viewport: ${JSON.stringify(state)}`);
+				await page.keyboard.press('Escape');
+				expect(await page.evaluate(() => document.activeElement.getAttribute('aria-haspopup')) === 'menu', `${way}: Escape returns focus to the button`);
+				expect((await page.evaluate(() => scrollY)) === before, `${way}: returning focus did not scroll`);
+			}
+		}
+	},
+	{
 		name: 'dialog: focus moves in, Tab wraps, Escape closes and focus returns to the opener',
 		consumers: ['dom', 'react19', 'react18'],
 		async run(browser, consumer) {

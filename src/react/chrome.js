@@ -48,10 +48,13 @@ export function Disclosure({ label, name = null, align = 'start', onChange = nul
 	return h('div', { ref: host, className: 'bui-host' }, panel ? ReactDOM.createPortal(children, panel.panel) : null);
 }
 
-/** A menu button of actions. Items: `{ label, onSelect?, href?, disabled?, reason?, tone? }`. */
-export function ActionMenu({ label = null, name = null, items, align = 'end', glyph = 'more' }) {
+/**
+ * A menu button of actions. Items: `{ label, onSelect?, href?, disabled?, reason?, tone? }`;
+ * `placement` is `auto` (below, or above without room below), `below` or `above`.
+ */
+export function ActionMenu({ label = null, name = null, items, align = 'end', glyph = 'more', placement = 'auto' }) {
 	const latest = useLatest(items);
-	const [host, menu] = useInstance(() => new Menu({ label, name, align, glyph, items: [] }), [label, name, align, glyph]);
+	const [host, menu] = useInstance(() => new Menu({ label, name, align, glyph, placement, items: [] }), [label, name, align, glyph, placement]);
 	useSync(menu, current => {
 		current.items = latest.current.map((item, index) => item && { ...item, run: event => latest.current[index]?.onSelect?.(event) });
 	}, [JSON.stringify(items.map(item => item && { ...item, onSelect: undefined }))]);

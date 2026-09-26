@@ -159,6 +159,15 @@
 	box-shadow: var(--elevation-menu);
 	animation: bui-enter var(--motion-quick) var(--motion-ease);
 }
+.bui-menu {
+	overflow-y: auto;
+}
+/* Opened above its button when the viewport has no room below; it rises from the button. */
+.bui-menu.bui-menu-above {
+	top: auto;
+	bottom: calc(100% + var(--space-1));
+	--bui-enter-from: -4px;
+}
 .bui-align-start {
 	left: 0;
 }

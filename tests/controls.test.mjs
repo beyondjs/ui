@@ -70,6 +70,74 @@ test('ActionMenu: arrows move, Escape returns focus, disabled items explain and 
 	assert.equal(document.activeElement, button);
 });
 
+test('ActionMenu: moving focus into, within and out of the menu never scrolls anything', () => {
+	const prototype = page.window.HTMLElement.prototype;
+	const focus = prototype.focus;
+	const calls = [];
+	prototype.focus = function (options) {
+		calls.push(options);
+		return focus.call(this, options);
+	};
+	try {
+		const menu = new ui.ActionMenu({ label: 'Arrange', items: [{ label: 'Side by side' }, { label: 'Grid' }] }).mount(document.body);
+		const button = menu.element.querySelector('button');
+		page.key(button, 'ArrowUp');
+		const items = [...menu.element.querySelectorAll('[role="menuitem"]')];
+		assert.ok(document.activeElement === items[1], 'ArrowUp opens on the last item');
+		page.key(items[1], 'Home');
+		assert.ok(document.activeElement === items[0], 'Home moves to the first item');
+		page.key(items[0], 'Escape');
+		assert.ok(document.activeElement === button, 'Escape returns focus to the button');
+		button.click();
+		items[1].click();
+		assert.ok(document.activeElement === button, 'choosing returns focus to the button');
+	} finally {
+		prototype.focus = focus;
+	}
+	assert.equal(calls.length, 5);
+	assert.ok(calls.every(options => options?.preventScroll === true), `every focus keeps the scroll position: ${JSON.stringify(calls)}`);
+});
+
+test('ActionMenu: the list opens on the side with room and stays inside the viewport', () => {
+	// happy-dom does not lay out: the button and the list report the rectangles a browser would.
+	const box = (left, top, width, height) => ({ left, top, width, height, right: left + width, bottom: top + height, x: left, y: top });
+	const open = ({ anchor, height = 190, placement = undefined }) => {
+		page.reset();
+		const menu = new ui.ActionMenu({ label: 'Arrange', align: 'start', placement, items: [{ label: 'Side by side' }, { label: 'Grid' }] }).mount(document.body);
+		const button = menu.element.querySelector('button');
+		const list = menu.element.querySelector('[role="menu"]');
+		button.getBoundingClientRect = () => anchor;
+		list.getBoundingClientRect = () => {
+			const at = button.getBoundingClientRect();
+			return list.classList.contains('bui-menu-above') ? box(at.left, at.top - 4 - height, 200, height) : box(at.left, at.bottom + 4, 200, height);
+		};
+		button.click();
+		return { menu, list };
+	};
+	// The viewport is 1024 × 768 (tests/support/page.mjs).
+	let { list } = open({ anchor: box(900, 720, 80, 32) });
+	assert.ok(list.classList.contains('bui-menu-above'), 'without room below it opens above');
+	assert.equal(list.style.getPropertyValue('translate'), '-84px 0', 'shifted left so its right edge stays 8 px inside');
+	assert.equal(list.style.getPropertyValue('max-height'), '', 'not capped when it fits');
+	({ list } = open({ anchor: box(100, 40, 80, 32) }));
+	assert.ok(!list.classList.contains('bui-menu-above'), 'with room below it opens below');
+	assert.equal(list.style.getPropertyValue('translate'), '', 'not shifted when it fits');
+	({ list } = open({ anchor: box(100, 300, 80, 32), height: 500 }));
+	assert.ok(!list.classList.contains('bui-menu-above'), 'below has more room than above');
+	assert.equal(list.style.getPropertyValue('max-height'), '424px', 'capped to the room below, 8 px from the edge');
+	({ list } = open({ anchor: box(100, 720, 80, 32), placement: 'below' }));
+	assert.ok(!list.classList.contains('bui-menu-above'), 'placement below keeps the side');
+	assert.equal(list.style.getPropertyValue('max-height'), '4px', 'and still stops 8 px before the viewport ends');
+	({ list } = open({ anchor: box(100, 40, 80, 32), placement: 'above' }));
+	assert.ok(list.classList.contains('bui-menu-above'), 'placement above keeps the side');
+	const { menu, list: reopened } = open({ anchor: box(900, 720, 80, 32) });
+	menu.close();
+	reopened.previousElementSibling.getBoundingClientRect = () => box(100, 40, 80, 32);
+	menu.open();
+	assert.ok(!reopened.classList.contains('bui-menu-above'), 'placed again on every opening');
+	assert.equal(reopened.style.getPropertyValue('translate'), '', 'an earlier shift does not stay');
+});
+
 test('Field validates with consumer messages, rechecks while typing and clears', () => {
 	const field = new ui.Field({ label: 'Name', required: true, hint: 'As people know it', messages: { valueMissing: 'Escribe un nombre.' } }).mount(document.body);
 	assert.equal(field.check(), false);

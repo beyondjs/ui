@@ -11,18 +11,36 @@ import { Ids } from './core/ids.js';
  * on, and a press outside closes. A disabled item stays reachable so its reason can be read, but it
  * does nothing. Choosing an item closes the menu, returns focus and runs the item.
  *
+ * The list stays inside the viewport. With `placement: 'auto'` (the default) it opens below the
+ * button, or above it when there is no room below and more room above; `'below'` and `'above'` fix
+ * the side. Whatever the side, it is shifted sideways when an edge of the viewport would cut it, and
+ * no taller than the room on its side (it then scrolls). Moving focus into it, within it and back to
+ * the button never scrolls the page or a scroll container around the menu.
+ *
  * Items: `{ label, run?, href?, disabled?, reason?, tone? }`; `tone: 'danger'` marks destructive ones.
  */
 export class ActionMenu extends Component {
+	static #margin = 8;
 	#element;
 	#button;
 	#list;
 	#items = [];
 	#open = false;
 	#release = null;
+	#placement;
 
-	constructor({ label, name = null, items, align = 'end', glyph = 'more' }) {
+	/**
+	 * @param {object} options
+	 * @param {string|Node|null} options.label visible content of the button
+	 * @param {string|null} [options.name] accessible name of the button when the label is not enough
+	 * @param {Array<object|null|false>} options.items the actions
+	 * @param {'start'|'end'} [options.align] which edge of the button the list aligns to
+	 * @param {string|null} [options.glyph] the button's icon
+	 * @param {'auto'|'below'|'above'} [options.placement] which side of the button the list opens on
+	 */
+	constructor({ label, name = null, items, align = 'end', glyph = 'more', placement = 'auto' }) {
 		super();
+		this.#placement = ['auto', 'below', 'above'].includes(placement) ? placement : 'auto';
 		const id = Ids.next('bui-menu');
 		this.#button = el(
 			'button',
@@ -64,12 +82,13 @@ export class ActionMenu extends Component {
 			this.#open = true;
 			this.#list.hidden = false;
 			this.#button.setAttribute('aria-expanded', 'true');
+			this.#place();
 			this.#release = this.listen(this.#element.ownerDocument, 'pointerdown', event => {
 				if (!this.#element.contains(event.target)) this.close(false);
 			});
 		}
 		const targets = this.#items.map(entry => entry.node);
-		targets.at(index < 0 ? targets.length + index : index)?.focus();
+		targets.at(index < 0 ? targets.length + index : index)?.focus({ preventScroll: true });
 	}
 
 	close(refocus = false) {
@@ -78,7 +97,33 @@ export class ActionMenu extends Component {
 		this.#list.hidden = true;
 		this.#button.setAttribute('aria-expanded', 'false');
 		this.#release?.();
-		if (refocus) this.#button.focus();
+		if (refocus) this.#button.focus({ preventScroll: true });
+	}
+
+	/**
+	 * Keeps the open list inside the viewport: on the side its placement asks for (below, or above when
+	 * `auto` finds no room below and more room above), shifted sideways when an edge would cut it, and
+	 * no taller than the room on its side.
+	 */
+	#place() {
+		const list = this.#list;
+		list.classList.remove('bui-menu-above');
+		list.style.removeProperty('max-height');
+		list.style.removeProperty('translate');
+		const view = this.#element.ownerDocument.defaultView;
+		if (!view) return;
+		const margin = ActionMenu.#margin;
+		const anchor = this.#button.getBoundingClientRect();
+		const height = list.getBoundingClientRect().height;
+		const below = view.innerHeight - anchor.bottom - margin;
+		const above = anchor.top - margin;
+		const up = this.#placement === 'above' || (this.#placement === 'auto' && height > below && above > below);
+		list.classList.toggle('bui-menu-above', up);
+		const box = list.getBoundingClientRect();
+		const room = up ? box.bottom - margin : view.innerHeight - margin - box.top;
+		if (box.height > room) list.style.maxHeight = `${Math.max(Math.floor(room), 0)}px`;
+		const shift = box.left < margin ? margin - box.left : box.right > view.innerWidth - margin ? view.innerWidth - margin - box.right : 0;
+		if (shift) list.style.translate = `${Math.round(shift)}px 0`;
 	}
 
 	#item({ label, run = null, href = null, disabled = false, reason = null, tone = null }) {
@@ -121,7 +166,7 @@ export class ActionMenu extends Component {
 		else if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
 			event.preventDefault();
 			const next = { ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: targets.length - 1 }[event.key];
-			targets[(next + targets.length) % targets.length]?.focus();
+			targets[(next + targets.length) % targets.length]?.focus({ preventScroll: true });
 		}
 	}
 }
