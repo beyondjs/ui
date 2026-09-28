@@ -103,10 +103,11 @@
 	}
 }
 
+/* A surface with a bottom bar of its own (a dock) raises the toaster with --bui-toaster-bottom. */
 .bui-toaster {
 	position: fixed;
 	right: var(--space-4);
-	bottom: var(--space-4);
+	bottom: var(--bui-toaster-bottom, var(--space-4));
 	z-index: 50;
 	display: grid;
 	gap: var(--space-2);
@@ -122,7 +123,7 @@
 	grid-template-columns: auto 1fr auto;
 	align-items: start;
 	gap: var(--space-2);
-	padding: var(--space-3);
+	padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
 	border: 1px solid var(--color-border);
 	border-left: 3px solid var(--color-success);
 	border-radius: var(--radius-base);
@@ -132,9 +133,13 @@
 	pointer-events: auto;
 	animation: bui-enter var(--motion-standard) var(--motion-ease);
 }
+/* Icon, first line and close button are centred on one target-tall line. */
 .bui-toast > .bui-icon {
-	margin-top: 2px;
+	margin-top: calc((var(--bui-target) - 18px) / 2);
 	color: var(--color-success);
+}
+.bui-toast-text {
+	padding-top: calc((var(--bui-target) - 1lh) / 2);
 }
 .bui-toast-info {
 	border-left-color: var(--color-info);

@@ -128,7 +128,7 @@
 	.bui-table tbody th,
 	.bui-table tbody td {
 		height: auto;
-		padding: var(--space-1) var(--space-2);
+		padding: var(--space-1) 0;
 		border: 0;
 	}
 	.bui-table tbody td::before {

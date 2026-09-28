@@ -15,10 +15,11 @@
 .bui-notice:last-child {
 	border-bottom: 0;
 }
+/* The dot is centred on the first line of the title, whose line box is one target tall. */
 .bui-notice-dot {
 	width: 8px;
 	height: 8px;
-	margin-top: 7px;
+	margin-top: calc((var(--bui-target) - 8px) / 2);
 	border-radius: var(--radius-round);
 }
 .bui-notice[data-read='false'] .bui-notice-dot {
@@ -31,8 +32,7 @@
 	min-width: 0;
 }
 .bui-notice-open {
-	min-height: var(--bui-target);
-	padding: 0;
+	padding: calc((var(--bui-target) - 1lh) / 2) 0;
 	border: 0;
 	background: none;
 	color: var(--color-link);
@@ -82,6 +82,7 @@
 	gap: var(--space-1);
 }
 .bui-inbox-tools .bui-button {
+	min-height: var(--bui-control);
 	margin-left: auto;
 }
 .bui-inbox-body[aria-busy='true'] .bui-notices {

@@ -23,6 +23,7 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 export function Button(props: ButtonProps): ReactElement;
 /** `[busy, run]`: `run(work)` runs an action once and ignores presses meanwhile. */
 export function useBusy(): [boolean, <T>(work: () => Promise<T>) => Promise<T | undefined>];
+export function Lockup(props: { src: string; name?: ReactNode; alt?: string }): ReactElement;
 export function Status(props: { label: ReactNode; tone?: Tone | 'progress' }): ReactElement;
 export function Badge(props: { label: ReactNode; tone?: Tone }): ReactElement;
 export function Callout(props: { tone?: Exclude<Tone, 'neutral'>; title: ReactNode; body?: ReactNode; actions?: ReactNode; live?: boolean; children?: ReactNode }): ReactElement;

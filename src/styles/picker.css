@@ -43,7 +43,9 @@
 	border-color: var(--color-warning);
 	background: var(--color-warning-surface);
 }
+/* The reason takes its own last line, so the remove button stays beside the chip's name. */
 .bui-chip-reason {
+	order: 1;
 	flex-basis: 100%;
 	color: var(--color-text-muted);
 	font-size: var(--text-label);

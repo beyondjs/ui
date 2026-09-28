@@ -208,6 +208,8 @@ export class Help extends Disclosure {
 	constructor(options: { topic: string; text: Content | Content[]; labels?: Copy; onchange?: ((open: boolean) => void) | null });
 }
 
+/** The family lockup: the Beyond wordmark (`src`, the consumer's asset) with the product name. */
+export function lockup(options: { src: string; name?: Content | null; alt?: string }): HTMLElement;
 export function status(label: Content, tone?: Tone | 'progress'): HTMLElement;
 export function badge(label: Content, tone?: Tone): HTMLElement;
 export function callout(options: { tone?: Exclude<Tone, 'neutral'>; title: Content; body?: Content | null; actions?: Node[]; live?: boolean }): HTMLElement;

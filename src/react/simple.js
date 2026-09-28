@@ -6,7 +6,7 @@ const { useCallback, useRef, useState, useEffect } = React;
 
 /**
  * Elements React renders itself, with exactly the markup and classes of the DOM builders:
- * `Icon`, `Button`, `Status`, `Badge`, `Callout`, `Loading` and `Skeleton`, plus `useBusy`.
+ * `Icon`, `Button`, `Lockup`, `Status`, `Badge`, `Callout`, `Loading` and `Skeleton`, plus `useBusy`.
  */
 
 /** A decorative icon from the package catalog. */
@@ -67,6 +67,11 @@ export function useBusy() {
 		}
 	}, []);
 	return [busy, run];
+}
+
+/** The family lockup: the Beyond wordmark (`src`) with the product name, as the DOM `lockup` builds it. */
+export function Lockup({ src, name = null, alt = 'Beyond' }) {
+	return h('span', { className: 'bui-lockup' }, h('img', { className: 'bui-lockup-mark', src, alt }), name ? h('span', { className: 'bui-lockup-name' }, name) : null);
 }
 
 export function Status({ label, tone = 'neutral' }) {

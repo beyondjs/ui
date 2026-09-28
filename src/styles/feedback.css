@@ -1,7 +1,8 @@
 /* Status, badges, counts, callouts, loading, skeletons and empty states. */
+/* The dot sits on the first line when the label wraps. */
 .bui-status {
 	display: inline-flex;
-	align-items: center;
+	align-items: flex-start;
 	gap: 6px;
 	font-size: var(--text-small);
 	font-weight: var(--weight-medium);
@@ -11,6 +12,7 @@
 	width: 8px;
 	height: 8px;
 	flex: none;
+	margin-top: calc((1lh - 8px) / 2);
 	border-radius: var(--radius-round);
 	background: var(--color-text-muted);
 }
@@ -94,7 +96,7 @@
 	color: var(--color-text);
 }
 .bui-callout > .bui-icon {
-	margin-top: 2px;
+	margin-top: calc((1lh - 18px) / 2);
 	color: var(--color-info);
 }
 .bui-callout-success {

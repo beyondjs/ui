@@ -40,6 +40,13 @@ test('simple elements render the same markup as the DOM builders', async () => {
 	assert.deepEqual(shape(skeleton), shape(dom.skeleton(2)));
 });
 
+test('Lockup renders the markup of the DOM lockup, with or without a product name', async () => {
+	await render(h('div', null, h(ui.Lockup, { src: '/brand/wordmark.svg', name: 'Accounts' }), h(ui.Lockup, { src: '/brand/wordmark.svg' })));
+	const [named, bare] = host.firstChild.children;
+	assert.deepEqual(shape(named), shape(dom.lockup({ src: '/brand/wordmark.svg', name: 'Accounts' })));
+	assert.deepEqual(shape(bare), shape(dom.lockup({ src: '/brand/wordmark.svg' })));
+});
+
 test('Dialog opens from its prop, renders React children, reports Escape and cleans up', async () => {
 	const closes = [];
 	const view = open => h(ui.Dialog, { open, title: 'Rename area', onClose: value => closes.push(value), actions: h('button', { type: 'button' }, 'Save') }, h('input', { 'aria-label': 'Name' }));

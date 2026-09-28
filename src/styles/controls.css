@@ -100,8 +100,9 @@
 	border-radius: var(--radius-control);
 	overflow: hidden;
 }
+/* The group's border is outside its toggles, so the group is exactly one control tall. */
 .bui-toggle {
-	min-height: var(--bui-control);
+	min-height: calc(var(--bui-control) - 2px);
 	padding: 0 var(--space-4);
 	border: 0;
 	background: var(--color-surface);
@@ -161,7 +162,13 @@
 	animation: bui-enter var(--motion-quick) var(--motion-ease);
 }
 .bui-menu {
+	width: max-content;
 	overflow-y: auto;
+}
+/* A trigger with a visible label stands in a row of buttons: it takes their height and weight. */
+.bui-menu-button:has(> span) {
+	min-height: var(--bui-control);
+	font-weight: var(--weight-medium);
 }
 /* Opened above its button when the viewport has no room below; it rises from the button. */
 .bui-menu.bui-menu-above {

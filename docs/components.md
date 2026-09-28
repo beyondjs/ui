@@ -1,12 +1,12 @@
 # Component catalog
 
-Every component of `@beyond-js/ui` 0.1.5: what it is for, its variants and main options, the states it states in words, and its consumers. DOM names come from `@beyond-js/ui` (or `/dom`); React names from `@beyond-js/ui/react`. Every component takes `labels` for its copy (strings with `{placeholders}` or functions of the values) and every DOM class has `mount(parent)` and `destroy()`. Type declarations in `types/` list every option.
+Every component of `@beyond-js/ui` 0.1.6: what it is for, its variants and main options, the states it states in words, and its consumers. DOM names come from `@beyond-js/ui` (or `/dom`); React names from `@beyond-js/ui/react`. Every component takes `labels` for its copy (strings with `{placeholders}` or functions of the values) and every DOM class has `mount(parent)` and `destroy()`. Type declarations in `types/` list every option.
 
 **Consumers** (each product vendors the tarball in its own `tools/` and records its adoption, residual copies and evidence in its own repository; the family reference catalogs them component by component in `branding/src/family/components/consumers.js`): the Beyond desktop (plain DOM, 0.1.5), the Delegate application (React, the whole application, 0.1.3), Branding (plain DOM, 0.1.5), the Conduict interface and its Desktop surface (plain DOM, 0.1.3), the Projects interface (plain DOM served by its service, 0.1.2), the Snapshots and Accounts frontends and the Workspace client (React, 0.1.2), and the CDN administration and backoffice (React, 0.1.1, binding the DOM `Dialog` themselves until they re-vendor).
 
 ## Foundations
 
-**Tokens** (`@beyond-js/ui/tokens`, `@beyond-js/ui/tokens.css`). Token set 0.1.0 (unchanged in packages 0.1.1 to 0.1.5: the package version and the token set version are independent, and `tokens.version` stays `0.1.0`), `status: 'proposed'`, canonical here with provenance from the family reference. Components read semantic roles only (`--color-<role>`), never primitives. The theme follows `data-beyond-mode` (`light` or `dark`), falling back to the system preference. Density follows `data-density="compact"` on the root; coarse pointers always get 44 px targets. Consumer: Branding (tokens only).
+**Tokens** (`@beyond-js/ui/tokens`, `@beyond-js/ui/tokens.css`). Token set 0.1.0 (unchanged in packages 0.1.1 to 0.1.6: the package version and the token set version are independent, and `tokens.version` stays `0.1.0`), `status: 'proposed'`, canonical here with provenance from the family reference. Components read semantic roles only (`--color-<role>`), never primitives. The theme follows `data-beyond-mode` (`light` or `dark`), falling back to the system preference. Density follows `data-density="compact"` on the root; coarse pointers always get 44 px targets. Consumer: Branding (tokens only).
 
 **Motion.** 150 ms and 200 ms with one easing, for entering panels and dialogs and for control color changes. Under `prefers-reduced-motion: reduce` nothing animates or transitions; spinners stop and state stays in words.
 
@@ -48,9 +48,11 @@ Every component of `@beyond-js/ui` 0.1.5: what it is for, its variants and main 
 
 **Status, Badge, Callout, Loading, Skeleton.** `status(label, tone)` is a state with a dot and words; `badge` a short tag; `callout({ tone, title, body, actions, live })` a message block (`live` announces, assertively for danger); `loading(label)` an announced spinner; `skeleton(lines)` hidden placeholders. Tones: `neutral`, `success`, `warning`, `danger`, `info` (and `progress` for status).
 
-**Toaster** (`Toaster`; React `useToaster`). Transient outcome messages, one region per page: successes and information announced politely and removed after `duration`; failures assertive and kept until dismissed. A toast says what just happened on this screen; it is never stored and is not a notification.
+**Toaster** (`Toaster`; React `useToaster`). Transient outcome messages, one region per page: successes and information announced politely and removed after `duration`; failures assertive and kept until dismissed. A toast says what just happened on this screen; it is never stored and is not a notification. Since 0.1.6 the toaster sits `--bui-toaster-bottom` above the viewport's bottom edge (default `--space-4`), so a surface with a bottom bar of its own, such as the Desktop's dock, raises it there.
 
 ## Header and notifications
+
+**Lockup** (DOM `lockup`, React `Lockup`; since 0.1.6). The family treatment of the product name: the Beyond wordmark with the product name beside it, set apart by a divider, the same in every product. The consumer passes the wordmark asset it carries (`src`; the package ships no brand asset), `name` and, when needed, `alt` (default `Beyond`). The name is sized to the wordmark's cap height and aligned to its letters, not to its image box, whose lower part holds the drips of the O; `--bui-lockup-height` (default 21px) scales both. Pass it to `Header` as `brand.logo`. The family reference's proposal R06 (no name beside the wordmark) is not decided; this component is the single place that would change if it were approved.
 
 **Header** (`Header`). The shared family header: `brand` (link home, text or image), `context` (breadcrumb entries), `nav` (product links), `notifications` and `account` slots, `onnavigate` for routed applications. Below 768 px the navigation collapses behind a toggle; with `toggle: { controls, expanded, onchange }` the same button opens a product's own sidebar instead. It places content and decides nothing about access.
 
