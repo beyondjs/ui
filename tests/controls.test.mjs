@@ -14,17 +14,6 @@ test('Labels apply placeholders and consumer functions; unknown keys fall back t
 	assert.equal(labels.text('missing'), 'missing');
 });
 
-test('lockup names the product beside the wordmark; the image alone carries the accessible name Beyond', () => {
-	const named = ui.lockup({ src: '/brand/wordmark.svg', name: 'Accounts' });
-	assert.equal(named.className, 'bui-lockup');
-	assert.equal(named.querySelector('.bui-lockup-mark').getAttribute('alt'), 'Beyond');
-	assert.equal(named.querySelector('.bui-lockup-name').textContent, 'Accounts');
-	assert.equal(named.textContent, 'Accounts');
-	const bare = ui.lockup({ src: '/brand/wordmark.svg', alt: 'Beyond Snapshots' });
-	assert.equal(bare.querySelector('.bui-lockup-name'), null);
-	assert.equal(bare.querySelector('img').getAttribute('alt'), 'Beyond Snapshots');
-});
-
 test('destroy() releases outside listeners and cancels timers', async () => {
 	const menu = new ui.ActionMenu({ label: 'More', items: [{ label: 'Edit' }] }).mount(document.body);
 	menu.open();

@@ -11,7 +11,7 @@ const { useLayoutEffect, useRef, useState } = React;
 
 /**
  * The shared family header, driven by the DOM `Header` class. `context` and `nav` are entry arrays
- * (`{ label, href, current }`); `notifications` and `account` are React content rendered into their
+ * (`{ label, href, current }`); `brand.lockup` (`{ src, name }`) shows the family lockup; `notifications` and `account` are React content rendered into their
  * slots. `toggle` makes the menu button open an external region such as a product sidebar;
  * `onNavigate(item, event)` takes over plain clicks on header links.
  */
@@ -29,7 +29,7 @@ export function Header({ brand, context = null, nav = null, notifications = null
 			onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null,
 			toggle: toggle ? { controls: toggle.controls, expanded: toggle.expanded, onchange: expanded => latest.current.toggle?.onChange?.(expanded) } : null
 		});
-	}, [brand.href, brand.label, brand.image?.src, labels, Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
+	}, [brand.href, brand.label, brand.image?.src, brand.lockup?.src, brand.lockup?.name, brand.logo, labels, Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
 	useSync(bar, current => (current.context = context), [JSON.stringify(context)]);
 	useSync(bar, current => (current.nav = nav), [JSON.stringify(nav)]);
 	useSync(bar, current => {

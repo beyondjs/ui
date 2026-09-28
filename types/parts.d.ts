@@ -67,7 +67,7 @@ export class Toaster extends Component {
 
 export interface Crumb { label: Content; href?: string | null; current?: boolean }
 export interface HeaderOptions {
-	brand: { label: string; href: string; logo?: Node | null; image?: { src: string; width?: number; height?: number } | null };
+	brand: { label: string; href: string; lockup?: { src: string; name?: string } | null; logo?: Node | null; image?: { src: string; width?: number; height?: number } | null };
 	context?: Crumb[] | Node | null;
 	nav?: Crumb[] | Node | null;
 	notifications?: Node | null;

@@ -3,6 +3,7 @@ import { el, fill, content } from './core/element.js';
 import { icon } from './core/icons.js';
 import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
+import { lockup } from './lockup.js';
 
 const defaults = { header: 'Beyond', context: 'Where you are', nav: 'Product', open: 'Open navigation', close: 'Close navigation' };
 
@@ -29,7 +30,8 @@ export class Header extends Component {
 
 	/**
 	 * @param {object} options
-	 * @param {{label: string, href: string, logo?: Node, image?: {src: string, width?: number, height?: number}}} options.brand
+	 * @param {{label: string, href: string, lockup?: {src: string, name?: string}, logo?: Node, image?: {src: string, width?: number, height?: number}}} options.brand
+	 *   `label` names the link home; with `lockup`, `logo` or `image` it is the link's accessible name and the picture is not read
 	 * @param {Array<{label: string|Node, href?: string, current?: boolean}>|Node} [options.context]
 	 * @param {Array<{label: string|Node, href: string, current?: boolean}>|Node} [options.nav]
 	 * @param {Node} [options.notifications] usually a NotificationEntry element
@@ -52,7 +54,7 @@ export class Header extends Component {
 		this.#element = el('header', { class: `bui-header${toggle ? ' bui-header-external' : ''}`, 'aria-label': this.#labels.text('header') }, [
 			el('div', { class: 'bui-header-start' }, [
 				this.#toggle,
-				el('a', { class: 'bui-header-brand', href: brand.href }, [this.#logo(brand), el('span', { class: brand.logo || brand.image ? 'bui-hidden' : 'bui-header-name' }, [content(brand.label)])])
+				this.#brand(brand)
 			]),
 			this.#context,
 			this.#nav,
@@ -115,7 +117,15 @@ export class Header extends Component {
 		}, [content(label)]);
 	}
 
-	#logo({ logo = null, image = null }) {
+	#brand(brand) {
+		const picture = this.#picture(brand);
+		if (!picture) return el('a', { class: 'bui-header-brand', href: brand.href }, [el('span', { class: 'bui-header-name' }, [content(brand.label)])]);
+		picture.setAttribute('aria-hidden', 'true');
+		return el('a', { class: 'bui-header-brand', href: brand.href, 'aria-label': brand.label }, [picture]);
+	}
+
+	#picture({ lockup: family = null, logo = null, image = null }) {
+		if (family) return lockup(family);
 		if (logo) return logo;
 		return image ? el('img', { src: image.src, alt: '', width: image.width ?? null, height: image.height ?? null }) : null;
 	}

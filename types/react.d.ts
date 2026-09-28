@@ -105,7 +105,7 @@ export interface CollectionProps<Row> {
 export function Collection<Row = Record<string, unknown>>(props: CollectionProps<Row>): ReactElement;
 
 export interface HeaderProps {
-	brand: { label: string; href: string; image?: { src: string; width?: number; height?: number } | null };
+	brand: { label: string; href: string; lockup?: { src: string; name?: string } | null; logo?: Node | null; image?: { src: string; width?: number; height?: number } | null };
 	context?: Crumb[] | null;
 	nav?: Crumb[] | null;
 	notifications?: ReactNode;

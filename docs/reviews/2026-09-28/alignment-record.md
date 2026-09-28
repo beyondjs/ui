@@ -1,4 +1,4 @@
-# 0.1.6: the family lockup and alignment corrections — 28 September 2026
+# 0.1.6 and 0.1.7: the family lockup and alignment corrections — 28 September 2026
 
 The family's interface alignment audit of this date (the suite's `docs/reviews/2026-09-28/ui-alignment-audit.md`) found eleven defects in this package's shared components, shown by every product that vendors them. It also found each product building its own wordmark and product-name lockup, several of them wrong. 0.1.6 corrects the eleven and adds one lockup for the family.
 
@@ -32,6 +32,27 @@ The family reference's proposal R06 (never styling the product name beside the w
 | `npm run acceptance` | 67 of 67 (the packed tarball installed in the `dom`, `react19` and `react18` consumers, Chrome headless) |
 | Measurement page (scratch, not retained) | The lockup, status, callout, toast, notice, inbox tools and labelled trigger, as above |
 
+## 0.1.7: the lockup in the header
+
+The products' adoption of 0.1.6 found two gaps:
+
+- **The brand read twice.** `Header` kept `brand.label` as hidden text beside a `logo`. A named lockup therefore read "Beyond Snapshots Beyond Snapshots" unless the product hid it.
+- **No React `logo`.** The React declarations had no `brand.logo`, and a React product could pass only a DOM node.
+
+0.1.7 closes both:
+
+- **One accessible name.** With a picture (`lockup`, `logo` or `image`), `Header` names the brand link by `aria-label` from `brand.label` and hides the picture from assistive technology. With no picture, the visible label stays the name.
+- **`brand.lockup`.** The new `brand.lockup: { src, name }` builds the family lockup inside the header, in both the DOM and the React `Header`.
+- **Declarations.** `lockup` and `logo` are declared for both.
+
+The brand tests moved to `tests/brand.test.mjs`, because `controls.test.mjs` would have exceeded the 300-line target.
+
+| Command | Result |
+| --- | --- |
+| `npm test` | 86 of 86 |
+| `npm run types` | Clean |
+| `npm run acceptance` | 67 of 67 |
+
 ## Consumers
 
-Recorded when the products adopt 0.1.6 in the same assignment.
+Recorded when the products adopt the release in the same assignment.
