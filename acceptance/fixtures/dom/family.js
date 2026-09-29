@@ -5,14 +5,14 @@ import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import { FamilyBar, ProductNav, NotificationEntry, Unavailable, Button, confirm, lockup, badge, availability } from '@beyond-js/ui';
 import { Notices } from '../data/notices.js';
-import { chosen, descriptors, fallback } from '../data/family.js';
+import { chosen, descriptors, fallback, product } from '../data/family.js';
 
 const log = [];
 const root = document.getElementById('root');
 const products = { delegate: 'Delegate', cdn: 'CDN', projects: 'Projects' };
 const entry = new NotificationEntry({ adapter: new Notices('ready').adapter, href: '#/notifications', products });
 const bar = new FamilyBar({
-	product: 'delegate',
+	product,
 	brand: { src: '../brand/wordmark.svg', href: '/projects/' },
 	descriptor: chosen(),
 	fallback,

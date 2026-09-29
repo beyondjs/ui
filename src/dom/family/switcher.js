@@ -11,6 +11,9 @@ import { NavigationMenu, entry } from './menu.js';
  * them, each with its availability: an unavailable entry states its reason and is a link only when
  * it has an address and the reason is advisory. Outside a project it lists the products of the
  * organization. Without a descriptor (loading or unavailable) it holds one link to Projects.
+ *
+ * It also carries the location's sections (`carried`), hidden until a touch screen too narrow for a
+ * location button of a target's size folds the location into this menu (see family.css).
  */
 export class ProductSwitcher extends Component {
 	#menu;
@@ -23,11 +26,12 @@ export class ProductSwitcher extends Component {
 	 * @param {object|null} options.descriptor the `beyond-family/1` descriptor when ready, else null
 	 * @param {import('./places.js').Places} options.places
 	 * @param {import('../core/labels.js').Labels} options.labels
+	 * @param {Array<{heading: string, items: Node[]}>} [options.carried] the location's sections
 	 */
 	constructor(options) {
 		super();
 		this.#options = options;
-		const { product, names, descriptor, labels } = options;
+		const { product, names, descriptor, labels, carried = [] } = options;
 		const name = names[product] ?? product;
 		const items = descriptor ? (descriptor.products ?? []).map(item => this.#item(item)) : [this.#back()];
 		this.#menu = new NavigationMenu({
@@ -35,7 +39,7 @@ export class ProductSwitcher extends Component {
 			name: labels.text('product', { name }),
 			part: 'product',
 			class: 'bui-family-product',
-			sections: [{ heading: labels.text(descriptor?.project ? 'entries' : 'products'), items }]
+			sections: [{ heading: labels.text(descriptor?.project ? 'entries' : 'products'), items }, ...carried.map(section => ({ ...section, class: 'bui-family-carried' }))]
 		});
 	}
 

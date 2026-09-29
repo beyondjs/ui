@@ -82,7 +82,8 @@
 	font-size: var(--text-label);
 	font-weight: var(--weight-light);
 }
-.bui-navmenu-list > li:has(> .bui-family-docs-item) {
+.bui-navmenu-list > li:has(> .bui-family-docs-item),
+.bui-family-carried {
 	display: none;
 }
 

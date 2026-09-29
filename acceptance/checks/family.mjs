@@ -49,6 +49,42 @@ export const checks = [
 		}
 	},
 	{
+		name: 'family bar on phones (320 to 479 px) with each long product name, with and without a sidebar toggle: touch targets 44 × 44, nothing overlapping',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			const toggle = consumer.name === 'react19';
+			for (const touch of [true, false]) {
+				for (const width of [320, 340, 360, 390, 479]) {
+					for (const product of ['workspace', 'snapshots', 'conduict', 'delegate']) {
+						const at = `${product} at ${width}px ${touch ? 'touch' : 'mouse'}${toggle ? ' with a toggle' : ''}`;
+						const { page, context } = await open(browser, consumer, { width, query: `?family=inside&product=${product}`, ...(touch ? { hasTouch: true, isMobile: true } : {}) });
+						expect((await page.evaluate(() => matchMedia('(pointer: coarse)').matches)) === touch, `${at}: pointer`);
+						const found = await Geometry.bar(page);
+						expect(found.height === 44 && !(await overflow(page)), `${at}: one row, no sideways scroll`);
+						expect(found.outside.length === 0 && found.overlaps.length === 0, `${at}: outside ${found.outside} overlapping ${found.overlaps}`);
+						const targets = await Geometry.targets(page);
+						expect(targets.mark >= 21, `${at}: wordmark ${targets.mark}px`);
+						if (touch) {
+							const small = targets.controls.filter(control => control.width < 43.5 || control.height < 43.5);
+							expect(!small.length, `${at}: targets under 44 × 44: ${JSON.stringify(small)}`);
+						}
+						// With a toggle on a touch screen below 380 px the location folds into the product menu.
+						const folded = touch && toggle && width < 380;
+						expect(targets.location === !folded, `${at}: location ${targets.location ? 'shown' : 'folded'}`);
+						if (folded) {
+							await page.locator('.bui-family [data-part="product"] .bui-navmenu-button').click();
+							const carried = page.locator('.bui-family [data-part="product"] .bui-family-carried');
+							expect((await carried.count()) === 2 && (await carried.first().isVisible()), `${at}: organizations and projects in the product menu`);
+							const box = await page.locator('.bui-family [data-part="product"] .bui-navmenu-panel').boundingBox();
+							expect(box && box.x >= 0 && box.x + box.width <= width, `${at}: product menu inside the viewport ${JSON.stringify(box)}`);
+						}
+						await context.close();
+					}
+				}
+			}
+		}
+	},
+	{
 		name: 'family bar location at 1024, 900 and 768 px: long organization and project names share the width, neither collapses',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
@@ -191,6 +227,9 @@ export const checks = [
 			await page.locator('#patterns .bui-button-danger').click();
 			const list = await page.locator('dialog .bui-consequence dt').allInnerTexts();
 			expect(list.length === 3, `lost, kept and undo: ${list}`);
+			// Sentence case as written (D20): innerText follows text-transform, so capitals by style would show here.
+			const written = await page.locator('dialog .bui-consequence dt').evaluateAll(nodes => nodes.map(node => node.textContent));
+			expect(list.every((text, index) => text === written[index]) && list.every(text => text !== text.toUpperCase()), `labels in sentence case: ${list}`);
 			await page.keyboard.press('Escape');
 			await page.waitForFunction(() => window.fixture.log.includes('confirm:false'));
 		}

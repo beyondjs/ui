@@ -45,6 +45,13 @@ export class Location extends Component {
 		return [...this.#element.children].every(form => !form.childElementCount);
 	}
 
+	/** New copies of the location menu's sections (organizations, then projects), for another menu to carry. */
+	sections() {
+		const { state, descriptor } = this.#options;
+		if (state !== 'ready' || !descriptor.organization) return [];
+		return [this.#organizations(), descriptor.project ? this.#projects() : null].filter(Boolean);
+	}
+
 	/** The menus built, wide and narrow. */
 	get menus() {
 		return this.#menus;

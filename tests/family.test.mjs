@@ -12,7 +12,8 @@ const brand = { src: '/brand/wordmark.svg', href: '/own-home' };
 const make = (options = {}) => new ui.FamilyBar({ product: 'delegate', brand, account: { signout: () => {} }, ...options }).mount(document.body);
 const menu = (bar, part) => bar.element.querySelector(`.bui-family-wide [data-part="${part}"], .bui-family-brand [data-part="${part}"], .bui-family-end [data-part="${part}"]`);
 const button = (bar, part) => menu(bar, part)?.querySelector('.bui-navmenu-button');
-const entries = (bar, part) => [...menu(bar, part).querySelectorAll('.bui-navmenu-item')];
+// The entries a menu shows; the location's sections the product menu carries are hidden by the package stylesheet.
+const entries = (bar, part) => [...menu(bar, part).querySelectorAll('.bui-navmenu-item')].filter(node => !node.closest('.bui-family-carried'));
 const texts = nodes => nodes.map(node => node.querySelector('.bui-navmenu-label').textContent);
 
 test('FamilyBar renders the descriptor: the lockup as switcher, the location and the account', () => {
@@ -213,7 +214,10 @@ test('FamilyBar labels: Spanish copy replaces the English defaults; product name
 	bar.destroy();
 });
 
-test('FamilyBar keyboard: a menu opens on its first entry, arrows move, Escape returns focus', () => {
+test('FamilyBar keyboard: a menu opens on its first entry, arrows move, Escape returns focus', t => {
+	// The package stylesheet's rule hiding the carried location sections (happy-dom loads no stylesheet).
+	const style = document.head.appendChild(Object.assign(document.createElement('style'), { textContent: '.bui-family-carried { display: none; }' }));
+	t.after(() => style.remove());
 	const bar = make({ descriptor: inside });
 	const trigger = button(bar, 'product');
 	trigger.focus();
@@ -230,6 +234,20 @@ test('FamilyBar keyboard: a menu opens on its first entry, arrows move, Escape r
 	page.key(document.activeElement, 'Escape');
 	assert.equal(trigger.getAttribute('aria-expanded'), 'false');
 	assert.ok(document.activeElement === trigger, 'focus returns to the button');
+	bar.destroy();
+});
+
+test('FamilyBar product menu carries the location\'s sections for the touch fold, apart from its own entries', () => {
+	const bar = make({ descriptor: inside });
+	const carried = [...menu(bar, 'product').querySelectorAll('.bui-family-carried')];
+	assert.equal(carried.length, 2, 'organizations and projects');
+	const hrefs = carried.map(section => [...section.querySelectorAll('a.bui-navmenu-item')].map(node => node.getAttribute('href')));
+	const location = [...bar.element.querySelectorAll('.bui-family-narrow .bui-navmenu-item')].map(node => node.getAttribute('href')).filter(Boolean);
+	assert.deepEqual(hrefs.flat(), location, 'the same entries as the location menu');
+	bar.descriptor = { ...inside, project: null };
+	assert.equal(menu(bar, 'product').querySelectorAll('.bui-family-carried').length, 1, 'outside a project: organizations only');
+	bar.descriptor = { unavailable: true };
+	assert.equal(menu(bar, 'product').querySelectorAll('.bui-family-carried').length, 0, 'nothing to carry without a descriptor');
 	bar.destroy();
 });
 

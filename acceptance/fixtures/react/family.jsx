@@ -7,7 +7,7 @@ import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { FamilyBar, ProductNav, NotificationEntry, Unavailable, Button, Badge, Lockup, useConfirm, availability } from '@beyond-js/ui/react';
 import { Notices } from '../data/notices.js';
-import { chosen, descriptors, fallback } from '../data/family.js';
+import { chosen, descriptors, fallback, product } from '../data/family.js';
 import { es } from './labels.js';
 
 const log = [];
@@ -22,7 +22,7 @@ function Page() {
 	return (
 		<>
 			<FamilyBar
-				product="delegate"
+				product={product}
 				brand={{ src: '../brand/wordmark.svg', href: '/projects/' }}
 				descriptor={descriptor}
 				fallback={fallback}

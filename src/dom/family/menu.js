@@ -21,7 +21,7 @@ export class NavigationMenu extends Component {
 	 * @param {object} options
 	 * @param {string|Node|Array<string|Node>} options.label visible content of the button (a chevron follows)
 	 * @param {string} options.name accessible name of the button, stating what it chooses
-	 * @param {Array<{heading?: string|Node|null, items: Array<Node|null>}|null>} options.sections
+	 * @param {Array<{heading?: string|Node|null, items: Array<Node|null>, class?: string}|null>} options.sections
 	 * @param {'start'|'end'} [options.align]
 	 * @param {string} [options.part] names the menu for focus restoration after a redraw
 	 * @param {string} [options.class]
@@ -75,9 +75,9 @@ export class NavigationMenu extends Component {
 		super.destroy();
 	}
 
-	#section({ heading = null, items }) {
+	#section({ heading = null, items, class: extra = '' }) {
 		const id = heading ? Ids.next('bui-navmenu-heading') : null;
-		return el('div', { class: 'bui-navmenu-section' }, [
+		return el('div', { class: `bui-navmenu-section ${extra}`.trim() }, [
 			heading ? el('p', { id, class: 'bui-navmenu-heading' }, [content(heading)]) : null,
 			el('ul', { class: 'bui-navmenu-list', 'aria-labelledby': id }, items.filter(Boolean).map(item => el('li', {}, [item])))
 		]);
@@ -86,7 +86,8 @@ export class NavigationMenu extends Component {
 	/** The entries arrow keys move between: links, buttons and unavailable entries that are shown. */
 	#entries() {
 		const view = this.element.ownerDocument.defaultView;
-		return [...this.panel.querySelectorAll('.bui-navmenu-item')].filter(node => view.getComputedStyle(node.parentElement).display !== 'none');
+		const shown = node => view.getComputedStyle(node).display !== 'none';
+		return [...this.panel.querySelectorAll('.bui-navmenu-item')].filter(node => shown(node.parentElement) && shown(node.closest('.bui-navmenu-section')));
 	}
 
 	#keys(event) {

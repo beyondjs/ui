@@ -124,8 +124,8 @@ export class FamilyBar extends Component {
 		const places = new Places({ descriptor: ready, brand, product, advisory, fallback: this.#fallback.links });
 		const labels = this.#labels;
 		const person = ready?.person ?? FamilyBar.#person(this.#fallback.person);
-		const switcher = new ProductSwitcher({ product, names: this.#names, descriptor: ready, places, labels });
 		const location = new Location({ state, descriptor: ready, fallback: this.#fallback, places, labels });
+		const switcher = new ProductSwitcher({ product, names: this.#names, descriptor: ready, places, labels, carried: location.sections() });
 		const menu = new AccountMenu({ person, links: places.links, organization: Boolean(ready?.organization), account, labels });
 		this.#parts = [switcher, location, menu];
 		this.#start.append(switcher.element);

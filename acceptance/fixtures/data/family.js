@@ -56,6 +56,9 @@ export const fallback = fallbacks[new URLSearchParams(location.search).get('fall
 
 export const descriptors = { inside, outside, loading: null, unavailable: { unavailable: true }, long, nandu };
 
+/** The product the bar is in, named by `?product=` (`delegate` by default), to measure other product names. */
+export const product = new URLSearchParams(location.search).get('product') ?? 'delegate';
+
 /** The descriptor the address asks for (`inside` by default). */
 export function chosen() {
 	const name = new URLSearchParams(location.search).get('family') ?? 'inside';

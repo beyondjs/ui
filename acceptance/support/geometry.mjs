@@ -77,6 +77,20 @@ export class Geometry {
 		});
 	}
 
+	/** Every control of the bar that is shown, with its width and height, and the wordmark's height. */
+	static targets(page) {
+		return page.evaluate(() => {
+			const round = value => Math.round(value * 100) / 100;
+			const bar = document.querySelector('.bui-family');
+			const shown = node => node.getClientRects().length > 0 && getComputedStyle(node).visibility !== 'hidden';
+			const controls = [...bar.querySelectorAll('.bui-header-toggle, .bui-header-brand, .bui-navmenu-button, .bui-family-docs, .bui-disclosure-bell')].filter(shown).map(node => {
+				const rect = node.getBoundingClientRect();
+				return { name: node.closest('[data-part]')?.dataset.part ?? node.className.split(' ')[0], width: round(rect.width), height: round(rect.height) };
+			});
+			return { controls, mark: round(bar.querySelector('.bui-header-brand img').getBoundingClientRect().height), location: shown(bar.querySelector('.bui-family-thread')) };
+		});
+	}
+
 	/** What must not move when the descriptor arrives: the bar's height, the wordmark and the name. */
 	static parts(page) {
 		return page.evaluate(() => {

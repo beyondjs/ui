@@ -180,12 +180,11 @@
 	border-radius: var(--radius-control);
 	background: var(--color-surface-sunken);
 }
+/* Sentence case, as the labels are written (D20): no capitals by style. */
 .bui-consequence dt {
 	color: var(--color-text-muted);
 	font-size: var(--text-label);
 	font-weight: var(--weight-medium);
-	letter-spacing: var(--tracking-label);
-	text-transform: uppercase;
 }
 .bui-consequence dd {
 	margin: 0;
