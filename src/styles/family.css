@@ -97,9 +97,27 @@
 	flex: none;
 	color: var(--color-family-muted);
 }
+/* Wide, the organization and the project share the location's width: each grows from nothing, in
+   equal parts, up to its whole name, so a short name is shown whole and the longer one takes the
+   rest, and two long names are cut to the same width instead of one collapsing to a letter or two.
+   The organization is capped narrower than the project. */
+.bui-family-wide > .bui-navmenu,
+.bui-family-wide > .bui-family-static {
+	flex: 1 1 0;
+	max-width: max-content;
+}
 .bui-family-thread .bui-navmenu-button {
 	max-width: 16rem;
 	font-size: var(--text-small);
+}
+.bui-family-static > .bui-family-place {
+	max-width: calc(16rem - 2 * var(--space-2));
+}
+.bui-family-organization .bui-navmenu-button {
+	max-width: 12rem;
+}
+.bui-family-static.bui-family-organization > .bui-family-place {
+	max-width: calc(12rem - 2 * var(--space-2));
 }
 .bui-family-place {
 	min-width: 0;
@@ -110,7 +128,6 @@
 .bui-family-static {
 	display: inline-flex;
 	min-width: 0;
-	max-width: 16rem;
 	padding: 0 var(--space-2);
 	font-size: var(--text-small);
 	font-weight: var(--weight-medium);

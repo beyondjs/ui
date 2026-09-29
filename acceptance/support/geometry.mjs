@@ -59,6 +59,24 @@ export class Geometry {
 		return page.evaluate(() => [...document.querySelectorAll('#lockups .bui-lockup')].map(node => ({ height: node.querySelector('img').getBoundingClientRect().height, ...window.fixtureLetters(node.querySelector('img'), node.querySelector('.bui-lockup-name')) })));
 	}
 
+	/**
+	 * The wide location's two names: the width of each name's text, its whole width, whether it is cut
+	 * and the width of its button.
+	 */
+	static location(page) {
+		return page.evaluate(() => {
+			const round = value => Math.round(value * 100) / 100;
+			const one = part => {
+				const holder = document.querySelector(`.bui-family-wide .bui-family-${part}`);
+				const place = holder?.querySelector('.bui-family-place');
+				if (!place || !place.getClientRects().length) return null;
+				const button = holder.querySelector('.bui-navmenu-button') ?? holder;
+				return { text: place.textContent, width: round(place.getBoundingClientRect().width), whole: place.scrollWidth, cut: place.scrollWidth > place.clientWidth + 1, button: round(button.getBoundingClientRect().width) };
+			};
+			return { organization: one('organization'), project: one('project') };
+		});
+	}
+
 	/** What must not move when the descriptor arrives: the bar's height, the wordmark and the name. */
 	static parts(page) {
 		return page.evaluate(() => {

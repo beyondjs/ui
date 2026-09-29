@@ -131,6 +131,8 @@ test('FamilyBar unavailable: the fallback names say where you are, without menus
 	const bar = make({ descriptor: { unavailable: true }, fallback: { person: 'Ana Pérez', organization: 'Northwind', project: 'Storefront' } });
 	assert.equal(bar.state, 'unavailable');
 	assert.deepEqual([...bar.element.querySelectorAll('.bui-family-wide .bui-family-static')].map(node => node.textContent), ['Northwind', 'Storefront']);
+	// As text the names keep the width rules of the menus they stand for (shared width, organization capped).
+	assert.deepEqual([...bar.element.querySelectorAll('.bui-family-wide .bui-family-static')].map(node => node.classList.contains('bui-family-organization') ? 'organization' : node.classList.contains('bui-family-project') ? 'project' : null), ['organization', 'project']);
 	assert.equal(bar.element.querySelector('.bui-family-narrow .bui-family-static').textContent, 'Storefront');
 	assert.equal(bar.element.querySelectorAll('.bui-family-thread .bui-navmenu').length, 0);
 	assert.equal(bar.element.querySelector('.bui-family-placeholder'), null);

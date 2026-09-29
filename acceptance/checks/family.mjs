@@ -49,6 +49,31 @@ export const checks = [
 		}
 	},
 	{
+		name: 'family bar location at 1024, 900 and 768 px: long organization and project names share the width, neither collapses',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			// `nandu`: a short organization ("Estudio Ñandú") and a long project; `long`: both long.
+			for (const family of ['nandu', 'long']) {
+				for (const width of [1024, 900, 768]) {
+					const { page, context } = await open(browser, consumer, { width, family });
+					const at = `${family} at ${width}px`;
+					const { organization, project } = await Geometry.location(page);
+					const found = await Geometry.bar(page);
+					expect(organization && project, `${at}: both names in the bar`);
+					expect(!(await overflow(page)) && found.outside.length === 0 && found.overlaps.length === 0, `${at}: one row, nothing outside or overlapping: ${JSON.stringify(found.overlaps)}`);
+					// Neither is cut to a letter or two: a name is whole or keeps at least 3.5rem of text.
+					for (const [label, name] of [['organization', organization], ['project', project]]) expect(!name.cut || name.width >= 56, `${at}: ${label} collapsed: ${JSON.stringify(name)}`);
+					// A cut name is never narrower than the other one, unless that one is whole or at its cap (12rem, 16rem).
+					const capped = (name, cap) => !name.cut || name.button >= cap - 0.5;
+					if (organization.cut && !capped(project, 256)) expect(organization.width >= project.width - 1, `${at}: organization gives way to the project: ${JSON.stringify([organization, project])}`);
+					if (project.cut && !capped(organization, 192)) expect(project.width >= organization.width - 1, `${at}: project gives way to the organization: ${JSON.stringify([organization, project])}`);
+					if (family === 'nandu' && width >= 900) expect(!organization.cut, `${at}: "${organization.text}" whole: ${JSON.stringify(organization)}`);
+					await context.close();
+				}
+			}
+		}
+	},
+	{
 		name: 'lockup: the name meets the wordmark letters within 0.5 px at every height from 18 to 40 px',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {

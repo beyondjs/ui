@@ -8,7 +8,8 @@ import { NavigationMenu, entry } from './menu.js';
  *
  * Both forms are built and CSS shows one: wide, the two menus; below about 720 px one "location"
  * menu whose button shows the project name (or the organization's) and whose panel lists both
- * sections. There is no project menu outside a project. While the descriptor loads, placeholders
+ * sections. Wide, the two names share the width in equal parts up to each whole name (the
+ * organization capped narrower), so neither collapses while the other is shown whole. There is no project menu outside a project. While the descriptor loads, placeholders
  * (or the names the product passed as `fallback`) hold the place without menus; when it is
  * unavailable, the fallback names are shown as text so the bar still says where you are.
  */
@@ -117,11 +118,11 @@ export class Location extends Component {
 	#still(narrow = false) {
 		const { state, fallback, labels } = this.#options;
 		const { organization = null, project = null } = fallback;
-		if (narrow && (organization || project)) return [Location.#text(project ?? organization)];
+		if (narrow && (organization || project)) return [Location.#text(project ?? organization, project ? 'project' : 'organization')];
 		const parts = [];
-		if (organization) parts.push(Location.#text(organization));
+		if (organization) parts.push(Location.#text(organization, 'organization'));
 		else if (state === 'loading') parts.push(el('span', { class: 'bui-family-placeholder', 'aria-hidden': 'true' }), hidden(labels.text('loading')));
-		if (project && !narrow) parts.push(Location.#separator(), Location.#text(project));
+		if (project && !narrow) parts.push(Location.#separator(), Location.#text(project, 'project'));
 		return parts;
 	}
 
@@ -129,8 +130,9 @@ export class Location extends Component {
 		return el('span', { class: 'bui-family-place', text: name });
 	}
 
-	static #text(name) {
-		return el('span', { class: 'bui-family-static' }, [Location.#place(name)]);
+	/** A name shown as text; `part` (`organization` or `project`) gives it that menu's width rules. */
+	static #text(name, part) {
+		return el('span', { class: `bui-family-static bui-family-${part}` }, [Location.#place(name)]);
 	}
 
 	static #separator() {
