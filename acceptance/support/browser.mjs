@@ -20,9 +20,11 @@ export class Browser {
 	/**
 	 * Opens a consumer page in a new context and waits until the fixture is ready. `file` names
 	 * another page of the fixture than `index.html`; such a page only has to declare itself ready.
+	 * `prepare(context)` runs before the page opens, for example to install a measuring script.
 	 */
-	async open(consumer, { query = '', file = null, ...options } = {}) {
+	async open(consumer, { query = '', file = null, prepare = null, ...options } = {}) {
 		const context = await this.#browser.newContext({ viewport: { width: 1280, height: 900 }, ...options });
+		await prepare?.(context);
 		const page = await context.newPage();
 		const errors = [];
 		page.on('pageerror', error => errors.push(error.message));

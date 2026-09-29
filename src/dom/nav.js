@@ -49,8 +49,16 @@ export class ProductNav extends Component {
 		return this;
 	}
 
-	/** Scrolls the row, never the page, so the current tab is visible. */
+	/**
+	 * Scrolls the row, never the page, so the current tab is visible; again once the page's fonts have
+	 * loaded, since a web font changes the tabs' widths.
+	 */
 	#reveal() {
+		this.#scroll();
+		this.#element.ownerDocument.fonts?.ready.then(() => !this.destroyed && this.#scroll());
+	}
+
+	#scroll() {
 		const current = this.#list.querySelector('[aria-current]');
 		if (!current || !this.#element.isConnected) return;
 		const row = this.#list.getBoundingClientRect();

@@ -53,8 +53,8 @@ export class Consumer {
 		if (this.#react) Object.assign(dependencies, { react: this.#react, 'react-dom': this.#react });
 		writeFileSync(join(this.#directory, 'package.json'), JSON.stringify({ name: `ui-consumer-${this.#name}`, private: true, type: 'module', dependencies }, null, '\t'));
 		execFileSync('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error'], { cwd: this.#directory, stdio: 'pipe' });
-		// The React fixture has two pages: the full consumer and one under an external store.
-		const entries = (this.#page === 'react' ? ['main.jsx', 'store.jsx'] : ['main.js']).map(file => join(this.#directory, 'fixtures', this.#page, file));
+		// The React fixture has three pages: the full consumer, one under an external store and the family bar.
+		const entries = (this.#page === 'react' ? ['main.jsx', 'store.jsx', 'family.jsx'] : ['main.js', 'family.js']).map(file => join(this.#directory, 'fixtures', this.#page, file));
 		await build({ entryPoints: entries, bundle: true, format: 'esm', outdir: join(this.#directory, 'fixtures', this.#page, 'out'), jsx: 'automatic', define: { 'process.env.NODE_ENV': '"development"' }, logLevel: 'error', absWorkingDir: this.#directory });
 		this.#server = await new Server(this.#directory).start();
 		return this;

@@ -20,6 +20,7 @@
 	flex: none;
 }
 .bui-family .bui-header-context {
+	order: 0;
 	display: flex;
 	flex: 1 1 auto;
 	min-width: 0;
@@ -30,6 +31,11 @@
 }
 .bui-family :focus-visible {
 	outline-color: var(--color-family-marker);
+}
+
+/* The React adapter's host takes no box, so the bar sticks to the page and not to its host. */
+.bui-family-host {
+	display: contents;
 }
 
 /* Menu buttons on the navy bar: no border, the bar's text, a lift on hover and while open. */
@@ -164,22 +170,41 @@
 	.bui-family .bui-navmenu {
 		position: static;
 	}
-	.bui-family .bui-navmenu-panel,
-	.bui-family .bui-navmenu :is(.bui-disclosure-leaving) {
+	/* Panels are placed against the bar (the closing picture keeps these classes too). */
+	.bui-family .bui-navmenu-panel {
 		top: 100%;
 		left: var(--space-2);
+		right: auto;
+		min-width: min(16rem, 100% - 2 * var(--space-2));
+		max-width: calc(100% - 2 * var(--space-2));
+	}
+	.bui-family .bui-navmenu-panel.bui-align-end {
+		left: auto;
 		right: var(--space-2);
-		min-width: 0;
-		max-width: none;
 	}
 	.bui-family-docs span {
 		display: none;
 	}
 }
+/* Phones: the location keeps the room the other parts can give up (see the dated record's widths). */
 @media (max-width: 479px) {
 	.bui-family {
-		column-gap: var(--space-2);
-		padding-inline: var(--space-3);
+		column-gap: var(--space-1);
+		padding-inline: var(--space-2);
+	}
+	.bui-family .bui-navmenu-button {
+		padding-right: var(--space-1);
+	}
+	.bui-family-narrow .bui-navmenu-button {
+		min-width: 3.5rem;
+		padding-left: var(--space-1);
+	}
+	/* A product's sidebar toggle takes a target's width from the location. */
+	.bui-header-external .bui-family-narrow .bui-navmenu-button {
+		min-width: 2.25rem;
+	}
+	.bui-family-account .bui-navmenu-button {
+		padding: 0;
 	}
 	.bui-family .bui-header-end,
 	.bui-family-end {
