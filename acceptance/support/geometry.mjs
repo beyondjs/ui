@@ -22,10 +22,9 @@ export class Geometry {
 				const rect = node.getBoundingClientRect();
 				return rect.top < box.top - 0.5 || rect.bottom > box.bottom + 0.5 || rect.left < -0.5 || rect.right > innerWidth + 0.5;
 			});
-			const groups = ['.bui-header-start', '.bui-header-context', '.bui-header-end'].map(selector => bar.querySelector(selector).getBoundingClientRect());
-			const overlaps = [];
-			if (groups[0].right > groups[1].left + 0.5) overlaps.push('brand/location');
-			if (groups[1].right > groups[2].left + 0.5) overlaps.push('location/end');
+			// The controls left to right: each ends before the next begins (a shrunk group can still overflow).
+			const controls = [...bar.querySelectorAll('.bui-header-toggle, .bui-header-brand, .bui-navmenu-button, .bui-family-static, .bui-family-placeholder, .bui-family-docs, .bui-disclosure-bell')].filter(shown).map(node => [node.getAttribute('aria-label') ?? node.className, node.getBoundingClientRect()]).sort((a, b) => a[1].left - b[1].left);
+			const overlaps = controls.slice(1).filter(([, rect], index) => rect.left < controls[index][1].right - 0.5).map(([label], index) => `${controls[index][0]} / ${label}`);
 			const centre = node => {
 				const rect = node.getBoundingClientRect();
 				return round(rect.top + rect.height / 2 - middle);

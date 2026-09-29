@@ -38,6 +38,17 @@ export const checks = [
 		}
 	},
 	{
+		name: 'family bar on a 320px touch screen: one row, no overlapping controls, no sideways scroll',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			const { page } = await open(browser, consumer, { width: 320, hasTouch: true, isMobile: true });
+			const found = await Geometry.bar(page);
+			expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches), 'a coarse pointer');
+			expect(found.height === 44 && !(await overflow(page)), `one row, no sideways scroll: ${found.height}`);
+			expect(found.outside.length === 0 && found.overlaps.length === 0, `outside ${found.outside} overlapping ${found.overlaps}`);
+		}
+	},
+	{
 		name: 'lockup: the name meets the wordmark letters within 0.5 px at every height from 18 to 40 px',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {

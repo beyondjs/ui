@@ -195,13 +195,22 @@
 	.bui-family .bui-navmenu-button {
 		padding-right: var(--space-1);
 	}
+	/* At least an ellipsis and the chevron, never less. */
 	.bui-family-narrow .bui-navmenu-button {
-		min-width: 3.5rem;
+		min-width: 1.75rem;
 		padding-left: var(--space-1);
 	}
-	/* A product's sidebar toggle takes a target's width from the location. */
-	.bui-header-external .bui-family-narrow .bui-navmenu-button {
-		min-width: 2.25rem;
+	/* A product's sidebar toggle takes a target's width: the switcher gives up its chevron (the name
+	   stays a button) and the brand group its gap, so the location keeps its place. */
+	.bui-header-external.bui-family .bui-header-start {
+		gap: var(--space-1);
+	}
+	.bui-header-external .bui-family-product .bui-navmenu-button > .bui-icon {
+		display: none;
+	}
+	/* The toggle keeps its target's height and gives up width, which touch screens make 44px. */
+	.bui-family .bui-header-toggle {
+		width: 32px;
 	}
 	.bui-family-account .bui-navmenu-button {
 		padding: 0;
@@ -217,5 +226,10 @@
 	}
 	.bui-navmenu-list > li:has(> .bui-family-docs-item) {
 		display: list-item;
+	}
+}
+@media (max-width: 359px) {
+	.bui-family {
+		padding-inline: var(--space-1);
 	}
 }
