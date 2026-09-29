@@ -90,6 +90,8 @@ Every consumer adopted 0.1.6 and then 0.1.7 in the same assignment, each with it
 | CDN administration and backoffice | `095cde4` (from 0.1.1; the local `Dialog` binding removed) | `de500f0` | React `Lockup` in the administration's own link; the backoffice shows the wordmark alone |
 | Workspace client | `4b479ec` (from 0.1.2) | `4b89d64` | React `Lockup` in the sidebar |
 | Snapshots | `d35fd7e` (from 0.1.2) | `ba006b3` | `Header` `brand.lockup`, React `Lockup` on sign-in |
-| Branding | suite `627bed1` (from 0.1.5) | See the suite's synchronization record | Catalog entry and live sample |
+| Branding | suite `627bed1` (from 0.1.5) | suite `29b994e` | Catalog entry and live sample |
+
+The collection consumers adopted 0.1.8 when the assignment closed: Delegate `b765592`, Conduict `7502c5c` and Branding (the suite's `branding/docs/reviews/2026-09-28/family-synchronization.md`).
 
 Residual differences reported by the consumers: the lockup's name measures 0.9 px low at `--bui-lockup-height: 28px` (−0.12 px at 21 and 32 px) through text rendering. The Workspace administration console does not load the package, so it reproduces the lockup rules by hand.
