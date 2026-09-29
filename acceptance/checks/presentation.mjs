@@ -56,6 +56,26 @@ export const checks = [
 		}
 	},
 	{
+		name: 'collection narrower than its table: the table scrolls in the body and nothing leaves the container',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			// 700px keeps the table layout (it stacks at 640px and below); the listing is then narrowed below the table's width.
+			const { page } = await browser.open(consumer, { viewport: { width: 700, height: 720 } });
+			await page.waitForFunction(() => document.querySelectorAll('#listing tbody tr').length > 0);
+			const result = await page.evaluate(() => {
+				const listing = document.getElementById('listing');
+				listing.style.width = '200px';
+				const edge = listing.getBoundingClientRect().right;
+				const outside = [...listing.querySelectorAll('.bui-collection, .bui-collection-tools, .bui-collection-filter, .bui-collection-body')].filter(node => node.getBoundingClientRect().right > edge + 0.5).map(node => node.className);
+				const body = listing.querySelector('.bui-collection-body');
+				return { outside, scrolls: body.scrollWidth > body.clientWidth };
+			});
+			expect(result.outside.length === 0, `nothing leaves the listing: ${JSON.stringify(result.outside)}`);
+			expect(result.scrolls, 'the table scrolls inside the collection body');
+			expect(!(await overflow(page)), 'no sideways scroll');
+		}
+	},
+	{
 		name: '200% zoom: no horizontal scroll and the dialog fits the viewport',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {

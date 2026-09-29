@@ -1,4 +1,4 @@
-# 0.1.6 and 0.1.7: the family lockup and alignment corrections — 28 September 2026
+# 0.1.6 to 0.1.8: the family lockup and alignment corrections — 28 September 2026
 
 The family's interface alignment audit of this date (the suite's `docs/reviews/2026-09-28/ui-alignment-audit.md`) found eleven defects in this package's shared components, shown by every product that vendors them. It also found each product building its own wordmark and product-name lockup, several of them wrong. 0.1.6 corrects the eleven and adds one lockup for the family.
 
@@ -53,6 +53,43 @@ The brand tests moved to `tests/brand.test.mjs`, because `controls.test.mjs` wou
 | `npm run types` | Clean |
 | `npm run acceptance` | 67 of 67 |
 
+## 0.1.8: a collection never widens the page
+
+Closing Delegate's second pass found Requests, in Spanish at 851 px, scrolling the page sideways to 941 px:
+
+- **The filter.** A filter whose longest option is wide kept its select at that width.
+- **The table.** The table grew past the room, because the collection's single grid column followed its content.
+
+0.1.8 keeps a collection inside its container:
+
+- **Column.** The column is `minmax(0, 1fr)`.
+- **Filters.** A filter is at most as wide as the tools row.
+- **Table.** A table wider than the room scrolls inside `.bui-collection-body`, whose focus outline is drawn inside it.
+
+A new browser check narrows the fixture's listing below its table's width at 700 px. It fails on 0.1.7 (the collection, its tools and its body leave the listing) and passes on 0.1.8.
+
+| Command | Result |
+| --- | --- |
+| `npm test` | 86 of 86 |
+| `npm run types` | Clean |
+| `npm run acceptance` | 69 of 69 (two new checks, `dom` and `react19`) |
+
+The Collection consumers (Delegate, Conduict and Branding) adopt 0.1.8. The other products render no `Collection` and stay on 0.1.7.
+
 ## Consumers
 
-Recorded when the products adopt the release in the same assignment.
+Every consumer adopted 0.1.6 and then 0.1.7 in the same assignment, each with its own dated record (`docs/reviews/2026-09-28/` in its repository):
+
+| Consumer | 0.1.6 adoption | 0.1.7 adoption | Lockup |
+| --- | --- | --- | --- |
+| Accounts | `d546460` (from 0.1.2) | `9b6fcc5` | React `Lockup` in its own header and signed-out pages |
+| Projects | `9e1cd52` (from 0.1.2) | `89b1f0b` | `Header` `brand.lockup` |
+| Conduict | `f5ea03e` (from 0.1.3) | `11643a5` | `Header` `brand.lockup` |
+| Beyond desktop | `321c574` (from 0.1.5) | `3f4d316` | Nameless `lockup` on the sign-in veil and unconfigured page |
+| Delegate | `782dc64` (from 0.1.3) | `8c4d6e6` | React `Lockup` on sign-in, `Header` `brand.lockup` |
+| CDN administration and backoffice | `095cde4` (from 0.1.1; the local `Dialog` binding removed) | `de500f0` | React `Lockup` in the administration's own link; the backoffice shows the wordmark alone |
+| Workspace client | `4b479ec` (from 0.1.2) | `4b89d64` | React `Lockup` in the sidebar |
+| Snapshots | `d35fd7e` (from 0.1.2) | `ba006b3` | `Header` `brand.lockup`, React `Lockup` on sign-in |
+| Branding | suite `627bed1` (from 0.1.5) | See the suite's synchronization record | Catalog entry and live sample |
+
+Residual differences reported by the consumers: the lockup's name measures 0.9 px low at `--bui-lockup-height: 28px` (−0.12 px at 21 and 32 px) through text rendering. The Workspace administration console does not load the package, so it reproduces the lockup rules by hand.

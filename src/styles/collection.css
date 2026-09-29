@@ -1,6 +1,9 @@
 /* Compact collections: tools, the table with rows as links, and the pager. */
+/* A collection never widens the page: its column shrinks to the container, a filter never exceeds the
+   row, and a table wider than the room scrolls inside the body. */
 .bui-collection {
 	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	gap: var(--space-3);
 	min-width: 0;
 }
@@ -20,13 +23,17 @@
 	display: grid;
 	gap: var(--space-1);
 	min-width: 0;
+	max-width: 100%;
 }
 .bui-collection-body:focus {
 	outline: none;
 }
+.bui-collection-body {
+	overflow-x: auto;
+}
 .bui-collection-body:focus-visible {
 	outline: 2px solid var(--color-focus);
-	outline-offset: 2px;
+	outline-offset: -2px;
 }
 .bui-collection-body[aria-busy='true'] .bui-table {
 	opacity: 0.6;
