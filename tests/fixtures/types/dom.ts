@@ -20,7 +20,7 @@ list.state = { query: '', filters: {}, page: 1 };
 const sheet: string = new TokenSheet(tokens).css;
 void confirm({ title: 'Leave?' }).then((answer: boolean) => answer && partial && sheet);
 const descriptor: FamilyDescriptor = { person: { name: 'Ana' }, organization: { id: 'org_1', name: 'Northwind' }, products: [{ product: 'cdn', available: false, reason: 'UNCONFIGURED' }], links: { home: '/' } };
-const family = new FamilyBar({ product: 'delegate', brand: { src: '/wordmark.svg', href: '/' }, descriptor: null, fallback: { organization: 'Northwind' }, notifications: entry.element, account: { signout: { href: '/signout' }, items: [{ label: 'Settings', href: '/settings' }] }, onnavigate: item => item.url, labels: { NOT_ADMITTED: 'Aún no está abierto para ti' } }).mount(document.body);
+const family = new FamilyBar({ product: 'delegate', brand: { src: '/wordmark.svg', href: '/' }, descriptor: null, fallback: { organization: 'Northwind', links: { account: '/account', docs: '/docs/' } }, notifications: entry.element, account: { signout: { href: '/signout' }, items: [{ label: 'Settings', href: '/settings' }] }, onnavigate: item => item.url, labels: { NOT_ADMITTED: 'Aún no está abierto para ti' } }).mount(document.body);
 family.descriptor = descriptor;
 family.descriptor = { unavailable: true };
 const state: 'loading' | 'unavailable' | 'ready' = family.state;

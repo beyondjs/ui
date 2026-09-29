@@ -36,6 +36,8 @@ export interface FamilyFallback {
 	person?: string | { name: string; email?: string } | null;
 	organization?: string | null;
 	project?: string | null;
+	/** Addresses used when the descriptor names none (all of them while it loads or is unavailable). */
+	links?: { home?: string; account?: string; members?: string; docs?: string } | null;
 }
 
 export interface FamilyNavigation {

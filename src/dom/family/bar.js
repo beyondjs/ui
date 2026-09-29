@@ -20,7 +20,8 @@ import { AccountMenu } from './account.js';
  *
  * It never blocks a page: `descriptor: null` is still loading (the lockup and placeholders show,
  * without menus), and `{ unavailable: true }` shows the names the product passed as `fallback`
- * with a single Projects link in the product menu. It places links and decides nothing about access.
+ * with a single Projects link in the product menu; `fallback.links` supplies the addresses (home,
+ * account, members, docs) the descriptor does not. It places links and decides nothing about access.
  */
 export class FamilyBar extends Component {
 	#header;
@@ -39,7 +40,7 @@ export class FamilyBar extends Component {
 	 * @param {string} options.product the current product id (`delegate`, `workspace`, …)
 	 * @param {{src: string, href: string}} options.brand the wordmark asset the product carries and its own home address
 	 * @param {object|null} [options.descriptor] the `beyond-family/1` descriptor, null while loading, `{ unavailable: true }` when it failed
-	 * @param {{person?: string|{name: string, email?: string}, organization?: string, project?: string}} [options.fallback] names the product knows itself
+	 * @param {{person?: string|{name: string, email?: string}, organization?: string, project?: string, links?: {home?: string, account?: string, members?: string, docs?: string}}} [options.fallback] names and addresses the product knows itself
 	 * @param {Record<string, string>} [options.products] display names by product id, added to the family's
 	 * @param {Node} [options.notifications] the notification entry
 	 * @param {{signout?: (() => void)|{href: string}, items?: Array<{label: string, href?: string, run?: () => void}>, label?: string}} [options.account]
@@ -120,7 +121,7 @@ export class FamilyBar extends Component {
 		const state = this.state;
 		const ready = state === 'ready' ? this.#descriptor : null;
 		const { product, brand, notifications, account, advisory } = this.#options;
-		const places = new Places({ descriptor: ready, brand, product, advisory });
+		const places = new Places({ descriptor: ready, brand, product, advisory, fallback: this.#fallback.links });
 		const labels = this.#labels;
 		const person = ready?.person ?? FamilyBar.#person(this.#fallback.person);
 		const switcher = new ProductSwitcher({ product, names: this.#names, descriptor: ready, places, labels });
@@ -129,7 +130,8 @@ export class FamilyBar extends Component {
 		this.#parts = [switcher, location, menu];
 		this.#start.append(switcher.element);
 		this.#start.querySelector('.bui-header-brand').setAttribute('href', places.home);
-		this.#thread.replaceChildren(el('span', { class: 'bui-family-divider', 'aria-hidden': 'true' }), location.element);
+		// No divider when there is no place to show after it.
+		this.#thread.replaceChildren(...(location.blank ? [] : [el('span', { class: 'bui-family-divider', 'aria-hidden': 'true' })]), location.element);
 		const docs = places.links.docs ? el('a', { class: 'bui-family-docs', href: places.links.docs, 'data-part': 'docs' }, [icon('book'), el('span', { text: labels.text('docs') })]) : null;
 		this.#end.replaceChildren(...[docs, notifications, menu.element].filter(Boolean));
 		this.element.dataset.state = state;

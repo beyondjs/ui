@@ -67,7 +67,7 @@ export class ProductSwitcher extends Component {
 		});
 	}
 
-	/** The one entry while the descriptor is loading or unavailable: Projects, from the product's own brand address. */
+	/** The one entry while the descriptor is loading or unavailable: Projects, at `fallback.links.home` or the product's own brand address. */
 	#back() {
 		const { product, names, places, labels } = this.#options;
 		return entry({ label: names.projects, meta: labels.text('back'), href: places.home, current: product === 'projects' ? 'page' : null });

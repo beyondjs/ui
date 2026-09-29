@@ -2,8 +2,9 @@
  * The addresses the family bar links to, derived from the `beyond-family/1` descriptor.
  *
  * Nothing here grants anything: every address is navigation with context, and the destination signs
- * the person in and rechecks access. Home is `links.home` (Beyond Projects), or the product's own
- * `brand.href` without a descriptor. Choosing a project goes to the current product's entry for it
+ * the person in and rechecks access. The links are the descriptor's, and each one it lacks (all of
+ * them while it loads or is unavailable) comes from the product's `fallback.links`. Home is
+ * `links.home` (Beyond Projects), or the product's own `brand.href` when neither names it. Choosing a project goes to the current product's entry for it
  * when that entry is available (or its reason is advisory), otherwise to the project in Projects.
  */
 export class Places {
@@ -11,23 +12,26 @@ export class Places {
 	#brand;
 	#product;
 	#advisory;
+	#links;
 
 	/**
-	 * @param {{descriptor: object|null, brand: {href: string}, product: string, advisory: string[]}} options
+	 * @param {{descriptor: object|null, brand: {href: string}, product: string, advisory: string[], fallback?: {home?: string, account?: string, members?: string, docs?: string}}} options
 	 */
-	constructor({ descriptor, brand, product, advisory }) {
+	constructor({ descriptor, brand, product, advisory, fallback = {} }) {
 		this.#descriptor = descriptor && !descriptor.unavailable ? descriptor : null;
+		const own = Object.entries(this.#descriptor?.links ?? {}).filter(([, value]) => value);
+		this.#links = { ...Places.#addresses(fallback), ...Object.fromEntries(own) };
 		this.#brand = brand;
 		this.#product = product;
 		this.#advisory = advisory;
 	}
 
 	get home() {
-		return this.#descriptor?.links?.home ?? this.#brand.href;
+		return this.#links.home ?? this.#brand.href;
 	}
 
 	get links() {
-		return this.#descriptor?.links ?? {};
+		return this.#links;
 	}
 
 	/** Whether an entry is followed: available, or unavailable for an advisory reason, with an address. */
@@ -47,6 +51,12 @@ export class Places {
 		const projects = products.find(item => item.product === 'projects' && item.url && Places.#carries(item.url));
 		const base = own ?? projects;
 		return Places.#with(base ? base.url : this.home, { project: id });
+	}
+
+	/** The fallback's addresses that are set, of the keys the bar uses. */
+	static #addresses(links) {
+		const known = ['home', 'account', 'members', 'docs'].map(key => [key, links?.[key]]);
+		return Object.fromEntries(known.filter(([, value]) => typeof value === 'string' && value));
 	}
 
 	static #carries(address) {

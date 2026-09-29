@@ -40,6 +40,11 @@ export class Location extends Component {
 		return this.#element;
 	}
 
+	/** Whether neither form has anything to show (no organization, project or placeholder). */
+	get blank() {
+		return [...this.#element.children].every(form => !form.childElementCount);
+	}
+
 	/** The menus built, wide and narrow. */
 	get menus() {
 		return this.#menus;
@@ -122,7 +127,7 @@ export class Location extends Component {
 		const parts = [];
 		if (organization) parts.push(Location.#text(organization, 'organization'));
 		else if (state === 'loading') parts.push(el('span', { class: 'bui-family-placeholder', 'aria-hidden': 'true' }), hidden(labels.text('loading')));
-		if (project && !narrow) parts.push(Location.#separator(), Location.#text(project, 'project'));
+		if (project && !narrow) parts.push(...(parts.length ? [Location.#separator()] : []), Location.#text(project, 'project'));
 		return parts;
 	}
 

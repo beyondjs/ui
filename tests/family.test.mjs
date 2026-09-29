@@ -143,6 +143,42 @@ test('FamilyBar unavailable: the fallback names say where you are, without menus
 	bar.destroy();
 });
 
+test('FamilyBar fallback links: home, account and docs while unavailable or loading; the descriptor\'s win; no divider with no place', () => {
+	const links = { home: '/projects/', account: '/accounts/account', members: '/accounts/members', docs: '/docs/' };
+	const bar = make({ descriptor: { unavailable: true }, fallback: { person: 'Ana Pérez', links } });
+	const hrefs = () => entries(bar, 'account').map(node => [node.textContent.trim(), node.getAttribute('href')]);
+	assert.equal(bar.element.querySelector('.bui-header-brand').getAttribute('href'), '/projects/');
+	assert.equal(entries(bar, 'product')[0].getAttribute('href'), '/projects/', 'the one Projects entry goes to the fallback home');
+	assert.deepEqual(hrefs().filter(([, href]) => href), [['Your account', '/accounts/account'], ['Docs', '/docs/']], 'members only with an organization in view');
+	assert.equal(bar.element.querySelector('.bui-family-docs').getAttribute('href'), '/docs/');
+	// Unavailable with no organization or project: nothing after the product name, not even a divider.
+	assert.equal(bar.element.querySelector('.bui-family-divider'), null);
+	assert.equal(bar.element.querySelector('.bui-family-thread .bui-family-static, .bui-family-thread .bui-family-separator'), null);
+	// Only a project: shown without a separator before it.
+	bar.fallback = { project: 'Storefront', links };
+	assert.ok(bar.element.querySelector('.bui-family-divider'));
+	assert.equal(bar.element.querySelector('.bui-family-wide').textContent, 'Storefront');
+	// Loading keeps its placeholder and divider, and the fallback addresses.
+	bar.descriptor = null;
+	bar.fallback = { links };
+	assert.ok(bar.element.querySelector('.bui-family-divider') && bar.element.querySelector('.bui-family-placeholder'));
+	assert.ok(hrefs().some(([label, href]) => label === 'Your account' && href === '/accounts/account'));
+	// Ready: the descriptor's addresses win, and a key it lacks still comes from the fallback.
+	bar.descriptor = { ...inside, links: { home: inside.links.home, account: inside.links.account } };
+	assert.equal(bar.element.querySelector('.bui-header-brand').getAttribute('href'), inside.links.home);
+	assert.ok(hrefs().some(([label, href]) => label === 'Your account' && href === inside.links.account));
+	assert.equal(bar.element.querySelector('.bui-family-docs').getAttribute('href'), '/docs/');
+	bar.destroy();
+});
+
+test('FamilyBar without fallback links keeps the brand address and offers no account link while unavailable', () => {
+	const bar = make({ descriptor: { unavailable: true }, fallback: { person: 'Ana Pérez', links: { account: '', home: null } } });
+	assert.equal(bar.element.querySelector('.bui-header-brand').getAttribute('href'), '/own-home');
+	assert.equal(entries(bar, 'account').filter(node => node.getAttribute('href')).length, 0);
+	assert.equal(bar.element.querySelector('.bui-family-docs'), null);
+	bar.destroy();
+});
+
 test('FamilyBar account menu: person, account links, product entries, docs and sign out', async () => {
 	const calls = [];
 	const bar = make({ descriptor: inside, account: { signout: () => calls.push('signout'), items: [{ label: 'Delegate settings', href: '/settings' }, { label: 'Keyboard shortcuts', run: () => calls.push('keys') }] } });

@@ -44,7 +44,15 @@ function named(organization, project) {
 const long = named('Northwind Creative Studio and Partners', 'Storefront redesign for the spring catalogue');
 const nandu = named('Estudio Ñandú', 'Rediseño de la tienda en línea y del catálogo de primavera');
 
-export const fallback = { person: 'Ana Pérez', organization: 'Northwind Studio', project: 'Storefront redesign' };
+// What the product knows itself, selected by `?fallback=`: the names and addresses (default), or
+// `bare`, the person and addresses without an organization or project (a product outside one).
+const addresses = { home: projects, account: 'https://accounts.example.test/account', docs: 'https://docs.example.test/' };
+const fallbacks = {
+	names: { person: 'Ana Pérez', organization: 'Northwind Studio', project: 'Storefront redesign', links: addresses },
+	bare: { person: 'Ana Pérez', links: addresses }
+};
+
+export const fallback = fallbacks[new URLSearchParams(location.search).get('fallback')] ?? fallbacks.names;
 
 export const descriptors = { inside, outside, loading: null, unavailable: { unavailable: true }, long, nandu };
 

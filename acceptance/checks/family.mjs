@@ -156,6 +156,16 @@ export const checks = [
 			const text = await failed.page.locator('.bui-family-wide').innerText();
 			expect(text.includes('Northwind Studio') && text.includes('Storefront redesign'), `fallback names: ${text}`);
 			expect((await failed.page.locator('.bui-family-thread .bui-navmenu').count()) === 0, 'no location menus');
+			// The product's own addresses keep the account link, Docs and home while unavailable.
+			await failed.page.locator('.bui-family [data-part="account"] .bui-navmenu-button').click();
+			const account = failed.page.locator('.bui-family [data-part="account"] .bui-navmenu-panel a[href="https://accounts.example.test/account"]');
+			expect((await account.count()) === 1 && (await account.isVisible()), 'the account link from the fallback addresses');
+			expect((await failed.page.locator('.bui-family-docs').getAttribute('href')) === 'https://docs.example.test/', 'Docs from the fallback addresses');
+			// Outside an organization nothing follows the product name: no divider, no separator.
+			const bare = await open(browser, consumer, { family: 'unavailable', query: '?family=unavailable&fallback=bare' });
+			const trailing = await bare.page.evaluate(() => [...document.querySelectorAll('.bui-family-thread *')].filter(node => node.getBoundingClientRect().width > 0).map(node => node.className));
+			expect(!trailing.length, `nothing drawn after the product name: ${trailing}`);
+			await bare.context.close();
 			await page.mouse.wheel(0, 1200);
 			await page.waitForFunction(() => window.scrollY > 600);
 			const top = await page.evaluate(() => [document.querySelector('.bui-family').getBoundingClientRect().top, document.querySelector('.bui-productnav').getBoundingClientRect().bottom]);
