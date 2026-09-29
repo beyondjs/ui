@@ -37,7 +37,7 @@ class Acceptance {
 			await Promise.all(this.#consumers.map(consumer => consumer.prepare(tarball)));
 			for (const consumer of this.#consumers) console.log(`Consumer ${consumer.name}: ${JSON.stringify(consumer.installed)}`);
 			await browser.launch();
-			console.log(`Browser: Chrome ${browser.version}`);
+			console.log(`Browser: ${browser.engine} ${browser.version}`);
 			for (const check of this.#checks) {
 				for (const consumer of this.#consumers.filter(item => check.consumers.includes(item.name))) {
 					if (this.#filter && !`${consumer.name} ${check.name}`.includes(this.#filter)) continue;

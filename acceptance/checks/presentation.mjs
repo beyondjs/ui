@@ -1,5 +1,6 @@
 import { expect, overflow } from '../support/browser.mjs';
 import { words } from '../support/words.mjs';
+import { PageListeners } from '../support/listeners.mjs';
 
 /** Motion, themes, narrow screens, zoom, collections and cleanup. */
 export const checks = [
@@ -143,23 +144,35 @@ export const checks = [
 		name: 'teardown: destroying or unmounting leaves no component element and no added document listener',
 		consumers: ['dom', 'react19', 'react18'],
 		async run(browser, consumer) {
-			const { page, context } = await browser.open(consumer);
-			const session = await context.newCDPSession(page);
-			const listeners = async () => {
+			const { page, context } = await browser.open(consumer, { prepare: PageListeners.install });
+			// Every engine: the listeners the page registered on document and window, through a wrapper
+			// installed before any page script. Chromium also: the document's listeners from DevTools.
+			const chromium = context.browser().browserType().name() === 'chromium';
+			const session = chromium ? await context.newCDPSession(page) : null;
+			const devtools = async () => {
 				const { result } = await session.send('Runtime.evaluate', { expression: 'document' });
 				const found = await session.send('DOMDebugger.getEventListeners', { objectId: result.objectId });
 				return found.listeners.map(listener => listener.type);
 			};
+			await PageListeners.snapshot(page);
 			await page.locator('.bui-notify > button').click();
 			await page.getByRole('button', { name: words[consumer.language].more }).click();
-			const open = await listeners();
-			expect(open.includes('pointerdown'), `open panels listen on the document: ${open}`);
+			const open = await PageListeners.added(page);
+			expect(open.includes('document:pointerdown'), `open panels listen on the document: ${open}`);
+			if (session) expect((await devtools()).includes('pointerdown'), 'DevTools sees the open panels listening on the document');
 			await page.evaluate(() => window.fixture.destroy());
 			await page.waitForFunction(() => !document.querySelector('[class*="bui-"]'));
 			// The components listen on the document for pointer presses and keys only; React's own
-			// document listeners (such as selectionchange) belong to React and stay.
-			const left = (await listeners()).filter(type => ['pointerdown', 'keydown'].includes(type));
+			// document listeners (such as selectionchange) belong to React and stay. Nothing added while
+			// the panels were open may stay on the document or the window.
+			const left = (await PageListeners.present(page)).filter(entry => ['document:pointerdown', 'document:keydown'].includes(entry));
 			expect(!left.length, `component listeners left on the document: ${left}`);
+			const added = await PageListeners.added(page);
+			expect(!added.length, `listeners added since the page was ready and still registered: ${added}`);
+			if (session) {
+				const seen = (await devtools()).filter(type => ['pointerdown', 'keydown'].includes(type));
+				expect(!seen.length, `DevTools sees component listeners left on the document: ${seen}`);
+			}
 		}
 	},
 	{

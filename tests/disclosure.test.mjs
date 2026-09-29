@@ -29,6 +29,22 @@ test('Disclosure closed from code returns focus to its button only when focus wa
 	assert.ok(document.activeElement !== disclosure.button, 'and leaves focus to the press');
 });
 
+test('Escape reaching the document while focus rests on the body closes the panel and focuses the button; focus elsewhere keeps it open', t => {
+	const field = document.createElement('input');
+	const disclosure = new ui.Disclosure({ label: 'Help', children: [document.createElement('p')] }).mount(document.body);
+	t.after(() => disclosure.destroy());
+	document.body.append(field);
+	disclosure.open();
+	field.focus();
+	page.key(field, 'Escape');
+	assert.equal(disclosure.expanded, true, 'Escape in another field is that field\'s');
+	field.blur();
+	page.key(document.body, 'Escape');
+	assert.equal(disclosure.expanded, false);
+	assert.ok(document.activeElement === disclosure.button, 'focus on the button, not the body');
+	assert.equal(disclosure.listeners.size, 0, 'closing releases its document listeners');
+});
+
 test('Disclosure hides its panel at once and lets an inert picture of it ease out, never with reduced motion', async t => {
 	const inside = document.createElement('p');
 	inside.id = 'inside';

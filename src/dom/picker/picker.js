@@ -2,6 +2,7 @@ import { Component } from '../core/component.js';
 import { el, fill, content } from '../core/element.js';
 import { icon } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
+import { Interaction } from '../core/interaction.js';
 import { Labels } from '../core/labels.js';
 import { Select } from '../select.js';
 import { Search } from './search.js';
@@ -204,7 +205,7 @@ export class Picker extends Component {
 	// "Select all shown" is offered while there is something left to add; focus never falls out of the picker.
 	#offer() {
 		if (!this.#all) return;
-		const focused = this.#all.ownerDocument.activeElement === this.#all;
+		const focused = Interaction.used(this.#all);
 		this.#all.hidden = !(this.#search.state === 'ready' && this.#open().length);
 		if (focused && this.#all.hidden) this.#input.focus();
 	}
@@ -226,7 +227,7 @@ export class Picker extends Component {
 		this.#list.element.setAttribute('aria-busy', String(busy));
 		if (search.state !== 'more') this.#list.render(search.items, id => this.#selection.has(id), this.#labels);
 		this.#retry.hidden = search.state !== 'failed';
-		const focused = this.#more.ownerDocument.activeElement === this.#more;
+		const focused = Interaction.used(this.#more);
 		this.#more.hidden = !(search.state === 'ready' && search.more);
 		this.#more.toggleAttribute('data-busy', search.state === 'more');
 		if (focused && this.#more.hidden) this.#input.focus();

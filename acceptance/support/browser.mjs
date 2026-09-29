@@ -1,15 +1,28 @@
-import { chromium } from 'playwright-core';
+import { chromium, firefox, webkit } from 'playwright-core';
 
 /**
- * The browser of the acceptance run: the installed Google Chrome (channel `chrome`), headless.
- * Every check opens its own context so viewport, color scheme, motion and touch never leak between
- * checks.
+ * The browser of the acceptance run: the installed Google Chrome (channel `chrome`), headless, or
+ * Playwright's own Firefox or WebKit build when `BEYOND_UI_BROWSER` names it (`firefox`, `webkit`;
+ * installed with `npx playwright-core install firefox webkit`). Every check opens its own context so
+ * viewport, color scheme, motion and touch never leak between checks.
  */
 export class Browser {
+	static ENGINES = { chrome: () => chromium.launch({ channel: 'chrome', headless: true }), firefox: () => firefox.launch(), webkit: () => webkit.launch() };
+
 	#browser = null;
+	#engine;
+
+	constructor(engine = process.env.BEYOND_UI_BROWSER || 'chrome') {
+		if (!Browser.ENGINES[engine]) throw new Error(`BEYOND_UI_BROWSER names one of ${Object.keys(Browser.ENGINES).join(', ')}`);
+		this.#engine = engine;
+	}
+
+	get engine() {
+		return this.#engine;
+	}
 
 	async launch() {
-		this.#browser = await chromium.launch({ channel: 'chrome', headless: true });
+		this.#browser = await Browser.ENGINES[this.#engine]();
 		return this;
 	}
 

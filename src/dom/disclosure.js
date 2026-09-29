@@ -1,13 +1,16 @@
 import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
 import { Ids } from './core/ids.js';
+import { Interaction } from './core/interaction.js';
 
 /**
  * A button that shows and hides a panel: the disclosure pattern.
  *
  * It traps nothing: Tab moves on normally. Escape and the button close the panel and return focus to
- * the button; a press outside closes it without moving focus. Closing it from code returns focus to
- * the button when focus was inside the panel, so it is never left on a hidden element. The panel works the same with a mouse,
+ * the button; a press outside closes it without moving focus. Escape also closes it when focus rests
+ * on the page's body, as it does in Safari after a click on a button, and focus then goes to the
+ * button. Closing it from code returns focus to the button when focus was inside the panel, so it is
+ * never left on a hidden element. The panel works the same with a mouse,
  * a keyboard and touch, which is what essential help and header panels need. Help, the account slot
  * and the notification entry are built on it.
  *
@@ -21,7 +24,7 @@ export class Disclosure extends Component {
 	#panel;
 	#open = false;
 	#onchange;
-	#release = null;
+	#releases = [];
 
 	/**
 	 * @param {object} options
@@ -80,9 +83,16 @@ export class Disclosure extends Component {
 		this.#open = true;
 		this.#panel.hidden = false;
 		this.#button.setAttribute('aria-expanded', 'true');
-		this.#release = this.listen(this.#element.ownerDocument, 'pointerdown', event => {
-			if (!this.#element.contains(event.target)) this.#shut(false);
-		});
+		const document = this.#element.ownerDocument;
+		this.#releases = [
+			this.listen(document, 'pointerdown', event => {
+				if (!this.#element.contains(event.target)) this.#shut(false);
+			}),
+			// Escape that reaches the document from nowhere in particular (the body) still closes the panel.
+			this.listen(document, 'keydown', event => {
+				if (event.key === 'Escape' && !event.defaultPrevented && !this.#element.contains(event.target) && Interaction.adrift(document)) this.#shut(true);
+			})
+		];
 		this.#onchange?.(true);
 	}
 
@@ -101,8 +111,8 @@ export class Disclosure extends Component {
 		this.#leave();
 		this.#panel.hidden = true;
 		this.#button.setAttribute('aria-expanded', 'false');
-		this.#release?.();
-		this.#release = null;
+		for (const release of this.#releases) release();
+		this.#releases = [];
 		if (refocus) this.#button.focus();
 		this.#onchange?.(false);
 	}

@@ -58,13 +58,19 @@ export class ProductNav extends Component {
 		this.#element.ownerDocument.fonts?.ready.then(() => !this.destroyed && this.#scroll());
 	}
 
+	/**
+	 * Moves the row by whole pixels, rounded away from the tab, inside the row's padding: WebKit keeps
+	 * only whole pixels of `scrollLeft`, so a fractional move would leave the tab a fraction outside.
+	 */
 	#scroll() {
 		const current = this.#list.querySelector('[aria-current]');
 		if (!current || !this.#element.isConnected) return;
-		const row = this.#list.getBoundingClientRect();
+		const style = this.#element.ownerDocument.defaultView.getComputedStyle(this.#list);
+		const box = this.#list.getBoundingClientRect();
+		const [start, end] = [box.left + parseFloat(style.paddingLeft || '0'), box.right - parseFloat(style.paddingRight || '0')];
 		const tab = current.getBoundingClientRect();
-		if (tab.left < row.left) this.#list.scrollLeft -= row.left - tab.left;
-		else if (tab.right > row.right) this.#list.scrollLeft += tab.right - row.right;
+		if (tab.left < start) this.#list.scrollLeft -= Math.ceil(start - tab.left);
+		else if (tab.right > end) this.#list.scrollLeft += Math.ceil(Math.min(tab.right - end, tab.left - start));
 	}
 
 	#link(item) {

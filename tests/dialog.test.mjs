@@ -87,6 +87,29 @@ test('destroy while open resolves null, restores focus and removes the element',
 	assert.equal(await dialog.open(), null, 'a destroyed dialog never opens');
 });
 
+test('where a click focuses nothing (Safari), focus returns to the element last pressed, or to `restore`, never to the body', async () => {
+	const button = document.createElement('button');
+	document.body.append(button);
+	document.activeElement?.blur?.();
+	button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+	assert.ok(document.activeElement === document.body, 'the press itself moved no focus');
+	const dialog = new ui.Dialog({ title: 'Delete' });
+	const closed = dialog.open();
+	page.key(dialog.element, 'Escape');
+	await closed;
+	assert.ok(document.activeElement === button, 'focus on the button that opened it');
+	button.blur();
+	// A key on the body forgets that press: the dialog has no opener and uses `restore`.
+	page.key(document.body, 'x');
+	const fallback = document.createElement('button');
+	document.body.append(fallback);
+	const second = new ui.Dialog({ title: 'Delete', restore: fallback });
+	const again = second.open();
+	second.close();
+	await again;
+	assert.ok(document.activeElement === fallback, 'focus on `restore`');
+});
+
 test('focus goes to `restore` when the opener disappeared', async () => {
 	const origin = opener();
 	const fallback = document.createElement('h1');

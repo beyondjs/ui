@@ -4,6 +4,7 @@ import { icon } from './core/icons.js';
 import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 import { Focus } from './core/focus.js';
+import { Interaction } from './core/interaction.js';
 
 const defaults = { close: 'Close' };
 
@@ -11,9 +12,11 @@ const defaults = { close: 'Close' };
  * A modal dialog on the native `<dialog>` element.
  *
  * Each instance is named by its own title (and described by its description). Opening remembers the
- * element that had focus, makes the rest of the page inert (`showModal`), keeps Tab and Shift+Tab
- * inside the dialog and moves focus to `[data-autofocus]`, the first field or the first action.
- * Closing returns focus to that element, or to `restore` when it is gone.
+ * element that opened it (the focused element, or, where a click does not focus a button, as in
+ * Safari, the element last pressed or typed on), makes the rest of the page inert (`showModal`), keeps
+ * Tab and Shift+Tab inside the dialog and moves focus to `[data-autofocus]`, the first field or the
+ * first action. Closing returns focus to that element, or to `restore` when it is gone or unknown;
+ * never to the page's body.
  *
  * Dismissal policy: Escape and the close button dismiss unless `escape` is false; a press on the
  * backdrop dismisses only with `backdrop: true`. While `busy` nothing dismisses it — not Escape, the
@@ -46,7 +49,7 @@ export class Dialog extends Component {
 	 * @param {boolean} [options.escape] Escape and the close button dismiss (default true)
 	 * @param {boolean} [options.backdrop] a press on the backdrop dismisses (default false)
 	 * @param {'small'|'medium'|'large'} [options.size]
-	 * @param {Element} [options.restore] focus target after closing when the opener is gone
+	 * @param {Element} [options.restore] focus target after closing when the opener is gone or unknown
 	 */
 	constructor({ title, description = null, children = [], actions = [], escape = true, backdrop = false, size = 'medium', restore = null, onclose = null, labels = {} }) {
 		super();
@@ -133,7 +136,7 @@ export class Dialog extends Component {
 		if (this.destroyed) return Promise.resolve(null);
 		if (this.#element.open) return this.#settle.promise;
 		const document = this.#element.ownerDocument;
-		this.#opener = document.activeElement;
+		this.#opener = Interaction.origin(document);
 		if (!this.#element.isConnected) {
 			document.body.append(this.#element);
 			this.#adopted = true;
@@ -206,8 +209,8 @@ export class Dialog extends Component {
 			this.#element.remove();
 			this.#adopted = false;
 		}
-		const target = opener?.isConnected ? opener : this.#restore;
-		target?.focus?.();
+		const target = opener?.isConnected ? opener : this.#restore?.isConnected ? this.#restore : null;
+		if (target && target !== target.ownerDocument.body) target.focus?.();
 		this.#onclose?.(value);
 		this.#settle?.resolve(value);
 	}

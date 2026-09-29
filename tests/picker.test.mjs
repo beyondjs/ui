@@ -85,6 +85,18 @@ test('"all" adds every result shown that can be chosen, keeps earlier choices, a
 	assert.equal(all(picker).hidden, false, 'offered again once more results are shown');
 });
 
+test('"all" pressed without taking focus (a click in Safari) still leaves focus in the search field', async () => {
+	const picker = new Picker({ label: 'People', source: new People().source, limit: 20, delay: 0, all: true }).mount(document.body);
+	await settle(picker);
+	const all = picker.element.querySelector('.bui-picker-all');
+	document.activeElement?.blur?.();
+	all.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+	all.click();
+	assert.equal(all.hidden, true);
+	assert.ok(document.activeElement === picker.control, 'focus goes to the search field, not the body');
+	picker.destroy();
+});
+
 test('"all" is not offered by a single picker or without asking for it', async () => {
 	const single = new Picker({ label: 'Owner', multiple: false, all: true, source: new People().source, delay: 0 }).mount(document.body);
 	const plain = new Picker({ label: 'People', source: new People().source, delay: 0 }).mount(document.body);
