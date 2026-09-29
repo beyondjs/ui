@@ -1,0 +1,196 @@
+/* The family bar (FamilyBar). Its menus' panels and the product navigation row are in navigation.css. */
+
+/* One row at every width, and visible while the page scrolls: below dialogs (the top layer) and
+   toasts, above the page's own floating lists. */
+.bui-family {
+	position: sticky;
+	top: 0;
+	z-index: var(--bui-family-layer, 45);
+	flex-wrap: nowrap;
+	column-gap: var(--space-3);
+	height: var(--layout-family);
+	padding-block: 0;
+}
+.bui-family .bui-header-start {
+	flex: none;
+	gap: var(--space-2);
+	line-height: 1;
+}
+.bui-family .bui-header-brand {
+	flex: none;
+}
+.bui-family .bui-header-context {
+	display: flex;
+	flex: 1 1 auto;
+	min-width: 0;
+	color: var(--color-family-text);
+}
+.bui-family .bui-header-end {
+	flex: none;
+}
+.bui-family :focus-visible {
+	outline-color: var(--color-family-marker);
+}
+
+/* Menu buttons on the navy bar: no border, the bar's text, a lift on hover and while open. */
+.bui-family .bui-navmenu {
+	display: flex;
+	min-width: 0;
+}
+.bui-family .bui-navmenu-button {
+	min-width: 0;
+	min-height: var(--bui-target);
+	gap: var(--space-1);
+	padding: 0 var(--space-2);
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font-weight: var(--weight-medium);
+	line-height: 1;
+}
+.bui-family .bui-navmenu-button > .bui-icon {
+	width: 14px;
+	height: 14px;
+	opacity: 0.8;
+}
+.bui-family .bui-navmenu-button:hover,
+.bui-family .bui-navmenu-button[aria-expanded='true'],
+.bui-family-docs:hover {
+	background: var(--overlay-lift);
+}
+
+/* The product switcher is the lockup's name: the same size, place and divider (see .bui-lockup-name). */
+.bui-family-product .bui-navmenu-button {
+	padding-left: 0;
+}
+.bui-family-product .bui-navmenu-button > .bui-icon {
+	translate: 0 calc(var(--bui-lockup-height, 21px) * -0.0555);
+}
+
+.bui-family-thread,
+.bui-family-location,
+.bui-family-wide,
+.bui-family-narrow {
+	display: flex;
+	align-items: center;
+	gap: var(--space-1);
+	min-width: 0;
+}
+.bui-family-narrow {
+	display: none;
+}
+.bui-family-divider {
+	flex: none;
+	width: 1px;
+	height: 1rem;
+	margin-right: var(--space-2);
+	background: var(--color-family-muted);
+	opacity: 0.5;
+}
+.bui-family-separator {
+	flex: none;
+	color: var(--color-family-muted);
+}
+.bui-family-thread .bui-navmenu-button {
+	max-width: 16rem;
+	font-size: var(--text-small);
+}
+.bui-family-place {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.bui-family-static {
+	display: inline-flex;
+	min-width: 0;
+	max-width: 16rem;
+	padding: 0 var(--space-2);
+	font-size: var(--text-small);
+	font-weight: var(--weight-medium);
+}
+.bui-family-placeholder {
+	display: inline-block;
+	width: 7rem;
+	height: 0.75rem;
+	margin: 0 var(--space-2);
+	border-radius: var(--radius-control);
+	background: var(--overlay-lift);
+}
+
+.bui-family-end {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+}
+.bui-family-docs {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-2);
+	min-height: var(--bui-target);
+	padding: 0 var(--space-2);
+	border-radius: var(--radius-control);
+	font-size: var(--text-small);
+	font-weight: var(--weight-medium);
+}
+.bui-family-account .bui-navmenu-button {
+	padding: 0 var(--space-1);
+}
+.bui-family-avatar {
+	display: grid;
+	place-items: center;
+	width: 28px;
+	height: 28px;
+	border-radius: var(--radius-round);
+	background: var(--color-family-marker);
+	color: var(--color-family-bar);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	letter-spacing: 0.02em;
+}
+.bui-family-avatar > .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+
+/* Narrow: the organization and project become one location menu, and every panel spans the bar. */
+@media (max-width: 719px) {
+	.bui-family-wide {
+		display: none;
+	}
+	.bui-family-narrow {
+		display: flex;
+	}
+	.bui-family .bui-navmenu {
+		position: static;
+	}
+	.bui-family .bui-navmenu-panel,
+	.bui-family .bui-navmenu :is(.bui-disclosure-leaving) {
+		top: 100%;
+		left: var(--space-2);
+		right: var(--space-2);
+		min-width: 0;
+		max-width: none;
+	}
+	.bui-family-docs span {
+		display: none;
+	}
+}
+@media (max-width: 479px) {
+	.bui-family {
+		column-gap: var(--space-2);
+		padding-inline: var(--space-3);
+	}
+	.bui-family .bui-header-end,
+	.bui-family-end {
+		gap: 0;
+	}
+	.bui-family-docs,
+	.bui-family-divider,
+	.bui-family-account .bui-navmenu-button > .bui-icon:last-child {
+		display: none;
+	}
+	.bui-navmenu-list > li:has(> .bui-family-docs-item) {
+		display: list-item;
+	}
+}

@@ -185,3 +185,65 @@
 	margin: 0;
 	color: var(--color-text-muted);
 }
+
+/* "Not available here" (Unavailable): explained in place, in tones that never read as a failure. */
+.bui-unavailable {
+	display: flex;
+	gap: var(--space-4);
+	max-width: 44rem;
+	padding: var(--space-6);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-base);
+	background: var(--color-surface);
+	color: var(--color-text);
+}
+/* The disc is centred on the title's first line. */
+.bui-unavailable-icon {
+	display: grid;
+	place-items: center;
+	flex: none;
+	width: 44px;
+	height: 44px;
+	margin-top: calc((var(--text-title-2) * var(--leading-title-2) - 44px) / 2);
+	border-radius: var(--radius-round);
+	background: var(--color-warning-surface);
+	color: var(--color-warning);
+}
+.bui-unavailable-capability .bui-unavailable-icon {
+	background: var(--color-info-surface);
+	color: var(--color-info);
+}
+.bui-unavailable-association .bui-unavailable-icon {
+	background: var(--color-surface-sunken);
+	color: var(--color-text-muted);
+}
+.bui-unavailable-body {
+	display: grid;
+	align-content: start;
+	gap: var(--space-2);
+	min-width: 0;
+}
+.bui-unavailable-title {
+	margin: 0;
+	font-size: var(--text-title-2);
+	font-weight: var(--weight-medium);
+	line-height: var(--leading-title-2);
+}
+.bui-unavailable-body > p {
+	margin: 0;
+}
+.bui-unavailable-label {
+	color: var(--color-text-muted);
+}
+.bui-unavailable-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	margin-top: var(--space-2);
+}
+@media (max-width: 480px) {
+	.bui-unavailable {
+		gap: var(--space-3);
+		padding: var(--space-4);
+	}
+}

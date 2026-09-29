@@ -5,7 +5,7 @@ import { el, content } from './core/element.js';
 import { Labels } from './core/labels.js';
 import { callout } from './feedback.js';
 
-const defaults = { accept: 'Confirm', cancel: 'Cancel', ok: 'OK', close: 'Close', failure: 'That did not work. Try again or cancel.' };
+const defaults = { accept: 'Confirm', cancel: 'Cancel', ok: 'OK', close: 'Close', failure: 'That did not work. Try again or cancel.', lost: 'What is lost', kept: 'What is kept', recovery: 'How to undo' };
 
 /**
  * One in-app question: the dialog behind `confirm`, `prompt` and `alert`.
@@ -40,6 +40,7 @@ export class Question {
 		const buttons = [cancel?.element, this.#accept.element].filter(Boolean);
 		const body = [
 			options.message ? el('p', { class: 'bui-question-message' }, [content(options.message)]) : null,
+			consequence(options.consequence, this.#labels),
 			this.#field ? this.#field.element : null,
 			this.#problem
 		];
@@ -99,14 +100,28 @@ export class Question {
 	}
 }
 
+/**
+ * The consequence of a confirmed action (decision D17) as a short list under the message: what is
+ * lost, what is kept and how to undo it, each stated only when given. A value is text, a node or a
+ * list of them.
+ */
+function consequence(value, labels) {
+	const parts = ['lost', 'kept', 'recovery'].filter(key => value?.[key] && [].concat(value[key]).length);
+	if (!parts.length) return null;
+	const describe = item => (Array.isArray(item) ? el('ul', {}, item.map(line => el('li', {}, [content(line)]))) : content(item));
+	return el('dl', { class: 'bui-consequence' }, parts.map(key => el('div', { class: `bui-consequence-${key}` }, [el('dt', { text: labels.text(key) }), el('dd', {}, [describe(value[key])])])));
+}
+
 function pick(source, keys) {
 	return Object.fromEntries(keys.filter(key => typeof source[key] === 'string').map(key => [key, source[key]]));
 }
 
 /**
  * Asks for confirmation. Resolves true when accepted (after `work` succeeded) and false otherwise.
- * Options: `title`, `message`, `accept`, `cancel`, `tone: 'danger'`, `focus: 'cancel' | 'accept'` (Cancel
- * for a danger, Accept otherwise), `work`, `explain`, `labels`.
+ * Options: `title`, `message`, `consequence: { lost?, kept?, recovery? }` (shown as a short list under
+ * the message), `accept`, `cancel`, `tone: 'danger'`, `focus: 'cancel' | 'accept'` (Cancel for a
+ * danger, Accept otherwise), `work`, `explain`, `labels`. `accept` is the action's own verb
+ * ("Delete project"); "OK" and "Confirm" are wrong for a named action.
  */
 export async function confirm(options) {
 	const answer = await new Question('confirm', options).ask();

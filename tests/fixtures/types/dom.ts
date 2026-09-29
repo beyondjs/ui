@@ -1,5 +1,5 @@
 // A plain DOM consumer in TypeScript: compiled, never run, to check the `dom` and `tokens` declarations.
-import { Dialog, Picker, NotificationEntry, Header, Collection, confirm, type NotificationAdapter, type NoticeSummary, type NoticePage } from '@beyond-js/ui';
+import { Dialog, Picker, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Unavailable, Button, badge, availability, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor } from '@beyond-js/ui';
 import { tokens, TokenSheet } from '@beyond-js/ui/tokens';
 
 declare const adapter: NotificationAdapter;
@@ -19,3 +19,12 @@ const list = new Collection<{ id: string }>({ label: 'Rows', columns: [{ key: 'i
 list.state = { query: '', filters: {}, page: 1 };
 const sheet: string = new TokenSheet(tokens).css;
 void confirm({ title: 'Leave?' }).then((answer: boolean) => answer && partial && sheet);
+const descriptor: FamilyDescriptor = { person: { name: 'Ana' }, organization: { id: 'org_1', name: 'Northwind' }, products: [{ product: 'cdn', available: false, reason: 'UNCONFIGURED' }], links: { home: '/' } };
+const family = new FamilyBar({ product: 'delegate', brand: { src: '/wordmark.svg', href: '/' }, descriptor: null, fallback: { organization: 'Northwind' }, notifications: entry.element, account: { signout: { href: '/signout' }, items: [{ label: 'Settings', href: '/settings' }] }, onnavigate: item => item.url, labels: { NOT_ADMITTED: 'Aún no está abierto para ti' } }).mount(document.body);
+family.descriptor = descriptor;
+family.descriptor = { unavailable: true };
+const state: 'loading' | 'unavailable' | 'ready' = family.state;
+new ProductNav({ items: [{ label: 'Requests', href: '/requests', current: true }], sticky: true }).mount(document.body);
+new Unavailable({ title: 'Not open to you yet', reason: 'By invitation.', owner: 'An owner', action: new Button({ label: 'Ask' }).element, kind: 'access', code: 'NOT_ADMITTED', level: 3 }).mount(document.body);
+const tags = availability.map(entry => badge(entry.label, entry.tone));
+void confirm({ title: 'Delete Storefront?', accept: 'Delete project', consequence: { lost: ['Entries'], kept: 'Records', recovery: 'None' } }).then(answer => answer && state && tags.length);

@@ -3,7 +3,9 @@ import type { ReactNode, ReactElement, Ref, RefAttributes, ForwardRefExoticCompo
 import type { Copy, NotificationAdapter, Notice } from './notifications.js';
 import type { Tone, MenuItem, ChoiceOption, SelectOption, PromptOptions, QuestionOptions, Crumb, CollectionState, InboxState, PickerChoice, PickerSource, Component } from './dom.js';
 export type { Copy, NotificationAdapter, Notice, NoticePage, NoticeRequest, NoticeSource, NoticeSummary } from './notifications.js';
-export { confirm, prompt, alert } from './dom.js';
+export { confirm, prompt, alert, availability } from './dom.js';
+export type { AvailabilityState, Consequence, FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, FamilyProduct, FamilyReason, ProductNavItem, UnavailableKind } from './dom.js';
+import type { FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, ProductNavItem, UnavailableKind } from './dom.js';
 
 export function Icon(props: { name: string }): ReactElement;
 
@@ -115,6 +117,24 @@ export interface HeaderProps {
 	labels?: Copy;
 }
 export function Header(props: HeaderProps): ReactElement;
+export interface FamilyBarProps {
+	product: string;
+	brand: { src: string; href: string };
+	descriptor?: FamilyDescriptor | FamilyUnavailable | null;
+	fallback?: FamilyFallback | null;
+	products?: Record<string, string>;
+	notifications?: ReactNode;
+	account?: { signout?: (() => void) | { href: string } | null; items?: Array<{ label: string; href?: string | null; onSelect?: (() => void) | null } | null | false>; label?: string | null };
+	toggle?: { controls: string; expanded: boolean; onChange?: (expanded: boolean) => void } | null;
+	onNavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null;
+	advisory?: string[];
+	/** Memoize: a new object creates a new bar */
+	labels?: Copy;
+}
+/** The family bar, driven by the DOM `FamilyBar`; `descriptor` and `fallback` are applied when they change. */
+export function FamilyBar(props: FamilyBarProps): ReactElement;
+export function ProductNav(props: { items: Array<ProductNavItem | null | false>; label?: string | null; sticky?: boolean; onNavigate?: ((item: ProductNavItem, event: MouseEvent) => void) | null; labels?: { nav?: string } }): ReactElement;
+export function Unavailable(props: { title: ReactNode; reason: ReactNode; owner?: ReactNode; action?: ReactNode; secondary?: ReactNode; kind?: UnavailableKind; code?: string | null; level?: 2 | 3 | 4 | 5 | 6; labels?: { owner?: string } }): ReactElement;
 export function Disclosure(props: { label: string; name?: string | null; align?: 'start' | 'end'; onChange?: (open: boolean) => void; children?: ReactNode }): ReactElement;
 export function ActionMenu(props: { label?: string | null; name?: string | null; items: Array<(Omit<MenuItem, 'run'> & { onSelect?: (event: MouseEvent) => void }) | null | false>; align?: 'start' | 'end'; glyph?: string | null; placement?: 'auto' | 'below' | 'above' }): ReactElement;
 export function Help(props: { topic: string; text?: string | string[]; labels?: Copy; children?: ReactNode }): ReactElement;

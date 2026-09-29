@@ -30,7 +30,7 @@ export class Labels {
 }
 
 export function el(tag: string, props?: Record<string, unknown>, children?: unknown): HTMLElement;
-export function icon(name: 'chevron' | 'check' | 'close' | 'search' | 'menu' | 'alert' | 'info' | 'help' | 'bell' | 'more' | 'refresh'): SVGSVGElement;
+export function icon(name: 'chevron' | 'check' | 'close' | 'search' | 'menu' | 'alert' | 'info' | 'help' | 'bell' | 'more' | 'refresh' | 'user' | 'book' | 'lock' | 'plug'): SVGSVGElement;
 
 export interface ButtonOptions {
 	label: Content;
@@ -161,6 +161,9 @@ export class Dialog extends Component {
 export interface QuestionOptions {
 	title: Content;
 	message?: Content;
+	/** What is lost, what is kept and how to undo it, as a short list under the message (confirm) */
+	consequence?: import('./family.js').Consequence | null;
+	/** The action's own verb ("Delete project"); "OK" and "Confirm" are wrong for a named action */
 	accept?: string;
 	cancel?: string;
 	ok?: string;
@@ -218,3 +221,4 @@ export function skeleton(lines?: number): HTMLElement;
 export function hidden(text: string): HTMLElement;
 
 export * from './parts.js';
+export * from './family.js';

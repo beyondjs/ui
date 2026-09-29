@@ -1,0 +1,128 @@
+/* The family bar's navigation menus (their panels on the page's surface) and the product navigation row (ProductNav). */
+
+.bui-navmenu-panel {
+	display: grid;
+	gap: var(--space-2);
+	min-width: 16rem;
+	max-height: calc(100dvh - var(--layout-family) - var(--space-4));
+	padding: var(--space-2);
+	overflow-y: auto;
+	font-size: var(--text-small);
+	font-weight: var(--weight-light);
+	line-height: var(--leading-small);
+}
+.bui-navmenu-heading {
+	margin: 0;
+	padding: var(--space-1) var(--space-2) 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	letter-spacing: var(--tracking-label);
+	text-transform: uppercase;
+}
+.bui-family-person {
+	display: grid;
+	letter-spacing: normal;
+	text-transform: none;
+}
+.bui-family-name {
+	color: var(--color-text);
+	font-size: var(--text-small);
+}
+.bui-navmenu-list {
+	display: grid;
+	gap: 2px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.bui-navmenu-item {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	width: 100%;
+	min-height: var(--bui-target);
+	padding: var(--space-1) var(--space-2);
+	border: 0;
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: var(--color-text);
+	font: inherit;
+	text-align: left;
+	text-decoration: none;
+	cursor: pointer;
+}
+.bui-family .bui-navmenu-item:focus-visible,
+.bui-navmenu-item:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: -2px;
+}
+.bui-navmenu-item:hover,
+.bui-navmenu-item:focus {
+	background: var(--color-surface-sunken);
+}
+.bui-navmenu-item[aria-current] {
+	background: var(--color-surface-selected);
+	font-weight: var(--weight-medium);
+}
+.bui-navmenu-item-off {
+	cursor: default;
+}
+.bui-navmenu-action {
+	color: var(--color-link);
+}
+.bui-navmenu-text {
+	display: grid;
+	flex: 1;
+	min-width: 0;
+}
+.bui-navmenu-meta {
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-light);
+}
+.bui-navmenu-list > li:has(> .bui-family-docs-item) {
+	display: none;
+}
+
+/* The product's own navigation under the family bar. */
+.bui-productnav {
+	border-bottom: 1px solid var(--color-border);
+	background: var(--color-surface);
+}
+.bui-productnav-sticky {
+	position: sticky;
+	top: var(--layout-family);
+	z-index: calc(var(--bui-family-layer, 45) - 1);
+}
+.bui-productnav-list {
+	display: flex;
+	gap: var(--space-1);
+	margin: 0;
+	padding: 0 var(--space-4);
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+	scrollbar-width: thin;
+	list-style: none;
+}
+.bui-productnav-list a {
+	display: inline-flex;
+	align-items: center;
+	min-height: max(var(--bui-target), 40px);
+	padding: 0 var(--space-3);
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-medium);
+	text-decoration: none;
+	white-space: nowrap;
+}
+.bui-productnav-list a:hover,
+.bui-productnav-list a[aria-current] {
+	color: var(--color-text);
+}
+.bui-productnav-list a[aria-current] {
+	box-shadow: inset 0 -2px 0 var(--color-accent);
+}
+.bui-productnav-list a:focus-visible {
+	outline-offset: -2px;
+}

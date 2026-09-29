@@ -1,7 +1,7 @@
 // A React consumer as Delegate writes one (TypeScript, bundler resolution, react-jsx). It is
 // compiled, never run: it proves the declarations of `@beyond-js/ui/react` accept real usage.
 import { useRef, useState } from 'react';
-import { Button, Dialog, Field, FocusedForm, Header, NotificationEntry, NotificationInbox, Picker, Collection, Help, Tooltip, ActionMenu, Select, Choices, useConfirm, useBusy, useToaster, type NotificationAdapter, type NotificationEntryHandle, type PickerHandle } from '@beyond-js/ui/react';
+import { Button, Dialog, Field, FocusedForm, Header, NotificationEntry, NotificationInbox, Picker, Collection, Help, Tooltip, ActionMenu, Select, Choices, useConfirm, useBusy, useToaster, FamilyBar, ProductNav, Unavailable, Badge, availability, type FamilyDescriptor, type NotificationAdapter, type NotificationEntryHandle, type PickerHandle } from '@beyond-js/ui/react';
 
 declare const adapter: NotificationAdapter;
 type Row = { id: string; title: string; votes: number };
@@ -16,6 +16,10 @@ export function Screen() {
 	const toaster = useToaster();
 	return (
 		<>
+			<FamilyBar product="delegate" brand={{ src: '/wordmark.svg', href: '/' }} descriptor={null as FamilyDescriptor | null} fallback={{ project: 'Storefront' }} notifications={<NotificationEntry adapter={adapter} />} account={{ signout: () => undefined, items: [{ label: 'Atajos', onSelect: () => setOpen(true) }] }} onNavigate={item => item.href} labels={{ signout: 'Cerrar sesión' }} />
+			<ProductNav items={[{ label: 'Pedidos', href: '/requests', current: true }]} onNavigate={item => item.href} />
+			<Unavailable title="Aún no" reason="Por invitación." owner="Ana" action={<Button label="Pedir acceso" />} kind="capability" />
+			{availability.map(entry => <Badge key={entry.key} label={entry.label} tone={entry.tone} />)}
 			<Header brand={{ label: 'Beyond', href: '/' }} context={[{ label: 'Northwind', href: '/o' }]} notifications={<NotificationEntry ref={bell} adapter={adapter} href="#/notifications" locale="es" onView={() => bell.current?.more} labels={{ badge: ({ count, more }) => (more ? `${count}+` : String(count)) }} />} account={<span>Ana</span>} toggle={{ controls: 'rail', expanded: open, onChange: setOpen }} />
 			<Button label="Delete" variant="danger" busy={busy} onClick={() => void run(async () => { if (await questions.confirm({ title: '¿Borrar?', tone: 'danger' })) toaster.show('Borrado'); })} />
 			<Dialog open={open} title="Rename" onClose={() => setOpen(false)} actions={<Button label="Save" type="submit" />}>

@@ -223,3 +223,14 @@
 	white-space: nowrap;
 	translate: 0 calc(var(--bui-lockup-height, 21px) * -0.02);
 }
+/* Where text-box trimming exists, the name's box is exactly its cap height (cap top to baseline), so
+   its place no longer depends on the font's rounded ascent and descent: centred on the image and
+   raised to the letters' centre (0.4445 of the wordmark's height, 0.0555 above its middle), cap top
+   and baseline meet the letters' at every height. The padding keeps the divider as tall as before. */
+@supports (text-box: trim-both cap alphabetic) {
+	.bui-lockup-name {
+		text-box: trim-both cap alphabetic;
+		padding-block: calc(var(--bui-lockup-height, 21px) * 0.107);
+		translate: 0 calc(var(--bui-lockup-height, 21px) * -0.0555);
+	}
+}
