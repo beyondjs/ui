@@ -1,5 +1,5 @@
 import { el, fill, content } from '../core/element.js';
-import { icon } from '../core/icons.js';
+import { glyph } from '../core/icons.js';
 import { callout } from '../feedback.js';
 
 /**
@@ -61,7 +61,7 @@ export class Panel {
 
 	/** A failure with its retry button. */
 	failed(message) {
-		const retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', onclick: () => this.#retry() }, [icon('refresh'), el('span', { text: this.#labels.text('retry') })]);
+		const retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', onclick: () => this.#retry() }, [glyph('refresh'), el('span', { text: this.#labels.text('retry') })]);
 		this.show([callout({ tone: 'danger', title: content(message), actions: [retry] })]);
 	}
 

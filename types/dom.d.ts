@@ -30,7 +30,6 @@ export class Labels {
 }
 
 export function el(tag: string, props?: Record<string, unknown>, children?: unknown): HTMLElement;
-export function icon(name: 'chevron' | 'check' | 'close' | 'search' | 'menu' | 'alert' | 'info' | 'help' | 'bell' | 'more' | 'refresh' | 'user' | 'book' | 'lock' | 'plug'): SVGSVGElement;
 
 export interface ButtonOptions {
 	label: Content;
@@ -222,3 +221,5 @@ export function hidden(text: string): HTMLElement;
 
 export * from './parts.js';
 export * from './family.js';
+export * from './icons.js';
+export * from './preferences.js';

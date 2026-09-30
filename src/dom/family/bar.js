@@ -1,6 +1,6 @@
 import { Component } from '../core/component.js';
 import { el } from '../core/element.js';
-import { icon } from '../core/icons.js';
+import { glyph } from '../core/icons.js';
 import { Labels } from '../core/labels.js';
 import { Header } from '../header.js';
 import { defaults, names } from './labels.js';
@@ -132,7 +132,8 @@ export class FamilyBar extends Component {
 		this.#start.querySelector('.bui-header-brand').setAttribute('href', places.home);
 		// No divider when there is no place to show after it.
 		this.#thread.replaceChildren(...(location.blank ? [] : [el('span', { class: 'bui-family-divider', 'aria-hidden': 'true' })]), location.element);
-		const docs = places.links.docs ? el('a', { class: 'bui-family-docs', href: places.links.docs, 'data-part': 'docs' }, [icon('book'), el('span', { text: labels.text('docs') })]) : null;
+		// Named on the link too: between 480 and 719 px the stylesheet shows its glyph alone.
+		const docs = places.links.docs ? el('a', { class: 'bui-family-docs', href: places.links.docs, 'data-part': 'docs', 'aria-label': labels.text('docs') }, [glyph('book'), el('span', { text: labels.text('docs') })]) : null;
 		this.#end.replaceChildren(...[docs, notifications, menu.element].filter(Boolean));
 		this.element.dataset.state = state;
 		this.#restore(focused);

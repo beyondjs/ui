@@ -1,6 +1,6 @@
 import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
-import { icon } from './core/icons.js';
+import { glyph } from './core/icons.js';
 import { Labels } from './core/labels.js';
 
 const defaults = { region: 'Messages', dismiss: 'Dismiss' };
@@ -38,14 +38,14 @@ export class Toaster extends Component {
 	 * @param {{tone?: string, detail?: string|Node, duration?: number}} [options]
 	 */
 	show(message, { tone = 'success', detail = null, duration = 5000 } = {}) {
-		const glyph = { success: 'check', info: 'info', warning: 'alert', danger: 'alert' }[tone] ?? 'info';
+		const mark = { success: 'check', info: 'info', warning: 'alert', danger: 'alert' }[tone] ?? 'info';
 		const toast = el('div', { class: `bui-toast bui-toast-${tone}` }, [
-			icon(glyph),
+			glyph(mark),
 			el('div', { class: 'bui-toast-text' }, [
 				el('p', { class: 'bui-toast-title' }, [content(message)]),
 				detail ? el('p', { class: 'bui-toast-detail' }, [content(detail)]) : null
 			]),
-			el('button', { type: 'button', class: 'bui-icon-button', 'aria-label': this.#labels.text('dismiss'), onclick: () => remove() }, [icon('close')])
+			el('button', { type: 'button', class: 'bui-icon-button', 'aria-label': this.#labels.text('dismiss'), onclick: () => remove() }, [glyph('close')])
 		]);
 		(tone === 'danger' ? this.#assertive : this.#polite).append(toast);
 		const cancel = tone === 'danger' ? null : this.later(() => toast.remove(), duration);

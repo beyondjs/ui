@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { FamilyBar as Bar } from '../dom/family/bar.js';
 import { ProductNav as Row } from '../dom/nav.js';
 import { Unavailable as Missing, glyphs } from '../dom/unavailable.js';
-import { Icon, Badge } from './simple.js';
+import { Mark, Badge } from './simple.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 
 const { useId, useState } = React;
@@ -67,7 +67,7 @@ export function Unavailable({ title, reason, owner = null, action = null, second
 	return h(
 		'section',
 		{ className: `bui-unavailable bui-unavailable-${type}`, 'data-unavailable': type, 'aria-labelledby': id },
-		h('span', { className: 'bui-unavailable-icon' }, h(Icon, { name: glyphs[type] })),
+		h('span', { className: 'bui-unavailable-icon' }, h(Mark, { name: glyphs[type] })),
 		h(
 			'div',
 			{ className: 'bui-unavailable-body' },

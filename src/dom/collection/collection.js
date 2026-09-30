@@ -1,6 +1,6 @@
 import { Component } from '../core/component.js';
 import { el, fill, content } from '../core/element.js';
-import { icon } from '../core/icons.js';
+import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { Select } from '../select.js';
@@ -57,7 +57,7 @@ export class Collection extends Component {
 			? el('input', { id: `${id}-search`, type: 'search', class: 'bui-input', value: this.#state.query, autocomplete: 'off', placeholder: this.#labels.text('placeholder'), oninput: () => this.#typed() })
 			: null;
 		const tools = [
-			this.#input ? el('div', { class: 'bui-collection-search' }, [el('label', { for: this.#input.id, class: 'bui-field-label' }, [this.#labels.text('search', { label })]), el('span', { class: 'bui-picker-search' }, [icon('search'), this.#input])]) : null,
+			this.#input ? el('div', { class: 'bui-collection-search' }, [el('label', { for: this.#input.id, class: 'bui-field-label' }, [this.#labels.text('search', { label })]), el('span', { class: 'bui-picker-search' }, [glyph('search'), this.#input])]) : null,
 			...filters.map(filter => this.#filter(filter, id))
 		];
 		this.#region = el('div', { class: 'bui-collection-body', tabindex: '-1', 'aria-busy': 'false' });
@@ -174,7 +174,7 @@ export class Collection extends Component {
 	}
 
 	#failed(error) {
-		const retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary', onclick: () => this.load() }, [icon('refresh'), el('span', { text: this.#labels.text('retry') })]);
+		const retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary', onclick: () => this.load() }, [glyph('refresh'), el('span', { text: this.#labels.text('retry') })]);
 		const message = this.#options.explain?.(error) ?? this.#labels.text('failure');
 		fill(this.#region, [callout({ tone: 'danger', title: message, actions: [retry] })]);
 		fill(this.#pager, []);

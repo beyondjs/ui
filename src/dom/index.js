@@ -7,7 +7,7 @@
 export { Component, Listeners } from './core/component.js';
 export { Labels } from './core/labels.js';
 export { el } from './core/element.js';
-export { icon } from './core/icons.js';
+export { icon, icons, unlabeled } from './core/icons.js';
 export { Button } from './button.js';
 export { ActionMenu } from './menu.js';
 export { Disclosure } from './disclosure.js';
@@ -29,5 +29,6 @@ export { FamilyBar } from './family/bar.js';
 export { ProductNav } from './nav.js';
 export { Unavailable } from './unavailable.js';
 export { availability } from './availability.js';
+export { Preferences } from './preferences/preferences.js';
 export { NotificationEntry } from './notifications/entry.js';
 export { NotificationInbox } from './notifications/inbox.js';

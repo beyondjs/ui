@@ -1,6 +1,6 @@
 import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
-import { icon } from './core/icons.js';
+import { glyph } from './core/icons.js';
 
 /**
  * A native select for a short, finite list of choices, styled over the tokens.
@@ -19,7 +19,7 @@ export class Select extends Component {
 		super();
 		this.#control = el('select', { id, name, required, disabled, class: 'bui-select-control', onchange: () => onchange?.(this.value) }, options.map(option => this.#option(option)));
 		if (value !== null) this.#control.value = value;
-		this.#element = el('span', { class: 'bui-select' }, [this.#control, icon('chevron')]);
+		this.#element = el('span', { class: 'bui-select' }, [this.#control, glyph('chevron')]);
 	}
 
 	get element() {

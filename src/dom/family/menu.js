@@ -1,6 +1,6 @@
 import { Component } from '../core/component.js';
 import { el, content } from '../core/element.js';
-import { icon } from '../core/icons.js';
+import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { Disclosure } from '../disclosure.js';
 
@@ -29,7 +29,7 @@ export class NavigationMenu extends Component {
 	constructor({ label, name, sections, align = 'start', part = null, class: extra = '' }) {
 		super();
 		this.#disclosure = new Disclosure({
-			label: [].concat(label, icon('chevron')),
+			label: [].concat(label, glyph('chevron')),
 			name,
 			align,
 			class: `bui-navmenu ${extra}`.trim(),

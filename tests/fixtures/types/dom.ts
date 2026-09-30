@@ -1,5 +1,5 @@
 // A plain DOM consumer in TypeScript: compiled, never run, to check the `dom` and `tokens` declarations.
-import { Dialog, Picker, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Unavailable, Button, badge, availability, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor } from '@beyond-js/ui';
+import { Dialog, Picker, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Unavailable, Button, badge, availability, icon, icons, unlabeled, Preferences, type Appearance, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor } from '@beyond-js/ui';
 import { tokens, TokenSheet } from '@beyond-js/ui/tokens';
 
 declare const adapter: NotificationAdapter;
@@ -28,3 +28,12 @@ new ProductNav({ items: [{ label: 'Requests', href: '/requests', current: true }
 new Unavailable({ title: 'Not open to you yet', reason: 'By invitation.', owner: 'An owner', action: new Button({ label: 'Ask' }).element, kind: 'access', code: 'NOT_ADMITTED', level: 3 }).mount(document.body);
 const tags = availability.map(entry => badge(entry.label, entry.tone));
 void confirm({ title: 'Delete Storefront?', accept: 'Delete project', consequence: { lost: ['Entries'], kept: 'Records', recovery: 'None' } }).then(answer => answer && state && tags.length);
+// The icon catalog and Preferences (0.3.0).
+const glyphs: SVGSVGElement[] = [icon('close', { size: 16, label: 'Close' }), icon('pin'), ...icons.map(name => icon(name, { size: 24 }))];
+const bare: readonly string[] = unlabeled;
+const preferences = new Preferences({ key: 'beyond-projects', fallback: { appearance: 'light', locale: 'en' }, storage: null });
+preferences.restore();
+preferences.apply({ appearance: null, locale: 'es' });
+const release: () => void = preferences.subscribe(values => values.appearance === 'dark' && glyphs.length && bare.length);
+const appearance: Appearance = preferences.choose({ appearance: 'system' }).appearance;
+void [release, appearance, preferences.labels.everywhere, Preferences.labels.es.everywhere];

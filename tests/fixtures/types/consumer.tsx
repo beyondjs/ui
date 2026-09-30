@@ -1,10 +1,11 @@
 // A React consumer as Delegate writes one (TypeScript, bundler resolution, react-jsx). It is
 // compiled, never run: it proves the declarations of `@beyond-js/ui/react` accept real usage.
 import { useRef, useState } from 'react';
-import { Button, Dialog, Field, FocusedForm, Header, NotificationEntry, NotificationInbox, Picker, Collection, Help, Tooltip, ActionMenu, Select, Choices, useConfirm, useBusy, useToaster, FamilyBar, ProductNav, Unavailable, Badge, availability, type FamilyDescriptor, type NotificationAdapter, type NotificationEntryHandle, type PickerHandle } from '@beyond-js/ui/react';
+import { Button, Dialog, Field, FocusedForm, Header, NotificationEntry, NotificationInbox, Picker, Collection, Help, Tooltip, ActionMenu, Select, Choices, useConfirm, useBusy, useToaster, FamilyBar, ProductNav, Unavailable, Badge, availability, Icon, icons, Preferences, usePreferences, type FamilyDescriptor, type NotificationAdapter, type NotificationEntryHandle, type PickerHandle } from '@beyond-js/ui/react';
 
 declare const adapter: NotificationAdapter;
 type Row = { id: string; title: string; votes: number };
+const preferences = new Preferences({ key: 'beyond-delegate', fallback: { appearance: 'system', locale: 'en' } });
 
 export function Screen() {
 	const [open, setOpen] = useState(false);
@@ -14,6 +15,7 @@ export function Screen() {
 	const questions = useConfirm({ accept: 'Aceptar', cancel: 'Cancelar' });
 	const [busy, run] = useBusy();
 	const toaster = useToaster();
+	const { appearance, locale } = usePreferences(preferences);
 	return (
 		<>
 			<FamilyBar product="delegate" brand={{ src: '/wordmark.svg', href: '/' }} descriptor={null as FamilyDescriptor | null} fallback={{ project: 'Storefront', links: { account: '/account', home: '/projects/' } }} notifications={<NotificationEntry adapter={adapter} />} account={{ signout: () => undefined, items: [{ label: 'Atajos', onSelect: () => setOpen(true) }] }} onNavigate={item => item.href} labels={{ signout: 'Cerrar sesión' }} />
@@ -33,6 +35,8 @@ export function Screen() {
 			<NotificationInbox adapter={adapter} products={{ delegate: 'Delegate' }} onState={state => state.state} />
 			<Button label="Close notifications" onClick={() => (bell.current?.expanded ? bell.current.close() : bell.current?.open())} />
 			<Help topic="Identifier" text="Never changes." />
+			<Icon name="search" size={16} />
+			<Icon name={icons[0]} label={`${appearance} ${locale}`} />
 			<Tooltip text="Copies the address"><button type="button">Copy</button></Tooltip>
 			<ActionMenu name="More actions" items={[{ label: 'Rename', onSelect: () => setOpen(true) }, { label: 'Delete', disabled: true, reason: 'Owners only' }]} />
 			<Select options={[{ value: 'en', label: 'English' }]} value="en" onChange={event => event.target.value} />

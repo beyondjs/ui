@@ -1,6 +1,6 @@
 import { Component } from '../core/component.js';
 import { el, fill, content } from '../core/element.js';
-import { icon } from '../core/icons.js';
+import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { Interaction } from '../core/interaction.js';
 import { Labels } from '../core/labels.js';
@@ -78,7 +78,7 @@ export class Picker extends Component {
 			onkeydown: event => this.#keys(event)
 		});
 		this.#list = new ResultList({ id: `${id}-list`, label, multiple, input: this.#input, onchoose: index => this.#choose(this.#list.item(index)) });
-		this.#retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', hidden: true, onclick: () => this.#search.retry() }, [icon('refresh'), el('span', { text: this.#labels.text('retry') })]);
+		this.#retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', hidden: true, onclick: () => this.#search.retry() }, [glyph('refresh'), el('span', { text: this.#labels.text('retry') })]);
 		this.#more = el('button', { type: 'button', class: 'bui-button bui-button-quiet bui-button-small', hidden: true, onclick: () => this.#search.page() }, [el('span', { text: this.#labels.text('more') })]);
 		this.#all = multiple && all ? el('button', { type: 'button', class: 'bui-button bui-button-quiet bui-button-small bui-picker-all', hidden: true, onclick: () => this.#choose(...this.#open()) }, [el('span', { text: this.#labels.text('all') })]) : null;
 		this.#search = new Search({ source, limit, onchange: () => this.#render() });
@@ -86,7 +86,7 @@ export class Picker extends Component {
 			el('label', { for: `${id}-input`, class: 'bui-field-label' }, [content(label)]),
 			hint ? el('p', { id: `${id}-hint`, class: 'bui-field-hint' }, [content(hint)]) : null,
 			el('div', { class: 'bui-picker-chosen' }, [this.#count, this.#chips]),
-			el('div', { class: 'bui-picker-bar' }, [el('span', { class: 'bui-picker-search' }, [icon('search'), this.#input]), ...this.#filter(filters)]),
+			el('div', { class: 'bui-picker-bar' }, [el('span', { class: 'bui-picker-search' }, [glyph('search'), this.#input]), ...this.#filter(filters)]),
 			this.#list.element,
 			el('div', { class: 'bui-picker-foot' }, [this.#status, this.#retry, this.#all, this.#more]),
 			this.#inputs

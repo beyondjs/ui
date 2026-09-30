@@ -1,6 +1,6 @@
 import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
-import { icon } from './core/icons.js';
+import { Glyph } from './core/icons.js';
 import { Ids } from './core/ids.js';
 
 /**
@@ -54,7 +54,7 @@ export class ActionMenu extends Component {
 				onclick: () => (this.#open ? this.close(true) : this.open(0)),
 				onkeydown: event => this.#opener(event)
 			},
-			[glyph ? icon(glyph) : null, label ? el('span', {}, [content(label)]) : null]
+			[glyph ? new Glyph(glyph).element : null, label ? el('span', {}, [content(label)]) : null]
 		);
 		this.#list = el('ul', { id, class: `bui-menu bui-align-${align}`, role: 'menu', hidden: true, onkeydown: event => this.#keys(event) });
 		this.items = items;

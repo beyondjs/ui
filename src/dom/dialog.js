@@ -1,6 +1,6 @@
 import { Component } from './core/component.js';
 import { el, append, fill, content } from './core/element.js';
-import { icon } from './core/icons.js';
+import { glyph } from './core/icons.js';
 import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 import { Focus } from './core/focus.js';
@@ -60,7 +60,7 @@ export class Dialog extends Component {
 		this.#onclose = onclose;
 		const id = Ids.next('bui-dialog');
 		this.#heading = el('h2', { id: `${id}-title`, class: 'bui-dialog-title' }, [content(title)]);
-		this.#closer = el('button', { type: 'button', class: 'bui-icon-button', 'aria-label': this.#labels.text('close'), onclick: () => this.dismiss() }, [icon('close')]);
+		this.#closer = el('button', { type: 'button', class: 'bui-icon-button', 'aria-label': this.#labels.text('close'), onclick: () => this.dismiss() }, [glyph('close')]);
 		this.#body = el('div', { class: 'bui-dialog-body' }, children);
 		this.#footer = el('div', { class: 'bui-dialog-actions', hidden: !actions.length }, actions);
 		this.#element = el(

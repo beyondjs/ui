@@ -1,6 +1,6 @@
 import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
-import { icon } from './core/icons.js';
+import { glyph } from './core/icons.js';
 import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 
@@ -95,7 +95,7 @@ export class Field extends Component {
 		this.#shown = Boolean(message);
 		this.#element.classList.toggle('bui-field-invalid', this.#shown);
 		this.#error.hidden = !this.#shown;
-		this.#error.replaceChildren(...(this.#shown ? [icon('alert'), el('span', { text: message })] : []));
+		this.#error.replaceChildren(...(this.#shown ? [glyph('alert'), el('span', { text: message })] : []));
 		if (this.#shown) this.#control.setAttribute('aria-invalid', 'true');
 		else this.#control.removeAttribute('aria-invalid');
 		const described = [this.#hint?.id, this.#shown ? this.#error.id : null].filter(Boolean).join(' ');

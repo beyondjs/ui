@@ -1,5 +1,5 @@
 import React from 'react';
-import { paths } from '../dom/core/icons.js';
+import { Glyph } from '../dom/core/icons.js';
 import { h } from './hooks.js';
 
 const { useCallback, useRef, useState, useEffect } = React;
@@ -9,9 +9,22 @@ const { useCallback, useRef, useState, useEffect } = React;
  * `Icon`, `Button`, `Lockup`, `Status`, `Badge`, `Callout`, `Loading` and `Skeleton`, plus `useBusy`.
  */
 
-/** A decorative icon from the package catalog. */
-export function Icon({ name }) {
-	return h('svg', { viewBox: '0 0 24 24', className: 'bui-icon', 'aria-hidden': 'true', focusable: 'false' }, [].concat(paths[name] ?? []).map((d, index) => h('path', { key: index, d })));
+/**
+ * An icon of the catalog, as the DOM `icon` builds it: 16, 20 (default) or 24 px, decorative without
+ * `label` and an image of that name with it. An unknown name, another size or an empty label throws.
+ */
+export function Icon({ name, size = 20, label = null }) {
+	return svg(new Glyph(name, { size, label }));
+}
+
+/** The package's own glyph, sized by its component's stylesheet, as the DOM components draw it (internal to the adapter). */
+export function Mark({ name }) {
+	return svg(new Glyph(name));
+}
+
+function svg(glyph) {
+	const { class: className, ...attributes } = glyph.attributes;
+	return h('svg', { ...attributes, className }, glyph.paths.map((d, index) => h('path', { key: index, d })));
 }
 
 /**
@@ -22,7 +35,7 @@ export function Button({ label, children, variant = 'secondary', glyph = null, h
 	const className = `bui-button bui-button-${variant}${small ? ' bui-button-small' : ''}`;
 	const text = label ?? children;
 	const shown = busy && typeof text === 'string' ? (labels.busy ?? '{label}…').replace('{label}', text) : text;
-	const inner = [busy ? h('span', { key: 'mark', className: 'bui-spinner', 'aria-hidden': 'true' }) : glyph ? h(Icon, { key: 'mark', name: glyph }) : null, h('span', { key: 'text' }, shown)];
+	const inner = [busy ? h('span', { key: 'mark', className: 'bui-spinner', 'aria-hidden': 'true' }) : glyph ? h(Mark, { key: 'mark', name: glyph }) : null, h('span', { key: 'text' }, shown)];
 	if (href && !disabled) return h('a', { ...rest, className, href, onClick, 'aria-label': name }, inner);
 	return h(
 		'button',
@@ -88,7 +101,7 @@ export function Callout({ tone = 'info', title, body = null, actions = null, liv
 	return h(
 		'div',
 		{ className: `bui-callout bui-callout-${tone}`, role: live ? (tone === 'danger' ? 'alert' : 'status') : undefined },
-		h(Icon, { name: glyphs[tone] ?? 'info' }),
+		h(Mark, { name: glyphs[tone] ?? 'info' }),
 		h('div', { className: 'bui-callout-body' }, h('p', { className: 'bui-callout-title' }, title), body ? h('p', { className: 'bui-callout-text' }, body) : null, children, actions ? h('div', { className: 'bui-callout-actions' }, actions) : null)
 	);
 }
