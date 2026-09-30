@@ -1,0 +1,20 @@
+/*
+ * Icon sizes (decision D11): an icon built with a size (`icon(name, { size })`, React `<Icon size>`)
+ * is drawn at 16, 20 or 24 px. The stroke stays 1.8 on the 24 px grid, so it scales with the icon.
+ * The components' own glyphs carry no size and keep the size their component's stylesheet gives them.
+ */
+
+.bui-icon[data-size='16'] {
+	width: 16px;
+	height: 16px;
+}
+
+.bui-icon[data-size='20'] {
+	width: 20px;
+	height: 20px;
+}
+
+.bui-icon[data-size='24'] {
+	width: 24px;
+	height: 24px;
+}

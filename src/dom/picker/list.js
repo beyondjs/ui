@@ -1,5 +1,5 @@
 import { el, content } from '../core/element.js';
-import { icon } from '../core/icons.js';
+import { glyph } from '../core/icons.js';
 
 /**
  * The listbox of a picker's results and its active option.
@@ -97,7 +97,7 @@ export class ResultList {
 				'aria-disabled': item.disabled ? 'true' : null
 			},
 			[
-				el('span', { class: 'bui-option-mark', 'aria-hidden': 'true' }, [icon('check')]),
+				el('span', { class: 'bui-option-mark', 'aria-hidden': 'true' }, [glyph('check')]),
 				el('span', { class: 'bui-option-text' }, [
 					el('span', { class: 'bui-option-label' }, [content(item.label)]),
 					item.description ? el('span', { class: 'bui-option-description' }, [content(item.description)]) : null,

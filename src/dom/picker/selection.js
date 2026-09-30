@@ -1,6 +1,6 @@
 import { el, content } from '../core/element.js';
 import { badge } from '../feedback.js';
-import { icon } from '../core/icons.js';
+import { glyph } from '../core/icons.js';
 
 /**
  * The chosen items of a picker, kept by id independently of the results shown, so a choice
@@ -82,7 +82,7 @@ export class Selection {
 					class: 'bui-chip-remove',
 					'aria-label': labels.text('remove', { label: typeof item.label === 'string' ? item.label : item.id }),
 					onclick: () => onremove(item.id)
-				}, [icon('close')])
+				}, [glyph('close')])
 			])
 		);
 	}

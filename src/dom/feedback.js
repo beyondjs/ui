@@ -1,5 +1,5 @@
 import { el, content } from './core/element.js';
-import { icon } from './core/icons.js';
+import { glyph } from './core/icons.js';
 
 /**
  * Stateless feedback builders: status, badge, count, callout, loading and skeleton. Each returns a
@@ -28,7 +28,7 @@ export function badge(label, tone = 'neutral') {
  */
 export function callout({ tone = 'info', title, body = null, actions = [], live = false }) {
 	return el('div', { class: `bui-callout bui-callout-${tone}`, role: live ? (tone === 'danger' ? 'alert' : 'status') : null }, [
-		icon(glyphs[tone] ?? 'info'),
+		glyph(glyphs[tone] ?? 'info'),
 		el('div', { class: 'bui-callout-body' }, [
 			el('p', { class: 'bui-callout-title' }, [content(title)]),
 			body ? el('p', { class: 'bui-callout-text' }, [content(body)]) : null,

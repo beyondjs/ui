@@ -1,6 +1,6 @@
 import { Component } from '../core/component.js';
 import { el, fill } from '../core/element.js';
-import { icon } from '../core/icons.js';
+import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { Select } from '../select.js';
@@ -65,7 +65,7 @@ export class NotificationInbox extends Component {
 			value: this.#state.product,
 			onchange: value => this.#change({ product: value })
 		});
-		this.#everything = el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', hidden: true, onclick: () => this.#all() }, [icon('check'), el('span', { text: this.#labels.text('everything') })]);
+		this.#everything = el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', hidden: true, onclick: () => this.#all() }, [glyph('check'), el('span', { text: this.#labels.text('everything') })]);
 		this.#status = el('p', { class: 'bui-notify-status', role: 'status' });
 		this.#body = el('div', { class: 'bui-inbox-body' });
 		this.#more = el('button', { type: 'button', class: 'bui-button bui-button-quiet', hidden: true, onclick: () => this.#page() }, [this.#labels.text('more')]);
@@ -152,7 +152,7 @@ export class NotificationInbox extends Component {
 		if (feed.state === 'loading') return fill(this.#body, [loading(words.text('loading'))]);
 		if (feed.state === 'unavailable') return fill(this.#body, [callout({ tone: 'info', title: words.text('unavailable') })]);
 		if (feed.state === 'failed') {
-			const retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', onclick: () => this.#retry() }, [icon('refresh'), el('span', { text: words.text('retry') })]);
+			const retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', onclick: () => this.#retry() }, [glyph('refresh'), el('span', { text: words.text('retry') })]);
 			return fill(this.#body, [callout({ tone: 'danger', title: words.text('failure'), actions: [retry] })]);
 		}
 		// Items marked read stay listed until the next load, so "Mark as unread" can undo at once.

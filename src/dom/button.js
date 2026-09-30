@@ -1,6 +1,6 @@
 import { Component } from './core/component.js';
 import { el, fill, content } from './core/element.js';
-import { icon } from './core/icons.js';
+import { glyph } from './core/icons.js';
 import { Labels } from './core/labels.js';
 
 const defaults = { busy: '{label}…' };
@@ -114,7 +114,7 @@ export class Button extends Component {
 	#render() {
 		const text = this.#busy && typeof this.#label === 'string' ? this.#labels.text('busy', { label: this.#label }) : this.#label;
 		fill(this.#element, [
-			this.#busy ? el('span', { class: 'bui-spinner', 'aria-hidden': 'true' }) : this.#glyph ? icon(this.#glyph) : null,
+			this.#busy ? el('span', { class: 'bui-spinner', 'aria-hidden': 'true' }) : this.#glyph ? glyph(this.#glyph) : null,
 			el('span', {}, [content(text)])
 		]);
 	}

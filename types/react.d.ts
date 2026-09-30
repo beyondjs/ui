@@ -7,7 +7,13 @@ export { confirm, prompt, alert, availability } from './dom.js';
 export type { AvailabilityState, Consequence, FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, FamilyProduct, FamilyReason, ProductNavItem, UnavailableKind } from './dom.js';
 import type { FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, ProductNavItem, UnavailableKind } from './dom.js';
 
-export function Icon(props: { name: string }): ReactElement;
+/** An icon of the catalog: 16, 20 (default) or 24 px; decorative without `label`. */
+export function Icon(props: { name: IconName; size?: IconSize; label?: string | null }): ReactElement;
+export { icons, unlabeled, Preferences } from './dom.js';
+export type { IconName, IconSize, IconOptions, UnlabeledIconName, Appearance, PreferenceValues, PreferenceLabels, PreferencesOptions } from './dom.js';
+import type { IconName, IconSize, Preferences, PreferenceValues } from './dom.js';
+/** The values in effect of a `Preferences` instance, re-rendering after each change. */
+export function usePreferences(preferences: Preferences): PreferenceValues;
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'onClick'> {
 	label?: ReactNode;

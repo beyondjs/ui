@@ -1,6 +1,6 @@
 import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
-import { icon } from './core/icons.js';
+import { glyph } from './core/icons.js';
 import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 import { badge } from './feedback.js';
@@ -40,7 +40,7 @@ export class Unavailable extends Component {
 		const id = Ids.next('bui-unavailable');
 		const text = new Labels(defaults, labels);
 		this.#element = el('section', { class: `bui-unavailable bui-unavailable-${type}`, 'data-unavailable': type, 'aria-labelledby': id }, [
-			el('span', { class: 'bui-unavailable-icon' }, [icon(glyphs[type])]),
+			el('span', { class: 'bui-unavailable-icon' }, [glyph(glyphs[type])]),
 			el('div', { class: 'bui-unavailable-body' }, [
 				el(`h${Unavailable.level(level)}`, { id, class: 'bui-unavailable-title' }, [content(title)]),
 				el('p', { class: 'bui-unavailable-reason' }, [content(reason)]),

@@ -1,6 +1,6 @@
 import { Component } from '../core/component.js';
 import { el } from '../core/element.js';
-import { icon } from '../core/icons.js';
+import { glyph } from '../core/icons.js';
 import { NavigationMenu, entry } from './menu.js';
 
 /**
@@ -74,6 +74,6 @@ export class AccountMenu extends Component {
 			.slice(0, 2)
 			.map(word => word[0].toUpperCase())
 			.join('');
-		return el('span', { class: 'bui-family-avatar', 'aria-hidden': 'true' }, [initials || icon('user')]);
+		return el('span', { class: 'bui-family-avatar', 'aria-hidden': 'true' }, [initials || glyph('user')]);
 	}
 }

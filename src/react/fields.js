@@ -1,6 +1,6 @@
 import React from 'react';
 import { h } from './hooks.js';
-import { Icon } from './simple.js';
+import { Mark } from './simple.js';
 
 const { cloneElement, isValidElement, useId } = React;
 
@@ -32,7 +32,7 @@ export function Field({ label, hint = null, error = null, optional = false, labe
 		h('label', { htmlFor: target, className: 'bui-field-label' }, label, optional ? h('span', { className: 'bui-field-optional' }, ` ${labels.optional ?? '(optional)'}`) : null),
 		hint ? h('p', { id: `${id}-hint`, className: 'bui-field-hint' }, hint) : null,
 		control,
-		h('p', { id: `${id}-error`, className: 'bui-field-error', hidden: !error }, error ? [h(Icon, { key: 'icon', name: 'alert' }), h('span', { key: 'text' }, error)] : null)
+		h('p', { id: `${id}-error`, className: 'bui-field-error', hidden: !error }, error ? [h(Mark, { key: 'icon', name: 'alert' }), h('span', { key: 'text' }, error)] : null)
 	);
 }
 
@@ -42,7 +42,7 @@ export function Select({ options, className, ...rest }) {
 		item.options
 			? h('optgroup', { key: `group-${item.group}`, label: item.group }, item.options.map(option))
 			: h('option', { key: item.value, value: item.value, disabled: item.disabled }, item.label);
-	return h('span', { className: 'bui-select' }, h('select', { ...rest, className: `bui-select-control${className ? ` ${className}` : ''}` }, options.map(option)), h(Icon, { name: 'chevron' }));
+	return h('span', { className: 'bui-select' }, h('select', { ...rest, className: `bui-select-control${className ? ` ${className}` : ''}` }, options.map(option)), h(Mark, { name: 'chevron' }));
 }
 
 /**
@@ -77,6 +77,6 @@ export function Choices({ legend, type = 'checkbox', name, options, value, onCha
 				);
 			})
 		),
-		h('p', { id: `${id}-error`, className: 'bui-field-error', hidden: !error }, error ? [h(Icon, { key: 'icon', name: 'alert' }), h('span', { key: 'text' }, error)] : null)
+		h('p', { id: `${id}-error`, className: 'bui-field-error', hidden: !error }, error ? [h(Mark, { key: 'icon', name: 'alert' }), h('span', { key: 'text' }, error)] : null)
 	);
 }

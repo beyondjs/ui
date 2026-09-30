@@ -1,6 +1,6 @@
 import { Disclosure } from '../disclosure.js';
 import { el, fill } from '../core/element.js';
-import { icon } from '../core/icons.js';
+import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { callout, loading } from '../feedback.js';
@@ -54,7 +54,7 @@ export class NotificationEntry extends Disclosure {
 	constructor({ adapter, href = null, onopen = null, onview = null, products = {}, locale = undefined, limit = 6, interval = 0, labels = {} }) {
 		const words = new Labels(defaults, labels);
 		const badge = el('span', { class: 'bui-count', 'aria-hidden': 'true', hidden: true });
-		super({ label: [icon('bell'), badge], name: words.text('button', { count: null }), align: 'end', variant: 'bell', class: 'bui-notify', onchange: open => this.#toggled(open) });
+		super({ label: [glyph('bell'), badge], name: words.text('button', { count: null }), align: 'end', variant: 'bell', class: 'bui-notify', onchange: open => this.#toggled(open) });
 		this.#adapter = adapter;
 		this.#labels = words;
 		this.#badge = badge;

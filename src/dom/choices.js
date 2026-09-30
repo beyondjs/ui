@@ -1,6 +1,6 @@
 import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
-import { icon } from './core/icons.js';
+import { glyph } from './core/icons.js';
 import { Ids } from './core/ids.js';
 
 /**
@@ -81,7 +81,7 @@ export class Choices extends Component {
 	set error(message) {
 		this.#element.classList.toggle('bui-field-invalid', Boolean(message));
 		this.#error.hidden = !message;
-		this.#error.replaceChildren(...(message ? [icon('alert'), el('span', { text: message })] : []));
+		this.#error.replaceChildren(...(message ? [glyph('alert'), el('span', { text: message })] : []));
 		const described = [this.#hint?.id, message ? this.#error.id : null].filter(Boolean).join(' ');
 		if (described) this.#element.setAttribute('aria-describedby', described);
 		else this.#element.removeAttribute('aria-describedby');

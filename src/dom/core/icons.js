@@ -1,37 +1,80 @@
-/**
- * The package's outline icons, 24px paths with a 1.8px stroke (the family's icon convention).
- * Icons are decorative: every control that shows one also carries a visible label or an accessible
- * name. This file is a data catalog plus its one builder.
- */
-export const paths = {
-	chevron: 'M8 10l4 4 4-4',
-	check: 'M5 12.5l4.5 4.5L19 7.5',
-	close: ['M6 6l12 12', 'M18 6L6 18'],
-	search: ['M10.5 4a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13z', 'M15.5 15.5L20 20'],
-	menu: ['M4 7h16', 'M4 12h16', 'M4 17h16'],
-	alert: ['M12 4l9 16H3z', 'M12 10v4', 'M12 17v.5'],
-	info: ['M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z', 'M12 11v6', 'M12 7.5v.5'],
-	help: ['M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z', 'M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6', 'M12 17v.5'],
-	bell: ['M6 14.25v-5a6 6 0 0 1 12 0v5l1.5 2h-15z', 'M10 18.75a2 2 0 0 0 4 0'],
-	more: ['M6 12h.01', 'M12 12h.01', 'M18 12h.01'],
-	refresh: ['M19 7v4h-4', 'M18.4 11A7 7 0 1 0 17 16.5'],
-	user: ['M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8z', 'M4.5 20a7.5 7.5 0 0 1 15 0'],
-	book: ['M5 4.5h9.5a2.5 2.5 0 0 1 2.5 2.5v12.5H7.5A2.5 2.5 0 0 1 5 17z', 'M5 17a2.5 2.5 0 0 1 2.5-2.5H17'],
-	lock: ['M6 11h12v9H6z', 'M8.5 11V8a3.5 3.5 0 0 1 7 0v3'],
-	plug: ['M9 3v5', 'M15 3v5', 'M6.5 8h11v3a5.5 5.5 0 0 1-11 0z', 'M12 16.5V21']
-};
+import { paths, unlabeled } from './glyphs.js';
 
-/** An inline SVG icon, hidden from assistive technology. */
-export function icon(name) {
-	const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-	svg.setAttribute('viewBox', '0 0 24 24');
-	svg.setAttribute('class', 'bui-icon');
-	svg.setAttribute('aria-hidden', 'true');
-	svg.setAttribute('focusable', 'false');
-	for (const d of [].concat(paths[name] ?? [])) {
-		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-		path.setAttribute('d', d);
-		svg.append(path);
+export { paths, unlabeled };
+
+/** Every name of the icon catalog, in catalog order. */
+export const icons = Object.freeze(Object.keys(paths));
+
+/** The sizes an icon is drawn at, in CSS pixels. */
+export const sizes = Object.freeze([16, 20, 24]);
+
+/**
+ * One icon of the catalog: validates its name, size and label and describes its SVG element, which
+ * `element` builds for the DOM and the React adapter renders from `attributes` and `paths`.
+ *
+ * An icon without a label is decorative (`aria-hidden`); its control or its visible text names it.
+ * With a label it is an image with that accessible name (`role="img"`). A sized icon carries
+ * `data-size`, which the stylesheet draws at that size; an unsized one (the components' own glyphs)
+ * is drawn at the size its component's stylesheet gives it.
+ */
+export class Glyph {
+	#name;
+	#size;
+	#label;
+
+	/**
+	 * @param {string} name a name of `icons`
+	 * @param {{size?: 16|20|24|null, label?: string|null}} [options]
+	 */
+	constructor(name, { size = null, label = null } = {}) {
+		if (typeof name !== 'string' || !Object.hasOwn(paths, name)) throw new TypeError(`Unknown icon "${name}": use one of the names in \`icons\``);
+		if (size !== null && !sizes.includes(size)) throw new RangeError(`Icon size ${size} is not one of ${sizes.join(', ')}`);
+		if (label !== null && (typeof label !== 'string' || !label.trim())) throw new TypeError('An icon label is a non-empty string, or null for a decorative icon');
+		this.#name = name;
+		this.#size = size;
+		this.#label = label;
 	}
-	return svg;
+
+	get name() {
+		return this.#name;
+	}
+
+	/** The path data of the glyph. */
+	get paths() {
+		return [].concat(paths[this.#name]);
+	}
+
+	/** The attributes of the `<svg>` element, by their DOM names. */
+	get attributes() {
+		const sized = this.#size === null ? {} : { width: String(this.#size), height: String(this.#size), 'data-size': String(this.#size) };
+		const named = this.#label === null ? { 'aria-hidden': 'true' } : { role: 'img', 'aria-label': this.#label };
+		return { viewBox: '0 0 24 24', class: 'bui-icon', 'data-icon': this.#name, ...sized, ...named, focusable: 'false' };
+	}
+
+	/** A new `<svg>` element of the glyph. */
+	get element() {
+		const namespace = 'http://www.w3.org/2000/svg';
+		const svg = document.createElementNS(namespace, 'svg');
+		for (const [name, value] of Object.entries(this.attributes)) svg.setAttribute(name, value);
+		for (const d of this.paths) {
+			const path = document.createElementNS(namespace, 'path');
+			path.setAttribute('d', d);
+			svg.append(path);
+		}
+		return svg;
+	}
+}
+
+/**
+ * An icon of the catalog as an inline SVG element, 16, 20 (default) or 24 px. Without `label` it is
+ * hidden from assistive technology; with one it is an image of that name. An unknown name, a size
+ * outside 16/20/24 or an empty label throws.
+ */
+export function icon(name, { size = 20, label = null } = {}) {
+	return new Glyph(name, { size, label }).element;
+}
+
+/** The package's own decorative glyph, drawn at the size its component's stylesheet gives it. */
+export function glyph(name) {
+	return new Glyph(name).element;
 }
