@@ -176,6 +176,60 @@ export const checks = [
 		}
 	},
 	{
+		name: 'sentence case and the label size: tags, table headings, narrow-screen labels and menu headings show as written, at 12px and weight 500',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			// innerText follows text-transform, so capitals by style would show as a difference (D20).
+			const read = (page, selector, pseudo = null) =>
+				page.evaluate(([selector, pseudo]) => [...document.querySelectorAll(selector)].map(node => {
+					const style = getComputedStyle(node, pseudo);
+					return { shown: node.innerText, written: node.textContent, transform: style.textTransform, size: style.fontSize, weight: style.fontWeight, tracking: style.letterSpacing };
+				}), [selector, pseudo]);
+			const label = (found, what) => {
+				expect(found.length > 0, `${what}: present`);
+				for (const item of found) {
+					expect(item.transform === 'none' && (item.shown === null || item.shown === item.written), `${what} as written: ${JSON.stringify(item)}`);
+					expect(item.size === '12px' && item.weight === '500' && (item.tracking === 'normal' || parseFloat(item.tracking) <= 0.25), `${what} at 12px, 500, tracking at most 0.02em: ${JSON.stringify(item)}`);
+				}
+			};
+			const family = await browser.open(consumer, { file: 'family.html', query: '?family=inside' });
+			label(await read(family.page, '.bui-badge'), 'tags');
+			await family.page.locator('.bui-family-product .bui-navmenu-button').click();
+			label(await read(family.page, '.bui-navmenu-panel:not([hidden]) .bui-navmenu-heading'), 'menu headings');
+			await family.context.close();
+			const { page } = await browser.open(consumer);
+			await page.waitForFunction(() => document.querySelectorAll('#listing tbody tr').length > 0);
+			label(await read(page, '#listing thead th'), 'table headings');
+			const cell = await page.evaluate(() => getComputedStyle(document.querySelector('#listing tbody td')).fontWeight);
+			expect(cell === '400', `table text in Rubik 400: ${cell}`);
+			const narrow = await browser.open(consumer, { viewport: { width: 390, height: 800 } });
+			await narrow.page.waitForFunction(() => document.querySelectorAll('#listing tbody tr').length > 0);
+			const before = await read(narrow.page, '#listing tbody td[data-label]', '::before');
+			label(before.map(item => ({ ...item, shown: null })), 'narrow-screen labels');
+			await narrow.context.close();
+		}
+	},
+	{
+		name: 'Rubik from @beyond-js/ui/fonts.css: 300, 400 and 500 load from the installed package, latin-ext only when the text needs it',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			const { page } = await browser.open(consumer);
+			const found = await page.evaluate(async () => {
+				await document.fonts.ready;
+				const base = await Promise.all(['300', '400', '500'].map(weight => document.fonts.load(`${weight} 16px Rubik`, 'Beyond')));
+				const before = performance.getEntriesByType('resource').map(entry => entry.name).filter(name => /\.woff2$/.test(name));
+				await document.fonts.load('400 16px Rubik', 'Łódź');
+				const after = performance.getEntriesByType('resource').map(entry => entry.name).filter(name => /\.woff2$/.test(name));
+				return { loaded: base.map(list => list.length), before, after, family: getComputedStyle(document.body).fontFamily };
+			});
+			const names = list => list.map(name => name.split('/').at(-1)).sort();
+			expect(found.loaded.every(count => count >= 1), `each weight has a face: ${JSON.stringify(found)}`);
+			expect(['300', '400', '500'].every(weight => found.before.some(name => new RegExp(`rubik-latin-${weight}-normal`).test(name))), `latin files: ${names(found.before)}`);
+			expect(!found.before.some(name => /latin-ext/.test(name)) && found.after.some(name => /rubik-latin-ext-400-normal/.test(name)), `latin-ext on demand: ${names(found.after)}`);
+			expect(/Rubik/.test(found.family), `the page uses Rubik: ${found.family}`);
+		}
+	},
+	{
 		name: 'Spanish copy passed through labels reaches the components',
 		consumers: ['react19', 'react18'],
 		async run(browser, consumer) {

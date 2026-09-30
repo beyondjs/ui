@@ -3,6 +3,7 @@
 // browser checks switch and a teardown that destroys everything.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
+import '@beyond-js/ui/fonts.css';
 import { Header, NotificationEntry, NotificationInbox, Button, ActionMenu, Dialog, confirm, prompt, Picker, Collection, Help, Tooltip, Field, FocusedForm, Toaster, status } from '@beyond-js/ui';
 import { People, teams } from '../data/people.js';
 import { rows, states } from '../data/rows.js';

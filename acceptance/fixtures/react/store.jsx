@@ -5,6 +5,7 @@
 // closes it, and its field must keep what is typed.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
+import '@beyond-js/ui/fonts.css';
 import { StrictMode, useState, useSyncExternalStore, version } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Button, Dialog, Field } from '@beyond-js/ui/react';

@@ -30,6 +30,8 @@
 		"./tokens.css": "./dist/tokens.css",
 		"./tokens.json": "./dist/tokens.json",
 		"./styles.css": "./dist/styles.css",
+		"./fonts.css": "./fonts/fonts.css",
+		"./fonts/*": "./fonts/*",
 		"./package.json": "./package.json"
 	},
 	"files": [
@@ -37,7 +39,8 @@
 		"types/",
 		"dist/tokens.css",
 		"dist/tokens.json",
-		"dist/styles.css"
+		"dist/styles.css",
+		"fonts/"
 	],
 	"scripts": {
 		"build": "node tools/build.mjs",

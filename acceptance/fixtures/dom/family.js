@@ -3,6 +3,7 @@
 // a confirmation with its consequence. window.fixture exposes the bar, a log and a teardown.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
+import '@beyond-js/ui/fonts.css';
 import { FamilyBar, ProductNav, NotificationEntry, Unavailable, Button, confirm, lockup, badge, availability } from '@beyond-js/ui';
 import { Notices } from '../data/notices.js';
 import { chosen, descriptors, fallback, product } from '../data/family.js';

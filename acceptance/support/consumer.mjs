@@ -55,7 +55,7 @@ export class Consumer {
 		execFileSync('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error'], { cwd: this.#directory, stdio: 'pipe' });
 		// The React fixture has three pages: the full consumer, one under an external store and the family bar.
 		const entries = (this.#page === 'react' ? ['main.jsx', 'store.jsx', 'family.jsx'] : ['main.js', 'family.js']).map(file => join(this.#directory, 'fixtures', this.#page, file));
-		await build({ entryPoints: entries, bundle: true, format: 'esm', outdir: join(this.#directory, 'fixtures', this.#page, 'out'), jsx: 'automatic', define: { 'process.env.NODE_ENV': '"development"' }, logLevel: 'error', absWorkingDir: this.#directory });
+		await build({ entryPoints: entries, bundle: true, format: 'esm', outdir: join(this.#directory, 'fixtures', this.#page, 'out'), jsx: 'automatic', loader: { '.woff2': 'file' }, define: { 'process.env.NODE_ENV': '"development"' }, logLevel: 'error', absWorkingDir: this.#directory });
 		this.#server = await new Server(this.#directory).start();
 		return this;
 	}

@@ -58,6 +58,7 @@
 	min-width: 0;
 	color: var(--color-family-muted);
 	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
 }
 .bui-crumbs {
 	display: flex;
@@ -96,6 +97,7 @@
 	padding: 0 var(--space-2);
 	border-radius: var(--radius-control);
 	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
 }
 .bui-header-links a:hover {
 	background: var(--overlay-lift);
@@ -170,6 +172,7 @@
 .bui-notify-status {
 	margin: 0;
 	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
 	color: var(--color-text-muted);
 }
 .bui-notify-status:empty {
@@ -194,6 +197,7 @@
 	min-height: var(--bui-target);
 	color: var(--color-link);
 	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
 }
 
 /* The family lockup: the Beyond wordmark and the product name. The wordmark's letters fill only the

@@ -3,23 +3,29 @@
  *
  * Primitives marked `captured` are values of the verified capture of the public Beyond site
  * (2026-09-18), the same capture every product's `brand/tokens.css` copies. Primitives marked
- * `proposed` are new values the family reference introduced, each for a stated reason — mostly because a
- * captured value fails contrast for the role it would otherwise fill. Nothing proposed is approved
- * until the owner approves it in the family reference's decision register.
+ * `proposed` are values the family reference introduced, each for a stated reason — mostly because a
+ * captured value fails contrast for the role it would otherwise fill. `provenance` records where a
+ * value came from, not whether it is approved: the owner approved the whole palette and its roles on
+ * 2026-09-29 (decision D08, token set 0.2.0; see `tokens.approval`).
+ *
+ * The brand orange (decision D12) is coral-400, the wordmark's `#e46f4e`. On light backgrounds its
+ * text and fill variant is coral-600; on navy its text variant is coral-200. coral-500 is only the
+ * light accent and focus ring, never "the brand color". White text never sits on coral-400
+ * (3.14:1): the dark action puts navy on it.
  *
  * Semantic roles name what a color is for, never what it looks like. Products consume roles only;
  * a primitive is never referenced from a component.
  */
 export const primitives = {
-	'coral-500': { value: '#cb6245', provenance: 'captured', source: '--primary' },
-	'coral-600': { value: '#9e533e', provenance: 'captured', source: '--primary-dark' },
+	'coral-500': { value: '#cb6245', provenance: 'captured', source: '--primary', use: 'Only the light accent and focus ring; never named the brand color.' },
+	'coral-600': { value: '#9e533e', provenance: 'captured', source: '--primary-dark', use: 'The brand orange as text and fill on light backgrounds.' },
 	'coral-700': {
 		value: '#86442f',
 		provenance: 'proposed',
 		reason: 'Hover for the light filled action; darker than coral-600 so the hover never loses contrast.'
 	},
-	'coral-400': { value: '#e46f4e', provenance: 'captured', source: '--primary-light and the wordmark' },
-	'coral-200': { value: '#ffa385', provenance: 'captured', source: '--accent-color (dark)' },
+	'coral-400': { value: '#e46f4e', provenance: 'captured', source: '--primary-light and the wordmark', use: 'The brand orange (D12); navy text on it, never white (3.14:1).' },
+	'coral-200': { value: '#ffa385', provenance: 'captured', source: '--accent-color (dark)', use: 'The brand orange as text on navy.' },
 	'coral-50': {
 		value: '#fbeee9',
 		provenance: 'proposed',
@@ -43,6 +49,11 @@ export const primitives = {
 	'gray-50': { value: '#f5f5f5', provenance: 'captured', source: '--surface / --color-gray-5' },
 	'gray-100': { value: '#e4e4e4', provenance: 'captured', source: '--color-gray-10' },
 	'gray-200': { value: '#c8c8c8', provenance: 'captured', source: '--color-gray-20' },
+	'gray-500': {
+		value: '#767676',
+		provenance: 'proposed',
+		reason: 'Boundary of controls on white (4.54:1): gray-200 is 1.7:1, below the 3:1 a control boundary needs.'
+	},
 	'gray-600': { value: '#5f5f5f', provenance: 'captured', source: '--color-gray-70' },
 	'gray-700': { value: '#424242', provenance: 'captured', source: '--color-gray-80' },
 
@@ -84,6 +95,10 @@ export const primitives = {
 /**
  * Semantic roles per theme. Each role names a primitive.
  *
+ * `border` and `border-strong` separate content (dividers, in-page surfaces, tags); `border-control`
+ * is the boundary of inputs, selects, checkboxes, toggles and other controls, held to 3:1 because a
+ * person must see where a control is (WCAG 1.4.11).
+ *
  * `family-*` roles belong to the family bar, the one piece of chrome every product shares. It is
  * navy in both themes, which is also where the published wordmark reads best: its gray "JS" is
  * 2.55:1 on white but 6.45:1 on navy.
@@ -96,6 +111,7 @@ export const themes = {
 		'surface-selected': 'coral-50',
 		border: 'gray-100',
 		'border-strong': 'gray-200',
+		'border-control': 'gray-500',
 		text: 'navy-800',
 		'text-muted': 'gray-600',
 		'text-inverse': 'white',
@@ -129,6 +145,7 @@ export const themes = {
 		'surface-selected': 'coral-950',
 		border: 'navy-700',
 		'border-strong': 'navy-500',
+		'border-control': 'navy-300',
 		text: 'white',
 		'text-muted': 'slate-300',
 		'text-inverse': 'navy-900',
@@ -181,6 +198,8 @@ export const pairs = [
 	['focus', 'surface', 'graphic'],
 	['accent', 'canvas', 'graphic'],
 	['border-strong', 'canvas', 'decorative'],
+	['border-control', 'canvas', 'graphic'],
+	['border-control', 'surface', 'graphic'],
 	['success', 'success-surface', 'text'],
 	['success', 'surface', 'text'],
 	['warning', 'warning-surface', 'text'],
