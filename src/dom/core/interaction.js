@@ -14,6 +14,7 @@ const interactive = 'a[href], button, input, select, textarea, summary, [tabinde
 export class Interaction {
 	static #trackers = new WeakMap();
 	#last = null;
+	#keyboard = false;
 
 	constructor(view) {
 		const note = event => this.#note(event);
@@ -55,6 +56,11 @@ export class Interaction {
 		return Interaction.adrift(document) && Interaction.of(document)?.last === element;
 	}
 
+	/** Whether the last press or key was a key: focus that follows it was moved by the keyboard. */
+	get keyboard() {
+		return this.#keyboard;
+	}
+
 	/** The interactive element of the last press or key, while it is still in the page. */
 	get last() {
 		const element = this.#last?.deref() ?? null;
@@ -62,6 +68,7 @@ export class Interaction {
 	}
 
 	#note(event) {
+		this.#keyboard = event.type === 'keydown';
 		const element = event.target?.closest?.(interactive) ?? null;
 		this.#last = element ? new WeakRef(element) : null;
 	}

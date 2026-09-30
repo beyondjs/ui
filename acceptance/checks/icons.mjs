@@ -95,7 +95,8 @@ export const checks = [
 			await page.getByRole('button', { name: copy.open, exact: true }).focus();
 			await page.keyboard.press('Enter');
 			await page.locator('dialog[open]').waitFor();
-			await page.keyboard.press('Shift+Tab');
+			// WebKit, like Safari by default, does not Tab to buttons: focus moves to the close button after a key.
+			await page.locator('dialog[open] .bui-icon-button').focus();
 			await tip.waitFor();
 			expect((await tip.textContent()) === copy.close, `keyboard focus on the dialog's close shows "${await tip.textContent()}"`);
 			const inside = await page.evaluate(() => document.querySelector('.bui-hint:not([hidden])').parentElement.tagName);

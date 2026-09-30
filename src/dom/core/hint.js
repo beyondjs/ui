@@ -1,5 +1,6 @@
 import { Component } from './component.js';
 import { el } from './element.js';
+import { Interaction } from './interaction.js';
 
 /**
  * The visible name of a component's icon-only controls (decision D11): a glyph on the closed list
@@ -118,8 +119,12 @@ export class Hint extends Component {
 		this.#element.style.top = `${below ? box.bottom + margin : box.top - own.height - margin}px`;
 	}
 
-	/** Keyboard focus shows the hint; focus a page moves by code after a press does not. */
+	/**
+	 * Keyboard focus shows the hint; focus a page moves by code after a press does not. WebKit does not
+	 * match `:focus-visible` when a focus trap moves focus on Tab, so the last key counts too.
+	 */
 	static #visible(target) {
+		if (Interaction.of(target.ownerDocument)?.keyboard) return true;
 		try {
 			return target.matches(':focus-visible');
 		} catch {
