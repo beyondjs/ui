@@ -43,6 +43,7 @@
 	width: 100%;
 	border-collapse: collapse;
 	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
 }
 .bui-table th,
 .bui-table td {
@@ -57,7 +58,6 @@
 	font-size: var(--text-label);
 	font-weight: var(--weight-medium);
 	letter-spacing: var(--tracking-label);
-	text-transform: uppercase;
 	white-space: nowrap;
 }
 .bui-table tbody th {
@@ -110,6 +110,7 @@
 	margin: 0;
 	color: var(--color-text-muted);
 	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
 }
 
 @media (max-width: 640px) {
@@ -143,8 +144,8 @@
 		display: block;
 		color: var(--color-text-muted);
 		font-size: var(--text-label);
+		font-weight: var(--weight-medium);
 		letter-spacing: var(--tracking-label);
-		text-transform: uppercase;
 	}
 	.bui-table .bui-numeric {
 		text-align: left;

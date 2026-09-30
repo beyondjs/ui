@@ -9,7 +9,7 @@
 	padding: var(--space-2);
 	overflow-y: auto;
 	font-size: var(--text-small);
-	font-weight: var(--weight-light);
+	font-weight: var(--weight-regular);
 	line-height: var(--leading-small);
 }
 .bui-navmenu-heading {
@@ -19,12 +19,10 @@
 	font-size: var(--text-label);
 	font-weight: var(--weight-medium);
 	letter-spacing: var(--tracking-label);
-	text-transform: uppercase;
 }
 .bui-family-person {
 	display: grid;
 	letter-spacing: normal;
-	text-transform: none;
 }
 .bui-family-name {
 	color: var(--color-text);
@@ -80,7 +78,7 @@
 .bui-navmenu-meta {
 	color: var(--color-text-muted);
 	font-size: var(--text-label);
-	font-weight: var(--weight-light);
+	font-weight: var(--weight-regular);
 }
 .bui-navmenu-list > li:has(> .bui-family-docs-item),
 .bui-family-carried {

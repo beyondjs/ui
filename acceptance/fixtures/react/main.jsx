@@ -2,6 +2,7 @@
 // consumes it, with Spanish copy passed through `labels`. The same page runs on React 18 and 19.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
+import '@beyond-js/ui/fonts.css';
 import { StrictMode, useMemo, useRef, useState, version } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Header, NotificationEntry, NotificationInbox, Button, ActionMenu, Dialog, Picker, Collection, Help, Tooltip, Field, FocusedForm, Status, useConfirm, useToaster } from '@beyond-js/ui/react';

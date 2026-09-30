@@ -51,6 +51,7 @@
 .bui-notice-meta {
 	margin: 0;
 	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
 	overflow-wrap: anywhere;
 }
 .bui-notice-meta {

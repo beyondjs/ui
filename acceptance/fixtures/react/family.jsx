@@ -3,6 +3,7 @@
 // window.fixture.show(name) replaces the descriptor prop, as a product does when its relay answers.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
+import '@beyond-js/ui/fonts.css';
 import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { FamilyBar, ProductNav, NotificationEntry, Unavailable, Button, Badge, Lockup, useConfirm, availability } from '@beyond-js/ui/react';
