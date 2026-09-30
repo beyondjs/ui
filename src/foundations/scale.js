@@ -3,7 +3,9 @@
  *
  * Every entry carries its provenance. `captured` values come from the verified capture of the public
  * Beyond site; `proposed` values are introduced here for product interfaces, which the marketing
- * site never had to serve (dense tables, sidebars, dialogs).
+ * site never had to serve (dense tables, sidebars, dialogs). The owner approved the product type
+ * scale (D09, with weight 400 and the sentence-case label) and the elevation rule (D10, with the
+ * window levels) on 2026-09-29; `provenance` still records where each value came from.
  */
 export const typography = {
 	family: {
@@ -19,8 +21,13 @@ export const typography = {
 		}
 	},
 	weight: {
-		light: { value: 300, provenance: 'captured', source: 'Rubik 300, the body weight' },
-		medium: { value: 500, provenance: 'captured', source: 'Rubik 500, the heading weight' }
+		light: { value: 300, provenance: 'captured', source: 'Rubik 300, the body weight; only at body size and larger' },
+		regular: {
+			value: 400,
+			provenance: 'proposed',
+			reason: 'Text below body size (small, tables, reasons, hints): Rubik 300 thins out at 13 px and less (D09).'
+		},
+		medium: { value: 500, provenance: 'captured', source: 'Rubik 500, the heading weight; labels, buttons and names' }
 	},
 	// Product interfaces use a tighter scale than the marketing site (h1 2.7rem there).
 	size: {
@@ -41,11 +48,11 @@ export const typography = {
 		},
 		small: { value: '0.8125rem', line: 1.45, provenance: 'proposed', reason: 'Secondary facts and table metadata.' },
 		label: {
-			value: '0.6875rem',
+			value: '0.75rem',
 			line: 1.3,
-			tracking: '0.08em',
+			tracking: '0.02em',
 			provenance: 'proposed',
-			reason: 'Uppercase labels, echoing the captured `.t3` and `.pretitle`.'
+			reason: 'Labels (table headings, tags, menu headings) in sentence case, as written: told apart by weight 500 and the muted color, never by capitals; 12 px is the smallest text (D09, D20).'
 		}
 	}
 };
@@ -62,8 +69,11 @@ export const radius = {
 	round: { value: '999px', provenance: 'proposed', reason: 'Avatars, status dots and pills.' }
 };
 
-// The capture defines shadows but uses none: surfaces are flat and separated by 1px borders.
-// Elevation is kept for things that float above the page, and nothing else.
+// The capture defines shadows but uses none: surfaces are flat and separated by 1px borders (D10).
+// Only what overlaps other content casts a shadow: `menu` (menus, popovers, tooltips, toasts,
+// drawers), `dialog`, and `window` / `window-focus` (Desktop windows at rest and focused). Inset or
+// ring shadows that mark a state or draw focus are marks, not elevation. Surfaces inside the page
+// (cards, panels, tables, sections) are flat. An entry with `dark` takes that value in the dark theme.
 export const elevation = {
 	flat: { value: 'none', provenance: 'captured', source: 'Flat, border-defined surfaces' },
 	menu: { value: '0 8px 16px 0 rgba(0, 0, 0, .08), 0 4px 8px 0 rgba(0, 0, 0, .06)', provenance: 'captured', source: '--shadow-5' },
@@ -71,6 +81,18 @@ export const elevation = {
 		value: '0 32px 64px -4px rgba(0, 0, 0, .12), 0 12px 24px -2px rgba(0, 0, 0, .06)',
 		provenance: 'captured',
 		source: '--shadow-7'
+	},
+	window: {
+		value: '0 1px 2px rgba(18, 31, 54, .06), 0 8px 20px -12px rgba(18, 31, 54, .16)',
+		dark: '0 14px 30px -12px rgba(12, 21, 37, .9)',
+		provenance: 'proposed',
+		reason: 'A Desktop window at rest: the Desktop\'s --frame-shadow, resolved per theme (the text color at 6% and 16% on light; the sunken surface at 90% on dark).'
+	},
+	'window-focus': {
+		value: '0 2px 4px rgba(18, 31, 54, .06), 0 22px 44px -18px rgba(18, 31, 54, .28)',
+		dark: '0 30px 64px -16px rgba(12, 21, 37, .96)',
+		provenance: 'proposed',
+		reason: 'The focused Desktop window: the Desktop\'s --frame-shadow-focus, resolved per theme; a deeper, wider shadow says which window has focus.'
 	}
 };
 

@@ -10,14 +10,23 @@ import { typography, space, radius, elevation, overlay, motion, density, layout,
  * render its manual, check contrast and write its own sheet. It is plain data with no dependency on
  * a browser, a bundler or a UI framework, so any technology can consume it.
  *
- * The values moved here unchanged from the family reference; `provenance` records where from.
- * `status` stays `proposed`: moving the source approves no value. `version` identifies the token
- * set; a product review cites it together with the package version.
+ * The values moved here unchanged from the family reference at 0.1.0; `provenance` records where
+ * from. The owner approved the set on 2026-09-29 with one addition (`border-control`), weight 400,
+ * the sentence-case label and the window elevations: that is token set 0.2.0, `status: 'approved'`,
+ * and `approval` records the decisions. Each entry's own `provenance` still says whether its value
+ * was captured or introduced by the family reference. `version` identifies the token set; a product
+ * review cites it together with the package version.
  */
 export const tokens = {
-	version: '0.1.0',
-	status: 'proposed',
-	source: 'Verified capture of the public Beyond site, 2026-09-18, with proposed additions',
+	version: '0.2.0',
+	status: 'approved',
+	source: 'Verified capture of the public Beyond site, 2026-09-18, with the family reference\'s additions',
+	approval: {
+		date: '2026-09-29',
+		by: 'owner',
+		decisions: ['D08', 'D09', 'D10', 'D12', 'D20'],
+		note: 'Approved in the Beyond family reference\'s decision register: the palette and roles with border-control (D08), the product type scale with weight 400 and a 0.75rem sentence-case label (D09, D20), flat surfaces with the window elevations (D10) and the brand orange\'s roles (D12).'
+	},
 	attribute: 'data-beyond-mode',
 	provenance: {
 		origin: 'branding/src/foundations',

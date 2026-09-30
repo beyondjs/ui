@@ -39,7 +39,7 @@ test('every exported class carries a doc comment', () => {
 
 test('versioned content carries no machine-specific path', () => {
 	const text = walk(root)
-		.filter(path => !/node_modules|[\\/]\.git[\\/]|[\\/]dist[\\/]|[\\/]dist-pack[\\/]|package-lock|\.tgz$/.test(path))
+		.filter(path => !/node_modules|[\\/]\.git([\\/]|$)|[\\/]dist[\\/]|[\\/]dist-pack[\\/]|package-lock|\.tgz$/.test(path))
 		.map(path => readFileSync(path, 'utf8'))
 		.join('\n');
 	const machine = new RegExp(['/Us' + 'ers/', '/ho' + 'me/[a-z]', '/priv' + 'ate/tmp', 'C:\\\\\\\\Us' + 'ers'].join('|'));

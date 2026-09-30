@@ -1,6 +1,7 @@
 /** Types of `@beyond-js/ui/tokens`: the canonical Beyond design tokens. */
 export type Provenance = { provenance: 'captured'; source: string } | { provenance: 'proposed'; reason: string };
-export type Primitive = { value: string } & Provenance;
+/** `use` states a primitive's role where its use is restricted (the brand orange and its variants). */
+export type Primitive = { value: string; use?: string } & Provenance;
 export type Pair = [foreground: string, background: string, kind: 'text' | 'graphic' | 'decorative'];
 
 export interface Tokens {
@@ -8,16 +9,18 @@ export interface Tokens {
 	status: 'proposed' | 'approved';
 	source: string;
 	attribute: 'data-beyond-mode';
+	approval?: { date: string; by: string; decisions: string[]; note: string };
 	provenance: { origin: string; revision: string; moved: string; note: string };
 	color: { primitives: Record<string, Primitive>; themes: { light: Record<string, string>; dark: Record<string, string> }; pairs: Pair[] };
 	typography: {
 		family: Record<'sans' | 'mono', { value: string; provenance: string }>;
-		weight: Record<'light' | 'medium', { value: number; provenance: string }>;
+		weight: Record<'light' | 'regular' | 'medium', { value: number; provenance: string }>;
 		size: Record<string, { value: string; line: number; tracking?: string; provenance: string }>;
 	};
 	space: { provenance: string; reason: string; steps: Record<string, string> };
 	radius: Record<string, { value: string; provenance: string }>;
-	elevation: Record<string, { value: string; provenance: string }>;
+	/** `dark`, when present, is the value in the dark theme (the window levels). */
+	elevation: Record<string, { value: string; dark?: string; provenance: string }>;
 	overlay: Record<string, { value: string; provenance: string }>;
 	motion: Record<string, { value: string; provenance: string }>;
 	density: Record<string, { control: string; row: string; provenance: string }>;
