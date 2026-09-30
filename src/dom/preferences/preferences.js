@@ -7,7 +7,10 @@ const appearances = Object.freeze(['system', 'light', 'dark']);
  *
  * Accounts holds the person's choice; the product applies it on arrival, when it learns who the
  * person is (`apply`), and keeps a copy on this device for the next first paint (`restore`). A change
- * made inside the product applies on this device only (`choose`) until the next arrival; the product
+ * made inside the product applies on this device only (`choose`) and lasts until the account's values
+ * change: every arrival passes them to `apply`, which overrides the device choice only when they
+ * differ from the account values it last applied on this device (the first arrival here, another
+ * person, or a change made at Accounts). A reload therefore keeps the device choice. The product
  * offers "Change for all of Beyond" (`labels.everywhere`), a link to the Accounts account page,
  * because a product never writes the account setting.
  *
@@ -30,6 +33,7 @@ export class Preferences {
 	#locales;
 	#root;
 	#chosen = { appearance: null, locale: null };
+	#account = null;
 	#current;
 	#listeners = new Set();
 
@@ -81,21 +85,27 @@ export class Preferences {
 	restore() {
 		const saved = this.#store.read();
 		this.#chosen = { appearance: this.#appearance(saved?.appearance), locale: this.#locale(saved?.locale) };
+		this.#account = saved?.account ?? null;
 		return this.#update();
 	}
 
 	/**
-	 * Arrival: the account's values win and become the device copy. A missing, `null` or unknown
-	 * appearance is unset (the product's default applies); a language the product is not localized in
-	 * leaves its default.
+	 * Arrival: the account's values win and become the device copy, unless they are the values this
+	 * device last applied, in which case a choice made here since then stays. A missing, `null` or
+	 * unknown appearance is unset (the product's default applies); a language the product is not
+	 * localized in leaves its default.
 	 */
 	apply({ appearance = null, locale = null } = {}) {
-		this.#chosen = { appearance: this.#appearance(appearance), locale: this.#locale(locale) };
-		this.#store.write(this.#chosen);
+		const account = { appearance: this.#appearance(appearance), locale: this.#locale(locale) };
+		if (!this.#account) this.#account = this.#store.read()?.account ?? null;
+		const known = this.#account?.appearance === account.appearance && this.#account?.locale === account.locale;
+		if (!known) this.#chosen = account;
+		this.#account = account;
+		this.#store.write(this.#chosen, account);
 		return this.#update();
 	}
 
-	/** A change made in the product: this device only, until the next arrival. Only the given values change. */
+	/** A change made in the product: this device only, until the account's values change. Only the given values change. */
 	choose(values = {}) {
 		const next = { ...this.#chosen };
 		if ('appearance' in values) {
@@ -107,7 +117,7 @@ export class Preferences {
 			next.locale = values.locale;
 		}
 		this.#chosen = next;
-		this.#store.write(next);
+		this.#store.write(next, this.#account);
 		return this.#update();
 	}
 

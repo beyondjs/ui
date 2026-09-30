@@ -106,7 +106,7 @@ export const checks = [
 		}
 	},
 	{
-		name: 'preferences: first paint from the device copy, a device choice survives a reload, the account wins, blocked storage still works',
+		name: 'preferences: first paint from the device copy, a device choice survives a reload, changed account values win, blocked storage still works',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const { page, context } = await browser.open(consumer, { file: 'icons.html' });
@@ -123,7 +123,16 @@ export const checks = [
 			await page.getByText('Cambiar en todo Beyond').waitFor();
 			expect(JSON.stringify((await mode()).slice(0, 2)) === JSON.stringify(['light', 'es']), `an unset account appearance keeps the product default: ${await mode()}`);
 			const saved = await page.evaluate(() => localStorage.getItem('ui-acceptance'));
-			expect(saved === JSON.stringify({ appearance: null, locale: 'es' }), `the device copy holds only the two values: ${saved}`);
+			expect(
+				saved === JSON.stringify({ appearance: null, locale: 'es', account: { appearance: null, locale: 'es' } }),
+				`the device copy holds only the two values and the account's two: ${saved}`
+			);
+			await page.getByRole('button', { name: 'Oscuro' }).click();
+			await page.waitForFunction(() => document.documentElement.getAttribute('data-beyond-mode') === 'dark');
+			await page.reload();
+			await page.waitForFunction(() => window.fixture?.ready);
+			await page.evaluate(() => window.fixture.arrive({ appearance: null, locale: 'es', id: 'acc_1' }));
+			expect((await mode())[0] === 'dark', 'an arrival with unchanged account values keeps the device choice after a reload');
 			await page.evaluate(() => window.fixture.arrive({ appearance: 'system', locale: 'en' }));
 			expect((await mode())[0] === null, 'system removes data-beyond-mode');
 			await context.addInitScript(() => Object.defineProperty(window, 'localStorage', { get: () => { throw new DOMException('blocked', 'SecurityError'); } }));

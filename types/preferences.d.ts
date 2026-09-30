@@ -29,7 +29,7 @@ export interface PreferencesOptions {
 	root?: Element;
 }
 
-/** A person's language and appearance in one product: the account's values on arrival, a device choice in between. */
+/** A person's language and appearance in one product: the account's values on arrival when they changed, a device choice in between. */
 export class Preferences {
 	static readonly labels: { readonly en: PreferenceLabels; readonly es: PreferenceLabels };
 	static readonly appearances: readonly Appearance[];

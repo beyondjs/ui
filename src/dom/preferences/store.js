@@ -1,6 +1,7 @@
 /**
- * The device copy of a person's preferences: `{ appearance, locale }` as JSON under one key, and
- * nothing else. Storage may be missing, full or refuse access (a private window, blocked site data):
+ * The device copy of a person's preferences: the values in effect on this device, `{ appearance,
+ * locale }`, and the account's values last applied here (`account`, the same two fields), as JSON
+ * under one key, and nothing else: never an account identifier. Storage may be missing, full or refuse access (a private window, blocked site data):
  * every access is guarded, a failed read answers nothing, and a failed write is skipped.
  */
 export class Store {
@@ -16,23 +17,33 @@ export class Store {
 		this.#storage = storage === undefined ? Store.#local() : storage;
 	}
 
-	/** The saved `{ appearance, locale }`, or null when there is none or it cannot be read. */
+	/**
+	 * The saved `{ appearance, locale, account }`, or null when there is none or it cannot be read.
+	 * `account` is null in a copy written before the account's values were remembered.
+	 */
 	read() {
 		try {
 			const saved = JSON.parse(this.#storage?.getItem(this.#key) ?? 'null');
-			return saved && typeof saved === 'object' ? { appearance: saved.appearance ?? null, locale: saved.locale ?? null } : null;
+			if (!saved || typeof saved !== 'object') return null;
+			const account = saved.account && typeof saved.account === 'object' ? Store.#pair(saved.account) : null;
+			return { ...Store.#pair(saved), account };
 		} catch {
 			return null;
 		}
 	}
 
-	/** Saves the two values; nothing else is ever written. */
-	write({ appearance, locale }) {
+	/** Saves the values in effect and the account's values last applied; nothing else is ever written. */
+	write({ appearance, locale }, account = null) {
 		try {
-			this.#storage?.setItem(this.#key, JSON.stringify({ appearance, locale }));
+			const copy = { appearance, locale, account: account ? Store.#pair(account) : null };
+			this.#storage?.setItem(this.#key, JSON.stringify(copy));
 		} catch {
 			// Storage refused: the values stay in effect for this page only.
 		}
+	}
+
+	static #pair({ appearance = null, locale = null }) {
+		return { appearance: appearance ?? null, locale: locale ?? null };
 	}
 
 	static #local() {

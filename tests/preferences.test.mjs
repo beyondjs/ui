@@ -41,13 +41,13 @@ test('system removes the attribute; a corrupt or foreign device copy falls back'
 	assert.deepEqual({ ...make({ storage: shelf }).restore() }, { appearance: 'light', locale: 'en' });
 });
 
-test('apply: the account wins and becomes the device copy, holding only the two values', () => {
+test('apply: the account wins and becomes the device copy, holding only the two values and the account\'s two', () => {
 	const shelf = new Shelf();
 	const preferences = make({ storage: shelf });
 	preferences.restore();
 	preferences.apply({ appearance: 'dark', locale: 'es', account: 'acc_123', email: 'ana@example.test' });
 	assert.deepEqual([preferences.appearance, preferences.locale], ['dark', 'es']);
-	assert.deepEqual(JSON.parse(shelf.getItem('beyond-projects')), { appearance: 'dark', locale: 'es' });
+	assert.deepEqual(JSON.parse(shelf.getItem('beyond-projects')), { appearance: 'dark', locale: 'es', account: { appearance: 'dark', locale: 'es' } });
 	assert.deepEqual(shelf.keys, ['beyond-projects'], 'nothing else is written');
 	assert.doesNotMatch(shelf.getItem('beyond-projects'), /acc_|example/);
 });
@@ -84,13 +84,28 @@ test('choose: a device-only change of the given values; invalid choices throw', 
 	preferences.apply({ appearance: 'dark', locale: 'es' });
 	preferences.choose({ appearance: 'system' });
 	assert.deepEqual([preferences.appearance, preferences.locale], ['system', 'es']);
-	assert.deepEqual(JSON.parse(shelf.getItem('beyond-projects')), { appearance: 'system', locale: 'es' });
+	assert.deepEqual(JSON.parse(shelf.getItem('beyond-projects')), { appearance: 'system', locale: 'es', account: { appearance: 'dark', locale: 'es' } });
 	assert.throws(() => preferences.choose({ appearance: null }), TypeError);
 	assert.throws(() => preferences.choose({ appearance: 'sepia' }), TypeError);
 	assert.throws(() => preferences.choose({ locale: 'fr' }), TypeError);
 	assert.equal(preferences.appearance, 'system', 'a refused choice changes nothing');
+	preferences.apply({ appearance: 'dark', locale: 'es' });
+	assert.deepEqual([preferences.appearance, preferences.locale], ['system', 'es'], 'an arrival with the same account values keeps the device choice');
+	const reloaded = make({ storage: shelf });
+	reloaded.restore();
+	reloaded.apply({ appearance: 'dark', locale: 'es' });
+	assert.equal(reloaded.appearance, 'system', 'a reload keeps the device choice too');
 	preferences.apply({ appearance: 'light', locale: 'en' });
-	assert.deepEqual([preferences.appearance, preferences.locale], ['light', 'en'], 'the next arrival wins over the device choice');
+	assert.deepEqual([preferences.appearance, preferences.locale], ['light', 'en'], 'account values that changed win over the device choice');
+});
+
+test('apply: a device copy written before the account values were remembered is overridden once', () => {
+	const shelf = new Shelf();
+	shelf.setItem('beyond-projects', JSON.stringify({ appearance: 'dark', locale: 'en' }));
+	const preferences = make({ storage: shelf });
+	preferences.restore();
+	preferences.apply({ appearance: 'light', locale: 'es' });
+	assert.deepEqual([preferences.appearance, preferences.locale], ['light', 'es']);
 });
 
 test('works without storage and when storage refuses access', () => {
@@ -106,7 +121,7 @@ test('works without storage and when storage refuses access', () => {
 	const defaulted = new Preferences({ key: 'beyond-desktop', fallback: { appearance: 'light', locale: 'en' } });
 	assert.deepEqual({ ...defaulted.restore() }, { appearance: 'light', locale: 'en' });
 	defaulted.choose({ appearance: 'dark' });
-	assert.deepEqual(JSON.parse(window.localStorage.getItem('beyond-desktop')), { appearance: 'dark', locale: null }, 'the page\'s localStorage by default; null is a value never chosen');
+	assert.deepEqual(JSON.parse(window.localStorage.getItem('beyond-desktop')), { appearance: 'dark', locale: null, account: null }, 'the page\'s localStorage by default; null is a value never chosen');
 	window.localStorage.removeItem('beyond-desktop');
 });
 
