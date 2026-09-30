@@ -185,6 +185,8 @@ export class Collection extends Component {
 
 	#paging({ rows, total, more, pages, limit }) {
 		const page = this.#state.page;
+		// Nothing to count: the empty state says why, and a range such as "1–0 of 0" would contradict it
+		if (!rows.length && page === 1 && !more) return fill(this.#pager, []), '';
 		const first = (page - 1) * limit + 1;
 		const summary = total !== null ? this.#labels.text('range', { first, last: first + rows.length - 1, total }) : this.#labels.text('page', { page });
 		const button = (text, target, enabled) =>

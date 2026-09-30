@@ -85,6 +85,7 @@ test('an empty collection invites its first action; a failure offers retry and r
 	const empty = new Collection({ label: 'Requests', columns, source: async () => ({ rows: [], total: 0 }), empty: { title: 'No requests yet', body: 'Requests you submit appear here.', action } }).mount(document.body);
 	await settle(empty);
 	assert.match(empty.element.textContent, /No requests yet.*Requests you submit appear here.*New request/);
+	assert.equal(empty.element.querySelector('.bui-pager').textContent, '', 'an empty list shows no range such as "1–0 of 0"');
 	let fail = true;
 	const failing = new Collection({ label: 'Requests', columns, source: async request => { if (fail) throw new Error('down'); return Collection.local(rows)(request); }, explain: () => 'Requests are unavailable.' }).mount(document.body);
 	await settle(failing);
