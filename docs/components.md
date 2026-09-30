@@ -143,3 +143,66 @@ React `NotificationEntry` takes `onOpen`, `onView` and the same options as props
 **Adapter.** Both take `{ summary(), list({ state, product, cursor, limit }), read(ids | { before, product }), unread(ids), open(id) }`, shaped after `beyond-notifications/1` as the product's relay answers: `summary` → `{ unread, more?, sources?, unavailable?, available? }`; `list` → `{ items, next, sources?, unavailable?, available? }` with items `{ id, product, title, summary?, occurred, read, group? }`; `open` → `{ destination }` or a rejection with `code: 'NOT_FOUND'`. `available: false` means the aggregation is absent or unreachable. Beyond Projects answers `{ unread (0–99), more, sources: [{ product, state }] }`: `more: true` means its count stopped at the scan bound, and a source with `state: 'unavailable'` is a product whose items are hidden because it did not answer (the partial signal, in a summary and in a list page alike). A product relay may instead name those products in `unavailable` (ids); both shapes are read, together if both are present. Marking read never performs a business action.
 
 **Notification copy.** Both take `labels` (EN defaults; products pass ES or any language). Entries added or changed in 0.1.1: `button({ count, more })`, the bell's accessible name (`more` is true for a bounded count); `badge({ count, more })`, the visible count (default "N+" with `more`, "99+" past 99 without it); `partial({ products })`, where `products` is now the display names joined by ", ".
+
+## Icons
+
+**Icon catalog** (DOM `icon`, `icons`, `unlabeled`; React `Icon`, `icons`, `unlabeled`; since 0.3.0, decision D11). The family's one outline set: 53 glyphs on a 24 px grid drawn with one 1.8 px round stroke in the current text color (`src/dom/core/glyphs.js`). It merges the package's first glyphs, the family reference's set, Workspace's client set (redrawn from its 1.7 stroke), the Desktop's window controls and CDN's step markers, with duplicates removed. New glyphs may be drawn on the Lucide grid (ISC licence).
+
+| Group | Names |
+| --- | --- |
+| Direction and navigation | `chevron` (down: the disclosure chevron), `right`, `left`, `back` (arrow), `external`, `home`, `menu`, `more` |
+| Actions | `check`, `close`, `plus`, `minus`, `search`, `refresh`, `play`, `stop`, `send`, `merge` |
+| Window controls | `pin`, `minimize`, `maximize`, `restore` (with `close`) |
+| States and notices | `alert`, `exclamation`, `info`, `help`, `bell`, `lock`, `shield`, `key`, `clock`, `eye`, `star` |
+| People and places | `user`, `people`, `building`, `globe`, `chat` |
+| Things and work | `folder`, `archive`, `book`, `code`, `branch`, `camera`, `graph`, `box`, `layers`, `grid`, `window`, `rocket`, `plug`, `coins`, `flask` |
+
+```js
+import { icon, icons, unlabeled } from '@beyond-js/ui';
+button.append(icon('plus'), label);                       // 20 px, decorative (aria-hidden)
+status.append(icon('alert', { size: 16 }));               // 16, 20 or 24 px
+figure.append(icon('bell', { size: 24, label: 'Notifications' })); // role="img" with that name
+```
+
+React: `<Icon name="plus" />`, `<Icon name="alert" size={16} />`, `<Icon name="bell" size={24} label="Notifications" />`. Both render the same `<svg class="bui-icon" viewBox="0 0 24 24" data-icon="…" data-size="…" width height focusable="false">`: without `label` it carries `aria-hidden="true"`, with one `role="img"` and `aria-label`. `.bui-icon[data-size]` in the stylesheet draws it at its size; the stroke scales with it. An unknown name throws a `TypeError` naming it, a size other than 16, 20 or 24 a `RangeError`, and an empty label a `TypeError`. Types: `IconName`, `IconSize`, `IconOptions`, `UnlabeledIconName`.
+
+The components draw the same glyphs unsized, at the size their stylesheet gives them (18 px in buttons, fields and menus), so their look is unchanged. Their `glyph` options (`Button`, `ActionMenu`) take catalog names and now throw on an unknown one instead of drawing an empty icon.
+
+**A visible label, except for a closed list.** An icon comes with a visible label. Only these glyphs may stand alone on a control, which then carries an accessible name and a tooltip that shows the name, and its shortcut when there is one (`Tooltip`): `close`, `menu`, `more`, `search`, `bell` (notifications), `chevron` (disclosure) and the window controls `pin`, `minimize`, `maximize` and `restore`. The list is exported as `unlabeled`. Toolbars of tools or views always show labels. A product that shows another glyph alone has a defect to correct, not an exception to add.
+
+The package's own icon-only controls all carry an accessible name, and `tests/icons.test.mjs` and the acceptance's `checks/icons.mjs` fail any that has none or that shows a glyph outside the list. Three cases in the package are on record for the owner rather than corrected: `Help`'s question-mark button (named "Help: {topic}"), the family bar's account avatar before a name is known (`user`, named "Account") and the family bar's Docs link, whose label the stylesheet hides between 480 and 719 px (`book`, named "Docs" since 0.3.0). The package's icon-only controls (dialog close, toast dismiss, chip remove, header toggle) carry their names but no tooltip yet.
+
+**Earlier names.** A product moving to the catalog maps its own names: the family reference's names are unchanged, except that its `book` is drawn as the package's; Workspace's client set maps `files` → `folder`, `review` → `merge`, `preview` → `window`, `diagnostics` → `alert`, `inspect` → `box`, `captures` → `archive`, `talk` → `chat`, `caret` → `right`, `down` → `chevron`, `back` (a chevron) → `left`, and keeps `close`, `plus`, `refresh`, `star`, `send`, `stop`, `more` and `code`; the Desktop's CSS-drawn window glyphs become `pin`, `minimize`, `maximize` and `restore`; CDN's step markers become `check`, `close`, `exclamation` and `minus`.
+
+## Preferences
+
+**Preferences** (DOM `Preferences`, React `Preferences` and `usePreferences`; since 0.3.0, decision D07). A person's language (`en`, `es`) and appearance (`system`, `light`, `dark`) in one product. Accounts holds the person's choice; the product applies it when it learns who the person is and keeps a device copy for the next first paint. A change made inside the product applies on this device only, until the next arrival; the product offers "Change for all of Beyond", a link to the Accounts account page, and never writes the account setting. Motion and density stay per device and are not part of it.
+
+```js
+import { Preferences } from '@beyond-js/ui';
+const preferences = new Preferences({ key: 'beyond-projects', fallback: { appearance: 'light', locale: 'en' } });
+preferences.restore();                                      // first paint, before rendering: the device copy or the fallback
+preferences.apply({ appearance: identity.appearance, locale: identity.locale }); // on arrival: the account wins
+preferences.choose({ appearance: 'dark' });                 // a change made in the product: this device only
+preferences.appearance; preferences.locale; preferences.current; // 'dark', 'en', a frozen { appearance, locale }
+const release = preferences.subscribe(({ appearance, locale }) => render()); // returns the release
+link.textContent = preferences.labels.everywhere;           // "Change for all of Beyond" / "Cambiar en todo Beyond"
+```
+
+- **Options.** `key`: the device copy's storage key, one per product. `fallback: { appearance, locale }`: the product's defaults (the Desktop's appearance is `light`). `locales` (default `['en', 'es']`): the languages the product is localized in; an English-only product passes `['en']` and stays English whatever the account says. `storage` (default `localStorage`; `null` stores nothing) and `root` (default `<html>`) exist for tests and embedded surfaces.
+- **Effect.** Every call sets `data-beyond-mode` on the root to `light` or `dark`, removes it for `system` (the stylesheet then follows the system preference), and sets `lang` to the language. Each returns the frozen `current`.
+- **`apply(values)`.** The account's values win and become the device copy. A missing, `null` or unknown appearance is unset: the product's default applies, even over an earlier device choice. The earlier account default `system` is accepted as a choice. A language outside `locales` leaves the product's default. Fields other than the two are ignored and never stored.
+- **`choose(values)`.** Changes only the values given, on this device; an appearance or language outside the lists throws a `TypeError` and changes nothing.
+- **Device copy.** JSON `{ appearance, locale }` under `key`, where `null` is a value never chosen; never an account identifier. Every storage access is guarded: when storage is missing, full or refused (a private window, blocked site data), the values last until the page closes.
+- **`subscribe(listener)`.** Calls the listener with `current` after each change of the values in effect (not when a call changes nothing) and returns the release; it may be passed detached. A throwing listener does not stop the others; its error goes to `reportError`.
+- **Copy.** `Preferences.labels.en` and `.es`: `everywhere` ("Change for all of Beyond", "Cambiar en todo Beyond"), `appearance` ("Appearance", "Apariencia"), `system` ("System", "Sistema"), `light` ("Light", "Claro"), `dark` ("Dark", "Oscuro"), `language` ("Language", "Idioma"); `preferences.labels` is the set of the language in effect. `Preferences.appearances` lists the three appearances.
+- **React.** Create the instance once outside React and call `restore()` before the first render; `usePreferences(preferences)` returns `current` and re-renders after each change.
+
+```jsx
+const preferences = new Preferences({ key: 'beyond-delegate', fallback: { appearance: 'system', locale: 'en' } });
+preferences.restore();
+function Settings() {
+	const { appearance, locale } = usePreferences(preferences);
+	return <a href={accountsPage}>{Preferences.labels[locale].everywhere}</a>;
+}
+```

@@ -8,8 +8,8 @@
 
 | Public module | Contents |
 | --- | --- |
-| `@beyond-js/ui` and `@beyond-js/ui/dom` | DOM component classes: `Button`, `ActionMenu`, `Disclosure`, `Field`, `Choices`, `Select`, `Picker`, `Dialog`, `confirm`/`prompt`/`alert`, `FocusedForm`, `Tooltip`, `Help`, `Collection`, `Toaster`, `Header`, `FamilyBar`, `ProductNav`, `Unavailable`, `NotificationEntry`, `NotificationInbox`, the builders `lockup`, `status`, `badge`, `callout`, `loading`, `skeleton`, and the `availability` vocabulary |
-| `@beyond-js/ui/react` | The React 18/19 adapter: the same components as React components and hooks (`useConfirm`, `useBusy`, `useToaster`) |
+| `@beyond-js/ui` and `@beyond-js/ui/dom` | DOM component classes: `Button`, `ActionMenu`, `Disclosure`, `Field`, `Choices`, `Select`, `Picker`, `Dialog`, `confirm`/`prompt`/`alert`, `FocusedForm`, `Tooltip`, `Help`, `Collection`, `Toaster`, `Header`, `FamilyBar`, `ProductNav`, `Unavailable`, `NotificationEntry`, `NotificationInbox`, the builders `lockup`, `status`, `badge`, `callout`, `loading`, `skeleton`, the `availability` vocabulary, the icon catalog (`icon`, `icons`, `unlabeled`) and `Preferences` |
+| `@beyond-js/ui/react` | The React 18/19 adapter: the same components as React components and hooks (`useConfirm`, `useBusy`, `useToaster`, `usePreferences`), with `Icon`, `icons`, `unlabeled` and `Preferences` |
 | `@beyond-js/ui/tokens` | The canonical token data (`tokens`, with its own version, `status` and provenance), `TokenSheet` and `Contrast`. The token set version (0.1.0) changes only when a token changes, independently of the package version |
 | `@beyond-js/ui/tokens.css` | The generated token custom properties, both themes (`data-beyond-mode`, then the system preference) |
 | `@beyond-js/ui/styles.css` | Every component style (`bui-` classes), using token custom properties only |
