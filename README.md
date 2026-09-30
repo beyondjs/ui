@@ -10,9 +10,10 @@
 | --- | --- |
 | `@beyond-js/ui` and `@beyond-js/ui/dom` | DOM component classes: `Button`, `ActionMenu`, `Disclosure`, `Field`, `Choices`, `Select`, `Picker`, `Dialog`, `confirm`/`prompt`/`alert`, `FocusedForm`, `Tooltip`, `Help`, `Collection`, `Toaster`, `Header`, `FamilyBar`, `ProductNav`, `Unavailable`, `NotificationEntry`, `NotificationInbox`, the builders `lockup`, `status`, `badge`, `callout`, `loading`, `skeleton`, and the `availability` vocabulary |
 | `@beyond-js/ui/react` | The React 18/19 adapter: the same components as React components and hooks (`useConfirm`, `useBusy`, `useToaster`) |
-| `@beyond-js/ui/tokens` | The canonical token data (`tokens`, with its own version, `status` and provenance), `TokenSheet` and `Contrast`. The token set version (0.1.0) changes only when a token changes, independently of the package version |
+| `@beyond-js/ui/tokens` | The canonical token data (`tokens`, with its own version, `status`, approval and provenance), `TokenSheet` and `Contrast`. The token set version (0.2.0, approved by the owner on 2026-09-29) changes only when a token changes, independently of the package version |
 | `@beyond-js/ui/tokens.css` | The generated token custom properties, both themes (`data-beyond-mode`, then the system preference) |
 | `@beyond-js/ui/styles.css` | Every component style (`bui-` classes), using token custom properties only |
+| `@beyond-js/ui/fonts.css` and `@beyond-js/ui/fonts/*` | Rubik 300, 400 and 500 (latin and latin-ext woff2) with its OFL licence and one `@font-face` per weight and subset |
 
 The [component catalog](docs/components.md) describes each component, its options, states and usage guidance. [Architecture](docs/architecture.md) records the decisions.
 
@@ -22,11 +23,12 @@ Prerequisite: Node.js 22.21.1 or later.
 
 1. In this repository, `npm install` once, then `npm run pack:consumers -- <consumer directory>`. That runs `npm pack`, writes `dist-pack/beyond-ui-<version>.tgz` (currently `beyond-ui-0.2.2.tgz`) with its `sha512` integrity beside it, and copies the tarball into `<consumer directory>/tools/`.
 2. In the consumer, declare `"@beyond-js/ui": "file:tools/beyond-ui-0.2.2.tgz"` (a dependency, or a devDependency when a bundler builds the product) and run `npm install`.
-3. Import the two stylesheets once, then the components:
+3. Import the stylesheets once (`fonts.css` is Rubik; a product that is not bundled serves it with the woff2 files beside it), then the components:
 
 ```js
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
+import '@beyond-js/ui/fonts.css';
 import { Dialog, Picker } from '@beyond-js/ui';          // plain DOM
 import { Dialog, Picker, useConfirm } from '@beyond-js/ui/react'; // React
 ```
