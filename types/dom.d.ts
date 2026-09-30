@@ -200,7 +200,7 @@ export class FocusedForm {
 }
 
 export class Tooltip extends Component {
-	constructor(trigger: HTMLElement, options: { text: Content; delay?: number });
+	constructor(trigger: HTMLElement, options: { text: Content; delay?: number; describe?: boolean });
 	readonly shown: boolean;
 	set text(value: Content);
 	show(): void;

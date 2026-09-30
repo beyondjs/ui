@@ -144,7 +144,7 @@ export function Unavailable(props: { title: ReactNode; reason: ReactNode; owner?
 export function Disclosure(props: { label: string; name?: string | null; align?: 'start' | 'end'; onChange?: (open: boolean) => void; children?: ReactNode }): ReactElement;
 export function ActionMenu(props: { label?: string | null; name?: string | null; items: Array<(Omit<MenuItem, 'run'> & { onSelect?: (event: MouseEvent) => void }) | null | false>; align?: 'start' | 'end'; glyph?: string | null; placement?: 'auto' | 'below' | 'above' }): ReactElement;
 export function Help(props: { topic: string; text?: string | string[]; labels?: Copy; children?: ReactNode }): ReactElement;
-export function Tooltip(props: { text: string; children: ReactElement }): ReactElement;
+export function Tooltip(props: { text: string; describe?: boolean; children: ReactElement }): ReactElement;
 
 export interface NotificationEntryHandle {
 	refresh(): void;

@@ -82,3 +82,18 @@ test('toasts, chips, the anonymous account and a glyph-only action menu carry hi
 	for (const part of [toaster, picker, bar, named, bare, labelled]) part.destroy();
 	assert.equal(hints().length, 0);
 });
+
+test('Tooltip with describe: false shows the name without describing the control', () => {
+	const button = ui.el('button', { 'aria-label': 'Minimize' }, [ui.icon('minimize')]);
+	document.body.append(button);
+	const plain = new ui.Tooltip(button, { text: 'Minimize · Ctrl+M', describe: false });
+	assert.equal(button.getAttribute('aria-describedby'), null);
+	assert.equal(plain.element.getAttribute('aria-hidden'), 'true');
+	assert.equal(plain.element.getAttribute('role'), null);
+	plain.show();
+	assert.equal(plain.shown, true);
+	plain.destroy();
+	const described = new ui.Tooltip(button, { text: 'Copies the address' });
+	assert.equal(button.getAttribute('aria-describedby'), described.element.id, 'the default still describes');
+	described.destroy();
+});

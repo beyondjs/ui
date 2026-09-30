@@ -17,15 +17,17 @@ export class Tooltip extends Component {
 
 	/**
 	 * @param {Element} trigger the described control, owned by the consumer
-	 * @param {{text: string|Node, delay?: number}} options
+	 * @param {{text: string|Node, delay?: number, describe?: boolean}} options `describe: false` for a
+	 *   tooltip that only shows the control's own accessible name (an icon-only control, D11): it is
+	 *   then hidden from assistive technology, so the name is not heard twice
 	 */
-	constructor(trigger, { text, delay = 120 }) {
+	constructor(trigger, { text, delay = 120, describe = true }) {
 		super();
 		this.#trigger = trigger;
 		const id = Ids.next('bui-tooltip');
-		this.#element = el('span', { id, role: 'tooltip', class: 'bui-tooltip', hidden: true }, [content(text)]);
+		this.#element = el('span', { id, role: describe ? 'tooltip' : null, 'aria-hidden': describe ? null : 'true', class: 'bui-tooltip', hidden: true }, [content(text)]);
 		const described = trigger.getAttribute('aria-describedby');
-		trigger.setAttribute('aria-describedby', [described, id].filter(Boolean).join(' '));
+		if (describe) trigger.setAttribute('aria-describedby', [described, id].filter(Boolean).join(' '));
 		trigger.ownerDocument.body.append(this.#element);
 		const soon = () => (this.#hide = this.later(() => this.hide(), delay));
 		this.listen(trigger, 'pointerenter', event => event.pointerType !== 'touch' && this.show());

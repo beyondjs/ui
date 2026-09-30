@@ -68,13 +68,13 @@ export function Help({ topic, text = [], labels, children }) {
 }
 
 /** A supplementary tooltip on its single child element. Never the only copy of essential information. */
-export function Tooltip({ text, children }) {
+export function Tooltip({ text, describe = true, children }) {
 	const holder = useRef(null);
 	const [hint, setHint] = useState(null);
 	useLayoutEffect(() => {
 		const trigger = holder.current?.firstElementChild;
 		if (!trigger) return undefined;
-		const made = new Hint(trigger, { text });
+		const made = new Hint(trigger, { text, describe });
 		setHint(made);
 		return () => {
 			made.destroy();
