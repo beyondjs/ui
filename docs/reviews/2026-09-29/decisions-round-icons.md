@@ -38,3 +38,7 @@ The acceptance adds eight checks (four per consumer, DOM and React 19): every ca
 ## Family reference synchronization
 
 **Synchronization pending at integration.** The branch changes no visible component behavior (the Docs link gains an accessible name equal to its text). D11 asks the reference to consume the catalog instead of `branding/src/app/parts/icons.js`, and D07 changes how products apply appearance and language; both follow when the coordinator releases 0.3.0 and the reference re-vendors it. Affected: the reference's icon set and the component catalog entries for icons and preferences (`branding/src/family/components/consumers.js`). Token set unchanged in this branch (0.1.0).
+
+## Closed in the 0.3.0 integration
+
+The open items above were closed when the round was integrated and released as 0.3.0 (see [the release record](release-0.3.0.md)): the package's icon-only controls show their names as tooltips, `help` and `user` joined the closed list for the owner to confirm, and the Docs link keeps its label, moving into the account menu below 600 px.
