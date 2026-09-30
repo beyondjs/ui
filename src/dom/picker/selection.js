@@ -80,6 +80,7 @@ export class Selection {
 				el('button', {
 					type: 'button',
 					class: 'bui-chip-remove',
+					'data-bui-hint': true,
 					'aria-label': labels.text('remove', { label: typeof item.label === 'string' ? item.label : item.id }),
 					onclick: () => onremove(item.id)
 				}, [glyph('close')])

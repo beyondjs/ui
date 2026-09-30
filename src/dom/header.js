@@ -1,6 +1,7 @@
 import { Component } from './core/component.js';
 import { el, fill, content } from './core/element.js';
 import { glyph } from './core/icons.js';
+import { Hint } from './core/hint.js';
 import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 import { lockup } from './lockup.js';
@@ -26,6 +27,7 @@ export class Header extends Component {
 	#expanded;
 	#onchange;
 	#controls;
+	#hint;
 	#onnavigate;
 
 	/**
@@ -47,7 +49,7 @@ export class Header extends Component {
 		this.#controls = toggle?.controls ?? `${id}-nav`;
 		this.#expanded = toggle?.expanded ?? false;
 		this.#onchange = toggle?.onchange ?? null;
-		this.#toggle = el('button', { type: 'button', class: 'bui-header-toggle', 'aria-controls': this.#controls, onclick: () => (this.expanded = !this.#expanded) }, [glyph('menu')]);
+		this.#toggle = el('button', { type: 'button', class: 'bui-header-toggle', 'aria-controls': this.#controls, 'data-bui-hint': true, onclick: () => (this.expanded = !this.#expanded) }, [glyph('menu')]);
 		this.#context = el('nav', { class: 'bui-header-context', 'aria-label': this.#labels.text('context') });
 		this.#nav = el('nav', { id: `${id}-nav`, class: 'bui-header-nav', 'aria-label': this.#labels.text('nav') });
 		this.#end = el('div', { class: 'bui-header-end' }, [notifications, account]);
@@ -60,9 +62,15 @@ export class Header extends Component {
 			this.#nav,
 			this.#end
 		]);
+		this.#hint = new Hint(this.#element);
 		this.context = context;
 		this.nav = nav;
 		this.#draw();
+	}
+
+	destroy() {
+		this.#hint.destroy();
+		super.destroy();
 	}
 
 	get element() {

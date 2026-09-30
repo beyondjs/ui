@@ -38,6 +38,6 @@ export function survey(layout) {
 			const visible = texts(control, node => shown(node) && !clipped(node));
 			const glyphs = [...control.querySelectorAll('svg')].filter(shown).map(svg => svg.getAttribute('data-icon') ?? 'unknown');
 			const describe = `${control.tagName.toLowerCase()}.${String(control.getAttribute('class') ?? '').replace(/\s+/g, '.')}`;
-			return { bare: !visible && glyphs.length > 0, name: name(control), glyphs, describe };
+			return { bare: !visible && glyphs.length > 0, name: name(control), glyphs, hint: control.hasAttribute('data-bui-hint'), describe };
 		});
 }

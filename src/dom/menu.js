@@ -1,6 +1,7 @@
 import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
 import { Glyph } from './core/icons.js';
+import { Hint } from './core/hint.js';
 import { Ids } from './core/ids.js';
 
 /**
@@ -20,6 +21,7 @@ import { Ids } from './core/ids.js';
  * Items: `{ label, run?, href?, disabled?, reason?, tone? }`; `tone: 'danger'` marks destructive ones.
  */
 export class ActionMenu extends Component {
+	#hint;
 	static #margin = 8;
 	#element;
 	#button;
@@ -51,6 +53,8 @@ export class ActionMenu extends Component {
 				'aria-expanded': 'false',
 				'aria-controls': id,
 				'aria-label': name,
+				// A glyph alone shows its name as a tooltip (D11).
+				'data-bui-hint': Boolean(glyph && !label && name),
 				onclick: () => (this.#open ? this.close(true) : this.open(0)),
 				onkeydown: event => this.#opener(event)
 			},
@@ -59,10 +63,16 @@ export class ActionMenu extends Component {
 		this.#list = el('ul', { id, class: `bui-menu bui-align-${align}`, role: 'menu', hidden: true, onkeydown: event => this.#keys(event) });
 		this.items = items;
 		this.#element = el('div', { class: 'bui-menu-holder' }, [this.#button, this.#list]);
+		this.#hint = glyph && !label ? new Hint(this.#element) : null;
 	}
 
 	get element() {
 		return this.#element;
+	}
+
+	destroy() {
+		this.#hint?.destroy();
+		super.destroy();
 	}
 
 	get expanded() {

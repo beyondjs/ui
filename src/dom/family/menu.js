@@ -25,13 +25,15 @@ export class NavigationMenu extends Component {
 	 * @param {'start'|'end'} [options.align]
 	 * @param {string} [options.part] names the menu for focus restoration after a redraw
 	 * @param {string} [options.class]
+	 * @param {boolean} [options.hint] the button shows glyphs alone: its name appears as a tooltip (D11)
 	 */
-	constructor({ label, name, sections, align = 'start', part = null, class: extra = '' }) {
+	constructor({ label, name, sections, align = 'start', part = null, hint = false, class: extra = '' }) {
 		super();
 		this.#disclosure = new Disclosure({
 			label: [].concat(label, glyph('chevron')),
 			name,
 			align,
+			hint,
 			class: `bui-navmenu ${extra}`.trim(),
 			children: sections.filter(Boolean).map(section => this.#section(section)),
 			onchange: open => open && this.#entries()[0]?.focus({ preventScroll: true })

@@ -54,7 +54,7 @@ export class NotificationEntry extends Disclosure {
 	constructor({ adapter, href = null, onopen = null, onview = null, products = {}, locale = undefined, limit = 6, interval = 0, labels = {} }) {
 		const words = new Labels(defaults, labels);
 		const badge = el('span', { class: 'bui-count', 'aria-hidden': 'true', hidden: true });
-		super({ label: [glyph('bell'), badge], name: words.text('button', { count: null }), align: 'end', variant: 'bell', class: 'bui-notify', onchange: open => this.#toggled(open) });
+		super({ label: [glyph('bell'), badge], name: words.text('button', { count: null }), align: 'end', variant: 'bell', class: 'bui-notify', hint: true, onchange: open => this.#toggled(open) });
 		this.#adapter = adapter;
 		this.#labels = words;
 		this.#badge = badge;

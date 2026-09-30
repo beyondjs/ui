@@ -2,7 +2,7 @@ import { expect, overflow, focused } from '../support/browser.mjs';
 import { Geometry } from '../support/geometry.mjs';
 
 /** The family bar at the family's widths and in both themes, its keyboard, its states and the lockup. */
-const widths = [1440, 1024, 768, 390, 320];
+const widths = [1440, 1024, 768, 600, 480, 390, 320];
 const navy = { light: 'rgb(18, 31, 54)', dark: 'rgb(12, 21, 37)' };
 
 async function open(browser, consumer, { width = 1440, family = 'inside', ...options } = {}) {
@@ -13,7 +13,7 @@ async function open(browser, consumer, { width = 1440, family = 'inside', ...opt
 
 export const checks = [
 	{
-		name: 'family bar at 1440, 1024, 768, 390 and 320 px in both themes: one row, nothing outside it, centred parts, the lockup name on the letters',
+		name: 'family bar at 1440, 1024, 768, 600, 480, 390 and 320 px in both themes: one row, nothing outside it, centred parts, the lockup name on the letters, the Docs label wherever the link shows',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			for (const scheme of ['light', 'dark']) {
@@ -31,8 +31,29 @@ export const checks = [
 					expect(Math.abs(found.name.top) <= 0.5 && Math.abs(found.name.base) <= 0.5, `${at}: name against the letters ${JSON.stringify(found.name)}`);
 					const narrow = width < 720;
 					expect(found.narrow === narrow && found.wide === !narrow, `${at}: location form ${JSON.stringify([found.wide, found.narrow])}`);
-					expect(found.docs === width >= 480, `${at}: Docs link shown ${found.docs}`);
+					expect(found.docs === width >= 600, `${at}: Docs link shown ${found.docs}`);
+					const label = await page.evaluate(() => document.querySelector('.bui-family-docs span')?.checkVisibility() ?? false);
+					expect(label === width >= 600, `${at}: Docs label shown ${label} (D11: the book glyph never stands alone)`);
 					await context.close();
+				}
+			}
+		}
+	},
+	{
+		name: 'family bar from 600 to 719 px with each long product name, with and without a sidebar toggle: the Docs label shown, nothing overlapping',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			for (const width of [600, 660, 719]) {
+				for (const product of ['workspace', 'snapshots', 'conduict', 'delegate']) {
+					for (const family of ['inside', 'long']) {
+						const at = `${product} ${family} at ${width}px`;
+						const { page, context } = await open(browser, consumer, { width, family, query: `?family=${family}&product=${product}` });
+						const found = await Geometry.bar(page);
+						expect(found.height === 44 && !(await overflow(page)), `${at}: one row, no sideways scroll`);
+						expect(found.outside.length === 0 && found.overlaps.length === 0, `${at}: outside ${found.outside} overlapping ${found.overlaps}`);
+						expect(await page.evaluate(() => document.querySelector('.bui-family-docs span')?.checkVisibility()), `${at}: the Docs label shows`);
+						await context.close();
+					}
 				}
 			}
 		}
@@ -158,7 +179,7 @@ export const checks = [
 		name: 'family bar menus stay inside the viewport at 390 and 320 px',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
-			for (const width of [390, 320]) {
+			for (const width of [480, 390, 320]) {
 				const { page, context } = await open(browser, consumer, { width });
 				for (const part of ['product', 'location', 'account']) {
 					const trigger = page.locator(`.bui-family [data-part="${part}"]:visible .bui-navmenu-button`);
@@ -169,7 +190,7 @@ export const checks = [
 					await page.keyboard.press('Escape');
 				}
 				const docs = await page.locator('.bui-family [data-part="account"] .bui-disclosure-panel .bui-family-docs-item').isVisible();
-				expect(width >= 480 || docs === false, 'the docs entry is hidden while the menu is closed');
+				expect(docs === false, 'the docs entry is hidden while the menu is closed');
 				await page.locator('.bui-family [data-part="account"] .bui-navmenu-button').click();
 				expect(await page.locator('.bui-disclosure-panel .bui-family-docs-item').isVisible(), `${width}px: Docs moved into the account menu`);
 				await context.close();

@@ -22,7 +22,7 @@ export class Help extends Disclosure {
 	constructor({ topic, text, labels = {}, onchange = null }) {
 		const words = new Labels(defaults, labels);
 		const body = [].concat(text).map(part => (typeof part === 'string' ? el('p', { text: part }) : content(part)));
-		super({ label: glyph('help'), name: words.text('name', { topic }), children: body, variant: 'help', class: 'bui-help', onchange });
+		super({ label: glyph('help'), name: words.text('name', { topic }), children: body, variant: 'help', class: 'bui-help', hint: true, onchange });
 		this.panel.classList.add('bui-help-panel');
 		this.panel.setAttribute('role', 'note');
 		this.panel.setAttribute('aria-label', words.text('name', { topic }));

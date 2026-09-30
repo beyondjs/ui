@@ -2,19 +2,18 @@ import { expect } from '../support/browser.mjs';
 import { words } from '../support/words.mjs';
 import { survey } from '../../tests/support/names.mjs';
 
-// The closed list of glyphs shown without a visible label (D11), and those the package still shows so
-// outside it, on record for the owner: Help's question mark, the family bar's account avatar before a
-// name is known, and the Docs link's glyph alone between 480 and 719 px.
-const unlabeled = ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore'];
-const pending = ['help', 'user', 'book'];
+// The closed list of glyphs shown without a visible label (D11): the owner's ten, with `help` and
+// `user` added at the 0.3.0 integration for the owner to confirm.
+const unlabeled = ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user'];
 
-/** Fails any icon-only control of the page without an accessible name or with a glyph outside the lists. */
+/** Fails any icon-only control of the page without an accessible name, a tooltip or a glyph of the list. */
 async function named(page, at) {
 	const controls = await page.evaluate(survey, true);
 	const bare = controls.filter(control => control.bare);
 	for (const control of bare) {
 		expect(control.name, `${at}: icon-only ${control.describe} (${control.glyphs}) has no accessible name`);
-		expect(control.glyphs.every(name => unlabeled.includes(name) || pending.includes(name)), `${at}: ${control.describe} shows ${control.glyphs} without a visible label`);
+		expect(control.glyphs.every(name => unlabeled.includes(name)), `${at}: ${control.describe} shows ${control.glyphs} without a visible label`);
+		expect(control.hint, `${at}: ${control.describe} shows no tooltip of its name`);
 	}
 	return bare.length;
 }
@@ -70,6 +69,39 @@ export const checks = [
 					await named(page, `${width}px${query}`);
 				}
 			}
+		}
+	},
+	{
+		name: 'icon-only controls show their name as a tooltip on hover and keyboard focus, announced once',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			const copy = words[consumer.language];
+			const { page } = await browser.open(consumer, { viewport: { width: 390, height: 900 } });
+			const tip = page.locator('.bui-hint:not([hidden])');
+			const controls = page.locator('[data-bui-hint]:visible');
+			const total = await controls.count();
+			expect(total >= 3, `${total} controls with a tooltip`);
+			for (let index = 0; index < total; index++) {
+				const control = controls.nth(index);
+				if ((await control.getAttribute('aria-expanded')) === 'true') continue;
+				await control.hover();
+				await tip.waitFor();
+				const [name, text] = [await control.getAttribute('aria-label'), await tip.textContent()];
+				expect(text === name, `hover shows "${text}" for "${name}"`);
+				expect((await tip.getAttribute('aria-hidden')) === 'true' && !(await control.getAttribute('aria-describedby')), `"${name}" is announced once`);
+				await page.mouse.move(1, 899);
+				await tip.waitFor({ state: 'hidden' });
+			}
+			await page.getByRole('button', { name: copy.open, exact: true }).focus();
+			await page.keyboard.press('Enter');
+			await page.locator('dialog[open]').waitFor();
+			await page.keyboard.press('Shift+Tab');
+			await tip.waitFor();
+			expect((await tip.textContent()) === copy.close, `keyboard focus on the dialog's close shows "${await tip.textContent()}"`);
+			const inside = await page.evaluate(() => document.querySelector('.bui-hint:not([hidden])').parentElement.tagName);
+			expect(inside === 'DIALOG', `the tooltip is drawn in the dialog (${inside})`);
+			await page.keyboard.press('Escape');
+			await tip.waitFor({ state: 'hidden' });
 		}
 	},
 	{

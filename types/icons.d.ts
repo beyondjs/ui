@@ -60,7 +60,7 @@ export type IconName =
 export type IconSize = 16 | 20 | 24;
 
 /** The glyphs that may appear without a visible label (decision D11). */
-export type UnlabeledIconName = 'close' | 'menu' | 'more' | 'search' | 'bell' | 'chevron' | 'pin' | 'minimize' | 'maximize' | 'restore';
+export type UnlabeledIconName = 'close' | 'menu' | 'more' | 'search' | 'bell' | 'chevron' | 'pin' | 'minimize' | 'maximize' | 'restore' | 'help' | 'user';
 
 export interface IconOptions {
 	/** 16, 20 (default) or 24 px. */

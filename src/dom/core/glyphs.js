@@ -77,8 +77,8 @@ export const paths = Object.freeze({
 /**
  * The glyphs that may appear without a visible label (decision D11): conventional controls whose
  * button carries an accessible name and a tooltip that shows the name, and its shortcut when there is
- * one. Every other icon comes with a visible label. `help` is the package's own exception on record:
- * `Help` opens essential help from a question-mark button named after its topic, pending the owner's
- * decision on adding it to the list.
+ * one. Every other icon comes with a visible label. The owner's list is the first ten; `help` (the
+ * question mark that opens essential help beside a field) and `user` (the account avatar before a
+ * name is known) were added at the 0.3.0 integration under the same rule, for the owner to confirm.
  */
-export const unlabeled = Object.freeze(['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore']);
+export const unlabeled = Object.freeze(['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user']);

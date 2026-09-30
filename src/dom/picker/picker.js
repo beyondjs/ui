@@ -2,6 +2,7 @@ import { Component } from '../core/component.js';
 import { el, fill, content } from '../core/element.js';
 import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
+import { Hint } from '../core/hint.js';
 import { Interaction } from '../core/interaction.js';
 import { Labels } from '../core/labels.js';
 import { Select } from '../select.js';
@@ -40,6 +41,7 @@ export class Picker extends Component {
 	#filters = [];
 	#delay;
 	#pending = null;
+	#tip;
 
 	/**
 	 * @param {object} options
@@ -91,6 +93,8 @@ export class Picker extends Component {
 			el('div', { class: 'bui-picker-foot' }, [this.#status, this.#retry, this.#all, this.#more]),
 			this.#inputs
 		]);
+		// The chips' remove buttons show a glyph alone: their names appear as tooltips (D11).
+		this.#tip = new Hint(this.#element);
 		this.#draw();
 		this.#search.find('', this.#values());
 	}
@@ -138,6 +142,7 @@ export class Picker extends Component {
 
 	destroy() {
 		this.#search.cancel();
+		this.#tip.destroy();
 		super.destroy();
 	}
 
@@ -196,6 +201,7 @@ export class Picker extends Component {
 			size ? this.#labels.text('count', { count: size }) : this.#labels.text('none'),
 			problems ? this.#labels.text('attention', { count: problems }) : null
 		].filter(Boolean).join(' · ');
+		this.#tip.release(this.#chips);
 		fill(this.#chips, this.#selection.chips(this.#labels, id => this.#drop(id)));
 		this.#chips.hidden = !size;
 		fill(this.#inputs, this.#selection.inputs(this.#name));

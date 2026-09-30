@@ -5,10 +5,6 @@ import { Scene } from './fixtures/controls.mjs';
 import { survey } from './support/names.mjs';
 
 /** The icon catalog (D11): every name renders, sizes and labels, clear failures, and named icon-only controls. */
-// Glyphs the package still shows without a visible label outside the closed list, on record for the
-// owner (docs/components.md#icons): Help's question mark, and the family bar's account avatar before
-// the person's name is known.
-const pending = ['help', 'user'];
 const page = new Page();
 const ui = await import('@beyond-js/ui/dom');
 after(() => page.close());
@@ -62,7 +58,7 @@ test('the components keep their own unsized glyphs', () => {
 });
 
 test('the closed list of glyphs shown without a visible label is part of the catalog', () => {
-	assert.deepEqual([...ui.unlabeled], ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore']);
+	assert.deepEqual([...ui.unlabeled], ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user']);
 	assert.ok(ui.unlabeled.every(name => ui.icons.includes(name)));
 });
 
@@ -73,7 +69,8 @@ test('every icon-only control of the components has an accessible name and a gly
 	assert.ok(bare.length >= 6, `the scene shows icon-only controls (${bare.map(control => control.glyphs.join('+')).join(', ')})`);
 	for (const control of bare) {
 		assert.ok(control.name, `icon-only ${control.describe} has no accessible name`);
-		assert.ok(control.glyphs.every(name => ui.unlabeled.includes(name) || pending.includes(name)), `${control.describe} shows ${control.glyphs} without a visible label`);
+		assert.ok(control.glyphs.every(name => ui.unlabeled.includes(name)), `${control.describe} shows ${control.glyphs} without a visible label`);
+		assert.ok(control.hint, `${control.describe} shows no tooltip of its name`);
 	}
 	scene.destroy();
 });

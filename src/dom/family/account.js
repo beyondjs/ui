@@ -32,6 +32,8 @@ export class AccountMenu extends Component {
 			name: name ? labels.text('account', { name }) : labels.text('anonymous'),
 			align: 'end',
 			part: 'account',
+			// Without a name the avatar is a person glyph alone (D11).
+			hint: !name,
 			class: 'bui-family-account',
 			sections: [
 				{

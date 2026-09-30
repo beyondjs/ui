@@ -2,6 +2,7 @@ import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
 import { Ids } from './core/ids.js';
 import { Interaction } from './core/interaction.js';
+import { Hint } from './core/hint.js';
 
 /**
  * A button that shows and hides a panel: the disclosure pattern.
@@ -25,6 +26,7 @@ export class Disclosure extends Component {
 	#open = false;
 	#onchange;
 	#releases = [];
+	#hint = null;
 
 	/**
 	 * @param {object} options
@@ -33,8 +35,9 @@ export class Disclosure extends Component {
 	 * @param {Node[]} [options.children] panel content
 	 * @param {'start'|'end'} [options.align] which edge of the button the panel aligns to
 	 * @param {(open: boolean) => void} [options.onchange]
+	 * @param {boolean} [options.hint] the button shows a glyph alone: its name appears as a tooltip (D11)
 	 */
-	constructor({ label, name = null, children = [], align = 'start', variant = 'plain', role = null, onchange = null, class: extra = '' }) {
+	constructor({ label, name = null, children = [], align = 'start', variant = 'plain', role = null, onchange = null, hint = false, class: extra = '' }) {
 		super();
 		this.#onchange = onchange;
 		const id = Ids.next('bui-panel');
@@ -55,6 +58,18 @@ export class Disclosure extends Component {
 			this.#button,
 			this.#panel
 		]);
+		if (hint) this.hint = true;
+	}
+
+	/** Whether the button's name shows as a tooltip, for a button that shows a glyph alone (D11). */
+	set hint(value) {
+		this.#button.toggleAttribute('data-bui-hint', Boolean(value));
+		if (value) this.#hint ??= new Hint(this.#element);
+	}
+
+	destroy() {
+		this.#hint?.destroy();
+		super.destroy();
 	}
 
 	get element() {

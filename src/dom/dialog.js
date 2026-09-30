@@ -1,6 +1,7 @@
 import { Component } from './core/component.js';
 import { el, append, fill, content } from './core/element.js';
 import { glyph } from './core/icons.js';
+import { Hint } from './core/hint.js';
 import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 import { Focus } from './core/focus.js';
@@ -39,6 +40,7 @@ export class Dialog extends Component {
 	#adopted = false;
 	#settle = null;
 	#closing = false;
+	#hint;
 
 	/**
 	 * @param {object} options
@@ -60,7 +62,7 @@ export class Dialog extends Component {
 		this.#onclose = onclose;
 		const id = Ids.next('bui-dialog');
 		this.#heading = el('h2', { id: `${id}-title`, class: 'bui-dialog-title' }, [content(title)]);
-		this.#closer = el('button', { type: 'button', class: 'bui-icon-button', 'aria-label': this.#labels.text('close'), onclick: () => this.dismiss() }, [glyph('close')]);
+		this.#closer = el('button', { type: 'button', class: 'bui-icon-button', 'aria-label': this.#labels.text('close'), 'data-bui-hint': true, onclick: () => this.dismiss() }, [glyph('close')]);
 		this.#body = el('div', { class: 'bui-dialog-body' }, children);
 		this.#footer = el('div', { class: 'bui-dialog-actions', hidden: !actions.length }, actions);
 		this.#element = el(
@@ -80,6 +82,7 @@ export class Dialog extends Component {
 		});
 		this.#element.addEventListener('close', () => this.#closed());
 		this.#element.addEventListener('click', event => this.#press(event));
+		this.#hint = new Hint(this.#element);
 		this.#policy();
 	}
 
@@ -165,6 +168,7 @@ export class Dialog extends Component {
 	destroy() {
 		this.#busy = false;
 		if (this.#element.open) this.close(null);
+		this.#hint.destroy();
 		super.destroy();
 	}
 

@@ -199,8 +199,15 @@
 		left: auto;
 		right: var(--space-2);
 	}
-	.bui-family-docs span {
+}
+/* Docs always shows its label (D11: the book glyph never stands alone); below 600 px, where the label
+   no longer fits beside a sidebar toggle and a localized name, it moves into the account menu. */
+@media (max-width: 599px) {
+	.bui-family-docs {
 		display: none;
+	}
+	.bui-navmenu-list > li:has(> .bui-family-docs-item) {
+		display: list-item;
 	}
 }
 /* Phones: the location keeps the room the other parts can give up (see the dated record's widths). */
@@ -236,13 +243,9 @@
 	.bui-family-end {
 		gap: 0;
 	}
-	.bui-family-docs,
 	.bui-family-divider,
 	.bui-family-account .bui-navmenu-button > .bui-icon:last-child {
 		display: none;
-	}
-	.bui-navmenu-list > li:has(> .bui-family-docs-item) {
-		display: list-item;
 	}
 }
 @media (max-width: 359px) {

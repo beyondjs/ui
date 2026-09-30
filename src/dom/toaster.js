@@ -1,6 +1,7 @@
 import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
 import { glyph } from './core/icons.js';
+import { Hint } from './core/hint.js';
 import { Labels } from './core/labels.js';
 
 const defaults = { region: 'Messages', dismiss: 'Dismiss' };
@@ -18,6 +19,7 @@ export class Toaster extends Component {
 	#labels;
 	#polite;
 	#assertive;
+	#hint;
 
 	constructor({ labels = {} } = {}) {
 		super();
@@ -26,6 +28,7 @@ export class Toaster extends Component {
 		this.#polite = el('div', { class: 'bui-toast-stack', role: 'status', 'aria-live': 'polite' });
 		this.#assertive = el('div', { class: 'bui-toast-stack', role: 'alert', 'aria-live': 'assertive' });
 		this.#element = el('section', { class: 'bui-toaster', 'aria-label': this.#labels.text('region') }, [this.#assertive, this.#polite]);
+		this.#hint = new Hint(this.#element);
 	}
 
 	get element() {
@@ -45,20 +48,27 @@ export class Toaster extends Component {
 				el('p', { class: 'bui-toast-title' }, [content(message)]),
 				detail ? el('p', { class: 'bui-toast-detail' }, [content(detail)]) : null
 			]),
-			el('button', { type: 'button', class: 'bui-icon-button', 'aria-label': this.#labels.text('dismiss'), onclick: () => remove() }, [glyph('close')])
+			el('button', { type: 'button', class: 'bui-icon-button', 'aria-label': this.#labels.text('dismiss'), 'data-bui-hint': true, onclick: () => remove() }, [glyph('close')])
 		]);
 		(tone === 'danger' ? this.#assertive : this.#polite).append(toast);
-		const cancel = tone === 'danger' ? null : this.later(() => toast.remove(), duration);
 		const remove = () => {
 			cancel?.();
+			this.#hint.release(toast);
 			toast.remove();
 		};
+		const cancel = tone === 'danger' ? null : this.later(remove, duration);
 		return remove;
 	}
 
 	/** Removes every message. */
 	clear() {
+		this.#hint.hide();
 		this.#polite.replaceChildren();
 		this.#assertive.replaceChildren();
+	}
+
+	destroy() {
+		this.#hint.destroy();
+		super.destroy();
 	}
 }
