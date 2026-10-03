@@ -14,6 +14,7 @@ export { Disclosure } from './disclosure.js';
 export { Field } from './field.js';
 export { Choices } from './choices.js';
 export { Select } from './select.js';
+export { ChoiceMenu } from './choice.js';
 export { Picker } from './picker/picker.js';
 export { Dialog } from './dialog.js';
 export { Question, confirm, prompt, alert } from './questions.js';

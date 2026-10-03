@@ -24,6 +24,35 @@ export const checks = [
 		}
 	},
 	{
+		name: 'choice menu: ArrowDown opens on the chosen option, a disabled option explains, Enter chooses, Escape returns focus; the button never cuts its words at 320 px',
+		consumers: ['dom'],
+		async run(browser, consumer) {
+			const { page } = await browser.open(consumer, { viewport: { width: 320, height: 800 } });
+			const button = page.locator('#picking .bui-choice-button');
+			expect((await button.innerText()).includes('Choose'), 'nothing is chosen for the person');
+			await button.focus();
+			await page.keyboard.press('ArrowDown');
+			expect((await page.evaluate(() => document.activeElement.getAttribute('role'))) === 'menuitemradio', 'an option takes focus');
+			await page.keyboard.press('ArrowDown');
+			await page.keyboard.press('ArrowDown');
+			expect((await page.evaluate(() => document.activeElement.getAttribute('aria-disabled'))) === 'true', 'the deleted option is reachable to read its reason');
+			await page.keyboard.press('Enter');
+			expect(await page.locator('#picking .bui-choice-list').isVisible(), 'a disabled option does not choose or close');
+			await page.keyboard.press('ArrowUp');
+			await page.keyboard.press('Enter');
+			expect((await page.evaluate(() => document.activeElement.classList.contains('bui-choice-button'))), 'focus returned to the button');
+			const text = await button.innerText();
+			expect(text.includes('laboratory-with-a-long-name') && text.includes('Machine missing'), `the button reads ${text}`);
+			const cut = await button.evaluate(node => node.scrollWidth > node.clientWidth + 1 || [...node.querySelectorAll('span')].some(part => part.scrollWidth > part.clientWidth + 1));
+			expect(!cut, 'the button cuts its words');
+			const inside = await button.evaluate(node => node.getBoundingClientRect().right <= document.documentElement.clientWidth);
+			expect(inside, 'the button runs past the viewport');
+			await button.click();
+			await page.keyboard.press('Escape');
+			expect((await page.evaluate(() => document.activeElement.classList.contains('bui-choice-button'))), 'Escape returns focus to the button');
+		}
+	},
+	{
 		name: 'action menu at the bottom of the viewport: opens above its button, inside the viewport, and scrolls nothing (click, ArrowDown, ArrowUp)',
 		consumers: ['dom', 'react19', 'react18'],
 		async run(browser, consumer) {

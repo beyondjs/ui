@@ -4,7 +4,7 @@
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { Header, NotificationEntry, NotificationInbox, Button, ActionMenu, Dialog, confirm, prompt, Picker, Collection, Help, Tooltip, Field, FocusedForm, Toaster, status } from '@beyond-js/ui';
+import { Header, NotificationEntry, NotificationInbox, Button, ActionMenu, ChoiceMenu, Dialog, confirm, prompt, Picker, Collection, Help, Tooltip, Field, FocusedForm, Toaster, status } from '@beyond-js/ui';
 import { People, teams } from '../data/people.js';
 import { rows, states } from '../data/rows.js';
 import { Notices } from '../data/notices.js';
@@ -47,6 +47,9 @@ row(actions).append(
 	keep(new ActionMenu({ label: 'More', name: 'More actions', items: [{ label: 'Duplicate', run: () => log.push('menu:duplicate') }, { label: 'Archive', disabled: true, reason: 'Only owners archive' }, { label: 'Toast', run: () => toaster.show('Saved') }] })).element,
 	keep(builder(status('Live', 'success'))).element
 );
+
+// One choice among a few things that have a state, beside the picker of many
+keep(new ChoiceMenu({ label: 'Environment', placeholder: 'Choose', options: [{ value: 'web', label: 'web', detail: 'acme/web, acme/api', status: ['Running', 'success'] }, { value: 'laboratory-with-a-long-name', label: 'laboratory-with-a-long-name', detail: 'No repository yet', status: ['Machine missing', 'danger'] }, { value: 'old', label: 'old', status: ['Deleted', 'neutral'], disabled: true, reason: 'Deleted environments take no work' }], actions: [{ label: 'New environment…', run: () => log.push('choice:new') }], onchange: value => log.push(`choice:${value}`) })).mount(section('picking'));
 
 const picker = keep(new Picker({
 	label: 'People in this batch',

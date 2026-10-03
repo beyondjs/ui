@@ -69,6 +69,33 @@ export class ActionMenu extends Component {
 	close(refocus?: boolean): void;
 }
 
+export interface ChoiceMenuOption {
+	value: string;
+	label: Content;
+	detail?: string | null;
+	status?: [string, 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'progress'] | null;
+	disabled?: boolean;
+	reason?: string | null;
+}
+export interface ChoiceMenuAction {
+	label: Content;
+	run: () => void;
+	disabled?: boolean;
+	reason?: string | null;
+}
+export class ChoiceMenu extends Component {
+	constructor(options: { label: string; options: Array<ChoiceMenuOption | null | false>; value?: string | null; placeholder?: string; actions?: Array<ChoiceMenuAction | null | false>; disabled?: boolean; align?: 'start' | 'end'; placement?: 'auto' | 'below' | 'above'; onchange?: ((value: string) => void) | null });
+	readonly control: HTMLButtonElement;
+	readonly expanded: boolean;
+	readonly chosen: ChoiceMenuOption | null;
+	value: string | null;
+	set disabled(disabled: boolean);
+	set options(options: Array<ChoiceMenuOption | null | false>);
+	set actions(actions: Array<ChoiceMenuAction | null | false>);
+	open(): void;
+	close(refocus?: boolean): void;
+}
+
 export interface DisclosureOptions {
 	label: Content | Content[];
 	name?: string | null;

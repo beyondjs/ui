@@ -1,0 +1,114 @@
+/* A choice among a few things that have a state (ChoiceMenu): a button that names the choice and
+   its state, and the family's menu with each option's state and detail. Its words are never cut:
+   the button grows, and wraps inside a narrow container. */
+.bui-choice {
+	max-width: 100%;
+}
+.bui-choice-button {
+	display: inline-flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--space-1) var(--space-2);
+	max-width: 100%;
+	min-height: var(--bui-control);
+	padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+	border: 1px solid var(--color-border-control);
+	border-radius: var(--radius-control);
+	background: var(--color-surface);
+	color: var(--color-text);
+	font: inherit;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	text-align: left;
+	cursor: pointer;
+}
+.bui-choice-button:hover {
+	background: var(--color-surface-sunken);
+}
+.bui-choice-button:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+}
+.bui-choice-button:disabled {
+	color: var(--color-text-muted);
+	background: var(--color-surface-sunken);
+	cursor: not-allowed;
+}
+.bui-choice-button[data-tone='danger'] {
+	border-color: var(--color-danger);
+}
+.bui-choice-button[data-tone='warning'] {
+	border-color: var(--color-warning);
+}
+.bui-choice-label {
+	color: var(--color-text-muted);
+}
+.bui-choice-value {
+	font-weight: var(--weight-medium);
+	overflow-wrap: anywhere;
+}
+.bui-choice-empty .bui-choice-value {
+	color: var(--color-text-muted);
+	font-weight: var(--weight-regular);
+}
+.bui-choice-dot {
+	display: inline-flex;
+}
+.bui-choice-dot .bui-status-dot {
+	margin-top: 0;
+}
+.bui-choice-state {
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+}
+.bui-choice-button[data-tone='danger'] .bui-choice-state {
+	color: var(--color-danger);
+}
+.bui-choice-button > .bui-icon {
+	margin-left: auto;
+	color: var(--color-text-muted);
+}
+.bui-choice-list {
+	min-width: max(100%, 16rem);
+}
+.bui-choice-item {
+	gap: 2px;
+}
+/* A long detail or reason wraps inside the menu instead of running past its edge */
+.bui-choice-item > * {
+	max-width: 100%;
+	overflow-wrap: anywhere;
+}
+.bui-choice-line {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	width: 100%;
+}
+.bui-choice-line > .bui-icon,
+.bui-choice-space {
+	flex: none;
+	width: 16px;
+	height: 16px;
+}
+.bui-choice-name {
+	flex: 1 1 auto;
+	font-weight: var(--weight-medium);
+}
+.bui-choice-line > .bui-status {
+	flex: none;
+	font-size: var(--text-label);
+}
+.bui-choice-detail {
+	padding-left: calc(16px + var(--space-2));
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+}
+.bui-choice-item .bui-menu-reason {
+	padding-left: calc(16px + var(--space-2));
+}
+.bui-menu-separator {
+	height: 1px;
+	margin: var(--space-1) var(--space-2);
+	background: var(--color-border);
+}

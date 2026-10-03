@@ -1,5 +1,5 @@
 // A plain DOM consumer in TypeScript: compiled, never run, to check the `dom` and `tokens` declarations.
-import { Dialog, Picker, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Unavailable, Button, badge, availability, icon, icons, unlabeled, Preferences, type Appearance, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor } from '@beyond-js/ui';
+import { Dialog, Picker, ChoiceMenu, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Unavailable, Button, badge, availability, icon, icons, unlabeled, Preferences, type Appearance, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor } from '@beyond-js/ui';
 import { tokens, TokenSheet } from '@beyond-js/ui/tokens';
 
 declare const adapter: NotificationAdapter;
@@ -37,3 +37,7 @@ preferences.apply({ appearance: null, locale: 'es' });
 const release: () => void = preferences.subscribe(values => values.appearance === 'dark' && glyphs.length && bare.length);
 const appearance: Appearance = preferences.choose({ appearance: 'system' }).appearance;
 void [release, appearance, preferences.labels.everywhere, Preferences.labels.es.everywhere];
+const engine = new ChoiceMenu({ label: 'AI engine', placeholder: 'Choose', options: [{ value: 'claude', label: 'Claude Code', detail: 'Signed in', status: ['Ready', 'success'] }, false], actions: [{ label: 'Connect another…', run: () => undefined }], onchange: (value: string) => value }).mount(document.body);
+engine.value = 'claude';
+const chosen: string | null = engine.chosen?.value ?? null;
+engine.disabled = !chosen;

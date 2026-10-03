@@ -3,6 +3,7 @@ import { el, content } from './core/element.js';
 import { Glyph } from './core/icons.js';
 import { Hint } from './core/hint.js';
 import { Ids } from './core/ids.js';
+import { Placement } from './core/placement.js';
 
 /**
  * A menu button of actions: the ARIA menu pattern.
@@ -22,7 +23,6 @@ import { Ids } from './core/ids.js';
  */
 export class ActionMenu extends Component {
 	#hint;
-	static #margin = 8;
 	#element;
 	#button;
 	#list;
@@ -42,7 +42,7 @@ export class ActionMenu extends Component {
 	 */
 	constructor({ label, name = null, items, align = 'end', glyph = 'more', placement = 'auto' }) {
 		super();
-		this.#placement = ['auto', 'below', 'above'].includes(placement) ? placement : 'auto';
+		this.#placement = new Placement(placement);
 		const id = Ids.next('bui-menu');
 		this.#button = el(
 			'button',
@@ -92,7 +92,7 @@ export class ActionMenu extends Component {
 			this.#open = true;
 			this.#list.hidden = false;
 			this.#button.setAttribute('aria-expanded', 'true');
-			this.#place();
+			this.#placement.place(this.#list, this.#button);
 			this.#release = this.listen(this.#element.ownerDocument, 'pointerdown', event => {
 				if (!this.#element.contains(event.target)) this.close(false);
 			});
@@ -108,32 +108,6 @@ export class ActionMenu extends Component {
 		this.#button.setAttribute('aria-expanded', 'false');
 		this.#release?.();
 		if (refocus) this.#button.focus({ preventScroll: true });
-	}
-
-	/**
-	 * Keeps the open list inside the viewport: on the side its placement asks for (below, or above when
-	 * `auto` finds no room below and more room above), shifted sideways when an edge would cut it, and
-	 * no taller than the room on its side.
-	 */
-	#place() {
-		const list = this.#list;
-		list.classList.remove('bui-menu-above');
-		list.style.removeProperty('max-height');
-		list.style.removeProperty('translate');
-		const view = this.#element.ownerDocument.defaultView;
-		if (!view) return;
-		const margin = ActionMenu.#margin;
-		const anchor = this.#button.getBoundingClientRect();
-		const height = list.getBoundingClientRect().height;
-		const below = view.innerHeight - anchor.bottom - margin;
-		const above = anchor.top - margin;
-		const up = this.#placement === 'above' || (this.#placement === 'auto' && height > below && above > below);
-		list.classList.toggle('bui-menu-above', up);
-		const box = list.getBoundingClientRect();
-		const room = up ? box.bottom - margin : view.innerHeight - margin - box.top;
-		if (box.height > room) list.style.maxHeight = `${Math.max(Math.floor(room), 0)}px`;
-		const shift = box.left < margin ? margin - box.left : box.right > view.innerWidth - margin ? view.innerWidth - margin - box.right : 0;
-		if (shift) list.style.translate = `${Math.round(shift)}px 0`;
 	}
 
 	#item({ label, run = null, href = null, disabled = false, reason = null, tone = null }) {
