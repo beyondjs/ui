@@ -66,8 +66,12 @@ export const defaults = {
 	signout: 'Sign out'
 };
 
-/** Display names of the family's products; a product passes `products` to add or rename one. */
-export const names = {
+/**
+ * Display names of the family's products, never translated. Public as `productNames` (since 0.4.1),
+ * so a product names another one (a notice's product, a link) the way the bar does instead of keeping
+ * its own copy; a product passes the bar's `products` option to add or rename one.
+ */
+export const names = Object.freeze({
 	projects: 'Projects',
 	workspace: 'Workspace',
 	delegate: 'Delegate',
@@ -77,4 +81,4 @@ export const names = {
 	accounts: 'Accounts',
 	desktop: 'Desktop',
 	docs: 'Docs'
-};
+});

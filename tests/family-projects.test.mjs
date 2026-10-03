@@ -1,7 +1,7 @@
 import { test, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { Page } from './support/page.mjs';
-import { inside, annotated, many, member, nobody, standing } from './fixtures/family.mjs';
+import { inside, outside, annotated, many, member, nobody, standing } from './fixtures/family.mjs';
 
 /** The 0.4.0 location: project rows with their state, the chooser outside a project, search, notice and organizations. */
 const page = new Page();
@@ -60,6 +60,48 @@ test('outside a project: "Choose a project", no overview, and an empty catalog s
 	assert.equal(menu(empty, 'project').querySelector('.bui-navmenu-none').textContent, 'Northwind has no projects yet');
 	assert.deepEqual(texts(rows(empty, 'project')), ['All projects of Northwind'], 'never an empty menu');
 	empty.destroy();
+});
+
+test('in Projects itself the chooser offers no "Project overview": that page is the one in view', () => {
+	const bar = make({ product: 'projects', descriptor: annotated, fallback: { links: { projects: 'http://localhost/projects/?organization=org_north' } } });
+	const labels = texts(rows(bar, 'project'));
+	assert.ok(!labels.includes('Project overview'));
+	assert.equal(labels.at(-1), 'All projects of Northwind', 'the organization\'s projects stay offered');
+	bar.destroy();
+	const elsewhere = make({ product: 'cdn', descriptor: annotated });
+	assert.ok(texts(rows(elsewhere, 'project')).includes('Project overview'), 'every other product keeps it');
+	elsewhere.destroy();
+});
+
+test('a row without `here.url` stays in the product whose entry is open, inside a project and outside one', () => {
+	const own = url => ({ product: 'snapshots', url, available: true });
+	const away = make({ product: 'snapshots', descriptor: { ...outside, products: [...outside.products, own('https://snapshots.example.test/')] } });
+	assert.deepEqual(rows(away, 'project').slice(0, 2).map(item => item.getAttribute('href')), ['https://snapshots.example.test/?project=prj_docs', 'https://snapshots.example.test/?project=prj_shop'], 'outside a project: the entry carries no project and the row adds it');
+	away.destroy();
+	const within = make({ product: 'snapshots', descriptor: { ...inside, products: [...inside.products.filter(item => item.product !== 'snapshots'), own('https://snapshots.example.test/?project=prj_shop')] } });
+	assert.equal(rows(within, 'project')[1].getAttribute('href'), 'https://snapshots.example.test/?project=prj_docs', 'inside a project: the chosen project replaces the one in view');
+	within.destroy();
+	const advisory = make({ product: 'snapshots', descriptor: { ...outside, products: [...outside.products, { product: 'snapshots', url: 'https://snapshots.example.test/', available: false, reason: 'NOT_ADMITTED' }] } });
+	assert.equal(rows(advisory, 'project')[0].getAttribute('href'), 'https://snapshots.example.test/?project=prj_docs', 'an advisory reason keeps the entry open');
+	advisory.destroy();
+	const closed = make({ product: 'snapshots', descriptor: { ...outside, products: [...outside.products, { product: 'snapshots', url: 'https://snapshots.example.test/', available: false, reason: 'UNCONFIGURED' }] } });
+	assert.equal(rows(closed, 'project')[0].getAttribute('href'), 'http://localhost/projects/?project=prj_docs', 'no open entry: the project in Projects');
+	closed.destroy();
+	const missing = make({ product: 'snapshots', descriptor: outside });
+	assert.equal(rows(missing, 'project')[0].getAttribute('href'), 'http://localhost/projects/?project=prj_docs', 'no entry at all: the project in Projects');
+	missing.destroy();
+});
+
+test('productNames: the family\'s display names, the ones the bar draws, frozen, from both entry points', async () => {
+	assert.deepEqual({ ...ui.productNames }, { projects: 'Projects', workspace: 'Workspace', delegate: 'Delegate', cdn: 'CDN', snapshots: 'Snapshots', conduict: 'Conduict', accounts: 'Accounts', desktop: 'Desktop', docs: 'Docs' });
+	assert.ok(Object.isFrozen(ui.productNames));
+	assert.throws(() => { 'use strict'; ui.productNames.cdn = 'Content'; }, TypeError, 'a consumer cannot rename a product for every other');
+	assert.equal(ui.productNames.cdn, 'CDN');
+	const bar = make({ product: 'conduict', descriptor: null });
+	assert.equal(bar.element.querySelector('.bui-family-here .bui-navmenu-label').textContent, ui.productNames.conduict, 'the bar draws the same name');
+	bar.destroy();
+	const react = await import('@beyond-js/ui/react');
+	assert.equal(react.productNames, ui.productNames, 'one object for the DOM and React consumers');
 });
 
 test('search: offered past eight rows, filters without case or accents, says when nothing matches and recovers', () => {

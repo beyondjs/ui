@@ -3,8 +3,8 @@ import type { ReactNode, ReactElement, Ref, RefAttributes, ForwardRefExoticCompo
 import type { Copy, NotificationAdapter, Notice } from './notifications.js';
 import type { Tone, MenuItem, ChoiceOption, SelectOption, PromptOptions, QuestionOptions, Crumb, CollectionState, InboxState, PickerChoice, PickerSource, Component } from './dom.js';
 export type { Copy, NotificationAdapter, Notice, NoticePage, NoticeRequest, NoticeSource, NoticeSummary } from './notifications.js';
-export { confirm, prompt, alert, availability } from './dom.js';
-export type { AvailabilityState, Consequence, FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, FamilyProduct, FamilyReason, FamilyHere, FamilyManage, FamilyNotice, FamilyOrganization, FamilyProjectState, ProductNavItem, SidebarGroup, SidebarItem, UnavailableKind } from './dom.js';
+export { confirm, prompt, alert, availability, productNames } from './dom.js';
+export type { AvailabilityState, Consequence, FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, FamilyProduct, FamilyProductId, FamilyProductNames, FamilyReason, FamilyHere, FamilyManage, FamilyNotice, FamilyOrganization, FamilyProjectState, ProductNavItem, SidebarGroup, SidebarItem, UnavailableKind } from './dom.js';
 import type { FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, ProductNavItem, SidebarGroup, UnavailableKind } from './dom.js';
 
 /** An icon of the catalog: 16, 20 (default) or 24 px; decorative without `label`. */

@@ -1,7 +1,7 @@
 // A React consumer as Delegate writes one (TypeScript, bundler resolution, react-jsx). It is
 // compiled, never run: it proves the declarations of `@beyond-js/ui/react` accept real usage.
 import { useRef, useState } from 'react';
-import { Button, Dialog, Field, FocusedForm, Header, NotificationEntry, NotificationInbox, Picker, Collection, Help, Tooltip, ActionMenu, Select, Choices, useConfirm, useBusy, useToaster, FamilyBar, ProductNav, Sidebar, Unavailable, Badge, availability, Icon, icons, Preferences, usePreferences, type FamilyDescriptor, type NotificationAdapter, type NotificationEntryHandle, type PickerHandle } from '@beyond-js/ui/react';
+import { Button, Dialog, Field, FocusedForm, Header, NotificationEntry, NotificationInbox, Picker, Collection, Help, Tooltip, ActionMenu, Select, Choices, useConfirm, useBusy, useToaster, FamilyBar, ProductNav, Sidebar, Unavailable, Badge, availability, productNames, Icon, icons, Preferences, usePreferences, type FamilyDescriptor, type NotificationAdapter, type NotificationEntryHandle, type PickerHandle } from '@beyond-js/ui/react';
 
 declare const adapter: NotificationAdapter;
 type Row = { id: string; title: string; votes: number };

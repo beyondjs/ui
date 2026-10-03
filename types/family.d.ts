@@ -1,4 +1,4 @@
-/** Types of the family patterns, re-exported by `@beyond-js/ui/dom`: FamilyBar, ProductNav, Sidebar (0.4.0), Unavailable and availability. */
+/** Types of the family patterns, re-exported by `@beyond-js/ui/dom`: FamilyBar, productNames (0.4.1), ProductNav, Sidebar (0.4.0), Unavailable and availability. */
 import type { Component, Content, Copy, Tone } from './dom.js';
 
 /** Why a product entry is unavailable, as Beyond Projects reports it; other codes read "Not available". */
@@ -147,6 +147,18 @@ export interface FamilyBarOptions {
 	transient?: string[];
 	labels?: FamilyLabels;
 }
+
+/** The id of a product of the family, as `productNames` keys it. */
+export type FamilyProductId = 'projects' | 'workspace' | 'delegate' | 'cdn' | 'snapshots' | 'conduict' | 'accounts' | 'desktop' | 'docs';
+
+/** Display names by product id: every family product is named; any other id may be absent. */
+export type FamilyProductNames = { readonly [id in FamilyProductId]: string } & { readonly [id: string]: string | undefined };
+
+/**
+ * The family's display names of its products by id (0.4.1), never translated: the names the family
+ * bar draws. A product names another one with them instead of keeping its own copy. Frozen.
+ */
+export const productNames: FamilyProductNames;
 
 /** The family bar every signed-in product renders. */
 export class FamilyBar extends Component {

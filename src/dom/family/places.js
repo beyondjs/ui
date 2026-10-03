@@ -7,9 +7,10 @@
  * `links.home` (Beyond Projects), or the product's own `brand.href` when neither names it.
  *
  * A project row goes to `here.url`, the address the relaying product gave for that project, when it
- * has one; otherwise to the current product's entry for it when that entry is available (or its
- * reason is advisory), otherwise to the project in Projects. "All projects" goes to the product's own
+ * has one; otherwise to the current product's entry with `project=<id>` when that entry is available
+ * (or its reason is advisory), inside a project or outside one; otherwise to the project in Projects. "All projects" goes to the product's own
  * projects page (`fallback.links.projects`) and only without one to the organization in Projects.
+ * "Project overview" is Projects' page for the project, offered in every product but Projects.
  */
 export class Places {
 	static #keys = ['home', 'account', 'members', 'docs', 'projects'];
@@ -63,17 +64,25 @@ export class Places {
 		return this.#links.projects ?? this.organization(id);
 	}
 
-	/** Projects' page for the project in view ("Project overview"), or null. */
+	/**
+	 * Projects' page for the project in view ("Project overview"), or null. Null in Projects itself,
+	 * where that page is the one the person is already on.
+	 */
 	get overview() {
+		if (this.#product === 'projects') return null;
 		const item = (this.#descriptor?.products ?? []).find(entry => entry.product === 'projects' && entry.url);
 		return item?.url ?? null;
 	}
 
-	/** One project: `here.url` when given; in the current product when its entry is open; otherwise in Projects. */
+	/**
+	 * One project: `here.url` when given; in the current product when its entry is open, inside a
+	 * project or outside one (its address with `project=<id>`: every signed-in product accepts that
+	 * arrival, so choosing a project never leaves the product); otherwise in Projects.
+	 */
 	project(id, here = null) {
 		if (typeof here?.url === 'string' && here.url) return here.url;
 		const products = this.#descriptor?.products ?? [];
-		const own = products.find(item => item.product === this.#product && this.open(item) && Places.#carries(item.url));
+		const own = products.find(item => item.product === this.#product && this.open(item));
 		const projects = products.find(item => item.product === 'projects' && item.url && Places.#carries(item.url));
 		const base = own ?? projects;
 		return Places.#with(base ? base.url : this.home, { project: id });

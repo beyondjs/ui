@@ -1,5 +1,5 @@
 // A plain DOM consumer in TypeScript: compiled, never run, to check the `dom` and `tokens` declarations.
-import { Dialog, Picker, ChoiceMenu, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Sidebar, Unavailable, Button, badge, availability, icon, icons, unlabeled, Preferences, type Appearance, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor, type FamilyNotice } from '@beyond-js/ui';
+import { productNames, type FamilyProductId, Dialog, Picker, ChoiceMenu, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Sidebar, Unavailable, Button, badge, availability, icon, icons, unlabeled, Preferences, type Appearance, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor, type FamilyNotice } from '@beyond-js/ui';
 import { tokens, TokenSheet } from '@beyond-js/ui/tokens';
 
 declare const adapter: NotificationAdapter;
@@ -52,3 +52,12 @@ const engine = new ChoiceMenu({ label: 'AI engine', placeholder: 'Choose', optio
 engine.value = 'claude';
 const chosen: string | null = engine.chosen?.value ?? null;
 engine.disabled = !chosen;
+// The family's product names (0.4.1): every family id is a string, any other id may be absent, and none is writable.
+const delegate: string = productNames.delegate;
+const ids: FamilyProductId[] = ['conduict', 'desktop'];
+const named: string = productNames['notice-product'] ?? 'notice-product';
+// @ts-expect-error the names are read-only
+productNames.cdn = 'Content';
+// @ts-expect-error not a family product id
+const odd: FamilyProductId = 'mail';
+void [delegate, ids, named, odd];

@@ -14,6 +14,7 @@ export { FamilyBar, ProductNav, Unavailable, Sidebar } from './family.js';
 export { NotificationEntry, NotificationInbox, useToaster } from './notifications.js';
 export { confirm, prompt, alert } from '../dom/questions.js';
 export { availability } from '../dom/availability.js';
+export { names as productNames } from '../dom/family/labels.js';
 export { icons, unlabeled } from '../dom/core/icons.js';
 export { Preferences } from '../dom/preferences/preferences.js';
 export { usePreferences } from './preferences.js';
