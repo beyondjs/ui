@@ -1,7 +1,7 @@
 // A React consumer as Delegate writes one (TypeScript, bundler resolution, react-jsx). It is
 // compiled, never run: it proves the declarations of `@beyond-js/ui/react` accept real usage.
 import { useRef, useState } from 'react';
-import { Button, Dialog, Field, FocusedForm, Header, NotificationEntry, NotificationInbox, Picker, Collection, Help, Tooltip, ActionMenu, Select, Choices, useConfirm, useBusy, useToaster, FamilyBar, ProductNav, Unavailable, Badge, availability, Icon, icons, Preferences, usePreferences, type FamilyDescriptor, type NotificationAdapter, type NotificationEntryHandle, type PickerHandle } from '@beyond-js/ui/react';
+import { Button, Dialog, Field, FocusedForm, Header, NotificationEntry, NotificationInbox, Picker, Collection, Help, Tooltip, ActionMenu, Select, Choices, useConfirm, useBusy, useToaster, FamilyBar, ProductNav, Sidebar, Unavailable, Badge, availability, Icon, icons, Preferences, usePreferences, type FamilyDescriptor, type NotificationAdapter, type NotificationEntryHandle, type PickerHandle } from '@beyond-js/ui/react';
 
 declare const adapter: NotificationAdapter;
 type Row = { id: string; title: string; votes: number };
@@ -18,7 +18,8 @@ export function Screen() {
 	const { appearance, locale } = usePreferences(preferences);
 	return (
 		<>
-			<FamilyBar product="delegate" brand={{ src: '/wordmark.svg', href: '/' }} descriptor={null as FamilyDescriptor | null} fallback={{ project: 'Storefront', links: { account: '/account', home: '/projects/' } }} notifications={<NotificationEntry adapter={adapter} />} account={{ signout: () => undefined, items: [{ label: 'Atajos', onSelect: () => setOpen(true) }] }} onNavigate={item => item.href} labels={{ signout: 'Cerrar sesión' }} />
+			<FamilyBar product="delegate" brand={{ src: '/wordmark.svg', href: '/' }} descriptor={null as FamilyDescriptor | null} fallback={{ project: 'Storefront', links: { account: '/account', home: '/projects/' } }} notifications={<NotificationEntry adapter={adapter} />} account={{ signout: () => undefined, items: [{ label: 'Atajos', onSelect: () => setOpen(true) }] }} onNavigate={item => item.href} notice={{ text: 'Delegate isn’t set up for Northwind', action: { label: 'Try again', onSelect: () => setOpen(false) } }} transient={['dialog']} labels={{ signout: 'Cerrar sesión' }} />
+			<Sidebar product="Delegate" groups={[{ heading: 'Project', items: [{ label: 'Requests', href: '/r', current: true }] }]} context="Storefront" cut={850} onNavigate={item => item.url} />
 			<ProductNav items={[{ label: 'Pedidos', href: '/requests', current: true }]} onNavigate={item => item.href} />
 			<Unavailable title="Aún no" reason="Por invitación." owner="Ana" action={<Button label="Pedir acceso" />} kind="capability" />
 			{availability.map(entry => <Badge key={entry.key} label={entry.label} tone={entry.tone} />)}

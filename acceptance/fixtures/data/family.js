@@ -52,9 +52,41 @@ const fallbacks = {
 	bare: { person: 'Ana Pérez', links: addresses }
 };
 
-export const fallback = fallbacks[new URLSearchParams(location.search).get('fallback')] ?? fallbacks.names;
+export const fallback = { ...(fallbacks[new URLSearchParams(location.search).get('fallback')] ?? fallbacks.names) };
+fallback.links = { ...fallback.links, projects: `${location.origin}${location.pathname}#/projects` };
 
-export const descriptors = { inside, outside, loading: null, unavailable: { unavailable: true }, long, nandu };
+/** The product's sections, shown with `?sidebar=<cut>` (the width in px from which the sidebar is permanent). */
+export const sidebar = new URLSearchParams(location.search).get('sidebar');
+export const sections = (words = ['Projects', 'Project', 'Requests', 'Versions', 'Environments', 'Services', 'Consumption', 'Settings']) => [
+	{ items: [{ label: words[0], href: '#/projects' }] },
+	{ heading: words[1], items: words.slice(2).map((label, index) => ({ label, href: `#/${index}`, current: index === 0, meta: index === 0 ? 3 : null })) }
+];
+
+// 0.4.0 shapes: rows annotated with `here` (Projects' `mapped` and `url`, the state the product
+// wrote), a row only Delegate has, organizations with the product's own arrival, Accounts' pages.
+const manage = {
+	account: 'https://accounts.example.test/account',
+	organizations: 'https://accounts.example.test/organizations',
+	create: 'https://accounts.example.test/organizations?view=create',
+	members: 'https://accounts.example.test/organizations/org_north?view=members',
+	settings: 'https://accounts.example.test/organizations/org_north?view=settings'
+};
+const here = id => `${location.origin}${location.pathname}?family=annotated&project=${id}`;
+const annotated = {
+	...inside,
+	organizations: [{ ...inside.organizations[0], url: `${location.origin}${location.pathname}?family=annotated&organization=org_north` }, inside.organizations[1]],
+	projects: [
+		{ id: 'prj_shop', name: 'Storefront redesign', current: true, here: { mapped: 1, url: here('prj_shop') } },
+		{ id: 'prj_docs', name: 'Handbook', here: { mapped: 0, url: here('prj_docs') } },
+		{ id: 'prj_ads', name: 'Advertising campaign for the spring catalogue', here: { mapped: 1, state: 'denied', url: here('prj_ads') } },
+		{ id: 'dlg_nora', name: 'Nora sample', here: { state: 'only', url: here('dlg_nora') } }
+	],
+	links: { ...inside.links, manage }
+};
+const names = ['Atlas', 'Beacon', 'Comet', 'Delta', 'Échelle', 'Forge', 'Garnet', 'Harbor', 'Iris', 'Juniper', 'Kestrel', 'Lumen'];
+const many = { ...annotated, project: null, products: outside.products, projects: names.map((name, index) => ({ id: `prj_${index}`, name, here: { mapped: index % 3 ? 1 : 0, url: here(`prj_${index}`) } })) };
+
+export const descriptors = { inside, outside, loading: null, unavailable: { unavailable: true }, long, nandu, annotated, many };
 
 /** The product the bar is in, named by `?product=` (`delegate` by default), to measure other product names. */
 export const product = new URLSearchParams(location.search).get('product') ?? 'delegate';

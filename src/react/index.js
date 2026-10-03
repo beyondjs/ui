@@ -10,7 +10,7 @@ export { Dialog, useConfirm, FocusedForm } from './dialog.js';
 export { Picker } from './picker.js';
 export { Collection } from './collection.js';
 export { Header, Disclosure, ActionMenu, Help, Tooltip } from './chrome.js';
-export { FamilyBar, ProductNav, Unavailable } from './family.js';
+export { FamilyBar, ProductNav, Unavailable, Sidebar } from './family.js';
 export { NotificationEntry, NotificationInbox, useToaster } from './notifications.js';
 export { confirm, prompt, alert } from '../dom/questions.js';
 export { availability } from '../dom/availability.js';

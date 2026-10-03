@@ -2,7 +2,8 @@
  * A notification adapter for the fixture pages, in one of the modes a check selects with
  * `?notices=`: `ready` (default), `empty`, `failed` (every call fails until `recover()`),
  * `unavailable` (aggregation not configured), `partial` (CDN did not answer) and `bound` (the
- * summary stops counting at 2, `more: true`). `ready` answers as a product relay (`unavailable`);
+ * summary stops counting at 2, `more: true`) and `slow` (`ready`, but every call takes `?delay=` ms,
+ * 900 by default). `ready` answers as a product relay (`unavailable`);
  * `partial` and `bound` answer as Beyond Projects does (`sources: [{ product, state }]`).
  */
 export class Notices {
@@ -36,7 +37,8 @@ export class Notices {
 	}
 
 	get adapter() {
-		const wait = () => new Promise(resolve => setTimeout(resolve, 80));
+		const slow = Number(new URLSearchParams(location.search).get('delay') ?? 900);
+		const wait = () => new Promise(resolve => setTimeout(resolve, this.#mode === 'slow' ? slow : 80));
 		const guard = async () => {
 			await wait();
 			if (this.#mode === 'failed') throw new Error('relay down');

@@ -8,7 +8,7 @@ export const defaults = {
 	caught: 'You are all caught up.',
 	failure: 'Notifications could not be loaded.',
 	retry: 'Try again',
-	unavailable: 'Notifications are unavailable right now. Your work is not affected; try again later.',
+	unavailable: 'Notifications are unavailable right now. Everything else works.',
 	partial: ({ products }) => `Some products could not be reached (${products}). Their notifications are hidden until they answer.`,
 	all: 'View all notifications',
 	everything: 'Mark all as read',

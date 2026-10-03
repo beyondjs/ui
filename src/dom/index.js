@@ -33,3 +33,4 @@ export { availability } from './availability.js';
 export { Preferences } from './preferences/preferences.js';
 export { NotificationEntry } from './notifications/entry.js';
 export { NotificationInbox } from './notifications/inbox.js';
+export { Sidebar } from './sidebar/sidebar.js';

@@ -1,9 +1,9 @@
 import { test, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { Page } from './support/page.mjs';
-import { inside, outside } from './fixtures/family.mjs';
+import { inside, outside, annotated } from './fixtures/family.mjs';
 
-/** The React adapter of the family patterns: FamilyBar, ProductNav, Unavailable and availability. */
+/** The React adapter of the family patterns: FamilyBar, ProductNav, Sidebar, Unavailable and availability. */
 const page = new Page();
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const { default: React } = await import('react');
@@ -44,7 +44,7 @@ test('FamilyBar renders the descriptor prop, puts React notifications in its slo
 	assert.deepEqual(end.map(node => node.className), ['bui-family-docs', 'bui-slot', 'bui-disclosure bui-navmenu bui-family-account']);
 	assert.equal(end[1].querySelector('.bell').textContent, 'Avisos');
 	await render(view(outside));
-	assert.equal(bar.querySelector('[data-part="project"]'), null, 'the new descriptor is drawn');
+	assert.equal(bar.querySelector('.bui-family-wide [data-part="project"] .bui-navmenu-button').textContent, 'Choose a project', 'the new descriptor is drawn');
 	await render(view({ unavailable: true }));
 	assert.equal(bar.dataset.state, 'unavailable');
 });
@@ -93,4 +93,43 @@ test('Unavailable renders the markup of the DOM class; availability is exported'
 	assert.deepEqual(shape(section), shape(expected));
 	assert.equal(section.getAttribute('aria-labelledby'), section.querySelector('h3').id);
 	assert.ok(ui.availability === dom.availability);
+});
+
+test('FamilyBar applies its notice prop and calls the latest action', async () => {
+	const calls = [];
+	const view = (text, tag) => h(ui.FamilyBar, { product: 'delegate', brand, descriptor: annotated, notice: text ? { text, action: { label: 'Try again', onSelect: () => calls.push(tag) } } : null, account: { signout: () => {} } });
+	await render(view('Beyond Projects didn\'t answer.', 'a'));
+	await render(view('Beyond Projects didn\'t answer.', 'b'));
+	const bar = document.querySelector('.bui-family');
+	const line = () => bar.querySelector('.bui-family-wide [data-part="project"] .bui-navmenu-notice');
+	assert.equal(line().querySelector('span').textContent, 'Beyond Projects didn\'t answer.');
+	await act(async () => line().querySelector('button').click());
+	assert.deepEqual(calls, ['b']);
+	await render(view(null));
+	assert.equal(line(), null);
+});
+
+test('Sidebar renders its groups, follows its props and opens its drawer below the cut', async () => {
+	const seen = [];
+	const groups = current => [{ heading: 'Project', items: [{ label: 'Requests', href: '/requests', current: current === 0 }, { label: 'Versions', href: '/versions', current: current === 1 }] }];
+	const view = (current, cut) => h('div', { className: 'bui-shell' }, h(ui.Sidebar, { product: 'Delegate', groups: groups(current), context: 'Storefront', cut, onNavigate: item => seen.push(item.href) }), h('main', null, 'content'));
+	await render(view(0, 800));
+	assert.equal(document.querySelectorAll('.bui-sidebar').length, 1, 'development double mount leaves one sidebar');
+	const sidebar = document.querySelector('.bui-sidebar');
+	assert.equal(sidebar.dataset.mode, 'permanent');
+	assert.equal(sidebar.querySelector('.bui-sidebar-panel [aria-current="page"]').textContent, 'Requests');
+	await render(view(1, 800));
+	assert.equal(sidebar.querySelector('.bui-sidebar-panel [aria-current="page"]').textContent, 'Versions');
+	assert.equal(sidebar.querySelector('.bui-sidebar-context-name').textContent, 'Storefront');
+	await render(view(1, 1200));
+	const drawer = document.querySelector('.bui-sidebar');
+	assert.equal(drawer.dataset.mode, 'drawer', 'a new cut creates a new sidebar');
+	await act(async () => drawer.querySelector('.bui-sidebar-button').click());
+	assert.equal(drawer.querySelector('dialog').open, true);
+	await act(async () => drawer.querySelector('dialog a[href="/requests"]').dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 })));
+	assert.equal(drawer.querySelector('dialog').open, false);
+	assert.deepEqual(seen, ['/requests']);
+	await act(() => root.unmount());
+	root = null;
+	assert.equal(document.querySelector('.bui-sidebar'), null);
 });

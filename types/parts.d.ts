@@ -98,6 +98,8 @@ export interface NotificationEntryOptions {
 	labels?: Copy;
 }
 export class NotificationEntry extends Disclosure {
+	/** Milliseconds before the panel's loading indicator shows (default 250); a quicker answer never shows it. */
+	static delay: number;
 	constructor(options: NotificationEntryOptions);
 	/** The unread count shown, or null while unknown. */
 	readonly count: number | null;

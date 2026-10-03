@@ -37,6 +37,7 @@
 	background: none;
 	color: var(--color-link);
 	font: inherit;
+	font-weight: var(--weight-regular);
 	text-align: left;
 	overflow-wrap: anywhere;
 	cursor: pointer;

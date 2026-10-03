@@ -13,9 +13,10 @@ const bell = entry => entry.button;
 const badge = entry => entry.element.querySelector('.bui-count');
 const titles = root => [...root.querySelectorAll('.bui-notice-open')].filter(node => !node.closest('[hidden]')).map(node => node.textContent);
 
+/** Opens the panel and waits until its body is no longer busy (the answer arrived). */
 async function opened(entry) {
 	bell(entry).click();
-	await page.until(() => !entry.panel.querySelector('.bui-loading'));
+	await page.until(() => entry.panel.querySelector('.bui-notify-body').getAttribute('aria-busy') === 'false');
 }
 
 test('the count shows when known and hides while unknown, failed or unavailable', async () => {

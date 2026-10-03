@@ -4,8 +4,8 @@ import type { Copy, NotificationAdapter, Notice } from './notifications.js';
 import type { Tone, MenuItem, ChoiceOption, SelectOption, PromptOptions, QuestionOptions, Crumb, CollectionState, InboxState, PickerChoice, PickerSource, Component } from './dom.js';
 export type { Copy, NotificationAdapter, Notice, NoticePage, NoticeRequest, NoticeSource, NoticeSummary } from './notifications.js';
 export { confirm, prompt, alert, availability } from './dom.js';
-export type { AvailabilityState, Consequence, FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, FamilyProduct, FamilyReason, ProductNavItem, UnavailableKind } from './dom.js';
-import type { FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, ProductNavItem, UnavailableKind } from './dom.js';
+export type { AvailabilityState, Consequence, FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, FamilyProduct, FamilyReason, FamilyHere, FamilyManage, FamilyNotice, FamilyOrganization, FamilyProjectState, ProductNavItem, SidebarGroup, SidebarItem, UnavailableKind } from './dom.js';
+import type { FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, ProductNavItem, SidebarGroup, UnavailableKind } from './dom.js';
 
 /** An icon of the catalog: 16, 20 (default) or 24 px; decorative without `label`. */
 export function Icon(props: { name: IconName; size?: IconSize; label?: string | null }): ReactElement;
@@ -134,11 +134,17 @@ export interface FamilyBarProps {
 	toggle?: { controls: string; expanded: boolean; onChange?: (expanded: boolean) => void } | null;
 	onNavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null;
 	advisory?: string[];
+	/** One line at the top of the project menu (0.4.0); its action's `onSelect` is called with the latest props. */
+	notice?: { text: string; href?: string | null; action?: { label: string; href?: string | null; onSelect?: (() => void) | null } | null } | null;
+	/** The product's own dialog markers, left out of the address Accounts returns to (0.4.0). */
+	transient?: string[];
 	/** Memoize: a new object creates a new bar */
 	labels?: Copy;
 }
 /** The family bar, driven by the DOM `FamilyBar`; `descriptor` and `fallback` are applied when they change. */
 export function FamilyBar(props: FamilyBarProps): ReactElement;
+/** A product's sections (0.4.0), driven by the DOM `Sidebar`; place it first in a `.bui-shell` element. */
+export function Sidebar(props: { product: string; groups?: SidebarGroup[]; context?: string | { label?: string | null; name: string } | null; cut?: number; section?: string | null; onNavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null; labels?: { sections?: string; close?: string } }): ReactElement;
 export function ProductNav(props: { items: Array<ProductNavItem | null | false>; label?: string | null; sticky?: boolean; onNavigate?: ((item: ProductNavItem, event: MouseEvent) => void) | null; labels?: { nav?: string } }): ReactElement;
 export function Unavailable(props: { title: ReactNode; reason: ReactNode; owner?: ReactNode; action?: ReactNode; secondary?: ReactNode; kind?: UnavailableKind; code?: string | null; level?: 2 | 3 | 4 | 5 | 6; labels?: { owner?: string } }): ReactElement;
 export function Disclosure(props: { label: string; name?: string | null; align?: 'start' | 'end'; onChange?: (open: boolean) => void; children?: ReactNode }): ReactElement;

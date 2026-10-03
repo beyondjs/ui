@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { FamilyBar as Bar } from '../dom/family/bar.js';
 import { ProductNav as Row } from '../dom/nav.js';
 import { Unavailable as Missing, glyphs } from '../dom/unavailable.js';
+import { Sidebar as Sections } from '../dom/sidebar/sidebar.js';
 import { Mark, Badge } from './simple.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 
@@ -12,13 +13,14 @@ const { useId, useState } = React;
  * The family bar, driven by the DOM `FamilyBar` class. `descriptor` is a prop (null while loading,
  * `{ unavailable: true }` when the relay failed); `notifications` is React content rendered into its
  * slot; `account.signout` and `account.items[].onSelect` are called with the latest props.
- * `onNavigate(item, event)` takes over plain clicks on the bar's same-origin links. A change of
- * `product`, `brand`, `products`, `labels` (memoize it), `advisory`, the account entries or `toggle`
- * creates a new bar.
+ * `onNavigate(item, event)` takes over plain clicks on the bar's same-origin links. `notice` is
+ * applied when its text, address or action label change, and its `action.onSelect` is called with
+ * the latest props. A change of `product`, `brand`, `products`, `labels` (memoize it), `advisory`,
+ * `transient`, the account entries or `toggle` creates a new bar.
  */
-export function FamilyBar({ product, brand, descriptor = null, fallback = null, products = {}, notifications = null, account = {}, toggle = null, onNavigate = null, advisory = ['NOT_ADMITTED'], labels }) {
+export function FamilyBar({ product, brand, descriptor = null, fallback = null, products = {}, notifications = null, account = {}, toggle = null, onNavigate = null, advisory = ['NOT_ADMITTED'], notice = null, transient = [], labels }) {
 	const [slot] = useState(() => document.createElement('div'));
-	const latest = useLatest({ account, toggle, onNavigate });
+	const latest = useLatest({ account, toggle, onNavigate, notice });
 	const items = (account.items ?? []).filter(Boolean);
 	const signout = account.signout ?? null;
 	const [host, bar] = useInstance(() => {
@@ -38,15 +40,39 @@ export function FamilyBar({ product, brand, descriptor = null, fallback = null, 
 				items: items.map((item, index) => ({ label: item.label, href: item.href ?? null, run: item.href ? null : () => latest.current.account.items?.filter(Boolean)[index]?.onSelect?.() }))
 			},
 			onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null,
-			toggle: toggle ? { controls: toggle.controls, expanded: toggle.expanded, onchange: expanded => latest.current.toggle?.onChange?.(expanded) } : null
+			toggle: toggle ? { controls: toggle.controls, expanded: toggle.expanded, onchange: expanded => latest.current.toggle?.onChange?.(expanded) } : null,
+			notice: relay(notice, latest),
+			transient
 		});
-	}, [product, brand.src, brand.href, JSON.stringify(products), JSON.stringify(advisory), labels, account.label, typeof signout === 'function' ? 'function' : signout?.href, JSON.stringify(items.map(item => [item.label, item.href ?? null])), Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
+	}, [product, brand.src, brand.href, JSON.stringify(products), JSON.stringify(advisory), JSON.stringify(transient), labels, account.label, typeof signout === 'function' ? 'function' : signout?.href, JSON.stringify(items.map(item => [item.label, item.href ?? null])), Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
+	useSync(bar, current => (current.notice = relay(notice, latest)), [notice?.text, notice?.href, notice?.action?.label, notice?.action?.href]);
 	useSync(bar, current => (current.descriptor = descriptor), [JSON.stringify(descriptor)]);
 	useSync(bar, current => (current.fallback = fallback ?? {}), [JSON.stringify(fallback)]);
 	useSync(bar, current => {
 		if (toggle && current.expanded !== toggle.expanded) current.expanded = toggle.expanded;
 	}, [toggle?.expanded]);
 	return h('div', { ref: host, className: 'bui-host bui-family-host' }, notifications ? ReactDOM.createPortal(notifications, slot) : null);
+}
+
+/** The DOM notice for a `notice` prop: its action's `onSelect` is read from the latest props when chosen. */
+function relay(notice, latest) {
+	if (!notice?.text) return null;
+	const action = notice.action?.label ? { label: notice.action.label, href: notice.action.href ?? null, run: notice.action.href ? null : () => latest.current.notice?.action?.onSelect?.() } : null;
+	return { text: notice.text, href: notice.href ?? null, action };
+}
+
+/**
+ * A product's sections, driven by the DOM `Sidebar` class: permanent above `cut`, a product row and a
+ * modal drawer below it. `groups`, `context` and `section` are applied when they change; a change of
+ * `product`, `cut`, `labels` (memoize it) or whether `onNavigate` is given creates a new sidebar.
+ */
+export function Sidebar({ product, groups = [], context = null, cut = 1024, section = null, onNavigate = null, labels }) {
+	const latest = useLatest(onNavigate);
+	const [host, sidebar] = useInstance(() => new Sections({ product, groups, context, cut, section, labels, onnavigate: onNavigate ? (item, event) => latest.current?.(item, event) : null }), [product, cut, labels, Boolean(onNavigate)]);
+	useSync(sidebar, current => (current.groups = groups), [JSON.stringify(groups)]);
+	useSync(sidebar, current => (current.context = context), [JSON.stringify(context)]);
+	useSync(sidebar, current => (current.section = section), [section]);
+	return h('div', { ref: host, className: 'bui-host bui-sidebar-host' });
 }
 
 /** The product's own navigation row under the family bar, driven by the DOM `ProductNav` class. */

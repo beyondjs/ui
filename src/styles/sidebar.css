@@ -1,0 +1,240 @@
+/* A product's sections (Sidebar): the permanent sidebar, the product row and its drawer. */
+
+/* The page beside a sidebar: the sidebar as a column above the cut, the product row above the
+   content below it. */
+.bui-shell {
+	display: flex;
+	align-items: flex-start;
+	min-height: calc(100dvh - var(--layout-family));
+}
+.bui-shell > :not(.bui-sidebar, .bui-sidebar-host) {
+	flex: 1 1 auto;
+	align-self: stretch;
+	min-width: 0;
+}
+.bui-shell:has(> .bui-sidebar[data-mode='drawer'], > .bui-sidebar-host > .bui-sidebar[data-mode='drawer']) {
+	flex-direction: column;
+	align-items: stretch;
+}
+
+/* The React adapter's host takes no box, so the sidebar is the shell's own column or row. */
+.bui-sidebar-host {
+	display: contents;
+}
+
+/* Permanent: flush under the family bar, full height, sticky, its inner edge a border. */
+.bui-sidebar {
+	flex: none;
+	color: var(--color-text);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+}
+.bui-sidebar[data-mode='permanent'] {
+	position: sticky;
+	top: var(--layout-family);
+	width: var(--layout-sidebar);
+	height: calc(100dvh - var(--layout-family));
+}
+.bui-sidebar-panel {
+	height: 100%;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	border-right: 1px solid var(--color-border);
+	background: var(--color-surface-sunken);
+}
+.bui-sidebar-panel[hidden],
+.bui-sidebar-row[hidden] {
+	display: none;
+}
+.bui-sidebar-nav {
+	display: grid;
+	gap: var(--space-4);
+	padding: var(--space-4) var(--space-3);
+}
+.bui-sidebar-context {
+	display: grid;
+	gap: 2px;
+	padding: 0 var(--space-2);
+}
+.bui-sidebar-context-label,
+.bui-sidebar-heading {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	letter-spacing: var(--tracking-label);
+}
+.bui-sidebar-heading {
+	padding: 0 var(--space-2) var(--space-1);
+}
+/* A long name takes two lines, then is cut; the bar and the page title keep it whole. */
+.bui-sidebar-context-name {
+	display: -webkit-box;
+	overflow: hidden;
+	color: var(--color-text);
+	font-size: var(--text-body);
+	font-weight: var(--weight-medium);
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	overflow-wrap: anywhere;
+}
+.bui-sidebar-list {
+	display: grid;
+	gap: 2px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.bui-sidebar-item {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	min-height: var(--bui-target);
+	padding: var(--space-1) var(--space-2);
+	border-radius: var(--radius-control);
+	color: var(--color-text);
+	text-decoration: none;
+}
+a.bui-sidebar-item:hover {
+	background: var(--color-surface);
+}
+.bui-sidebar-item:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: -2px;
+}
+.bui-sidebar-item[aria-current='page'] {
+	background: var(--color-surface);
+	box-shadow: inset 2px 0 0 var(--color-accent);
+	color: var(--color-link);
+	font-weight: var(--weight-medium);
+}
+.bui-sidebar-item[aria-disabled='true'] {
+	color: var(--color-text-muted);
+	cursor: default;
+}
+.bui-sidebar-label {
+	flex: 1;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.bui-sidebar-meta {
+	flex: none;
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-regular);
+}
+
+/* Below the cut: the product row, sticky under the bar, naming the section in view. */
+.bui-sidebar[data-mode='drawer'] {
+	position: sticky;
+	top: var(--layout-family);
+	z-index: calc(var(--bui-family-layer, 45) - 1);
+}
+.bui-sidebar-row {
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0 var(--space-2);
+	border-bottom: 1px solid var(--color-border);
+	background: var(--color-surface);
+}
+.bui-sidebar-button {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-2);
+	min-width: 0;
+	max-width: 100%;
+	min-height: max(var(--bui-target), 40px);
+	padding: 0 var(--space-2);
+	border: 0;
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: var(--color-text);
+	font: inherit;
+	font-weight: var(--weight-medium);
+	cursor: pointer;
+}
+.bui-sidebar-button:hover {
+	background: var(--color-surface-sunken);
+}
+.bui-sidebar-button > .bui-icon {
+	flex: none;
+	width: 18px;
+	height: 18px;
+}
+.bui-sidebar-section {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* The drawer: the whole viewport, a scrim and the panel at the start edge with a strip of scrim
+   left to press. The native dialog's own box and backdrop are cleared. */
+.bui-drawer {
+	position: fixed;
+	inset: 0;
+	width: 100vw;
+	max-width: none;
+	height: 100dvh;
+	max-height: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	background: transparent;
+	color: var(--color-text);
+}
+.bui-drawer::backdrop {
+	background: transparent;
+}
+.bui-drawer-scrim {
+	position: absolute;
+	inset: 0;
+	background: var(--overlay-scrim);
+	animation: bui-fade var(--motion-standard) var(--motion-ease);
+}
+.bui-drawer-panel {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: min(20rem, calc(100vw - 3.5rem));
+	height: 100%;
+	border-right: 1px solid var(--color-border);
+	background: var(--color-surface-sunken);
+	box-shadow: var(--elevation-menu);
+	font-size: var(--text-small);
+	line-height: var(--leading-small);
+	animation: bui-slide var(--motion-standard) var(--motion-ease);
+}
+.bui-drawer-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-2);
+	min-height: var(--layout-family);
+	padding: 0 var(--space-2) 0 var(--space-5);
+	border-bottom: 1px solid var(--color-border);
+}
+.bui-drawer-title {
+	margin: 0;
+	font-size: var(--text-body);
+	font-weight: var(--weight-medium);
+}
+.bui-drawer-body {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+@keyframes bui-slide {
+	from {
+		transform: translateX(-100%);
+	}
+}
+@keyframes bui-fade {
+	from {
+		opacity: 0;
+	}
+}

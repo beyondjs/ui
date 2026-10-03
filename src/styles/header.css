@@ -160,14 +160,26 @@
 		width: auto;
 	}
 }
+/* The panel sets its own text roles, so a product's base stylesheet cannot make its title and its
+   content alike: the title outranks the items, and an empty inbox is a quiet line of body text. */
 .bui-notify-frame {
 	display: grid;
 	gap: var(--space-2);
+	font-size: var(--text-body);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-body);
 }
 .bui-notify-title {
 	margin: 0;
 	font-size: var(--text-title-3);
 	font-weight: var(--weight-medium);
+	line-height: var(--leading-title-3);
+}
+.bui-notify-empty {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-body);
+	font-weight: var(--weight-regular);
 }
 .bui-notify-status {
 	margin: 0;
@@ -182,6 +194,10 @@
 	max-height: min(24rem, 60dvh);
 	overflow-y: auto;
 }
+.bui-notify-foot[hidden],
+.bui-notify-all[hidden] {
+	display: none;
+}
 .bui-notify-foot {
 	display: flex;
 	flex-wrap: wrap;
@@ -191,7 +207,8 @@
 	padding-top: var(--space-2);
 	border-top: 1px solid var(--color-border);
 }
-.bui-notify-all {
+.bui-notify-all,
+.bui-header .bui-notify-all {
 	display: inline-flex;
 	align-items: center;
 	min-height: var(--bui-target);

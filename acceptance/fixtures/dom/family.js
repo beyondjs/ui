@@ -4,14 +4,15 @@
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { FamilyBar, ProductNav, NotificationEntry, Unavailable, Button, confirm, lockup, badge, availability } from '@beyond-js/ui';
+import { FamilyBar, ProductNav, Sidebar, NotificationEntry, Unavailable, Button, confirm, lockup, badge, availability } from '@beyond-js/ui';
 import { Notices } from '../data/notices.js';
-import { chosen, descriptors, fallback, product } from '../data/family.js';
+import { chosen, descriptors, fallback, product, sidebar, sections } from '../data/family.js';
 
 const log = [];
 const root = document.getElementById('root');
 const products = { delegate: 'Delegate', cdn: 'CDN', projects: 'Projects' };
-const entry = new NotificationEntry({ adapter: new Notices('ready').adapter, href: '#/notifications', products });
+const notices = new Notices(new URLSearchParams(location.search).get('notices') ?? 'ready');
+const entry = new NotificationEntry({ adapter: notices.adapter, href: '#/notifications', products });
 const bar = new FamilyBar({
 	product,
 	brand: { src: '../brand/wordmark.svg', href: '/projects/' },
@@ -21,12 +22,16 @@ const bar = new FamilyBar({
 	account: { signout: () => log.push('signout'), items: [{ label: 'Delegate settings', href: '#/settings' }] },
 	onnavigate: item => log.push(`navigate:${item.href}`)
 }).mount(root);
-const nav = new ProductNav({ label: 'Delegate', items: ['Requests', 'Versions', 'Environments', 'Services', 'Consumption', 'Settings'].map((label, index) => ({ label, href: `#/${label.toLowerCase()}`, current: index === 4 })) }).mount(root);
+// With `?sidebar=<cut>` the page has the product's sections in a shell; otherwise the product navigation row.
+const shell = sidebar ? root.appendChild(Object.assign(document.createElement('div'), { className: 'bui-shell' })) : root;
+const nav = sidebar
+	? new Sidebar({ product: 'Delegate', groups: sections(), context: { label: 'Project', name: 'Storefront redesign' }, cut: Number(sidebar), onnavigate: item => (log.push(`section:${item.href}`), main.querySelector('h1').focus()) }).mount(shell)
+	: new ProductNav({ label: 'Delegate', items: ['Requests', 'Versions', 'Environments', 'Services', 'Consumption', 'Settings'].map((label, index) => ({ label, href: `#/${label.toLowerCase()}`, current: index === 4 })) }).mount(root);
 
 const main = document.createElement('main');
 main.id = 'main';
-main.innerHTML = '<h1>Family bar</h1><section id="lockups" class="lockups" aria-label="Lockups"></section><section id="patterns" class="row"></section><div class="tall"></div>';
-root.append(main);
+main.innerHTML = '<h1 tabindex="-1">Family bar</h1><section id="lockups" class="lockups" aria-label="Lockups"></section><section id="patterns" class="row"></section><div class="tall"></div>';
+shell.append(main);
 for (let height = 18; height <= 40; height++) {
 	const row = document.createElement('div');
 	row.style.setProperty('--bui-lockup-height', `${height}px`);
@@ -41,6 +46,8 @@ for (const state of availability) patterns.append(badge(state.label, state.tone)
 
 window.fixture = {
 	bar,
+	nav,
+	notices,
 	log,
 	descriptors,
 	/** Destroys everything this page created. */

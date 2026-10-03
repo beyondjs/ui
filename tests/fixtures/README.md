@@ -4,7 +4,7 @@
 - `people.mjs`: an entity source for the picker (people with teams, one disabled), with controllable delay, failure and paging.
 - `notices.mjs`: a notification adapter over in-memory items shaped as the product relay of `beyond-notifications/1` answers, with switches for failure, unavailability and unreachable products, and a `shape` switch that answers as Beyond Projects does instead (`sources: [{ product, state }]` and a summary `{ unread, more, sources }` bounded by `bound`).
 - `rows.mjs`: request rows for the collection.
-- `family.mjs`: `beyond-family/1` descriptors as a product relay answers them (inside a project, outside one, a person with no organization) and a Spanish label set for the family bar.
+- `family.mjs`: `beyond-family/1` descriptors as a product relay answers them: the 0.3.x shape (inside a project, outside one, a person with no organization), the 0.4.0 additions (`annotated` with `here`, organization `url` and `links.manage`; `many` for the search; `member`; `nobody`), the organizations a product reads from Accounts (`standing`) and a Spanish label set for the family bar.
 - `controls.mjs`: a scene of every component that draws an icon-only control, in the state that shows it, for the icon-only survey.
 - `shelf.mjs`: an in-memory `Storage` for `Preferences`, which can refuse every access as a browser with blocked site data does.
 - `types/`: a typed plain DOM consumer (`dom.ts`) and a typed React consumer (`consumer.tsx`) with their `tsconfig.json`; `npm run types` compiles them and never runs them.

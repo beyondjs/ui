@@ -34,8 +34,8 @@ export class Geometry {
 				['product', bar.querySelector('[data-part="product"] .bui-navmenu-button')],
 				['location', [...bar.querySelectorAll('.bui-family-thread .bui-navmenu-button')].find(shown)],
 				['docs', bar.querySelector('.bui-family-docs')],
-				['bell', bar.querySelector('.bui-disclosure-bell')],
-				['avatar', bar.querySelector('.bui-family-avatar')]
+				['bell', bar.querySelector('.bui-disclosure-bell')]
+				// The avatar's disc is ink on the letters' axis (support/ink.mjs); its button is centred above.
 			].filter(([, node]) => shown(node));
 			return {
 				height: round(box.height),

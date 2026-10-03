@@ -2,7 +2,7 @@ import { expect, overflow, focused } from '../support/browser.mjs';
 import { Geometry } from '../support/geometry.mjs';
 
 /** The family bar at the family's widths and in both themes, its keyboard, its states and the lockup. */
-const widths = [1440, 1024, 768, 600, 480, 390, 320];
+const widths = [1440, 1024, 768, 600, 480, 390, 360, 320];
 const navy = { light: 'rgb(18, 31, 54)', dark: 'rgb(12, 21, 37)' };
 
 async function open(browser, consumer, { width = 1440, family = 'inside', ...options } = {}) {
@@ -13,7 +13,7 @@ async function open(browser, consumer, { width = 1440, family = 'inside', ...opt
 
 export const checks = [
 	{
-		name: 'family bar at 1440, 1024, 768, 600, 480, 390 and 320 px in both themes: one row, nothing outside it, centred parts, the lockup name on the letters, the Docs label wherever the link shows',
+		name: 'family bar at 1440, 1024, 768, 600, 480, 390, 360 and 320 px in both themes: one row, nothing outside it, centred parts, the lockup name on the letters, the Docs label wherever the link shows',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			for (const scheme of ['light', 'dark']) {
@@ -95,7 +95,7 @@ export const checks = [
 						if (folded) {
 							await page.locator('.bui-family [data-part="product"] .bui-navmenu-button').click();
 							const carried = page.locator('.bui-family [data-part="product"] .bui-family-carried');
-							expect((await carried.count()) === 2 && (await carried.first().isVisible()), `${at}: organizations and projects in the product menu`);
+							expect((await carried.count()) === 3 && (await carried.first().isVisible()), `${at}: organizations, projects and all projects in the product menu`);
 							const box = await page.locator('.bui-family [data-part="product"] .bui-navmenu-panel').boundingBox();
 							expect(box && box.x >= 0 && box.x + box.width <= width, `${at}: product menu inside the viewport ${JSON.stringify(box)}`);
 						}
@@ -150,9 +150,9 @@ export const checks = [
 			await product.focus();
 			await page.keyboard.press('Enter');
 			expect((await product.getAttribute('aria-expanded')) === 'true', 'Enter opens the product menu');
-			expect((await focused(page)).includes('Projects'), `focus on the first entry: ${await focused(page)}`);
+			expect((await focused(page)).includes('Workspace'), `focus on the first entry: ${await focused(page)}`);
 			await page.keyboard.press('ArrowDown');
-			expect((await focused(page)).includes('Workspace'), `ArrowDown moves: ${await focused(page)}`);
+			expect((await focused(page)).includes('Delegate'), `ArrowDown moves: ${await focused(page)}`);
 			await page.keyboard.press('Escape');
 			expect((await product.getAttribute('aria-expanded')) === 'false', 'Escape closes');
 			expect(await product.evaluate(node => node === document.activeElement), 'focus returns to the product button');

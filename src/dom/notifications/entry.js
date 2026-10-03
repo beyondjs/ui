@@ -3,7 +3,7 @@ import { el, fill } from '../core/element.js';
 import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
-import { callout, loading } from '../feedback.js';
+import { loading } from '../feedback.js';
 import { defaults } from './labels.js';
 import { Moment } from './moment.js';
 import { Feed } from './feed.js';
@@ -24,10 +24,19 @@ import { Reach } from './reach.js';
  * forgets its items when closed. It states loading, empty, failure with retry, unavailable (for
  * example when the product runs without Beyond Projects) and partial results naming the products
  * that did not answer by their display names, and offers "Mark all as read" and "View all", which
- * closes the panel before the browser or the product (`onview`) goes to the full inbox. Nothing
- * here performs a business action.
+ * closes the panel before the browser or the product (`onview`) goes to the full inbox; an empty
+ * inbox offers no "View all", and an unavailable one "Try again". A quick answer replaces the panel's
+ * content directly: the loading indicator appears only once the answer is slower than `delay`, and
+ * goes with the answer. A late answer after the panel closed is discarded. Nothing here performs a
+ * business action.
  */
 export class NotificationEntry extends Disclosure {
+	/**
+	 * Milliseconds before the loading indicator shows. The fixture relay answers in about 80 ms and the
+	 * review measured a one-frame flash at once and a 900 ms wait, so a quick answer never shows it.
+	 */
+	static delay = 250;
+
 	#adapter;
 	#labels;
 	#badge;
@@ -39,6 +48,7 @@ export class NotificationEntry extends Disclosure {
 	#more = false;
 	#missing = [];
 	#stamp = null;
+	#waiting = null;
 
 	/**
 	 * @param {object} options
@@ -69,7 +79,7 @@ export class NotificationEntry extends Disclosure {
 			event.preventDefault();
 			onview(event);
 		};
-		this.#panel = new Panel({ labels: words, id: Ids.next('bui-notify'), href, view, retry: () => this.#load(), everything: () => this.#everything() });
+		this.#panel = new Panel({ labels: words, id: Ids.next('bui-notify'), href, view, retry: () => this.#again(), everything: () => this.#everything() });
 		fill(this.panel, [this.#panel.element]);
 		this.panel.setAttribute('aria-labelledby', this.#panel.heading);
 		this.refresh();
@@ -127,8 +137,10 @@ export class NotificationEntry extends Disclosure {
 	#toggled(open) {
 		if (open) this.#load();
 		else {
-			// Private text never outlives the open panel.
+			// Private text never outlives the open panel, and an answer still on its way is discarded.
+			this.#wait(false);
 			this.#feed.clear();
+			this.#panel.busy = false;
 			this.#panel.show([]);
 		}
 	}
@@ -140,15 +152,33 @@ export class NotificationEntry extends Disclosure {
 		if (await pending) this.#draw();
 	}
 
+	/** "Try again" while unavailable or after a failure: the panel and the count. */
+	#again() {
+		this.#load();
+		this.refresh();
+	}
+
+	/** Schedules the loading indicator after `delay`, or cancels it. */
+	#wait(start) {
+		this.#waiting?.();
+		this.#waiting = start ? this.later(() => this.#panel.show([loading(this.#labels.text('loading'))]), NotificationEntry.delay) : null;
+	}
+
 	#draw() {
 		const feed = this.#feed;
 		const words = this.#labels;
-		if (feed.state === 'loading') return this.#panel.show([loading(words.text('loading'))], false);
-		if (feed.state === 'unavailable') return this.#panel.show([callout({ tone: 'info', title: words.text('unavailable') })], false);
+		const busy = feed.state === 'loading';
+		this.#panel.busy = busy;
+		if (busy) {
+			if (!this.#waiting) this.#wait(true);
+			return;
+		}
+		this.#wait(false);
+		if (feed.state === 'unavailable') return this.#panel.unavailable(words.text('unavailable'));
 		if (feed.state === 'failed') return this.#panel.failed(words.text('failure'));
 		const partial = this.#list.partial(feed.missing);
-		const body = feed.items.length ? this.#list.render(feed.items) : el('p', { class: 'bui-empty-title', text: words.text('empty') });
-		NoticeList.keep(this.panel, () => this.#panel.show([partial, body], feed.items.some(item => !item.read)));
+		if (!feed.items.length) return this.#panel.show([partial, el('p', { class: 'bui-notify-empty', text: words.text('empty') })]);
+		NoticeList.keep(this.panel, () => this.#panel.show([partial, this.#list.render(feed.items)], { unread: feed.items.some(item => !item.read), all: true }));
 	}
 
 	#changed() {

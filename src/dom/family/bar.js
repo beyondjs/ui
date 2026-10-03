@@ -8,6 +8,7 @@ import { Places } from './places.js';
 import { ProductSwitcher } from './switcher.js';
 import { Location } from './location.js';
 import { AccountMenu } from './account.js';
+import { Manage } from './manage.js';
 
 /**
  * The family bar: the one bar every signed-in Beyond product renders (decisions D01 and D04).
@@ -18,10 +19,13 @@ import { AccountMenu } from './account.js';
  * `beyond-family/1` descriptor the product relays from Beyond Projects, and it is identical in
  * every product: a product's own navigation belongs in its sidebar or in `ProductNav`, never here.
  *
- * It never blocks a page: `descriptor: null` is still loading (the lockup and placeholders show,
- * without menus), and `{ unavailable: true }` shows the names the product passed as `fallback`
- * with a single Projects link in the product menu; `fallback.links` supplies the addresses (home,
- * account, members, docs) the descriptor does not. It places links and decides nothing about access.
+ * It never blocks a page: `descriptor: null` is still loading (the lockup and placeholders show),
+ * and `{ unavailable: true }` shows the names the product passed as `fallback`; the product's
+ * `fallback.organizations` keep the organization menu working in both, and `fallback.links` supplies
+ * the addresses (home, account, members, docs, the product's projects page, Accounts' `manage`) the
+ * descriptor does not. It places links and decides nothing about access: the product annotates each
+ * project's state in the descriptor (`projects[i].here.state`) and may add one `notice` line to the
+ * project menu.
  */
 export class FamilyBar extends Component {
 	#header;
@@ -30,6 +34,7 @@ export class FamilyBar extends Component {
 	#names;
 	#descriptor;
 	#fallback;
+	#notice;
 	#start;
 	#thread;
 	#end;
@@ -40,17 +45,20 @@ export class FamilyBar extends Component {
 	 * @param {string} options.product the current product id (`delegate`, `workspace`, …)
 	 * @param {{src: string, href: string}} options.brand the wordmark asset the product carries and its own home address
 	 * @param {object|null} [options.descriptor] the `beyond-family/1` descriptor, null while loading, `{ unavailable: true }` when it failed
-	 * @param {{person?: string|{name: string, email?: string}, organization?: string, project?: string, links?: {home?: string, account?: string, members?: string, docs?: string}}} [options.fallback] names and addresses the product knows itself
+	 * @param {{person?: string|{name: string, email?: string}, organization?: string, project?: string, organizations?: Array<{id: string, name: string, role?: string, url?: string, current?: boolean}>, links?: {home?: string, account?: string, members?: string, docs?: string, projects?: string, manage?: Record<string, string>}}} [options.fallback] names and addresses the product knows itself
 	 * @param {Record<string, string>} [options.products] display names by product id, added to the family's
 	 * @param {Node} [options.notifications] the notification entry
 	 * @param {{signout?: (() => void)|{href: string}, items?: Array<{label: string, href?: string, run?: () => void}>, label?: string}} [options.account]
 	 * @param {{controls: string, expanded: boolean, onchange: (expanded: boolean) => void}} [options.toggle] a sidebar of the product's own
 	 * @param {(item: {href: string, url: string, label: string}, event: MouseEvent) => void} [options.onnavigate] takes over plain clicks on same-origin links
 	 * @param {string[]} [options.advisory] reasons whose entries stay links when they have an address
+	 * @param {{text: string, href?: string, action?: {label: string, href?: string, run?: () => void}}|null} [options.notice] one line at the top of the project menu
+	 * @param {string[]} [options.transient] the product's own dialog markers, left out of the address Accounts returns to
 	 */
-	constructor({ product, brand, descriptor = null, fallback = {}, products = {}, notifications = null, account = {}, toggle = null, onnavigate = null, advisory = ['NOT_ADMITTED'], labels = {} }) {
+	constructor({ product, brand, descriptor = null, fallback = {}, products = {}, notifications = null, account = {}, toggle = null, onnavigate = null, advisory = ['NOT_ADMITTED'], notice = null, transient = [], labels = {} }) {
 		super();
-		this.#options = { product, brand, notifications, account, onnavigate, advisory };
+		this.#options = { product, brand, notifications, account, onnavigate, advisory, transient };
+		this.#notice = notice;
 		this.#labels = new Labels(defaults, labels);
 		this.#names = { ...names, ...products };
 		this.#descriptor = descriptor;
@@ -99,6 +107,16 @@ export class FamilyBar extends Component {
 		this.#draw();
 	}
 
+	get notice() {
+		return this.#notice;
+	}
+
+	/** Replaces the project menu's notice (null removes it) and redraws. */
+	set notice(value) {
+		this.#notice = value ?? null;
+		this.#draw();
+	}
+
 	get expanded() {
 		return this.#header.expanded;
 	}
@@ -120,13 +138,15 @@ export class FamilyBar extends Component {
 		for (const part of this.#parts) part.destroy();
 		const state = this.state;
 		const ready = state === 'ready' ? this.#descriptor : null;
-		const { product, brand, notifications, account, advisory } = this.#options;
+		const { product, brand, notifications, account, advisory, transient } = this.#options;
 		const places = new Places({ descriptor: ready, brand, product, advisory, fallback: this.#fallback.links });
 		const labels = this.#labels;
+		const name = this.#names[product] ?? product;
 		const person = ready?.person ?? FamilyBar.#person(this.#fallback.person);
-		const location = new Location({ state, descriptor: ready, fallback: this.#fallback, places, labels });
+		const location = new Location({ state, descriptor: ready, fallback: this.#fallback, places, labels, product: name, notice: this.#notice });
 		const switcher = new ProductSwitcher({ product, names: this.#names, descriptor: ready, places, labels, carried: location.sections() });
-		const menu = new AccountMenu({ person, links: places.links, organization: Boolean(ready?.organization), account, labels });
+		const manage = new Manage({ links: places.links.manage ?? null, product, transient });
+		const menu = new AccountMenu({ person, links: places.links, manage, organization: location.organization, any: location.any, product: name, account, labels });
 		this.#parts = [switcher, location, menu];
 		this.#start.append(switcher.element);
 		this.#start.querySelector('.bui-header-brand').setAttribute('href', places.home);

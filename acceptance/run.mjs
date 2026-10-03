@@ -14,6 +14,8 @@ import { checks as presentation } from './checks/presentation.mjs';
 import { checks as strict } from './checks/strict.mjs';
 import { checks as family } from './checks/family.mjs';
 import { checks as icons } from './checks/icons.mjs';
+import { checks as navigation } from './checks/navigation.mjs';
+import { checks as sidebar } from './checks/sidebar.mjs';
 
 /**
  * Browser acceptance of the packed package: `npm pack` → three consumers installed from the tarball
@@ -23,7 +25,7 @@ import { checks as icons } from './checks/icons.mjs';
 class Acceptance {
 	#root = fileURLToPath(new URL('..', import.meta.url));
 	#consumers = [new Consumer('dom', 'dom'), new Consumer('react19', 'react', '19.3.0'), new Consumer('react18', 'react', '18.3.1')];
-	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...icons];
+	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...icons];
 	#filter = process.argv[2] ?? '';
 
 	async run() {
@@ -57,7 +59,7 @@ class Acceptance {
 
 	async #one(browser, check, consumer) {
 		const opened = [];
-		const tracked = { open: async (...args) => { const view = await browser.open(...args); opened.push(view); return view; } };
+		const tracked = { engine: browser.engine, open: async (...args) => { const view = await browser.open(...args); opened.push(view); return view; } };
 		try {
 			await check.run(tracked, consumer);
 			const errors = opened.flatMap(view => view.errors);

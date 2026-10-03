@@ -1,8 +1,11 @@
 /* The family bar (FamilyBar). Its menus' panels and the product navigation row are in navigation.css. */
 
 /* One row at every width, and visible while the page scrolls: below dialogs (the top layer) and
-   toasts, above the page's own floating lists. */
+   toasts, above the page's own floating lists. Its texts and icons share one optical axis, the
+   wordmark letters' centre, which sits above the bar's middle because the drips of the O hang below
+   the letters: each part keeps its box (and its target) and moves its ink by `--bui-family-axis`. */
 .bui-family {
+	--bui-family-axis: calc(var(--bui-lockup-height, 21px) * -0.0555);
 	position: sticky;
 	top: 0;
 	z-index: var(--bui-family-layer, 45);
@@ -10,6 +13,28 @@
 	column-gap: var(--space-3);
 	height: var(--layout-family);
 	padding-block: 0;
+}
+/* The edge: a line in the shared border token under the bar, so the bar never floats over a page or a
+   sidebar of its own color (the dark sunken surface). A border, not a shadow, survives forced colors. */
+.bui-family::after {
+	content: '';
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	border-bottom: 1px solid var(--color-border);
+	pointer-events: none;
+}
+.bui-family .bui-family-divider,
+.bui-family .bui-family-separator,
+.bui-family .bui-family-placeholder,
+.bui-family-static > .bui-family-place,
+.bui-family-thread .bui-navmenu-button > *,
+.bui-family-docs > *,
+.bui-family-account .bui-navmenu-button > *,
+.bui-family .bui-disclosure-bell > .bui-icon,
+.bui-family .bui-header-toggle > .bui-icon {
+	translate: 0 var(--bui-family-axis);
 }
 .bui-family .bui-header-start {
 	flex: none;
@@ -65,12 +90,24 @@
 	background: var(--overlay-lift);
 }
 
-/* The product switcher is the lockup's name: the same size, place and divider (see .bui-lockup-name). */
-.bui-family-product .bui-navmenu-button {
+/* The product switcher is the lockup's name: the same size and place (see .bui-lockup-name). Its
+   divider stands before the button, so the button's hover and open surface never covers it, and the
+   name starts the same distance after it as the location's text after its own divider. */
+.bui-family-product::before {
+	content: '';
+	flex: none;
+	align-self: center;
+	width: 1px;
+	height: calc(var(--bui-lockup-height, 21px) * 0.714);
+	background: color-mix(in srgb, currentColor 45%, transparent);
+	translate: 0 var(--bui-family-axis);
+}
+.bui-family-product .bui-lockup-name {
 	padding-left: 0;
+	border-left: 0;
 }
 .bui-family-product .bui-navmenu-button > .bui-icon {
-	translate: 0 calc(var(--bui-lockup-height, 21px) * -0.0555);
+	translate: 0 var(--bui-family-axis);
 }
 
 .bui-family-thread,
@@ -82,14 +119,18 @@
 	gap: var(--space-1);
 	min-width: 0;
 }
+/* The divider touches the location: its text starts one button padding after it, as the product
+   name does after the lockup's divider. */
+.bui-family-thread {
+	gap: 0;
+}
 .bui-family-narrow {
 	display: none;
 }
 .bui-family-divider {
 	flex: none;
 	width: 1px;
-	height: 1rem;
-	margin-right: var(--space-2);
+	height: calc(var(--bui-lockup-height, 21px) * 0.714);
 	background: var(--color-family-muted);
 	opacity: 0.5;
 }
@@ -174,117 +215,4 @@
 .bui-family-avatar > .bui-icon {
 	width: 16px;
 	height: 16px;
-}
-
-/* Narrow: the organization and project become one location menu, and every panel spans the bar. */
-@media (max-width: 719px) {
-	.bui-family-wide {
-		display: none;
-	}
-	.bui-family-narrow {
-		display: flex;
-	}
-	.bui-family .bui-navmenu {
-		position: static;
-	}
-	/* Panels are placed against the bar (the closing picture keeps these classes too). */
-	.bui-family .bui-navmenu-panel {
-		top: 100%;
-		left: var(--space-2);
-		right: auto;
-		min-width: min(16rem, 100% - 2 * var(--space-2));
-		max-width: calc(100% - 2 * var(--space-2));
-	}
-	.bui-family .bui-navmenu-panel.bui-align-end {
-		left: auto;
-		right: var(--space-2);
-	}
-}
-/* Docs always shows its label (D11: the book glyph never stands alone); below 600 px, where the label
-   no longer fits beside a sidebar toggle and a localized name, it moves into the account menu. */
-@media (max-width: 599px) {
-	.bui-family-docs {
-		display: none;
-	}
-	.bui-navmenu-list > li:has(> .bui-family-docs-item) {
-		display: list-item;
-	}
-}
-/* Phones: the location keeps the room the other parts can give up (see the dated record's widths). */
-@media (max-width: 479px) {
-	.bui-family {
-		column-gap: var(--space-1);
-		padding-inline: var(--space-2);
-	}
-	.bui-family .bui-navmenu-button {
-		padding-right: var(--space-1);
-	}
-	/* At least an ellipsis and the chevron, never less. */
-	.bui-family-narrow .bui-navmenu-button {
-		min-width: 1.75rem;
-		padding-left: var(--space-1);
-	}
-	/* A product's sidebar toggle takes a target's width: the switcher gives up its chevron (the name
-	   stays a button) and the brand group its gap, so the location keeps its place. */
-	.bui-header-external.bui-family .bui-header-start {
-		gap: var(--space-1);
-	}
-	.bui-header-external .bui-family-product .bui-navmenu-button > .bui-icon {
-		display: none;
-	}
-	/* The toggle keeps its target's height and gives up width, which touch screens make 44px. */
-	.bui-family .bui-header-toggle {
-		width: 32px;
-	}
-	.bui-family-account .bui-navmenu-button {
-		padding: 0;
-	}
-	.bui-family .bui-header-end,
-	.bui-family-end {
-		gap: 0;
-	}
-	.bui-family-divider,
-	.bui-family-account .bui-navmenu-button > .bui-icon:last-child {
-		display: none;
-	}
-}
-@media (max-width: 359px) {
-	.bui-family {
-		padding-inline: var(--space-1);
-	}
-}
-/* Touch screens below 480 px: every control of the bar is a 44 × 44 target (the toggle, the location
-   and the account included) and the wordmark keeps 21 px. The parts sit side by side without gaps,
-   each target its own. Below 360 px the switcher gives up its chevron (the name stays a button). With
-   a product's sidebar toggle below 380 px there is no room for a location target beside the others:
-   the location folds into the product menu, whose sections then list the organizations and projects
-   (see the dated record's widths). */
-@media (max-width: 479px) and (pointer: coarse) {
-	.bui-family,
-	.bui-family .bui-header-start,
-	.bui-header-external.bui-family .bui-header-start {
-		column-gap: 0;
-		gap: 0;
-	}
-	.bui-family .bui-header-toggle {
-		width: var(--bui-target);
-	}
-	.bui-family-narrow .bui-navmenu-button,
-	.bui-family-account .bui-navmenu-button {
-		justify-content: center;
-		min-width: var(--bui-target);
-	}
-}
-@media (max-width: 359px) and (pointer: coarse) {
-	.bui-family-product .bui-navmenu-button > .bui-icon {
-		display: none;
-	}
-}
-@media (max-width: 379px) and (pointer: coarse) {
-	.bui-header-external.bui-family .bui-family-thread {
-		display: none;
-	}
-	.bui-header-external.bui-family .bui-family-carried {
-		display: block;
-	}
 }

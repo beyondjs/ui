@@ -1,5 +1,5 @@
 // A plain DOM consumer in TypeScript: compiled, never run, to check the `dom` and `tokens` declarations.
-import { Dialog, Picker, ChoiceMenu, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Unavailable, Button, badge, availability, icon, icons, unlabeled, Preferences, type Appearance, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor } from '@beyond-js/ui';
+import { Dialog, Picker, ChoiceMenu, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Sidebar, Unavailable, Button, badge, availability, icon, icons, unlabeled, Preferences, type Appearance, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor, type FamilyNotice } from '@beyond-js/ui';
 import { tokens, TokenSheet } from '@beyond-js/ui/tokens';
 
 declare const adapter: NotificationAdapter;
@@ -24,6 +24,17 @@ const family = new FamilyBar({ product: 'delegate', brand: { src: '/wordmark.svg
 family.descriptor = descriptor;
 family.descriptor = { unavailable: true };
 const state: 'loading' | 'unavailable' | 'ready' = family.state;
+const annotated: FamilyDescriptor = { organization: { id: 'org_1', name: 'Northwind' }, organizations: [{ id: 'org_1', name: 'Northwind', role: 'owner', url: '/?organization=org_1' }], projects: [{ id: 'p', name: 'Shop', here: { mapped: 0, url: '/?project=p', state: 'unset' } }], links: { manage: { account: '/account', members: '/m' } } };
+family.descriptor = annotated;
+const notice: FamilyNotice = { text: 'Beyond Projects did not answer.', action: { label: 'Try again', run: () => undefined } };
+family.notice = notice;
+family.fallback = { organizations: [{ id: 'org_1', name: 'Northwind', current: true }], links: { projects: '/projects', manage: { create: '/create' } } };
+new FamilyBar({ product: 'cdn', brand: { src: '/w.svg', href: '/' }, notice: null, transient: ['dialog'] }).destroy();
+const sidebar = new Sidebar({ product: 'Delegate', groups: [{ heading: 'Project', items: [{ label: 'Requests', href: '/r', current: true, meta: 3 }, null] }], context: { label: 'Project', name: 'Shop' }, cut: 850, onnavigate: item => item.url }).mount(document.body);
+const mode: 'permanent' | 'drawer' = sidebar.mode;
+sidebar.groups = [];
+sidebar.section = null;
+NotificationEntry.delay = 250;
 new ProductNav({ items: [{ label: 'Requests', href: '/requests', current: true }], sticky: true }).mount(document.body);
 new Unavailable({ title: 'Not open to you yet', reason: 'By invitation.', owner: 'An owner', action: new Button({ label: 'Ask' }).element, kind: 'access', code: 'NOT_ADMITTED', level: 3 }).mount(document.body);
 const tags = availability.map(entry => badge(entry.label, entry.tone));

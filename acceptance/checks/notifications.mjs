@@ -121,5 +121,39 @@ export const checks = [
 			const log = await page.evaluate(() => window.fixture.log);
 			expect(log.some(entry => entry.startsWith('inbox:') && entry.includes('"all"')), 'the state change is reported for the address');
 		}
+	},
+	{
+		name: 'panel: an empty inbox offers no "View all"; a slow answer shows the indicator only after the delay, stays busy, animates the height and drops the indicator; a late answer after Escape is discarded',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			const family = query => browser.open(consumer, { file: 'family.html', query: `?family=annotated&${query}`, viewport: { width: 1280, height: 800 } });
+			let view = await family('notices=empty');
+			await bell(view.page).click();
+			await view.page.waitForFunction(() => document.querySelector('.bui-notify .bui-notify-body').getAttribute('aria-busy') === 'false');
+			expect(await view.page.locator('.bui-notify .bui-notify-empty').isVisible(), 'one quiet line');
+			expect(!(await view.page.locator('.bui-notify .bui-notify-all').isVisible()), 'no "View all" with nothing to see');
+			const roles = await view.page.evaluate(() => ['.bui-notify-title', '.bui-notify-empty'].map(selector => parseFloat(getComputedStyle(document.querySelector(`.bui-notify ${selector}`)).fontSize)));
+			expect(roles[0] > roles[1], `the title outranks the content: ${roles}`);
+			await view.context.close();
+			view = await family('notices=slow&delay=900');
+			await bell(view.page).click();
+			const early = await view.page.evaluate(() => new Promise(resolve => setTimeout(() => resolve([document.querySelector('.bui-notify .bui-loading') !== null, document.querySelector('.bui-notify .bui-notify-body').getAttribute('aria-busy')]), 120)));
+			expect(!early[0] && early[1] === 'true', `busy, without the indicator yet: ${early}`);
+			await view.page.locator('.bui-notify .bui-loading').waitFor();
+			// Watch the body from the frame the answer lands: the indicator goes in that frame and the height eases.
+			const landing = await view.page.evaluate(() => new Promise(resolve => {
+				const body = document.querySelector('.bui-notify .bui-notify-body');
+				const watch = () => (body.querySelector('.bui-notice') ? resolve({ loading: body.querySelector('.bui-loading') !== null, animations: body.getAnimations().length }) : requestAnimationFrame(watch));
+				watch();
+			}));
+			expect(!landing.loading && landing.animations > 0, `the indicator goes with the answer and the height animates: ${JSON.stringify(landing)}`);
+			await view.page.keyboard.press('Escape');
+			await bell(view.page).click();
+			await view.page.waitForTimeout(150);
+			await view.page.keyboard.press('Escape');
+			await view.page.waitForTimeout(1100);
+			expect((await view.page.locator('.bui-notify .bui-notify-body .bui-notice, .bui-notify .bui-notify-body .bui-loading').count()) === 0, 'a late answer after Escape is not drawn');
+			await view.context.close();
+		}
 	}
 ];
