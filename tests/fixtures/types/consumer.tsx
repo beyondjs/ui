@@ -18,7 +18,7 @@ export function Screen() {
 	const { appearance, locale } = usePreferences(preferences);
 	return (
 		<>
-			<FamilyBar product="delegate" brand={{ src: '/wordmark.svg', href: '/' }} descriptor={null as FamilyDescriptor | null} fallback={{ project: 'Storefront', links: { account: '/account', home: '/projects/' } }} notifications={<NotificationEntry adapter={adapter} />} account={{ signout: () => undefined, items: [{ label: 'Atajos', onSelect: () => setOpen(true) }] }} onNavigate={item => item.href} notice={{ text: 'Delegate isn’t set up for Northwind', action: { label: 'Try again', onSelect: () => setOpen(false) } }} transient={['dialog']} labels={{ signout: 'Cerrar sesión' }} />
+			<FamilyBar product="delegate" brand={{ src: '/wordmark.svg', href: '/' }} descriptor={null as FamilyDescriptor | null} fallback={{ project: 'Storefront', links: { account: '/account', home: '/projects/' } }} notifications={<NotificationEntry adapter={adapter} products={productNames} />} account={{ signout: () => undefined, items: [{ label: 'Atajos', onSelect: () => setOpen(true) }] }} onNavigate={item => item.href} notice={{ text: 'Delegate isn’t set up for Northwind', action: { label: 'Try again', onSelect: () => setOpen(false) } }} transient={['dialog']} labels={{ signout: 'Cerrar sesión' }} />
 			<Sidebar product="Delegate" groups={[{ heading: 'Project', items: [{ label: 'Requests', href: '/r', current: true }] }]} context="Storefront" cut={850} onNavigate={item => item.url} />
 			<ProductNav items={[{ label: 'Pedidos', href: '/requests', current: true }]} onNavigate={item => item.href} />
 			<Unavailable title="Aún no" reason="Por invitación." owner="Ana" action={<Button label="Pedir acceso" />} kind="capability" />

@@ -52,12 +52,14 @@ const engine = new ChoiceMenu({ label: 'AI engine', placeholder: 'Choose', optio
 engine.value = 'claude';
 const chosen: string | null = engine.chosen?.value ?? null;
 engine.disabled = !chosen;
-// The family's product names (0.4.1): every family id is a string, any other id may be absent, and none is writable.
+// The family's product names (0.4.1): every family id is a string, they pass as a component's `products`, and none is writable.
 const delegate: string = productNames.delegate;
 const ids: FamilyProductId[] = ['conduict', 'desktop'];
 const named: string = productNames['notice-product'] ?? 'notice-product';
+const products: Record<string, string> = productNames;
+new NotificationEntry({ adapter, products: productNames }).destroy();
 // @ts-expect-error the names are read-only
 productNames.cdn = 'Content';
 // @ts-expect-error not a family product id
 const odd: FamilyProductId = 'mail';
-void [delegate, ids, named, odd];
+void [delegate, ids, named, odd, products];

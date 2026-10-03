@@ -151,8 +151,11 @@ export interface FamilyBarOptions {
 /** The id of a product of the family, as `productNames` keys it. */
 export type FamilyProductId = 'projects' | 'workspace' | 'delegate' | 'cdn' | 'snapshots' | 'conduict' | 'accounts' | 'desktop' | 'docs';
 
-/** Display names by product id: every family product is named; any other id may be absent. */
-export type FamilyProductNames = { readonly [id in FamilyProductId]: string } & { readonly [id: string]: string | undefined };
+/**
+ * Display names by product id: every family product is named. It is a `Record<string, string>`, so it
+ * passes as any component's `products` option; an id outside the family reads as absent at run time.
+ */
+export type FamilyProductNames = Readonly<Record<FamilyProductId, string>> & Readonly<Record<string, string>>;
 
 /**
  * The family's display names of its products by id (0.4.1), never translated: the names the family
