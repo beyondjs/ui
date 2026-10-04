@@ -112,5 +112,33 @@ export const checks = [
 				await context.close();
 			}
 		}
+	},
+	{
+		name: 'product row (D44): a long section name is never cut: it wraps, the row grows past 44 px and the drawer still opens and closes, in both themes',
+		consumers: ['dom'],
+		async run(browser, consumer) {
+			const name = 'Consumption and charges of every environment in this project';
+			for (const scheme of ['light', 'dark']) {
+				for (const width of [390, 320]) {
+					const at = `${width}px ${scheme}`;
+					const { page, context } = await open(browser, consumer, { width, colorScheme: scheme });
+					await page.evaluate(text => (window.fixture.nav.section = text), name);
+					const row = await page.evaluate(() => {
+						const label = document.querySelector('.bui-sidebar-section');
+						const style = getComputedStyle(label);
+						const box = document.querySelector('.bui-sidebar-row').getBoundingClientRect();
+						return { text: label.textContent, whole: label.scrollWidth <= label.clientWidth + 1, ellipsis: style.textOverflow, wrap: style.whiteSpace, lines: Math.round(label.getBoundingClientRect().height / parseFloat(style.lineHeight)), height: box.height, right: box.right };
+					});
+					expect(row.text === name && row.whole && row.ellipsis !== 'ellipsis' && row.wrap !== 'nowrap', `${at}: the whole name: ${JSON.stringify(row)}`);
+					expect(row.lines >= 2 && row.height > 45, `${at}: it wraps and the row grows: ${JSON.stringify(row)}`);
+					expect(!(await overflow(page)) && row.right <= width, `${at}: no sideways scroll`);
+					await page.locator('.bui-sidebar-button').click();
+					expect((await state(page)).open, `${at}: the drawer opens`);
+					await page.keyboard.press('Escape');
+					expect(!(await state(page)).open && (await state(page)).focus.includes('bui-sidebar-button'), `${at}: and closes`);
+					await context.close();
+				}
+			}
+		}
 	}
 ];

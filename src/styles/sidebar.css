@@ -161,13 +161,18 @@ a.bui-sidebar-item:hover {
 }
 .bui-sidebar-button > .bui-icon {
 	flex: none;
+	align-self: flex-start;
+	margin-top: calc((max(var(--bui-target), 40px) - 18px) / 2);
 	width: 18px;
 	height: 18px;
 }
+/* The section's name is a fixed label: never cut (D44). A long one wraps and the row grows past
+   its 44 px; the glyph stays on the first line. */
 .bui-sidebar-section {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	min-width: 0;
+	padding-block: var(--space-1);
+	overflow-wrap: anywhere;
+	text-align: left;
 }
 
 /* The drawer: the whole viewport, a scrim and the panel at the start edge with a strip of scrim

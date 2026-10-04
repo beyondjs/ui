@@ -75,6 +75,19 @@ test('the opened menus wrap names: no ellipsis on a menu row, an option or a chi
 	}
 });
 
+test('the sidebar\'s product row never cuts its section name, a fixed label: it wraps and the row grows', async () => {
+	const { readFileSync } = await import('node:fs');
+	const sheet = readFileSync(new URL('../dist/styles.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+	const rules = [...sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, list]) => /\.bui-sidebar-(section|button|row)\b/.test(list) && !/bui-icon/.test(list));
+	assert.ok(rules.length >= 3);
+	for (const [, list, body] of rules) assert.doesNotMatch(body, /text-overflow|white-space:\s*nowrap|(^|[^-])height:\s*\d/, list.trim());
+	const section = rules.filter(([, list]) => list.split(',').map(part => part.trim()).includes('.bui-sidebar-section'));
+	assert.ok(section.some(([, , body]) => /overflow-wrap:\s*anywhere/.test(body)), 'the section name wraps');
+	const sidebar = new ui.Sidebar({ product: 'Delegate', groups: [{ items: [{ label: 'Consumption and charges of every environment', href: '#/c', current: true }] }] }).mount(document.body);
+	assert.equal(sidebar.element.querySelector('.bui-sidebar-section').textContent, 'Consumption and charges of every environment', 'the whole name is in the row');
+	sidebar.destroy();
+});
+
 test('Select: the chosen text shows whole while the select cuts it, measured in its own font', () => {
 	const saved = page.window.HTMLCanvasElement.prototype.getContext;
 	// A canvas that measures 8 px per character, as the browser measures in the select's font.
