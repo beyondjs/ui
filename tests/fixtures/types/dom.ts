@@ -1,5 +1,5 @@
 // A plain DOM consumer in TypeScript: compiled, never run, to check the `dom` and `tokens` declarations.
-import { productNames, type FamilyProductId, Clock, Steps, Awaited, Freshness, TechnicalDetails, Tooltip, type Step, type AwaitedState, Dialog, Picker, ChoiceMenu, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Sidebar, Unavailable, Button, badge, availability, icon, icons, unlabeled, Preferences, type Appearance, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor, type FamilyNotice } from '@beyond-js/ui';
+import { productNames, type FamilyProductId, Select, type NameTip, Clock, Steps, Awaited, Freshness, TechnicalDetails, Tooltip, type Step, type AwaitedState, Dialog, Picker, ChoiceMenu, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Sidebar, Unavailable, Button, badge, availability, icon, icons, unlabeled, Preferences, type Appearance, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor, type FamilyNotice } from '@beyond-js/ui';
 import { tokens, TokenSheet } from '@beyond-js/ui/tokens';
 
 declare const adapter: NotificationAdapter;
@@ -84,3 +84,11 @@ const signed = new FamilyBar({ product: 'cdn', brand: { src: '/w.svg', href: '/'
 const leaveAt: FamilyDescriptor['links'] = { leave: 'https://accounts.example.test/leave' };
 const tip = new Tooltip(document.body, { text: 'Northwind Creative Studio', describe: false, when: () => true });
 void [signed, leaveAt, tip];
+// A select's cut-name tooltip (0.5.0, D44), for a product that draws its own select markup.
+const chooser = document.createElement('select');
+const whole: NameTip = Select.tip(chooser);
+const shownTip: Tooltip | null = whole.tooltip;
+whole.destroy();
+// @ts-expect-error a select element, not any element
+Select.tip(document.body);
+void shownTip;

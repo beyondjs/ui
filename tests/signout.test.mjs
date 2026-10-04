@@ -1,6 +1,7 @@
 import { test, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { Page } from './support/page.mjs';
+import { Listeners } from './support/listeners.mjs';
 import { annotated, leaving } from './fixtures/family.mjs';
 
 /** Q09 and D48: "Sign out of Beyond" ends the product's session under a bound, then goes to Accounts' /leave. */
@@ -132,4 +133,40 @@ test('the earlier forms still work: a callback and { href }', () => {
 	const link = make({ href: '/signout' });
 	assert.equal(entry(link).getAttribute('href'), '/signout');
 	link.destroy();
+});
+
+test('one sign-out entry in the open menu after closings, a descriptor that arrives later and a bar made again with other options; nothing left registered', async t => {
+	// The package's stylesheet floats the panels, so a closing panel leaves a picture of itself
+	const style = document.createElement('style');
+	style.textContent = '.bui-disclosure-panel { position: absolute; }';
+	document.head.append(style);
+	const listeners = new Listeners(page.window).install();
+	t.after(() => (style.remove(), listeners.uninstall()));
+	const own = { label: 'Workspace preferences', run: () => {} };
+	const signouts = bar => bar.element.querySelectorAll('.bui-family-signout');
+	const opened = bar => {
+		if (open(bar).getAttribute('aria-expanded') !== 'true') open(bar).click();
+		return signouts(bar);
+	};
+	let bar = make({ end: () => {} }, { descriptor: null, account: { signout: { end: () => {} }, label: 'Sign out', items: [own] } });
+	opened(bar);
+	page.key(open(bar), 'Escape');
+	opened(bar);
+	[...bar.element.querySelectorAll('[data-part="account"] .bui-navmenu-item')].find(node => node.textContent === own.label).click();
+	assert.equal(open(bar).getAttribute('aria-expanded'), 'false', 'choosing an entry closes the menu');
+	assert.equal(opened(bar).length, 1, 'the open menu holds one sign-out entry, not pictures of earlier closings');
+	page.key(open(bar), 'Escape');
+	bar.descriptor = leaving;
+	assert.equal(opened(bar).length, 1, 'one after the descriptor arrives');
+	assert.equal(document.querySelectorAll('.bui-family').length, 1);
+	bar.destroy();
+	bar = make({ end: () => {} }, { descriptor: leaving, account: { signout: { end: () => {} }, items: [own] } });
+	const entries = opened(bar);
+	assert.equal(entries.length, 1, 'one in a bar made again with the label changed');
+	assert.equal(entries[0].textContent, 'Sign out of Beyond');
+	page.key(open(bar), 'Escape');
+	bar.destroy();
+	assert.equal(document.querySelectorAll('.bui-family-signout').length, 0, 'nothing of either bar is left, pictures included');
+	await new Promise(resolve => setTimeout(resolve, 0));
+	assert.deepEqual(listeners.present(), [], 'no listener left on the document or the window');
 });

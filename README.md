@@ -21,8 +21,8 @@ The [component catalog](docs/components.md) describes each component, its option
 
 Prerequisite: Node.js 22.21.1 or later.
 
-1. In this repository, `npm install` once, then `npm run pack:consumers -- <consumer directory>`. That runs `npm pack`, writes `dist-pack/beyond-ui-<version>.tgz` (currently `beyond-ui-0.5.0.tgz`) with its `sha512` integrity beside it, and copies the tarball into `<consumer directory>/tools/`.
-2. In the consumer, declare `"@beyond-js/ui": "file:tools/beyond-ui-0.5.0.tgz"` (a dependency, or a devDependency when a bundler builds the product) and run `npm install`.
+1. In this repository, `npm install` once, then `npm run pack:consumers -- <consumer directory>`. That runs `npm pack`, writes `dist-pack/beyond-ui-<version>.tgz` (currently `beyond-ui-0.5.1.tgz`) with its `sha512` integrity beside it, and copies the tarball into `<consumer directory>/tools/`.
+2. In the consumer, declare `"@beyond-js/ui": "file:tools/beyond-ui-0.5.1.tgz"` (a dependency, or a devDependency when a bundler builds the product) and run `npm install`.
 3. Import the stylesheets once (`fonts.css` is Rubik; a product that is not bundled serves it with the woff2 files beside it), then the components:
 
 ```js

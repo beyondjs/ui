@@ -72,6 +72,25 @@ test('Disclosure hides its panel at once and lets an inert picture of it ease ou
 	assert.equal(disclosure.element.querySelector('.bui-disclosure-leaving'), null, 'no picture with reduced motion');
 });
 
+test('Opening again removes the picture of an earlier closing, so an open panel never has a copy beside it; destroy removes one still easing out', t => {
+	const entry = document.createElement('button');
+	entry.className = 'entry';
+	const disclosure = new ui.Disclosure({ label: 'Account', children: [entry] }).mount(document.body);
+	t.after(() => disclosure.destroy());
+	disclosure.panel.style.position = 'absolute';
+	disclosure.open();
+	disclosure.close();
+	disclosure.open();
+	assert.equal(disclosure.element.querySelectorAll('.bui-disclosure-leaving').length, 0, 'no picture while the panel is open');
+	assert.equal(disclosure.element.querySelectorAll('.entry').length, 1, 'one entry, the panel\'s own');
+	disclosure.close();
+	disclosure.open();
+	disclosure.close();
+	assert.equal(disclosure.element.querySelectorAll('.bui-disclosure-leaving').length, 1, 'one picture at most');
+	disclosure.destroy();
+	assert.equal(disclosure.element.querySelector('.bui-disclosure-leaving'), null, 'destroy removes a picture still easing out');
+});
+
 test('A panel in the page flow closes at once, with no picture that would hold its place', t => {
 	const help = new ui.Help({ topic: 'Billing', text: 'Charges are monthly.' }).mount(document.body);
 	t.after(() => help.destroy());

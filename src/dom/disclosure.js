@@ -17,7 +17,9 @@ import { Hint } from './core/hint.js';
  *
  * Closing hides the panel at once (nothing in it can be reached after `close()` returns), and a
  * picture of it eases out where it was: an inert copy without identifiers, hidden from assistive
- * technology, removed as soon as its movement ends. With reduced motion there is no picture.
+ * technology, removed as soon as its movement ends. With reduced motion there is no picture. The
+ * picture keeps the panel's classes so it looks the same, so it never outlives a reopening: opening
+ * again or destroying removes it, and an open panel has no copy beside it.
  */
 export class Disclosure extends Component {
 	#element;
@@ -27,6 +29,7 @@ export class Disclosure extends Component {
 	#onchange;
 	#releases = [];
 	#hint = null;
+	#picture = null;
 
 	/**
 	 * @param {object} options
@@ -69,6 +72,7 @@ export class Disclosure extends Component {
 
 	destroy() {
 		this.#hint?.destroy();
+		this.#picture?.remove();
 		super.destroy();
 	}
 
@@ -96,6 +100,7 @@ export class Disclosure extends Component {
 	open() {
 		if (this.#open || this.destroyed) return;
 		this.#open = true;
+		this.#picture?.remove();
 		this.#panel.hidden = false;
 		this.#button.setAttribute('aria-expanded', 'true');
 		const document = this.#element.ownerDocument;
@@ -137,6 +142,7 @@ export class Disclosure extends Component {
 	 * page's flow (help) closes at once: a picture of it would hold its place and push what follows.
 	 */
 	#leave() {
+		this.#picture?.remove();
 		const view = this.#element.ownerDocument.defaultView;
 		if (!this.#element.isConnected || view?.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
 		const position = view?.getComputedStyle?.(this.#panel).position;
@@ -148,9 +154,13 @@ export class Disclosure extends Component {
 		picture.setAttribute('aria-hidden', 'true');
 		picture.inert = true;
 		this.#element.append(picture);
-		const remove = () => picture.remove();
+		this.#picture = picture;
+		const remove = () => {
+			picture.remove();
+			if (this.#picture === picture) this.#picture = null;
+		};
 		picture.addEventListener('animationend', remove, { once: true });
-		view.setTimeout(remove, 400);
+		this.later(remove, 400);
 	}
 
 	#escape(event) {

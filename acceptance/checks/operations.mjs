@@ -3,7 +3,8 @@ import { expect } from '../support/browser.mjs';
 /**
  * 0.5.0 (D50, E52, D43, D44, Q09): the awaited card and its steps at their thresholds on an injected
  * clock, reload, Check again, reduced motion; freshness; technical details copied or refused; cut names
- * shown whole on hover and focus and whole in the open menu; signing out of Beyond through /leave.
+ * shown whole on hover and focus and whole in the open menu; signing out of Beyond through /leave;
+ * since 0.5.1 one sign-out entry in a menu opened again while pictures of its closings ease out.
  */
 const words = {
 	en: { left: 'About 2 min left', brief: 'Less than a minute left', slow: 'Taking longer than usual', check: 'Check again', step: '6 s so far · usually about 1 min', late: 'taking longer than usual', blocked: 'Conduict cannot reach the machine.', checked: 'Checked 3 min ago', known: /^Last known: Running · \d\d:\d\d$/, copied: 'Copied', refused: 'Could not copy', summary: 'Technical details', leaving: 'Signing out…', signout: 'Sign out of Beyond' },
@@ -188,6 +189,29 @@ export const checks = [
 			await silent.page.waitForURL(/\/leave\.html\?/, { timeout: 5000 });
 			expect(Date.now() - started >= 350, 'it waited for the bound, then left');
 			await silent.context.close();
+		}
+	},
+	{
+		name: 'sign out of Beyond: a menu closed and opened again at once holds one sign-out entry, not the pictures of its closings (0.5.1)',
+		consumers: ['dom', 'react19', 'react18'],
+		async run(browser, consumer) {
+			const { page } = await open(browser, consumer, '?at=0');
+			const menu = page.locator('[data-part="account"] .bui-navmenu-button');
+			const count = () => page.evaluate(() => [...document.querySelectorAll('.bui-family-signout')].map(node => (node.closest('.bui-disclosure-leaving') ? 'picture' : 'entry')));
+			await menu.click();
+			await page.keyboard.press('Escape');
+			const closing = await count();
+			expect(closing.includes('picture'), `a closing leaves its picture easing out: ${closing}`);
+			await menu.click();
+			await page.keyboard.press('Escape');
+			await menu.click();
+			const shown = await count();
+			expect(shown.length === 1 && shown[0] === 'entry', `the open menu holds one entry: ${shown}`);
+			await page.locator('.bui-family-signout').click({ trial: true });
+			await page.keyboard.press('Escape');
+			await page.waitForTimeout(500);
+			const settled = await count();
+			expect(settled.length === 1 && settled[0] === 'entry', `a settled bar holds one entry: ${settled}`);
 		}
 	}
 ];

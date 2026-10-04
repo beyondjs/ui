@@ -2,6 +2,7 @@ import { test, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { Page } from './support/page.mjs';
 import { start, minute, at, preparing, blocked } from './fixtures/operations.mjs';
+import { Listeners } from './support/listeners.mjs';
 import { leaving } from './fixtures/family.mjs';
 
 /** The React adapter of 0.5.0: the long-operation components, the sign-out of Beyond and the Select's whole name. */
@@ -87,6 +88,43 @@ test('FamilyBar: the { end, before, after } sign-out calls the latest props and 
 	const left = new URL(visits[0]);
 	assert.equal(left.searchParams.get('product'), 'cdn');
 	assert.equal(left.searchParams.get('return'), 'http://localhost/app?project=prj_shop');
+});
+
+test('FamilyBar: one sign-out entry in the open menu when the label changes as the descriptor arrives, after closings; unmounting leaves no listener', async t => {
+	// The package's stylesheet floats the panels, so a closing panel leaves a picture of itself
+	const style = document.createElement('style');
+	style.textContent = '.bui-disclosure-panel { position: absolute; }';
+	document.head.append(style);
+	const listeners = new Listeners(page.window).install();
+	t.after(() => (style.remove(), listeners.uninstall()));
+	const signout = { before: () => true, end: () => {} };
+	const items = [{ label: 'Workspace preferences', onSelect: () => {} }];
+	// As Workspace drew it: "Sign out" while the descriptor loads, "Sign out of Beyond" once it names /leave
+	const view = descriptor => h(ui.FamilyBar, { product: 'workspace', brand: { src: '/w.svg', href: '/' }, descriptor, account: { signout, label: descriptor ? null : 'Sign out', items } });
+	const button = () => document.querySelector('.bui-family [data-part="account"] .bui-navmenu-button');
+	const opened = async () => {
+		if (button().getAttribute('aria-expanded') !== 'true') await act(async () => button().click());
+		return document.querySelectorAll('.bui-family .bui-family-signout');
+	};
+	await render(view(null));
+	await opened();
+	await act(async () => page.key(button(), 'Escape'));
+	await opened();
+	await act(async () => [...document.querySelectorAll('.bui-family [data-part="account"] .bui-navmenu-item')].find(node => node.textContent === items[0].label).click());
+	assert.equal((await opened()).length, 1, 'the open menu holds one sign-out entry, not pictures of earlier closings');
+	assert.equal((await opened())[0].textContent, 'Sign out');
+	await act(async () => page.key(button(), 'Escape'));
+	await render(view(leaving));
+	assert.equal(document.querySelectorAll('.bui-family').length, 1, 'the bar made again replaces the first');
+	const entries = await opened();
+	assert.equal(entries.length, 1, 'one entry once the descriptor arrived and the label changed');
+	assert.equal(entries[0].textContent, 'Sign out of Beyond');
+	await act(async () => page.key(button(), 'Escape'));
+	await act(() => root.unmount());
+	root = null;
+	assert.equal(document.querySelectorAll('.bui-family, .bui-family-signout').length, 0, 'nothing of either bar is left, pictures included');
+	await new Promise(resolve => setTimeout(resolve, 0));
+	assert.deepEqual(listeners.present(), [], 'no listener left on the document or the window');
 });
 
 test('Select keeps the DOM markup and shows a cut chosen text whole', async () => {

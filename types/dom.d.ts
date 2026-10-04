@@ -150,7 +150,23 @@ export class Choices extends Component {
 }
 
 export type SelectOption = { value: string; label: Content; disabled?: boolean } | { group: string; options: SelectOption[] };
+/**
+ * The tooltip that shows a cut name whole on hover and keyboard focus, only while it is cut (0.5.0,
+ * D44). It is created on the first hover or focus and hidden from assistive technology.
+ */
+export interface NameTip {
+	/** The tooltip once it was first needed, else null. */
+	readonly tooltip: Tooltip | null;
+	/** Removes the control's listeners and the tooltip. */
+	destroy(): void;
+}
 export class Select extends Component {
+	/**
+	 * Gives a native select the tooltip of its chosen text while the select cuts it (0.5.0, D44): what
+	 * `Select` and the React `Select` use, for a product that draws its own select markup. Destroy it
+	 * with the control.
+	 */
+	static tip(control: HTMLSelectElement): NameTip;
 	constructor(options: { name?: string | null; options: SelectOption[]; value?: string | null; required?: boolean; disabled?: boolean; onchange?: ((value: string) => void) | null; id?: string | null });
 	readonly control: HTMLSelectElement;
 	value: string;
