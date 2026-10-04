@@ -65,3 +65,25 @@ test('Arrival and Tabs drive the DOM classes; the bar\'s preferences entry opens
 	await act(async () => entry.click());
 	assert.ok(document.querySelector('dialog.bui-dialog')?.open);
 });
+
+test('a new "Change for all of Beyond" address (a string or an inline function) keeps the same bar, and the dialog reads the latest one', async () => {
+	const values = new dom.Preferences({ key: 'beyond-react-everywhere', fallback: { appearance: 'system', locale: 'en' }, storage: null });
+	let closed = 0;
+	const view = address => h(ui.FamilyBar, { product: 'cdn', brand: { src: '/brand.svg', href: '/' }, descriptor: inside, account: { signout: () => {}, preferences: { preferences: values, everywhere: address, onclose: () => closed++ } } });
+	await render(view('/account?return=%2Fa'));
+	const bar = document.querySelector('.bui-family');
+	const menu = bar.querySelector('.bui-family-account > .bui-navmenu-button');
+	await render(view('/account?return=%2Fb'));
+	await render(view(() => '/account?return=%2Fc'));
+	await render(view(() => '/account?return=%2Fd'));
+	assert.equal(document.querySelector('.bui-family'), bar, 'the same bar: nothing was drawn again');
+	assert.equal(bar.querySelector('.bui-family-account > .bui-navmenu-button'), menu, 'the same profile button');
+	await act(async () => document.querySelector('.bui-family-preferences').click());
+	assert.equal(document.querySelector('dialog.bui-dialog .bui-preferences-note a').getAttribute('href'), '/account?return=%2Fd', 'the latest address');
+	await act(async () => {
+		document.querySelector('dialog.bui-dialog button.bui-button-primary').click();
+		await new Promise(resolve => setTimeout(resolve, 0));
+	});
+	assert.equal(closed, 1, 'the latest onclose');
+});
+

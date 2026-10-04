@@ -46,7 +46,8 @@ export class PageHeader extends Component {
 		this.#crumbs = el('nav', { class: 'bui-crumbs', 'aria-label': this.#labels.text('crumbs') });
 		this.#tabs = el('div', { class: 'bui-page-tabs' });
 		const line = el('div', { class: 'bui-page-title' }, [this.#heading, this.#status, this.#actions]);
-		this.#element = el('header', { class: 'bui-page-header', 'aria-labelledby': id }, [this.#crumbs, line, this.#facts, this.#tabs]);
+		// No name on the header: inside <main> it has the generic role, which takes none (ARIA 1.2), and the H1 already names the page
+		this.#element = el('header', { class: 'bui-page-header' }, [this.#crumbs, line, this.#facts, this.#tabs]);
 		this.title = title;
 		this.crumbs = crumbs;
 		this.status = status;

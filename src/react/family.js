@@ -14,7 +14,9 @@ const { useId, useState } = React;
  * `{ unavailable: true }` when the relay failed); `notifications` is React content rendered into its
  * slot; `account.signout` (a callback, or since 0.5.0 `{ end, before?, after?, bound? }`, whose
  * functions are read from the latest props) and `account.items[].onSelect` are called with the latest props.
- * `account.preferences` (`{ preferences, everywhere }`, since 0.6.0) adds "Language and appearance".
+ * `account.preferences` (`{ preferences, everywhere, onclose? }`, since 0.6.0) adds "Language and appearance";
+ * since 0.6.4 its `everywhere` and `onclose` are read from the latest props, so a new address (a string
+ * or an inline function) never draws the bar again.
  * `onNavigate(item, event)` takes over plain clicks on the bar's same-origin links. `notice` is
  * applied when its text, address or action label change, and its `action.onSelect` is called with
  * the latest props. A change of `product`, `brand`, `products`, `labels` (memoize it), `advisory`,
@@ -40,14 +42,14 @@ export function FamilyBar({ product, brand, descriptor = null, fallback = null, 
 				label: account.label ?? null,
 				signout: leaving(signout, latest),
 				items: items.map((item, index) => ({ label: item.label, href: item.href ?? null, run: item.href ? null : () => latest.current.account.items?.filter(Boolean)[index]?.onSelect?.() })),
-				preferences: account.preferences ?? null
+				preferences: preferring(account.preferences, latest)
 			},
 			onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null,
 			toggle: toggle ? { controls: toggle.controls, expanded: toggle.expanded, onchange: expanded => latest.current.toggle?.onChange?.(expanded) } : null,
 			notice: relay(notice, latest),
 			transient
 		});
-	}, [product, brand.src, brand.href, JSON.stringify(products), JSON.stringify(advisory), JSON.stringify(transient), labels, account.label, typeof signout === 'function' ? 'function' : (signout?.href ?? (signout ? `leave:${signout.bound ?? ''}` : null)), JSON.stringify(items.map(item => [item.label, item.href ?? null])), account.preferences?.preferences, account.preferences?.everywhere, Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
+	}, [product, brand.src, brand.href, JSON.stringify(products), JSON.stringify(advisory), JSON.stringify(transient), labels, account.label, typeof signout === 'function' ? 'function' : (signout?.href ?? (signout ? `leave:${signout.bound ?? ''}` : null)), JSON.stringify(items.map(item => [item.label, item.href ?? null])), account.preferences?.preferences, JSON.stringify(account.preferences?.locales ?? null), Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
 	useSync(bar, current => (current.notice = relay(notice, latest)), [notice?.text, notice?.href, notice?.action?.label, notice?.action?.href]);
 	useSync(bar, current => (current.descriptor = descriptor), [JSON.stringify(descriptor)]);
 	useSync(bar, current => (current.fallback = fallback ?? {}), [JSON.stringify(fallback)]);
@@ -55,6 +57,24 @@ export function FamilyBar({ product, brand, descriptor = null, fallback = null, 
 		if (toggle && current.expanded !== toggle.expanded) current.expanded = toggle.expanded;
 	}, [toggle?.expanded]);
 	return h('div', { ref: host, className: 'bui-host bui-family-host' }, notifications ? ReactDOM.createPortal(notifications, slot) : null);
+}
+
+/**
+ * The DOM `account.preferences` for the prop: the product's `Preferences` instance as given, its
+ * `everywhere` (a string or a function) and `onclose` read from the latest props each time they are used.
+ */
+function preferring(preferences, latest) {
+	if (!preferences) return null;
+	const now = () => latest.current.account.preferences;
+	return {
+		preferences: preferences.preferences,
+		locales: preferences.locales,
+		everywhere: () => {
+			const everywhere = now()?.everywhere;
+			return (typeof everywhere === 'function' ? everywhere() : everywhere) ?? null;
+		},
+		onclose: () => now()?.onclose?.()
+	};
 }
 
 /**

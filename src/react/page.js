@@ -39,7 +39,7 @@ export function PageHeader({ title, crumbs = [], status = null, facts = null, ac
 	const levels = (crumbs ?? []).filter(Boolean);
 	return h(
 		'header',
-		{ className: 'bui-page-header', 'aria-labelledby': id },
+		{ className: 'bui-page-header' },
 		levels.length
 			? h('nav', { className: 'bui-crumbs', 'aria-label': labels.crumbs ?? 'Breadcrumb' }, h('ol', null, levels.map((level, index) => h('li', { key: index }, level.href ? h('a', { href: level.href }, level.label) : h('span', null, level.label)))))
 			: null,

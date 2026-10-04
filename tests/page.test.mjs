@@ -50,7 +50,7 @@ test('PageHeader: crumbs only with levels above, the H1, one status, facts, the 
 	const header = new ui.PageHeader({ title: 'web', crumbs: [{ label: 'Environments', href: '/environments' }], status: ui.status('Ready', 'success'), facts: 'Compute Engine · us-east4', actions: [primary], tabs }).mount(document.body);
 	const element = header.element;
 	assert.equal(element.tagName, 'HEADER');
-	assert.equal(element.getAttribute('aria-labelledby'), header.heading.id);
+	assert.equal(element.hasAttribute('aria-labelledby'), false, 'the header takes no name: the H1 names the page (ARIA 1.2, a generic header inside <main>)');
 	assert.deepEqual([...element.querySelectorAll('.bui-crumbs a')].map(link => [link.textContent, link.getAttribute('href')]), [['Environments', '/environments']]);
 	const line = element.querySelector('.bui-page-title');
 	assert.deepEqual([...line.children].map(child => child.className), ['bui-page-heading', 'bui-page-status', 'bui-page-actions'], 'the status follows the H1 and the actions end the line');

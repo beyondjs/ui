@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
  */
 const version = '18.3.1';
 const hooks = fileURLToPath(new URL('./support/react.mjs', import.meta.url));
-const suites = ['react.test.mjs', 'strict.test.mjs', 'react-family.test.mjs', 'react-icons.test.mjs', 'react-operations.test.mjs'];
+const suites = ['react.test.mjs', 'strict.test.mjs', 'react-family.test.mjs', 'react-icons.test.mjs', 'react-operations.test.mjs', 'react-page.test.mjs'];
 
 test(`the React adapter suites pass on React ${version}`, async t => {
 	const directory = mkdtempSync(join(tmpdir(), 'ui react18-'));
