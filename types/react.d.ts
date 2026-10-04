@@ -15,6 +15,19 @@ export type { IconName, IconSize, IconOptions, UnlabeledIconName, Appearance, Pr
 import type { IconName, IconSize, Preferences, PreferenceValues } from './dom.js';
 /** The values in effect of a `Preferences` instance, re-rendering after each change. */
 export function usePreferences(preferences: Preferences): PreferenceValues;
+export { PreferencesDialog } from './dom.js';
+export type { PageTemplate, PageWidth, PageCrumb, TabItem, FamilyPreferences, ArrivalLabels } from './dom.js';
+import type { PageTemplate, PageWidth, PageCrumb, TabItem, ArrivalLabels } from './dom.js';
+/** The content region (D52): edge to edge, one gutter from the navigation, blocks at their width tier. */
+export function Page(props: { template?: PageTemplate; width?: PageWidth; arrival?: ReactNode; header?: ReactNode; aside?: ReactNode; label?: string | null; children?: ReactNode }): ReactElement;
+/** The page's one header: crumbs, the H1, one status, facts, the line's actions and the tabs. */
+export function PageHeader(props: { title: ReactNode; crumbs?: Array<PageCrumb | null | false>; status?: ReactNode; facts?: ReactNode; actions?: ReactNode; tabs?: ReactNode; headingRef?: Ref<HTMLHeadingElement> | null; labels?: { crumbs?: string } }): ReactElement;
+/** A flat section: a heading, one description line, its actions and its content. */
+export function Section(props: { title: ReactNode; description?: ReactNode; actions?: ReactNode; level?: 2 | 3; children?: ReactNode }): ReactElement;
+/** The arrival line (D54), driven by the DOM `Arrival`. */
+export function Arrival(props: { product: string; href: string; onDismiss?: (() => void) | null; onNavigate?: ((item: { href: string; url: string }, event: MouseEvent) => void) | null; labels?: Partial<ArrivalLabels> }): ReactElement;
+/** A resource's areas as tabs, driven by the DOM `Tabs`. */
+export function Tabs(props: { items: Array<TabItem | null | false>; label?: string | null; onNavigate?: ((item: TabItem, event: MouseEvent) => void) | null; labels?: { nav?: string } }): ReactElement;
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'onClick'> {
 	label?: ReactNode;
@@ -132,7 +145,7 @@ export interface FamilyBarProps {
 	products?: Record<string, string>;
 	notifications?: ReactNode;
 	/** `signout`: `{ end, before?, after?, bound? }` (0.5.0), whose functions are read from the latest props, or the earlier callback or link. */
-	account?: { signout?: FamilySignout | (() => void) | { href: string } | null; items?: Array<{ label: string; href?: string | null; onSelect?: (() => void) | null } | null | false>; label?: string | null };
+	account?: { signout?: FamilySignout | (() => void) | { href: string } | null; items?: Array<{ label: string; href?: string | null; onSelect?: (() => void) | null } | null | false>; label?: string | null; preferences?: import('./page.js').FamilyPreferences | null };
 	toggle?: { controls: string; expanded: boolean; onChange?: (expanded: boolean) => void } | null;
 	onNavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null;
 	advisory?: string[];

@@ -97,6 +97,7 @@ export const es = {
 		anonymous: 'Cuenta',
 		yours: 'Tu cuenta',
 		members: 'Miembros de esta organización',
+		preferences: 'Idioma y apariencia',
 		signout: 'Cerrar sesión en Beyond',
 		leaving: 'Cerrando sesión…'
 	},

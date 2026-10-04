@@ -6,7 +6,8 @@ import { tokens, TokenSheet, Contrast } from '@beyond-js/ui/tokens';
 /**
  * The token set: the package is the canonical source from 0.1.0, when it reproduced byte for byte
  * the sheet the family reference generated before the move. Token set 0.2.0 (the owner's approval of
- * 2026-09-29) is that baseline plus exactly the recorded changes below, in place, and nothing else.
+ * 2026-09-29) is that baseline plus exactly the recorded changes below, in place, and nothing else;
+ * token set 0.3.0 (the family page system, D52, approved on 2026-10-04) adds the layout tokens.
  * Imported through the package's own export, as consumers import it.
  */
 const fixture = new URL('./fixtures/branding-tokens-0.1.0.css', import.meta.url);
@@ -16,7 +17,15 @@ const dark = ['--color-border-control: #8e99bb;', '--elevation-window: 0 14px 30
 const changes = {
 	removed: ['/* Beyond family tokens 0.1.0 (proposed). Generated from src/foundations; do not edit. */', '\t--text-label: 0.6875rem;', '\t--tracking-label: 0.08em;'],
 	added: [
-		'/* Beyond family tokens 0.2.0 (approved). Generated from src/foundations; do not edit. */',
+		'/* Beyond family tokens 0.3.0 (approved). Generated from src/foundations; do not edit. */',
+		// 0.3.0: the gutter by band and the width tiers of the family page system (D52)
+		'\t--layout-gutter: 16px;',
+		'\t--layout-gutter-medium: 24px;',
+		'\t--layout-gutter-wide: 32px;',
+		'\t--layout-form: 40rem;',
+		'\t--layout-standard: 90rem;',
+		'\t--layout-aside: 22rem;',
+		'\t--layout-fluid-max: 100rem;',
 		'\t--weight-regular: 400;',
 		'\t--text-label: 0.75rem;',
 		'\t--tracking-label: 0.02em;',
@@ -38,7 +47,7 @@ const without = (lines, listed) => {
 	});
 };
 
-test('the 0.2.0 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
+test('the 0.3.0 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
 	const baseline = readFileSync(fixture, 'utf8').split('\n');
 	const current = `${new TokenSheet(tokens).css}\n`.split('\n');
 	for (const line of changes.removed) assert.ok(baseline.includes(line) && !current.includes(line), `removed: ${line}`);
@@ -51,10 +60,12 @@ test('the packed tokens.css is the generated sheet', () => {
 });
 
 test('version, status, approval and provenance of the token set are recorded', () => {
-	assert.equal(tokens.version, '0.2.0');
+	assert.equal(tokens.version, '0.3.0');
 	assert.equal(tokens.status, 'approved');
 	assert.equal(tokens.approval.date, '2026-09-29');
 	assert.deepEqual(tokens.approval.decisions, ['D08', 'D09', 'D10', 'D12', 'D20']);
+	assert.deepEqual([tokens.approval.layout.date, tokens.approval.layout.decisions], ['2026-10-04', ['D52']]);
+	assert.equal(tokens.breakpoints.steps.compact, 640, 'the compact band of the page system');
 	assert.equal(tokens.attribute, 'data-beyond-mode');
 	assert.equal(tokens.provenance.origin, 'branding/src/foundations');
 	assert.match(tokens.provenance.revision, /^[0-9a-f]{40}$/);

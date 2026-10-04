@@ -20,4 +20,6 @@ export { names as productNames } from '../dom/family/labels.js';
 export { icons, unlabeled } from '../dom/core/icons.js';
 export { Preferences } from '../dom/preferences/preferences.js';
 export { usePreferences } from './preferences.js';
+export { PreferencesDialog } from '../dom/preferences/dialog.js';
+export { Page, PageHeader, Section, Arrival, Tabs } from './page.js';
 export { useInstance } from './hooks.js';

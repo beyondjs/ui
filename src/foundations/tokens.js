@@ -13,19 +13,27 @@ import { typography, space, radius, elevation, overlay, motion, density, layout,
  * The values moved here unchanged from the family reference at 0.1.0; `provenance` records where
  * from. The owner approved the set on 2026-09-29 with one addition (`border-control`), weight 400,
  * the sentence-case label and the window elevations: that is token set 0.2.0, `status: 'approved'`,
- * and `approval` records the decisions. Each entry's own `provenance` still says whether its value
+ * and `approval` records the decisions. On 2026-10-04 the owner approved the family page system
+ * (D52), whose layout tokens (gutters by band, the width tiers and the compact band) make token set 0.3.0
+ * (`approval.layout`). Each entry's own `provenance` still says whether its value
  * was captured or introduced by the family reference. `version` identifies the token set; a product
  * review cites it together with the package version.
  */
 export const tokens = {
-	version: '0.2.0',
+	version: '0.3.0',
 	status: 'approved',
 	source: 'Verified capture of the public Beyond site, 2026-09-18, with the family reference\'s additions',
 	approval: {
 		date: '2026-09-29',
 		by: 'owner',
 		decisions: ['D08', 'D09', 'D10', 'D12', 'D20'],
-		note: 'Approved in the Beyond family reference\'s decision register: the palette and roles with border-control (D08), the product type scale with weight 400 and a 0.75rem sentence-case label (D09, D20), flat surfaces with the window elevations (D10) and the brand orange\'s roles (D12).'
+		note: 'Approved in the Beyond family reference\'s decision register: the palette and roles with border-control (D08), the product type scale with weight 400 and a 0.75rem sentence-case label (D09, D20), flat surfaces with the window elevations (D10) and the brand orange\'s roles (D12).',
+		layout: {
+			date: '2026-10-04',
+			by: 'owner',
+			decisions: ['D52'],
+			note: 'The family page system (D52, settled contract S23: LR-01 to LR-09 and LR-11): the gutter by band, the form, standard, aside and fluid width tiers and the compact 640px band, their values engineering defaults to be measured. Token set 0.3.0.'
+		}
 	},
 	attribute: 'data-beyond-mode',
 	provenance: {

@@ -126,12 +126,20 @@ export const layout = {
 	content: {
 		value: '1180px',
 		provenance: 'proposed',
-		reason: 'Maximum product content width; the captured section container is 1146.67px.'
-	}
+		reason: 'Maximum product content width; the captured section container is 1146.67px. Superseded inside a `Page` by the width tiers of token set 0.3.0.'
+	},
+	// Token set 0.3.0 (D52, the family page system: LR-01 to LR-03; engineering defaults, to be measured): where content starts and how wide each block may grow.
+	gutter: { value: '16px', provenance: 'family', reason: 'Start of content from the navigation (LR-01): 16px in a region narrower than 640px; a `Page` raises it to gutter-medium and gutter-wide by its region\'s width.' },
+	'gutter-medium': { value: '24px', provenance: 'family', reason: 'Start of content from the navigation in a region of 640px to 1023px (LR-01).' },
+	'gutter-wide': { value: '32px', provenance: 'family', reason: 'Start of content from the navigation in a region of 1024px or more (LR-01).' },
+	form: { value: '40rem', provenance: 'family', reason: 'Width tier of inputs, settings groups and task pages (LR-02); the help panel already stops there.' },
+	standard: { value: '90rem', provenance: 'family', reason: 'Width tier of a main column with its aside (LR-02); it re-derives the marketing container `content`.' },
+	aside: { value: '22rem', provenance: 'family', reason: 'Width of a resource page\'s side panel (LR-03), between the 20 and 24rem the analysis measured.' },
+	'fluid-max': { value: '100rem', provenance: 'family', reason: 'Limit of a fluid collection, past which a row is lost between its first and last column (LR-02).' }
 };
 
 export const breakpoints = {
 	provenance: 'captured',
-	source: 'Media queries of styles.css and global.css',
-	steps: { phone: 480, tablet: 768, desktop: 1024 }
+	source: 'Media queries of styles.css and global.css; `compact` from the products\' own 640px (token set 0.3.0, LR-09)',
+	steps: { phone: 480, compact: 640, tablet: 768, desktop: 1024 }
 };

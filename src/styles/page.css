@@ -1,0 +1,227 @@
+/* The family page system (D52): a region edge to edge, content one gutter after the navigation, blocks at their width tier. */
+
+.bui-page {
+	container: bui-page / inline-size;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+.bui-page-frame {
+	display: grid;
+	align-content: start;
+	gap: var(--space-6);
+	padding: var(--space-6) var(--layout-gutter) var(--space-12);
+}
+/* The gutter follows the region's own width, never the window's: 16, 24 or 32 px (LR-01, LR-09). */
+@container bui-page (min-width: 640px) {
+	.bui-page-frame {
+		--layout-gutter: var(--layout-gutter-medium);
+	}
+}
+@container bui-page (min-width: 1024px) {
+	.bui-page-frame {
+		--layout-gutter: var(--layout-gutter-wide);
+	}
+}
+/* The tool template (Workspace's editor, Conduict's terminal) has full-bleed panes and no gutter (LR-04). */
+.bui-page[data-template='tool'] .bui-page-frame {
+	padding: 0;
+	gap: 0;
+}
+
+/* Width tiers, left-anchored: unused width falls only on the far side (LR-02). */
+.bui-page-frame > * {
+	min-width: 0;
+	max-width: var(--layout-standard);
+}
+.bui-page[data-width='fluid'] .bui-page-frame > * {
+	max-width: var(--layout-fluid-max);
+}
+.bui-page[data-width='form'] .bui-page-body {
+	max-width: var(--layout-form);
+}
+.bui-page[data-width='reading'] .bui-page-body {
+	max-width: var(--layout-measure);
+}
+.bui-page[data-template='tool'] .bui-page-frame > * {
+	max-width: none;
+}
+.bui-page-main {
+	display: grid;
+	align-content: start;
+	gap: var(--space-8);
+	min-width: 0;
+}
+.bui-page-body {
+	display: grid;
+	align-items: start;
+	gap: var(--space-8);
+}
+.bui-page-aside {
+	display: grid;
+	align-content: start;
+	gap: var(--space-6);
+	min-width: 0;
+}
+/* A resource page's side panel moves beside the main column once a form column and the panel fit (LR-03). */
+@container bui-page (min-width: 68rem) {
+	.bui-page-body:has(> .bui-page-aside) {
+		grid-template-columns: minmax(var(--layout-form), 1fr) var(--layout-aside);
+	}
+	.bui-page[data-width='form'] .bui-page-body:has(> .bui-page-aside) {
+		max-width: calc(var(--layout-form) + var(--layout-aside) + var(--space-8));
+	}
+}
+
+/* Text keeps a readable measure wherever it sits (LR-02): never past about 80 characters. */
+.bui-reading,
+.bui-callout-text,
+.bui-empty-body,
+.bui-section-description,
+.bui-page-facts {
+	max-width: var(--layout-measure);
+}
+.bui-form-width {
+	max-width: var(--layout-form);
+}
+
+/* The arrival line: first in the region, small, at its start (D54). */
+.bui-arrival {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1);
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+}
+.bui-arrival-back {
+	color: var(--color-link);
+}
+.bui-arrival-dismiss {
+	margin-inline-start: var(--space-1);
+}
+
+/* One page header (LR-05): crumbs, the H1 with its one status and the line's actions, facts, tabs. */
+.bui-page-header {
+	display: grid;
+	gap: var(--space-2);
+	min-width: 0;
+}
+.bui-crumbs ol {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-1);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	color: var(--color-text-muted);
+}
+.bui-crumbs li + li::before {
+	content: '/';
+	margin-inline-end: var(--space-1);
+	color: var(--color-text-muted);
+}
+.bui-crumbs a {
+	color: var(--color-link);
+}
+.bui-page-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2) var(--space-4);
+	min-width: 0;
+}
+.bui-page-heading {
+	margin: 0;
+	min-width: 0;
+	font-size: var(--text-title-1);
+	font-weight: var(--weight-medium);
+	line-height: var(--leading-title-1);
+	overflow-wrap: anywhere;
+}
+.bui-page-heading:focus {
+	outline: none;
+}
+.bui-page-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+	margin-inline-start: auto;
+}
+.bui-page-facts {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+}
+.bui-page-tabs {
+	margin-top: var(--space-2);
+}
+.bui-tabs .bui-productnav-list {
+	padding: 0;
+}
+.bui-tabs {
+	background: transparent;
+}
+/* Under a 640 px region the status and the actions follow the title (LR-05, LR-09). */
+@container bui-page (max-width: 639px) {
+	.bui-page-title {
+		display: grid;
+		justify-items: start;
+	}
+	.bui-page-actions {
+		margin-inline-start: 0;
+	}
+}
+
+/* Flat sections, set apart by space and one divider, never a box in a box (LR-06, D10). */
+.bui-section {
+	display: grid;
+	gap: var(--space-3);
+	min-width: 0;
+}
+.bui-section + .bui-section {
+	padding-top: var(--space-6);
+	border-top: 1px solid var(--color-border);
+}
+.bui-section-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2) var(--space-4);
+}
+.bui-section-title {
+	margin: 0;
+	font-size: var(--text-title-2);
+	font-weight: var(--weight-medium);
+	line-height: var(--leading-title-2);
+}
+.bui-section-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	margin-inline-start: auto;
+}
+.bui-section-description {
+	margin: 0;
+	color: var(--color-text-muted);
+}
+.bui-section-body {
+	display: grid;
+	gap: var(--space-4);
+	min-width: 0;
+}
+
+/* The preferences dialog's note under its two fields. */
+.bui-preferences-note {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}

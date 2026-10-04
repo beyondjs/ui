@@ -51,3 +51,20 @@ export function Screen() {
 		</>
 	);
 }
+
+// The family page system (0.6.0, D52, D54) in React.
+import { Page, PageHeader, Section, Arrival, Tabs } from '@beyond-js/ui/react';
+export function Region() {
+	const heading = useRef<HTMLHeadingElement>(null);
+	const chosen = new Preferences({ key: 'beyond-region', fallback: { appearance: 'system', locale: 'en' } });
+	return (
+		<>
+			<FamilyBar product="cdn" brand={{ src: '/w.svg', href: '/' }} account={{ preferences: { preferences: chosen, everywhere: '/account' } }} />
+			<Page template="list" width="fluid" arrival={<Arrival product="Conduict" href="/back" onDismiss={() => undefined} />} header={<PageHeader title="Applications" headingRef={heading} tabs={<Tabs items={[{ label: 'All', href: '#all', current: true }]} />} />} aside={<p>Facts</p>}>
+				<Section title="Recent" description="The last ten.">
+					<p>None yet.</p>
+				</Section>
+			</Page>
+		</>
+	);
+}

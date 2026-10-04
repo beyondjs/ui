@@ -267,4 +267,5 @@ export * from './parts.js';
 export * from './family.js';
 export * from './icons.js';
 export * from './preferences.js';
+export * from './page.js';
 export * from './operations.js';

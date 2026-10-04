@@ -117,6 +117,8 @@ export interface FamilyAccount {
 	items?: Array<{ label: string; href?: string | null; run?: (() => void) | null } | null | false>;
 	/** Replaces "Sign out" for a product that asks how to leave. */
 	label?: string | null;
+	/** "Language and appearance" first in the product's group, opening one `PreferencesDialog` (0.6.0, D54). */
+	preferences?: import('./page.js').FamilyPreferences | null;
 }
 
 /**

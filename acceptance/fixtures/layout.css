@@ -1,0 +1,17 @@
+/* The layout fixture's page only: no container of its own, so every measurement is the package's `Page`. */
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+	font-size: var(--text-body);
+	line-height: var(--leading-body);
+}
+main {
+	display: flex;
+	flex: 1 1 auto;
+	min-width: 0;
+}

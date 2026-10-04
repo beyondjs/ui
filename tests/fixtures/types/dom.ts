@@ -92,3 +92,14 @@ whole.destroy();
 // @ts-expect-error a select element, not any element
 Select.tip(document.body);
 void shownTip;
+
+// The family page system (0.6.0, D52, D54).
+import { Page, PageHeader, Tabs, Section, Arrival, PreferencesDialog, status } from '@beyond-js/ui';
+const heading = new PageHeader({ title: 'web', crumbs: [{ label: 'Environments', href: '/environments' }], status: status('Ready', 'success'), facts: ['Compute Engine'], tabs: new Tabs({ items: [{ label: 'Overview', href: '#o', current: true }] }) });
+const region = new Page({ template: 'detail', width: 'standard', header: heading, arrival: new Arrival({ product: 'Conduict', href: '/back', ondismiss: () => {} }), children: [new Section({ title: 'Repositories' }).element] });
+region.aside = [document.createElement('p')];
+region.width = 'form';
+heading.focus();
+const settings = new Preferences({ key: 'beyond-types', fallback: { appearance: 'system', locale: 'en' } });
+void new PreferencesDialog({ preferences: settings, everywhere: '/account' }).open({ restore: null });
+void new FamilyBar({ product: 'delegate', brand: { src: '/brand.svg', href: '/' }, account: { preferences: { preferences: settings, everywhere: '/account' } } });

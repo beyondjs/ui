@@ -63,6 +63,7 @@ export const defaults = {
 	settings: 'Organization settings',
 	yours: 'Your account',
 	members: 'Members of this organization',
+	preferences: 'Language and appearance',
 	signout: 'Sign out of Beyond',
 	leaving: 'Signing out…'
 };

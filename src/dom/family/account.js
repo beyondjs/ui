@@ -3,6 +3,7 @@ import { el } from '../core/element.js';
 import { glyph } from '../core/icons.js';
 import { NavigationMenu, entry } from './menu.js';
 import { Leave } from './leave.js';
+import { PreferencesDialog } from '../preferences/dialog.js';
 
 /**
  * The profile menu at the end of the family bar: a disclosure of links in groups.
@@ -12,7 +13,9 @@ import { Leave } from './leave.js';
  *    person with none), at Accounts.
  * 3. The organization in view, headed "{organization} · {role}": "Members and invitations" and, when
  *    Accounts gives it (owners and administrators), "Organization settings".
- * 4. The product's own entries (`account.items`), headed by the product's name.
+ * 4. The product's own entries, headed by the product's name: "Language and appearance" first when
+ *    the product passes `account.preferences` (D54: one `PreferencesDialog` with "Change for all of
+ *    Beyond"), then `account.items`.
  * 5. Docs, on narrow screens, and Sign out, set apart.
  *
  * Accounts' addresses (`links.manage`) are completed with the product and the way back each time the
@@ -27,6 +30,7 @@ export class AccountMenu extends Component {
 	#menu;
 	#manage;
 	#leave = null;
+	#preferences = null;
 
 	/**
 	 * @param {object} options
@@ -37,15 +41,19 @@ export class AccountMenu extends Component {
 	 * @param {boolean} options.any whether the person has any organization
 	 * @param {string} options.product the product's display name
 	 * @param {string} options.id the product's id, which Accounts' `/leave` receives
-	 * @param {{signout?: (() => void)|{href: string}|{end?: () => unknown, before?: () => boolean|Promise<boolean>, after?: () => void, bound?: number}|null, items?: Array<{label: string, href?: string, run?: () => void}>, label?: string|null}} options.account
+	 * @param {{signout?: (() => void)|{href: string}|{end?: () => unknown, before?: () => boolean|Promise<boolean>, after?: () => void, bound?: number}|null, items?: Array<{label: string, href?: string, run?: () => void}>, label?: string|null, preferences?: {preferences: import('../preferences/preferences.js').Preferences, everywhere?: string|null, locales?: string[]}|null}} options.account
 	 * @param {import('../core/labels.js').Labels} options.labels
 	 */
 	constructor({ person, links, manage, organization, any, product, id, account, labels }) {
 		super();
 		this.#manage = manage;
 		const name = person?.name ?? null;
-		const { signout = null, items = [], label = null } = account;
+		const { signout = null, items = [], label = null, preferences = null } = account;
 		const own = items.filter(Boolean).map(item => entry({ label: item.label, href: item.href ?? null, run: item.href ? null : (item.run ?? null) }));
+		if (preferences) {
+			this.#preferences = new PreferencesDialog(preferences);
+			own.unshift(entry({ label: labels.text('preferences'), run: () => this.#open(), class: 'bui-family-preferences' }));
+		}
 		const heading = person ? el('span', { class: 'bui-family-person' }, [el('span', { class: 'bui-family-name', text: name ?? '' }), person.email ? el('span', { class: 'bui-family-email', text: person.email }) : null]) : null;
 		const groups = manage.present ? this.#groups({ organization, any, labels }) : AccountMenu.#earlier({ links, organization, labels });
 		this.#menu = new NavigationMenu({
@@ -81,9 +89,21 @@ export class AccountMenu extends Component {
 		return this.#leave;
 	}
 
+	/** The "Language and appearance" dialog, when the product passed `account.preferences`. */
+	get preferences() {
+		return this.#preferences;
+	}
+
 	destroy() {
+		this.#preferences?.destroy();
 		this.#menu.destroy();
 		super.destroy();
+	}
+
+	/** Closes the menu and opens the dialog, which returns focus to the menu's button. */
+	#open() {
+		this.#menu.close(true);
+		void this.#preferences.open({ restore: this.#menu.button });
 	}
 
 	/** Accounts' entries, each completed with the product and the way back when the menu opens. */
