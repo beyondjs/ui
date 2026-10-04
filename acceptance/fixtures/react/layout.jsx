@@ -15,7 +15,7 @@ const preferences = new Preferences({ key: 'beyond-layout', fallback: { appearan
 window.fixture = { preferences, ready: false };
 
 function View() {
-	const header = <PageHeader title={words.title} crumbs={[{ label: 'Entornos', href: '#/environments' }]} status={<Status label="Listo" tone="success" />} facts={words.facts} actions={<Button label="Empezar una conversación" variant="primary" />} tabs={<Tabs items={[{ label: 'Resumen', href: '#o', current: true }, { label: 'Repositorios', href: '#r' }, { label: 'Acceso', href: '#a' }]} />} />;
+	const header = <PageHeader title={words.title} crumbs={[{ label: 'Entornos', href: '#/environments' }]} status={<Status label="Listo" tone="success" />} facts={words.facts} actions={<><Button label="Empezar una conversación" variant="primary" /><Button label="Detener el entorno" /><Button label="Más acciones" /></>} tabs={<Tabs items={['Resumen', 'Conversaciones', 'Repositorios', 'Motores de IA', 'Acceso', 'Ejecución'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 }))} />} />;
 	const aside = shape.aside ? (
 		<>
 			<h2>Acerca de</h2>

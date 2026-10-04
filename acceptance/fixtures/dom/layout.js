@@ -14,8 +14,8 @@ const bar = new FamilyBar({ product, brand: { src: '../brand/wordmark.svg', href
 const shell = root.appendChild(el('div', { class: shape.nav === 'sidebar' ? 'bui-shell' : 'bui-stack' }));
 const nav = shape.nav === 'sidebar' ? new Sidebar({ product: 'Conduict', groups, context: { label: 'Project', name: 'Storefront' } }).mount(shell) : new ProductNav({ items: groups[0].items }).mount(shell);
 const main = shell.appendChild(el('main', { id: 'main' }));
-const tabs = new Tabs({ items: [{ label: 'Overview', href: '#o', current: true }, { label: 'Repositories', href: '#r' }, { label: 'Access', href: '#a' }] });
-const header = new PageHeader({ title: words.title, crumbs: [{ label: 'Environments', href: '#/environments' }], status: status('Ready', 'success'), facts: words.facts, actions: [new Button({ label: 'Start a conversation', variant: 'primary' })], tabs });
+const tabs = new Tabs({ items: ['Overview', 'Conversations', 'Repositories', 'AI engines', 'Access', 'Runtime'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 })) });
+const header = new PageHeader({ title: words.title, crumbs: [{ label: 'Environments', href: '#/environments' }], status: status('Ready', 'success'), facts: words.facts, actions: [new Button({ label: 'Start a conversation', variant: 'primary' }), new Button({ label: 'Stop the environment' }), new Button({ label: 'More actions' })], tabs });
 const arrival = shape.arrival ? new Arrival({ product: 'Conduict', href: '#/back', ondismiss: () => {} }) : null;
 const repositories = new Section({ title: 'Repositories', description: words.description, actions: [new Button({ label: 'Add a repository' })], children: [el('ul', {}, words.rows.map(row => el('li', { text: row })))] });
 const access = new Section({ title: 'Access', children: [el('p', { class: 'bui-reading', text: words.description })] });

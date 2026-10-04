@@ -63,8 +63,11 @@ export const checks = [
 					expect(Math.abs(found.start - gutter(found.region)) <= 1, `${at}: the H1 starts ${found.start}px from the navigation, expected ${gutter(found.region)} (region ${found.region})`);
 					expect(Math.abs(found.arrival - found.start) <= 1, `${at}: the arrival line starts where the H1 does: ${found.arrival} / ${found.start}`);
 					expect(found.longest <= 80, `${at}: a line of ${found.longest} characters`);
-					if (found.region >= 640) expect(Math.abs(found.actions.middle - found.heading.middle) <= 2, `${at}: the primary action is centred on the H1's line: ${JSON.stringify([found.actions, found.heading])}`);
-					else expect(found.actions.top >= found.heading.bottom - 1, `${at}: under 640 px the actions follow the title`);
+					// From 640 px the actions sit centred on the H1's line, or wrap below it when the title leaves them no room
+					const wrapped = found.actions.top >= found.heading.bottom - 1;
+					if (found.region >= 640) expect(wrapped || Math.abs(found.actions.middle - found.heading.middle) <= 2, `${at}: the actions are centred on the H1's line: ${JSON.stringify([found.actions, found.heading])}`);
+					if (found.region >= 1400) expect(!wrapped, `${at}: a wide region keeps the actions on the title's line`);
+					if (found.region < 640) expect(wrapped, `${at}: under 640 px the actions follow the title`);
 					await context.close();
 				}
 			}
