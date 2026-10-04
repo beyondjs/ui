@@ -1,5 +1,8 @@
-/** English defaults of the picker's copy; consumers replace any entry through `labels`. */
-export const defaults = {
+/**
+ * The picker's copy in English and Spanish (`Picker.labels`); consumers replace any entry through
+ * `labels`. `defaults` is the English set, as before 0.7.0.
+ */
+const en = {
 	placeholder: 'Type to search',
 	chosen: 'Chosen',
 	count: ({ count }) => `${count} selected`,
@@ -12,11 +15,66 @@ export const defaults = {
 	empty: ({ query }) => (query ? `No matches for “${query}”.` : 'No matches for these filters.'),
 	nothing: 'There is nothing to choose from yet.',
 	failure: 'The choices could not be loaded.',
+	late: 'The choices didn’t answer in time, so they can’t be listed now.',
 	retry: 'Try again',
 	more: 'Load more',
 	all: 'Select all shown',
 	disabled: 'Not available',
 	stale: 'No longer available',
 	ineligible: 'Not eligible',
-	unavailable: 'Unavailable'
+	unavailable: 'Unavailable',
+	from: 'From',
+	escape: 'Can’t find it?',
+	suggested: 'Suggested',
+	private: 'Private',
+	public: 'Public',
+	updated: 'Updated {duration} ago',
+	recent: 'Updated just now',
+	picked: '{label} selected',
+	refused: '{label} can’t be chosen: {reason}',
+	missing: '{label} isn’t in this list.',
+	second: '{count} s',
+	minute: '{count} min',
+	hour: '{count} h',
+	day: '{count} d'
 };
+
+const es = {
+	placeholder: 'Escribe para buscar',
+	chosen: 'Elegidos',
+	count: ({ count }) => (count === 1 ? '1 elegido' : `${count} elegidos`),
+	none: 'Nada elegido',
+	attention: ({ count }) => (count === 1 ? '1 necesita atención' : `${count} necesitan atención`),
+	remove: 'Quitar {label}',
+	loading: 'Cargando…',
+	shown: ({ shown }) => (shown === 1 ? '1 resultado' : `${shown} resultados`),
+	total: '{shown} de {total} mostrados',
+	empty: ({ query }) => (query ? `Nada coincide con «${query}».` : 'Nada coincide con estos filtros.'),
+	nothing: 'Todavía no hay nada para elegir.',
+	failure: 'No se pudieron cargar las opciones.',
+	late: 'Las opciones no respondieron a tiempo, así que ahora no se pueden mostrar.',
+	retry: 'Reintentar',
+	more: 'Cargar más',
+	all: 'Elegir todo lo mostrado',
+	disabled: 'No disponible',
+	stale: 'Ya no está disponible',
+	ineligible: 'No es elegible',
+	unavailable: 'No disponible',
+	from: 'Desde',
+	escape: '¿No lo encuentras?',
+	suggested: 'Sugeridos',
+	private: 'Privado',
+	public: 'Público',
+	updated: 'Actualizado hace {duration}',
+	recent: 'Actualizado ahora mismo',
+	picked: '{label} elegido',
+	refused: 'No se puede elegir {label}: {reason}',
+	missing: '{label} no está en esta lista.',
+	second: '{count} s',
+	minute: '{count} min',
+	hour: '{count} h',
+	day: '{count} d'
+};
+
+export const labels = Object.freeze({ en: Object.freeze(en), es: Object.freeze(es) });
+export const defaults = labels.en;

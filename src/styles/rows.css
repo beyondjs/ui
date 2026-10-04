@@ -1,0 +1,146 @@
+/* One thing with one state (StatusRow), a text to copy (CopyMessage) and a provider's window
+   (ProviderWindow). Flat, in the page's flow: no surface of their own beyond one border. */
+
+.bui-statusrow {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--space-3);
+	padding: var(--space-3) 0;
+	border-bottom: 1px solid var(--color-border);
+	min-width: 0;
+}
+.bui-statusrow-main {
+	display: grid;
+	gap: var(--space-1);
+	flex: 1 1 18rem;
+	min-width: 0;
+}
+.bui-statusrow-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1) var(--space-2);
+}
+.bui-statusrow-mark {
+	display: inline-grid;
+	color: var(--color-text-muted);
+}
+.bui-statusrow-mark .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-statusrow-success {
+	color: var(--color-success);
+}
+.bui-statusrow-warning {
+	color: var(--color-warning);
+}
+.bui-statusrow-danger {
+	color: var(--color-danger);
+}
+.bui-statusrow-title {
+	margin: 0;
+	font-size: var(--text-body);
+	font-weight: var(--weight-medium);
+	overflow-wrap: anywhere;
+}
+.bui-statusrow-kind,
+.bui-statusrow-reason,
+.bui-statusrow-owner,
+.bui-statusrow-facts {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-statusrow-reason {
+	max-width: var(--layout-measure);
+	color: var(--color-text);
+}
+.bui-statusrow-label {
+	font-weight: var(--weight-medium);
+}
+.bui-statusrow-facts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 var(--space-3);
+	padding: 0;
+	list-style: none;
+}
+.bui-statusrow-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+}
+.bui-statusrow [hidden] {
+	display: none;
+}
+
+.bui-copy {
+	display: grid;
+	gap: var(--space-2);
+	max-width: var(--layout-measure);
+	min-width: 0;
+}
+.bui-copy-label {
+	margin: 0;
+	font-size: var(--text-small);
+	font-weight: var(--weight-medium);
+}
+.bui-copy-text {
+	margin: 0;
+	padding: var(--space-2) var(--space-3);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	background: var(--color-surface-sunken);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	overflow-wrap: anywhere;
+	user-select: all;
+}
+.bui-copy-command {
+	overflow-x: auto;
+	white-space: pre;
+	overflow-wrap: normal;
+	font-family: var(--font-mono);
+}
+.bui-copy-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+}
+.bui-copy-result {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-copy-refused {
+	color: var(--color-text);
+}
+
+.bui-provider {
+	display: grid;
+	justify-items: start;
+	gap: var(--space-3);
+	min-width: 0;
+}
+.bui-provider:empty {
+	display: none;
+}
+.bui-provider-steps,
+.bui-provider-said {
+	margin: 0;
+	max-width: var(--layout-measure);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-provider-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+}

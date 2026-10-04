@@ -107,3 +107,47 @@ const shown: boolean = asked.shown;
 asked.leave();
 void shown;
 void new FamilyBar({ product: 'delegate', brand: { src: '/brand.svg', href: '/' }, account: { preferences: { preferences: settings, everywhere: '/account' } } });
+
+// "Choose, never type" (0.7.0, D56).
+import { RefChooser, ProjectPicker, SecretField, Draft, SideSheet, ProviderWindow, StatusRow, CopyMessage, ListDetail, Field } from '@beyond-js/ui';
+import type { PickerItem, PickerFound, ProviderState } from '@beyond-js/ui';
+const rows: PickerItem[] = [{ id: '1', label: 'acme/web', visibility: 'private', meta: 'main', updated: Date.now(), state: ['Ready', 'success'], marks: [{ label: 'In Website', reason: 'Also in Website' }], avatar: '/a.png' }];
+const resource = new Picker({
+	label: 'Repositories',
+	source: async ({ account, query }) => ({ items: rows.filter(() => account !== null && query !== undefined), suggested: { label: 'Recent', items: rows } }),
+	accounts: { items: [{ id: 'con_1', label: 'acme', detail: 'GitHub organization' }], connect: { label: 'Install on another GitHub organization', run: () => {} } },
+	footer: [document.createElement('button')],
+	recognize: text => ({ label: text, match: item => item.label === text, value: { owner: 'acme', name: 'web' } }),
+	onrecognize: (found: PickerFound | null) => void found?.outcome,
+	bound: 5000
+});
+resource.gate = { title: 'Connect GitHub', reason: 'Nothing is connected yet.', action: document.createElement('button') };
+resource.gate = null;
+const viewing: string | null = resource.account;
+const refs = new RefChooser({ refs: [{ name: 'main', default: true }], value: 'main', escape: true, validate: value => (value === 'HEAD' ? 'Choose a branch' : null), onchange: value => void value });
+refs.unavailable = { retry: () => {} };
+refs.loading = true;
+const projects = new ProjectPicker({ product: 'Delegate', projects: [{ id: 'prj_1', name: 'Storefront', here: { state: 'unset' } }], only: 'unset', onchange: id => void id });
+const secret = new SecretField({ label: 'Supabase access', connect: { label: 'Connect Supabase', run: () => {} }, credential: 'access token', stored: true, name: 'token' });
+const pasted: string | null = secret.value;
+const draft = Draft.read('https://conduict.example.test/#/acme/web?environment=env_1&from=conduict');
+const next: string = new Draft({ ...draft.values, agent: 'claude' }).address('/new');
+const panel = new SideSheet({ title: 'Add repositories', width: 'form' });
+panel.busy = true;
+panel.error(null);
+void panel.open({ restore: document.body });
+const provider = new ProviderWindow({ provider: 'GitHub', href: '/start', origin: 'https://projects.example.test', read: async () => ({ state: 'done' }), onend: outcome => void outcome });
+const where: ProviderState = provider.state;
+const row = new StatusRow({ title: 'acme', kind: 'GitHub organization', state: { label: 'Active', tone: 'success', checked: Date.now() }, owner: 'Owners of acme', more: [{ label: 'Disconnect', run: () => {} }] });
+row.update({ reason: 'Suspended on GitHub' });
+const message = new CopyMessage({ text: 'git clone …', kind: 'command' });
+void message.copy();
+const split = new ListDetail({ list: document.createElement('div'), back: { label: 'Repositories', href: '?view=repositories' } });
+split.detail = null;
+const menu = new ChoiceMenu({ label: 'Branch', options: [{ value: 'main', label: 'main', search: 'main' }], search: 8, statement: false, name: 'branch', labels: ChoiceMenu.labels.es });
+const slug = new Field({ label: 'Slug', suggest: 'storefront' });
+slug.suggest = 'storefront-2';
+const columns = new Collection({ label: 'Repositories', columns: [{ key: 'name', label: 'Name', primary: true }, { key: 'branch', label: 'Branch', priority: 2 }], source: Collection.local([]), labels: Collection.labels.es });
+// @ts-expect-error a side sheet is form or standard wide
+void new SideSheet({ title: 'x', width: 'reading' });
+void [viewing, projects, pasted, next, where, menu, slug.edited, columns, refs];

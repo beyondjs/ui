@@ -7,7 +7,8 @@ import { Select } from '../select.js';
 import { callout, skeleton } from '../feedback.js';
 import { Loader, local } from './loader.js';
 import { Table } from './table.js';
-import { defaults } from './labels.js';
+import { ColumnFit } from './columns.js';
+import { defaults, spanish } from './labels.js';
 
 /**
  * A compact collection: search, finite filters, a table of rows that open their detail, and paging.
@@ -16,10 +17,14 @@ import { defaults } from './labels.js';
  * invites its first action, and no matches for the search or filters with a way to clear them. The
  * query, filters and page are the collection's `state`; `onstate` reports every change so the
  * product can keep it in the address, and passing it back as `state` restores the same view after
- * back, forward or a reload. The source decides what the person may see.
+ * back, forward or a reload. The source decides what the person may see. Columns with a `priority`
+ * leave, the highest number first, as the region narrows, and "Show 2 more columns" brings them back
+ * (0.7.0, `ColumnFit`).
  */
 export class Collection extends Component {
 	static local = local;
+	/** The copy in English and Spanish. */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze(spanish) });
 
 	#element;
 	#labels;
@@ -33,6 +38,7 @@ export class Collection extends Component {
 	#pending = null;
 	#status;
 	#paged = false;
+	#columns;
 
 	/**
 	 * @param {object} options
@@ -63,10 +69,12 @@ export class Collection extends Component {
 		this.#region = el('div', { class: 'bui-collection-body', tabindex: '-1', 'aria-busy': 'false' });
 		this.#status = el('p', { class: 'bui-hidden', role: 'status' });
 		this.#pager = el('nav', { class: 'bui-pager', 'aria-label': this.#labels.text('pages', { label }) });
+		this.#columns = new ColumnFit({ columns: options.columns, labels: this.#labels });
 		this.#element = el('section', { class: 'bui-collection', 'aria-label': typeof label === 'string' ? label : null }, [
 			tools.some(Boolean) ? el('div', { class: 'bui-collection-tools' }, tools) : null,
 			this.#status,
 			this.#region,
+			this.#columns.element,
 			this.#pager
 		]);
 		this.load();
@@ -102,7 +110,9 @@ export class Collection extends Component {
 		const { rows = [], total = null, more = null } = result.answer ?? {};
 		const pages = total !== null ? Math.max(1, Math.ceil(total / limit)) : null;
 		if (!rows.length && this.#state.page > 1 && (pages === null || this.#state.page > pages)) return this.#go(pages ?? this.#state.page - 1);
-		fill(this.#region, rows.length ? [this.#table(rows).element] : [this.#nothing()]);
+		const table = rows.length ? this.#table(rows).element : null;
+		fill(this.#region, [table ?? this.#nothing()]);
+		this.#columns.attach(table, this.#region);
 		this.#options.onrender?.();
 		const summary = this.#paging({ rows, total, more: more ?? (pages !== null ? this.#state.page < pages : false), pages, limit });
 		this.#status.textContent = rows.length ? summary : this.#region.textContent;
@@ -113,6 +123,7 @@ export class Collection extends Component {
 
 	destroy() {
 		this.#loader.cancel();
+		this.#columns.release();
 		for (const filter of this.#filters) filter.select.destroy();
 		super.destroy();
 	}
@@ -178,6 +189,7 @@ export class Collection extends Component {
 		const retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary', onclick: () => this.load() }, [glyph('refresh'), el('span', { text: this.#labels.text('retry') })]);
 		const message = this.#options.explain?.(error) ?? this.#labels.text('failure');
 		fill(this.#region, [callout({ tone: 'danger', title: message, actions: [retry] })]);
+		this.#columns.attach(null, this.#region);
 		fill(this.#pager, []);
 		this.#status.textContent = message;
 		this.#paged = false;

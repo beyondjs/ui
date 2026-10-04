@@ -1,12 +1,13 @@
-import { el, content } from '../core/element.js';
-import { glyph } from '../core/icons.js';
+import { el } from '../core/element.js';
+import { PickerRow } from './row.js';
 
 /**
  * The listbox of a picker's results and its active option.
  *
  * Focus stays in the search field; the active option is announced through `aria-activedescendant`,
  * the combobox pattern. Disabled options remain reachable so their reason can be read, and are never
- * chosen. Pressing an option does not move focus out of the search field.
+ * chosen. Pressing an option does not move focus out of the search field. A suggested group (recent
+ * or suggested items, `{ label, items }`) comes first as an ARIA group named by its heading.
  */
 export class ResultList {
 	#element;
@@ -45,13 +46,21 @@ export class ResultList {
 		return this.#options.length;
 	}
 
-	/** Draws the items, marking the chosen ones; keeps the active item when it is still listed. */
-	render(items, chosen, labels) {
+	/** Draws the items after the suggested group, marking the chosen ones; keeps the active item when it is still listed. */
+	render(items, chosen, labels, suggested = null) {
 		const previous = this.active?.id;
-		this.#options = items.map((item, index) => ({ item, node: this.#option(item, index, chosen(item.id), labels) }));
-		this.#element.replaceChildren(...this.#options.map(entry => entry.node));
+		const now = Date.now();
+		const lead = suggested?.items?.length ? suggested.items : [];
+		this.#options = [...lead, ...items].map((item, index) => ({ item, node: this.#option(item, index, chosen(item.id), labels, now) }));
+		const group = lead.length ? this.#group(suggested.label ?? labels.text('suggested'), this.#options.slice(0, lead.length)) : null;
+		this.#element.replaceChildren(...[group, ...this.#options.slice(lead.length).map(entry => entry.node)].filter(Boolean));
 		const kept = this.#options.findIndex(entry => String(entry.item.id) === String(previous));
 		this.activate(kept);
+	}
+
+	/** The index of the option of `id`, or -1. */
+	find(id) {
+		return this.#options.findIndex(entry => String(entry.item.id) === String(id));
 	}
 
 	/** Refreshes which options are marked chosen. */
@@ -85,8 +94,7 @@ export class ResultList {
 		return this.#options[index]?.item ?? null;
 	}
 
-	#option(item, index, chosen, labels) {
-		const reason = item.disabled ? (item.reason ?? labels.text('disabled')) : null;
+	#option(item, index, chosen, labels, now) {
 		return el(
 			'li',
 			{
@@ -96,14 +104,15 @@ export class ResultList {
 				'aria-selected': String(chosen),
 				'aria-disabled': item.disabled ? 'true' : null
 			},
-			[
-				el('span', { class: 'bui-option-mark', 'aria-hidden': 'true' }, [glyph('check')]),
-				el('span', { class: 'bui-option-text' }, [
-					el('span', { class: 'bui-option-label' }, [content(item.label)]),
-					item.description ? el('span', { class: 'bui-option-description' }, [content(item.description)]) : null,
-					reason ? el('span', { class: 'bui-option-reason', text: reason }) : null
-				])
-			]
+			PickerRow.parts(item, labels, now)
 		);
+	}
+
+	#group(label, entries) {
+		const id = `${this.#prefix}-group`;
+		return el('li', { role: 'group', class: 'bui-picker-group', 'aria-labelledby': id }, [
+			el('span', { id, class: 'bui-picker-heading', role: 'presentation', text: label }),
+			el('ul', { role: 'none', class: 'bui-picker-grouped' }, entries.map(entry => entry.node))
+		]);
 	}
 }

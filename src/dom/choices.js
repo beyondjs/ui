@@ -2,6 +2,7 @@ import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
 import { glyph } from './core/icons.js';
 import { Ids } from './core/ids.js';
+import { statement, single } from './core/statement.js';
 
 /**
  * A group of checkboxes or radio buttons in a fieldset with its legend, hint and error.
@@ -9,6 +10,10 @@ import { Ids } from './core/ids.js';
  * Radio groups keep the browser's own arrow-key behavior. `value` is an array of the checked values
  * for checkboxes and the checked value (or null) for radios. Options may be disabled with a reason,
  * which stays visible next to the option.
+ *
+ * A radio group with one option that can be chosen is a statement, not a choice (D56, 0.7.0): the
+ * legend and the option are shown as text and the value is submitted (`statement: false` keeps the
+ * radio). A single checkbox stays a checkbox: it is a yes or no, not a choice among options.
  */
 export class Choices extends Component {
 	#element;
@@ -17,6 +22,7 @@ export class Choices extends Component {
 	#error;
 	#hint;
 	#onchange;
+	#stated = null;
 
 	/**
 	 * @param {object} options
@@ -25,12 +31,21 @@ export class Choices extends Component {
 	 * @param {Array<{value: string, label: string|Node, hint?: string, disabled?: boolean, reason?: string}>} options.options
 	 * @param {string|string[]} [options.value]
 	 */
-	constructor({ legend, type = 'checkbox', name = null, options, value = null, hint = null, error = null, required = false, onchange = null }) {
+	constructor({ legend, type = 'checkbox', name = null, options, value = null, hint = null, error = null, required = false, onchange = null, statement: stating = true }) {
 		super();
 		this.#type = type;
 		this.#onchange = onchange;
 		const id = Ids.next('bui-choices');
 		const group = name ?? id;
+		const one = stating && type === 'radio' ? single(options) : null;
+		if (one) {
+			this.#stated = one.value;
+			this.#hint = hint ? el('p', { id: `${id}-hint`, class: 'bui-field-hint' }, [content(hint)]) : null;
+			this.#error = el('p', { id: `${id}-error`, class: 'bui-field-error', hidden: true });
+			this.#element = el('div', { class: 'bui-field bui-choices-stated' }, [el('label', { class: 'bui-field-label', for: `${id}-stated` }, [content(legend)]), this.#hint, statement({ text: one.label, value: one.value, name, id: `${id}-stated` }), this.#error]);
+			this.error = error;
+			return;
+		}
 		const chosen = new Set([].concat(value ?? []));
 		this.#hint = hint ? el('p', { id: `${id}-hint`, class: 'bui-field-hint' }, [content(hint)]) : null;
 		this.#error = el('p', { id: `${id}-error`, class: 'bui-field-error', hidden: true });
@@ -68,7 +83,13 @@ export class Choices extends Component {
 		return this.#element;
 	}
 
+	/** Whether the one option is stated as text instead of offered. */
+	get stated() {
+		return this.#stated !== null;
+	}
+
 	get value() {
+		if (this.#stated !== null) return this.#stated;
 		const checked = this.#inputs.filter(input => input.checked).map(input => input.value);
 		return this.#type === 'radio' ? (checked[0] ?? null) : checked;
 	}

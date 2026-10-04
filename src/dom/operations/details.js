@@ -1,6 +1,7 @@
 import { Component } from '../core/component.js';
 import { el, fill } from '../core/element.js';
 import { Labels } from '../core/labels.js';
+import { Clipboard } from '../core/clipboard.js';
 import { Button } from '../button.js';
 import { TimeWords } from '../time/words.js';
 import { details } from './labels.js';
@@ -95,22 +96,11 @@ export class TechnicalDetails extends Component {
 	 * saying so in place and selecting the text.
 	 */
 	async copy() {
-		const report = this.report;
-		let copied = false;
-		try {
-			const clipboard = this.#element.ownerDocument.defaultView?.navigator?.clipboard ?? globalThis.navigator?.clipboard;
-			if (!clipboard?.writeText) throw new Error('No clipboard');
-			let stop = null;
-			const late = new Promise((resolve, reject) => (stop = this.later(() => reject(new Error('The clipboard did not answer')), TechnicalDetails.bound)));
-			await Promise.race([clipboard.writeText(report), late]).finally(() => stop?.());
-			copied = true;
-		} catch {
-			copied = false;
-		}
+		const copied = await Clipboard.write(this.#element.ownerDocument, this.report, TechnicalDetails.bound);
 		if (this.destroyed) return copied;
 		this.#result.textContent = this.#labels.text(copied ? 'copied' : 'refused');
 		this.#result.classList.toggle('bui-details-refused', !copied);
-		if (!copied) this.#select();
+		if (!copied) Clipboard.select(this.#content);
 		return copied;
 	}
 
@@ -121,18 +111,5 @@ export class TechnicalDetails extends Component {
 
 	#shown(moment) {
 		return new Intl.DateTimeFormat(this.#locale, { dateStyle: 'medium', timeStyle: 'medium', hourCycle: 'h23' }).format(new Date(moment));
-	}
-
-	/** Selects the words, request and time so the keyboard copies them. */
-	#select() {
-		const view = this.#element.ownerDocument.defaultView;
-		const selection = view?.getSelection?.();
-		if (!selection) return;
-		try {
-			selection.removeAllRanges();
-			selection.selectAllChildren(this.#content);
-		} catch {
-			// A browser that cannot select keeps the message; the text is still shown.
-		}
 	}
 }

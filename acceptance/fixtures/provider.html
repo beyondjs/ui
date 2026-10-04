@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Stand-in provider</title>
+	</head>
+	<body>
+		<p>A stand-in for GitHub's installation page.</p>
+		<button id="finish" type="button">Install</button>
+		<script>
+			// Finishing tells the opener, from this origin, and closes the window; the opener reads the outcome from its server.
+			document.getElementById('finish').addEventListener('click', () => {
+				localStorage.setItem('attempt', 'done');
+				window.opener?.postMessage({ type: 'beyond-provider' }, location.origin);
+				window.close();
+			});
+		</script>
+	</body>
+</html>

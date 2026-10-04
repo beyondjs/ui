@@ -5,7 +5,10 @@
  * `@beyond-js/ui/tokens.css` and `@beyond-js/ui/styles.css`.
  */
 export { Icon, Button, useBusy, Lockup, Status, Badge, Callout, Loading, Skeleton } from './simple.js';
-export { Field, Select, Choices } from './fields.js';
+export { Field, Select, Choices, useSuggestion } from './fields.js';
+export { ChoiceMenu, RefChooser, ProjectPicker, SecretField, CopyMessage, StatusRow, ProviderWindow } from './choose.js';
+export { SideSheet } from './sheet.js';
+export { Draft } from '../dom/draft.js';
 export { Dialog, useConfirm, FocusedForm } from './dialog.js';
 export { Picker } from './picker.js';
 export { Collection } from './collection.js';
@@ -21,5 +24,5 @@ export { icons, unlabeled } from '../dom/core/icons.js';
 export { Preferences } from '../dom/preferences/preferences.js';
 export { usePreferences } from './preferences.js';
 export { PreferencesDialog } from '../dom/preferences/dialog.js';
-export { Page, PageHeader, Section, Arrival, Tabs } from './page.js';
+export { Page, PageHeader, Section, Arrival, Tabs, ListDetail } from './page.js';
 export { useInstance } from './hooks.js';

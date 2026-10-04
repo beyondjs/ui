@@ -1,7 +1,8 @@
 /** Types of `@beyond-js/ui/react`: the React adapter (React 18 and 19). */
 import type { ReactNode, ReactElement, Ref, RefAttributes, ForwardRefExoticComponent, FormHTMLAttributes, ButtonHTMLAttributes, SelectHTMLAttributes, MouseEvent as ReactMouseEvent, RefObject } from 'react';
 import type { Copy, NotificationAdapter, Notice } from './notifications.js';
-import type { Tone, MenuItem, ChoiceOption, SelectOption, PromptOptions, QuestionOptions, Crumb, CollectionState, InboxState, PickerChoice, PickerSource, Component } from './dom.js';
+import type { Tone, MenuItem, ChoiceOption, SelectOption, PromptOptions, QuestionOptions, Crumb, CollectionState, InboxState, PickerChoice, PickerSource, Component, ChoiceMenuOption, PickerAccount, PickerRecognized, PickerFound, GitRef, PickedProject, StatusRowState, ProviderState } from './dom.js';
+export type { ChoiceMenuOption, PickerAccount, PickerItem, PickerMark, PickerRecognized, PickerFound, GitRef, PickedProject, StatusRowState, ProviderState, DraftKey } from './dom.js';
 export type { Copy, NotificationAdapter, Notice, NoticePage, NoticeRequest, NoticeSource, NoticeSummary } from './notifications.js';
 export { confirm, prompt, alert, availability, productNames } from './dom.js';
 export type { AvailabilityState, Consequence, FamilySignout, Step, StepState, Expected, DetailsRecord, AwaitedReason, AwaitedState, Moment, FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, FamilyProduct, FamilyProductId, FamilyProductNames, FamilyReason, FamilyHere, FamilyManage, FamilyNotice, FamilyOrganization, FamilyProjectState, ProductNavItem, SidebarGroup, SidebarItem, UnavailableKind } from './dom.js';
@@ -52,9 +53,39 @@ export function Callout(props: { tone?: Exclude<Tone, 'neutral'>; title: ReactNo
 export function Loading(props: { label?: string }): ReactElement;
 export function Skeleton(props: { lines?: number }): ReactElement;
 
-export function Field(props: { label: ReactNode; hint?: ReactNode; error?: ReactNode; optional?: boolean; labels?: { optional?: string }; children: ReactNode }): ReactElement;
-export function Select(props: SelectHTMLAttributes<HTMLSelectElement> & { options: SelectOption[] }): ReactElement;
-export function Choices(props: { legend: ReactNode; type?: 'checkbox' | 'radio'; name?: string; options: ChoiceOption[]; value: string | string[] | null; onChange?: (value: any) => void; hint?: ReactNode; error?: ReactNode }): ReactElement;
+export function Field(props: { label: ReactNode; hint?: ReactNode; error?: ReactNode; optional?: boolean; /** Marks the value as suggested (0.7.0, `useSuggestion`) */ suggested?: boolean; labels?: { optional?: string; suggested?: string }; children: ReactNode }): ReactElement;
+/** A suggested value that follows `suggestion` until the person edits it (0.7.0). */
+export function useSuggestion(suggestion: string | null): { value: string; onChange: (event: { target: { value: string } } | string) => void; onBlur: (event: { target: { value: string } }) => void; suggested: boolean; follow: () => void };
+export function Select(props: SelectHTMLAttributes<HTMLSelectElement> & { options: SelectOption[]; /** One option is stated as text (default true; 0.7.0) */ statement?: boolean }): ReactElement;
+export function Choices(props: { legend: ReactNode; type?: 'checkbox' | 'radio'; name?: string; options: ChoiceOption[]; value: string | string[] | null; onChange?: (value: any) => void; hint?: ReactNode; error?: ReactNode; statement?: boolean }): ReactElement;
+
+/** Actions with `onSelect` read from the latest props. */
+export interface ReactChoiceAction { label: string; onSelect?: (() => void) | null; disabled?: boolean; reason?: string | null }
+/** One choice among a few things that have a state (CNT-94, 0.7.0). */
+export function ChoiceMenu(props: { label: string; options: Array<ChoiceMenuOption | null | false>; value?: string | null; placeholder?: string | null; actions?: Array<ReactChoiceAction | null | false>; disabled?: boolean; align?: 'start' | 'end'; placement?: 'auto' | 'below' | 'above'; search?: boolean | 'auto' | number; statement?: boolean; name?: string | null; onChange?: ((value: string) => void) | null; labels?: Copy }): ReactElement;
+export namespace ChoiceMenu { const labels: Copies; }
+/** A branch or another Git ref (0.7.0). */
+export function RefChooser(props: { label?: string | null; refs?: GitRef[]; value?: string | null; loading?: boolean; unavailable?: { text?: string | null; onRetry?: (() => void) | null } | null; escape?: boolean; validate?: ((value: string) => string | null) | null; layout?: 'field' | 'inline'; name?: string | null; onChange?: ((value: string) => void) | null; labels?: Copy }): ReactElement;
+export namespace RefChooser { const labels: Copies; }
+/** The organization's projects with their state in this product (0.7.0). */
+export function ProjectPicker(props: { projects: PickedProject[]; product: string; value?: string | null; label?: string | null; only?: 'unset' | null; actions?: Array<ReactChoiceAction | null | false>; name?: string | null; onChange?: ((id: string) => void) | null; labels?: Copy }): ReactElement;
+export namespace ProjectPicker { const labels: Copies; }
+/** A secret with Connect first (0.7.0); the ref's `value` is the pasted text, or null when the stored one is kept. */
+export const SecretField: ForwardRefExoticComponent<{ label: string; connect?: { label: string; onSelect?: (() => void) | null; href?: string | null } | null; credential?: string; stored?: boolean; hint?: string | null; name?: string | null; labels?: Copy } & RefAttributes<{ readonly value: string | null }>> & { labels: Copies };
+/** A prewritten message, link or command with one copy action (0.7.0). */
+export function CopyMessage(props: { text: string; kind?: 'message' | 'command' | 'link'; label?: string | null; labels?: Copy }): ReactElement;
+export namespace CopyMessage { const labels: Copies; }
+/** One thing with one state (0.7.0); `action` is React content, `more` items take `onSelect`. */
+export function StatusRow(props: { title: string; kind?: string | null; state: StatusRowState; reason?: string | null; owner?: string | null; facts?: string[]; action?: ReactNode; more?: Array<ReactChoiceAction | null | false>; level?: 2 | 3 | 4 | 5 | 6; clock?: Clock; locale?: string; labels?: Copy }): ReactElement;
+export namespace StatusRow { const labels: Copies; }
+/** A provider's window followed until the server says how it ended (0.7.0). */
+export const ProviderWindow: ForwardRefExoticComponent<{ provider: string; href: string; read: () => Promise<{ state: string; [key: string]: unknown }>; origin?: string | null; onEnd?: ((outcome: 'done' | 'waiting', answer: { state: string; [key: string]: unknown }) => void) | null; same?: boolean | 'auto'; expected?: Expected; bound?: number; clock?: Clock; locale?: string; labels?: Copy } & RefAttributes<{ open(): void; check(): Promise<void> | undefined; cancel(): void; readonly state: ProviderState }>> & { labels: Copies };
+/** A side sheet (0.7.0): `open`, `onClose`, `busy`, `error` (React content at its top), `actions`, `restore`. */
+export function SideSheet(props: { open: boolean; title: string; label?: string | null; description?: string | null; width?: 'form' | 'standard'; busy?: boolean; error?: ReactNode; restore?: HTMLElement | null; labels?: { close?: string }; onClose?: (value: unknown) => void; actions?: ReactNode; children?: ReactNode }): ReactElement | null;
+export namespace SideSheet { const labels: Copies; }
+/** List and detail (0.7.0): the detail beside the list on a wide region, its own page on a narrow one. */
+export function ListDetail(props: { list: ReactNode; detail?: ReactNode; label?: string | null; back?: { label: ReactNode; href: string; onNavigate?: ((event: ReactMouseEvent<HTMLAnchorElement>) => void) | null } | null }): ReactElement;
+export { Draft } from './dom.js';
 
 export interface DialogProps {
 	open: boolean;
@@ -87,6 +118,9 @@ export function FocusedForm(props: Omit<FormHTMLAttributes<HTMLFormElement>, 'on
 export interface PickerHandle {
 	readonly value: string[];
 	readonly selected: PickerChoice[];
+	/** The account in view (0.7.0). */
+	readonly account: string | null;
+	readonly recognized: PickerRecognized | null;
 	mark(id: string, finding: { state?: PickerChoice['state']; reason?: string | null }): void;
 	remove(id: string): void;
 	refresh(): void;
@@ -104,11 +138,22 @@ export interface PickerProps {
 	limit?: number;
 	delay?: number;
 	all?: boolean;
+	/** Milliseconds the source may take (20000; 0.7.0) */
+	bound?: number;
+	/** "From [account ▾]" (0.7.0); `connect.onSelect` is read from the latest props */
+	accounts?: { items: PickerAccount[]; value?: string | null; connect?: { label: string; onSelect?: (() => void) | null } | null } | null;
+	/** In place of the list while given (0.7.0) */
+	gate?: { title: string; reason: string; owner?: string | null; action?: ReactNode; secondary?: ReactNode; kind?: UnavailableKind; code?: string | null; level?: 2 | 3 | 4 | 5 | 6 } | null;
+	/** The "Can't find it?" content, shown in every state (0.7.0) */
+	footer?: ReactNode;
+	recognize?: ((text: string) => PickerRecognized | null) | null;
+	onRecognize?: ((found: PickerFound | null) => void) | null;
+	explain?: ((error: unknown) => string | null) | null;
 	labels?: Copy;
 }
-export const Picker: ForwardRefExoticComponent<PickerProps & RefAttributes<PickerHandle>>;
+export const Picker: ForwardRefExoticComponent<PickerProps & RefAttributes<PickerHandle>> & { labels: Copies };
 
-export interface ReactColumn<Row> { key: string; label: string; value?: (row: Row) => string | Node; render?: (row: Row) => ReactNode; numeric?: boolean; primary?: boolean }
+export interface ReactColumn<Row> { key: string; label: string; value?: (row: Row) => string | Node; render?: (row: Row) => ReactNode; numeric?: boolean; primary?: boolean; /** Hidden as the region narrows, the highest number first (0.7.0) */ priority?: number }
 export interface CollectionProps<Row> {
 	label: string;
 	columns: ReactColumn<Row>[];

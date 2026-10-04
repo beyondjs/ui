@@ -1,0 +1,117 @@
+/* A side sheet (LR-07): a modal panel at the inline end, as tall as the window, form-wide by default and
+   the whole width below the family cut (1024 px). It overlaps the page, so it takes the dialog's
+   elevation; its body scrolls on its own while its title and actions stay in view. */
+.bui-sheet {
+	box-sizing: border-box;
+	inset-block: 0;
+	inset-inline: auto 0;
+	width: min(var(--layout-form), 100vw);
+	max-width: 100vw;
+	height: 100dvh;
+	max-height: 100dvh;
+	margin: 0 0 0 auto;
+	padding: 0;
+	border: 0;
+	border-inline-start: 1px solid var(--color-border);
+	border-radius: 0;
+	background: var(--color-surface);
+	color: var(--color-text);
+	box-shadow: var(--elevation-dialog);
+	overflow: hidden;
+}
+.bui-sheet-standard {
+	width: min(var(--layout-standard), calc(100vw - var(--layout-sidebar)));
+}
+.bui-sheet[open] {
+	display: flex;
+	flex-direction: column;
+	animation: bui-sheet-in var(--motion-standard) var(--motion-ease);
+}
+.bui-sheet:dir(rtl)[open] {
+	margin: 0 auto 0 0;
+	animation-name: bui-sheet-in-rtl;
+}
+.bui-sheet::backdrop {
+	background: var(--overlay-scrim);
+}
+@media (max-width: 1023.98px) {
+	.bui-sheet,
+	.bui-sheet-standard {
+		width: 100vw;
+		border-inline-start: 0;
+	}
+}
+.bui-sheet-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	flex: none;
+	gap: var(--space-3);
+	padding: var(--space-4) var(--space-4) 0 var(--space-5);
+}
+.bui-sheet-title {
+	margin: 0;
+	padding-top: var(--space-1);
+	font-size: var(--text-title-3);
+	line-height: var(--leading-title-3);
+	font-weight: var(--weight-medium);
+	overflow-wrap: anywhere;
+}
+.bui-sheet-title:focus {
+	outline: none;
+}
+.bui-sheet-title:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+}
+.bui-sheet-description {
+	flex: none;
+	max-width: var(--layout-measure);
+	margin: var(--space-2) var(--space-5) 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-sheet-problem {
+	flex: none;
+	margin: var(--space-3) var(--space-5) 0;
+}
+.bui-sheet-problem[hidden] {
+	display: none;
+}
+.bui-sheet-body {
+	flex: 1 1 auto;
+	min-height: 0;
+	display: grid;
+	align-content: start;
+	gap: var(--space-4);
+	padding: var(--space-4) var(--space-5);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+.bui-sheet-actions {
+	flex: none;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+	padding: var(--space-3) var(--space-5);
+	border-top: 1px solid var(--color-border);
+	background: var(--color-surface);
+}
+.bui-sheet-actions[hidden] {
+	display: none;
+}
+.bui-sheet[data-busy] .bui-sheet-body {
+	cursor: progress;
+}
+@keyframes bui-sheet-in {
+	from {
+		transform: translateX(100%);
+	}
+}
+@keyframes bui-sheet-in-rtl {
+	from {
+		transform: translateX(-100%);
+	}
+}

@@ -41,8 +41,8 @@ test('controls take border-control; dividers and tags keep border-strong (D08)',
 	assert.ok(find('.bui-badge').some(rule => /--color-border-strong/.test(rule.body)));
 });
 
-test('elevation only on what overlaps the page: menus, panels, tooltips, toasts, dialogs and the sidebar drawer (D10)', () => {
-	const overlapping = /\.bui-(menu|disclosure-panel|disclosure-leaving|tooltip|toast|dialog|drawer-panel)\b/;
+test('elevation only on what overlaps the page: menus, panels, tooltips, toasts, dialogs, side sheets and the sidebar drawer (D10)', () => {
+	const overlapping = /\.bui-(menu|disclosure-panel|disclosure-leaving|tooltip|toast|dialog|drawer-panel|sheet)\b/;
 	const raised = rules.filter(rule => /box-shadow:\s*var\(--elevation-/.test(rule.body));
 	assert.ok(raised.length >= 4, `${raised.length} rules`);
 	for (const rule of raised) assert.match(rule.selector, overlapping, rule.selector);

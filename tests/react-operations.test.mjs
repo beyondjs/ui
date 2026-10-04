@@ -129,9 +129,9 @@ test('FamilyBar: one sign-out entry in the open menu when the label changes as t
 
 test('Select keeps the DOM markup and shows a cut chosen text whole', async () => {
 	const shape = node => (node.nodeType === 3 ? node.textContent : { tag: node.tagName, attributes: [...node.attributes].map(({ name, value }) => `${name}=${value}`).sort(), children: [...node.childNodes].map(shape) });
-	const options = [{ value: 'b', label: 'A very long environment name' }];
+	const options = [{ value: 'a', label: 'Short' }, { value: 'b', label: 'A very long environment name' }];
 	await render(h(ui.Select, { options, defaultValue: 'b' }));
-	const made = new dom.Select({ options });
+	const made = new dom.Select({ options, value: 'b' });
 	assert.deepEqual(shape(host.querySelector('.bui-select')), shape(made.element));
 	made.destroy();
 	const saved = page.window.HTMLCanvasElement.prototype.getContext;

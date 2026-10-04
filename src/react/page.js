@@ -2,6 +2,7 @@ import React from 'react';
 import { Page as Region } from '../dom/page/page.js';
 import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
+import { Mark } from './simple.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 
 const { useId } = React;
@@ -88,4 +89,28 @@ export function Tabs({ items, label = null, onNavigate = null, labels }) {
 	const [host, row] = useInstance(() => new Row({ items: [], label, labels, onnavigate: onNavigate ? (item, event) => latest.current?.(item, event) : null }), [label, labels, Boolean(onNavigate)]);
 	useSync(row, current => (current.items = items), [JSON.stringify(items)]);
 	return h('div', { ref: host, className: 'bui-host' });
+}
+
+/**
+ * List and detail (LR-03, FAM-40), rendered by React with the markup of the DOM `ListDetail`: the
+ * open `detail` beside the `list` on a wide region, and alone with `back` (`{ label, href, onNavigate? }`)
+ * on a narrow one. The product keeps the open item in its address.
+ */
+export function ListDetail({ list, detail = null, label = null, back = null }) {
+	const navigate = event => {
+		if (!back?.onNavigate || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+		event.preventDefault();
+		back.onNavigate(event);
+	};
+	const link = back?.href ? h('a', { href: back.href, className: 'bui-listdetail-link', onClick: navigate }, h(Mark, { name: 'back' }), back.label) : null;
+	return h(
+		'div',
+		{ className: 'bui-listdetail', 'data-open': detail ? '' : undefined },
+		h(
+			'div',
+			{ className: 'bui-listdetail-frame' },
+			h('div', { className: 'bui-listdetail-list' }, list),
+			h('section', { className: 'bui-listdetail-detail', 'aria-label': label ?? undefined, tabIndex: -1, hidden: !detail }, h('p', { className: 'bui-listdetail-back' }, link), h('div', { className: 'bui-listdetail-body' }, detail))
+		)
+	);
 }

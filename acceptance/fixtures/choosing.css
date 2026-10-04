@@ -1,0 +1,18 @@
+/* The "Choose, never type" fixture's page: sections in the page's flow, nothing measured but the components. */
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	padding: var(--space-4);
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+	font-size: var(--text-body);
+	line-height: var(--leading-body);
+}
+section {
+	display: grid;
+	gap: var(--space-3);
+	margin-bottom: var(--space-8);
+}

@@ -69,33 +69,6 @@ export class ActionMenu extends Component {
 	close(refocus?: boolean): void;
 }
 
-export interface ChoiceMenuOption {
-	value: string;
-	label: Content;
-	detail?: string | null;
-	status?: [string, 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'progress'] | null;
-	disabled?: boolean;
-	reason?: string | null;
-}
-export interface ChoiceMenuAction {
-	label: Content;
-	run: () => void;
-	disabled?: boolean;
-	reason?: string | null;
-}
-export class ChoiceMenu extends Component {
-	constructor(options: { label: string; options: Array<ChoiceMenuOption | null | false>; value?: string | null; placeholder?: string; actions?: Array<ChoiceMenuAction | null | false>; disabled?: boolean; align?: 'start' | 'end'; placement?: 'auto' | 'below' | 'above'; onchange?: ((value: string) => void) | null });
-	readonly control: HTMLButtonElement;
-	readonly expanded: boolean;
-	readonly chosen: ChoiceMenuOption | null;
-	value: string | null;
-	set disabled(disabled: boolean);
-	set options(options: Array<ChoiceMenuOption | null | false>);
-	set actions(actions: Array<ChoiceMenuAction | null | false>);
-	open(): void;
-	close(refocus?: boolean): void;
-}
-
 export interface DisclosureOptions {
 	label: Content | Content[];
 	name?: string | null;
@@ -129,13 +102,22 @@ export interface FieldOptions {
 	autocomplete?: string | null;
 	messages?: Partial<Record<keyof ValidityState, string>>;
 	validate?: ((value: string) => string | null) | null;
+	/** A value derived from context, followed until the person edits the field (0.7.0) */
+	suggest?: string | null;
 	labels?: Copy;
 }
 export class Field extends Component {
+	/** The copy in English and Spanish (0.7.0). */
+	static readonly labels: { readonly en: Copy; readonly es: Copy };
 	constructor(options: FieldOptions);
 	readonly control: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 	readonly value: string;
 	readonly invalid: boolean;
+	/** Whether the person's own value stands over the suggestion (0.7.0). */
+	readonly edited: boolean;
+	set suggest(value: string | null);
+	/** Follows the suggestion again (0.7.0). */
+	follow(): void;
 	set error(message: string | null);
 	check(): boolean;
 	focus(): void;
@@ -143,7 +125,9 @@ export class Field extends Component {
 
 export interface ChoiceOption { value: string; label: Content; hint?: string; disabled?: boolean; reason?: string }
 export class Choices extends Component {
-	constructor(options: { legend: Content; type?: 'checkbox' | 'radio'; name?: string | null; options: ChoiceOption[]; value?: string | string[] | null; hint?: Content | null; error?: string | null; required?: boolean; onchange?: ((value: string | string[] | null) => void) | null });
+	constructor(options: { legend: Content; type?: 'checkbox' | 'radio'; name?: string | null; options: ChoiceOption[]; value?: string | string[] | null; hint?: Content | null; error?: string | null; required?: boolean; onchange?: ((value: string | string[] | null) => void) | null; /** A radio group's one option is stated as text (default true; 0.7.0) */ statement?: boolean });
+	/** Whether the one option is stated as text (0.7.0). */
+	readonly stated: boolean;
 	value: string | string[] | null;
 	set error(message: string | null);
 	focus(): void;
@@ -167,8 +151,11 @@ export class Select extends Component {
 	 * with the control.
 	 */
 	static tip(control: HTMLSelectElement): NameTip;
-	constructor(options: { name?: string | null; options: SelectOption[]; value?: string | null; required?: boolean; disabled?: boolean; onchange?: ((value: string) => void) | null; id?: string | null });
+	constructor(options: { name?: string | null; options: SelectOption[]; value?: string | null; required?: boolean; disabled?: boolean; onchange?: ((value: string) => void) | null; id?: string | null; /** One option is stated as text (default true; 0.7.0) */ statement?: boolean });
+	/** The select, or the statement's `<output>` while one option is stated (0.7.0). */
 	readonly control: HTMLSelectElement;
+	/** Whether the one option is stated as text (0.7.0). */
+	readonly stated: boolean;
 	value: string;
 }
 
@@ -269,3 +256,4 @@ export * from './icons.js';
 export * from './preferences.js';
 export * from './page.js';
 export * from './operations.js';
+export * from './choose.js';

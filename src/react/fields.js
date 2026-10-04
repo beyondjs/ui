@@ -2,8 +2,10 @@ import React from 'react';
 import { h } from './hooks.js';
 import { Mark } from './simple.js';
 import { Select as Choice } from '../dom/select.js';
+import { single } from '../dom/core/statement.js';
+import { Suggestion } from '../dom/core/suggestion.js';
 
-const { cloneElement, isValidElement, useCallback, useId, useLayoutEffect, useRef } = React;
+const { cloneElement, isValidElement, useCallback, useId, useLayoutEffect, useRef, useState } = React;
 
 /**
  * Form controls React renders itself, with the markup and classes of the DOM `Field`, `Choices` and
@@ -13,9 +15,10 @@ const { cloneElement, isValidElement, useCallback, useId, useLayoutEffect, useRe
 
 /**
  * A labelled field around one control child (an `input`, `textarea`, `Select` or other element).
- * The child receives the id, `aria-describedby` for the hint and error, and `aria-invalid`.
+ * The child receives the id, `aria-describedby` for the hint and error, and `aria-invalid`. With
+ * `suggested` (0.7.0, from `useSuggestion`) the label carries the "Suggested" mark.
  */
-export function Field({ label, hint = null, error = null, optional = false, labels = {}, children }) {
+export function Field({ label, hint = null, error = null, optional = false, suggested = false, labels = {}, children }) {
 	const id = useId();
 	const described = [hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(Boolean).join(' ') || undefined;
 	const control = isValidElement(children)
@@ -30,7 +33,7 @@ export function Field({ label, hint = null, error = null, optional = false, labe
 	return h(
 		'div',
 		{ className: `bui-field${error ? ' bui-field-invalid' : ''}` },
-		h('label', { htmlFor: target, className: 'bui-field-label' }, label, optional ? h('span', { className: 'bui-field-optional' }, ` ${labels.optional ?? '(optional)'}`) : null),
+		h('label', { htmlFor: target, className: 'bui-field-label' }, label, optional ? h('span', { className: 'bui-field-optional' }, ` ${labels.optional ?? '(optional)'}`) : null, suggested ? [' ', h('span', { key: 'suggested', className: 'bui-field-suggested' }, labels.suggested ?? 'Suggested')] : null),
 		hint ? h('p', { id: `${id}-hint`, className: 'bui-field-hint' }, hint) : null,
 		control,
 		h('p', { id: `${id}-error`, className: 'bui-field-error', hidden: !error }, error ? [h(Mark, { key: 'icon', name: 'alert' }), h('span', { key: 'text' }, error)] : null)
@@ -38,10 +41,51 @@ export function Field({ label, hint = null, error = null, optional = false, labe
 }
 
 /**
- * A native select for a short finite list. Options: `{ value, label, disabled? }` or `{ group, options }`.
- * Its chosen text shows whole in a tooltip while the select cuts it (D44), as the DOM `Select`.
+ * A suggested value for a controlled input (D56, CNT-95), with the DOM `Field`'s rule: it follows
+ * `suggestion` until the person edits it, and an input left empty takes it back. Returns `{ value,
+ * onChange, onBlur, suggested, follow }`: spread `value`, `onChange` and `onBlur` on the input and pass
+ * `suggested` to `Field`; `onChange(event)` may also take the new text itself.
  */
-export function Select({ options, className, ...rest }) {
+export function useSuggestion(suggestion) {
+	const [rule] = useState(() => new Suggestion(suggestion));
+	const [value, setValue] = useState(() => suggestion ?? '');
+	const [, setTick] = useState(0);
+	useLayoutEffect(() => {
+		const shown = rule.offer(suggestion);
+		if (shown !== null) setValue(shown);
+		setTick(tick => tick + 1);
+	}, [rule, suggestion]);
+	const onChange = useCallback(event => {
+		const text = typeof event === 'string' ? event : event.target.value;
+		rule.typed(text);
+		setValue(text);
+	}, [rule]);
+	const onBlur = useCallback(event => {
+		const back = rule.left(event?.target?.value ?? '');
+		if (back !== null) setValue(back);
+		setTick(tick => tick + 1);
+	}, [rule]);
+	const follow = useCallback(() => setValue(rule.follow()), [rule]);
+	return { value, onChange, onBlur, suggested: rule.shown, follow };
+}
+
+/** One option that can be chosen, stated as text with its value submitted, as the DOM statement draws it. */
+function Statement({ id, name, option, extra = null }) {
+	return h('span', { className: 'bui-statement', 'data-value': option.value }, h('output', { id, className: 'bui-statement-text' }, option.label), extra, name ? h('input', { type: 'hidden', name, value: option.value }) : null);
+}
+
+/**
+ * A native select for a short finite list. Options: `{ value, label, disabled? }` or `{ group, options }`.
+ * Its chosen text shows whole in a tooltip while the select cuts it (D44), as the DOM `Select`. One
+ * option that can be chosen is stated as text and submitted (0.7.0, D56) unless `statement` is false.
+ */
+export function Select({ options, statement = true, ...rest }) {
+	const one = statement ? single(options) : null;
+	if (one) return h(Statement, { id: rest.id, name: rest.name, option: one });
+	return h(Native, { options, ...rest });
+}
+
+function Native({ options, className, ...rest }) {
 	const control = useRef(null);
 	const given = rest.ref ?? null;
 	const ref = useCallback(node => {
@@ -63,10 +107,22 @@ export function Select({ options, className, ...rest }) {
 
 /**
  * Checkboxes or radio buttons in a fieldset. `value` is an array for checkboxes and a string for
- * radios; `onChange` receives the next value. Disabled options show their `reason`.
+ * radios; `onChange` receives the next value. Disabled options show their `reason`. A radio group
+ * with one option that can be chosen is stated as text (0.7.0, D56) unless `statement` is false.
  */
-export function Choices({ legend, type = 'checkbox', name, options, value, onChange, hint = null, error = null }) {
+export function Choices({ legend, type = 'checkbox', name, options, value, onChange, hint = null, error = null, statement = true }) {
 	const id = useId();
+	const one = statement && type === 'radio' ? single(options) : null;
+	if (one) {
+		return h(
+			'div',
+			{ className: `bui-field bui-choices-stated${error ? ' bui-field-invalid' : ''}` },
+			h('label', { className: 'bui-field-label', htmlFor: `${id}-stated` }, legend),
+			hint ? h('p', { id: `${id}-hint`, className: 'bui-field-hint' }, hint) : null,
+			h(Statement, { id: `${id}-stated`, name, option: one }),
+			h('p', { id: `${id}-error`, className: 'bui-field-error', hidden: !error }, error ? [h(Mark, { key: 'icon', name: 'alert' }), h('span', { key: 'text' }, error)] : null)
+		);
+	}
 	const chosen = new Set([].concat(value ?? []));
 	const described = [hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(Boolean).join(' ') || undefined;
 	const change = (option, checked) => {

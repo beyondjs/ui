@@ -1,0 +1,245 @@
+/* "Choose, never type" (D56): the resource picker's parts, a stated single option, the ref chooser, the
+   project picker, the secret field and a suggested value. */
+
+/* A single option stated as text: the value, readable, with its state. */
+.bui-statement {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1) var(--space-2);
+	min-height: var(--bui-control);
+	max-width: 100%;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-statement-text {
+	overflow-wrap: anywhere;
+}
+.bui-choice-statement .bui-choice-label {
+	color: var(--color-text-muted);
+}
+.bui-choice-statement .bui-choice-value {
+	font-weight: var(--weight-medium);
+}
+
+/* A long ChoiceMenu opens with its search field above the options. */
+.bui-choice-list > .bui-choice-items {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.bui-choice-search {
+	position: relative;
+	display: flex;
+	margin-bottom: var(--space-1);
+}
+.bui-choice-search > .bui-icon {
+	position: absolute;
+	left: var(--space-2);
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--color-text-muted);
+	pointer-events: none;
+}
+.bui-choice-search > .bui-input {
+	padding-left: calc(var(--space-2) + 24px);
+}
+.bui-choice-none {
+	margin: 0;
+	padding: var(--space-2) var(--space-3);
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-choice-none[hidden],
+.bui-choice-items > [hidden] {
+	display: none;
+}
+
+/* The resource picker: From [account], the gate, rows with their facts and marks, a suggested group and
+   "Can't find it?". */
+.bui-picker-work {
+	display: grid;
+	gap: var(--space-2);
+	min-width: 0;
+}
+.bui-picker-work[hidden],
+.bui-picker-gate[hidden],
+.bui-picker-escape[hidden] {
+	display: none;
+}
+.bui-picker-group {
+	display: grid;
+	padding-bottom: var(--space-1);
+	margin-bottom: var(--space-1);
+	border-bottom: 1px solid var(--color-border);
+}
+.bui-picker-heading {
+	padding: var(--space-1) var(--space-2);
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	letter-spacing: var(--tracking-label);
+}
+.bui-picker-grouped {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.bui-option:has(> .bui-option-avatar, > .bui-option-glyph) {
+	grid-template-columns: 20px 20px 1fr;
+}
+.bui-option-avatar {
+	width: 20px;
+	height: 20px;
+	margin-top: 1px;
+	border-radius: var(--radius-round);
+	object-fit: cover;
+}
+.bui-option-glyph {
+	display: inline-grid;
+	color: var(--color-text-muted);
+}
+.bui-option-glyph .bui-icon {
+	width: 20px;
+	height: 20px;
+}
+.bui-option-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1) var(--space-2);
+}
+.bui-option-facts {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0 var(--space-1);
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-option-private {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+}
+.bui-option-private .bui-icon {
+	width: 14px;
+	height: 14px;
+}
+.bui-picker-escape {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1) var(--space-2);
+	padding-top: var(--space-2);
+	border-top: 1px solid var(--color-border);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-picker-escape-title {
+	margin: 0;
+	color: var(--color-text-muted);
+}
+.bui-picker-escape-slot {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+/* The ref chooser and the project picker: a label above the control, or a composer's inline button. */
+.bui-refs {
+	display: grid;
+	justify-items: start;
+	gap: var(--space-1);
+	min-width: 0;
+}
+.bui-refs-field .bui-choice-button .bui-choice-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+.bui-refs-body {
+	display: grid;
+	justify-items: start;
+	gap: var(--space-1);
+	width: 100%;
+}
+.bui-refs-body > .bui-skeleton {
+	width: min(16rem, 100%);
+}
+.bui-refs-problem,
+.bui-refs-empty {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-refs-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+}
+.bui-refs-other {
+	display: grid;
+	gap: var(--space-2);
+	width: min(var(--layout-form), 100%);
+}
+.bui-refs-other[hidden] {
+	display: none;
+}
+
+/* A secret with the integration first: Connect, then the folded last resort, or "Stored · Replace". */
+.bui-secret {
+	display: grid;
+	justify-items: start;
+	gap: var(--space-2);
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+.bui-secret-body,
+.bui-secret-inside,
+.bui-secret-field {
+	display: grid;
+	gap: var(--space-2);
+	width: min(var(--layout-form), 100%);
+}
+.bui-secret-summary {
+	min-height: var(--bui-target);
+	color: var(--color-link);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	cursor: pointer;
+}
+.bui-secret-last,
+.bui-secret-stored {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-secret-stored {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1);
+	color: var(--color-text);
+}
+
+/* A suggested value, marked until the person edits it. */
+.bui-field-suggested {
+	color: var(--color-text-muted);
+	font-weight: var(--weight-regular);
+}
+.bui-field-suggested[hidden] {
+	display: none;
+}

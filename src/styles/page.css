@@ -236,3 +236,63 @@
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
 }
+
+/* List and detail (LR-03, FAM-40): the detail beside the list on a wide region, its own page on a
+   narrow one, decided by the region's own width (ListDetail.cut). */
+.bui-listdetail {
+	container: bui-listdetail / inline-size;
+	min-width: 0;
+}
+.bui-listdetail-frame {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--space-6);
+	min-width: 0;
+}
+.bui-listdetail[data-open] .bui-listdetail-list {
+	display: none;
+}
+.bui-listdetail-detail {
+	display: grid;
+	align-content: start;
+	gap: var(--space-3);
+	min-width: 0;
+}
+.bui-listdetail-detail:focus {
+	outline: none;
+}
+.bui-listdetail-detail[hidden],
+.bui-listdetail-back:empty {
+	display: none;
+}
+.bui-listdetail-back {
+	margin: 0;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-listdetail-link {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-1);
+	min-height: var(--bui-target);
+	color: var(--color-link);
+}
+.bui-listdetail-link .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+@container bui-listdetail (min-width: 72rem) {
+	.bui-listdetail[data-open] > .bui-listdetail-frame {
+		grid-template-columns: minmax(0, 1fr) minmax(22rem, 32rem);
+	}
+	.bui-listdetail[data-open] .bui-listdetail-list {
+		display: block;
+	}
+	.bui-listdetail-back {
+		display: none;
+	}
+	.bui-listdetail-detail {
+		padding-inline-start: var(--space-6);
+		border-inline-start: 1px solid var(--color-border);
+	}
+}

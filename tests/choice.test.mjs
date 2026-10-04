@@ -67,7 +67,7 @@ test('ChoiceMenu: choosing calls onchange once; a disabled option explains and i
 });
 
 test('ChoiceMenu: a press outside closes it, a disabled button never opens, and destroy releases its listener', () => {
-	const menu = new ui.ChoiceMenu({ label: 'AI engine', options: [{ value: 'claude', label: 'Claude Code' }] }).mount(document.body);
+	const menu = new ui.ChoiceMenu({ label: 'AI engine', options: [{ value: 'claude', label: 'Claude Code' }, { value: 'codex', label: 'Codex' }] }).mount(document.body);
 	menu.open();
 	assert.equal(menu.listeners.size, 1);
 	document.body.dispatchEvent(new window.PointerEvent('pointerdown', { bubbles: true }));
@@ -81,7 +81,7 @@ test('ChoiceMenu: a press outside closes it, a disabled button never opens, and 
 
 test('ChoiceMenu: replacing the options keeps the value only while an option has it', () => {
 	const menu = new ui.ChoiceMenu({ label: 'Repository', value: 'rep_web', options: [{ value: 'rep_web', label: 'acme/web' }] }).mount(document.body);
-	menu.options = [{ value: 'rep_api', label: 'acme/api' }];
+	menu.options = [{ value: 'rep_api', label: 'acme/api' }, { value: 'rep_docs', label: 'acme/docs' }];
 	assert.equal(menu.chosen, null);
 	assert.match(menu.control.textContent, /Choose/);
 });

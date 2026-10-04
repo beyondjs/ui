@@ -48,7 +48,7 @@ export class Selection {
 			return false;
 		}
 		if (!this.#multiple) this.#items.clear();
-		this.#items.set(id, { id, label: item.label, description: item.description ?? null });
+		this.#items.set(id, Selection.#kept(item));
 		return true;
 	}
 
@@ -56,7 +56,7 @@ export class Selection {
 	add(items) {
 		if (!this.#multiple) return 0;
 		const fresh = items.filter(item => !this.#items.has(String(item.id)));
-		for (const item of fresh) this.#items.set(String(item.id), { id: String(item.id), label: item.label, description: item.description ?? null });
+		for (const item of fresh) this.#items.set(String(item.id), Selection.#kept(item));
 		return fresh.length;
 	}
 
@@ -86,6 +86,12 @@ export class Selection {
 				}, [glyph('close')])
 			])
 		);
+	}
+
+	/** What a choice keeps of a result: its id, label and description, and the account it came from. */
+	static #kept(item) {
+		const kept = { id: String(item.id), label: item.label, description: item.description ?? null };
+		return item.account === null || item.account === undefined ? kept : { ...kept, account: item.account };
 	}
 
 	/** Hidden inputs that submit the chosen ids with a form. */

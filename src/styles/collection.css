@@ -159,3 +159,18 @@
 		text-align: center;
 	}
 }
+
+/* Column priority (FAM-40): a hidden column leaves every row; measuring lays the table out at its
+   content's width for a moment. */
+.bui-table [data-bui-hidden] {
+	display: none;
+}
+.bui-table.bui-table-measure {
+	width: max-content;
+}
+.bui-collection-columns {
+	justify-self: start;
+}
+.bui-collection-columns[hidden] {
+	display: none;
+}

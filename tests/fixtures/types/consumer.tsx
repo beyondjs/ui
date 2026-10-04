@@ -68,3 +68,30 @@ export function Region() {
 		</>
 	);
 }
+
+// "Choose, never type" (0.7.0) in React.
+import { Picker as Chooser, ChoiceMenu, RefChooser, ProjectPicker, SecretField, CopyMessage, StatusRow, ProviderWindow, SideSheet, ListDetail, Field as Labelled, useSuggestion, Draft } from '@beyond-js/ui/react';
+export function Choosing() {
+	const name = useSuggestion('storefront');
+	const secret = useRef<{ readonly value: string | null }>(null);
+	const draft = Draft.read(window.location);
+	return (
+		<>
+			<Chooser label="Repositories" source={async () => ({ items: [] })} accounts={{ items: [{ id: 'con_1', label: 'acme' }], connect: { label: 'Install on another GitHub organization', onSelect: () => undefined } }} gate={{ title: 'Connect GitHub', reason: 'Nothing is connected', action: <button>Connect GitHub</button> }} footer={<button>Choose on GitHub</button>} recognize={text => ({ label: text })} onRecognize={found => void found?.outcome} />
+			<ChoiceMenu label="Environment" options={[{ value: 'web', label: 'web', status: ['Ready', 'success'] }]} actions={[{ label: 'New environment…', onSelect: () => undefined }]} onChange={value => void value} labels={ChoiceMenu.labels.es} />
+			<RefChooser refs={[{ name: 'main', default: true }]} value="main" unavailable={null} onChange={value => void value} layout="inline" />
+			<ProjectPicker product="Delegate" projects={[{ id: 'prj_1', name: 'Storefront' }]} onChange={id => void id} />
+			<SecretField ref={secret} label="Supabase access" connect={{ label: 'Connect Supabase', onSelect: () => undefined }} stored />
+			<CopyMessage text="Could you approve the Beyond app?" />
+			<StatusRow title="acme" state={{ label: 'Active', tone: 'success' }} action={<button>Check now</button>} more={[{ label: 'Disconnect', onSelect: () => undefined }]} />
+			<ProviderWindow provider="GitHub" href="/start" read={async () => ({ state: 'done' })} onEnd={outcome => void outcome} />
+			<SideSheet open={false} title="Add repositories" busy={false} error={<p>Beyond Projects didn’t answer.</p>} onClose={value => void value}>
+				<p>Body</p>
+			</SideSheet>
+			<ListDetail list={<ul />} detail={draft.empty ? null : <p>Detail</p>} back={{ label: 'Repositories', href: '?view=repositories' }} />
+			<Labelled label="Slug" suggested={name.suggested}>
+				<input value={name.value} onChange={name.onChange} onBlur={name.onBlur} />
+			</Labelled>
+		</>
+	);
+}

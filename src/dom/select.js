@@ -2,6 +2,7 @@ import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
 import { glyph } from './core/icons.js';
 import { Cut, NameTip } from './core/cut.js';
+import { statement, single } from './core/statement.js';
 
 /**
  * A native select for a short, finite list of choices, styled over the tokens.
@@ -16,14 +17,26 @@ import { Cut, NameTip } from './core/cut.js';
  * tooltip on hover and keyboard focus (D44), which a name that fits never shows; the platform's own
  * list shows every option whole, and the select's value is the whole text for assistive technology.
  * Fixed labels should fit: when they may not, use `ChoiceMenu`, which wraps.
+ *
+ * One option that can be chosen is a statement, not a choice (D56, 0.7.0): it is shown as text (an
+ * `<output>` that a `Field`'s label names) and its value is submitted with `name`; `statement: false`
+ * keeps the select. `control` is then the output and `stated` is true.
  */
 export class Select extends Component {
 	#element;
 	#control;
-	#tip;
+	#tip = null;
+	#stated = null;
 
-	constructor({ name = null, options, value = null, required = false, disabled = false, onchange = null, id = null }) {
+	constructor({ name = null, options, value = null, required = false, disabled = false, onchange = null, id = null, statement: stating = true }) {
 		super();
+		const one = stating ? single(options) : null;
+		if (one) {
+			this.#element = statement({ text: one.label, value: one.value, name, id });
+			this.#control = this.#element.querySelector('output');
+			this.#stated = one.value;
+			return;
+		}
 		this.#control = el('select', { id, name, required, disabled, class: 'bui-select-control', onchange: () => onchange?.(this.value) }, options.map(option => this.#option(option)));
 		if (value !== null) this.#control.value = value;
 		this.#element = el('span', { class: 'bui-select' }, [this.#control, glyph('chevron')]);
@@ -46,16 +59,21 @@ export class Select extends Component {
 		return this.#control;
 	}
 
+	/** Whether the one option is stated as text instead of offered. */
+	get stated() {
+		return this.#stated !== null;
+	}
+
 	get value() {
-		return this.#control.value;
+		return this.#stated ?? this.#control.value;
 	}
 
 	set value(value) {
-		this.#control.value = value;
+		if (this.#stated === null) this.#control.value = value;
 	}
 
 	destroy() {
-		this.#tip.destroy();
+		this.#tip?.destroy();
 		super.destroy();
 	}
 
