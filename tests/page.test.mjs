@@ -173,16 +173,26 @@ test('the profile menu offers "Language and appearance" first in the product gro
 	await Promise.resolve();
 	const opened = document.querySelector('dialog.bui-dialog');
 	assert.ok(opened?.open, 'the dialog opened');
-	assert.equal(opened.querySelector('.bui-preferences-note a').getAttribute('href').split('?')[0], 'https://accounts.example.test/account', 'Accounts\' account page, completed as the account group\'s links');
+	assert.equal(opened.querySelector('.bui-preferences-note a').getAttribute('href'), 'https://accounts.example.test/account', 'the product\'s own address first');
 	// A product draws its bar again when the language changes: the open dialog stays, then returns focus to the new bar
 	bar.destroy();
 	assert.ok(document.querySelector('dialog.bui-dialog')?.open, 'the open dialog outlives the bar that opened it');
 	const again = new ui.FamilyBar({ product: 'delegate', brand: { src: '/brand.svg', href: '/' }, descriptor: annotated, account: { signout: () => {}, preferences: { preferences: values } } }).mount(document.body);
+	assert.equal(document.querySelectorAll('dialog.bui-dialog').length, 1, 'one dialog');
 	[...document.querySelectorAll('dialog.bui-dialog button')].find(button => button.textContent === 'Done').click();
 	await new Promise(resolve => setTimeout(resolve, 0));
 	assert.equal(document.querySelector('dialog.bui-dialog'), null, 'closing releases it');
 	assert.ok(again.element.querySelector('.bui-family-account > .bui-navmenu-button') === document.activeElement, 'focus returns to the profile button in view');
 	again.destroy();
+	// Without the product's own address, Accounts' account page from the descriptor, completed with the page in view
+	const bare = new ui.FamilyBar({ product: 'delegate', brand: { src: '/brand.svg', href: '/' }, descriptor: annotated, account: { signout: () => {}, preferences: { preferences: values } } }).mount(document.body);
+	bare.element.querySelector('button.bui-family-preferences').click();
+	await Promise.resolve();
+	const completed = new URL(document.querySelector('dialog.bui-dialog .bui-preferences-note a').getAttribute('href'));
+	assert.deepEqual([completed.searchParams.get('product'), completed.searchParams.get('return')], ['delegate', 'http://localhost/?returned=accounts'], 'completed with the product and the page in view, marked as the account group\'s links');
+	document.querySelector('dialog.bui-dialog button.bui-button-primary').click();
+	await new Promise(resolve => setTimeout(resolve, 0));
+	bare.destroy();
 	const plain = new ui.FamilyBar({ product: 'delegate', brand: { src: '/brand.svg', href: '/' }, descriptor: annotated, account: { signout: () => {} } }).mount(document.body);
 	assert.equal(plain.element.querySelector('.bui-family-preferences'), null, 'nothing without account.preferences');
 	plain.destroy();

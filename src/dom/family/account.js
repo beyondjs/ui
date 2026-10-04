@@ -51,9 +51,11 @@ export class AccountMenu extends Component {
 		const { signout = null, items = [], label = null, preferences = null } = account;
 		const own = items.filter(Boolean).map(item => entry({ label: item.label, href: item.href ?? null, run: item.href ? null : (item.run ?? null) }));
 		if (preferences) {
-			// "Change for all of Beyond" is Accounts' account page completed with the page in view when the
-			// descriptor gives it (as the account group's links), else the product's own address
-			const everywhere = () => (manage.has('account') ? manage.address('account', this.#menu?.element.ownerDocument.defaultView?.location) : null) ?? preferences.everywhere ?? null;
+			// "Change for all of Beyond" is the product's own address (a string, or a function asked at each
+			// opening, for a product that routes itself); without one, Accounts' account page from the
+			// descriptor, completed with the page in view as the account group's links are
+			const given = preferences.everywhere;
+			const everywhere = () => (typeof given === 'function' ? given() : given) ?? (manage.has('account') ? manage.address('account', this.#menu?.element.ownerDocument.defaultView?.location) : null);
 			this.#preferences = new PreferencesDialog({ ...preferences, everywhere });
 			own.unshift(entry({ label: labels.text('preferences'), run: () => this.#open(), class: 'bui-family-preferences' }));
 		}
