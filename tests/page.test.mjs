@@ -125,17 +125,41 @@ test('PreferencesDialog: language and appearance apply at once on this device; "
 	language.dispatchEvent(new Event('change', { bubbles: true }));
 	assert.equal(values.locale, 'es');
 	const everywhere = element.querySelector('.bui-preferences-note a');
-	assert.deepEqual([everywhere.textContent, everywhere.getAttribute('href')], ['Change for all of Beyond', 'https://accounts.example.test/account']);
-	assert.ok(element.querySelector('.bui-preferences-note').textContent.startsWith('Applies on this device.'));
+	// The language just chosen rewrote the copy in place
+	assert.deepEqual([everywhere.textContent, everywhere.getAttribute('href')], ['Cambiar en todo Beyond', 'https://accounts.example.test/account']);
+	assert.ok(element.querySelector('.bui-preferences-note').textContent.startsWith('Se aplica en este dispositivo.'));
+	assert.ok(element.open, 'a language change keeps it open');
 	assert.equal(await dialog.open(), null, 'opening again while open does nothing');
-	[...element.querySelectorAll('button')].find(button => button.textContent === 'Done').click();
+	element.querySelector('button.bui-button-primary').click();
 	assert.equal(await closed, true);
 	assert.equal(document.querySelector('dialog.bui-dialog'), null, 'closing removes it');
-	dialog.open();
+	const reopened = dialog.open();
 	assert.equal(document.querySelector('dialog.bui-dialog h2, dialog.bui-dialog .bui-dialog-title').textContent, 'Idioma y apariencia', 'its copy follows the language in effect');
-	assert.equal(document.querySelector('.bui-preferences-note a').textContent, 'Cambiar en todo Beyond');
+	// Choosing another language keeps the dialog open, its copy changed in place and focus where it was
+	const select = document.querySelector('dialog.bui-dialog select[name="locale"]');
+	select.focus();
+	select.value = 'en';
+	select.dispatchEvent(new Event('change', { bubbles: true }));
+	assert.ok(document.querySelector('dialog.bui-dialog')?.open, 'still open after a language change');
+	assert.equal(document.querySelector('dialog.bui-dialog h2, dialog.bui-dialog .bui-dialog-title').textContent, 'Language and appearance');
+	assert.deepEqual([...document.querySelectorAll('dialog.bui-dialog label')].map(label => label.textContent), ['Language', 'Appearance']);
+	assert.equal(document.activeElement, select, 'focus stays on the language');
+	assert.equal(dialog.shown, true);
+	assert.equal(document.querySelector('.bui-preferences-note a').textContent, 'Change for all of Beyond');
 	dialog.destroy();
+	assert.equal(await reopened, null, 'destroying closes it');
 	assert.equal(document.querySelector('dialog.bui-dialog'), null);
+	const asked = [];
+	let ended = 0;
+	const live = new ui.PreferencesDialog({ preferences: values, everywhere: () => (asked.push(1), `/account?return=${asked.length}`), onclose: () => ended++ });
+	void live.open();
+	assert.equal(document.querySelector('.bui-preferences-note a').getAttribute('href'), '/account?return=1', 'a function is asked at each opening');
+	live.leave();
+	assert.ok(document.querySelector('dialog.bui-dialog')?.open, 'leave() keeps an open dialog');
+	[...document.querySelectorAll('dialog.bui-dialog button')].find(button => button.textContent === 'Done').click();
+	await new Promise(resolve => setTimeout(resolve, 0));
+	assert.equal(live.destroyed, true, 'and releases it once closed');
+	assert.equal(ended, 1, 'onclose is called once it closed');
 	assert.throws(() => new ui.PreferencesDialog({ preferences: {} }), /needs the product's Preferences/);
 });
 
@@ -147,9 +171,18 @@ test('the profile menu offers "Language and appearance" first in the product gro
 	assert.deepEqual([...group.querySelectorAll('.bui-navmenu-label')].map(node => node.textContent), ['Language and appearance', 'Delegate settings']);
 	group.querySelector('button.bui-family-preferences').click();
 	await Promise.resolve();
-	assert.ok(document.querySelector('dialog.bui-dialog')?.open, 'the dialog opened');
+	const opened = document.querySelector('dialog.bui-dialog');
+	assert.ok(opened?.open, 'the dialog opened');
+	assert.equal(opened.querySelector('.bui-preferences-note a').getAttribute('href').split('?')[0], 'https://accounts.example.test/account', 'Accounts\' account page, completed as the account group\'s links');
+	// A product draws its bar again when the language changes: the open dialog stays, then returns focus to the new bar
 	bar.destroy();
-	assert.equal(document.querySelector('dialog.bui-dialog'), null, 'destroying the bar closes it');
+	assert.ok(document.querySelector('dialog.bui-dialog')?.open, 'the open dialog outlives the bar that opened it');
+	const again = new ui.FamilyBar({ product: 'delegate', brand: { src: '/brand.svg', href: '/' }, descriptor: annotated, account: { signout: () => {}, preferences: { preferences: values } } }).mount(document.body);
+	[...document.querySelectorAll('dialog.bui-dialog button')].find(button => button.textContent === 'Done').click();
+	await new Promise(resolve => setTimeout(resolve, 0));
+	assert.equal(document.querySelector('dialog.bui-dialog'), null, 'closing releases it');
+	assert.ok(again.element.querySelector('.bui-family-account > .bui-navmenu-button') === document.activeElement, 'focus returns to the profile button in view');
+	again.destroy();
 	const plain = new ui.FamilyBar({ product: 'delegate', brand: { src: '/brand.svg', href: '/' }, descriptor: annotated, account: { signout: () => {} } }).mount(document.body);
 	assert.equal(plain.element.querySelector('.bui-family-preferences'), null, 'nothing without account.preferences');
 	plain.destroy();

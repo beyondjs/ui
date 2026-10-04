@@ -221,6 +221,13 @@
 	gap: var(--space-4);
 	min-width: 0;
 }
+/* Every block of a page's grids may shrink below its content, so a wide table scrolls in its own box
+   instead of widening the page (0.6.2) */
+.bui-page-main > *,
+.bui-page-aside > *,
+.bui-section-body > * {
+	min-width: 0;
+}
 
 /* The preferences dialog's note under its two fields. */
 .bui-preferences-note {

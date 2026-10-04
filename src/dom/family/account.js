@@ -51,7 +51,10 @@ export class AccountMenu extends Component {
 		const { signout = null, items = [], label = null, preferences = null } = account;
 		const own = items.filter(Boolean).map(item => entry({ label: item.label, href: item.href ?? null, run: item.href ? null : (item.run ?? null) }));
 		if (preferences) {
-			this.#preferences = new PreferencesDialog(preferences);
+			// "Change for all of Beyond" is Accounts' account page completed with the page in view when the
+			// descriptor gives it (as the account group's links), else the product's own address
+			const everywhere = () => (manage.has('account') ? manage.address('account', this.#menu?.element.ownerDocument.defaultView?.location) : null) ?? preferences.everywhere ?? null;
+			this.#preferences = new PreferencesDialog({ ...preferences, everywhere });
 			own.unshift(entry({ label: labels.text('preferences'), run: () => this.#open(), class: 'bui-family-preferences' }));
 		}
 		const heading = person ? el('span', { class: 'bui-family-person' }, [el('span', { class: 'bui-family-name', text: name ?? '' }), person.email ? el('span', { class: 'bui-family-email', text: person.email }) : null]) : null;
@@ -95,7 +98,8 @@ export class AccountMenu extends Component {
 	}
 
 	destroy() {
-		this.#preferences?.destroy();
+		// An open dialog outlives the menu (the bar drawn again when its labels change) until it closes
+		this.#preferences?.leave();
 		this.#menu.destroy();
 		super.destroy();
 	}
@@ -103,7 +107,8 @@ export class AccountMenu extends Component {
 	/** Closes the menu and opens the dialog, which returns focus to the menu's button. */
 	#open() {
 		this.#menu.close(true);
-		void this.#preferences.open({ restore: this.#menu.button });
+		const document = this.#menu.element.ownerDocument;
+		void this.#preferences.open({ restore: () => (this.#menu.button.isConnected ? this.#menu.button : document.querySelector('.bui-family-account > .bui-navmenu-button')) });
 	}
 
 	/** Accounts' entries, each completed with the product and the way back when the menu opens. */

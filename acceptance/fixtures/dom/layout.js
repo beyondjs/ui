@@ -18,7 +18,9 @@ const tabs = new Tabs({ items: ['Overview', 'Conversations', 'Repositories', 'AI
 const header = new PageHeader({ title: words.title, crumbs: [{ label: 'Environments', href: '#/environments' }], status: status('Ready', 'success'), facts: words.facts, actions: [new Button({ label: 'Start a conversation', variant: 'primary' }), new Button({ label: 'Stop the environment' }), new Button({ label: 'More actions' })], tabs });
 const arrival = shape.arrival ? new Arrival({ product: 'Conduict', href: '#/back', ondismiss: () => {} }) : null;
 const repositories = new Section({ title: 'Repositories', description: words.description, actions: [new Button({ label: 'Add a repository' })], children: [el('ul', {}, words.rows.map(row => el('li', { text: row })))] });
-const access = new Section({ title: 'Access', children: [el('p', { class: 'bui-reading', text: words.description })] });
+// A wide table that scrolls inside its own box, as a collection does: it must never widen the page
+const table = el('div', {}, [el('div', { class: 'layout-scroll' }, [el('table', {}, [el('tr', {}, words.columns.map(text => el('td', { text })))])])]);
+const access = new Section({ title: 'Access', children: [el('p', { class: 'bui-reading', text: words.description }), table] });
 const page = new Page({ template: shape.template, width: shape.width, arrival, header, children: [repositories.element, access.element], aside: shape.aside ? [el('h2', { text: 'About' }), el('ul', {}, words.facts2.map(fact => el('li', { text: fact })))] : null, label: 'About this environment' }).mount(main);
 
 window.fixture = {

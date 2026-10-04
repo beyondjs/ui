@@ -10,6 +10,14 @@ body {
 	font-size: var(--text-body);
 	line-height: var(--leading-body);
 }
+/* A wide table scrolls inside its own box, as Collection's body does */
+.layout-scroll {
+	overflow-x: auto;
+}
+td {
+	white-space: nowrap;
+	padding: 0 var(--space-4);
+}
 main {
 	display: flex;
 	flex: 1 1 auto;

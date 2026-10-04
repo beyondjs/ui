@@ -34,6 +34,15 @@ function View() {
 						</Section>
 						<Section title="Acceso">
 							<p className="bui-reading">{words.description}</p>
+							<div>
+								<div className="layout-scroll">
+									<table>
+										<tbody>
+											<tr>{words.columns.map(text => <td key={text}>{text}</td>)}</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
 						</Section>
 					</Page>
 				</main>

@@ -108,7 +108,11 @@ export const checks = [
 			expect((await dialog.locator('h2').first().innerText()).trim() === (spanish ? 'Idioma y apariencia' : 'Language and appearance'), 'the dialog is named');
 			await dialog.locator('select[name="appearance"]').selectOption('dark');
 			expect((await page.evaluate(() => document.documentElement.getAttribute('data-beyond-mode'))) === 'dark', 'the appearance applies at once');
-			expect((await dialog.locator('a').getAttribute('href')) === 'https://accounts.example.test/account', '"Change for all of Beyond" leads to Accounts');
+			expect((await dialog.locator('a').getAttribute('href')).startsWith('https://accounts.example.test/account'), '"Change for all of Beyond" leads to Accounts');
+			// Since 0.6.2 choosing another language keeps the dialog open, its copy rewritten in place
+			await dialog.locator('select[name="locale"]').selectOption(spanish ? 'en' : 'es');
+			await dialog.locator('h2', { hasText: spanish ? 'Language and appearance' : 'Idioma y apariencia' }).waitFor();
+			expect(await dialog.isVisible(), 'a language change keeps the dialog open');
 			await dialog.locator('button.bui-button-primary').click();
 			await dialog.waitFor({ state: 'detached' });
 			const back = await page.evaluate(() => document.activeElement?.closest('.bui-family-account') !== null);

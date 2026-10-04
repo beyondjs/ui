@@ -104,16 +104,22 @@ export class Arrival extends Component {
 export interface FamilyPreferences {
 	/** The product's own `Preferences`. */
 	preferences: Preferences;
-	/** The account page at Accounts ("Change for all of Beyond"). */
-	everywhere?: string | null;
+	/** The account page at Accounts ("Change for all of Beyond"), or a function asked at each opening (0.6.2). */
+	everywhere?: string | (() => string | null) | null;
 	/** The languages offered (default English and Spanish). */
 	locales?: string[];
+	/** Called once the dialog closed (0.6.2); to follow each choice, subscribe to the `Preferences` instance. */
+	onclose?: (() => void) | null;
 }
 
 /** "Language and appearance" (D54): the one dialog the profile menu's product group opens. */
 export class PreferencesDialog extends Component {
 	static readonly labels: { readonly en: { title: string; note: string; done: string; names: Record<string, string> }; readonly es: { title: string; note: string; done: string; names: Record<string, string> } };
 	constructor(options: FamilyPreferences);
-	/** Opens it; resolves when it closes. Opening it again while open does nothing. */
-	open(options?: { restore?: Element | null }): Promise<boolean | null>;
+	/** Whether it is open now (0.6.2). */
+	readonly shown: boolean;
+	/** Opens it; resolves when it closes. Opening it again while open does nothing. `restore` may be a function asked at closing (0.6.2). */
+	open(options?: { restore?: Element | (() => Element | null) | null }): Promise<boolean | null>;
+	/** Its opener is going away: an open dialog stays until it closes, then releases itself (0.6.2). */
+	leave(): void;
 }
