@@ -27,7 +27,7 @@ test('groups: the person, the account, the organization in view, the product, Do
 		['Northwind · Owner', ['Members and invitations', 'Organization settings']],
 		['Delegate', ['Delegate settings', 'Language and appearance']],
 		[null, ['Docs']],
-		[null, ['Sign out']]
+		[null, ['Sign out of Beyond']]
 	]);
 	assert.equal(profile(bar).querySelector('.bui-family-person .bui-family-name').textContent, 'Ana Pérez');
 	assert.equal(profile(bar).querySelectorAll('a.bui-family-person, .bui-family-person a').length, 0, 'the person is a heading, not a link');

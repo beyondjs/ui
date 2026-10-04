@@ -143,6 +143,7 @@ export class Picker extends Component {
 	destroy() {
 		this.#search.cancel();
 		this.#tip.destroy();
+		for (const filter of this.#filters) filter.select.destroy();
 		super.destroy();
 	}
 

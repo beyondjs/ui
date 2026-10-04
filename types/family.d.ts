@@ -58,7 +58,8 @@ export interface FamilyDescriptor {
 	projects?: Array<{ id: string; name: string; current?: boolean; here?: FamilyHere }>;
 	project?: { id: string; name: string } | null;
 	products?: FamilyProduct[];
-	links?: { home?: string; account?: string; members?: string; docs?: string; manage?: FamilyManage };
+	/** `leave` (0.5.0): the absolute address of Accounts' `/leave` page, with no query. */
+	links?: { home?: string; account?: string; members?: string; docs?: string; leave?: string; manage?: FamilyManage };
 	unavailable?: false;
 }
 
@@ -78,7 +79,7 @@ export interface FamilyFallback {
 	 * Addresses used when the descriptor names none (all of them while it loads or is unavailable);
 	 * `projects` (0.4.0) is the product's own projects page, the destination of "All projects".
 	 */
-	links?: { home?: string; account?: string; members?: string; docs?: string; projects?: string; manage?: FamilyManage } | null;
+	links?: { home?: string; account?: string; members?: string; docs?: string; projects?: string; leave?: string; manage?: FamilyManage } | null;
 }
 
 /** One line at the top of the project menu (0.4.0), with an optional address and action. */
@@ -96,9 +97,22 @@ export interface FamilyNavigation {
 	label: string;
 }
 
+/**
+ * Signing out of Beyond (0.5.0, Q09): `before()` may cancel (a product holding unsaved work returns
+ * false), `end()` ends the product's own session under `bound` ms (5000; a failure or no answer does
+ * not block), then the bar goes to `links.leave` with `product` and `return`; without that address it
+ * calls `after()`, the product's own signed-out page.
+ */
+export interface FamilySignout {
+	end?: (() => unknown) | null;
+	before?: (() => boolean | void | Promise<boolean | void>) | null;
+	after?: (() => unknown) | null;
+	bound?: number;
+}
+
 export interface FamilyAccount {
-	/** What signing out does: a callback, or a link. */
-	signout?: (() => void) | { href: string } | null;
+	/** What signing out does: `{ end, before, after }` (0.5.0), or the earlier callback or link. */
+	signout?: FamilySignout | (() => void) | { href: string } | null;
 	/** The product's own entries, before Sign out. */
 	items?: Array<{ label: string; href?: string | null; run?: (() => void) | null } | null | false>;
 	/** Replaces "Sign out" for a product that asks how to leave. */
@@ -123,6 +137,7 @@ export interface FamilyAccount {
  * `unset` "Not set up in {product}", `denied` "No access in {product}", `only` "Only in {product}",
  * `access` "Account and sign-in", `mine` "Your organizations", `create` "Create an organization",
  * `group` "{organization} · {role}", `team` "Members and invitations", `settings` "Organization settings".
+ * Since 0.5.0: `signout` "Sign out of Beyond", `leaving` "Signing out…".
  */
 export type FamilyLabels = Copy;
 
@@ -192,7 +207,7 @@ export interface SidebarOptions {
 	groups?: SidebarGroup[];
 	/** What the sections belong to, as text: `"Storefront"` or `{ label: 'Project', name: 'Storefront' }`. */
 	context?: string | { label?: string | null; name: string } | Node | null;
-	/** The narrowest width, in CSS pixels, with a permanent sidebar (default 1024). */
+	/** The narrowest width, in CSS pixels, with a permanent sidebar: 1024, the family's one cut (D49); another only with a recorded measurement. */
 	cut?: number;
 	/** The row's text below the cut; the current item's label by default. */
 	section?: string | null;

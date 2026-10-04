@@ -16,6 +16,7 @@ import { checks as family } from './checks/family.mjs';
 import { checks as icons } from './checks/icons.mjs';
 import { checks as navigation } from './checks/navigation.mjs';
 import { checks as sidebar } from './checks/sidebar.mjs';
+import { checks as operations } from './checks/operations.mjs';
 
 /**
  * Browser acceptance of the packed package: `npm pack` → three consumers installed from the tarball
@@ -25,7 +26,7 @@ import { checks as sidebar } from './checks/sidebar.mjs';
 class Acceptance {
 	#root = fileURLToPath(new URL('..', import.meta.url));
 	#consumers = [new Consumer('dom', 'dom'), new Consumer('react19', 'react', '19.3.0'), new Consumer('react18', 'react', '18.3.1')];
-	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...icons];
+	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...icons];
 	#filter = process.argv[2] ?? '';
 
 	async run() {

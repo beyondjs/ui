@@ -227,7 +227,8 @@ export class FocusedForm {
 }
 
 export class Tooltip extends Component {
-	constructor(trigger: HTMLElement, options: { text: Content; delay?: number; describe?: boolean });
+	/** `when` (0.5.0) is asked each time it would show; it shows only while that returns true. */
+	constructor(trigger: HTMLElement, options: { text: Content; delay?: number; describe?: boolean; when?: (() => boolean) | null });
 	readonly shown: boolean;
 	set text(value: Content);
 	show(): void;
@@ -250,3 +251,4 @@ export * from './parts.js';
 export * from './family.js';
 export * from './icons.js';
 export * from './preferences.js';
+export * from './operations.js';

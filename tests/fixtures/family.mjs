@@ -124,3 +124,15 @@ export const standing = [
 	{ id: 'org_north', name: 'Northwind', role: 'owner', url: 'https://cdn.example.test/?organization=org_north', current: true },
 	{ id: 'org_south', name: 'Southwind', role: 'admin', url: 'https://cdn.example.test/?organization=org_south', current: false }
 ];
+
+/** 0.5.0: Projects names Accounts' `/leave` (Q09), the absolute address with no query. */
+export const leaving = { ...annotated, links: { ...annotated.links, leave: 'https://accounts.example.test/leave' } };
+
+/** The same place under long, user-written names, which the location cuts to its width (D44). */
+export const lengthy = {
+	...inside,
+	organizations: [{ ...inside.organizations[0], name: 'Northwind Creative Studio and Partners' }, inside.organizations[1]],
+	organization: { ...inside.organization, name: 'Northwind Creative Studio and Partners' },
+	projects: [{ ...inside.projects[0], name: 'Storefront redesign for the spring catalogue' }, inside.projects[1]],
+	project: { ...inside.project, name: 'Storefront redesign for the spring catalogue' }
+};

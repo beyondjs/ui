@@ -113,6 +113,7 @@ export class Collection extends Component {
 
 	destroy() {
 		this.#loader.cancel();
+		for (const filter of this.#filters) filter.select.destroy();
 		super.destroy();
 	}
 

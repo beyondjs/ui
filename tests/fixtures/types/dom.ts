@@ -1,5 +1,5 @@
 // A plain DOM consumer in TypeScript: compiled, never run, to check the `dom` and `tokens` declarations.
-import { productNames, type FamilyProductId, Dialog, Picker, ChoiceMenu, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Sidebar, Unavailable, Button, badge, availability, icon, icons, unlabeled, Preferences, type Appearance, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor, type FamilyNotice } from '@beyond-js/ui';
+import { productNames, type FamilyProductId, Clock, Steps, Awaited, Freshness, TechnicalDetails, Tooltip, type Step, type AwaitedState, Dialog, Picker, ChoiceMenu, NotificationEntry, Header, Collection, confirm, FamilyBar, ProductNav, Sidebar, Unavailable, Button, badge, availability, icon, icons, unlabeled, Preferences, type Appearance, type NotificationAdapter, type NoticeSummary, type NoticePage, type FamilyDescriptor, type FamilyNotice } from '@beyond-js/ui';
 import { tokens, TokenSheet } from '@beyond-js/ui/tokens';
 
 declare const adapter: NotificationAdapter;
@@ -63,3 +63,24 @@ productNames.cdn = 'Content';
 // @ts-expect-error not a family product id
 const odd: FamilyProductId = 'mail';
 void [delegate, ids, named, odd, products];
+// Long operations (0.5.0): one clock per page, timed steps, the awaited card, freshness and technical details.
+const beat = new Clock({ now: () => Date.now() });
+const timed: Step[] = [{ id: 'machine', label: 'Machine', state: 'done', since: 0, until: 84_000 }, { label: 'Startup', state: 'stalled', reason: { text: 'Blocked', details: { text: 'i/o timeout', request: 'req_1', time: new Date() } } }];
+const timeline = new Steps({ label: 'Preparing', steps: timed, clock: beat, labels: Steps.labels.es }).mount(document.body);
+timeline.steps = [...timed, { label: 'Sign-in', state: 'waiting', expected: { median: 60_000, p90: 120_000 } }];
+const card = new Awaited({ title: 'Starting', since: '2026-10-03T19:47:00Z', expected: { median: 120_000 }, steps: timed, check: async () => undefined, onend: outcome => outcome === 'done', clock: beat });
+card.update({ reason: { text: 'Cannot reach it', action: { label: 'Open', run: () => undefined } } });
+card.end('failed');
+const waiting: AwaitedState = card.state;
+const fresh = new Freshness({ label: 'Running', tone: 'success', checked: Date.now(), clock: Clock.system });
+fresh.update({ connected: false });
+const facts = new TechnicalDetails({ text: 'refused', request: 'req_2', time: Date.now(), labels: TechnicalDetails.labels.es });
+void facts.copy().then((copied: boolean) => copied && facts.report);
+// @ts-expect-error not a step state
+const odd2: Step = { label: 'x', state: 'running' };
+void [timeline, waiting, fresh, odd2];
+// Signing out of Beyond (0.5.0): the product ends its session; `before` may cancel; the earlier forms still type.
+const signed = new FamilyBar({ product: 'cdn', brand: { src: '/w.svg', href: '/' }, account: { signout: { end: async () => undefined, before: () => confirm({ title: 'Leave unsaved work?' }), after: () => undefined, bound: 5000 } } });
+const leaveAt: FamilyDescriptor['links'] = { leave: 'https://accounts.example.test/leave' };
+const tip = new Tooltip(document.body, { text: 'Northwind Creative Studio', describe: false, when: () => true });
+void [signed, leaveAt, tip];

@@ -1,0 +1,10 @@
+/* Layout of the long-operation pages only: a column of the components and a narrow box for the selects. */
+.operations {
+	display: grid;
+	gap: var(--space-4);
+	max-width: 40rem;
+	padding: var(--space-4);
+}
+.narrow {
+	width: 180px;
+}

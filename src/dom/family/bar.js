@@ -48,7 +48,9 @@ export class FamilyBar extends Component {
 	 * @param {{person?: string|{name: string, email?: string}, organization?: string, project?: string, organizations?: Array<{id: string, name: string, role?: string, url?: string, current?: boolean}>, links?: {home?: string, account?: string, members?: string, docs?: string, projects?: string, manage?: Record<string, string>}}} [options.fallback] names and addresses the product knows itself
 	 * @param {Record<string, string>} [options.products] display names by product id, added to the family's
 	 * @param {Node} [options.notifications] the notification entry
-	 * @param {{signout?: (() => void)|{href: string}, items?: Array<{label: string, href?: string, run?: () => void}>, label?: string}} [options.account]
+	 * @param {{signout?: (() => void)|{href: string}|{end?: () => unknown, before?: () => boolean|Promise<boolean>, after?: () => void, bound?: number}, items?: Array<{label: string, href?: string, run?: () => void}>, label?: string}} [options.account]
+	 *   `signout: { end }` signs out of Beyond: `end()` under a bound, then Accounts' `links.leave`
+	 *   (or `after()` without it); `before()` returning false cancels (unsaved work)
 	 * @param {{controls: string, expanded: boolean, onchange: (expanded: boolean) => void}} [options.toggle] a sidebar of the product's own
 	 * @param {(item: {href: string, url: string, label: string}, event: MouseEvent) => void} [options.onnavigate] takes over plain clicks on same-origin links
 	 * @param {string[]} [options.advisory] reasons whose entries stay links when they have an address
@@ -146,7 +148,7 @@ export class FamilyBar extends Component {
 		const location = new Location({ state, descriptor: ready, fallback: this.#fallback, places, labels, product: name, notice: this.#notice });
 		const switcher = new ProductSwitcher({ product, names: this.#names, descriptor: ready, places, labels, carried: location.sections() });
 		const manage = new Manage({ links: places.links.manage ?? null, product, transient });
-		const menu = new AccountMenu({ person, links: places.links, manage, organization: location.organization, any: location.any, product: name, account, labels });
+		const menu = new AccountMenu({ person, links: places.links, manage, organization: location.organization, any: location.any, product: name, id: product, account, labels });
 		this.#parts = [switcher, location, menu];
 		this.#start.append(switcher.element);
 		this.#start.querySelector('.bui-header-brand').setAttribute('href', places.home);

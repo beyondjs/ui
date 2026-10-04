@@ -2,6 +2,7 @@ import { Component } from '../core/component.js';
 import { el } from '../core/element.js';
 import { glyph } from '../core/icons.js';
 import { NavigationMenu, entry } from './menu.js';
+import { Leave } from './leave.js';
 
 /**
  * The profile menu at the end of the family bar: a disclosure of links in groups.
@@ -16,13 +17,16 @@ import { NavigationMenu, entry } from './menu.js';
  *
  * Accounts' addresses (`links.manage`) are completed with the product and the way back each time the
  * menu opens (`Manage`). Without them the menu offers the earlier "Your account" and "Members of
- * this organization" (`links.account`, `links.members`). Sign out is always offered, also while the
- * descriptor loads or is unavailable, so the bar never keeps a person in; the product owns what it
- * does (`signout` is a callback or `{ href }`, and `label` rewords it).
+ * this organization" (`links.account`, `links.members`). Sign out is always offered, last and apart
+ * (D48), also while the descriptor loads or is unavailable, so the bar never keeps a person in. Since
+ * 0.5.0 it reads "Sign out of Beyond" (Q09) and its supported form is `signout: { end, before?,
+ * after? }` (`Leave`): the product ends its own session and the bar goes to Accounts' `/leave`. The
+ * earlier forms, a callback or `{ href }`, still work, and `label` rewords it.
  */
 export class AccountMenu extends Component {
 	#menu;
 	#manage;
+	#leave = null;
 
 	/**
 	 * @param {object} options
@@ -32,10 +36,11 @@ export class AccountMenu extends Component {
 	 * @param {{name: string, role?: string|null}|null} options.organization the organization in view
 	 * @param {boolean} options.any whether the person has any organization
 	 * @param {string} options.product the product's display name
-	 * @param {{signout?: (() => void)|{href: string}|null, items?: Array<{label: string, href?: string, run?: () => void}>, label?: string|null}} options.account
+	 * @param {string} options.id the product's id, which Accounts' `/leave` receives
+	 * @param {{signout?: (() => void)|{href: string}|{end?: () => unknown, before?: () => boolean|Promise<boolean>, after?: () => void, bound?: number}|null, items?: Array<{label: string, href?: string, run?: () => void}>, label?: string|null}} options.account
 	 * @param {import('../core/labels.js').Labels} options.labels
 	 */
-	constructor({ person, links, manage, organization, any, product, account, labels }) {
+	constructor({ person, links, manage, organization, any, product, id, account, labels }) {
 		super();
 		this.#manage = manage;
 		const name = person?.name ?? null;
@@ -57,7 +62,7 @@ export class AccountMenu extends Component {
 				groups.organization.length ? { heading: AccountMenu.#title(organization, labels), items: groups.organization, class: 'bui-family-group' } : null,
 				own.length ? { heading: product, items: own, class: 'bui-family-group' } : null,
 				links.docs ? { items: [entry({ label: labels.text('docs'), href: links.docs, class: 'bui-family-docs-item' })], class: 'bui-family-group bui-family-docs-group' } : null,
-				signout ? { items: [AccountMenu.#signout(signout, label ?? labels.text('signout'))], class: 'bui-family-group bui-family-leave' } : null
+				signout ? { items: [this.#signout(signout, { label: label ?? labels.text('signout'), address: links.leave ?? null, id, labels })], class: 'bui-family-group bui-family-leave' } : null
 			]
 		});
 		this.#complete();
@@ -69,6 +74,11 @@ export class AccountMenu extends Component {
 
 	get menu() {
 		return this.#menu;
+	}
+
+	/** The sign-out of Beyond (`Leave`) for the `{ end }` form, or null for the earlier forms. */
+	get leave() {
+		return this.#leave;
 	}
 
 	destroy() {
@@ -115,9 +125,12 @@ export class AccountMenu extends Component {
 		return labels.text('group', { organization: organization.name, role: labels.text('role', { role: organization.role }) });
 	}
 
-	static #signout(signout, label) {
+	/** A callback, a link (`{ href }`), or the sign-out of Beyond (`{ end, before, after }`). */
+	#signout(signout, { label, address, id, labels }) {
 		if (typeof signout === 'function') return entry({ label, run: () => signout(), class: 'bui-family-signout' });
-		return entry({ label, href: signout.href, class: 'bui-family-signout' });
+		if (typeof signout.href === 'string') return entry({ label, href: signout.href, class: 'bui-family-signout' });
+		this.#leave = new Leave({ signout, address, manage: this.#manage, product: id, label, labels, onfinish: () => this.#menu?.close(true) });
+		return this.#leave.element;
 	}
 
 	/** Initials of the name (up to two), or a person glyph when no name is known. */

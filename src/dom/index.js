@@ -35,3 +35,8 @@ export { Preferences } from './preferences/preferences.js';
 export { NotificationEntry } from './notifications/entry.js';
 export { NotificationInbox } from './notifications/inbox.js';
 export { Sidebar } from './sidebar/sidebar.js';
+export { Clock } from './time/clock.js';
+export { Steps } from './operations/steps.js';
+export { Awaited } from './operations/awaited.js';
+export { Freshness } from './operations/freshness.js';
+export { TechnicalDetails } from './operations/details.js';

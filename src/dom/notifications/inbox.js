@@ -107,6 +107,7 @@ export class NotificationInbox extends Component {
 
 	destroy() {
 		this.#feed.clear();
+		this.#product.destroy();
 		super.destroy();
 	}
 

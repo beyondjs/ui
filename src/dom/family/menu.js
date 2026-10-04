@@ -56,8 +56,10 @@ export class NavigationMenu extends Component {
 		panel.classList.add('bui-navmenu-panel');
 		panel.tabIndex = -1;
 		panel.addEventListener('keydown', event => this.#keys(event));
+		// An entry marked `data-bui-keep` (signing out) keeps the menu open while it works.
 		panel.addEventListener('click', event => {
-			if (event.target.closest('a[href], button')) this.#disclosure.close(false);
+			const target = event.target.closest('a[href], button');
+			if (target && !target.hasAttribute('data-bui-keep')) this.#disclosure.close(false);
 		});
 		// Tab past the last entry (or Shift+Tab before the button) leaves the menu: it closes. A focus
 		// change with no new target (a press on the panel's text, the window losing focus) keeps it open.

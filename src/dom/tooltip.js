@@ -14,16 +14,20 @@ export class Tooltip extends Component {
 	#element;
 	#trigger;
 	#hide = null;
+	#when;
 
 	/**
 	 * @param {Element} trigger the described control, owned by the consumer
 	 * @param {{text: string|Node, delay?: number, describe?: boolean}} options `describe: false` for a
 	 *   tooltip that only shows the control's own accessible name (an icon-only control, D11): it is
-	 *   then hidden from assistive technology, so the name is not heard twice
+	 *   then hidden from assistive technology, so the name is not heard twice. `when` is asked each time
+	 *   it would show, and it shows only while that returns true (a name shown whole only while it is
+	 *   cut, D44)
 	 */
-	constructor(trigger, { text, delay = 120, describe = true }) {
+	constructor(trigger, { text, delay = 120, describe = true, when = null }) {
 		super();
 		this.#trigger = trigger;
+		this.#when = typeof when === 'function' ? when : null;
 		const id = Ids.next('bui-tooltip');
 		this.#element = el('span', { id, role: describe ? 'tooltip' : null, 'aria-hidden': describe ? null : 'true', class: 'bui-tooltip', hidden: true }, [content(text)]);
 		const described = trigger.getAttribute('aria-describedby');
@@ -58,6 +62,7 @@ export class Tooltip extends Component {
 
 	show() {
 		this.#hide?.();
+		if (this.#when && !this.#when()) return this.hide();
 		this.#element.hidden = false;
 		this.#place();
 	}

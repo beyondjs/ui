@@ -12,7 +12,8 @@ const defaults = { sections: '{product} sections', close: 'Close' };
  * A product's own sections, the same in every product that has them (Delegate, Conduict, CDN's
  * administration, Workspace).
  *
- * At or above the product's `cut` (a width in CSS pixels the product measures on its own pages) it is
+ * At or above `cut` (1024 px, the family's one cut, D49; a product passes another width only with a
+ * recorded measurement showing its content cannot fit at 1024 px) it is
  * a permanent sidebar, integrated in the page: flush under the family bar, full height and sticky,
  * with a border on its inner edge, a discretely different surface and a clear current item. It has no
  * toggle in the bar. Below the cut it becomes a product row under the bar, about 44 px and sticky,

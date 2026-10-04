@@ -1,5 +1,6 @@
 import { Component } from '../core/component.js';
 import { el } from '../core/element.js';
+import { Cut, NameTip } from '../core/cut.js';
 import { hidden } from '../feedback.js';
 import { NavigationMenu } from './menu.js';
 import { Organizations } from './organizations.js';
@@ -19,10 +20,15 @@ import { ProjectList } from './projects.js';
  * names the product passed as `fallback`) hold the place; the product's `fallback.organizations` keep
  * the organization menu working, and when the descriptor is unavailable and the product passes a
  * `notice`, the project menu opens on that notice with the project in view and "All projects".
+ *
+ * A name cut to its share of the width shows whole in a tooltip on hover and on keyboard focus of its
+ * menu button (D44, since 0.5.0), whose accessible name already carries it; a name shown as text has
+ * its tooltip on hover. The opened menus list every name whole.
  */
 export class Location extends Component {
 	#element;
 	#menus = [];
+	#tips = [];
 	#options;
 	#organizations;
 	#projects;
@@ -81,6 +87,7 @@ export class Location extends Component {
 
 	destroy() {
 		for (const menu of this.#menus) menu.destroy();
+		for (const tip of this.#tips) tip.destroy();
 		super.destroy();
 	}
 
@@ -102,7 +109,15 @@ export class Location extends Component {
 
 	#keep(menu) {
 		this.#menus.push(menu);
+		const button = menu.button;
+		this.#whole(button, button.querySelector('.bui-family-place'), () => button.getAttribute('aria-expanded') !== 'true');
 		return menu.element;
+	}
+
+	/** Shows `place` whole in a tooltip on `trigger` while it is cut (and `open()` allows it). */
+	#whole(trigger, place, open = () => true) {
+		if (!place) return;
+		this.#tips.push(new NameTip(trigger, { text: () => place.textContent, cut: () => open() && Cut.text(place) }));
 	}
 
 	#wide() {
@@ -111,14 +126,14 @@ export class Location extends Component {
 		if (!organization) return this.#ready ? [] : this.#still();
 		const parts = [this.#organization()];
 		if (this.#chooser()) parts.push(Location.#separator(), this.#project());
-		else if (fallback.project) parts.push(Location.#separator(), Location.#text(fallback.project, 'project'));
+		else if (fallback.project) parts.push(Location.#separator(), this.#text(fallback.project, 'project'));
 		return parts;
 	}
 
 	#narrow() {
 		const organization = this.#organizations.current;
 		if (!organization) return this.#ready ? [] : this.#still();
-		if (!this.#chooser() && !this.#organizations.several) return [Location.#text(this.#options.fallback.project ?? organization.name, this.#options.fallback.project ? 'project' : 'organization')];
+		if (!this.#chooser() && !this.#organizations.several) return [this.#text(this.#options.fallback.project ?? organization.name, this.#options.fallback.project ? 'project' : 'organization')];
 		const { labels } = this.#options;
 		const project = this.#name;
 		const place = project ? `${organization.name} / ${project}` : organization.name;
@@ -141,7 +156,7 @@ export class Location extends Component {
 	/** The organization: a menu when there are several, its name otherwise. */
 	#organization() {
 		const organization = this.#organizations.current;
-		if (!this.#organizations.several) return Location.#text(organization.name, 'organization');
+		if (!this.#organizations.several) return this.#text(organization.name, 'organization');
 		return this.#keep(new NavigationMenu({
 			label: Location.#place(organization.name),
 			name: this.#options.labels.text('organization', { name: organization.name }),
@@ -166,7 +181,7 @@ export class Location extends Component {
 	/** No organization while loading or unavailable: a project name as text, or a placeholder while loading. */
 	#still() {
 		const { state, fallback, labels } = this.#options;
-		if (fallback.project) return [Location.#text(fallback.project, 'project')];
+		if (fallback.project) return [this.#text(fallback.project, 'project')];
 		if (state !== 'loading') return [];
 		return [el('span', { class: 'bui-family-placeholder', 'aria-hidden': 'true' }), hidden(labels.text('loading'))];
 	}
@@ -176,8 +191,11 @@ export class Location extends Component {
 	}
 
 	/** A name shown as text; `part` (`organization` or `project`) gives it that menu's width rules. */
-	static #text(name, part) {
-		return el('span', { class: `bui-family-static bui-family-${part}` }, [Location.#place(name)]);
+	#text(name, part) {
+		const place = Location.#place(name);
+		const text = el('span', { class: `bui-family-static bui-family-${part}` }, [place]);
+		this.#whole(text, place);
+		return text;
 	}
 
 	static #separator() {

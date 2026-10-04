@@ -1,10 +1,11 @@
 // A React consumer as Delegate writes one (TypeScript, bundler resolution, react-jsx). It is
 // compiled, never run: it proves the declarations of `@beyond-js/ui/react` accept real usage.
 import { useRef, useState } from 'react';
-import { Button, Dialog, Field, FocusedForm, Header, NotificationEntry, NotificationInbox, Picker, Collection, Help, Tooltip, ActionMenu, Select, Choices, useConfirm, useBusy, useToaster, FamilyBar, ProductNav, Sidebar, Unavailable, Badge, availability, productNames, Icon, icons, Preferences, usePreferences, type FamilyDescriptor, type NotificationAdapter, type NotificationEntryHandle, type PickerHandle } from '@beyond-js/ui/react';
+import { Clock, Steps, Awaited, Freshness, TechnicalDetails, Button, Dialog, Field, FocusedForm, Header, NotificationEntry, NotificationInbox, Picker, Collection, Help, Tooltip, ActionMenu, Select, Choices, useConfirm, useBusy, useToaster, FamilyBar, ProductNav, Sidebar, Unavailable, Badge, availability, productNames, Icon, icons, Preferences, usePreferences, type FamilyDescriptor, type NotificationAdapter, type NotificationEntryHandle, type PickerHandle } from '@beyond-js/ui/react';
 
 declare const adapter: NotificationAdapter;
 type Row = { id: string; title: string; votes: number };
+const beat = new Clock();
 const preferences = new Preferences({ key: 'beyond-delegate', fallback: { appearance: 'system', locale: 'en' } });
 
 export function Screen() {
@@ -42,6 +43,11 @@ export function Screen() {
 			<ActionMenu name="More actions" items={[{ label: 'Rename', onSelect: () => setOpen(true) }, { label: 'Delete', disabled: true, reason: 'Owners only' }]} />
 			<Select options={[{ value: 'en', label: 'English' }]} value="en" onChange={event => event.target.value} />
 			<Choices legend="Theme" type="radio" options={[{ value: 'light', label: 'Light' }]} value={theme} onChange={setTheme} />
+			<Steps label="Preparing" steps={[{ label: 'Machine', state: 'progress', since: Date.now(), expected: { median: 60_000, p90: 120_000 }, phase: { label: 'Booting' } }]} clock={beat} labels={Steps.labels.es} />
+			<Awaited title="Starting" since={Date.now()} expected={{ median: 120_000 }} check={async () => undefined} ended={open ? 'done' : null} onEnd={outcome => setOpen(outcome === 'done')} reason={{ text: 'Cannot reach it', action: { label: 'Open', onSelect: () => setOpen(false) } }} />
+			<Freshness label="Running" tone="success" checked={new Date()} connected={false} />
+			<TechnicalDetails text="refused" request="req_1" time={Date.now()} />
+			<FamilyBar product="cdn" brand={{ src: '/w.svg', href: '/' }} account={{ signout: { end: async () => undefined, before: () => !open } }} />
 		</>
 	);
 }

@@ -192,7 +192,7 @@ test('FamilyBar account menu: person, account links, product entries, docs and s
 	const account = menu(bar, 'account');
 	assert.equal(account.querySelector('.bui-family-name').textContent, 'Ana Pérez');
 	assert.equal(account.querySelector('.bui-family-email').textContent, 'ana@example.test');
-	assert.deepEqual(texts(entries(bar, 'account')), ['Your account', 'Members of this organization', 'Delegate settings', 'Keyboard shortcuts', 'Docs', 'Sign out']);
+	assert.deepEqual(texts(entries(bar, 'account')), ['Your account', 'Members of this organization', 'Delegate settings', 'Keyboard shortcuts', 'Docs', 'Sign out of Beyond']);
 	assert.equal(account.querySelector('.bui-family-docs-item').getAttribute('href'), inside.links.docs);
 	account.querySelector('.bui-navmenu-button').click();
 	[...account.querySelectorAll('button.bui-navmenu-item')].find(node => node.textContent === 'Keyboard shortcuts').click();

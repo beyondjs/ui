@@ -1,0 +1,213 @@
+/* Long operations (D50): timed steps, the awaited card, a state with its freshness and technical
+   details. Every state is in words; color only repeats it. Nothing moves under reduced motion. */
+.bui-steps-list {
+	display: grid;
+	gap: var(--space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.bui-step {
+	display: grid;
+	grid-template-columns: 24px 1fr;
+	gap: var(--space-2);
+	align-items: start;
+}
+.bui-step-mark {
+	display: inline-grid;
+	place-items: center;
+	width: 24px;
+	height: 24px;
+	border: 1px solid var(--color-border-strong);
+	border-radius: var(--radius-round);
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+}
+.bui-step-mark .bui-icon {
+	width: 14px;
+	height: 14px;
+}
+.bui-step-done .bui-step-mark {
+	border-color: var(--color-success);
+	color: var(--color-success);
+}
+.bui-step-progress .bui-step-mark {
+	border-color: var(--color-info);
+}
+.bui-step-stalled .bui-step-mark {
+	border-color: var(--color-warning);
+	color: var(--color-warning);
+}
+.bui-step-failed .bui-step-mark {
+	border-color: var(--color-danger);
+	color: var(--color-danger);
+}
+.bui-step-ring {
+	width: 10px;
+	height: 10px;
+	border-radius: var(--radius-round);
+	background: var(--color-info);
+	animation: bui-pulse 1.2s ease-in-out infinite;
+}
+.bui-step-body {
+	display: grid;
+	gap: 2px;
+	min-width: 0;
+	padding-top: 2px;
+}
+.bui-step-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--space-1) var(--space-2);
+}
+.bui-step-label {
+	font-weight: var(--weight-medium);
+	overflow-wrap: anywhere;
+}
+.bui-step-waiting .bui-step-label {
+	color: var(--color-text-muted);
+	font-weight: var(--weight-regular);
+}
+.bui-step-time,
+.bui-step-phase {
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	font-variant-numeric: tabular-nums;
+}
+.bui-step-slow .bui-step-time {
+	color: var(--color-text);
+}
+.bui-step-reason {
+	margin: 0;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	overflow-wrap: anywhere;
+}
+
+/* The awaited card: one card that moves, in the page's flow (no elevation). */
+.bui-awaited {
+	display: grid;
+	gap: var(--space-3);
+	padding: var(--space-4);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-base);
+	background: var(--color-surface);
+	color: var(--color-text);
+}
+.bui-awaited[data-state='stalled'] {
+	border-left: 3px solid var(--color-warning);
+}
+.bui-awaited[data-state='failed'] {
+	border-left: 3px solid var(--color-danger);
+}
+.bui-awaited-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: var(--space-2) var(--space-3);
+}
+.bui-awaited-mark {
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	width: 20px;
+	height: 1lh;
+	color: var(--color-info);
+}
+.bui-awaited[data-state='stalled'] .bui-awaited-mark {
+	color: var(--color-warning);
+}
+.bui-awaited[data-state='failed'] .bui-awaited-mark {
+	color: var(--color-danger);
+}
+.bui-awaited[data-state='done'] .bui-awaited-mark {
+	color: var(--color-success);
+}
+.bui-awaited-heading {
+	flex: 1 1 12rem;
+	min-width: 0;
+}
+.bui-awaited-title {
+	margin: 0;
+	font-size: var(--text-body);
+	font-weight: var(--weight-medium);
+	line-height: var(--leading-body);
+	overflow-wrap: anywhere;
+}
+.bui-awaited-since,
+.bui-awaited-note {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-awaited-time {
+	font-size: var(--text-small);
+	font-weight: var(--weight-medium);
+	font-variant-numeric: tabular-nums;
+}
+.bui-awaited-bar {
+	display: block;
+	width: 100%;
+	height: 4px;
+	border: 0;
+	border-radius: var(--radius-round);
+	background: var(--color-surface-sunken);
+	color: var(--color-info);
+	appearance: none;
+	overflow: hidden;
+}
+.bui-awaited-bar::-webkit-progress-bar {
+	background: var(--color-surface-sunken);
+}
+.bui-awaited-bar::-webkit-progress-value {
+	background: var(--color-info);
+	transition: width var(--motion-standard) var(--motion-ease);
+}
+.bui-awaited-bar::-moz-progress-bar {
+	background: var(--color-info);
+}
+/* Indeterminate: a band that travels, or a still band under reduced motion. */
+.bui-awaited-bar:indeterminate {
+	background: linear-gradient(90deg, var(--color-surface-sunken) 0 30%, var(--color-info) 30% 60%, var(--color-surface-sunken) 60% 100%) var(--color-surface-sunken);
+	background-size: 200% 100%;
+	animation: bui-travel 1.6s linear infinite;
+}
+.bui-awaited-bar:indeterminate::-webkit-progress-bar {
+	background: transparent;
+}
+.bui-awaited-bar:indeterminate::-moz-progress-bar {
+	background: transparent;
+}
+.bui-awaited-bar[hidden],
+.bui-awaited-reason[hidden],
+.bui-awaited-actions[hidden],
+.bui-awaited-since[hidden] {
+	display: none;
+}
+@keyframes bui-travel {
+	from {
+		background-position: 100% 0;
+	}
+	to {
+		background-position: -100% 0;
+	}
+}
+.bui-awaited-reason {
+	display: grid;
+	gap: var(--space-2);
+	justify-items: start;
+}
+.bui-awaited-why {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+.bui-awaited-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2) var(--space-3);
+}

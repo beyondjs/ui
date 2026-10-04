@@ -97,7 +97,8 @@ export const es = {
 		anonymous: 'Cuenta',
 		yours: 'Tu cuenta',
 		members: 'Miembros de esta organización',
-		signout: 'Cerrar sesión'
+		signout: 'Cerrar sesión en Beyond',
+		leaving: 'Cerrando sesión…'
 	},
 	collection: {
 		search: 'Buscar {label}', placeholder: 'Buscar', all: 'Todos', loading: 'Cargando…', failure: 'No se pudo cargar la lista.', retry: 'Reintentar', empty: 'Todavía no hay nada.',

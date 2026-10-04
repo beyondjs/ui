@@ -4,8 +4,9 @@ import type { Copy, NotificationAdapter, Notice } from './notifications.js';
 import type { Tone, MenuItem, ChoiceOption, SelectOption, PromptOptions, QuestionOptions, Crumb, CollectionState, InboxState, PickerChoice, PickerSource, Component } from './dom.js';
 export type { Copy, NotificationAdapter, Notice, NoticePage, NoticeRequest, NoticeSource, NoticeSummary } from './notifications.js';
 export { confirm, prompt, alert, availability, productNames } from './dom.js';
-export type { AvailabilityState, Consequence, FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, FamilyProduct, FamilyProductId, FamilyProductNames, FamilyReason, FamilyHere, FamilyManage, FamilyNotice, FamilyOrganization, FamilyProjectState, ProductNavItem, SidebarGroup, SidebarItem, UnavailableKind } from './dom.js';
-import type { FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, ProductNavItem, SidebarGroup, UnavailableKind } from './dom.js';
+export type { AvailabilityState, Consequence, FamilySignout, Step, StepState, Expected, DetailsRecord, AwaitedReason, AwaitedState, Moment, FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, FamilyProduct, FamilyProductId, FamilyProductNames, FamilyReason, FamilyHere, FamilyManage, FamilyNotice, FamilyOrganization, FamilyProjectState, ProductNavItem, SidebarGroup, SidebarItem, UnavailableKind } from './dom.js';
+import type { FamilyDescriptor, FamilyUnavailable, FamilyFallback, FamilyNavigation, FamilySignout, ProductNavItem, SidebarGroup, UnavailableKind, Clock, Step, Expected, DetailsRecord, StepsLabels, Moment } from './dom.js';
+export { Clock } from './dom.js';
 
 /** An icon of the catalog: 16, 20 (default) or 24 px; decorative without `label`. */
 export function Icon(props: { name: IconName; size?: IconSize; label?: string | null }): ReactElement;
@@ -130,7 +131,8 @@ export interface FamilyBarProps {
 	fallback?: FamilyFallback | null;
 	products?: Record<string, string>;
 	notifications?: ReactNode;
-	account?: { signout?: (() => void) | { href: string } | null; items?: Array<{ label: string; href?: string | null; onSelect?: (() => void) | null } | null | false>; label?: string | null };
+	/** `signout`: `{ end, before?, after?, bound? }` (0.5.0), whose functions are read from the latest props, or the earlier callback or link. */
+	account?: { signout?: FamilySignout | (() => void) | { href: string } | null; items?: Array<{ label: string; href?: string | null; onSelect?: (() => void) | null } | null | false>; label?: string | null };
 	toggle?: { controls: string; expanded: boolean; onChange?: (expanded: boolean) => void } | null;
 	onNavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null;
 	advisory?: string[];
@@ -151,6 +153,34 @@ export function Disclosure(props: { label: string; name?: string | null; align?:
 export function ActionMenu(props: { label?: string | null; name?: string | null; items: Array<(Omit<MenuItem, 'run'> & { onSelect?: (event: MouseEvent) => void }) | null | false>; align?: 'start' | 'end'; glyph?: string | null; placement?: 'auto' | 'below' | 'above' }): ReactElement;
 export function Help(props: { topic: string; text?: string | string[]; labels?: Copy; children?: ReactNode }): ReactElement;
 export function Tooltip(props: { text: string; describe?: boolean; children: ReactElement }): ReactElement;
+
+/** The steps of an operation with their times (0.5.0, D50); `clock`, `locale` and `labels` (memoize) create a new list. */
+export function Steps(props: { label: string; steps?: Array<Step | null | false>; clock?: Clock; locale?: string; labels?: StepsLabels }): ReactElement;
+/** The card a person waits on (0.5.0, E52): `check` and `onEnd` use the latest props; `ended` ends it once. */
+export function Awaited(props: {
+	title: string;
+	since?: Moment | null;
+	expected?: Expected | null;
+	steps?: Array<Step | null | false> | null;
+	reason?: { text: string; way?: string | null; action?: { label: string; href?: string | null; onSelect?: (() => void) | null } | null; details?: DetailsRecord | null } | null;
+	check?: (() => Promise<unknown>) | null;
+	ended?: 'done' | 'failed' | null;
+	onEnd?: ((outcome: 'done' | 'failed') => void) | null;
+	clock?: Clock;
+	locale?: string;
+	level?: 2 | 3 | 4 | 5 | 6;
+	labels?: Copy & { steps?: StepsLabels; details?: Copy };
+}): ReactElement;
+/** A state with "Checked … ago", or "Last known: … · {time}" while disconnected (0.5.0). */
+export function Freshness(props: { label: string; tone?: Tone | 'progress'; checked?: Moment | null; connected?: boolean; clock?: Clock; locale?: string; labels?: Copy }): ReactElement;
+/** "Technical details" with the request and the time, copyable for support (0.5.0, D43). */
+export function TechnicalDetails(props: DetailsRecord & { open?: boolean; locale?: string; labels?: Copy }): ReactElement;
+/** The copy in English and Spanish, as on the DOM classes (`Steps.labels.es`). */
+type Copies = { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
+export namespace Steps { const labels: Copies; }
+export namespace Awaited { const labels: Copies; }
+export namespace Freshness { const labels: Copies; }
+export namespace TechnicalDetails { const labels: Copies; }
 
 export interface NotificationEntryHandle {
 	refresh(): void;

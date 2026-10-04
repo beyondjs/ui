@@ -12,7 +12,8 @@ const { useId, useState } = React;
 /**
  * The family bar, driven by the DOM `FamilyBar` class. `descriptor` is a prop (null while loading,
  * `{ unavailable: true }` when the relay failed); `notifications` is React content rendered into its
- * slot; `account.signout` and `account.items[].onSelect` are called with the latest props.
+ * slot; `account.signout` (a callback, or since 0.5.0 `{ end, before?, after?, bound? }`, whose
+ * functions are read from the latest props) and `account.items[].onSelect` are called with the latest props.
  * `onNavigate(item, event)` takes over plain clicks on the bar's same-origin links. `notice` is
  * applied when its text, address or action label change, and its `action.onSelect` is called with
  * the latest props. A change of `product`, `brand`, `products`, `labels` (memoize it), `advisory`,
@@ -36,7 +37,7 @@ export function FamilyBar({ product, brand, descriptor = null, fallback = null, 
 			notifications: slot,
 			account: {
 				label: account.label ?? null,
-				signout: typeof signout === 'function' ? () => latest.current.account.signout?.() : signout,
+				signout: leaving(signout, latest),
 				items: items.map((item, index) => ({ label: item.label, href: item.href ?? null, run: item.href ? null : () => latest.current.account.items?.filter(Boolean)[index]?.onSelect?.() }))
 			},
 			onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null,
@@ -44,7 +45,7 @@ export function FamilyBar({ product, brand, descriptor = null, fallback = null, 
 			notice: relay(notice, latest),
 			transient
 		});
-	}, [product, brand.src, brand.href, JSON.stringify(products), JSON.stringify(advisory), JSON.stringify(transient), labels, account.label, typeof signout === 'function' ? 'function' : signout?.href, JSON.stringify(items.map(item => [item.label, item.href ?? null])), Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
+	}, [product, brand.src, brand.href, JSON.stringify(products), JSON.stringify(advisory), JSON.stringify(transient), labels, account.label, typeof signout === 'function' ? 'function' : (signout?.href ?? (signout ? `leave:${signout.bound ?? ''}` : null)), JSON.stringify(items.map(item => [item.label, item.href ?? null])), Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
 	useSync(bar, current => (current.notice = relay(notice, latest)), [notice?.text, notice?.href, notice?.action?.label, notice?.action?.href]);
 	useSync(bar, current => (current.descriptor = descriptor), [JSON.stringify(descriptor)]);
 	useSync(bar, current => (current.fallback = fallback ?? {}), [JSON.stringify(fallback)]);
@@ -52,6 +53,22 @@ export function FamilyBar({ product, brand, descriptor = null, fallback = null, 
 		if (toggle && current.expanded !== toggle.expanded) current.expanded = toggle.expanded;
 	}, [toggle?.expanded]);
 	return h('div', { ref: host, className: 'bui-host bui-family-host' }, notifications ? ReactDOM.createPortal(notifications, slot) : null);
+}
+
+/**
+ * The DOM `account.signout` for the prop: a callback and `{ end, before, after }` call the latest
+ * props' functions; `{ href }` is passed as given.
+ */
+function leaving(signout, latest) {
+	const now = () => latest.current.account.signout;
+	if (typeof signout === 'function') return () => now()?.();
+	if (!signout || typeof signout.href === 'string') return signout;
+	return {
+		end: () => now()?.end?.(),
+		before: signout.before ? () => now()?.before?.() : null,
+		after: () => now()?.after?.(),
+		bound: signout.bound
+	};
 }
 
 /** The DOM notice for a `notice` prop: its action's `onSelect` is read from the latest props when chosen. */

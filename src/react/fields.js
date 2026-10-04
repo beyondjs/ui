@@ -1,8 +1,9 @@
 import React from 'react';
 import { h } from './hooks.js';
 import { Mark } from './simple.js';
+import { Select as Choice } from '../dom/select.js';
 
-const { cloneElement, isValidElement, useId } = React;
+const { cloneElement, isValidElement, useCallback, useId, useLayoutEffect, useRef } = React;
 
 /**
  * Form controls React renders itself, with the markup and classes of the DOM `Field`, `Choices` and
@@ -36,13 +37,28 @@ export function Field({ label, hint = null, error = null, optional = false, labe
 	);
 }
 
-/** A native select for a short finite list. Options: `{ value, label, disabled? }` or `{ group, options }`. */
+/**
+ * A native select for a short finite list. Options: `{ value, label, disabled? }` or `{ group, options }`.
+ * Its chosen text shows whole in a tooltip while the select cuts it (D44), as the DOM `Select`.
+ */
 export function Select({ options, className, ...rest }) {
+	const control = useRef(null);
+	const given = rest.ref ?? null;
+	const ref = useCallback(node => {
+		control.current = node;
+		if (typeof given === 'function') given(node);
+		else if (given) given.current = node;
+	}, [given]);
+	useLayoutEffect(() => {
+		if (!control.current) return undefined;
+		const tip = Choice.tip(control.current);
+		return () => tip.destroy();
+	}, []);
 	const option = item =>
 		item.options
 			? h('optgroup', { key: `group-${item.group}`, label: item.group }, item.options.map(option))
 			: h('option', { key: item.value, value: item.value, disabled: item.disabled }, item.label);
-	return h('span', { className: 'bui-select' }, h('select', { ...rest, className: `bui-select-control${className ? ` ${className}` : ''}` }, options.map(option)), h(Mark, { name: 'chevron' }));
+	return h('span', { className: 'bui-select' }, h('select', { ...rest, ref, className: `bui-select-control${className ? ` ${className}` : ''}` }, options.map(option)), h(Mark, { name: 'chevron' }));
 }
 
 /**

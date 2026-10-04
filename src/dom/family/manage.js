@@ -52,6 +52,16 @@ export class Manage {
 
 	/** The address to come back to: `href` without its transient parameters, with `returned=accounts`. */
 	back(href) {
+		const url = new URL(this.clean(href));
+		url.searchParams.set('returned', 'accounts');
+		return url.href;
+	}
+
+	/**
+	 * `href` without its transient parameters: `returned`, `from`, dialog markers and a `project` or
+	 * `organization` the path already carries. Signing out of Beyond returns here (since 0.5.0).
+	 */
+	clean(href) {
 		const url = new URL(href);
 		for (const key of this.#transient) url.searchParams.delete(key);
 		const segments = `${url.pathname}/${url.hash}`.split(/[/#?&=]/).filter(Boolean).map(Manage.#decode);
@@ -59,7 +69,6 @@ export class Manage {
 			const value = url.searchParams.get(key);
 			if (value && segments.includes(value)) url.searchParams.delete(key);
 		}
-		url.searchParams.set('returned', 'accounts');
 		return url.href;
 	}
 
