@@ -13,7 +13,7 @@
  * "Project overview" is Projects' page for the project, offered in every product but Projects.
  */
 export class Places {
-	static #keys = ['home', 'account', 'members', 'docs', 'projects', 'leave'];
+	static #keys = ['home', 'account', 'members', 'docs', 'projects', 'leave', 'github'];
 
 	#descriptor;
 	#brand;
@@ -46,7 +46,8 @@ export class Places {
 
 	/**
 	 * The addresses in effect: `home`, `account`, `members`, `docs`, `projects`, `leave` (Accounts'
-	 * `/leave`, since 0.5.0) and `manage` when known.
+	 * `/leave`, since 0.5.0), `github` (Projects' GitHub section of the organization in view, since 0.7.4)
+	 * and `manage` when known.
 	 */
 	get links() {
 		return this.#links;

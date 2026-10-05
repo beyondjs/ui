@@ -4,7 +4,9 @@ const selector = [
 	'input:not([disabled]):not([type="hidden"])',
 	'select:not([disabled])',
 	'textarea:not([disabled])',
-	'[tabindex]:not([tabindex="-1"])'
+	'[tabindex]:not([tabindex="-1"])',
+	// A disclosure's summary takes focus natively, so technical details can be opened by keyboard (0.7.4)
+	'details > summary'
 ].join(',');
 
 /**
@@ -17,9 +19,17 @@ export class Focus {
 		this.#container = container;
 	}
 
-	/** Focusable elements that are rendered. */
+	/**
+	 * Focusable elements that are rendered: not hidden, inert, a collection's hidden column
+	 * (`[data-bui-hidden]`) or inside a closed `<details>` other than its summary (0.7.4).
+	 */
 	get targets() {
-		return [...this.#container.querySelectorAll(selector)].filter(node => !node.closest('[hidden]') && !node.closest('[inert]'));
+		return [...this.#container.querySelectorAll(selector)].filter(node => !node.closest('[hidden]') && !node.closest('[inert]') && !node.closest('[data-bui-hidden]') && !Focus.#folded(node));
+	}
+
+	static #folded(node) {
+		const details = node.closest('details:not([open])');
+		return Boolean(details) && node.closest('summary')?.parentElement !== details;
 	}
 
 	/** Focuses `[data-autofocus]`, the first field, the first other target or `fallback`. */

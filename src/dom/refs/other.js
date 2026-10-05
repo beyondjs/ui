@@ -56,7 +56,8 @@ export class OtherRef {
 	static check(value) {
 		const text = String(value ?? '').trim();
 		if (!text) return 'required';
-		if (/\s|\.\.|[~^:?*[\\]|@\{|^[/.]|[/.]$|\.lock$|\/\/|^@$/.test(text)) return 'invalid';
+		// Git's ref rules (git check-ref-format), with a leading “-” refused as it would read as an option (0.7.4)
+		if (/\s|\.\.|[~^:?*[\\]|@\{|^[/.-]|[/.]$|\/\.|\.lock(\/|$)|\/\/|^@$|[\x00-\x1f\x7f]/.test(text)) return 'invalid';
 		return null;
 	}
 

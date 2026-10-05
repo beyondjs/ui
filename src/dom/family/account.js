@@ -12,7 +12,9 @@ import { PreferencesDialog } from '../preferences/dialog.js';
  * 2. The account: "Account and sign-in" and "Your organizations" ("Create an organization" for a
  *    person with none), at Accounts.
  * 3. The organization in view, headed "{organization} · {role}": "Members and invitations" and, when
- *    Accounts gives it (owners and administrators), "Organization settings".
+ *    Accounts gives it (owners and administrators), "Organization settings"; then "GitHub" for every
+ *    member when the descriptor carries `links.github` (D51 amending D48, since 0.7.4): Projects'
+ *    GitHub section of that organization, an absolute address followed as given.
  * 4. The product's own entries, headed by the product's name: "Language and appearance" first when
  *    the product passes `account.preferences` (D54: one `PreferencesDialog` with "Change for all of
  *    Beyond"), then `account.items`.
@@ -61,6 +63,8 @@ export class AccountMenu extends Component {
 		}
 		const heading = person ? el('span', { class: 'bui-family-person' }, [el('span', { class: 'bui-family-name', text: name ?? '' }), person.email ? el('span', { class: 'bui-family-email', text: person.email }) : null]) : null;
 		const groups = manage.present ? this.#groups({ organization, any, labels }) : AccountMenu.#earlier({ links, organization, labels });
+		// Projects' GitHub section, for every member and only with an organization in view (PRJ-14)
+		if (organization && links.github) groups.organization.push(entry({ label: labels.text('github'), href: links.github, class: 'bui-family-github' }));
 		this.#menu = new NavigationMenu({
 			label: AccountMenu.#avatar(name),
 			name: name ? labels.text('account', { name }) : labels.text('anonymous'),

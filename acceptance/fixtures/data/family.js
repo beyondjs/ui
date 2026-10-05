@@ -81,7 +81,8 @@ const annotated = {
 		{ id: 'prj_ads', name: 'Advertising campaign for the spring catalogue', here: { mapped: 1, state: 'denied', url: here('prj_ads') } },
 		{ id: 'dlg_nora', name: 'Nora sample', here: { state: 'only', url: here('dlg_nora') } }
 	],
-	links: { ...inside.links, manage }
+	// Projects' GitHub section of the organization in view (0.7.4, PRJ-14), complete as given
+	links: { ...inside.links, manage, github: 'https://projects.example.test/?organization=org_north&view=github' }
 };
 const names = ['Atlas', 'Beacon', 'Comet', 'Delta', 'Échelle', 'Forge', 'Garnet', 'Harbor', 'Iris', 'Juniper', 'Kestrel', 'Lumen'];
 const many = { ...annotated, project: null, products: outside.products, projects: names.map((name, index) => ({ id: `prj_${index}`, name, here: { mapped: index % 3 ? 1 : 0, url: here(`prj_${index}`) } })) };

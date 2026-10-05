@@ -52,7 +52,8 @@ export class Draft {
 		if (routed) url.hash = `${path}${text ? `?${text}` : ''}`;
 		else url.search = text;
 		const relative = !/^[a-z][a-z\d+.-]*:/i.test(base) && !String(base).startsWith('//');
-		return relative ? `${url.pathname === '/' && !String(base).startsWith('/') ? '' : url.pathname}${url.search}${url.hash}` : url.href;
+		// A relative address keeps its own path as written ("new", "../edit"), never made root-absolute (0.7.4)
+		return relative ? `${String(base).split(/[?#]/)[0]}${url.search}${url.hash}` : url.href;
 	}
 
 	/** The draft an address carries (a string, a `URL` or a `Location`); unknown and malformed values are dropped. */

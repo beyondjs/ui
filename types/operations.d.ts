@@ -86,6 +86,8 @@ export interface AwaitedOptions {
 	reason?: AwaitedReason | null;
 	/** Reads the operation again; runs once at a time. */
 	check?: (() => Promise<unknown>) | null;
+	/** How long a check may take before it is said not to have finished, in ms (0.7.4; 20 000 by default, D40). */
+	bound?: number;
 	/** After `end()`: where a product says "Ready · …" in the tab's title or moves on. */
 	onend?: ((outcome: 'done' | 'failed') => void) | null;
 	clock?: Clock;
@@ -121,6 +123,8 @@ export interface AwaitedLineOptions {
 	/** Why it cannot continue, in place of the time */
 	reason?: string | Node | null;
 	check?: (() => Promise<unknown>) | null;
+	/** How long a check may take before it is said not to have finished, in ms (0.7.4; 20 000 by default, D40). */
+	bound?: number;
 	onend?: ((outcome: 'done' | 'failed') => void) | null;
 	clock?: Clock;
 	locale?: string;

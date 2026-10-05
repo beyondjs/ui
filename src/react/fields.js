@@ -6,7 +6,7 @@ import { Field as Labelled } from '../dom/field.js';
 import { single } from '../dom/core/statement.js';
 import { Suggestion } from '../dom/core/suggestion.js';
 
-const { cloneElement, isValidElement, useCallback, useId, useLayoutEffect, useRef, useState } = React;
+const { cloneElement, isValidElement, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } = React;
 
 /**
  * Form controls React renders itself, with the markup and classes of the DOM `Field`, `Choices` and
@@ -70,9 +70,19 @@ export function useSuggestion(suggestion) {
 	return { value, onChange, onBlur, suggested: rule.shown, follow };
 }
 
-/** One option that can be chosen, stated as text with its state, its hint and its value, as the DOM statement draws it. */
-function Statement({ id, name, option }) {
+/**
+ * One option that can be chosen, stated as text with its state, its hint and its value, as the DOM
+ * statement draws it. A controlled form hears the stated value once it differs from its own (0.7.4).
+ */
+function Statement({ id, name, option, value = undefined, report = null }) {
 	const hint = useId();
+	// Reported once per stated value, also under StrictMode's second run of the effect
+	const reported = useRef(null);
+	useEffect(() => {
+		if (!report || value === undefined || value === option.value || reported.current === option.value) return;
+		reported.current = option.value;
+		report(option.value);
+	}, [option.value, value]);
 	const said = option.hint ?? option.detail ?? option.description ?? null;
 	const described = said ? `bui-statement-hint-${hint.replace(/[^a-zA-Z0-9_-]/g, '')}` : undefined;
 	return h(
@@ -97,7 +107,9 @@ function State({ status }) {
  */
 export function Select({ options, statement = true, ...rest }) {
 	const one = statement ? single(options) : null;
-	if (one) return h(Statement, { id: rest.id, name: rest.name, option: one });
+	// A native select's onChange takes an event: the stated value is reported as one, from a select of that name
+	const report = rest.onChange ? stated => rest.onChange({ target: { name: rest.name ?? null, value: stated }, currentTarget: { name: rest.name ?? null, value: stated } }) : null;
+	if (one) return h(Statement, { id: rest.id, name: rest.name, option: one, value: rest.value, report });
 	return h(Native, { options, ...rest });
 }
 
@@ -135,7 +147,7 @@ export function Choices({ legend, type = 'checkbox', name, options, value, onCha
 			{ className: `bui-field bui-choices-stated${error ? ' bui-field-invalid' : ''}` },
 			h('label', { className: 'bui-field-label', htmlFor: `${id}-stated` }, legend),
 			hint ? h('p', { id: `${id}-hint`, className: 'bui-field-hint' }, hint) : null,
-			h(Statement, { id: `${id}-stated`, name, option: one }),
+			h(Statement, { id: `${id}-stated`, name, option: one, value, report: onChange ?? null }),
 			h('p', { id: `${id}-error`, className: 'bui-field-error', hidden: !error }, error ? [h(Mark, { key: 'icon', name: 'alert' }), h('span', { key: 'text' }, error)] : null)
 		);
 	}

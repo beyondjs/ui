@@ -14,6 +14,32 @@ const copy = consumer => (consumer.language === 'es' ? { add: 'Añadir 1 reposit
 
 export const checks = [
 	{
+		name: 'choose: side sheet: Tab passes over a button folded in closed technical details and reaches the footer (0.7.4)',
+		consumers: ['dom'],
+		async run(browser, consumer) {
+			const { page, context } = await open(browser, consumer);
+			await page.locator('#sheeting > .bui-button, #sheeting > button').first().click();
+			await page.waitForFunction(() => document.querySelector('.bui-sheet')?.open);
+			// A failure's technical details, closed, at the end of the body: its copy button is not rendered
+			await page.evaluate(() => {
+				const details = document.createElement('details');
+				const summary = Object.assign(document.createElement('summary'), { textContent: 'Technical details' });
+				const copy = Object.assign(document.createElement('button'), { type: 'button', textContent: 'Copy details', id: 'folded' });
+				const last = Object.assign(document.createElement('button'), { type: 'button', textContent: 'Last in the body', id: 'last' });
+				details.append(summary, copy);
+				window.fixture.sheet.body.append(last, details);
+				last.focus();
+			});
+			await page.keyboard.press('Tab');
+			const name = await page.evaluate(() => document.activeElement?.textContent?.trim());
+			expect(name === 'Technical details', `Tab reaches the summary: ${name}`);
+			await page.keyboard.press('Tab');
+			const next = await page.evaluate(() => ({ text: document.activeElement?.textContent?.trim(), footer: Boolean(document.activeElement?.closest('.bui-sheet-actions')) }));
+			expect(next.footer, `and then the footer, never the folded copy button: ${JSON.stringify(next)}`);
+			await context.close();
+		}
+	},
+	{
 		name: 'choose: side sheet: at the inline end, the window\'s height, 40rem wide from 1024 px and whole below; focus kept inside and returned; busy and a press outside never close it; both themes',
 		consumers: ['dom', 'react19', 'react18'],
 		async run(browser, consumer) {

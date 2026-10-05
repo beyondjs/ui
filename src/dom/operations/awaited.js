@@ -8,6 +8,7 @@ import { Unavailable } from '../unavailable.js';
 import { Clock } from '../time/clock.js';
 import { TimeWords } from '../time/words.js';
 import { Announcer } from './announcer.js';
+import { Bound } from './bound.js';
 import { TechnicalDetails } from './details.js';
 import { Steps } from './steps.js';
 import { Timing } from './timing.js';
@@ -57,17 +58,18 @@ export class Awaited extends Component {
 	 * @param {Array<object>|null} [options.steps] the operation's steps (see `Steps`)
 	 * @param {{text: string, way?: string, action?: {label: string, href?: string, run?: () => void}, details?: object}|null} [options.reason]
 	 * @param {(() => Promise<unknown>)|null} [options.check] reads the operation again
+	 * @param {number} [options.bound] how long a check may take before it is said not to have finished (0.7.4; 20 s)
 	 * @param {(outcome: 'done'|'failed') => void} [options.onend]
 	 * @param {Clock} [options.clock] the page's clock (`Clock.system`)
 	 * @param {2|3|4|5|6} [options.level] the title's heading level (2)
 	 */
-	constructor({ title, since = null, expected = null, steps = null, reason = null, check = null, onend = null, clock = Clock.system, locale = undefined, level = 2, labels = {} }) {
+	constructor({ title, since = null, expected = null, steps = null, reason = null, check = null, bound = Bound.limit, onend = null, clock = Clock.system, locale = undefined, level = 2, labels = {} }) {
 		super();
 		const { steps: words = {}, details = {}, ...own } = labels ?? {};
 		this.#labels = new Labels(copy.en, own);
 		this.#words = new TimeWords(this.#labels, locale);
 		this.#clock = clock;
-		this.#options = { title, since, expected, steps, reason, check, onend, locale, words, details };
+		this.#options = { title, since, expected, steps, reason, check, bound, onend, locale, words, details };
 		const id = Ids.next('bui-awaited');
 		const parts = (this.#parts = {
 			mark: el('span', { class: 'bui-awaited-mark', 'aria-hidden': 'true' }),
@@ -135,7 +137,7 @@ export class Awaited extends Component {
 		if (!check || this.#again.busy) return;
 		this.#parts.note.textContent = '';
 		try {
-			await this.#again.run(() => check());
+			await this.#again.run(() => Bound.run(check, this.#options.bound));
 		} catch {
 			if (!this.destroyed) this.#parts.note.textContent = this.#labels.text('unchecked');
 		}

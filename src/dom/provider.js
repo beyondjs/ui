@@ -78,6 +78,14 @@ export class ProviderWindow extends Component {
 		const width = Math.min(1024, view.screen?.availWidth ?? 1024);
 		const opened = view.open(this.#options.href, 'beyond-provider', `popup,width=${width},height=760`);
 		if (!opened) return this.#go('blocked');
+		// The window passes through other origins (an organization's identity provider), which must not be
+		// able to navigate this tab (0.7.4): the outcome is read from the server, the window's closing
+		// polled every `poll` ms (500 by default) and a message, where it still arrives, only wakes it
+		try {
+			opened.opener = null;
+		} catch {
+			// A browser that refuses it keeps the window as opened
+		}
 		this.#window = opened;
 		this.#since = this.#options.clock.now;
 		this.#go('open');

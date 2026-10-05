@@ -33,6 +33,8 @@ export function ChoiceMenu({ label, options, value = null, placeholder = null, a
 		current.actions = relay(actions, latest, 'actions');
 		current.options = options;
 		if (current.value !== value && !current.stated) current.value = value;
+		// A stated option is the value: a controlled form hears it once it differs (0.7.4)
+		else if (current.stated && current.value !== value) latest.current.onChange?.(current.value);
 	}, [JSON.stringify(options), value, shape(actions)]);
 	useSync(menu, current => (current.disabled = disabled), [disabled]);
 	return h('div', { ref: host, className: 'bui-host' });

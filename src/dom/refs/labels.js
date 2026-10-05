@@ -2,6 +2,8 @@
 export const labels = Object.freeze({
 	en: Object.freeze({
 		label: 'Branch',
+		placeholder: 'Choose',
+		kept: '{value}, kept while the branches can’t be listed',
 		default: 'Default',
 		custom: 'Commit or other ref',
 		escape: 'Use a commit or another ref…',
@@ -20,6 +22,8 @@ export const labels = Object.freeze({
 	}),
 	es: Object.freeze({
 		label: 'Rama',
+		placeholder: 'Elegir',
+		kept: '{value}, se mantiene mientras no se pueden mostrar las ramas',
 		default: 'Predeterminada',
 		custom: 'Commit u otra referencia',
 		escape: 'Usar un commit u otra referencia…',

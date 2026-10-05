@@ -153,5 +153,22 @@ export const checks = [
 			expect((await trigger.getAttribute('aria-expanded')) === 'false', `Tab out of the panel closed it: ${path.join(' > ')}`);
 			expect(await page.evaluate(() => !document.activeElement.closest('[data-part="account"]')), 'focus moved on');
 		}
+	},
+	{
+		name: 'profile menu: GitHub after the organization’s Accounts pages, at Projects’ address as given, at 1440 and 390 px (0.7.4, PRJ-14)',
+		consumers: ['dom', 'react19', 'react18'],
+		async run(browser, consumer) {
+			for (const width of [1440, 390]) {
+				const { page, context } = await open(browser, consumer, { query: '?family=annotated', width });
+				await page.locator('.bui-family [data-part="account"] .bui-navmenu-button').click();
+				const group = page.locator('.bui-family [data-part="account"] .bui-navmenu-section').filter({ hasText: 'Northwind Studio · ' });
+				const labels = await group.locator('.bui-navmenu-label').allInnerTexts();
+				expect(labels.at(-1) === 'GitHub', `${width}px: GitHub last in the organization's group: ${labels}`);
+				const entry = page.locator('.bui-family [data-part="account"] a.bui-family-github');
+				expect((await entry.getAttribute('href')) === 'https://projects.example.test/?organization=org_north&view=github', `${width}px: as given`);
+				expect(await entry.isVisible(), `${width}px: shown`);
+				await context.close();
+			}
+		}
 	}
 ];

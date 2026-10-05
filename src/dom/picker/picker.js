@@ -257,9 +257,10 @@ export class Picker extends Component {
 		this.#onchange?.(this.selected);
 	}
 
-	/** The results shown that can be chosen and are not chosen yet. */
+	/** The results shown, the suggested group's included (0.7.4), that can be chosen and are not chosen yet. */
 	#open() {
-		return this.#search.items.filter(item => !item.disabled && !this.#selection.has(item.id));
+		const shown = new Map([...(this.#search.suggested?.items ?? []), ...this.#search.items].map(item => [item.id, item]));
+		return [...shown.values()].filter(item => !item.disabled && !this.#selection.has(item.id));
 	}
 
 	#draw() {
@@ -280,6 +281,8 @@ export class Picker extends Component {
 
 	/** Chooses what a pasted address named when the list holds it, and says what happened; null when nothing was recognized. */
 	#recognized() {
+		// Settled once, on the first answer to the query it was read for (0.7.4)
+		if (this.#recognizer.current && this.#recognizer.settled) return null;
 		const listed = [...(this.#search.suggested?.items ?? []), ...this.#search.items];
 		const settled = this.#recognizer.settle(listed);
 		const current = this.#recognizer.current;

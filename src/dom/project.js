@@ -6,8 +6,8 @@ import { ChoiceMenu } from './choice/menu.js';
 import { ProjectList } from './family/projects.js';
 
 const words = {
-	en: { label: 'Project', unset: 'Not set up in {product}', denied: 'No access in {product}', only: 'Only in {product}', empty: 'No projects to choose from.', search: 'Search projects', none: ({ query }) => `No projects match “${query}”.` },
-	es: { label: 'Proyecto', unset: 'Sin configurar en {product}', denied: 'Sin acceso en {product}', only: 'Solo en {product}', empty: 'No hay proyectos para elegir.', search: 'Buscar proyectos', none: ({ query }) => `Ningún proyecto coincide con «${query}».` }
+	en: { label: 'Project', placeholder: 'Choose', unset: 'Not set up in {product}', denied: 'No access in {product}', only: 'Only in {product}', empty: 'No projects to choose from.', search: 'Search projects', none: ({ query }) => `No projects match “${query}”.` },
+	es: { label: 'Proyecto', placeholder: 'Elegir', unset: 'Sin configurar en {product}', denied: 'Sin acceso en {product}', only: 'Solo en {product}', empty: 'No hay proyectos para elegir.', search: 'Buscar proyectos', none: ({ query }) => `Ningún proyecto coincide con «${query}».` }
 };
 
 /**
@@ -32,6 +32,8 @@ export class ProjectPicker extends Component {
 	#labels;
 	#product;
 	#only;
+	// The value given before any project was listed, applied once there are some (0.7.4)
+	#wanted = null;
 	#projects = [];
 
 	/**
@@ -52,7 +54,8 @@ export class ProjectPicker extends Component {
 		this.#only = only;
 		const id = Ids.next('bui-project');
 		const text = label ?? this.#labels.text('label');
-		this.#menu = new ChoiceMenu({ label: text, options: [], value, actions, name, search: ProjectList.threshold, labels: { search: this.#labels.text('search'), none: ({ query }) => this.#labels.text('none', { query }) }, onchange: chosen => onchange?.(chosen) });
+		this.#wanted = value;
+		this.#menu = new ChoiceMenu({ label: text, options: [], value, actions, name, search: ProjectList.threshold, labels: { placeholder: this.#labels.text('placeholder'), search: this.#labels.text('search'), none: ({ query }) => this.#labels.text('none', { query }) }, onchange: chosen => onchange?.(chosen) });
 		this.#menu.control.id = `${id}-button`;
 		this.#body = el('div', { class: 'bui-project-body' });
 		this.#element = el('div', { class: 'bui-refs bui-refs-field bui-project' }, [el('label', { class: 'bui-field-label', for: `${id}-button`, text }), this.#body]);
@@ -72,6 +75,7 @@ export class ProjectPicker extends Component {
 	}
 
 	set value(value) {
+		this.#wanted = null;
 		this.#menu.value = value;
 	}
 
@@ -94,7 +98,8 @@ export class ProjectPicker extends Component {
 
 	#draw() {
 		if (!this.#projects.length) return fill(this.#body, [el('p', { class: 'bui-refs-empty', role: 'status', text: this.#labels.text('empty') })]);
-		const value = this.#menu.value;
+		const value = this.#menu.value ?? this.#wanted;
+		this.#wanted = null;
 		this.#menu.options = this.#projects.map(({ project, state }) => this.#option(project, state));
 		this.#menu.value = this.#projects.some(row => row.project.id === value) ? value : null;
 		if (this.#menu.element.parentNode !== this.#body) fill(this.#body, [this.#menu.element]);

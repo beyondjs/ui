@@ -24,7 +24,9 @@ export class PickerAccounts {
 	 */
 	constructor({ accounts, labels, onchange }) {
 		this.#onchange = onchange;
-		this.#menu = new ChoiceMenu({ label: labels.text('from'), options: [], onchange: id => this.#onchange(id) });
+		// Its copy in the picker's language (0.7.4), not ChoiceMenu's English defaults
+		const words = { placeholder: labels.text('pick'), search: labels.text('accounts'), none: ({ query }) => labels.text('unmatched', { query }) };
+		this.#menu = new ChoiceMenu({ label: labels.text('from'), options: [], labels: words, onchange: id => this.#onchange(id) });
 		this.#element = el('div', { class: 'bui-picker-from' }, [this.#menu.element]);
 		this.update(accounts);
 	}

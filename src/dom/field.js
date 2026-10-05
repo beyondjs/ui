@@ -97,7 +97,8 @@ export class Field extends Component {
 
 	/** A new suggestion: shown while the person has not edited the field. */
 	set suggest(value) {
-		if (!this.#suggestion) return this.#follow(value, null);
+		// A first suggestion arriving late keeps what the person already typed (0.7.4)
+		if (!this.#suggestion) return this.#follow(value, this.#control.value);
 		const shown = this.#suggestion.offer(value);
 		if (shown !== null) this.#control.value = shown;
 		this.#marked();

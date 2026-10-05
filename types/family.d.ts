@@ -58,8 +58,12 @@ export interface FamilyDescriptor {
 	projects?: Array<{ id: string; name: string; current?: boolean; here?: FamilyHere }>;
 	project?: { id: string; name: string } | null;
 	products?: FamilyProduct[];
-	/** `leave` (0.5.0): the absolute address of Accounts' `/leave` page, with no query. */
-	links?: { home?: string; account?: string; members?: string; docs?: string; leave?: string; manage?: FamilyManage };
+	/**
+	 * `leave` (0.5.0): the absolute address of Accounts' `/leave` page, with no query. `github` (0.7.4):
+	 * Projects' GitHub section of the organization in view, complete as given; the profile menu offers it
+	 * as "GitHub" to every member.
+	 */
+	links?: { home?: string; account?: string; members?: string; docs?: string; leave?: string; github?: string; manage?: FamilyManage };
 	unavailable?: false;
 }
 
@@ -79,7 +83,7 @@ export interface FamilyFallback {
 	 * Addresses used when the descriptor names none (all of them while it loads or is unavailable);
 	 * `projects` (0.4.0) is the product's own projects page, the destination of "All projects".
 	 */
-	links?: { home?: string; account?: string; members?: string; docs?: string; projects?: string; leave?: string; manage?: FamilyManage } | null;
+	links?: { home?: string; account?: string; members?: string; docs?: string; projects?: string; leave?: string; github?: string; manage?: FamilyManage } | null;
 }
 
 /** One line at the top of the project menu (0.4.0), with an optional address and action. */

@@ -15,6 +15,7 @@
 export class Recognizer {
 	#recognize;
 	#current = null;
+	#settled = false;
 
 	/** @param {((text: string) => ({label: string, id?: string, match?: (item: object) => boolean, query?: string, value?: unknown}|null))|null} recognize */
 	constructor(recognize) {
@@ -26,6 +27,11 @@ export class Recognizer {
 		return this.#current;
 	}
 
+	/** Whether the recognition was already settled on the answer to its query (0.7.4): a later page, a retry or a removal never chooses it again. */
+	get settled() {
+		return this.#settled;
+	}
+
 	/** Reads the field's text. Returns the query to search with. */
 	read(text) {
 		const trimmed = String(text ?? '').trim();
@@ -35,6 +41,7 @@ export class Recognizer {
 		} catch {
 			found = null;
 		}
+		this.#settled = false;
 		this.#current = found?.label ? { label: String(found.label), id: found.id ?? null, match: typeof found.match === 'function' ? found.match : null, query: found.query ?? null, value: found.value ?? null } : null;
 		return this.#current?.query ?? trimmed;
 	}
@@ -42,6 +49,7 @@ export class Recognizer {
 	/** Forgets what was recognized (the field was cleared). */
 	clear() {
 		this.#current = null;
+		this.#settled = false;
 	}
 
 	/**
@@ -51,6 +59,7 @@ export class Recognizer {
 	settle(items) {
 		const current = this.#current;
 		if (!current) return null;
+		this.#settled = true;
 		const test = current.match ?? (current.id !== null ? item => String(item.id) === String(current.id) : null);
 		const item = test ? (items.find(entry => Recognizer.#safe(test, entry)) ?? null) : null;
 		if (!item) return { outcome: 'missing', item: null };

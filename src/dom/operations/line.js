@@ -5,6 +5,7 @@ import { Labels } from '../core/labels.js';
 import { Clock } from '../time/clock.js';
 import { TimeWords } from '../time/words.js';
 import { Announcer } from './announcer.js';
+import { Bound } from './bound.js';
 import { Timing } from './timing.js';
 import { line as copy } from './labels.js';
 
@@ -46,12 +47,12 @@ export class AwaitedLine extends Component {
 	 * @param {(outcome: 'done'|'failed') => void} [options.onend]
 	 * @param {Clock} [options.clock] the page's clock (`Clock.system`)
 	 */
-	constructor({ title, since = null, expected = null, reason = null, check = null, onend = null, clock = Clock.system, locale = undefined, labels = {} }) {
+	constructor({ title, since = null, expected = null, reason = null, check = null, bound = Bound.limit, onend = null, clock = Clock.system, locale = undefined, labels = {} }) {
 		super();
 		this.#labels = new Labels(copy.en, labels);
 		this.#words = new TimeWords(this.#labels, locale);
 		this.#clock = clock;
-		this.#options = { title, since, expected, reason, check, onend };
+		this.#options = { title, since, expected, reason, check, bound, onend };
 		this.#parts = {
 			mark: el('span', { class: 'bui-line-mark', 'aria-hidden': 'true' }),
 			title: el('span', { class: 'bui-line-title' }),
@@ -106,7 +107,8 @@ export class AwaitedLine extends Component {
 		this.#parts.check.setAttribute('aria-disabled', 'true');
 		this.#parts.note.textContent = '';
 		try {
-			await check();
+			// Bounded (D40, 0.7.4): a check that never settles still ends
+			await Bound.run(check, this.#options.bound);
 		} catch {
 			if (!this.destroyed) this.#parts.note.textContent = this.#labels.text('unchecked');
 		} finally {

@@ -39,6 +39,7 @@ export class RefChooser extends Component {
 	#unavailable;
 	#escape;
 	#onchange;
+	#name;
 
 	/**
 	 * @param {object} options
@@ -62,8 +63,9 @@ export class RefChooser extends Component {
 		this.#unavailable = unavailable;
 		this.#escape = escape;
 		this.#onchange = onchange;
+		this.#name = name;
 		const id = Ids.next('bui-refs');
-		this.#menu = new ChoiceMenu({ label: this.#label, options: [], name, search: 'auto', statement: !escape, labels: { search: this.#labels.text('search'), none: ({ query }) => this.#labels.text('none', { query }) }, onchange: chosen => this.#chosen(chosen) });
+		this.#menu = new ChoiceMenu({ label: this.#label, options: [], name, search: 'auto', statement: !escape, labels: { placeholder: this.#labels.text('placeholder'), search: this.#labels.text('search'), none: ({ query }) => this.#labels.text('none', { query }) }, onchange: chosen => this.#chosen(chosen) });
 		this.#menu.control.id = `${id}-button`;
 		this.#other = new OtherRef({ labels: this.#labels, validate, onuse: chosen => this.#chosen(chosen), oncancel: () => this.#menu.control.focus() });
 		this.#body = el('div', { class: 'bui-refs-body' });
@@ -129,10 +131,10 @@ export class RefChooser extends Component {
 
 	#draw() {
 		const escape = this.#escape ? this.#link() : null;
-		if (this.#loading) return fill(this.#body, [el('p', { class: 'bui-hidden', role: 'status', text: this.#labels.text('loading') }), skeleton(1)]);
+		if (this.#loading) return fill(this.#body, [...this.#kept(), el('p', { class: 'bui-hidden', role: 'status', text: this.#labels.text('loading') }), skeleton(1)]);
 		if (this.#unavailable) {
 			const retry = this.#unavailable.retry ? el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', onclick: () => this.#unavailable?.retry?.() }, [glyph('refresh'), el('span', { text: this.#labels.text('retry') })]) : null;
-			return fill(this.#body, [el('p', { class: 'bui-refs-problem', role: 'status', text: this.#unavailable.text ?? this.#labels.text('unavailable') }), el('div', { class: 'bui-refs-actions' }, [retry, escape])]);
+			return fill(this.#body, [...this.#kept(), el('p', { class: 'bui-refs-problem', role: 'status', text: this.#unavailable.text ?? this.#labels.text('unavailable') }), el('div', { class: 'bui-refs-actions' }, [retry, escape])]);
 		}
 		if (!this.#refs.length && !this.#custom()) return fill(this.#body, [el('p', { class: 'bui-refs-empty', role: 'status', text: this.#labels.text('empty') }), escape]);
 		this.#menu.options = this.#options();
@@ -152,6 +154,16 @@ export class RefChooser extends Component {
 		return Boolean(this.#value) && !this.#refs.some(ref => ref.name === this.#value);
 	}
 
+	/**
+	 * The chosen ref while the branches load or can't be read (0.7.4): stated, and submitted with the
+	 * form, so a ref typed through "Use a commit or another ref…" is never lost.
+	 */
+	#kept() {
+		if (!this.#value) return [];
+		const statement = el('p', { class: 'bui-refs-kept', text: this.#labels.text('kept', { value: this.#value }) });
+		return [statement, this.#name ? el('input', { type: 'hidden', name: this.#name, value: this.#value }) : null].filter(Boolean);
+	}
+
 	#link() {
 		return el('button', { type: 'button', class: 'bui-link-button bui-refs-escape', onclick: () => this.other() }, [this.#labels.text('escape')]);
 	}
@@ -160,7 +172,9 @@ export class RefChooser extends Component {
 		const changed = value !== this.#value;
 		this.#value = value;
 		this.#draw();
-		this.#menu.control.focus({ preventScroll: true });
+		// The menu's button when it is drawn, else the escape link or retry, which are (0.7.4)
+		const target = this.#menu.control.isConnected ? this.#menu.control : this.#body.querySelector('button');
+		target?.focus({ preventScroll: true });
 		if (changed) this.#onchange?.(value);
 	}
 }

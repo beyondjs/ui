@@ -18,10 +18,12 @@ export function SideSheet({ open, title, label = null, description = null, width
 	const [slot] = useState(() => document.createElement('div'));
 	const held = useRef(null);
 	const round = useRef(null);
+	// The sheet the error region was last filled for, and whether it held one: refilled only when that changes
+	const shown = useRef({ sheet: null, error: false });
 	const closing = useLatest(onClose);
 	const sheet = living(state);
 	useLayoutEffect(() => {
-		const made = new Sheet({ title, label, description, width, labels });
+		const made = new Sheet({ title, label, description, width, labels: { close: labels?.close } });
 		held.current = made;
 		setState(made);
 		return () => {
@@ -29,15 +31,20 @@ export function SideSheet({ open, title, label = null, description = null, width
 			setState(current => (current === made ? null : current));
 			made.destroy();
 		};
-		// The title and busy are updated in place; these options shape the element itself.
+		// The title and busy are updated in place; these options shape the element itself. The close
+		// label is a string, so labels passed inline never rebuild (and close) the sheet (0.7.4)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [label, description, width, labels]);
+	}, [label, description, width, labels?.close]);
 	useLayoutEffect(() => {
 		if (!sheet || sheet !== held.current) return;
 		sheet.title = title;
 		sheet.busy = busy;
 		sheet.footer.hidden = !actions;
-		sheet.error(error ? slot : null);
+		// The alert region is filled once per failure, so a render does not announce it again (0.7.4)
+		if (shown.current.sheet !== sheet || shown.current.error !== Boolean(error)) {
+			sheet.error(error ? slot : null);
+			shown.current = { sheet, error: Boolean(error) };
+		}
 	});
 	useLayoutEffect(() => {
 		if (!sheet || sheet !== held.current) return;
