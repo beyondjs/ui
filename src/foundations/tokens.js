@@ -15,12 +15,13 @@ import { typography, space, radius, elevation, overlay, motion, density, layout,
  * the sentence-case label and the window elevations: that is token set 0.2.0, `status: 'approved'`,
  * and `approval` records the decisions. On 2026-10-04 the owner approved the family page system
  * (D52), whose layout tokens (gutters by band, the width tiers and the compact band) make token set 0.3.0
- * (`approval.layout`). Each entry's own `provenance` still says whether its value
+ * (`approval.layout`); token set 0.3.1 narrows the reading measure to what was measured against
+ * LR-02. Each entry's own `provenance` still says whether its value
  * was captured or introduced by the family reference. `version` identifies the token set; a product
  * review cites it together with the package version.
  */
 export const tokens = {
-	version: '0.3.0',
+	version: '0.3.1',
 	status: 'approved',
 	source: 'Verified capture of the public Beyond site, 2026-09-18, with the family reference\'s additions',
 	approval: {
@@ -32,7 +33,7 @@ export const tokens = {
 			date: '2026-10-04',
 			by: 'owner',
 			decisions: ['D52'],
-			note: 'The family page system (D52, settled contract S23: LR-01 to LR-09 and LR-11): the gutter by band, the form, standard, aside and fluid width tiers and the compact 640px band, their values engineering defaults to be measured. Token set 0.3.0.'
+			note: 'The family page system (D52, settled contract S23: LR-01 to LR-09 and LR-11): the gutter by band, the form, standard, aside and fluid width tiers and the compact 640px band, their values engineering defaults to be measured. Token set 0.3.0; 0.3.1 sets the reading measure to the 54ch measured against LR-02.'
 		}
 	},
 	attribute: 'data-beyond-mode',

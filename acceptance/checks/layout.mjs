@@ -24,16 +24,34 @@ const measure = page =>
 		const actions = document.querySelector('.bui-page-actions');
 		const aside = document.querySelector('.bui-page-aside');
 		const main = rect(document.querySelector('.bui-page-main'));
-		// The most characters on one rendered line of the long paragraphs.
-		const longest = Math.max(
-			...[...document.querySelectorAll('.bui-section-description, .bui-reading')].map(node => {
-				const range = document.createRange();
-				range.selectNodeContents(node);
-				const lines = new Set([...range.getClientRects()].map(box => Math.round(box.top))).size;
-				return Math.ceil(node.textContent.length / Math.max(lines, 1));
-			})
-		);
+		// The most characters on one rendered line of the long paragraphs, counted per line: an average over
+		// the paragraph (its short last line included) hid lines of 90 characters at 68ch (0.7.7).
+		const characters = node => {
+			const lines = new Map();
+			const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+			const range = document.createRange();
+			for (let text = walker.nextNode(); text; text = walker.nextNode()) {
+				for (let index = 0; index < text.length; index++) {
+					range.setStart(text, index);
+					range.setEnd(text, index + 1);
+					const box = range.getClientRects()[0];
+					if (box) lines.set(Math.round(box.top), (lines.get(Math.round(box.top)) ?? 0) + 1);
+				}
+			}
+			return Math.max(0, ...lines.values());
+		};
+		const longest = Math.max(...[...document.querySelectorAll('.bui-section-description, .bui-reading')].map(characters));
+		// The crumb and the way back are 24 px targets on a line that keeps its own height (0.7.7)
+		const crumb = document.querySelector('.bui-crumbs a');
+		const back = document.querySelector('.bui-arrival-back');
+		const line = node => parseFloat(getComputedStyle(node).lineHeight);
 		return {
+			targets: [crumb, back].filter(Boolean).map(node => Math.round(rect(node).height * 10) / 10),
+			// A line is as tall as its text, or as its tallest other part (the arrival line's Dismiss button)
+			lines: [crumb?.closest('ol, .bui-crumbs'), back?.closest('.bui-arrival')].filter(Boolean).map(node => ({
+				height: rect(node).height,
+				line: Math.max(line(node), ...[...node.children].filter(child => child !== back && !child.contains(crumb)).map(child => rect(child).height))
+			})),
 			edge,
 			region: region.width,
 			start: heading.left - edge,
@@ -63,6 +81,8 @@ export const checks = [
 					expect(Math.abs(found.start - gutter(found.region)) <= 1, `${at}: the H1 starts ${found.start}px from the navigation, expected ${gutter(found.region)} (region ${found.region})`);
 					expect(Math.abs(found.arrival - found.start) <= 1, `${at}: the arrival line starts where the H1 does: ${found.arrival} / ${found.start}`);
 					expect(found.longest <= 80, `${at}: a line of ${found.longest} characters`);
+					expect(found.targets.length === 2 && found.targets.every(height => height >= 24), `${at}: the crumb and the way back are 24 px targets: ${found.targets}`);
+					if (found.region >= 640) expect(found.lines.every(({ height, line }) => height <= line + 1), `${at}: the crumbs' and the arrival's lines keep their height: ${JSON.stringify(found.lines)}`);
 					// From 640 px the actions sit centred on the H1's line, or wrap below it when the title leaves them no room
 					const wrapped = found.actions.top >= found.heading.bottom - 1;
 					if (found.region >= 640) expect(wrapped || Math.abs(found.actions.middle - found.heading.middle) <= 2, `${at}: the actions are centred on the H1's line: ${JSON.stringify([found.actions, found.heading])}`);

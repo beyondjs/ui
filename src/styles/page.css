@@ -84,25 +84,6 @@
 	max-width: var(--layout-form);
 }
 
-/* The arrival line: first in the region, small, at its start (D54). */
-.bui-arrival {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: var(--space-1);
-	margin: 0;
-	color: var(--color-text-muted);
-	font-size: var(--text-small);
-	font-weight: var(--weight-regular);
-	line-height: var(--leading-small);
-}
-.bui-arrival-back {
-	color: var(--color-link);
-}
-.bui-arrival-dismiss {
-	margin-inline-start: var(--space-1);
-}
-
 /* One page header (LR-05): crumbs, the H1 with its one status and the line's actions, facts, tabs. */
 .bui-page-header {
 	display: grid;

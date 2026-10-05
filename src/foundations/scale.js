@@ -122,7 +122,11 @@ export const layout = {
 	family: { value: '44px', provenance: 'proposed', reason: 'Height of the family bar shared by every product.' },
 	header: { value: '56px', provenance: 'proposed', reason: 'Product header; the captured site header is 60px for marketing.' },
 	sidebar: { value: '250px', provenance: 'captured', source: '--bynd-aside-width' },
-	measure: { value: '68ch', provenance: 'proposed', reason: 'Reading width for prose.' },
+	measure: {
+		value: '54ch',
+		provenance: 'family',
+		reason: 'Reading width for prose (LR-02): no line past 80 characters. Measured in token set 0.3.1 on 100 paragraphs of the family\'s English and Spanish prose in Rubik at body size (weight 300) and small size (weight 400), in Chrome, Firefox and WebKit: 54ch holds at most 77 characters a line (67 to 71 on average); 56ch reached 83 and the earlier 68ch 97.'
+	},
 	content: {
 		value: '1180px',
 		provenance: 'proposed',

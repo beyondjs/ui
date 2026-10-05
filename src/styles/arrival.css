@@ -1,0 +1,32 @@
+/* @beyond-js/ui: the arrival line and the 24 px targets of a small line's standalone links (D54, WCAG 2.5.8). */
+/* The arrival line: first in the region, small, at its start (D54). */
+.bui-arrival {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1);
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+}
+.bui-arrival-back {
+	color: var(--color-link);
+}
+.bui-arrival-dismiss {
+	margin-inline-start: var(--space-1);
+}
+/*
+ * A standalone link on a small line (a crumb, the arrival line's way back) is a 24 px target (WCAG 2.5.8)
+ * without changing the line: the block padding grows the hit area, and the equal negative margin gives
+ * the space back (0.7.7). The fixed values are the fallback where `lh` is not known.
+ */
+.bui-crumbs a,
+.bui-arrival-back {
+	display: inline-block;
+	padding-block: 3px;
+	padding-block: max(0px, calc((24px - 1lh) / 2));
+	margin-block: -3px;
+	margin-block: min(0px, calc((1lh - 24px) / 2));
+}
