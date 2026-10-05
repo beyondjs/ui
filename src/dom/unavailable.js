@@ -21,6 +21,9 @@ export const glyphs = { access: 'lock', association: 'plug', capability: 'info' 
  * the product states the refusal it received.
  */
 export class Unavailable extends Component {
+	/** The copy in English and Spanish (0.7.1). */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ owner: 'Quién puede cambiarlo: ' }) });
+
 	#element;
 
 	/**

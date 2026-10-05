@@ -144,3 +144,46 @@
 	flex-wrap: wrap;
 	gap: var(--space-2);
 }
+
+/* Awaited in one line (AwaitedLine, 0.7.1): a row's wait, wrapping at narrow widths, never cut. */
+.bui-line {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0 var(--space-1);
+	max-width: 100%;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-line-mark {
+	display: inline-grid;
+	place-items: center;
+	width: 16px;
+	color: var(--color-info);
+}
+.bui-line-mark .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-line[data-state='slow'] .bui-line-mark,
+.bui-line[data-state='stalled'] .bui-line-mark {
+	color: var(--color-warning);
+}
+.bui-line[data-state='failed'] .bui-line-mark {
+	color: var(--color-danger);
+}
+.bui-line[data-state='done'] .bui-line-mark {
+	color: var(--color-success);
+}
+.bui-line-title {
+	color: var(--color-text);
+	font-weight: var(--weight-medium);
+}
+.bui-line-time {
+	overflow-wrap: anywhere;
+}
+.bui-line [hidden],
+.bui-line-note:empty {
+	display: none;
+}

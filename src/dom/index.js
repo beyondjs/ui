@@ -53,5 +53,6 @@ export { Sidebar } from './sidebar/sidebar.js';
 export { Clock } from './time/clock.js';
 export { Steps } from './operations/steps.js';
 export { Awaited } from './operations/awaited.js';
+export { AwaitedLine } from './operations/line.js';
 export { Freshness } from './operations/freshness.js';
 export { TechnicalDetails } from './operations/details.js';

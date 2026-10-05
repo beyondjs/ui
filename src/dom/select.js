@@ -2,7 +2,7 @@ import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
 import { glyph } from './core/icons.js';
 import { Cut, NameTip } from './core/cut.js';
-import { statement, single } from './core/statement.js';
+import { statement, single, said } from './core/statement.js';
 
 /**
  * A native select for a short, finite list of choices, styled over the tokens.
@@ -20,7 +20,9 @@ import { statement, single } from './core/statement.js';
  *
  * One option that can be chosen is a statement, not a choice (D56, 0.7.0): it is shown as text (an
  * `<output>` that a `Field`'s label names) and its value is submitted with `name`; `statement: false`
- * keeps the select. `control` is then the output and `stated` is true.
+ * keeps the select. `control` is then the output and `stated` is true. An option's `hint` (or
+ * `detail`) and `status` (`[label, tone]`), which a native select cannot show, are kept by the
+ * statement (0.7.1).
  */
 export class Select extends Component {
 	#element;
@@ -32,7 +34,7 @@ export class Select extends Component {
 		super();
 		const one = stating ? single(options) : null;
 		if (one) {
-			this.#element = statement({ text: one.label, value: one.value, name, id });
+			this.#element = statement({ text: one.label, value: one.value, name, id, status: one.status ?? null, hint: said(one) });
 			this.#control = this.#element.querySelector('output');
 			this.#stated = one.value;
 			return;

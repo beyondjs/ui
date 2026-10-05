@@ -69,9 +69,24 @@ export function useSuggestion(suggestion) {
 	return { value, onChange, onBlur, suggested: rule.shown, follow };
 }
 
-/** One option that can be chosen, stated as text with its value submitted, as the DOM statement draws it. */
-function Statement({ id, name, option, extra = null }) {
-	return h('span', { className: 'bui-statement', 'data-value': option.value }, h('output', { id, className: 'bui-statement-text' }, option.label), extra, name ? h('input', { type: 'hidden', name, value: option.value }) : null);
+/** One option that can be chosen, stated as text with its state, its hint and its value, as the DOM statement draws it. */
+function Statement({ id, name, option }) {
+	const hint = useId();
+	const said = option.hint ?? option.detail ?? option.description ?? null;
+	const described = said ? `bui-statement-hint-${hint.replace(/[^a-zA-Z0-9_-]/g, '')}` : undefined;
+	return h(
+		'span',
+		{ className: 'bui-statement', 'data-value': option.value },
+		h('output', { id, className: 'bui-statement-text', 'aria-describedby': described }, option.label),
+		option.status?.[0] ? h(State, { status: option.status }) : null,
+		said ? h('span', { id: described, className: 'bui-statement-hint' }, said) : null,
+		name ? h('input', { type: 'hidden', name, value: option.value }) : null
+	);
+}
+
+/** A state with its dot, as the DOM `status` builder draws it. */
+function State({ status }) {
+	return h('span', { className: `bui-status bui-status-${status[1] ?? 'neutral'}` }, h('span', { className: 'bui-status-dot', 'aria-hidden': 'true' }), status[0]);
 }
 
 /**
@@ -144,7 +159,7 @@ export function Choices({ legend, type = 'checkbox', name, options, value, onCha
 					'div',
 					{ key: option.value, className: `bui-choice${option.disabled ? ' bui-choice-disabled' : ''}` },
 					h('input', { id: input, type, name: name ?? id, value: option.value, checked: chosen.has(option.value), disabled: option.disabled, 'aria-describedby': note, onChange: event => change(option, event.target.checked) }),
-					h('label', { htmlFor: input }, option.label),
+					h('label', { htmlFor: input }, option.label, option.status?.[0] ? [' ', h(State, { key: 'state', status: option.status })] : null),
 					note ? h('p', { id: note, className: 'bui-choice-note' }, option.reason ?? option.hint) : null
 				);
 			})

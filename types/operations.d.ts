@@ -114,6 +114,33 @@ export class Awaited extends Component {
 	end(outcome?: 'done' | 'failed'): void;
 }
 
+export interface AwaitedLineOptions {
+	title: string | Node;
+	since?: Moment | null;
+	expected?: Expected | null;
+	/** Why it cannot continue, in place of the time */
+	reason?: string | Node | null;
+	check?: (() => Promise<unknown>) | null;
+	onend?: ((outcome: 'done' | 'failed') => void) | null;
+	clock?: Clock;
+	locale?: string;
+	labels?: Copy;
+}
+/** `Awaited` in one line, for a row (0.7.1): "Cloning · 40 s so far · usually about 1 min". */
+export class AwaitedLine extends Component {
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
+	constructor(options: AwaitedLineOptions);
+	readonly state: AwaitedState;
+	readonly ended: 'done' | 'failed' | null;
+	readonly announced: string;
+	/** The line as it reads. */
+	readonly text: string;
+	update(values: Partial<Pick<AwaitedLineOptions, 'title' | 'since' | 'expected' | 'reason' | 'check'>>): void;
+	tick(): void;
+	again(): Promise<void>;
+	end(outcome?: 'done' | 'failed'): void;
+}
+
 export interface FreshnessValues {
 	label: string;
 	tone?: Tone | 'progress';

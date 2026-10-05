@@ -95,3 +95,17 @@ export function Choosing() {
 		</>
 	);
 }
+
+// 0.7.1 in React.
+import { AwaitedLine, Choices as Group, Dialog as Modal, useConfirm as asking, Unavailable as Missing, useToaster as toasts } from '@beyond-js/ui/react';
+export function Following() {
+	const { confirm } = asking(asking.labels.es);
+	toasts(toasts.labels.es);
+	void [Modal.labels.es, Missing.labels.es, confirm];
+	return (
+		<>
+			<Group legend="AI engine" type="radio" options={[{ value: 'claude', label: 'Claude Code', hint: 'Connected', status: ['Ready', 'success'] }]} value={null} />
+			<AwaitedLine title="Cloning" since={Date.now()} expected={{ median: 60_000 }} ended={null} labels={AwaitedLine.labels.es} />
+		</>
+	);
+}

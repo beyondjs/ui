@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Dialog as Modal } from '../dom/dialog.js';
 import { FocusedForm as Submission } from '../dom/form.js';
-import { confirm, prompt, alert } from '../dom/questions.js';
+import { Question, confirm, prompt, alert } from '../dom/questions.js';
 import { h, living, useLatest } from './hooks.js';
 
 const { useLayoutEffect, useMemo, useRef, useState } = React;
@@ -95,3 +95,7 @@ export function FocusedForm({ onSubmit, explain, onSuccess, labels, className, c
 	}, [labels?.failure]);
 	return h('form', { ...rest, ref: form, className: `bui-form${className ? ` ${className}` : ''}` }, typeof children === 'function' ? children(busy) : children);
 }
+
+// The copy in English and Spanish, as on the DOM classes (0.7.1): `useConfirm(useConfirm.labels.es)`.
+Dialog.labels = Modal.labels;
+useConfirm.labels = Question.labels;

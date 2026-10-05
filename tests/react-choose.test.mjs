@@ -129,3 +129,26 @@ test('ListDetail renders the DOM class\'s markup; StatusRow takes its action as 
 	assert.equal(host.querySelector('.bui-statusrow-actions button').textContent, 'Check now');
 	made.destroy();
 });
+
+test('0.7.1: a React statement keeps the hint and state with the DOM markup; AwaitedLine in React; the labels on the adapters', async () => {
+	const options = [{ value: 'claude', label: 'Claude Code', hint: 'Connected · Max plan', status: ['Ready', 'success'] }];
+	const clock = new dom.Clock({ now: () => Date.parse('2026-10-04T12:01:00Z') });
+	const ended = [];
+	const view = finished => h('div', null, h(ui.Choices, { legend: 'AI engine', type: 'radio', name: 'engine', options, value: null }), h(ui.AwaitedLine, { title: 'Cloning', since: '2026-10-04T12:00:00Z', expected: { median: 120_000, p90: 240_000 }, clock, ended: finished, onEnd: outcome => ended.push(outcome) }));
+	await render(view(null));
+	const strip = node => JSON.parse(JSON.stringify(shape(node)).replace(/aria-describedby=[^"]*/g, 'aria-describedby=id'));
+	const made = new dom.Choices({ legend: 'AI engine', type: 'radio', name: 'engine', options });
+	assert.deepEqual(strip(host.querySelector('.bui-statement')), strip(made.element.querySelector('.bui-statement')));
+	const output = host.querySelector('.bui-statement output');
+	assert.equal(document.getElementById(output.getAttribute('aria-describedby')).textContent, 'Connected · Max plan');
+	assert.equal(host.querySelector('.bui-line').textContent.replace(/\s+/g, ' ').includes('1 min so far · usually about 2 min'), true);
+	await render(view('done'));
+	assert.deepEqual(ended, ['done']);
+	assert.equal(ui.useConfirm.labels.es.accept, 'Confirmar');
+	assert.equal(ui.Dialog.labels.es.close, 'Cerrar');
+	assert.equal(ui.Unavailable.labels.es.owner, 'Quién puede cambiarlo: ');
+	assert.equal(ui.useToaster.labels.es.region, 'Mensajes');
+	assert.equal(ui.AwaitedLine.labels.es.done, 'Listo');
+	await render(h(ui.Unavailable, { title: 'No disponible', reason: 'Motivo', owner: 'Propietarios', labels: ui.Unavailable.labels.es }));
+	assert.match(host.textContent, /Quién puede cambiarlo: Propietarios/);
+});

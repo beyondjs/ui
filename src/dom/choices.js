@@ -2,7 +2,7 @@ import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
 import { glyph } from './core/icons.js';
 import { Ids } from './core/ids.js';
-import { statement, single } from './core/statement.js';
+import { statement, single, said } from './core/statement.js';
 
 /**
  * A group of checkboxes or radio buttons in a fieldset with its legend, hint and error.
@@ -13,7 +13,9 @@ import { statement, single } from './core/statement.js';
  *
  * A radio group with one option that can be chosen is a statement, not a choice (D56, 0.7.0): the
  * legend and the option are shown as text and the value is submitted (`statement: false` keeps the
- * radio). A single checkbox stays a checkbox: it is a yes or no, not a choice among options.
+ * radio). A single checkbox stays a checkbox: it is a yes or no, not a choice among options. The
+ * statement keeps the option's `hint` and its `status` (`[label, tone]`, also drawn beside an option's
+ * label in the group; 0.7.1).
  */
 export class Choices extends Component {
 	#element;
@@ -42,7 +44,7 @@ export class Choices extends Component {
 			this.#stated = one.value;
 			this.#hint = hint ? el('p', { id: `${id}-hint`, class: 'bui-field-hint' }, [content(hint)]) : null;
 			this.#error = el('p', { id: `${id}-error`, class: 'bui-field-error', hidden: true });
-			this.#element = el('div', { class: 'bui-field bui-choices-stated' }, [el('label', { class: 'bui-field-label', for: `${id}-stated` }, [content(legend)]), this.#hint, statement({ text: one.label, value: one.value, name, id: `${id}-stated` }), this.#error]);
+			this.#element = el('div', { class: 'bui-field bui-choices-stated' }, [el('label', { class: 'bui-field-label', for: `${id}-stated` }, [content(legend)]), this.#hint, statement({ text: one.label, value: one.value, name, id: `${id}-stated`, status: one.status ?? null, hint: said(one) }), this.#error]);
 			this.error = error;
 			return;
 		}
@@ -66,7 +68,7 @@ export class Choices extends Component {
 			this.#inputs.push(input);
 			return el('div', { class: `bui-choice${option.disabled ? ' bui-choice-disabled' : ''}` }, [
 				input,
-				el('label', { for: control }, [content(option.label)]),
+				el('label', { for: control }, [content(option.label), option.status?.[0] ? [' ', el('span', { class: `bui-status bui-status-${option.status[1] ?? 'neutral'}` }, [el('span', { class: 'bui-status-dot', 'aria-hidden': 'true' }), option.status[0]])] : null]),
 				note ? el('p', { id: note, class: 'bui-choice-note', text: option.reason ?? option.hint }) : null
 			]);
 		});

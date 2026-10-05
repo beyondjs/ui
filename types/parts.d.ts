@@ -107,6 +107,8 @@ export class Collection<Row = Record<string, unknown>> extends Component {
 }
 
 export class Toaster extends Component {
+	/** The copy in English and Spanish (0.7.1). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options?: { labels?: Copy });
 	show(message: Content, options?: { tone?: 'success' | 'info' | 'warning' | 'danger'; detail?: Content | null; duration?: number }): () => void;
 	clear(): void;

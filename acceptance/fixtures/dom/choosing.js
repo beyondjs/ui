@@ -4,7 +4,7 @@
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, el } from '@beyond-js/ui';
+import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine, el } from '@beyond-js/ui';
 import { shape, accounts, source, recognize, branches, projects, repositories, columns } from '../data/choosing.js';
 
 const log = [];
@@ -28,5 +28,8 @@ localStorage.removeItem('attempt');
 new ProviderWindow({ provider: 'GitHub', href: '../provider.html', origin: location.origin, same: false, read: async () => ({ state: localStorage.getItem('attempt') === 'done' ? 'done' : 'none' }), onend: outcome => log.push(`provider:${outcome}`) }).mount(section('provider'));
 const list = new Collection({ label: 'Repositories', columns, source: Collection.local(repositories), search: false, link: row => `?detail=1&repository=${row.id}` });
 new ListDetail({ list, label: 'Repository', detail: shape.detail ? el('div', {}, [el('h2', { text: 'acme/web' }), el('p', { text: 'Ready · updated from GitHub when the last conversation started.' })]) : null, back: { label: 'Repositories', href: '?' } }).mount(section('listing'));
+const following = section('following');
+new Choices({ legend: 'AI engine', type: 'radio', name: 'engine', options: [{ value: 'claude', label: 'Claude Code', hint: 'Connected with the Max plan · its sign-in lasts until you disconnect it', status: ['Ready', 'success'] }] }).mount(following);
+new AwaitedLine({ title: 'Cloning acme/web', since: Date.now() - 40_000, expected: { median: 60_000, p90: 120_000 } }).mount(following);
 if (shape.sheet) sheet.open();
 window.fixture = { log, stall: false, sheet, opener: opener.element, ready: true };

@@ -256,6 +256,8 @@ export interface UnavailableOptions {
 }
 /** "Not available here", explained in place. */
 export class Unavailable extends Component {
+	/** The copy in English and Spanish (0.7.1). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: UnavailableOptions);
 	static level(value: unknown): 2 | 3 | 4 | 5 | 6;
 }

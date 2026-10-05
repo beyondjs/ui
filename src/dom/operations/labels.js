@@ -118,3 +118,36 @@ export const details = freeze({
 		refused: 'No se pudo copiar. Los detalles están seleccionados: cópialos con el teclado.'
 	}
 });
+
+export const line = freeze({
+	en: {
+		...units.en,
+		running: '{elapsed} so far',
+		usual: '{elapsed} so far · usually about {expected}',
+		slow: 'Taking longer than usual · {elapsed} so far',
+		done: 'Done',
+		took: 'Done · took {duration}',
+		failed: 'Did not finish',
+		check: 'Check again',
+		unchecked: 'The check did not finish. Try again.',
+		ended: '{title}: done',
+		stopped: '{title}: did not finish',
+		late: '{title}: taking longer than usual',
+		blocked: '{title}: {reason}'
+	},
+	es: {
+		...units.es,
+		running: '{elapsed} hasta ahora',
+		usual: '{elapsed} hasta ahora · suele tardar unos {expected}',
+		slow: 'Está tardando más de lo habitual · {elapsed} hasta ahora',
+		done: 'Listo',
+		took: 'Listo · tardó {duration}',
+		failed: 'No terminó',
+		check: 'Comprobar de nuevo',
+		unchecked: 'La comprobación no terminó. Vuelve a intentarlo.',
+		ended: '{title}: listo',
+		stopped: '{title}: no terminó',
+		late: '{title}: está tardando más de lo habitual',
+		blocked: '{title}: {reason}'
+	}
+});

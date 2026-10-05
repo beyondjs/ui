@@ -153,5 +153,27 @@ export const checks = [
 			await popup.locator('#finish').click();
 			await page.waitForFunction(() => window.fixture.log.includes('provider:done'), null, { timeout: 10_000 });
 		}
+	},
+	{
+		name: 'choose: a stated option keeps its hint and state, and a row\'s one-line wait wraps without cutting, at 320 and 1440 px in both themes',
+		consumers: ['dom', 'react19', 'react18'],
+		async run(browser, consumer) {
+			for (const [width, scheme] of [[320, 'dark'], [1440, 'light']]) {
+				const at = `${width}px ${scheme}`;
+				const { page, context } = await open(browser, consumer, { width, scheme });
+				const found = await page.evaluate(() => {
+					const output = document.querySelector('#following .bui-statement output');
+					const hint = document.getElementById(output.getAttribute('aria-describedby'));
+					const line = document.querySelector('#following .bui-line');
+					const box = node => node.getBoundingClientRect();
+					return { hint: hint?.textContent ?? '', below: hint ? box(hint).top >= box(output).bottom - 1 : false, state: document.querySelector('#following .bui-statement .bui-status')?.textContent ?? '', line: line.textContent, right: box(line).right, view: innerWidth };
+				});
+				expect(found.hint.length > 20 && found.below, `${at}: the hint describes the statement on its own line: ${JSON.stringify(found)}`);
+				expect(/Ready|Listo/.test(found.state), `${at}: the state is kept: ${found.state}`);
+				expect(/40 s|41 s|42 s/.test(found.line) && /1 min/.test(found.line), `${at}: the line says the time so far and the usual time: ${found.line}`);
+				expect(found.right <= found.view && !(await overflow(page)), `${at}: the line stays inside the page`);
+				await context.close();
+			}
+		}
 	}
 ];

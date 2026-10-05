@@ -151,3 +151,13 @@ const columns = new Collection({ label: 'Repositories', columns: [{ key: 'name',
 // @ts-expect-error a side sheet is form or standard wide
 void new SideSheet({ title: 'x', width: 'reading' });
 void [viewing, projects, pasted, next, where, menu, slug.edited, columns, refs];
+// 0.7.1: statements keep the hint and state; Spanish for the questions, Dialog, Unavailable and Toaster; AwaitedLine.
+import { AwaitedLine, Question, Toaster as Toasts, alert as tell, prompt as ask, Choices as Group } from '@beyond-js/ui';
+const lone = new Group({ legend: 'AI engine', type: 'radio', options: [{ value: 'claude', label: 'Claude Code', hint: 'Connected', status: ['Ready', 'success'] }] });
+void new Select({ options: [{ value: 'a', label: 'A', hint: 'Only one', status: ['Ready', 'success'] }] });
+void confirm({ title: '¿Borrar?', labels: confirm.labels.es });
+void [Question.labels.es, ask.labels.en, tell.labels.es, Dialog.labels.es, Unavailable.labels.es, Toasts.labels.es, lone];
+const cloning = new AwaitedLine({ title: 'Cloning', since: Date.now(), expected: { median: 60_000, p90: 120_000 }, check: async () => undefined, labels: AwaitedLine.labels.es });
+cloning.update({ reason: 'GitHub didn’t answer' });
+const said: string = cloning.text;
+void said;

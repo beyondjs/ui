@@ -1,10 +1,11 @@
 import { el, content } from '../core/element.js';
 import { glyph } from '../core/icons.js';
-import { statement } from '../core/statement.js';
+import { statement, said } from '../core/statement.js';
 
 /**
  * What a `ChoiceMenu` shows while closed: its button ("Environment: lab", with the state's dot, and
- * its words when the state asks for attention), or, for one option, the statement in its place.
+ * its words when the state asks for attention), or, for one option, the statement in its place, with
+ * the option's state and its detail (0.7.1).
  */
 export class ChoiceFace {
 	/** Draws the button for the option `chosen` (or the placeholder when none is chosen). */
@@ -27,9 +28,7 @@ export class ChoiceFace {
 
 	/** The statement of a menu's one option: its label, the option and its state, with the value. */
 	static stated(label, option, name) {
-		const [state, tone] = option.status ?? [null, null];
-		const extra = state ? [el('span', { class: `bui-status bui-status-${tone ?? 'neutral'}` }, [el('span', { class: 'bui-status-dot', 'aria-hidden': 'true' }), state])] : [];
 		const text = [el('span', { class: 'bui-choice-label', text: label }), ' ', el('span', { class: 'bui-choice-value' }, [content(option.label)])];
-		return statement({ text, value: option.value, name, extra });
+		return statement({ text, value: option.value, name, status: option.status ?? null, hint: said(option) });
 	}
 }

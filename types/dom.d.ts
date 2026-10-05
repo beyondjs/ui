@@ -123,7 +123,7 @@ export class Field extends Component {
 	focus(): void;
 }
 
-export interface ChoiceOption { value: string; label: Content; hint?: string; disabled?: boolean; reason?: string }
+export interface ChoiceOption { value: string; label: Content; hint?: string; disabled?: boolean; reason?: string; /** The option's state, beside its label and in its statement (0.7.1) */ status?: [string, Tone | 'progress'] | null }
 export class Choices extends Component {
 	constructor(options: { legend: Content; type?: 'checkbox' | 'radio'; name?: string | null; options: ChoiceOption[]; value?: string | string[] | null; hint?: Content | null; error?: string | null; required?: boolean; onchange?: ((value: string | string[] | null) => void) | null; /** A radio group's one option is stated as text (default true; 0.7.0) */ statement?: boolean });
 	/** Whether the one option is stated as text (0.7.0). */
@@ -133,7 +133,7 @@ export class Choices extends Component {
 	focus(): void;
 }
 
-export type SelectOption = { value: string; label: Content; disabled?: boolean } | { group: string; options: SelectOption[] };
+export type SelectOption = { value: string; label: Content; disabled?: boolean; /** Shown only when the one option is stated (0.7.1) */ hint?: Content | null; status?: [string, Tone | 'progress'] | null } | { group: string; options: SelectOption[] };
 /**
  * The tooltip that shows a cut name whole on hover and keyboard focus, only while it is cut (0.5.0,
  * D44). It is created on the first hover or focus and hidden from assistive technology.
@@ -172,6 +172,8 @@ export interface DialogOptions {
 	labels?: Copy;
 }
 export class Dialog extends Component {
+	/** The copy in English and Spanish (0.7.1). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: DialogOptions);
 	readonly element: HTMLDialogElement;
 	readonly body: HTMLElement;
@@ -214,12 +216,18 @@ export interface PromptOptions extends QuestionOptions {
 	validate?: (value: string) => string | null;
 }
 export class Question {
+	/** The questions' copy in English and Spanish (0.7.1). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(kind: 'confirm' | 'prompt' | 'alert', options: QuestionOptions | PromptOptions);
 	ask(): Promise<{ value: unknown } | null>;
 }
 export function confirm(options: QuestionOptions): Promise<boolean>;
 export function prompt(options: PromptOptions): Promise<string | null>;
 export function alert(options: QuestionOptions): Promise<void>;
+/** The questions' copy in English and Spanish on each function (0.7.1): `confirm({ …, labels: confirm.labels.es })`. */
+export namespace confirm { const labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> }; }
+export namespace prompt { const labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> }; }
+export namespace alert { const labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> }; }
 
 export class FocusedForm {
 	constructor(form: HTMLFormElement, options: { submit: (values: Record<string, string>, data: FormData) => Promise<unknown>; fields?: Array<{ check(): boolean; focus(): void }>; explain?: ((error: unknown) => string) | null; onsuccess?: ((result: unknown) => void) | null; onbusy?: ((busy: boolean) => void) | null; labels?: Copy });

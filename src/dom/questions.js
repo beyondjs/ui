@@ -5,7 +5,8 @@ import { el, content } from './core/element.js';
 import { Labels } from './core/labels.js';
 import { callout } from './feedback.js';
 
-const defaults = { accept: 'Confirm', cancel: 'Cancel', ok: 'OK', close: 'Close', failure: 'That did not work. Try again or cancel.', lost: 'What is lost', kept: 'What is kept', recovery: 'How to undo' };
+const defaults = { accept: 'Confirm', cancel: 'Cancel', ok: 'OK', close: 'Close', failure: 'That did not work. Try again or cancel.', lost: 'What is lost', kept: 'What is kept', recovery: 'How to undo', optional: '(optional)', invalid: 'Check this value.' };
+const spanish = { accept: 'Confirmar', cancel: 'Cancelar', ok: 'Aceptar', close: 'Cerrar', failure: 'No funcionó. Vuelve a intentarlo o cancela.', lost: 'Lo que se pierde', kept: 'Lo que se conserva', recovery: 'Cómo deshacerlo', optional: '(opcional)', invalid: 'Revisa este valor.' };
 
 /**
  * One in-app question: the dialog behind `confirm`, `prompt` and `alert`.
@@ -14,8 +15,14 @@ const defaults = { accept: 'Confirm', cancel: 'Cancel', ok: 'OK', close: 'Close'
  * page's script and answers through a promise. With `work`, accepting runs that operation while the
  * dialog is busy and cannot be dismissed; a failure stays in the dialog with its message so the
  * person can retry or cancel, and the promise resolves only once the work succeeded or they cancel.
+ * `Question.labels` (also `confirm.labels`, `prompt.labels`, `alert.labels`) holds the copy in English
+ * and Spanish (0.7.1); a prompt's field takes `optional` and `invalid` from the same labels. The
+ * accept button should still be the action's own verb, given as `accept`.
  */
 export class Question {
+	/** The copy in English and Spanish (0.7.1). */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze(spanish) });
+
 	#dialog;
 	#labels;
 	#options;
@@ -35,7 +42,7 @@ export class Question {
 			type: kind === 'prompt' ? 'submit' : 'button',
 			onclick: kind === 'prompt' ? null : () => this.#answer(true)
 		});
-		if (kind === 'prompt') this.#field = new Field({ label: options.label, value: options.value ?? '', hint: options.hint, required: options.required ?? true, type: options.type ?? 'text', messages: options.messages, validate: options.validate });
+		if (kind === 'prompt') this.#field = new Field({ label: options.label, value: options.value ?? '', hint: options.hint, required: options.required ?? true, type: options.type ?? 'text', messages: options.messages, validate: options.validate, labels: { optional: this.#labels.text('optional'), invalid: this.#labels.text('invalid') } });
 		this.#cancel = cancel;
 		const buttons = [cancel?.element, this.#accept.element].filter(Boolean);
 		const body = [
@@ -141,3 +148,8 @@ export async function prompt(options) {
 export async function alert(options) {
 	await new Question('alert', options).ask();
 }
+
+// The questions' copy in English and Spanish, also reachable from each function: `confirm({ …, labels: confirm.labels.es })`.
+confirm.labels = Question.labels;
+prompt.labels = Question.labels;
+alert.labels = Question.labels;

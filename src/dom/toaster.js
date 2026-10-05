@@ -15,6 +15,9 @@ const defaults = { region: 'Messages', dismiss: 'Dismiss' };
  * inbox items for things that happened elsewhere or later.
  */
 export class Toaster extends Component {
+	/** The copy in English and Spanish (0.7.1). */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ region: 'Mensajes', dismiss: 'Descartar' }) });
+
 	#element;
 	#labels;
 	#polite;

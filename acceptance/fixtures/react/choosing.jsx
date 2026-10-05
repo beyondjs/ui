@@ -5,7 +5,7 @@ import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button } from '@beyond-js/ui/react';
+import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine } from '@beyond-js/ui/react';
 import { Collection as List } from '@beyond-js/ui';
 import { shape, accounts, source, recognize, branches, projects, repositories, columns } from '../data/choosing.js';
 
@@ -15,6 +15,7 @@ const labels = Picker.labels.es;
 const named = { items: accounts, connect: { label: 'Instalar en otra organización de GitHub', onSelect: () => log.push('connect') } };
 const find = source(log);
 const rows = List.local(repositories);
+const began = Date.now() - 40_000;
 
 function Choosing() {
 	const [open, setOpen] = useState(shape.sheet);
@@ -38,6 +39,10 @@ function Choosing() {
 				<CopyMessage text="¿Puedes aprobar la aplicación de Beyond para acme en GitHub? Permite que Beyond lea los repositorios que elijamos para nuestros proyectos." label="Mensaje para un propietario de acme" labels={CopyMessage.labels.es} />
 			</section>
 			<section id="provider"><ProviderWindow provider="GitHub" href="../provider.html" origin={location.origin} same={false} labels={ProviderWindow.labels.es} read={async () => ({ state: localStorage.getItem('attempt') === 'done' ? 'done' : 'none' })} onEnd={outcome => log.push(`provider:${outcome}`)} /></section>
+			<section id="following">
+				<Choices legend="Motor de IA" type="radio" name="engine" value={null} options={[{ value: 'claude', label: 'Claude Code', hint: 'Conectado con el plan Max · su inicio de sesión dura hasta que lo desconectes', status: ['Listo', 'success'] }]} />
+				<AwaitedLine title="Clonando acme/web" since={began} expected={{ median: 60_000, p90: 120_000 }} labels={AwaitedLine.labels.es} />
+			</section>
 			<section id="listing"><ListDetail label="Repositorio" list={<Collection label="Repositorios" columns={columns} source={rows} search={false} labels={List.labels.es} link={row => `?detail=1&repository=${row.id}`} />} detail={detail} back={{ label: 'Repositorios', href: '?' }} /></section>
 		</>
 	);

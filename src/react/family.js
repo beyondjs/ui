@@ -138,9 +138,12 @@ export function Unavailable({ title, reason, owner = null, action = null, second
 			{ className: 'bui-unavailable-body' },
 			h(`h${Missing.level(level)}`, { id, className: 'bui-unavailable-title' }, title),
 			h('p', { className: 'bui-unavailable-reason' }, reason),
-			owner ? h('p', { className: 'bui-unavailable-owner' }, h('span', { className: 'bui-unavailable-label' }, labels.owner ?? 'Who can change this: '), owner) : null,
+			owner ? h('p', { className: 'bui-unavailable-owner' }, h('span', { className: 'bui-unavailable-label' }, labels.owner ?? Missing.labels.en.owner), owner) : null,
 			code ? h('p', { className: 'bui-unavailable-code' }, h(Badge, { label: code, tone: 'neutral' })) : null,
 			action || secondary ? h('div', { className: 'bui-unavailable-actions' }, action, secondary) : null
 		)
 	);
 }
+
+// The copy in English and Spanish, as on the DOM classes (0.7.1).
+Unavailable.labels = Missing.labels;

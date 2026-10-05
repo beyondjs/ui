@@ -15,7 +15,7 @@ export { Collection } from './collection.js';
 export { Header, Disclosure, ActionMenu, Help, Tooltip } from './chrome.js';
 export { FamilyBar, ProductNav, Unavailable, Sidebar } from './family.js';
 export { NotificationEntry, NotificationInbox, useToaster } from './notifications.js';
-export { Steps, Awaited, Freshness, TechnicalDetails } from './operations.js';
+export { Steps, Awaited, AwaitedLine, Freshness, TechnicalDetails } from './operations.js';
 export { Clock } from '../dom/time/clock.js';
 export { confirm, prompt, alert } from '../dom/questions.js';
 export { availability } from '../dom/availability.js';

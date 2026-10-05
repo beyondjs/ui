@@ -1,5 +1,6 @@
 import { Steps as List } from '../dom/operations/steps.js';
 import { Awaited as Card } from '../dom/operations/awaited.js';
+import { AwaitedLine as Line } from '../dom/operations/line.js';
 import { Freshness as Fresh } from '../dom/operations/freshness.js';
 import { TechnicalDetails as Facts } from '../dom/operations/details.js';
 import { Clock } from '../dom/time/clock.js';
@@ -34,6 +35,18 @@ export function Awaited({ title, since = null, expected = null, steps = null, re
 	return h('div', { ref: host, className: 'bui-host' });
 }
 
+/**
+ * `Awaited` in one line, for a row (0.7.1): "Cloning · 40 s so far · usually about 1 min". `check` and
+ * `onEnd` are called with the latest props; `ended` (`'done'` or `'failed'`) ends it once.
+ */
+export function AwaitedLine({ title, since = null, expected = null, reason = null, check = null, ended = null, onEnd = null, clock = Clock.system, locale = undefined, labels }) {
+	const latest = useLatest({ check, onEnd });
+	const [host, row] = useInstance(() => new Line({ title, since, expected, reason, check: check ? () => latest.current.check?.() : null, onend: outcome => latest.current.onEnd?.(outcome), clock, locale, labels }), [clock, locale, labels, Boolean(check)]);
+	useSync(row, current => current.update({ title, since, expected, reason }), [title, String(since), JSON.stringify(expected), reason]);
+	useSync(row, current => ended && current.end(ended), [ended]);
+	return h('span', { ref: host, className: 'bui-host' });
+}
+
 /** A reason whose action's `onSelect` is read from the latest props when chosen. */
 function relay(reason, latest) {
 	if (!reason?.text) return null;
@@ -58,5 +71,6 @@ export function TechnicalDetails({ text = '', request = null, time = null, open 
 // The copy in English and Spanish, as on the DOM classes: `<Steps labels={Steps.labels.es} />`.
 Steps.labels = List.labels;
 Awaited.labels = Card.labels;
+AwaitedLine.labels = Line.labels;
 Freshness.labels = Fresh.labels;
 TechnicalDetails.labels = Facts.labels;

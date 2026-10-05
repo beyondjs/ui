@@ -243,3 +243,12 @@
 .bui-field-suggested[hidden] {
 	display: none;
 }
+
+/* A statement keeps its option's hint (0.7.1): on its own line, muted, describing the text. */
+.bui-statement-hint {
+	flex-basis: 100%;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	overflow-wrap: anywhere;
+}

@@ -25,6 +25,9 @@ const defaults = { close: 'Close' };
  * can finish. `open()` returns a promise of the value given to `close(value)`; a dismissal gives null.
  */
 export class Dialog extends Component {
+	/** The copy in English and Spanish (0.7.1). */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ close: 'Cerrar' }) });
+
 	#element;
 	#heading;
 	#body;

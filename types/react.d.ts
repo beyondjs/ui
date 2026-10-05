@@ -237,6 +237,13 @@ export function TechnicalDetails(props: DetailsRecord & { open?: boolean; locale
 type Copies = { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 export namespace Steps { const labels: Copies; }
 export namespace Awaited { const labels: Copies; }
+/** `Awaited` in one line, for a row (0.7.1); `ended` ends it once, `check` and `onEnd` come from the latest props. */
+export function AwaitedLine(props: { title: string; since?: Moment | null; expected?: Expected | null; reason?: string | null; check?: (() => Promise<unknown>) | null; ended?: 'done' | 'failed' | null; onEnd?: ((outcome: 'done' | 'failed') => void) | null; clock?: Clock; locale?: string; labels?: Copy }): ReactElement;
+export namespace AwaitedLine { const labels: Copies; }
+export namespace Dialog { const labels: Copies; }
+export namespace useConfirm { const labels: Copies; }
+export namespace Unavailable { const labels: Copies; }
+export namespace useToaster { const labels: Copies; }
 export namespace Freshness { const labels: Copies; }
 export namespace TechnicalDetails { const labels: Copies; }
 

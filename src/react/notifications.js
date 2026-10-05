@@ -113,3 +113,6 @@ export function useToaster(labels) {
 	}, [JSON.stringify(labels ?? {})]);
 	return useMemo(() => ({ show: (message, options) => living(toaster)?.show(message, options), clear: () => living(toaster)?.clear() }), [toaster]);
 }
+
+// The copy in English and Spanish, as on the DOM class (0.7.1): `useToaster(useToaster.labels.es)`.
+useToaster.labels = Toaster.labels;
