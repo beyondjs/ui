@@ -25,7 +25,9 @@ Tarball: `beyond-ui-0.7.9.tgz`, `sha512-dqwmDOvLtD+AiBYS0qi3hZrSnAW809h+ph8O7Oww
 
 ## Accounts' driver
 
-Accounts' driver runs against the live composition once it restarts on 0.7.9, so that no prebundle of an earlier release is served. The family reference's record of this round holds the result.
+Accounts' interface driver (`frontend/test/browser.mjs`) ran against the live composition, which the coordinating session restarted on 0.7.9 so that no prebundle of an earlier release was served. The run used accounts `b65dcd0`, `ACCOUNTS_UI=http://accounts.beyond.localhost:5190`, and `ACCOUNTS_RETURN` on Projects' origin in the composition, so the arrival line is offered and measured.
+
+**Result: 54 screens, 0 findings.** On 0.7.8 the same driver found 24 findings, all the "Organizations" crumb under 24 px.
 
 ## What stays open
 
