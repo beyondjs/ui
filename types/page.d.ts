@@ -81,9 +81,10 @@ export interface TabItem {
 
 /** A resource's areas as tabs under its header, drawn like `ProductNav`. */
 export class Tabs extends Component {
-	/** The copy in English and Spanish (0.7.2). */
+	/** The copy in English and Spanish (0.7.2; `named` since 0.7.6). */
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
-	constructor(options: { items?: Array<TabItem | null | false>; label?: string | null; onnavigate?: ((item: TabItem, event: MouseEvent) => void) | null; labels?: { nav?: string } });
+	/** `label` is the accessible name as given; `name` names what the tabs belong to ("Sections of {name}", 0.7.6). */
+	constructor(options: { items?: Array<TabItem | null | false>; label?: string | null; name?: string | null; onnavigate?: ((item: TabItem, event: MouseEvent) => void) | null; labels?: { nav?: string; named?: string } });
 	items: Array<TabItem | null | false>;
 }
 

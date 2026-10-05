@@ -5,7 +5,7 @@ import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { Select } from '../select.js';
 import { callout, loading } from '../feedback.js';
-import { defaults, copies } from './labels.js';
+import { Cause, defaults, copies } from './labels.js';
 import { Moment } from './moment.js';
 import { Feed } from './feed.js';
 import { NoticeList } from './list.js';
@@ -153,7 +153,7 @@ export class NotificationInbox extends Component {
 		this.#everything.hidden = !(feed.state === 'ready' && feed.items.some(item => !item.read));
 		if (feed.state === 'more') return;
 		if (feed.state === 'loading') return fill(this.#body, [loading(words.text('loading'))]);
-		if (feed.state === 'unavailable') return fill(this.#body, [callout({ tone: 'info', title: words.text('unavailable') })]);
+		if (feed.state === 'unavailable') return fill(this.#body, [callout({ tone: 'info', title: Cause.text(words, feed.reason) })]);
 		if (feed.state === 'failed') {
 			const retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', onclick: () => this.#retry() }, [glyph('refresh'), el('span', { text: words.text('retry') })]);
 			return fill(this.#body, [callout({ tone: 'danger', title: words.text('failure'), actions: [retry] })]);

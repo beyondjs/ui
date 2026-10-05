@@ -1,5 +1,6 @@
 import { el, content } from './core/element.js';
 import { glyph } from './core/icons.js';
+import { Labels } from './core/labels.js';
 
 /**
  * Stateless feedback builders: status, badge, count, callout, loading and skeleton. Each returns a
@@ -60,3 +61,18 @@ export function hidden(text) {
 }
 
 loading.labels = Object.freeze({ en: 'Loading…', es: 'Cargando…' });
+
+/**
+ * A loading line that names what it waits for (0.7.6): `loading`, `opening` or `reading`, each with
+ * `{name}` (the thing as the product calls it, with its article: "the conversation", «la conversación»).
+ */
+loading.names = Object.freeze({
+	en: Object.freeze({ loading: 'Loading {name}…', opening: 'Opening {name}…', reading: 'Reading {name}…' }),
+	es: Object.freeze({ loading: 'Cargando {name}…', opening: 'Abriendo {name}…', reading: 'Leyendo {name}…' })
+});
+
+/** The text of a named loading line: `loading(loading.text({ name, kind, language }))`; `kind` defaults to `loading`. */
+loading.text = ({ name, kind = 'loading', language = 'en' }) => {
+	const names = loading.names[language] ?? loading.names.en;
+	return new Labels(names).text(kind in names ? kind : 'loading', { name });
+};

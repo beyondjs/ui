@@ -21,6 +21,8 @@ export interface NoticeSource {
 export interface NoticeSummary {
 	/** False when the aggregation cannot be reached or is not configured. */
 	available?: boolean;
+	/** Why it is unavailable: `not_configured`, `not_platform_session`, `session_rejected`, `projects_unavailable` or `accounts_unavailable` (0.7.6). */
+	reason?: string | null;
 	/** Unread count, or null when unknown. Beyond Projects counts up to a bound (0–99). */
 	unread?: number | null;
 	/** True when counting stopped at the bound: the count is shown as "N+". */
@@ -33,6 +35,8 @@ export interface NoticeSummary {
 
 export interface NoticePage {
 	available?: boolean;
+	/** Why it is unavailable, as on `NoticeSummary`; the inbox's sentence says it (0.7.6). */
+	reason?: string | null;
 	items: Notice[];
 	next?: unknown;
 	/** Products whose items are hidden because they did not answer (a product relay's shape). */

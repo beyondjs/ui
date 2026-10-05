@@ -4,7 +4,7 @@ import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { loading } from '../feedback.js';
-import { defaults, copies } from './labels.js';
+import { Cause, defaults, copies } from './labels.js';
 import { Moment } from './moment.js';
 import { Feed } from './feed.js';
 import { NoticeList } from './list.js';
@@ -176,7 +176,7 @@ export class NotificationEntry extends Disclosure {
 			return;
 		}
 		this.#wait(false);
-		if (feed.state === 'unavailable') return this.#panel.unavailable(words.text('unavailable'));
+		if (feed.state === 'unavailable') return this.#panel.unavailable(Cause.text(words, feed.reason));
 		if (feed.state === 'failed') return this.#panel.failed(words.text('failure'));
 		const partial = this.#list.partial(feed.missing);
 		if (!feed.items.length) return this.#panel.show([partial, el('p', { class: 'bui-notify-empty', text: words.text('empty') })]);

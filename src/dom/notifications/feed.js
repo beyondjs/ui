@@ -4,10 +4,11 @@ import { Reach } from './reach.js';
  * Reading pages of notifications through the consumer's adapter.
  *
  * The adapter follows `beyond-notifications/1` as the product relays it:
- * `list({ state, product, cursor, limit })` resolves `{ items, next, unavailable?, sources?, available? }`.
- * `available: false` means the aggregation itself cannot be reached (for example Projects is not
- * configured); `unavailable` (product ids) or `sources` entries with `state: 'unavailable'` name
- * products whose items are hidden because they did not answer (see `Reach`).
+ * `list({ state, product, cursor, limit })` resolves
+ * `{ items, next, unavailable?, sources?, available?, reason? }`. `available: false` means the
+ * aggregation itself cannot be reached (for example Projects is not configured), and `reason` names
+ * why (`Cause.codes`); `unavailable` (product ids) or `sources` entries with `state: 'unavailable'`
+ * name products whose items are hidden because they did not answer (see `Reach`).
  * Only the latest request publishes. Nothing is kept once `clear()` runs, so no private text
  * outlives the view that showed it.
  */
@@ -20,9 +21,15 @@ export class Feed {
 	#state = 'idle';
 	#error = null;
 	#request = null;
+	#reason = null;
 
 	constructor(adapter) {
 		this.#adapter = adapter;
+	}
+
+	/** Why the aggregation is unavailable, as the relay's `reason` code, or null (0.7.6). */
+	get reason() {
+		return this.#reason;
 	}
 
 	/** `idle`, `loading`, `more`, `ready`, `failed` or `unavailable`. */
@@ -75,6 +82,7 @@ export class Feed {
 		this.#missing = [];
 		this.#state = 'idle';
 		this.#error = null;
+		this.#reason = null;
 	}
 
 	async #run(request, append) {
@@ -83,12 +91,14 @@ export class Feed {
 		this.#request = request;
 		this.#state = append ? 'more' : 'loading';
 		this.#error = null;
+		this.#reason = null;
 		try {
 			const answer = await this.#adapter.list(request);
 			if (sequence !== this.#sequence) return false;
 			if (answer?.available === false) {
 				this.#items = [];
 				this.#state = 'unavailable';
+				this.#reason = answer.reason ?? null;
 				return true;
 			}
 			this.#items = append ? [...this.#items, ...(answer?.items ?? [])] : [...(answer?.items ?? [])];

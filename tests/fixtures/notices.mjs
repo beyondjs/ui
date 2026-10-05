@@ -1,7 +1,7 @@
 /**
  * A notification adapter over in-memory items, shaped as a product's relay of
  * `beyond-notifications/1` answers. Switches: `down` (requests fail), `absent` (aggregation not
- * configured: `available: false`), `missing` (products whose items are hidden) and `gone` (ids the
+ * configured: `available: false`, with `reason` when set), `missing` (products whose items are hidden) and `gone` (ids the
  * producer no longer shows). `calls` records every call.
  *
  * `shape` selects how answers state reach: `relay` (default) names hidden products in
@@ -11,6 +11,8 @@
 export class Notices {
 	down = false;
 	absent = false;
+	/** The `reason` an absent aggregation answers with (0.7.6), or null for none. */
+	reason = null;
 	missing = [];
 	gone = new Set();
 	calls = [];
@@ -36,7 +38,7 @@ export class Notices {
 			return null;
 		};
 		return {
-			summary: async () => call('summary') ?? (this.absent ? { available: false } : this.#summary()),
+			summary: async () => call('summary') ?? (this.absent ? this.#absence({}) : this.#summary()),
 			list: async request => call('list', request) ?? this.#page(request),
 			read: async target => call('read', target) ?? this.#mark(target, true),
 			unread: async ids => call('unread', ids) ?? this.#mark(ids, false),
@@ -61,6 +63,10 @@ export class Notices {
 		return { sources: products.map(product => ({ product, state: this.missing.includes(product) ? 'unavailable' : 'available' })) };
 	}
 
+	#absence(answer) {
+		return this.reason ? { available: false, reason: this.reason, ...answer } : { available: false, ...answer };
+	}
+
 	#summary() {
 		const unread = this.visible.filter(item => !item.read).length;
 		if (this.shape !== 'projects') return { unread, ...this.reach };
@@ -68,7 +74,7 @@ export class Notices {
 	}
 
 	#page({ state = 'all', product = null, cursor = null, limit = 20 }) {
-		if (this.absent) return { available: false, items: [] };
+		if (this.absent) return this.#absence({ items: [] });
 		const found = this.visible.filter(item => (state === 'all' || !item.read) && (!product || item.product === product));
 		const start = cursor ?? 0;
 		return { items: found.slice(start, start + limit).map(item => ({ ...item })), next: start + limit < found.length ? start + limit : null, ...this.reach };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Glyph } from '../dom/core/icons.js';
+import { loading } from '../dom/feedback.js';
 import { h } from './hooks.js';
 
 const { useCallback, useRef, useState, useEffect } = React;
@@ -114,5 +115,7 @@ export function Skeleton({ lines = 3 }) {
 	return h('div', { className: 'bui-skeleton', 'aria-hidden': 'true' }, Array.from({ length: lines }, (_, index) => h('span', { key: index, className: 'bui-skeleton-line' })));
 }
 
-// The default label in English and Spanish, as the DOM `loading` builder's (0.7.2).
-Loading.labels = Object.freeze({ en: 'Loading…', es: 'Cargando…' });
+// The default label in English and Spanish, and the named lines (0.7.6), as the DOM `loading` builder's.
+Loading.labels = loading.labels;
+Loading.names = loading.names;
+Loading.text = loading.text;

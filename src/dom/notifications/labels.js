@@ -9,6 +9,12 @@ export const defaults = {
 	failure: 'Notifications could not be loaded.',
 	retry: 'Try again',
 	unavailable: 'Notifications are unavailable right now. Everything else works.',
+	cause: 'Notifications are unavailable right now because {reason}. Everything else works.',
+	not_configured: 'this installation is not connected to Beyond Projects',
+	not_platform_session: 'your session is not a Beyond Accounts session',
+	session_rejected: 'Beyond Accounts did not accept your session',
+	projects_unavailable: 'Beyond Projects did not answer',
+	accounts_unavailable: 'Beyond Accounts did not answer',
 	partial: ({ products }) => `Some products could not be reached (${products}). Their notifications are hidden until they answer.`,
 	all: 'View all notifications',
 	everything: 'Mark all as read',
@@ -37,6 +43,12 @@ export const spanish = {
 	failure: 'No se pudieron cargar las notificaciones.',
 	retry: 'Reintentar',
 	unavailable: 'Las notificaciones no están disponibles ahora. Todo lo demás funciona.',
+	cause: 'Las notificaciones no están disponibles ahora porque {reason}. Todo lo demás funciona.',
+	not_configured: 'esta instalación no está conectada a Beyond Projects',
+	not_platform_session: 'tu sesión no es una sesión de Beyond Accounts',
+	session_rejected: 'Beyond Accounts no aceptó tu sesión',
+	projects_unavailable: 'Beyond Projects no respondió',
+	accounts_unavailable: 'Beyond Accounts no respondió',
 	partial: ({ products }) => `Algunos productos no respondieron (${products}). Sus notificaciones no se muestran hasta que respondan.`,
 	all: 'Ver todas las notificaciones',
 	everything: 'Marcar todas como leídas',
@@ -53,6 +65,20 @@ export const spanish = {
 	updates: ({ count }) => (count === 1 ? '1 novedad' : `${count} novedades`),
 	hide: 'Ocultar las novedades anteriores'
 };
+
+/**
+ * Why the inbox is unavailable, in the person's words (0.7.6). A relay's `{ available: false, reason }`
+ * names the reason with one of `beyond-notifications/1`'s codes; the sentence says it when the code is
+ * one of these, and is the plain `unavailable` sentence otherwise. Each code is also a label key.
+ */
+export class Cause {
+	static codes = Object.freeze(['not_configured', 'not_platform_session', 'session_rejected', 'projects_unavailable', 'accounts_unavailable']);
+
+	/** The sentence for `reason`, from a component's `Labels`. */
+	static text(words, reason) {
+		return Cause.codes.includes(reason) ? words.text('cause', { reason: words.text(reason) }) : words.text('unavailable');
+	}
+}
 
 /** Both sets, as `NotificationEntry.labels` and `NotificationInbox.labels`. */
 export const copies = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze(spanish) });

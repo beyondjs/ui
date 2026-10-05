@@ -85,9 +85,9 @@ export function Arrival({ product, href, onDismiss = null, onNavigate = null, la
 }
 
 /** A resource's areas as tabs, driven by the DOM `Tabs` class. */
-export function Tabs({ items, label = null, onNavigate = null, labels }) {
+export function Tabs({ items, label = null, name = null, onNavigate = null, labels }) {
 	const latest = useLatest(onNavigate);
-	const [host, row] = useInstance(() => new Row({ items: [], label, labels, onnavigate: onNavigate ? (item, event) => latest.current?.(item, event) : null }), [label, labels, Boolean(onNavigate)]);
+	const [host, row] = useInstance(() => new Row({ items: [], label, name, labels, onnavigate: onNavigate ? (item, event) => latest.current?.(item, event) : null }), [label, name, labels, Boolean(onNavigate)]);
 	useSync(row, current => (current.items = items), [JSON.stringify(items)]);
 	return h('div', { ref: host, className: 'bui-host' });
 }

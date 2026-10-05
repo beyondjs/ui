@@ -166,3 +166,6 @@ import { consequence, FocusedForm as Submission, FamilyBar as Bar, NotificationE
 void confirm({ title: '¿Borrar?', consequence: { affected: ['2 conversaciones'], costing: 'El disco' }, labels: confirm.labels.es });
 const listed: HTMLElement | null = consequence({ affected: 'x', costing: ['y'] }, consequence.labels.es);
 void [listed, consequence.order, Submission.labels.es, Bar.labels.es, Bell.labels.es, busy.labels.es, Top.labels.es, Explained.labels.es, Heading.labels.es, Row.labels.es, availability[0].labels.es];
+// 0.7.6: a named loading line and tabs named by what they belong to
+const line076: string = busy.text({ name: 'la conversación', kind: 'reading', language: 'es' });
+void [line076, busy.names.en.opening, new Row({ items: [], name: 'web', labels: Row.labels.es })];

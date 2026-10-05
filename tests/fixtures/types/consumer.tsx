@@ -118,6 +118,8 @@ export function Consequential() {
 		<>
 			<Consequence parts={{ affected: <span>2 conversaciones</span>, costing: 'El disco' }} labels={Consequence.labels.es} />
 			<Busy label={Busy.labels.es} />
+			<Busy label={Busy.text({ name: 'Conduict', kind: 'opening' })} />
+			<Tabs name="web" items={[{ label: 'Overview', href: '#o', current: true }]} />
 		</>
 	);
 }

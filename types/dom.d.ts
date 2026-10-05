@@ -259,8 +259,12 @@ export function status(label: Content, tone?: Tone | 'progress'): HTMLElement;
 export function badge(label: Content, tone?: Tone): HTMLElement;
 export function callout(options: { tone?: Exclude<Tone, 'neutral'>; title: Content; body?: Content | null; actions?: Node[]; live?: boolean }): HTMLElement;
 export function loading(label?: string): HTMLElement;
-/** The default label in English and Spanish (0.7.2). */
-export namespace loading { const labels: { readonly en: string; readonly es: string }; }
+/** The default label in English and Spanish (0.7.2), and the named lines (0.7.6). */
+export namespace loading {
+	const labels: { readonly en: string; readonly es: string };
+	const names: { readonly en: Readonly<Record<'loading' | 'opening' | 'reading', string>>; readonly es: Readonly<Record<'loading' | 'opening' | 'reading', string>> };
+	function text(options: { name: string; kind?: 'loading' | 'opening' | 'reading'; language?: 'en' | 'es' }): string;
+}
 export function skeleton(lines?: number): HTMLElement;
 export function hidden(text: string): HTMLElement;
 

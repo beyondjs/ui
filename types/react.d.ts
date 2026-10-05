@@ -28,7 +28,7 @@ export function Section(props: { title: ReactNode; description?: ReactNode; acti
 /** The arrival line (D54), driven by the DOM `Arrival`. */
 export function Arrival(props: { product: string; href: string; onDismiss?: (() => void) | null; onNavigate?: ((item: { href: string; url: string }, event: MouseEvent) => void) | null; labels?: Partial<ArrivalLabels> }): ReactElement;
 /** A resource's areas as tabs, driven by the DOM `Tabs`. */
-export function Tabs(props: { items: Array<TabItem | null | false>; label?: string | null; onNavigate?: ((item: TabItem, event: MouseEvent) => void) | null; labels?: { nav?: string } }): ReactElement;
+export function Tabs(props: { items: Array<TabItem | null | false>; label?: string | null; name?: string | null; onNavigate?: ((item: TabItem, event: MouseEvent) => void) | null; labels?: { nav?: string; named?: string } }): ReactElement;
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'onClick'> {
 	label?: ReactNode;
@@ -288,7 +288,7 @@ export type { Ref };
 // 0.7.2: the copy in English and Spanish on the React components, as on the DOM classes.
 export namespace FamilyBar { const labels: Copies; } export namespace Sidebar { const labels: Copies; } export namespace ProductNav { const labels: Copies; } export namespace Header { const labels: Copies; } export namespace Help { const labels: Copies; } export namespace NotificationInbox { const labels: Copies; }
 export namespace PageHeader { const labels: Copies; } export namespace Tabs { const labels: Copies; } export namespace FocusedForm { const labels: Copies; } export namespace Field { const labels: Copies; } export namespace Collection { const labels: Copies; }
-export namespace Loading { const labels: { readonly en: string; readonly es: string }; }
+export namespace Loading { const labels: { readonly en: string; readonly es: string }; const names: typeof import('./dom.js').loading.names; const text: typeof import('./dom.js').loading.text; }
 /** The consequence of a destructive or irreversible action (D17, 0.7.2), the DOM builder's markup. */
 export function Consequence(props: { parts: { affected?: ReactNode; lost?: ReactNode; kept?: ReactNode; costing?: ReactNode; recovery?: ReactNode } | null; labels?: Copy }): ReactElement | null;
 export namespace Consequence { const labels: Copies; }
