@@ -81,7 +81,7 @@ export const checks = [
 					expect(Math.abs(found.start - gutter(found.region)) <= 1, `${at}: the H1 starts ${found.start}px from the navigation, expected ${gutter(found.region)} (region ${found.region})`);
 					expect(Math.abs(found.arrival - found.start) <= 1, `${at}: the arrival line starts where the H1 does: ${found.arrival} / ${found.start}`);
 					expect(found.longest <= 80, `${at}: a line of ${found.longest} characters`);
-					expect(found.targets.length === 2 && found.targets.every(height => height >= 24), `${at}: the crumb and the way back are 24 px targets: ${found.targets}`);
+					expect(found.targets.length === 2 && found.targets.every(height => height >= 25), `${at}: the crumb and the way back are 24 px targets with a pixel to spare, so no rounding takes them under 24: ${found.targets}`);
 					if (found.region >= 640) expect(found.lines.every(({ height, line }) => height <= line + 1), `${at}: the crumbs' and the arrival's lines keep their height: ${JSON.stringify(found.lines)}`);
 					// From 640 px the actions sit centred on the H1's line, or wrap below it when the title leaves them no room
 					const wrapped = found.actions.top >= found.heading.bottom - 1;

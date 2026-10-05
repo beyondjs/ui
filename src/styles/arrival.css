@@ -19,14 +19,15 @@
 }
 /*
  * A standalone link on a small line (a crumb, the arrival line's way back) is a 24 px target (WCAG 2.5.8)
- * without changing the line: the block padding grows the hit area, and the equal negative margin gives
- * the space back (0.7.7). The fixed values are the fallback where `lh` is not known.
+ * without changing the line: the block padding grows the hit area to about 26 px, a pixel of slack on each
+ * side so a fractional layout never rounds it under 24 (0.7.9), and the equal negative margin gives the
+ * space back (0.7.7). The fixed values are the fallback where `lh` is not known.
  */
 .bui-crumbs a,
 .bui-arrival-back {
 	display: inline-block;
-	padding-block: 3px;
-	padding-block: max(0px, calc((24px - 1lh) / 2));
-	margin-block: -3px;
-	margin-block: min(0px, calc((1lh - 24px) / 2));
+	padding-block: 4px;
+	padding-block: max(1px, calc((26px - 1lh) / 2));
+	margin-block: -4px;
+	margin-block: min(-1px, calc((1lh - 26px) / 2));
 }
