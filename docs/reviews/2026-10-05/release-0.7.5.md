@@ -30,6 +30,10 @@ Tarball: `beyond-ui-0.7.5.tgz`, `sha512-IaNNNkOju1E/XxOvy0iRl3KHoaOBhRlCjINh8ryC
 
 Projects is the only consumer of `ProviderWindow`, through `service/src/interface/assets/trip.js`. Its landing closing itself and its channel keep working, and its own channel can be removed in favor of this one. One case to check in Safari: Projects' second leg navigates the named window with `window.open(address, 'beyond-provider')` while that window is on another origin with no opener. WebKit may refuse it as it refused the page's `close()`. This release's acceptance does not exercise that navigation, because its two legs run in place.
 
+## What stays open
+
+- **A multi-leg window's hand-over is deferred on purpose.** The coordinating session decided this on 2026-10-05. In WebKit the page cannot send a window that has no opener to a second leg by its name. Projects solves this itself (projects `573f56b`): the waiting landing posts `beyond-provider.waiting` on the `BroadcastChannel`, the page answers `beyond-provider.next` with the address, and the window replaces its own location. It passed in Chrome, Firefox and WebKit. `ProviderWindow` gains a generic `next(href)` and a landing helper only when a second product needs a window with several legs.
+
 ## Family reference synchronization
 
 There is no visible change of the reference's own. The suite's family reference records the vendored version with the products' move to it.
