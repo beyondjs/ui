@@ -70,7 +70,7 @@ export const es = {
 		unavailable: 'No disponible',
 		organization: 'Organización: {name}. Cambiar de organización',
 		organizations: 'Organizaciones',
-		role: ({ role }) => ({ owner: 'Propietario', admin: 'Administración', developer: 'Desarrollo', viewer: 'Lectura' })[role] ?? role,
+		role: ({ role }) => ({ owner: 'Propietario', admin: 'Administrador', developer: 'Desarrollador', viewer: 'Lector' })[role] ?? role,
 		project: 'Proyecto: {name}. Cambiar de proyecto',
 		projects: 'Proyectos de {organization}',
 		all: 'Todos los proyectos de {organization}',

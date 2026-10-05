@@ -22,7 +22,7 @@ export const defaults = {
 	every: 'All',
 	product: 'Product',
 	products: 'All products',
-	updates: ({ count }) => `${count} updates`,
+	updates: ({ count }) => (count === 1 ? '1 update' : `${count} updates`),
 	hide: 'Hide earlier updates'
 };
 

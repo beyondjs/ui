@@ -1,6 +1,6 @@
 # Component catalog
 
-Every component of `@beyond-js/ui` 0.7.2: what it is for, its variants and main options, the states it states in words, and its consumers. DOM names come from `@beyond-js/ui` (or `/dom`); React names from `@beyond-js/ui/react`. Every component takes `labels` for its copy (strings with `{placeholders}` or functions of the values) and every DOM class has `mount(parent)` and `destroy()`. Type declarations in `types/` list every option.
+Every component of `@beyond-js/ui` 0.7.3: what it is for, its variants and main options, the states it states in words, and its consumers. DOM names come from `@beyond-js/ui` (or `/dom`); React names from `@beyond-js/ui/react`. Every component takes `labels` for its copy (strings with `{placeholders}` or functions of the values) and every DOM class has `mount(parent)` and `destroy()`. Type declarations in `types/` list every option.
 
 **Consumers** (each product vendors the tarball in its own `tools/` and records its adoption, residual copies and evidence in its own repository; the family reference catalogs them component by component in `branding/src/family/components/consumers.js`): on 0.1.7 or later since 2026-09-28 (the Collection consumers, Delegate, Conduict and Branding, on 0.1.8): the Beyond desktop (plain DOM), the Delegate application (React, the whole application), Branding (plain DOM), the Conduict interface and its Desktop surface (plain DOM), the Projects interface (plain DOM served by its service), the Snapshots and Accounts frontends and the Workspace client (React), and the CDN administration and backoffice (React, through the package's `Dialog`). Every product that names itself beside the wordmark uses `Lockup`.
 
@@ -187,7 +187,7 @@ const bar = new FamilyBar({
 }).mount(document.body);
 ```
 
-Since 0.7.2 this set ships as `FamilyBar.labels.es` (with `preferences` «Idioma y apariencia» and `docs` «Documentación»), so a product passes `labels: FamilyBar.labels.es` instead of keeping a copy; it reads:
+Since 0.7.2 this set ships as `FamilyBar.labels.es` (with `preferences` «Idioma y apariencia» and `docs` «Documentación»), so a product passes `labels: FamilyBar.labels.es` instead of keeping a copy; since 0.7.3 its roles are Beyond Accounts' own («Desarrollador», «Lector»). It reads:
 
 ```js
 const es = {
@@ -196,7 +196,7 @@ const es = {
 	area: ({ product }) => ({ projects: 'Proyectos de esta organización', workspace: 'Entornos de desarrollo', delegate: 'Proyectos delegados', cdn: 'Aplicaciones', snapshots: 'Capturas', conduict: 'Entornos y conversaciones', accounts: 'Miembros e invitaciones' })[product] ?? '',
 	back: 'Tus organizaciones y proyectos', UNCONFIGURED: 'No se ofrece aquí', NOT_ADMITTED: 'Aún no está abierto para ti', ARCHIVED: 'Proyecto archivado', unavailable: 'No disponible',
 	organization: 'Organización: {name}. Cambiar de organización', organizations: 'Organizaciones', single: 'Organización',
-	role: ({ role }) => ({ owner: 'Propietario', admin: 'Administrador', developer: 'Desarrollo', viewer: 'Lectura', member: 'Miembro' })[role] ?? role,
+	role: ({ role }) => ({ owner: 'Propietario', admin: 'Administrador', developer: 'Desarrollador', viewer: 'Lector', member: 'Miembro' })[role] ?? role,
 	beyond: 'Se abre en Beyond Projects',
 	project: 'Proyecto: {name}. Cambiar de proyecto', choose: 'Elegir un proyecto', projects: 'Proyectos de {organization}', all: 'Todos los proyectos de {organization}',
 	none: '{organization} todavía no tiene proyectos', search: 'Buscar proyectos', nomatch: 'Ningún proyecto coincide con "{query}"', find: 'Buscar en todos los proyectos de {organization}',

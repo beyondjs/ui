@@ -4,7 +4,7 @@ import { Page } from './support/page.mjs';
 import { Notices } from './fixtures/notices.mjs';
 import { inside } from './fixtures/family.mjs';
 
-/** 0.7.2: a confirmation's work affected and what keeps costing, `consequence` for a product's own dialog, and Spanish copy across the package. */
+/** 0.7.2 (and 0.7.3, the role names and singulars): a confirmation's work affected and what keeps costing, `consequence` for a product's own dialog, and Spanish copy across the package. */
 const page = new Page();
 const ui = await import('@beyond-js/ui/dom');
 after(() => page.close());
@@ -78,4 +78,14 @@ test('every component a Spanish page shows carries a Spanish set', async () => {
 	help.destroy();
 	const header = new ui.PageHeader({ title: 'web', crumbs: [{ label: 'Entornos', href: '#' }], labels: ui.PageHeader.labels.es });
 	assert.equal(header.element.querySelector('nav').getAttribute('aria-label'), 'Ruta de navegación');
+});
+
+test('the family bar names roles as Beyond Accounts does, and a count of one reads in the singular (0.7.3)', () => {
+	// Accounts owns the roles: its catalogs say Owner, Administrator, Developer, Viewer and Propietario, Administrador, Desarrollador, Lector
+	const names = set => ['owner', 'admin', 'developer', 'viewer', 'member'].map(role => set.role({ role }));
+	assert.deepEqual(names(ui.FamilyBar.labels.en), ['Owner', 'Administrator', 'Developer', 'Viewer', 'Member']);
+	assert.deepEqual(names(ui.FamilyBar.labels.es), ['Propietario', 'Administrador', 'Desarrollador', 'Lector', 'Miembro']);
+	const updates = set => [1, 2, 12].map(count => set.updates({ count }));
+	assert.deepEqual(updates(ui.NotificationEntry.labels.en), ['1 update', '2 updates', '12 updates']);
+	assert.deepEqual(updates(ui.NotificationEntry.labels.es), ['1 novedad', '2 novedades', '12 novedades']);
 });

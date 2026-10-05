@@ -2,7 +2,8 @@
  * English defaults of the family bar's copy; consumers replace any entry through `labels`.
  *
  * Product names are never translated: they come from the bar's `products` option. Everything else
- * here is copy a product passes in its own language (the component catalog carries a Spanish set).
+ * here is copy a product passes in its own language; the package ships the English and Spanish sets
+ * (`FamilyBar.labels.en` / `.es`), whose role names are Beyond Accounts' own (0.7.3).
  * `area` and `role` are functions of `{ product }` and `{ role }` so a language maps every value.
  */
 const areas = {
@@ -79,7 +80,7 @@ const translated = {
 		conduict: 'Entornos y conversaciones',
 		accounts: 'Miembros e invitaciones'
 	},
-	roles: { owner: 'Propietario', admin: 'Administrador', developer: 'Desarrollo', viewer: 'Lectura', member: 'Miembro' }
+	roles: { owner: 'Propietario', admin: 'Administrador', developer: 'Desarrollador', viewer: 'Lector', member: 'Miembro' }
 };
 
 /** The family bar's copy in Spanish (0.7.2; `FamilyBar.labels.es`), the set the component catalog carried before. */
