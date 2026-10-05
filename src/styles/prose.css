@@ -1,0 +1,45 @@
+/*
+ * Text keeps a readable measure wherever it sits (LR-02): no line past about 80 characters. Every part
+ * that holds a product's sentences takes it, a hint, a reason, a description or a note alike, so a
+ * product's own words stop there in a fluid page, a form or a list (0.7.8); `.bui-reading` gives a
+ * product's own paragraph the same measure. Last in the cascade: a cap never widens anything.
+ */
+.bui-reading,
+.bui-callout-text,
+.bui-empty-body,
+.bui-section-description,
+.bui-page-facts,
+.bui-field-hint,
+.bui-option-description,
+.bui-option-reason,
+.bui-choice-note,
+.bui-choice-detail,
+.bui-unavailable-reason,
+.bui-unavailable-body,
+.bui-picker-status,
+.bui-notice-text,
+.bui-notice-summary,
+.bui-copy-text,
+.bui-awaited-why,
+.bui-awaited-reason,
+.bui-awaited-note,
+.bui-step-reason,
+.bui-line-note,
+.bui-details-text,
+.bui-consequence,
+.bui-question-message,
+.bui-dialog-description,
+.bui-preferences-note,
+.bui-secret-summary,
+.bui-disclosure-help,
+.bui-toast-text,
+.bui-toast-detail,
+.bui-chip-reason,
+.bui-menu-reason {
+	max-width: var(--layout-measure);
+}
+
+/* A statement keeps its hint on a line of its own (`flex-basis: 100%`), so the measure caps the statement whole */
+.bui-statement {
+	max-width: min(100%, var(--layout-measure));
+}

@@ -19,6 +19,7 @@ import { checks as sidebar } from './checks/sidebar.mjs';
 import { checks as operations } from './checks/operations.mjs';
 import { checks as layout } from './checks/layout.mjs';
 import { checks as choosing } from './checks/choosing.mjs';
+import { checks as prose } from './checks/prose.mjs';
 
 /**
  * Browser acceptance of the packed package: `npm pack` → three consumers installed from the tarball
@@ -28,7 +29,7 @@ import { checks as choosing } from './checks/choosing.mjs';
 class Acceptance {
 	#root = fileURLToPath(new URL('..', import.meta.url));
 	#consumers = [new Consumer('dom', 'dom'), new Consumer('react19', 'react', '19.3.0'), new Consumer('react18', 'react', '18.3.1')];
-	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...choosing, ...icons];
+	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...choosing, ...icons, ...prose];
 	#filter = process.argv[2] ?? '';
 
 	async run() {

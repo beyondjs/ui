@@ -72,14 +72,6 @@
 	}
 }
 
-/* Text keeps a readable measure wherever it sits (LR-02): never past about 80 characters. */
-.bui-reading,
-.bui-callout-text,
-.bui-empty-body,
-.bui-section-description,
-.bui-page-facts {
-	max-width: var(--layout-measure);
-}
 .bui-form-width {
 	max-width: var(--layout-form);
 }
