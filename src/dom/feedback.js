@@ -37,8 +37,8 @@ export function callout({ tone = 'info', title, body = null, actions = [], live 
 	]);
 }
 
-/** An announced loading indicator with a visible label. */
-export function loading(label = 'Loading…') {
+/** An announced loading indicator with a visible label; `loading.labels` (0.7.2) holds the default in English and Spanish. */
+export function loading(label = loading.labels.en) {
 	return el('div', { class: 'bui-loading', role: 'status' }, [
 		el('span', { class: 'bui-spinner', 'aria-hidden': 'true' }),
 		el('span', { text: label })
@@ -58,3 +58,5 @@ export function skeleton(lines = 3) {
 export function hidden(text) {
 	return el('span', { class: 'bui-hidden', text });
 }
+
+loading.labels = Object.freeze({ en: 'Loading…', es: 'Cargando…' });

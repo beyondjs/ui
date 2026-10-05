@@ -16,6 +16,9 @@ const defaults = { crumbs: 'Breadcrumb' };
  * bar and the arrival line.
  */
 export class PageHeader extends Component {
+	/** The copy in English and Spanish (0.7.2). */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ crumbs: 'Ruta de navegación' }) });
+
 	#element;
 	#heading;
 	#status;

@@ -2,6 +2,7 @@ import React from 'react';
 import { Page as Region } from '../dom/page/page.js';
 import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
+import { PageHeader as Heading } from '../dom/page/header.js';
 import { Mark } from './simple.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 
@@ -114,3 +115,7 @@ export function ListDetail({ list, detail = null, label = null, back = null }) {
 		)
 	);
 }
+
+// The copy in English and Spanish, as on the DOM classes (0.7.2).
+PageHeader.labels = Heading.labels;
+Tabs.labels = Row.labels;

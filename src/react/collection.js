@@ -49,3 +49,6 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 	}, [JSON.stringify(state)]);
 	return h('div', { ref: host, className: 'bui-host' }, portals.map((portal, index) => ReactDOM.createPortal(portal.content, portal.holder, `cell-${index}`)));
 }
+
+// The copy in English and Spanish, as on the DOM class.
+Collection.labels = List.labels;

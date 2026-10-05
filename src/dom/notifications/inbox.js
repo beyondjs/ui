@@ -5,7 +5,7 @@ import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { Select } from '../select.js';
 import { callout, loading } from '../feedback.js';
-import { defaults } from './labels.js';
+import { defaults, copies } from './labels.js';
 import { Moment } from './moment.js';
 import { Feed } from './feed.js';
 import { NoticeList } from './list.js';
@@ -21,6 +21,8 @@ import { Actions } from './actions.js';
  * is the inbox's `state`; `onstate` reports changes so the product can keep them in its address.
  */
 export class NotificationInbox extends Component {
+	/** The copy in English and Spanish (0.7.2). */
+	static labels = copies;
 	#element;
 	#adapter;
 	#labels;

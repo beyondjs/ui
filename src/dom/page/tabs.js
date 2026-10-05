@@ -9,6 +9,9 @@ const defaults = { nav: 'Sections of this page' };
  * current tab in view on narrow screens. One component for the tabs every product drew on its own.
  */
 export class Tabs extends ProductNav {
+	/** The copy in English and Spanish (0.7.2). */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ nav: 'Secciones de esta página' }) });
+
 	/**
 	 * @param {object} options
 	 * @param {Array<{label: string|Node, href: string, current?: boolean}>} options.items

@@ -269,7 +269,7 @@ export interface NotificationEntryProps {
 	interval?: number;
 	labels?: Copy;
 }
-export const NotificationEntry: ForwardRefExoticComponent<NotificationEntryProps & RefAttributes<NotificationEntryHandle>>;
+export const NotificationEntry: ForwardRefExoticComponent<NotificationEntryProps & RefAttributes<NotificationEntryHandle>> & { labels: Copies };
 export function NotificationInbox(props: {
 	adapter: NotificationAdapter;
 	onOpen?: ((destination: string, item: Notice) => void) | null;
@@ -284,3 +284,12 @@ export function useToaster(labels?: Copy): { show(message: string, options?: { t
 /** `[host, instance]`; `instance` is null until mounted and whenever the rendered instance is already destroyed. */
 export function useInstance<T extends Component>(create: () => T, deps: unknown[], options?: { place?: boolean }): [RefObject<HTMLElement | null>, T | null];
 export type { Ref };
+
+// 0.7.2: the copy in English and Spanish on the React components, as on the DOM classes.
+export namespace FamilyBar { const labels: Copies; } export namespace Sidebar { const labels: Copies; } export namespace ProductNav { const labels: Copies; } export namespace Header { const labels: Copies; } export namespace Help { const labels: Copies; } export namespace NotificationInbox { const labels: Copies; }
+export namespace PageHeader { const labels: Copies; } export namespace Tabs { const labels: Copies; } export namespace FocusedForm { const labels: Copies; } export namespace Field { const labels: Copies; } export namespace Collection { const labels: Copies; }
+export namespace Loading { const labels: { readonly en: string; readonly es: string }; }
+/** The consequence of a destructive or irreversible action (D17, 0.7.2), the DOM builder's markup. */
+export function Consequence(props: { parts: { affected?: ReactNode; lost?: ReactNode; kept?: ReactNode; costing?: ReactNode; recovery?: ReactNode } | null; labels?: Copy }): ReactElement | null;
+export namespace Consequence { const labels: Copies; }
+export { consequence } from './dom.js';

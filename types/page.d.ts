@@ -1,5 +1,5 @@
 /** Types of the family page system (decision D52) and the preferences dialog (D54), re-exported by `@beyond-js/ui` and `/dom`. */
-import type { Component } from './dom.js';
+import type { Component, Copy } from './dom.js';
 import type { Preferences } from './preferences.js';
 
 export type PageTemplate = 'overview' | 'list' | 'detail' | 'settings' | 'task' | 'tool';
@@ -58,6 +58,8 @@ export interface PageHeaderOptions {
 
 /** A page's one header: crumbs, the H1, one status, facts, the line's actions and the tabs. */
 export class PageHeader extends Component {
+	/** The copy in English and Spanish (0.7.2). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: PageHeaderOptions);
 	/** The H1, for focus after a navigation. */
 	readonly heading: HTMLHeadingElement;
@@ -79,6 +81,8 @@ export interface TabItem {
 
 /** A resource's areas as tabs under its header, drawn like `ProductNav`. */
 export class Tabs extends Component {
+	/** The copy in English and Spanish (0.7.2). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: { items?: Array<TabItem | null | false>; label?: string | null; onnavigate?: ((item: TabItem, event: MouseEvent) => void) | null; labels?: { nav?: string } });
 	items: Array<TabItem | null | false>;
 }

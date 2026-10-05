@@ -14,6 +14,9 @@ const defaults = { nav: 'Product' };
  * the family bar.
  */
 export class ProductNav extends Component {
+	/** The copy in English and Spanish (0.7.2). */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ nav: 'Producto' }) });
+
 	#element;
 	#list;
 	#onnavigate;

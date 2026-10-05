@@ -14,6 +14,9 @@ const defaults = { name: 'Help: {topic}', close: 'Close help' };
  * explains and fits a 320px screen. `panel` can be placed elsewhere by the consumer.
  */
 export class Help extends Disclosure {
+	/** The copy in English and Spanish (0.7.2). */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ name: 'Ayuda: {topic}', close: 'Cerrar la ayuda' }) });
+
 	/**
 	 * @param {object} options
 	 * @param {string} options.topic what the help is about; names the button ("Help: Identifier")

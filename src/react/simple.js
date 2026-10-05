@@ -106,10 +106,13 @@ export function Callout({ tone = 'info', title, body = null, actions = null, liv
 	);
 }
 
-export function Loading({ label = 'Loading…' }) {
+export function Loading({ label = Loading.labels.en }) {
 	return h('div', { className: 'bui-loading', role: 'status' }, h('span', { className: 'bui-spinner', 'aria-hidden': 'true' }), h('span', null, label));
 }
 
 export function Skeleton({ lines = 3 }) {
 	return h('div', { className: 'bui-skeleton', 'aria-hidden': 'true' }, Array.from({ length: lines }, (_, index) => h('span', { key: index, className: 'bui-skeleton-line' })));
 }
+
+// The default label in English and Spanish, as the DOM `loading` builder's (0.7.2).
+Loading.labels = Object.freeze({ en: 'Loading…', es: 'Cargando…' });

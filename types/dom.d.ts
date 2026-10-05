@@ -230,6 +230,8 @@ export namespace prompt { const labels: { readonly en: Readonly<Copy>; readonly 
 export namespace alert { const labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> }; }
 
 export class FocusedForm {
+	/** The copy in English and Spanish (0.7.2). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(form: HTMLFormElement, options: { submit: (values: Record<string, string>, data: FormData) => Promise<unknown>; fields?: Array<{ check(): boolean; focus(): void }>; explain?: ((error: unknown) => string) | null; onsuccess?: ((result: unknown) => void) | null; onbusy?: ((busy: boolean) => void) | null; labels?: Copy });
 	readonly busy: boolean;
 	readonly form: HTMLFormElement;
@@ -246,6 +248,8 @@ export class Tooltip extends Component {
 	hide(): void;
 }
 export class Help extends Disclosure {
+	/** The copy in English and Spanish (0.7.2). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: { topic: string; text: Content | Content[]; labels?: Copy; onchange?: ((open: boolean) => void) | null });
 }
 
@@ -255,6 +259,8 @@ export function status(label: Content, tone?: Tone | 'progress'): HTMLElement;
 export function badge(label: Content, tone?: Tone): HTMLElement;
 export function callout(options: { tone?: Exclude<Tone, 'neutral'>; title: Content; body?: Content | null; actions?: Node[]; live?: boolean }): HTMLElement;
 export function loading(label?: string): HTMLElement;
+/** The default label in English and Spanish (0.7.2). */
+export namespace loading { const labels: { readonly en: string; readonly es: string }; }
 export function skeleton(lines?: number): HTMLElement;
 export function hidden(text: string): HTMLElement;
 

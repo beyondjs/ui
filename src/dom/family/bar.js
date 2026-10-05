@@ -3,7 +3,7 @@ import { el } from '../core/element.js';
 import { glyph } from '../core/icons.js';
 import { Labels } from '../core/labels.js';
 import { Header } from '../header.js';
-import { defaults, names } from './labels.js';
+import { defaults, names, spanish } from './labels.js';
 import { Places } from './places.js';
 import { ProductSwitcher } from './switcher.js';
 import { Location } from './location.js';
@@ -28,6 +28,9 @@ import { Manage } from './manage.js';
  * project menu.
  */
 export class FamilyBar extends Component {
+	/** The copy in English and Spanish (0.7.2): `new FamilyBar({ …, labels: FamilyBar.labels.es })`. */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ ...spanish }) });
+
 	#header;
 	#options;
 	#labels;

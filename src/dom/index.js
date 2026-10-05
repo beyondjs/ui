@@ -26,6 +26,7 @@ export { StatusRow } from './row.js';
 export { CopyMessage } from './copy.js';
 export { Dialog } from './dialog.js';
 export { Question, confirm, prompt, alert } from './questions.js';
+export { consequence } from './consequence.js';
 export { FocusedForm } from './form.js';
 export { Tooltip } from './tooltip.js';
 export { Help } from './help.js';

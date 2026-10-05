@@ -5,7 +5,7 @@ import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine } from '@beyond-js/ui/react';
+import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine, useConfirm } from '@beyond-js/ui/react';
 import { Collection as List } from '@beyond-js/ui';
 import { shape, accounts, source, recognize, branches, projects, repositories, columns } from '../data/choosing.js';
 
@@ -20,6 +20,7 @@ const began = Date.now() - 40_000;
 function Choosing() {
 	const [open, setOpen] = useState(shape.sheet);
 	const [busy, setBusy] = useState(false);
+	const { confirm } = useConfirm(useConfirm.labels.es);
 	const picker = autofocus => <Picker label="Repositorios" source={find} delay={50} bound={2000} labels={labels} accounts={named} recognize={recognize} onRecognize={found => found && log.push(`recognized:${found.label}:${found.outcome}`)} onChange={items => log.push(`picked:${items.map(item => item.id).join(',')}`)} footer={<button type="button" className="bui-link-button" data-autofocus={autofocus ? '' : undefined} onClick={() => log.push('escape')}>Elegir en GitHub qué repositorios puede ver Beyond</button>} />;
 	const detail = shape.detail ? <div><h2>acme/web</h2><p>Listo · actualizado desde GitHub al empezar la última conversación.</p></div> : null;
 	return (
@@ -42,6 +43,9 @@ function Choosing() {
 			<section id="following">
 				<Choices legend="Motor de IA" type="radio" name="engine" value={null} options={[{ value: 'claude', label: 'Claude Code', hint: 'Conectado con el plan Max · su inicio de sesión dura hasta que lo desconectes', status: ['Listo', 'success'] }]} />
 				<AwaitedLine title="Clonando acme/web" since={began} expected={{ median: 60_000, p90: 120_000 }} labels={AwaitedLine.labels.es} />
+			</section>
+			<section id="consequence">
+				<Button label="Borrar My first VM" variant="danger" onClick={() => confirm({ title: '¿Borrar My first VM?', accept: 'Borrar entorno', tone: 'danger', consequence: { affected: ['Se detienen 2 conversaciones en curso'], lost: 'La máquina y sus copias', costing: 'La instantánea del disco, hasta que la borres', recovery: 'No se puede deshacer.' } }).then(answer => log.push(`confirm:${answer}`))} />
 			</section>
 			<section id="listing"><ListDetail label="Repositorio" list={<Collection label="Repositorios" columns={columns} source={rows} search={false} labels={List.labels.es} link={row => `?detail=1&repository=${row.id}`} />} detail={detail} back={{ label: 'Repositorios', href: '?' }} /></section>
 		</>

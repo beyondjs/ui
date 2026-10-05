@@ -175,5 +175,23 @@ export const checks = [
 				await context.close();
 			}
 		}
+	},
+	{
+		name: 'choose: a confirmation states the work it affects and what keeps costing, in order, in the page\'s language, starting on Cancel',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			const { page } = await open(browser, consumer, { width: 390 });
+			await page.locator('#consequence button').click();
+			await page.waitForSelector('dialog[open] .bui-consequence');
+			const terms = await page.locator('dialog[open] .bui-consequence dt').allTextContents();
+			const expected = consumer.language === 'es' ? ['Trabajo afectado', 'Lo que se pierde', 'Qué sigue costando', 'Cómo deshacerlo'] : ['Work it affects', 'What is lost', 'What keeps costing', 'How to undo'];
+			expect(JSON.stringify(terms) === JSON.stringify(expected), `terms ${JSON.stringify(terms)}`);
+			const start = await page.evaluate(() => document.activeElement.textContent);
+			expect(start === (consumer.language === 'es' ? 'Cancelar' : 'Cancel'), `a danger starts on Cancel: ${start}`);
+			expect(!(await overflow(page)), 'no sideways scroll at 390 px');
+			await page.keyboard.press('Escape');
+			await page.waitForFunction(() => window.fixture.log.includes('confirm:false'));
+		}
 	}
 ];
+

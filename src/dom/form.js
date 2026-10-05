@@ -16,6 +16,9 @@ const defaults = { failure: 'That did not work. Try again.' };
  * consumer's: `destroy()` releases the listener and removes only what this class added.
  */
 export class FocusedForm {
+	/** The copy in English and Spanish (0.7.2). */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ failure: 'No funcionó. Vuelve a intentarlo.' }) });
+
 	#form;
 	#fields;
 	#submit;

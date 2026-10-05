@@ -147,3 +147,6 @@ export function Unavailable({ title, reason, owner = null, action = null, second
 
 // The copy in English and Spanish, as on the DOM classes (0.7.1).
 Unavailable.labels = Missing.labels;
+FamilyBar.labels = Bar.labels;
+Sidebar.labels = Sections.labels;
+ProductNav.labels = Row.labels;

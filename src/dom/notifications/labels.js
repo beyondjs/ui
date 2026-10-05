@@ -25,3 +25,34 @@ export const defaults = {
 	updates: ({ count }) => `${count} updates`,
 	hide: 'Hide earlier updates'
 };
+
+/** The notification entry's and inbox's copy in Spanish (0.7.2; `NotificationEntry.labels.es`). */
+export const spanish = {
+	title: 'Notificaciones',
+	button: ({ count, more }) => (count === null || count === undefined ? 'Notificaciones' : count === 0 ? 'Notificaciones, ninguna sin leer' : more ? `Notificaciones, ${count} o más sin leer` : `Notificaciones, ${count} sin leer`),
+	badge: defaults.badge,
+	loading: 'Cargando notificaciones…',
+	empty: 'Todavía no hay notificaciones.',
+	caught: 'Estás al día.',
+	failure: 'No se pudieron cargar las notificaciones.',
+	retry: 'Reintentar',
+	unavailable: 'Las notificaciones no están disponibles ahora. Todo lo demás funciona.',
+	partial: ({ products }) => `Algunos productos no respondieron (${products}). Sus notificaciones no se muestran hasta que respondan.`,
+	all: 'Ver todas las notificaciones',
+	everything: 'Marcar todas como leídas',
+	mark: 'Marcar como leída',
+	unmark: 'Marcar como no leída',
+	unread: 'Sin leer',
+	gone: 'Este elemento ya no está disponible para ti.',
+	update: 'No se pudo guardar ese cambio. Vuelve a intentarlo.',
+	more: 'Cargar más',
+	show: 'Mostrar',
+	every: 'Todas',
+	product: 'Producto',
+	products: 'Todos los productos',
+	updates: ({ count }) => (count === 1 ? '1 novedad' : `${count} novedades`),
+	hide: 'Ocultar las novedades anteriores'
+};
+
+/** Both sets, as `NotificationEntry.labels` and `NotificationInbox.labels`. */
+export const copies = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze(spanish) });

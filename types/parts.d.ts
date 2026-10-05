@@ -126,6 +126,8 @@ export interface HeaderOptions {
 	labels?: Copy;
 }
 export class Header extends Component {
+	/** The copy in English and Spanish (0.7.2). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: HeaderOptions);
 	expanded: boolean;
 	set context(value: Crumb[] | Node | null);
@@ -147,6 +149,8 @@ export interface NotificationEntryOptions {
 	labels?: Copy;
 }
 export class NotificationEntry extends Disclosure {
+	/** The copy in English and Spanish (0.7.2). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	/** Milliseconds before the panel's loading indicator shows (default 250); a quicker answer never shows it. */
 	static delay: number;
 	constructor(options: NotificationEntryOptions);
@@ -171,6 +175,8 @@ export interface NotificationInboxOptions {
 	labels?: Copy;
 }
 export class NotificationInbox extends Component {
+	/** The copy in English and Spanish (0.7.2). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: NotificationInboxOptions);
 	state: InboxState;
 	load(): Promise<void>;

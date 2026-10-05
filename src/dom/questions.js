@@ -4,9 +4,10 @@ import { Field } from './field.js';
 import { el, content } from './core/element.js';
 import { Labels } from './core/labels.js';
 import { callout } from './feedback.js';
+import { consequence } from './consequence.js';
 
-const defaults = { accept: 'Confirm', cancel: 'Cancel', ok: 'OK', close: 'Close', failure: 'That did not work. Try again or cancel.', lost: 'What is lost', kept: 'What is kept', recovery: 'How to undo', optional: '(optional)', invalid: 'Check this value.' };
-const spanish = { accept: 'Confirmar', cancel: 'Cancelar', ok: 'Aceptar', close: 'Cerrar', failure: 'No funcionó. Vuelve a intentarlo o cancela.', lost: 'Lo que se pierde', kept: 'Lo que se conserva', recovery: 'Cómo deshacerlo', optional: '(opcional)', invalid: 'Revisa este valor.' };
+const defaults = { accept: 'Confirm', cancel: 'Cancel', ok: 'OK', close: 'Close', failure: 'That did not work. Try again or cancel.', ...consequence.labels.en, optional: '(optional)', invalid: 'Check this value.' };
+const spanish = { accept: 'Confirmar', cancel: 'Cancelar', ok: 'Aceptar', close: 'Cerrar', failure: 'No funcionó. Vuelve a intentarlo o cancela.', ...consequence.labels.es, optional: '(opcional)', invalid: 'Revisa este valor.' };
 
 /**
  * One in-app question: the dialog behind `confirm`, `prompt` and `alert`.
@@ -107,26 +108,14 @@ export class Question {
 	}
 }
 
-/**
- * The consequence of a confirmed action (decision D17) as a short list under the message: what is
- * lost, what is kept and how to undo it, each stated only when given. A value is text, a node or a
- * list of them.
- */
-function consequence(value, labels) {
-	const parts = ['lost', 'kept', 'recovery'].filter(key => value?.[key] && [].concat(value[key]).length);
-	if (!parts.length) return null;
-	const describe = item => (Array.isArray(item) ? el('ul', {}, item.map(line => el('li', {}, [content(line)]))) : content(item));
-	return el('dl', { class: 'bui-consequence' }, parts.map(key => el('div', { class: `bui-consequence-${key}` }, [el('dt', { text: labels.text(key) }), el('dd', {}, [describe(value[key])])])));
-}
-
 function pick(source, keys) {
 	return Object.fromEntries(keys.filter(key => typeof source[key] === 'string').map(key => [key, source[key]]));
 }
 
 /**
  * Asks for confirmation. Resolves true when accepted (after `work` succeeded) and false otherwise.
- * Options: `title`, `message`, `consequence: { lost?, kept?, recovery? }` (shown as a short list under
- * the message), `accept`, `cancel`, `tone: 'danger'`, `focus: 'cancel' | 'accept'` (Cancel for a
+ * Options: `title`, `message`, `consequence: { affected?, lost?, kept?, costing?, recovery? }` (shown as
+ * a short list under the message; `affected` and `costing` since 0.7.2), `accept`, `cancel`, `tone: 'danger'`, `focus: 'cancel' | 'accept'` (Cancel for a
  * danger, Accept otherwise), `work`, `explain`, `labels`. `accept` is the action's own verb
  * ("Delete project"); "OK" and "Confirm" are wrong for a named action.
  */

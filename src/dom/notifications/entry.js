@@ -4,7 +4,7 @@ import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { loading } from '../feedback.js';
-import { defaults } from './labels.js';
+import { defaults, copies } from './labels.js';
 import { Moment } from './moment.js';
 import { Feed } from './feed.js';
 import { NoticeList } from './list.js';
@@ -31,6 +31,8 @@ import { Reach } from './reach.js';
  * business action.
  */
 export class NotificationEntry extends Disclosure {
+	/** The copy in English and Spanish (0.7.2). */
+	static labels = copies;
 	/**
 	 * Milliseconds before the loading indicator shows. The fixture relay answers in about 80 ms and the
 	 * review measured a one-frame flash at once and a 900 ms wait, so a quick answer never shows it.

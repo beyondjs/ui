@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Dialog as Modal } from '../dom/dialog.js';
 import { FocusedForm as Submission } from '../dom/form.js';
 import { Question, confirm, prompt, alert } from '../dom/questions.js';
+import { consequence as stated } from '../dom/consequence.js';
 import { h, living, useLatest } from './hooks.js';
 
 const { useLayoutEffect, useMemo, useRef, useState } = React;
@@ -99,3 +100,18 @@ export function FocusedForm({ onSubmit, explain, onSuccess, labels, className, c
 // The copy in English and Spanish, as on the DOM classes (0.7.1): `useConfirm(useConfirm.labels.es)`.
 Dialog.labels = Modal.labels;
 useConfirm.labels = Question.labels;
+FocusedForm.labels = Submission.labels;
+
+/**
+ * The consequence of a destructive or irreversible action (D17), rendered by React with the markup of
+ * the DOM `consequence` builder: `parts` (`affected`, `lost`, `kept`, `costing`, `recovery`; text,
+ * React content or a list) and `labels` (`Consequence.labels.es`). Renders nothing when nothing is stated.
+ */
+export function Consequence({ parts, labels = {} }) {
+	const words = { ...stated.labels.en, ...labels };
+	const given = stated.order.filter(key => [].concat(parts?.[key] ?? []).filter(Boolean).length);
+	if (!given.length) return null;
+	const describe = value => (Array.isArray(value) ? h('ul', null, value.filter(Boolean).map((line, index) => h('li', { key: index }, line))) : value);
+	return h('dl', { className: 'bui-consequence' }, given.map(key => h('div', { key, className: `bui-consequence-${key}` }, h('dt', null, words[key]), h('dd', null, describe(parts[key])))));
+}
+Consequence.labels = stated.labels;

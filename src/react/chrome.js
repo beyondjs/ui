@@ -84,3 +84,7 @@ export function Tooltip({ text, describe = true, children }) {
 	useSync(hint, current => (current.text = text), [text]);
 	return h('span', { ref: holder, className: 'bui-tooltip-anchor' }, children);
 }
+
+// The copy in English and Spanish, as on the DOM classes (0.7.2).
+Header.labels = Bar.labels;
+Help.labels = Explanation.labels;

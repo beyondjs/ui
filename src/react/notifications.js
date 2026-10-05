@@ -116,3 +116,5 @@ export function useToaster(labels) {
 
 // The copy in English and Spanish, as on the DOM class (0.7.1): `useToaster(useToaster.labels.es)`.
 useToaster.labels = Toaster.labels;
+NotificationEntry.labels = Entry.labels;
+NotificationInbox.labels = Inbox.labels;

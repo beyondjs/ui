@@ -27,6 +27,9 @@ const defaults = { sections: '{product} sections', close: 'Close' };
  * first, and the product moves focus to its new heading.
  */
 export class Sidebar extends Component {
+	/** The copy in English and Spanish (0.7.2). */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ sections: 'Secciones de {product}', close: 'Cerrar' }) });
+
 	#element;
 	#panel;
 	#row;

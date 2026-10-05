@@ -109,3 +109,15 @@ export function Following() {
 		</>
 	);
 }
+
+// 0.7.2 in React.
+import { Consequence, FamilyBar as Bar, Loading as Busy, NotificationEntry as Bell } from '@beyond-js/ui/react';
+export function Consequential() {
+	void [Bar.labels.es, Bell.labels.es];
+	return (
+		<>
+			<Consequence parts={{ affected: <span>2 conversaciones</span>, costing: 'El disco' }} labels={Consequence.labels.es} />
+			<Busy label={Busy.labels.es} />
+		</>
+	);
+}

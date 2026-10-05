@@ -161,3 +161,8 @@ const cloning = new AwaitedLine({ title: 'Cloning', since: Date.now(), expected:
 cloning.update({ reason: 'GitHub didn’t answer' });
 const said: string = cloning.text;
 void said;
+// 0.7.2: a confirmation's work affected and what keeps costing; Spanish across the package.
+import { consequence, FocusedForm as Submission, FamilyBar as Bar, NotificationEntry as Bell, loading as busy, Header as Top, Help as Explained, PageHeader as Heading, Tabs as Row } from '@beyond-js/ui';
+void confirm({ title: '¿Borrar?', consequence: { affected: ['2 conversaciones'], costing: 'El disco' }, labels: confirm.labels.es });
+const listed: HTMLElement | null = consequence({ affected: 'x', costing: ['y'] }, consequence.labels.es);
+void [listed, consequence.order, Submission.labels.es, Bar.labels.es, Bell.labels.es, busy.labels.es, Top.labels.es, Explained.labels.es, Heading.labels.es, Row.labels.es, availability[0].labels.es];

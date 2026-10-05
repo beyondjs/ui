@@ -2,6 +2,7 @@ import React from 'react';
 import { h } from './hooks.js';
 import { Mark } from './simple.js';
 import { Select as Choice } from '../dom/select.js';
+import { Field as Labelled } from '../dom/field.js';
 import { single } from '../dom/core/statement.js';
 import { Suggestion } from '../dom/core/suggestion.js';
 
@@ -167,3 +168,6 @@ export function Choices({ legend, type = 'checkbox', name, options, value, onCha
 		h('p', { id: `${id}-error`, className: 'bui-field-error', hidden: !error }, error ? [h(Mark, { key: 'icon', name: 'alert' }), h('span', { key: 'text' }, error)] : null)
 	);
 }
+
+// The copy in English and Spanish, as on the DOM class.
+Field.labels = Labelled.labels;

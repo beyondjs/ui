@@ -18,6 +18,9 @@ const defaults = { header: 'Beyond', context: 'Where you are', nav: 'Product', o
  * is data or a node the product provides: the header decides placement, never who may go where.
  */
 export class Header extends Component {
+	/** The copy in English and Spanish (0.7.2). */
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ header: 'Beyond', context: 'Dónde estás', nav: 'Producto', open: 'Abrir navegación', close: 'Cerrar navegación' }) });
+
 	#element;
 	#labels;
 	#context;

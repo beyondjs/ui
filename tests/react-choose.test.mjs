@@ -152,3 +152,14 @@ test('0.7.1: a React statement keeps the hint and state with the DOM markup; Awa
 	await render(h(ui.Unavailable, { title: 'No disponible', reason: 'Motivo', owner: 'Propietarios', labels: ui.Unavailable.labels.es }));
 	assert.match(host.textContent, /Quién puede cambiarlo: Propietarios/);
 });
+
+test('0.7.2: React Consequence renders the DOM builder\'s markup; the Spanish sets are on the React components', async () => {
+	const parts = { affected: ['2 running conversations stop'], lost: 'The machine', costing: 'The disk snapshot', recovery: 'Deletion cannot be undone.' };
+	await render(h('div', null, h(ui.Consequence, { parts, labels: ui.Consequence.labels.es }), h(ui.Consequence, { parts: {} })));
+	assert.deepEqual(shape(host.firstChild.firstChild), shape(dom.consequence(parts, dom.consequence.labels.es)));
+	assert.equal(host.firstChild.childNodes.length, 1, 'nothing stated, nothing rendered');
+	for (const name of ['FamilyBar', 'NotificationEntry', 'NotificationInbox', 'Header', 'Help', 'Sidebar', 'ProductNav', 'Tabs', 'PageHeader', 'FocusedForm', 'Field', 'Collection', 'Picker', 'Consequence', 'Loading']) assert.ok(ui[name].labels?.es, `${name}.labels.es`);
+	assert.ok(ui.consequence === dom.consequence);
+	await render(h(ui.Loading, { label: ui.Loading.labels.es }));
+	assert.equal(host.textContent, 'Cargando…');
+});

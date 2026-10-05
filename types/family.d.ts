@@ -182,6 +182,8 @@ export const productNames: FamilyProductNames;
 
 /** The family bar every signed-in product renders. */
 export class FamilyBar extends Component {
+	/** The copy in English and Spanish (0.7.2). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: FamilyBarOptions);
 	readonly state: 'loading' | 'unavailable' | 'ready';
 	descriptor: FamilyDescriptor | FamilyUnavailable | null;
@@ -219,6 +221,8 @@ export interface SidebarOptions {
 }
 /** A product's own sections (0.4.0): permanent above the cut, a product row and a modal drawer below it. */
 export class Sidebar extends Component {
+	/** The copy in English and Spanish (0.7.2). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: SidebarOptions);
 	readonly mode: 'permanent' | 'drawer';
 	/** Whether the drawer is open. */
@@ -237,6 +241,8 @@ export interface ProductNavItem {
 }
 /** A product's own navigation as a row of tabs under the family bar. */
 export class ProductNav extends Component {
+	/** The copy in English and Spanish (0.7.2). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: { items?: Array<ProductNavItem | null | false>; label?: string | null; sticky?: boolean; onnavigate?: ((item: ProductNavItem, event: MouseEvent) => void) | null; labels?: { nav?: string } });
 	set items(items: Array<ProductNavItem | null | false>);
 }
@@ -266,13 +272,25 @@ export interface AvailabilityState {
 	readonly key: 'available' | 'closed' | 'preparation' | 'planned' | 'retired';
 	readonly label: string;
 	readonly tone: Tone;
+	/** The label in English and Spanish (0.7.2) */
+	readonly labels: { readonly en: string; readonly es: string };
 }
 /** The family's one availability vocabulary, in order. */
 export const availability: readonly AvailabilityState[];
 
 /** The consequence a confirmation states under its message. */
 export interface Consequence {
+	/** The work it affects: running conversations, deliveries in progress (0.7.2) */
+	affected?: Content | Content[] | null;
 	lost?: Content | Content[] | null;
 	kept?: Content | Content[] | null;
+	/** What keeps being charged (0.7.2) */
+	costing?: Content | Content[] | null;
 	recovery?: Content | Content[] | null;
+}
+/** The consequence list for a product's own confirmation dialog (0.7.2); null when nothing is stated. */
+export function consequence(parts: Consequence | null, labels?: Copy): HTMLElement | null;
+export namespace consequence {
+	const order: readonly ['affected', 'lost', 'kept', 'costing', 'recovery'];
+	const labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 }

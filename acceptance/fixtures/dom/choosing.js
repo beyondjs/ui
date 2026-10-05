@@ -4,7 +4,7 @@
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine, el } from '@beyond-js/ui';
+import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine, confirm, el } from '@beyond-js/ui';
 import { shape, accounts, source, recognize, branches, projects, repositories, columns } from '../data/choosing.js';
 
 const log = [];
@@ -31,5 +31,6 @@ new ListDetail({ list, label: 'Repository', detail: shape.detail ? el('div', {},
 const following = section('following');
 new Choices({ legend: 'AI engine', type: 'radio', name: 'engine', options: [{ value: 'claude', label: 'Claude Code', hint: 'Connected with the Max plan · its sign-in lasts until you disconnect it', status: ['Ready', 'success'] }] }).mount(following);
 new AwaitedLine({ title: 'Cloning acme/web', since: Date.now() - 40_000, expected: { median: 60_000, p90: 120_000 } }).mount(following);
+new Button({ label: 'Delete My first VM', variant: 'danger', onclick: () => confirm({ title: 'Delete My first VM?', accept: 'Delete environment', tone: 'danger', consequence: { affected: ['2 running conversations stop'], lost: 'The machine and its copies', costing: 'The disk snapshot, until you delete it', recovery: 'Deletion cannot be undone.' } }).then(answer => log.push(`confirm:${answer}`)) }).mount(section('consequence'));
 if (shape.sheet) sheet.open();
 window.fixture = { log, stall: false, sheet, opener: opener.element, ready: true };
