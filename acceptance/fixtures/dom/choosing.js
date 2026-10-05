@@ -26,6 +26,11 @@ new StatusRow({ title: 'acme', kind: 'GitHub organization', state: { label: 'Sus
 new CopyMessage({ text: 'Could you approve the Beyond app for acme on GitHub? It lets Beyond read the repositories we choose for our projects.', label: 'Message for an owner of acme' }).mount(rows);
 localStorage.removeItem('attempt');
 new ProviderWindow({ provider: 'GitHub', href: '../provider.html', origin: location.origin, same: false, read: async () => ({ state: localStorage.getItem('attempt') === 'done' ? 'done' : 'none' }), onend: outcome => log.push(`provider:${outcome}`) }).mount(section('provider'));
+// 0.7.5: a two-leg trip whose landing is on another origin (localhost beside 127.0.0.1), with no opener and a
+// window that never closes itself; the page learns how it went only by reading the server
+const trip = `trip-${Date.now()}`;
+const landing = `${location.protocol}//localhost:${location.port}/fixtures/trip.html?id=${trip}&leg=1`;
+new ProviderWindow({ provider: 'GitHub', href: landing, origin: null, same: false, interval: 500, read: async () => ({ state: await (await fetch(`/attempt?id=${trip}`)).text() }), onend: outcome => log.push(`trip:${outcome}`) }).mount(section('trip'));
 const list = new Collection({ label: 'Repositories', columns, source: Collection.local(repositories), search: false, link: row => `?detail=1&repository=${row.id}` });
 new ListDetail({ list, label: 'Repository', detail: shape.detail ? el('div', {}, [el('h2', { text: 'acme/web' }), el('p', { text: 'Ready · updated from GitHub when the last conversation started.' })]) : null, back: { label: 'Repositories', href: '?' } }).mount(section('listing'));
 const following = section('following');

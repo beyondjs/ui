@@ -166,6 +166,12 @@ export interface ProviderWindowOptions {
 	expected?: Expected;
 	bound?: number;
 	poll?: number;
+	/** How often the attempt is read while the window is open, in ms (0.7.5; 2500, 0 never). */
+	interval?: number;
+	/** For how long it is read that way, in ms (0.7.5; 15 min). */
+	follow?: number;
+	/** The same-origin `BroadcastChannel` a landing wakes it on (0.7.5; 'beyond-provider', null for none). */
+	channel?: string | null;
 	clock?: Clock;
 	locale?: string;
 	labels?: Copy & { awaited?: Copy };

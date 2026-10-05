@@ -22,6 +22,15 @@ import { words } from './provider-labels.js';
  * this tab** and **Try the window again**. On a touch screen or inside a frame (`same: 'auto'`) the
  * address opens in this tab, and the product reads the attempt again when the person comes back. A
  * read that fails or does not answer says that it is not known yet, with **Check again**.
+ *
+ * Since 0.7.5 the outcome comes from the server however the window ends, across origins: the window's
+ * opener is dropped (0.7.4), so while it is open `read()` is also called every `interval` ms (2500),
+ * one at a time, for at most `follow` ms (15 min), a late answer dropped. A window that stays open, such
+ * as the first leg of a two-leg connect, or a product hosted on another origin than the provider's
+ * landing, is followed the same way. A landing on the page's own origin may wake it at once on the
+ * `BroadcastChannel` named `channel` ('beyond-provider') with `{ type: 'beyond-provider' }`. Without an
+ * opener a browser lets only the window close itself (Chrome refuses the page's `close()`), so a landing
+ * closes itself once it recorded the outcome, or says it can be closed.
  */
 export class ProviderWindow extends Component {
 	/** The copy in English and Spanish (`labels.awaited` reaches the card). */
@@ -37,6 +46,9 @@ export class ProviderWindow extends Component {
 	#since = null;
 	#sequence = 0;
 	#stop = null;
+	#reading = false;
+	#started = null;
+	#channel = null;
 
 	/**
 	 * @param {object} options
@@ -48,16 +60,25 @@ export class ProviderWindow extends Component {
 	 * @param {boolean|'auto'} [options.same] opens in this tab (`auto`: on touch screens and inside frames)
 	 * @param {{median: number, p90?: number}} [options.expected] how long it usually takes
 	 * @param {number} [options.bound] milliseconds `read` may take (20000)
+	 * @param {number} [options.poll] how often the window's closing is looked at, in ms (500)
+	 * @param {number} [options.interval] how often the attempt is read while the window is open, in ms (2500; 0 never)
+	 * @param {number} [options.follow] for how long it is read that way, in ms (15 min)
+	 * @param {string|null} [options.channel] the same-origin `BroadcastChannel` a landing wakes it on ('beyond-provider'; null for none)
 	 * @param {Clock} [options.clock]
 	 */
-	constructor({ provider, href, read, origin = null, onend = null, same = 'auto', expected = { median: 120_000, p90: 600_000 }, bound = 20_000, poll = 500, clock = Clock.system, locale = undefined, labels = {} }) {
+	constructor({ provider, href, read, origin = null, onend = null, same = 'auto', expected = { median: 120_000, p90: 600_000 }, bound = 20_000, poll = 500, interval = 2500, follow = 900_000, channel = 'beyond-provider', clock = Clock.system, locale = undefined, labels = {} }) {
 		super();
 		const { awaited = {}, ...own } = labels ?? {};
 		this.#labels = new Labels(words.en, own);
-		this.#options = { provider, href, read, origin, onend, same, expected, bound, poll, clock, locale, awaited };
+		this.#options = { provider, href, read, origin, onend, same, expected, bound, poll, interval, follow, clock, locale, awaited };
 		this.#element = el('div', { class: 'bui-provider' });
 		const view = this.#view;
 		if (view) this.listen(view, 'message', event => this.#message(event));
+		if (view && channel && typeof view.BroadcastChannel === 'function') {
+			// A landing on this page's own origin wakes it without an opener (0.7.5)
+			this.#channel = new view.BroadcastChannel(channel);
+			this.#channel.onmessage = event => this.#wake(event.data);
+		}
 		this.#draw();
 	}
 
@@ -76,15 +97,24 @@ export class ProviderWindow extends Component {
 		if (!view || this.destroyed) return;
 		if (this.#same(view)) return this.tab();
 		const width = Math.min(1024, view.screen?.availWidth ?? 1024);
-		const opened = view.open(this.#options.href, 'beyond-provider', `popup,width=${width},height=760`);
-		if (!opened) return this.#go('blocked');
+		const features = `popup,width=${width},height=760`;
 		// The window passes through other origins (an organization's identity provider), which must not be
-		// able to navigate this tab (0.7.4): the outcome is read from the server, the window's closing
-		// polled every `poll` ms (500 by default) and a message, where it still arrives, only wakes it
+		// able to navigate this tab (0.7.4). It opens blank, on this origin, loses its opener, and only then
+		// goes to the address: WebKit navigates a window `open()` returns afterwards, and refuses that
+		// navigation once the opener is gone (0.7.5). The outcome is read from the server (0.7.5: also while
+		// the window stays open), the window's closing polled every `poll` ms, and a message only wakes it.
+		let opened = view.open('', 'beyond-provider', features);
+		if (!opened) return this.#go('blocked');
 		try {
 			opened.opener = null;
 		} catch {
 			// A browser that refuses it keeps the window as opened
+		}
+		try {
+			opened.location.replace(this.#options.href);
+		} catch {
+			// A window of that name left on another origin: opened again by name, at the address
+			opened = view.open(this.#options.href, 'beyond-provider', features) ?? opened;
 		}
 		this.#window = opened;
 		this.#since = this.#options.clock.now;
@@ -101,6 +131,7 @@ export class ProviderWindow extends Component {
 	/** Reads the attempt from the server now. */
 	async check() {
 		const sequence = ++this.#sequence;
+		this.#reading = true;
 		const closed = !this.#window || this.#window.closed;
 		if (this.#state !== 'open' || closed) this.#go('checking');
 		let answer = null;
@@ -112,6 +143,7 @@ export class ProviderWindow extends Component {
 			answer = null;
 		} finally {
 			clearTimeout(timer);
+			if (sequence === this.#sequence) this.#reading = false;
 		}
 		if (sequence !== this.#sequence || this.destroyed) return;
 		this.#settle(answer, closed);
@@ -120,7 +152,8 @@ export class ProviderWindow extends Component {
 	/** Stops following the window and closes it; nothing is read. */
 	cancel() {
 		this.#sequence += 1;
-		this.#window?.close?.();
+		this.#reading = false;
+		this.#dismiss();
 		this.#window = null;
 		this.#go('idle');
 	}
@@ -128,8 +161,26 @@ export class ProviderWindow extends Component {
 	destroy() {
 		this.#sequence += 1;
 		this.#stop?.();
+		this.#channel?.close();
+		this.#channel = null;
 		this.#card?.destroy();
 		super.destroy();
+	}
+
+	/**
+	 * Closes the window while it is still on this origin. A window on another origin with no opener can
+	 * only close itself: Chrome refuses the page's `close()` and WebKit reports it as an unsafe navigation,
+	 * so it is left to its landing (0.7.5).
+	 */
+	#dismiss() {
+		const opened = this.#window;
+		if (!opened) return;
+		try {
+			void opened.location.href;
+		} catch {
+			return;
+		}
+		opened.close?.();
 	}
 
 	get #view() {
@@ -152,7 +203,7 @@ export class ProviderWindow extends Component {
 		const state = answer?.state;
 		if (!answer) return this.#go(closed ? 'unknown' : 'open');
 		if (state === 'done' || state === 'waiting') {
-			this.#window?.close?.();
+			this.#dismiss();
 			this.#window = null;
 			this.#go(state === 'done' ? 'done' : 'idle');
 			return this.#options.onend?.(state, answer);
@@ -164,20 +215,37 @@ export class ProviderWindow extends Component {
 		this.#go('open');
 	}
 
-	// Polls the window's `closed`, the only signal a cross-origin window gives; a closed window is read once.
+	/**
+	 * Polls the window's `closed`, the only signal a cross-origin window gives (a closed window is read
+	 * once), and while it is open reads the attempt every `interval`, one read at a time, for at most
+	 * `follow` (0.7.5).
+	 */
 	#watch() {
 		this.#stop?.();
+		this.#started = Date.now();
+		let last = Date.now();
+		const { poll, interval, follow } = this.#options;
 		const tick = () => {
 			if (!this.#window || this.#state === 'done') return;
 			if (this.#window.closed) return this.check();
-			this.#stop = this.later(tick, this.#options.poll);
+			const now = Date.now();
+			if (interval > 0 && now - last >= interval && now - this.#started <= follow && !this.#reading) {
+				last = now;
+				void this.check();
+			}
+			this.#stop = this.later(tick, poll);
 		};
-		this.#stop = this.later(tick, this.#options.poll);
+		this.#stop = this.later(tick, poll);
 	}
 
 	#message(event) {
 		const { origin } = this.#options;
-		if (!origin || event.origin !== origin || event.data?.type !== 'beyond-provider') return;
+		if (!origin || event.origin !== origin) return;
+		this.#wake(event.data);
+	}
+
+	#wake(data) {
+		if (data?.type !== 'beyond-provider') return;
 		if (this.#state === 'open' || this.#state === 'checking') this.check();
 	}
 

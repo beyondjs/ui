@@ -16,7 +16,8 @@ class Popups {
 		const saved = view.open;
 		view.open = href => {
 			if (this.blocked) return null;
-			const popup = { href, closed: false, close() { this.closed = true; }, focus() { this.focused = true; } };
+			// Opened blank, then sent to the address (0.7.5)
+			const popup = { href, closed: false, close() { this.closed = true; }, focus() { this.focused = true; }, location: { replace: address => (popup.href = address) } };
 			this.opened.push(popup);
 			return popup;
 		};

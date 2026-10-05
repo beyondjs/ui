@@ -92,9 +92,9 @@ export function StatusRow({ title, kind = null, state, reason = null, owner = nu
 }
 
 /** A provider's window followed until the server says how it ended. The ref exposes `open()`, `check()`, `cancel()` and `state`. */
-export const ProviderWindow = forwardRef(function ProviderWindow({ provider, href, read, origin = null, onEnd = null, same = 'auto', expected = undefined, bound = undefined, clock = Clock.system, locale = undefined, labels }, ref) {
+export const ProviderWindow = forwardRef(function ProviderWindow({ provider, href, read, origin = null, onEnd = null, same = 'auto', expected = undefined, bound = undefined, interval = undefined, follow = undefined, channel = undefined, clock = Clock.system, locale = undefined, labels }, ref) {
 	const latest = useLatest({ read, onEnd });
-	const [host, provided] = useInstance(() => new Provider({ provider, href, origin, same, expected, bound, clock, locale, labels, read: () => latest.current.read(), onend: (outcome, answer) => latest.current.onEnd?.(outcome, answer) }), [provider, href, origin, String(same), JSON.stringify(expected ?? null), bound, clock, locale, labels]);
+	const [host, provided] = useInstance(() => new Provider({ provider, href, origin, same, expected, bound, interval, follow, channel, clock, locale, labels, read: () => latest.current.read(), onend: (outcome, answer) => latest.current.onEnd?.(outcome, answer) }), [provider, href, origin, String(same), JSON.stringify(expected ?? null), bound, interval, follow, channel, clock, locale, labels]);
 	useImperativeHandle(ref, () => ({ open: () => provided?.open(), check: () => provided?.check(), cancel: () => provided?.cancel(), get state() { return provided?.state ?? 'idle'; } }), [provided]);
 	return h('div', { ref: host, className: 'bui-host' });
 });

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Stand-in provider, two legs</title>
+	</head>
+	<body>
+		<p id="said">A stand-in for a two-leg connect on another origin: leg 1 connects the account, leg 2 installs the app.</p>
+		<button id="finish" type="button">Continue</button>
+		<script>
+			// Each leg records its outcome on the server. Neither tells the page that opened it (no opener,
+			// another origin) and the window never closes itself: the page learns it only by reading.
+			// The second leg replaces the first in place: a navigation inside it is not what is measured, and
+			// WebKit reports one in a window without an opener as the opening page's.
+			const id = new URLSearchParams(location.search).get('id');
+			let leg = 1;
+			const finish = document.getElementById('finish');
+			finish.addEventListener('click', async () => {
+				await fetch(`/attempt?id=${encodeURIComponent(id)}&state=${leg === 1 ? 'next' : 'done'}`, { method: 'POST' });
+				leg += 1;
+				document.body.dataset.leg = String(leg);
+				document.getElementById('said').textContent = leg === 2 ? 'Now install the Beyond app.' : 'Installed. You can close this window.';
+			});
+		</script>
+	</body>
+</html>

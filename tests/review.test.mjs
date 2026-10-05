@@ -140,14 +140,16 @@ test('Draft.address keeps a relative path as written (finding 9b)', () => {
 });
 
 test('ProviderWindow drops the window’s opener, so the pages it passes through cannot navigate this tab (finding 9e)', () => {
-	const popup = { closed: false, opener: window, close() {} };
+	const popup = { closed: false, opener: window, close() {}, location: { replace: address => (popup.address = address) } };
 	const opened = [];
 	const original = window.open;
 	window.open = (...args) => (opened.push(args), popup);
 	const provider = new ui.ProviderWindow({ provider: 'GitHub', href: 'https://github.test/apps/beyond/installations/new', read: async () => ({ state: 'waiting' }), same: false }).mount(document.body);
 	provider.open();
 	assert.equal(opened.length, 1);
-	assert.equal(popup.opener, null);
+	assert.equal(opened[0][0], '', 'opened blank on this origin (0.7.5)');
+	assert.equal(popup.opener, null, 'its opener dropped before it leaves this origin');
+	assert.equal(popup.address, 'https://github.test/apps/beyond/installations/new', 'then sent to the address');
 	window.open = original;
 	provider.destroy();
 });
@@ -162,4 +164,64 @@ test('Awaited and AwaitedLine end a check that never settles within their bound 
 	assert.equal(line.element.querySelector('.bui-line-check').getAttribute('aria-disabled'), null, 'Check again can be pressed again');
 	card.destroy();
 	line.destroy();
+});
+
+test('a window that stays open is read every interval, one read at a time, and ends once the server says done (0.7.5)', async () => {
+	const popup = { closed: false, opener: window, close() { this.closed = true; }, location: { replace() {} } };
+	const original = window.open;
+	window.open = () => popup;
+	let reads = 0;
+	let state = 'next';
+	let release = null;
+	const ended = [];
+	const read = () => {
+		reads += 1;
+		// The first read never answers in this case: no second read starts while it waits
+		if (reads === 1) return new Promise(resolve => (release = resolve));
+		return Promise.resolve({ state });
+	};
+	const provider = new ui.ProviderWindow({ provider: 'GitHub', href: 'https://projects.test/connect', read, same: false, poll: 5, interval: 20, onend: outcome => ended.push(outcome) }).mount(document.body);
+	provider.open();
+	await page.until(() => reads === 1);
+	await new Promise(resolve => setTimeout(resolve, 80));
+	assert.equal(reads, 1, 'one read at a time');
+	release({ state: 'next' });
+	await page.until(() => reads >= 2);
+	assert.equal(provider.state, 'open', 'a window on its first leg stays followed');
+	state = 'done';
+	await page.until(() => ended.length === 1);
+	assert.deepEqual(ended, ['done']);
+	assert.equal(popup.closed, true, 'the window is closed once the server says done');
+	window.open = original;
+	provider.destroy();
+});
+
+test('a landing on the page’s own origin wakes it on the BroadcastChannel, and a ProviderWindow with no interval waits for it (0.7.5)', async () => {
+	const channels = [];
+	const original = window.BroadcastChannel;
+	window.BroadcastChannel = class {
+		constructor(name) {
+			this.name = name;
+			channels.push(this);
+		}
+		close() {
+			this.closed = true;
+		}
+	};
+	const popup = { closed: false, close() { this.closed = true; }, location: { replace() {} } };
+	const opener = window.open;
+	window.open = () => popup;
+	let reads = 0;
+	const provider = new ui.ProviderWindow({ provider: 'GitHub', href: '/connect', read: async () => (reads++, { state: 'done' }), same: false, interval: 0 }).mount(document.body);
+	assert.equal(channels[0]?.name, 'beyond-provider');
+	provider.open();
+	await new Promise(resolve => setTimeout(resolve, 30));
+	assert.equal(reads, 0, 'nothing read while nothing woke it');
+	channels[0].onmessage({ data: { type: 'beyond-provider' } });
+	await page.until(() => provider.state === 'done');
+	assert.equal(reads, 1);
+	provider.destroy();
+	assert.equal(channels[0].closed, true, 'the channel closes with it');
+	window.BroadcastChannel = original;
+	window.open = opener;
 });

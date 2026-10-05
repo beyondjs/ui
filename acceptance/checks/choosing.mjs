@@ -174,10 +174,33 @@ export const checks = [
 			for (const control of controls.filter(item => item.bare)) expect(control.name && control.hint, `icon-only ${control.describe} is named with a tooltip`);
 			await page.keyboard.press('Escape');
 			await page.waitForFunction(() => !document.querySelector('.bui-sheet')?.open);
-			const [popup] = await Promise.all([context.waitForEvent('page'), page.getByRole('button', { name: words.continue }).click()]);
+			const [popup] = await Promise.all([context.waitForEvent('page'), page.locator('#provider').getByRole('button', { name: words.continue }).click()]);
 			await popup.waitForLoadState();
 			await popup.locator('#finish').click();
 			await page.waitForFunction(() => window.fixture.log.includes('provider:done'), null, { timeout: 10_000 });
+		}
+	},
+	{
+		name: 'choose: provider window across origins: a two-leg trip whose window stays open and never tells the page ends from the server (0.7.5)',
+		consumers: ['dom'],
+		async run(browser, consumer) {
+			const { page, context } = await open(browser, consumer);
+			const [popup] = await Promise.all([context.waitForEvent('page'), page.locator('#trip button').first().click()]);
+			// It opens blank on this origin, then goes to the landing (0.7.5)
+			await popup.waitForURL(/\/\/localhost:/);
+			await popup.waitForLoadState();
+			expect(new URL(popup.url()).hostname === 'localhost', `the landing is on another origin: ${popup.url()}`);
+			expect(await popup.evaluate(() => window.opener === null), 'the window has no opener');
+			await popup.locator('#finish').click();
+			await popup.waitForSelector('body[data-leg="2"]');
+			// Read at least once on leg 1 (every 500 ms here), which leaves the trip followed
+			await page.waitForTimeout(1200);
+			expect(!(await page.evaluate(() => window.fixture.log.join('|'))).includes('trip:'), 'leg 1 does not end it');
+			await popup.locator('#finish').click();
+			// The window never closes itself or tells the page: only reading the server ends it. Whether the
+			// page may then close a window without an opener is the engine's choice (Chrome refuses it).
+			await page.waitForFunction(() => window.fixture.log.includes('trip:done'), null, { timeout: 15_000 });
+			await context.close();
 		}
 	},
 	{

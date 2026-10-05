@@ -6,9 +6,13 @@ const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 
 /**
  * A static file server over one directory on an ephemeral port, for the consumer pages. It serves
- * files only below its root and closes with the run.
+ * files only below its root and closes with the run. `/attempt?id=` holds a provider trip's state for
+ * the stand-in landing and the page that reads it (GET reads it, POST with `state=` writes it), so a
+ * landing on another origin (`localhost` beside `127.0.0.1`) and the page share it as a server would.
  */
 export class Server {
+	static #attempts = new Map();
+
 	#root;
 	#server = null;
 	#port = 0;
@@ -23,6 +27,13 @@ export class Server {
 
 	async start() {
 		this.#server = createServer((request, response) => {
+			const url = new URL(request.url, 'http://local');
+			if (url.pathname === '/attempt') {
+				const id = url.searchParams.get('id') ?? '';
+				if (request.method === 'POST') Server.#attempts.set(id, url.searchParams.get('state') ?? '');
+				response.writeHead(200, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' });
+				return response.end(Server.#attempts.get(id) ?? 'none');
+			}
 			const path = normalize(decodeURIComponent(new URL(request.url, 'http://local').pathname)).replace(/^([/\\])+/, '');
 			const file = join(this.#root, path);
 			if (!file.startsWith(this.#root)) return response.writeHead(403).end();
