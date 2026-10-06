@@ -24,6 +24,7 @@ export class SessionNotice {
 	#hooks;
 	#dialog = null;
 	#kind = null;
+	#strict = null;
 	#phase = 'idle';
 	#person = null;
 	#accounts;
@@ -64,7 +65,8 @@ export class SessionNotice {
 	/** Opens the dialog for `kind`, or redraws it. */
 	show(kind, person = null) {
 		const strict = kind === 'revoked' || kind === 'suspended';
-		const rebuild = !this.#dialog || this.#dialog.destroyed || (this.#kind && strict !== (this.#kind === 'revoked' || this.#kind === 'suspended'));
+		// The dialog's own strictness, kept across hide(): a dialog built for an expired session is never reused for a revoked one
+		const rebuild = !this.#dialog || this.#dialog.destroyed || strict !== this.#strict;
 		this.#kind = kind;
 		this.#person = person;
 		this.#phase = 'idle';
@@ -102,6 +104,7 @@ export class SessionNotice {
 		// Escape and × close only a dialog the person may leave; the page then stays readable
 		const onclose = value => value === null && !this.#closing && this.#hooks.dismiss();
 		this.#dialog = new Dialog({ title: '', escape: !strict, size: 'small', onclose, labels: { close: this.#close } });
+		this.#strict = strict;
 		this.#dialog.element.classList.add('bui-session');
 		this.#dialog.element.classList.toggle('bui-session-opaque', strict);
 	}

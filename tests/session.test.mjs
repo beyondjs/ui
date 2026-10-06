@@ -264,3 +264,21 @@ test('a product\'s own sign-in behind Continue (an installed shell): the same di
 	assert.equal(dialog()?.open ?? false, false);
 	session.destroy();
 });
+
+test('a dialog shown for an expired session and hidden by a renewal is not reused for a revoked one: the page is hidden', async () => {
+	const product = new Product({ platform: false });
+	const session = product.session();
+	const first = session.lost({ replay: 'read' });
+	await product.land();
+	await page.until(() => dialog()?.open);
+	assert.ok(!dialog().classList.contains('bui-session-opaque'));
+	button('Continue as Ada').click();
+	product.signin();
+	assert.equal(await first, true);
+	product.answer = { state: 'ended', reason: 'revoked' };
+	void session.lost({ reason: 'revoked' });
+	await page.until(() => dialog()?.open, 4000);
+	assert.ok(dialog().classList.contains('bui-session-opaque'), 'the revoked dialog hides the page');
+	assert.equal(dialog().querySelector('.bui-dialog-head .bui-icon-button'), null, 'and cannot be closed');
+	session.destroy();
+});
