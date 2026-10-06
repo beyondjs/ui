@@ -6,7 +6,7 @@ const { useEffect, useState } = React;
 
 /**
  * `Session` for a React product: created once the product knows who is signed in (`person`), for
- * `product`, and destroyed on unmount. Every function option (`read`, `start`, `other`, `delegate`,
+ * `product`, and destroyed on unmount. Every function option (`read`, `start`, `other`, `delegate`, `signin`,
  * `onrenewed`, `onchanged`) is read from the latest props. Returns `{ session, signin }`: pass
  * `signin` to `FamilyBar`, which then offers "Sign in" while the person reads without a session.
  */
@@ -25,6 +25,7 @@ export function useSession(options) {
 			start: call('start'),
 			other: given.other ? call('other') : null,
 			delegate: given.delegate ? call('delegate') : null,
+			signin: given.signin ? call('signin') : null,
 			onrenewed: call('onrenewed'),
 			onchanged: given.onchanged ? call('onchanged') : null,
 			bar: { set signin(value) { setSignin(value); } }

@@ -1,4 +1,4 @@
-# Releases 0.8.0 and 0.8.1 — 6 October 2026
+# Releases 0.8.0 to 0.8.2 — 6 October 2026
 
 `Session` answers a session that ends while the person works, the same way in every Beyond product. It
 is the family rule the owner asked for on 2026-10-06 (Beyond Suite's `docs/session-renewal.md`, D63 in
@@ -42,11 +42,19 @@ timeout and a read. The browser acceptance found it: a revoked session showed th
 because Accounts' reason never arrived. The landing is now a declared side effect, and the first
 `session:` check fails unless the landing itself reported the renewal.
 
+## What 0.8.2 adds
+
+`signin`, the product's own sign-in behind **Continue as {name}**, resolving true once done. Workspace's
+installed shell asked for it: its session lives in the shell's main process and only the system
+browser can renew it, so no hidden frame or window can. With `signin` the shell shows the same family
+dialog, and Continue starts its own sign-in. A new unit test holds it: the dialog, no window opened,
+the held write sent again.
+
 ## Checks
 
 | Check | Result |
 | --- | --- |
-| `npm test` | 327 of 327. `session.test.mjs` (10) covers: a silent renewal with every replay class; the dialog and the window; read-only with the bar's Sign in and a free control; revoked and suspended; someone else; unavailable; the loop guard; a look before acting; Spanish; the landing's message. `react-session.test.mjs` (1) covers `useSession` with the bar under `StrictMode` |
+| `npm test` | 328 of 328 on 0.8.2 (327 on 0.8.1). `session.test.mjs` (10) covers: a silent renewal with every replay class; the dialog and the window; read-only with the bar's Sign in and a free control; revoked and suspended; someone else; unavailable; the loop guard; a look before acting; Spanish; the landing's message. `react-session.test.mjs` (1) covers `useSession` with the bar under `StrictMode` |
 | `npm run types` | No diagnostics |
 | `npm run acceptance session:` | 4 of 4 in Chrome 154, Firefox and WebKit, against a stand-in product served by the acceptance server (`acceptance/support/product.mjs`): the silent renewal reported by the landing with nothing shown; the sign-in window signing in and closing itself; the opaque revoked dialog in both themes; the readable page at 1280 and 390 px |
 | `npm run acceptance` (the full run) | 173 of 173 in Chrome 154 on 0.8.1. The full run in Firefox and WebKit is not repeated here: their `session:` checks pass, and nothing else changed outside the opt-in `FamilyBar.signin` and the new stylesheet |

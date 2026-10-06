@@ -36,6 +36,8 @@ export interface SessionOptions {
 	bar?: { signin: { run: () => void; label?: string } | null } | null;
 	/** A host that asks the person itself (the Beyond Desktop); resolves true once signed in. */
 	delegate?: ((request: { reason: SessionKind | null; person: SessionPerson | null; address: string | null }) => Promise<boolean>) | null;
+	/** The product's own sign-in behind Continue, resolving true once done (0.8.2: an installed shell signing in through the system browser). */
+	signin?: (() => Promise<boolean>) | null;
 	onrenewed?: ((person: SessionPerson | null) => void) | null;
 	onchanged?: ((person: SessionPerson | null) => void) | null;
 	/** Renews in a hidden frame first (default true). */

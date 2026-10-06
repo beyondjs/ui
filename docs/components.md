@@ -1,6 +1,6 @@
 # Component catalog
 
-Every component of `@beyond-js/ui` 0.8.1: what it is for, its variants and main options, the states it states in words, and its consumers. DOM names come from `@beyond-js/ui` (or `/dom`); React names from `@beyond-js/ui/react`. Every component takes `labels` for its copy (strings with `{placeholders}` or functions of the values) and every DOM class has `mount(parent)` and `destroy()`. Type declarations in `types/` list every option.
+Every component of `@beyond-js/ui` 0.8.2: what it is for, its variants and main options, the states it states in words, and its consumers. DOM names come from `@beyond-js/ui` (or `/dom`); React names from `@beyond-js/ui/react`. Every component takes `labels` for its copy (strings with `{placeholders}` or functions of the values) and every DOM class has `mount(parent)` and `destroy()`. Type declarations in `types/` list every option.
 
 **Consumers** (each product vendors the tarball in its own `tools/` and records its adoption, residual copies and evidence in its own repository; the family reference catalogs them component by component in `branding/src/family/components/consumers.js`): on 0.1.7 or later since 2026-09-28 (the Collection consumers, Delegate, Conduict and Branding, on 0.1.8): the Beyond desktop (plain DOM), the Delegate application (React, the whole application), Branding (plain DOM), the Conduict interface and its Desktop surface (plain DOM), the Projects interface (plain DOM served by its service), the Snapshots and Accounts frontends and the Workspace client (React), and the CDN administration and backoffice (React, through the package's `Dialog`). Every product that names itself beside the wordmark uses `Lockup`.
 
@@ -86,7 +86,8 @@ await confirm({
 - `product` and `read()`: the product's read, answering `{ state: 'signed', person, expires? }` or `{ state: 'ended', reason }`; a rejection is an outage, never a sign-out;
 - `start(mode)`: the product's hand-off start for `silent` (`prompt=none` in a hidden frame), `window` and `tab`;
 - the family `bar`, `other` (the bar's "Sign out of Beyond", offered as "Use another account"), `accounts` (Beyond Accounts' account page), `onrenewed` and `onchanged`;
-- `delegate`, inside a Beyond Desktop window, where the Desktop asks.
+- `delegate`, inside a Beyond Desktop window, where the Desktop asks;
+- `signin` (0.8.2), the product's own sign-in behind Continue, for an installed shell that signs in through the system browser.
 
 **The transport.** It sends every `UNAUTHENTICATED`, `SESSION_*` and `ACCOUNT_SUSPENDED` answer to `lost({ reason, replay })`, which resolves with whether to send the request again:
 

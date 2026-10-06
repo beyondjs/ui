@@ -246,3 +246,21 @@ test('the landing tells its parent and the channel the outcome, and nothing else
 	const odd = new Landing({ location: { search: '?session=hijack' }, parent: null });
 	assert.equal(odd.message.outcome, 'failed', 'an unknown outcome is a failure');
 });
+
+test('a product\'s own sign-in behind Continue (an installed shell): the same dialog, then the page continues', async () => {
+	const product = new Product({ platform: false });
+	let asked = 0;
+	const session = product.session({ start: mode => (mode === 'silent' ? null : null), signin: async () => {
+		asked += 1;
+		product.signin();
+		return true;
+	} });
+	const write = session.lost({ replay: 'write' });
+	await page.until(() => dialog()?.open);
+	button('Continue as Ada').click();
+	assert.equal(await write, true);
+	assert.equal(asked, 1);
+	assert.deepEqual(product.opened, [], 'no window is opened');
+	assert.equal(dialog()?.open ?? false, false);
+	session.destroy();
+});
