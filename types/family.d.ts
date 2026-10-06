@@ -192,9 +192,9 @@ export class FamilyBar extends Component {
 	readonly state: 'loading' | 'unavailable' | 'ready';
 	descriptor: FamilyDescriptor | FamilyUnavailable | null;
 	set fallback(value: FamilyFallback | null);
-	/** Replaces the project menu's notice (0.4.0). */
+	/** `notice` replaces the project menu's notice (0.4.0); `signin` shows "Sign in" for the account menu while signed out (0.8.0, `Session`). */
 	notice: FamilyNotice | null;
-	expanded: boolean;
+	signin: { run: () => void; label?: string } | null; expanded: boolean;
 }
 
 /** One link of a product's sidebar. */

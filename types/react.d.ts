@@ -198,11 +198,15 @@ export interface FamilyBarProps {
 	notice?: { text: string; href?: string | null; action?: { label: string; href?: string | null; onSelect?: (() => void) | null } | null } | null;
 	/** The product's own dialog markers, left out of the address Accounts returns to (0.4.0). */
 	transient?: string[];
+	/** "Sign in" in place of the account menu while signed out: the `signin` of `useSession` (0.8.0). */
+	signin?: { run: () => void; label?: string } | null;
 	/** Memoize: a new object creates a new bar */
 	labels?: Copy;
 }
 /** The family bar, driven by the DOM `FamilyBar`; `descriptor` and `fallback` are applied when they change. */
 export function FamilyBar(props: FamilyBarProps): ReactElement;
+/** `Session` for a React product (0.8.0): created once `person` is known; pass `signin` to `FamilyBar`. */
+export function useSession(options: Omit<import('./session.js').SessionOptions, 'bar'>): { session: import('./session.js').Session | null; signin: { run: () => void; label?: string } | null };
 /** A product's sections (0.4.0), driven by the DOM `Sidebar`; place it first in a `.bui-shell` element. */
 export function Sidebar(props: { product: string; groups?: SidebarGroup[]; context?: string | { label?: string | null; name: string } | null; cut?: number; section?: string | null; onNavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null; labels?: { sections?: string; close?: string } }): ReactElement;
 export function ProductNav(props: { items: Array<ProductNavItem | null | false>; label?: string | null; sticky?: boolean; onNavigate?: ((item: ProductNavItem, event: MouseEvent) => void) | null; labels?: { nav?: string } }): ReactElement;

@@ -1,0 +1,53 @@
+/* A session that ended (Session): one small dialog, the person it belonged to, and the bar's "Sign in".
+   A revoked or suspended session hides the page behind an opaque backdrop. */
+.bui-session-opaque::backdrop {
+	background: var(--color-canvas);
+}
+.bui-session-person {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	min-width: 0;
+}
+.bui-session-avatar {
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: 50%;
+	background: var(--color-action);
+	color: var(--color-on-action);
+	font-weight: var(--weight-medium);
+}
+.bui-session-avatar svg {
+	width: 1.25rem;
+	height: 1.25rem;
+}
+.bui-session-who {
+	display: grid;
+	min-width: 0;
+}
+.bui-session-name {
+	font-weight: var(--weight-medium);
+	overflow-wrap: anywhere;
+}
+.bui-session-email {
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	overflow-wrap: anywhere;
+}
+.bui-session-said {
+	margin: 0;
+	max-width: var(--layout-measure);
+}
+.bui-session .bui-dialog-actions a.bui-button {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-2);
+	text-decoration: none;
+}
+.bui-family-signin {
+	white-space: nowrap;
+}

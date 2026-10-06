@@ -67,7 +67,8 @@ export const defaults = {
 	members: 'Members of this organization',
 	preferences: 'Language and appearance',
 	signout: 'Sign out of Beyond',
-	leaving: 'Signing out…'
+	leaving: 'Signing out…',
+	signin: 'Sign in'
 };
 
 /** The Spanish names of the areas and roles, which `spanish` maps by key. */
@@ -134,7 +135,8 @@ export const spanish = {
 	members: 'Miembros de esta organización',
 	preferences: 'Idioma y apariencia',
 	signout: 'Cerrar sesión en Beyond',
-	leaving: 'Cerrando sesión…'
+	leaving: 'Cerrando sesión…',
+	signin: 'Iniciar sesión'
 };
 
 /**

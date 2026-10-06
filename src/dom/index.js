@@ -22,6 +22,7 @@ export { SecretField } from './secret.js';
 export { Draft } from './draft.js';
 export { SideSheet } from './sheet.js';
 export { ProviderWindow } from './provider.js';
+export { Session } from './session/session.js';
 export { StatusRow } from './row.js';
 export { CopyMessage } from './copy.js';
 export { Dialog } from './dialog.js';

@@ -169,3 +169,14 @@ void [listed, consequence.order, Submission.labels.es, Bar.labels.es, Bell.label
 // 0.7.6: a named loading line and tabs named by what they belong to
 const line076: string = busy.text({ name: 'la conversación', kind: 'reading', language: 'es' });
 void [line076, busy.names.en.opening, new Row({ items: [], name: 'web', labels: Row.labels.es })];
+// 0.8.0: a session that ended, answered alike in every product
+import { Session } from '@beyond-js/ui';
+import { Landing } from '@beyond-js/ui/session/landed';
+const bar080 = new Bar({ product: 'conduict', brand: { src: '/brand.svg', href: '/' } });
+const session = new Session({ product: 'conduict', read: async () => ({ state: 'signed', person: { id: 'acc_1', name: 'Ada Lovelace' } }), start: mode => `/v1/auth/start?mode=${mode}`, bar: bar080, labels: Session.labels.es });
+const again080: Promise<boolean> = session.lost({ reason: 'expired', replay: 'write' });
+// @ts-expect-error replay is read, write or false
+void session.lost({ replay: true });
+bar080.signin = null;
+const message080: string = new Landing(window).message.outcome;
+void [again080, message080, session.state, session.subscribe(event => event.type)];

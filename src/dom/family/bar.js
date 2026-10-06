@@ -41,6 +41,7 @@ export class FamilyBar extends Component {
 	#start;
 	#thread;
 	#end;
+	#signin = null;
 	#parts = [];
 
 	/**
@@ -126,6 +127,20 @@ export class FamilyBar extends Component {
 		return this.#header.expanded;
 	}
 
+	/** "Sign in" in place of the account menu and the notifications while a session is not held. */
+	get signin() {
+		return this.#signin;
+	}
+
+	/**
+	 * `{ run, label? }` while the person reads a page whose session ended (`Session` sets it), null
+	 * otherwise: the bar then offers one "Sign in" button where the account menu was.
+	 */
+	set signin(value) {
+		this.#signin = value ?? null;
+		this.#draw();
+	}
+
 	/** Opens or closes the product's own region named by `toggle`. */
 	set expanded(value) {
 		this.#header.expanded = value;
@@ -151,15 +166,17 @@ export class FamilyBar extends Component {
 		const location = new Location({ state, descriptor: ready, fallback: this.#fallback, places, labels, product: name, notice: this.#notice });
 		const switcher = new ProductSwitcher({ product, names: this.#names, descriptor: ready, places, labels, carried: location.sections() });
 		const manage = new Manage({ links: places.links.manage ?? null, product, transient });
-		const menu = new AccountMenu({ person, links: places.links, manage, organization: location.organization, any: location.any, product: name, id: product, account, labels });
-		this.#parts = [switcher, location, menu];
+		const signin = this.#signin;
+		const menu = signin ? null : new AccountMenu({ person, links: places.links, manage, organization: location.organization, any: location.any, product: name, id: product, account, labels });
+		this.#parts = [switcher, location, menu].filter(Boolean);
 		this.#start.append(switcher.element);
 		this.#start.querySelector('.bui-header-brand').setAttribute('href', places.home);
 		// No divider when there is no place to show after it.
 		this.#thread.replaceChildren(...(location.blank ? [] : [el('span', { class: 'bui-family-divider', 'aria-hidden': 'true' })]), location.element);
 		// The Docs label stays visible wherever the link shows (D11); below 480 px it moves into the account menu.
 		const docs = places.links.docs ? el('a', { class: 'bui-family-docs', href: places.links.docs, 'data-part': 'docs' }, [glyph('book'), el('span', { text: labels.text('docs') })]) : null;
-		this.#end.replaceChildren(...[docs, notifications, menu.element].filter(Boolean));
+		const end = signin ? [docs, el('button', { type: 'button', class: 'bui-button bui-button-primary bui-family-signin', 'data-part': 'signin', onclick: () => signin.run() }, [signin.label ?? labels.text('signin')])] : [docs, notifications, menu.element];
+		this.#end.replaceChildren(...end.filter(Boolean));
 		this.element.dataset.state = state;
 		this.#restore(focused);
 	}
