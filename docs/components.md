@@ -81,7 +81,7 @@ await confirm({
 
 ## A session that ended
 
-**Session** (DOM `Session`, React `useSession`; since 0.8.0, the family rule D63 that presents D26, Beyond Suite's `docs/session-renewal.md`). The one answer, in every product, to a session that ends while the person works. A product creates it once its own session read says who is signed in, with:
+**Session** (DOM `Session`, React `useSession`; since 0.8.0, the family rule D63 that presents D26, Beyond Suite's `docs/family/session-renewal.md`). The one answer, in every product, to a session that ends while the person works. A product creates it once its own session read says who is signed in, with:
 
 - `product` and `read()`: the product's read, answering `{ state: 'signed', person, expires? }` or `{ state: 'ended', reason }`; a rejection is an outage, never a sign-out;
 - `start(mode)`: the product's hand-off start for `silent` (`prompt=none` in a hidden frame), `window` and `tab`;

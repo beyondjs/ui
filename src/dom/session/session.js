@@ -13,7 +13,7 @@ import { Channel } from './channel.js';
 
 /**
  * A session that ends while the person works, answered the same way in every Beyond product (D63,
- * presenting D26; Beyond Suite's `docs/session-renewal.md`). A 401-class answer calls `lost()`, a look
+ * presenting D26; Beyond Suite's `docs/family/session-renewal.md`). A 401-class answer calls `lost()`, a look
  * on return to the tab calls `check()`. Unless suspended, the session is first renewed with nothing
  * shown (`Silent`, `prompt=none`, once per `pause`); otherwise one dialog (`SessionNotice`) whose
  * Continue signs in in a window that closes itself (`Trip`). Closed, the page stays readable (`Guard`)
