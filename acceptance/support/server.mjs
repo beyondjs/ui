@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { createReadStream, statSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
+import { Product } from './product.mjs';
 
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.map': 'application/json', '.svg': 'image/svg+xml', '.ttf': 'font/ttf' };
 
@@ -9,6 +10,7 @@ const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
  * files only below its root and closes with the run. `/attempt?id=` holds a provider trip's state for
  * the stand-in landing and the page that reads it (GET reads it, POST with `state=` writes it), so a
  * landing on another origin (`localhost` beside `127.0.0.1`) and the page share it as a server would.
+ * `/product/` is the stand-in product of the `session:` checks (`Product`).
  */
 export class Server {
 	static #attempts = new Map();
@@ -28,6 +30,7 @@ export class Server {
 	async start() {
 		this.#server = createServer((request, response) => {
 			const url = new URL(request.url, 'http://local');
+			if (Product.answer(url, request, response) !== false) return;
 			if (url.pathname === '/attempt') {
 				const id = url.searchParams.get('id') ?? '';
 				if (request.method === 'POST') Server.#attempts.set(id, url.searchParams.get('state') ?? '');

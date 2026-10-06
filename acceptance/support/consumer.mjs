@@ -54,7 +54,7 @@ export class Consumer {
 		writeFileSync(join(this.#directory, 'package.json'), JSON.stringify({ name: `ui-consumer-${this.#name}`, private: true, type: 'module', dependencies }, null, '\t'));
 		execFileSync('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error'], { cwd: this.#directory, stdio: 'pipe' });
 		// The React fixture has seven pages: the full consumer, one under an external store, the family bar, the icons with preferences, the long operations, the page system and "Choose, never type".
-		const entries = (this.#page === 'react' ? ['main.jsx', 'store.jsx', 'family.jsx', 'icons.jsx', 'operations.jsx', 'layout.jsx', 'choosing.jsx'] : ['main.js', 'family.js', 'icons.js', 'operations.js', 'layout.js', 'choosing.js']).map(file => join(this.#directory, 'fixtures', this.#page, file));
+		const entries = (this.#page === 'react' ? ['main.jsx', 'store.jsx', 'family.jsx', 'icons.jsx', 'operations.jsx', 'layout.jsx', 'choosing.jsx'] : ['main.js', 'family.js', 'icons.js', 'operations.js', 'layout.js', 'choosing.js', 'session.js', 'landed.js']).map(file => join(this.#directory, 'fixtures', this.#page, file));
 		await build({ entryPoints: entries, bundle: true, format: 'esm', outdir: join(this.#directory, 'fixtures', this.#page, 'out'), jsx: 'automatic', loader: { '.woff2': 'file' }, define: { 'process.env.NODE_ENV': '"development"' }, logLevel: 'error', absWorkingDir: this.#directory });
 		this.#server = await new Server(this.#directory).start();
 		return this;

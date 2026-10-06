@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Stand-in Beyond Accounts sign-in</title>
+	</head>
+	<body>
+		<p>A stand-in for Beyond Accounts' sign-in page, in the window the product's dialog opened.</p>
+		<button id="signin" type="button">Sign in as Ada</button>
+		<script>
+			// Signing in makes Accounts' session alive, then the hand-off starts again and lands on the product.
+			const query = new URLSearchParams(location.search);
+			document.getElementById('signin').addEventListener('click', async () => {
+				await fetch(`/product/set?id=${encodeURIComponent(query.get('id'))}&platform=alive`, { method: 'POST' });
+				location.replace(`/product/start?id=${encodeURIComponent(query.get('id'))}&mode=${query.get('mode')}`);
+			});
+		</script>
+	</body>
+</html>
