@@ -174,8 +174,9 @@ export class Session extends Component {
 	#ask(kind) {
 		this.#kind = kind;
 		if (kind === 'suspended') this.#held.settle(false);
+		// Inside a host (the Desktop) the host is the one voice for every kind: a frame never draws a dialog
+		if (this.#options.delegate) return void this.#hand();
 		if (kind === 'unavailable') this.#retry.schedule();
-		if (this.#options.delegate && kind !== 'suspended' && kind !== 'unavailable') return void this.#hand();
 		this.#go(kind === 'suspended' ? 'ended' : 'asking');
 		this.#notice.show(kind, this.#person);
 	}

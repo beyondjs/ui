@@ -72,3 +72,19 @@ test('a product\'s own sign-in behind Continue (an installed shell): the same di
 	assert.equal(dialog()?.open ?? false, false);
 	session.destroy();
 });
+
+test('inside a host every kind goes to the host: a suspended account and Accounts not answering draw nothing in the frame', async () => {
+	for (const [reason, read] of [['suspended', null], [null, async () => Promise.reject(new Error('down'))]]) {
+		const product = new SessionProduct({ platform: false, reason: reason ?? 'expired' });
+		const asked = [];
+		const session = product.session({ silent: false, ...(read ? { read } : {}), delegate: async request => (asked.push(request.reason), false) });
+		try {
+			assert.equal(await session.lost({ reason, replay: 'read' }), false);
+			await page.until(() => session.state === 'ended');
+			assert.deepEqual(asked, [reason ?? 'unavailable'], 'the host was asked, with the reason');
+			assert.equal(dialog(), null, 'no dialog in the frame');
+		} finally {
+			session.destroy();
+		}
+	}
+});

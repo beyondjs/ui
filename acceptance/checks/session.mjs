@@ -86,6 +86,8 @@ export const checks = [
 				await page.waitForFunction(() => document.querySelector('dialog.bui-session')?.open, null, { timeout: 15_000 });
 				expect(!(await overflow(page)), `${width}: no sideways scroll with the dialog`);
 				expect(await page.evaluate(() => !document.querySelector('dialog.bui-session .bui-dialog-head .bui-icon-button')), `${width}: no close button`);
+				expect((await page.getByRole('alertdialog', { name: 'Sign in again to continue' }).count()) === 1, `${width}: the engine exposes one alert dialog named by its title`);
+				expect(await page.evaluate(() => document.getElementById(document.querySelector('dialog.bui-session').getAttribute('aria-describedby'))?.textContent === 'What you were doing stays here.'), `${width}: its sentence is its description`);
 				await page.keyboard.press('Escape');
 				await page.mouse.click(4, 400);
 				expect(await shown(page), `${width}: neither Escape nor a press outside closes it`);

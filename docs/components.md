@@ -1,6 +1,6 @@
 # Component catalog
 
-Every component of `@beyond-js/ui` 0.9.1: what it is for, its variants and main options, the states it states in words, and its consumers. DOM names come from `@beyond-js/ui` (or `/dom`); React names from `@beyond-js/ui/react`. Every component takes `labels` for its copy (strings with `{placeholders}` or functions of the values) and every DOM class has `mount(parent)` and `destroy()`. Type declarations in `types/` list every option.
+Every component of `@beyond-js/ui` 0.9.2: what it is for, its variants and main options, the states it states in words, and its consumers. DOM names come from `@beyond-js/ui` (or `/dom`); React names from `@beyond-js/ui/react`. Every component takes `labels` for its copy (strings with `{placeholders}` or functions of the values) and every DOM class has `mount(parent)` and `destroy()`. Type declarations in `types/` list every option.
 
 **Consumers** (each product vendors the tarball in its own `tools/` and records its adoption, residual copies and evidence in its own repository; the family reference catalogs them component by component in `branding/src/family/components/consumers.js`): on 0.1.7 or later since 2026-09-28 (the Collection consumers, Delegate, Conduict and Branding, on 0.1.8): the Beyond desktop (plain DOM), the Delegate application (React, the whole application), Branding (plain DOM), the Conduict interface and its Desktop surface (plain DOM), the Projects interface (plain DOM served by its service), the Snapshots and Accounts frontends and the Workspace client (React), and the CDN administration and backoffice (React, through the package's `Dialog`). Every product that names itself beside the wordmark uses `Lockup`.
 
@@ -86,7 +86,7 @@ await confirm({
 - `product` and `read()`: the product's read, answering `{ state: 'signed', person, expires? }` or `{ state: 'ended', reason }`; a rejection is an outage, never a sign-out;
 - `start(mode)`: the product's hand-off start for `silent` (`prompt=none` in a hidden frame), `window` and `tab`;
 - `other` (the bar's "Sign out of Beyond", offered as "Use another account"), `accounts` (Beyond Accounts' account page), `onrenewed` (read the view again, reconnect live transports) and `onchanged`;
-- `delegate`, inside a Beyond Desktop window, where the Desktop asks: `true` once signed in, `false` when the window is closing (the session then ends with nothing shown), and a rejection is asked again by itself after 5, 15, 30 and then every 60 s;
+- `delegate`, inside a Beyond Desktop window, where the Desktop asks for every kind (expired, revoked, suspended and Accounts not answering, since 0.9.2), so a frame never draws a dialog: `true` once signed in, `false` when the window is closing (the session then ends with nothing shown), and a rejection is asked again by itself after 5, 15, 30 and then every 60 s;
 - `signin` (0.8.2), the product's own sign-in behind Continue, for an installed shell that signs in through the system browser.
 
 **The transport.** It sends every `UNAUTHENTICATED`, `SESSION_*` and `ACCOUNT_SUSPENDED` answer to `lost({ reason, replay })`, which resolves with whether to send the request again:
@@ -103,7 +103,7 @@ await confirm({
 - **Suspended:** no sign-in, **Open Beyond Accounts** and "Use another account".
 - **Beyond Accounts not answering:** "This page tries again by itself", **Try again**, and retries by itself after 5, 15, 30 and then every 60 s.
 
-**The dialog cannot be dismissed** (0.9.0): no ×, Escape nor press outside, for every kind. Its actions are the ways on, and cancelling the sign-in window returns to the dialog. There is no state in which the page is open without a session (`state` is `signed`, `renewing`, `asking` or `ended`), so a request the page makes while the dialog asks waits behind it and is sent by its replay class once renewed. `FamilyBar` has no "Sign in" and the page carries no `data-session` marker.
+**The dialog cannot be dismissed** (0.9.0): no ×, Escape nor press outside, for every kind. Since 0.9.2 it is announced as an alert dialog (`role="alertdialog"`) named by its title and described by its sentence (`aria-describedby`). Its actions are the ways on, and cancelling the sign-in window returns to the dialog. There is no state in which the page is open without a session (`state` is `signed`, `renewing`, `asking` or `ended`), so a request the page makes while the dialog asks waits behind it and is sent by its replay class once renewed. `FamilyBar` has no "Sign in" and the page carries no `data-session` marker.
 
 **Live transports.** `check()` resolves with the state after looking. An event stream or poll that drops calls it first and shows its own "reconnecting" only for `signed`; otherwise the dialog speaks, and `onrenewed` reconnects it.
 

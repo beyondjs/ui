@@ -56,6 +56,8 @@ test('the dialog cannot be dismissed, and what the page asks for meanwhile waits
 	await page.until(() => dialog()?.open);
 	assert.equal(dialog().querySelector('.bui-dialog-head .bui-icon-button'), null, 'no close button');
 	assert.equal(dialog().getAttribute('closedby'), 'none');
+	assert.equal(dialog().getAttribute('role'), 'alertdialog', 'announced as a dialog that asks for an answer');
+	assert.equal(document.getElementById(dialog().getAttribute('aria-describedby'))?.textContent, 'What you were doing stays here.', 'its sentence is its description');
 	page.key(dialog(), 'Escape');
 	dialog().dispatchEvent(new window.Event('cancel', { cancelable: true }));
 	dialog().dispatchEvent(new window.MouseEvent('click', { bubbles: true }));

@@ -20,6 +20,7 @@ import { glyph } from '../core/icons.js';
  */
 export class SessionNotice {
 	static KINDS = Object.freeze(['expired', 'revoked', 'suspended', 'unavailable']);
+	static #count = 0;
 
 	#labels;
 	#hooks;
@@ -29,6 +30,7 @@ export class SessionNotice {
 	#phase = 'idle';
 	#person = null;
 	#accounts;
+	#said = `bui-session-said-${(SessionNotice.#count += 1)}`;
 
 	/**
 	 * @param {object} options
@@ -96,6 +98,9 @@ export class SessionNotice {
 		// No ×, Escape nor press outside: the person leaves it only through one of its actions
 		this.#dialog = new Dialog({ title: '', escape: false, size: 'small' });
 		this.#strict = strict;
+		// It asks for an answer and cannot be dismissed: announced as an alert dialog, its sentence as its description
+		this.#dialog.element.setAttribute('role', 'alertdialog');
+		this.#dialog.element.setAttribute('aria-describedby', this.#said);
 		this.#dialog.element.classList.add('bui-session');
 		this.#dialog.element.classList.toggle('bui-session-opaque', strict);
 	}
@@ -109,7 +114,7 @@ export class SessionNotice {
 		dialog.title = text(kind === 'expired' ? 'title' : kind);
 		const said = { expired: 'kept', revoked: 'revoked_body', suspended: 'suspended_body', unavailable: 'unavailable_body' }[kind];
 		const line = this.#phase === 'waiting' ? text('waiting') : this.#phase === 'blocked' ? text('blocked') : text(said);
-		const status = el('p', { class: 'bui-session-said', role: kind === 'unavailable' || this.#phase !== 'idle' ? 'status' : null, text: line });
+		const status = el('p', { id: this.#said, class: 'bui-session-said', role: kind === 'unavailable' || this.#phase !== 'idle' ? 'status' : null, text: line });
 		const focused = dialog.shown && dialog.element.contains(dialog.element.ownerDocument.activeElement);
 		dialog.fill([kind === 'unavailable' ? null : this.#chip(), status]);
 		dialog.actions = this.#actions();

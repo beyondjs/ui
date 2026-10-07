@@ -1,4 +1,4 @@
-# Releases 0.9.0 and 0.9.1 — 7 October 2026
+# Releases 0.9.0 to 0.9.2 — 7 October 2026
 
 The owner amended the family rule D63 on 2026-10-07 (S27 in the family reference; Beyond Suite's
 `docs/family/session-renewal.md`): **the session's dialog cannot be dismissed.**
@@ -53,3 +53,20 @@ so.
 
 `npm test`: 331 pass, 0 fail, with `wording.test.mjs` asserting the new sentence and that it does not
 mention the session; `npm run types` clean.
+
+## 0.9.2
+
+- **A frame never draws a dialog.** Inside a host (`delegate`, the Beyond Desktop), `Session` handed
+  only an expired or revoked session to the host and still drew its own dialog in the frame for a
+  suspended account and for Beyond Accounts not answering, under the Desktop's own dialog: two voices,
+  against the rule's point 7. Every kind now goes to the host with its reason (`suspended`,
+  `unavailable`), and the frame retries nothing of its own; the Desktop's dialog for the application
+  answers it (Close {application} for a suspended account).
+- **An alert dialog.** A dialog that asks for an answer and cannot be dismissed is announced as one:
+  `role="alertdialog"`, named by its title and described by its sentence (`aria-describedby`).
+
+`npm test`: 332 pass, 0 fail (`session-host.test.mjs` adds every kind handed to the host with nothing
+drawn in the frame; `session.test.mjs` asserts the role and the description). `npm run types` clean.
+The `session` browser checks, which now ask each engine for one alert dialog named by its title and
+check its description, pass 7 of 7 in Chrome, Firefox and WebKit. A screen reader was not run; the
+engines' accessibility trees were asked through Playwright's role queries.
