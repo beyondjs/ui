@@ -1,4 +1,4 @@
-/** Types of `Session` (0.8.0): a session that ends while the person works, answered alike in every product. Re-exported by `@beyond-js/ui/dom`. */
+/** Types of `Session` (0.8.0; the dialog cannot be dismissed since 0.9.0): a session that ends while the person works, answered alike in every product. Re-exported by `@beyond-js/ui/dom`. */
 import type { Component, Copy } from './dom.js';
 
 
@@ -10,7 +10,7 @@ export interface SessionPerson {
 }
 /** The product's read of its own session. A rejection is an unavailable answer, never a sign-out. */
 export type SessionAnswer = { state: 'signed'; person?: SessionPerson | null; expires?: string | number | null } | { state: 'ended'; reason?: 'expired' | 'revoked' | 'suspended' | string | null };
-export type SessionState = 'signed' | 'renewing' | 'asking' | 'reading' | 'ended';
+export type SessionState = 'signed' | 'renewing' | 'asking' | 'ended';
 export type SessionKind = 'expired' | 'revoked' | 'suspended' | 'unavailable';
 /** `read` sends it again once renewed; `write` once renewed while it waited; `false` never. */
 export type SessionReplay = 'read' | 'write' | false;
@@ -32,9 +32,7 @@ export interface SessionOptions {
 	other?: (() => void) | null;
 	/** Beyond Accounts' address, offered to a suspended account. */
 	accounts?: string | null;
-	/** The family bar, which offers "Sign in" while the person reads without a session. */
-	bar?: { signin: { run: () => void; label?: string } | null } | null;
-	/** A host that asks the person itself (the Beyond Desktop); resolves true once signed in. */
+	/** A host that asks the person itself (the Beyond Desktop): true once signed in, false when the window is closing; a rejection is asked again by itself. */
 	delegate?: ((request: { reason: SessionKind | null; person: SessionPerson | null; address: string | null }) => Promise<boolean>) | null;
 	/** The product's own sign-in behind Continue, resolving true once done (0.8.2: an installed shell signing in through the system browser). */
 	signin?: (() => Promise<boolean>) | null;
@@ -64,7 +62,7 @@ export class Session extends Component {
 	readonly notice: { readonly shown: boolean; readonly kind: SessionKind | null; readonly phase: string; readonly element: HTMLDialogElement | null };
 	text(key: string, values?: Record<string, unknown>): string;
 	lost(lost?: { reason?: string | null; replay?: SessionReplay }): Promise<boolean>;
-	check(): Promise<void>;
-	open(): void;
+	/** Looks at the session now and resolves with the state after looking: a live transport speaks only while `signed`. */
+	check(): Promise<SessionState>;
 	subscribe(listener: (event: SessionEvent) => void): () => void;
 }

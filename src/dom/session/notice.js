@@ -6,16 +6,17 @@ import { glyph } from '../core/icons.js';
  * The one dialog a session that ended shows, in every product alike.
  *
  * - `expired`: "Sign in again to continue", the person who was signed in, "What you were doing stays
- *   here", **Continue as {name}** and "Use another account". It can be closed (Escape, ×): the page
- *   stays readable and the family bar offers "Sign in".
+ *   here", **Continue as {name}** and "Use another account".
  * - `revoked`: "You were signed out of Beyond", over an opaque backdrop that hides the page (the session
- *   was ended on purpose, perhaps on a shared computer), with the same actions; it cannot be closed.
- * - `suspended`: "Your Beyond account is suspended", opaque, with no sign-in and a link to Beyond
- *   Accounts; it cannot be closed.
- * - `unavailable`: "Beyond Accounts is not answering", with **Try again**; it can be closed.
+ *   was ended on purpose, perhaps on a shared computer), with the same actions.
+ * - `suspended`: "Your Beyond account is suspended", opaque, with a link to Beyond Accounts and "Use
+ *   another account", and no sign-in.
+ * - `unavailable`: "Beyond Accounts is not answering", "This page tries again by itself", **Try again**.
  *
- * While the sign-in window is open (`waiting`) the dialog says to finish there, with "Show the window"
- * and "Cancel"; a blocked window (`blocked`) offers "Continue in this tab" and "Try the window again".
+ * None of them can be dismissed (no ×, Escape, nor a press outside; D63 as amended on 2026-10-07): a
+ * product holds nothing a person can use without a session, so each offers a way on instead. While the
+ * sign-in window is open (`waiting`) the dialog says to finish there, with "Show the window" and
+ * "Cancel"; a blocked window (`blocked`) offers "Continue in this tab" and "Try the window again".
  */
 export class SessionNotice {
 	static KINDS = Object.freeze(['expired', 'revoked', 'suspended', 'unavailable']);
@@ -28,20 +29,16 @@ export class SessionNotice {
 	#phase = 'idle';
 	#person = null;
 	#accounts;
-	#close;
-	#closing = false;
 
 	/**
 	 * @param {object} options
 	 * @param {import('../core/labels.js').Labels} options.labels
 	 * @param {string|null} [options.accounts] Beyond Accounts' address, offered to a suspended account
-	 * @param {string} [options.close] the close button's name, in the product's language
-	 * @param {{continue: () => void, other: (() => void)|null, reopen: () => void, cancel: () => void, tab: () => void, retry: () => void, dismiss: () => void}} options.hooks
+	 * @param {{continue: () => void, other: (() => void)|null, reopen: () => void, cancel: () => void, tab: () => void, retry: () => void}} options.hooks
 	 */
-	constructor({ labels, accounts = null, close = 'Close', hooks }) {
+	constructor({ labels, accounts = null, hooks }) {
 		this.#labels = labels;
 		this.#accounts = accounts;
-		this.#close = close;
 		this.#hooks = hooks;
 	}
 
@@ -81,29 +78,23 @@ export class SessionNotice {
 		if (this.#dialog) this.#draw();
 	}
 
-	/** Closes the dialog without calling `dismiss`. */
+	/** Closes the dialog: the session was renewed, changed hands or is no longer followed. */
 	hide() {
 		if (!this.#dialog) return;
-		this.#closing = true;
 		this.#dialog.busy = false;
 		this.#dialog.close('done');
-		this.#closing = false;
 		this.#kind = null;
 	}
 
 	destroy() {
-		this.#closing = true;
 		this.#dialog?.destroy();
 		this.#dialog = null;
 	}
 
 	#build(strict) {
-		this.#closing = true;
 		this.#dialog?.destroy();
-		this.#closing = false;
-		// Escape and × close only a dialog the person may leave; the page then stays readable
-		const onclose = value => value === null && !this.#closing && this.#hooks.dismiss();
-		this.#dialog = new Dialog({ title: '', escape: !strict, size: 'small', onclose, labels: { close: this.#close } });
+		// No ×, Escape nor press outside: the person leaves it only through one of its actions
+		this.#dialog = new Dialog({ title: '', escape: false, size: 'small' });
 		this.#strict = strict;
 		this.#dialog.element.classList.add('bui-session');
 		this.#dialog.element.classList.toggle('bui-session-opaque', strict);
@@ -131,7 +122,8 @@ export class SessionNotice {
 		const button = (key, run, variant = 'secondary', values = {}) => el('button', { type: 'button', class: `bui-button bui-button-${variant}`, 'data-action': key, onclick: run }, [text(key, values)]);
 		const hooks = this.#hooks;
 		if (this.#kind === 'suspended') {
-			return this.#accounts ? [el('a', { class: 'bui-button bui-button-primary', href: this.#accounts, 'data-action': 'accounts' }, [glyph('external'), el('span', { text: text('accounts') })])] : [];
+			const accounts = this.#accounts ? el('a', { class: 'bui-button bui-button-primary', href: this.#accounts, 'data-action': 'accounts' }, [glyph('external'), el('span', { text: text('accounts') })]) : null;
+			return [hooks.other ? button('other', () => hooks.other(), 'quiet') : null, accounts].filter(Boolean);
 		}
 		if (this.#kind === 'unavailable') {
 			const retry = button(this.#phase === 'retrying' ? 'retrying' : 'retry', () => hooks.retry(), 'primary');

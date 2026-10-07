@@ -5,69 +5,15 @@ import { Page } from './support/page.mjs';
 const page = new Page();
 const ui = await import('@beyond-js/ui/dom');
 const { Landing } = await import('@beyond-js/ui/session/landed');
+const { SessionProduct, ada } = await import('./support/session.mjs');
+SessionProduct.context = { ui, page };
 after(() => page.close());
 beforeEach(() => page.reset());
 
-const ada = { id: 'acc_ada', name: 'Ada Lovelace', email: 'ada@example.com' };
-
-/**
- * A product as `Session` sees it: a session it reads, a hand-off whose silent attempt a landing
- * answers, and the sign-in window a press opens. `platform` says whether Beyond Accounts still has a
- * session; `after` is the answer the product reads once the person signed in again.
- */
-class Product {
-	answer = { state: 'ended', reason: 'expired' };
-	platform = true;
-	ended = null;
-	opened = [];
-	reads = 0;
-	popup = null;
-
-	constructor({ platform = true, ended = null, reason = 'expired' } = {}) {
-		this.platform = platform;
-		this.ended = ended;
-		this.answer = { state: 'ended', reason };
-		window.open = (url, name) => {
-			this.opened.push(url);
-			this.popup = { closed: false, opener: window, location: { replace: address => this.opened.push(address), href: 'about:blank' }, focus: () => {}, close: () => (this.popup.closed = true) };
-			return this.popup;
-		};
-	}
-
-	session(options = {}) {
-		return new ui.Session({
-			product: 'conduict',
-			person: ada,
-			read: async () => {
-				this.reads += 1;
-				return this.answer;
-			},
-			start: mode => `about:blank#${mode}`,
-			wait: 300,
-			interval: 20,
-			...options
-		});
-	}
-
-	/** Answers the hidden frame as the landing would. */
-	async land() {
-		await page.until(() => document.querySelector('iframe[data-session="renewal"]'));
-		const frame = document.querySelector('iframe[data-session="renewal"]');
-		if (this.platform) this.answer = { state: 'signed', person: ada };
-		const data = { type: 'beyond-session', outcome: this.platform ? 'renewed' : 'interaction', ended: this.ended };
-		window.dispatchEvent(new window.MessageEvent('message', { data, source: frame.contentWindow }));
-	}
-
-	signin(person = ada) {
-		this.answer = { state: 'signed', person };
-	}
-}
-
-const dialog = () => document.querySelector('dialog.bui-session');
-const button = name => [...(dialog()?.querySelectorAll('button, a') ?? [])].find(node => node.textContent.trim() === name);
+const { dialog, button } = SessionProduct;
 
 test('an expired session is renewed in a hidden frame with nothing shown, and what waited is sent again', async () => {
-	const product = new Product();
+	const product = new SessionProduct();
 	const session = product.session();
 	const read = session.lost({ reason: 'expired', replay: 'read' });
 	const write = session.lost({ reason: 'expired', replay: 'write' });
@@ -81,9 +27,8 @@ test('an expired session is renewed in a hidden frame with nothing shown, and wh
 });
 
 test('without a Beyond session one dialog names the person; Continue opens the window and the page continues', async () => {
-	const product = new Product({ platform: false });
-	const bar = new ui.FamilyBar({ product: 'conduict', brand: { src: '/w.svg', href: '/' } }).mount(document.body);
-	const session = product.session({ bar });
+	const product = new SessionProduct({ platform: false });
+	const session = product.session();
 	const write = session.lost({ replay: 'write' });
 	await product.land();
 	await page.until(() => dialog()?.open);
@@ -100,51 +45,43 @@ test('without a Beyond session one dialog names the person; Continue opens the w
 	assert.equal(session.state, 'signed');
 	assert.equal(dialog()?.open ?? false, false);
 	session.destroy();
-	bar.destroy();
 });
 
-test('closing the dialog leaves the page readable: presses that act open it again, and the bar offers Sign in', async () => {
-	const product = new Product({ platform: false });
+test('the dialog cannot be dismissed, and what the page asks for meanwhile waits behind it and is sent once renewed', async () => {
+	const product = new SessionProduct({ platform: false });
 	const bar = new ui.FamilyBar({ product: 'conduict', brand: { src: '/w.svg', href: '/' } }).mount(document.body);
-	let pressed = 0;
-	const act = document.createElement('button');
-	act.textContent = 'Create environment';
-	act.addEventListener('click', () => (pressed += 1));
-	const free = Object.assign(document.createElement('button'), { textContent: 'Copy' });
-	free.dataset.session = 'free';
-	let copied = 0;
-	free.addEventListener('click', () => (copied += 1));
-	document.body.append(act, free);
-	const session = product.session({ bar });
+	const session = product.session({ other: () => {} });
 	const write = session.lost({ replay: 'write' });
 	await product.land();
 	await page.until(() => dialog()?.open);
+	assert.equal(dialog().querySelector('.bui-dialog-head .bui-icon-button'), null, 'no close button');
+	assert.equal(dialog().getAttribute('closedby'), 'none');
 	page.key(dialog(), 'Escape');
-	assert.equal(await write, false, 'nothing held is sent after the dialog closed');
-	assert.equal(session.state, 'reading');
-	assert.equal(document.documentElement.dataset.session, 'reading');
-	const signin = bar.element.querySelector('.bui-family-signin');
-	assert.equal(signin?.textContent, 'Sign in');
-	assert.equal(bar.element.querySelector('.bui-family-account'), null, 'no account menu while signed out');
-	act.click();
-	assert.equal(pressed, 0, 'the press did not act');
+	dialog().dispatchEvent(new window.Event('cancel', { cancelable: true }));
+	dialog().dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+	assert.ok(dialog().open, 'neither Escape, a close request nor a press outside closes it');
 	assert.equal(session.state, 'asking');
-	assert.ok(dialog()?.open, 'it opened the dialog again');
-	page.key(dialog(), 'Escape');
-	free.click();
-	assert.equal(copied, 1, 'a control marked free still works');
-	bar.element.querySelector('.bui-family-signin').click();
-	assert.ok(dialog()?.open);
+	assert.ok(button('Use another account') && button('Continue as Ada'), 'it offers a way on instead');
+	assert.equal(document.documentElement.dataset.session, undefined, 'the page is never marked as read without a session');
+	assert.equal(bar.element.querySelector('.bui-family-signin'), null, 'the bar offers no Sign in of its own');
+	assert.ok(bar.element.querySelector('.bui-family-account'), 'the account menu stays');
+	// A page opened while the dialog asks (the browser's Back, a list that loads) waits instead of failing
 	const read = session.lost({ replay: 'read' });
-	page.key(dialog(), 'Escape');
-	assert.equal(await read, false, 'a read held while asking is not sent once the dialog closed');
-	assert.equal(await session.lost({ replay: 'read' }), false, 'nor one asked while reading');
+	const destructive = session.lost({ replay: false });
+	button('Continue as Ada').click();
+	button('Cancel').click();
+	assert.equal(session.notice.phase, 'idle', 'cancelling the window returns to the dialog, never to the page');
+	assert.ok(dialog().open);
+	button('Continue as Ada').click();
+	product.signin();
+	assert.deepEqual(await Promise.all([write, read, destructive]), [true, true, false]);
+	assert.equal(session.state, 'signed');
 	session.destroy();
 	bar.destroy();
 });
 
 test('a revoked session hides the page and cannot be closed; a suspended account is offered no sign-in', async () => {
-	const product = new Product({ platform: false, ended: 'revoked' });
+	const product = new SessionProduct({ platform: false, ended: 'revoked' });
 	const session = product.session({ other: () => {} });
 	void session.lost({ reason: 'revoked' });
 	await product.land();
@@ -157,19 +94,24 @@ test('a revoked session hides the page and cannot be closed; a suspended account
 	assert.ok(button('Use another account') && button('Continue as Ada'));
 	session.destroy();
 
-	const suspended = new Product({ reason: 'suspended' });
-	const blocked = suspended.session({ accounts: 'https://accounts.example/account' });
+	const suspended = new SessionProduct({ reason: 'suspended' });
+	let other = 0;
+	const blocked = suspended.session({ accounts: 'https://accounts.example/account', other: () => (other += 1) });
 	assert.equal(await blocked.lost({ reason: 'suspended', replay: 'read' }), false);
 	assert.equal(blocked.state, 'ended');
 	assert.equal(document.querySelector('iframe'), null, 'no renewal is tried for a suspended account');
 	assert.equal(dialog().querySelector('.bui-dialog-title').textContent, 'Your Beyond account is suspended');
 	assert.equal(button('Open Beyond Accounts')?.getAttribute('href'), 'https://accounts.example/account');
 	assert.equal([...dialog().querySelectorAll('button')].filter(node => /Continue|Sign in/.test(node.textContent)).length, 0);
+	page.key(dialog(), 'Escape');
+	assert.ok(dialog().open, 'it cannot be closed');
+	button('Use another account').click();
+	assert.equal(other, 1, 'Use another account is its way on besides Beyond Accounts');
 	blocked.destroy();
 });
 
 test('someone else signing in drops what was held and starts the product again for them', async () => {
-	const product = new Product({ platform: false });
+	const product = new SessionProduct({ platform: false });
 	let changed = null;
 	const session = product.session({ onchanged: person => (changed = person) });
 	const write = session.lost({ replay: 'write' });
@@ -184,7 +126,7 @@ test('someone else signing in drops what was held and starts the product again f
 });
 
 test('an unavailable Accounts is not a sign-out: it says so and tries again', async () => {
-	const product = new Product();
+	const product = new SessionProduct();
 	product.answer = { state: 'ended', reason: 'expired' };
 	const session = product.session({ read: async () => Promise.reject(new Error('down')) });
 	void session.lost({});
@@ -192,12 +134,16 @@ test('an unavailable Accounts is not a sign-out: it says so and tries again', as
 	await page.until(() => dialog()?.open, 2000);
 	assert.equal(session.kind, 'unavailable');
 	assert.equal(dialog().querySelector('.bui-dialog-title').textContent, 'Beyond Accounts is not answering');
+	assert.match(dialog().textContent, /This page tries again by itself/);
 	assert.ok(button('Try again'));
+	assert.equal(dialog().querySelector('.bui-dialog-head .bui-icon-button'), null, 'it cannot be closed either');
+	page.key(dialog(), 'Escape');
+	assert.ok(dialog().open);
 	session.destroy();
 });
 
 test('a loop ends in the dialog: a second loss within the pause does not renew silently again', async () => {
-	const product = new Product();
+	const product = new SessionProduct();
 	const session = product.session();
 	const first = session.lost({});
 	await product.land();
@@ -209,29 +155,32 @@ test('a loop ends in the dialog: a second loss within the pause does not renew s
 	session.destroy();
 });
 
-test('a look at the session finds it ended before the person acts', async () => {
-	const product = new Product({ platform: false });
+test('a look at the session finds it ended before the person acts, and answers with the state', async () => {
+	const product = new SessionProduct({ platform: false });
 	const session = product.session();
-	await session.check();
+	assert.equal(await session.check(), 'renewing', 'a dropped live transport learns the session speaks, not it');
 	await product.land();
 	await page.until(() => dialog()?.open);
 	assert.equal(session.state, 'asking');
+	assert.equal(await session.check(), 'asking');
 	session.destroy();
+
+	const signed = new SessionProduct();
+	signed.signin();
+	const kept = signed.session();
+	assert.equal(await kept.check(), 'signed', 'a signed session lets the transport say it is reconnecting');
+	kept.destroy();
 });
 
-test('Spanish copy for the dialog and the bar', async () => {
-	const product = new Product({ platform: false });
-	const bar = new ui.FamilyBar({ product: 'conduict', brand: { src: '/w.svg', href: '/' }, labels: ui.FamilyBar.labels.es }).mount(document.body);
-	const session = product.session({ bar, labels: ui.Session.labels.es });
+test('Spanish copy for the dialog', async () => {
+	const product = new SessionProduct({ platform: false });
+	const session = product.session({ labels: ui.Session.labels.es });
 	void session.lost({});
 	await product.land();
 	await page.until(() => dialog()?.open);
 	assert.equal(dialog().querySelector('.bui-dialog-title').textContent, 'Vuelve a iniciar sesión para continuar');
 	assert.ok(button('Continuar como Ada'));
-	page.key(dialog(), 'Escape');
-	assert.equal(bar.element.querySelector('.bui-family-signin')?.textContent, 'Iniciar sesión');
 	session.destroy();
-	bar.destroy();
 });
 
 test('the landing tells its parent and the channel the outcome, and nothing else', () => {
@@ -247,26 +196,8 @@ test('the landing tells its parent and the channel the outcome, and nothing else
 	assert.equal(odd.message.outcome, 'failed', 'an unknown outcome is a failure');
 });
 
-test('a product\'s own sign-in behind Continue (an installed shell): the same dialog, then the page continues', async () => {
-	const product = new Product({ platform: false });
-	let asked = 0;
-	const session = product.session({ start: mode => (mode === 'silent' ? null : null), signin: async () => {
-		asked += 1;
-		product.signin();
-		return true;
-	} });
-	const write = session.lost({ replay: 'write' });
-	await page.until(() => dialog()?.open);
-	button('Continue as Ada').click();
-	assert.equal(await write, true);
-	assert.equal(asked, 1);
-	assert.deepEqual(product.opened, [], 'no window is opened');
-	assert.equal(dialog()?.open ?? false, false);
-	session.destroy();
-});
-
 test('a dialog shown for an expired session and hidden by a renewal is not reused for a revoked one: the page is hidden', async () => {
-	const product = new Product({ platform: false });
+	const product = new SessionProduct({ platform: false });
 	const session = product.session();
 	const first = session.lost({ replay: 'read' });
 	await product.land();

@@ -1,6 +1,6 @@
 import { expect, overflow } from '../support/browser.mjs';
 
-/** A session that ended (0.8.0) in a real engine: a hidden frame through the stand-in product's hand-off and landing, the sign-in window, an opaque backdrop and the readable page. */
+/** A session that ended (0.8.0; the dialog cannot be dismissed since 0.9.0) in a real engine: a hidden frame through the stand-in product's hand-off and landing, the sign-in window, an opaque backdrop and the dialog that stays. */
 let count = 0;
 async function open(browser, consumer, { product = {}, width = 1280, scheme = 'light' } = {}) {
 	const id = `check-${Date.now()}-${(count += 1)}`;
@@ -77,26 +77,28 @@ export const checks = [
 		}
 	},
 	{
-		name: 'session: closing the dialog leaves the page readable; a press that acts opens it again, a free control works, and the bar offers Sign in, at 1280 and 390 px',
+		name: 'session: the dialog cannot be dismissed (no ×, Escape nor a press outside), the page behind cannot be used, a read started meanwhile waits and is sent after Continue, at 1280 and 390 px',
 		consumers: ['dom'],
 		async run(browser, consumer) {
 			for (const width of [1280, 390]) {
-				const { page } = await open(browser, consumer, { width, product: { session: 'ended', reason: 'expired', platform: 'none' } });
+				const { page, context } = await open(browser, consumer, { width, product: { session: 'ended', reason: 'expired', platform: 'none' } });
 				await page.evaluate(() => void window.fixture.lost('write'));
 				await page.waitForFunction(() => document.querySelector('dialog.bui-session')?.open, null, { timeout: 15_000 });
 				expect(!(await overflow(page)), `${width}: no sideways scroll with the dialog`);
+				expect(await page.evaluate(() => !document.querySelector('dialog.bui-session .bui-dialog-head .bui-icon-button')), `${width}: no close button`);
 				await page.keyboard.press('Escape');
-				await page.waitForFunction(() => window.fixture.log.includes('write:false'));
-				expect(await page.evaluate(() => document.documentElement.dataset.session === 'reading'), `${width}: reading`);
-				const signin = page.locator('.bui-family-signin');
-				expect((await signin.textContent()) === 'Sign in', `${width}: the bar offers Sign in`);
-				await page.locator('#copy').click();
-				expect((await log(page)).includes('copied'), `${width}: a free control works`);
-				await page.locator('#act').click();
-				expect(!(await log(page)).includes('acted') && (await shown(page)), `${width}: a press that acts opens the dialog instead`);
-				await page.keyboard.press('Escape');
-				await signin.click();
-				expect(await shown(page), `${width}: Sign in opens it again`);
+				await page.mouse.click(4, 400);
+				expect(await shown(page), `${width}: neither Escape nor a press outside closes it`);
+				await page.locator('#act').click({ force: true, timeout: 2_000 }).catch(() => undefined);
+				expect(!(await log(page)).includes('acted'), `${width}: the page behind cannot be used`);
+				expect(await page.evaluate(() => !document.querySelector('.bui-family-signin') && document.documentElement.dataset.session === undefined), `${width}: no Sign in of the bar and no reading state`);
+				await page.evaluate(() => void window.fixture.lost('read'));
+				const [popup] = await Promise.all([context.waitForEvent('page'), page.getByRole('button', { name: 'Continue as Ada' }).click()]);
+				await popup.waitForLoadState();
+				await popup.locator('#signin').click();
+				await popup.waitForEvent('close', { timeout: 10_000 });
+				await page.waitForFunction(() => window.fixture.log.includes('write:true') && window.fixture.log.includes('read:true'), null, { timeout: 10_000 });
+				expect(!(await shown(page)), `${width}: the dialog closed once signed in`);
 			}
 		}
 	}

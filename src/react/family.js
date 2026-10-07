@@ -20,10 +20,9 @@ const { useId, useState } = React;
  * `onNavigate(item, event)` takes over plain clicks on the bar's same-origin links. `notice` is
  * applied when its text, address or action label change, and its `action.onSelect` is called with
  * the latest props. A change of `product`, `brand`, `products`, `labels` (memoize it), `advisory`,
- * `transient`, the account entries or `toggle` creates a new bar. `signin` (0.8.0, from `useSession`)
- * offers "Sign in" in place of the account menu while the person reads without a session.
+ * `transient`, the account entries or `toggle` creates a new bar.
  */
-export function FamilyBar({ product, brand, descriptor = null, fallback = null, products = {}, notifications = null, account = {}, toggle = null, onNavigate = null, advisory = ['NOT_ADMITTED'], notice = null, transient = [], signin = null, labels }) {
+export function FamilyBar({ product, brand, descriptor = null, fallback = null, products = {}, notifications = null, account = {}, toggle = null, onNavigate = null, advisory = ['NOT_ADMITTED'], notice = null, transient = [], labels }) {
 	const [slot] = useState(() => document.createElement('div'));
 	const latest = useLatest({ account, toggle, onNavigate, notice });
 	const items = (account.items ?? []).filter(Boolean);
@@ -54,7 +53,6 @@ export function FamilyBar({ product, brand, descriptor = null, fallback = null, 
 	useSync(bar, current => (current.notice = relay(notice, latest)), [notice?.text, notice?.href, notice?.action?.label, notice?.action?.href]);
 	useSync(bar, current => (current.descriptor = descriptor), [JSON.stringify(descriptor)]);
 	useSync(bar, current => (current.fallback = fallback ?? {}), [JSON.stringify(fallback)]);
-	useSync(bar, current => (current.signin = signin ? { label: signin.label, run: () => signin.run() } : null), [signin]);
 	useSync(bar, current => {
 		if (toggle && current.expanded !== toggle.expanded) current.expanded = toggle.expanded;
 	}, [toggle?.expanded]);

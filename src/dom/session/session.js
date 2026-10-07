@@ -4,7 +4,6 @@ import { words } from './words.js';
 import { Silent } from './silent.js';
 import { Trip } from './trip.js';
 import { SessionNotice } from './notice.js';
-import { Guard } from './guard.js';
 import { Watch } from './watch.js';
 import { Held } from './held.js';
 import { Reader } from './reader.js';
@@ -16,15 +15,16 @@ import { Channel } from './channel.js';
  * presenting D26; Beyond Suite's `docs/family/session-renewal.md`). A 401-class answer calls `lost()`, a look
  * on return to the tab calls `check()`. Unless suspended, the session is first renewed with nothing
  * shown (`Silent`, `prompt=none`, once per `pause`); otherwise one dialog (`SessionNotice`) whose
- * Continue signs in in a window that closes itself (`Trip`). Closed, the page stays readable (`Guard`)
- * and the bar offers "Sign in". Someone else signing in calls `onchanged`; tabs follow each other.
- * `lost({ replay })` resolves true for `read` once renewed, for `write` once renewed while it waited,
- * never for `false`.
+ * Continue signs in in a window that closes itself (`Trip`). The dialog cannot be dismissed (D63 as
+ * amended on 2026-10-07): there is no state in which the page is open without a session, so what the
+ * page asks for meanwhile waits behind it. Someone else signing in calls `onchanged`; tabs follow each
+ * other. `lost({ replay })` resolves true for `read` once renewed, for `write` once renewed while it
+ * waited, never for `false`.
  */
 export class Session extends Component {
 	/** The copy in English and Spanish. */
 	static labels = words;
-	static STATES = Object.freeze(['signed', 'renewing', 'asking', 'reading', 'ended']);
+	static STATES = Object.freeze(['signed', 'renewing', 'asking', 'ended']);
 
 	#element;
 	#options;
@@ -35,10 +35,10 @@ export class Session extends Component {
 	#held = new Held();
 	#attempted = 0;
 	#retry;
+	#host;
 	#reader;
 	#subscribers = new Set();
 	#notice;
-	#guard;
 	#watch;
 	#silent;
 	#trip;
@@ -49,29 +49,28 @@ export class Session extends Component {
 	 * `product` id, its `read()` of its own session (a rejection is unavailable, never a sign-out) and
 	 * its hand-off `start(mode)` for `silent`, `window` and `tab`; who is signed in (`person`,
 	 * `expires`); "Use another account" (`other`), Beyond Accounts' address for a suspended account
-	 * (`accounts`), the family `bar`, a host that asks the person itself (`delegate`, the Desktop), the
-	 * product's own sign-in behind Continue (`signin`, an installed shell; since 0.8.2), and
-	 * `onrenewed` / `onchanged`.
+	 * (`accounts`), a host that asks the person itself (`delegate`, the Desktop), the product's own
+	 * sign-in behind Continue (`signin`, an installed shell; since 0.8.2), and `onrenewed` / `onchanged`.
 	 */
-	constructor({ product, read, start, person = null, expires = null, other = null, accounts = null, bar = null, delegate = null, signin = null, onrenewed = null, onchanged = null, silent = true, pause = 60_000, bound = 8_000, wait = 10_000, interval = 2_000, document = globalThis.document, labels = {} }) {
+	constructor({ product, read, start, person = null, expires = null, other = null, accounts = null, delegate = null, signin = null, onrenewed = null, onchanged = null, silent = true, pause = 60_000, bound = 8_000, wait = 10_000, interval = 2_000, document = globalThis.document, labels = {} }) {
 		super();
 		this.#element = document.createElement('span');
 		this.#labels = new Labels(words.en, labels);
 		this.#person = person;
-		this.#options = { product, start, bar, delegate, signin, onrenewed, onchanged, silent, pause, document };
+		this.#options = { product, start, delegate, signin, onrenewed, onchanged, silent, pause, document };
 		this.#reader = new Reader(read, bound);
 		this.#retry = new Retry(() => this.#again());
+		// A host that did not answer is asked again by itself, on the same steps as Beyond Accounts
+		this.#host = new Retry(() => void this.#hand());
 		const hooks = {
 			continue: () => this.#continue(),
 			other: other ? () => other() : null,
 			reopen: () => this.#trip.show(start('window')),
 			cancel: () => void (this.#trip.stop(), (this.#notice.phase = 'idle')),
 			tab: () => this.#tab(),
-			retry: () => this.#again(),
-			dismiss: () => this.#dismiss()
+			retry: () => this.#again()
 		};
-		this.#notice = new SessionNotice({ labels: this.#labels, accounts, close: this.#labels.text('close'), hooks });
-		this.#guard = new Guard({ document, onblock: () => this.open() });
+		this.#notice = new SessionNotice({ labels: this.#labels, accounts, hooks });
 		this.#watch = new Watch({ document, check: () => void this.check() });
 		this.#watch.expires = expires;
 		this.#silent = new Silent({ document, bound: wait });
@@ -83,7 +82,7 @@ export class Session extends Component {
 		return this.#element;
 	}
 
-	/** `signed`, `renewing`, `asking` (the dialog), `reading` (closed without signing in) or `ended`. */
+	/** `signed`, `renewing` (nothing shown), `asking` (the dialog) or `ended` (suspended, or a host's no). */
 	get state() {
 		return this.#state;
 	}
@@ -112,30 +111,27 @@ export class Session extends Component {
 	 * @param {{reason?: string|null, replay?: 'read'|'write'|false}} [lost]
 	 */
 	lost({ reason = null, replay = 'read' } = {}) {
-		if (this.#state === 'ended' || this.#state === 'reading' || this.destroyed) return Promise.resolve(false);
+		if (this.#state === 'ended' || this.destroyed) return Promise.resolve(false);
 		const held = this.#held.add(replay);
 		// Signed means no recovery runs: the last one ended in a renewal
 		if (this.#state === 'signed') void this.#recover(reason);
 		return held;
 	}
 
-	/** Reads the session now (on a look): an ended one is renewed or asked for before the person acts. */
+	/**
+	 * Reads the session now (on a look, or when a live transport dropped): an ended one is renewed or
+	 * asked for before the person acts. Resolves with the state after looking, so a transport says
+	 * nothing of its own unless it is `signed` (a dropped stream while signed is an outage).
+	 * @returns {Promise<'signed'|'renewing'|'asking'|'ended'>}
+	 */
 	async check() {
-		if (this.#state !== 'signed' || this.destroyed) return;
+		if (this.#state !== 'signed' || this.destroyed) return this.#state;
 		const answer = await this.#reader.read();
-		if (this.#state !== 'signed' || this.destroyed) return;
-		if (answer.state === 'signed') return this.#known(answer);
-		if (answer.state === 'ended') void this.lost({ reason: answer.reason ?? null, replay: false });
-	}
-
-	/** Opens the dialog again from "Sign in" in the bar, or from a stopped press while reading. */
-	open() {
-		if (this.#state !== 'reading') return;
-		this.#guard.active = false;
-		this.#bar(null);
-		if (this.#options.delegate) return void this.#hand();
-		this.#go('asking');
-		this.#notice.show(this.#kind ?? 'expired', this.#person);
+		if (this.#state === 'signed' && !this.destroyed) {
+			if (answer.state === 'signed') this.#known(answer);
+			else if (answer.state === 'ended') void this.lost({ reason: answer.reason ?? null, replay: false });
+		}
+		return this.#state;
 	}
 
 	/** Hears `{type, state, person}` on every change of state, renewal and change of person. */
@@ -147,9 +143,9 @@ export class Session extends Component {
 	destroy() {
 		this.#held.settle(false);
 		this.#retry.reset();
+		this.#host.reset();
 		this.#trip.stop();
 		this.#watch.destroy();
-		this.#guard.active = false;
 		this.#notice.destroy();
 		this.#channel.close();
 		this.#subscribers.clear();
@@ -184,14 +180,23 @@ export class Session extends Component {
 		this.#notice.show(kind, this.#person);
 	}
 
-	/** A host asks the person (the Desktop); its answer is confirmed with the product's own read. */
+	/**
+	 * A host asks the person (the Desktop); its answer is confirmed with the product's own read. A `false`
+	 * answer means the window is closing (the person closed the application, or someone else signed in
+	 * there), so the session ends with nothing shown; a host that did not answer, or a yes the product's
+	 * read does not confirm, is asked again by itself.
+	 */
 	async #hand() {
+		if (this.destroyed || this.#state === 'ended' || this.#state === 'signed') return;
 		this.#go('asking');
-		const done = await this.#options.delegate({ reason: this.#kind, person: this.#person, address: this.#options.start('window') }).catch(() => false);
+		const request = { reason: this.#kind, person: this.#person, address: this.#options.start('window') };
+		const done = await Promise.resolve().then(() => this.#options.delegate(request)).catch(() => null);
 		if (this.destroyed || this.#state !== 'asking') return;
+		if (done === false) return this.#end();
 		const answer = done ? await this.#reader.read() : null;
+		if (this.destroyed || this.#state !== 'asking') return;
 		if (answer?.state === 'signed') return this.#renewed(answer, true);
-		this.#dismiss();
+		this.#host.schedule();
 	}
 
 	/** Continue: the sign-in window, or the product's own sign-in (`signin`, an installed shell's browser) */
@@ -225,14 +230,13 @@ export class Session extends Component {
 		await this.#recover(null);
 	}
 
-	/** The dialog was closed: the page stays readable, nothing held is sent, the bar offers "Sign in". */
-	#dismiss() {
-		if (this.#state === 'ended' || this.#state === 'signed') return;
+	/** A host's no: nothing held is sent and nothing is shown, since the window is closing. */
+	#end() {
+		this.#retry.reset();
+		this.#host.reset();
 		this.#trip.stop();
 		this.#held.settle(false);
-		this.#go('reading');
-		this.#guard.active = true;
-		this.#bar({ run: () => this.open() });
+		this.#go('ended');
 	}
 
 	#renewed(answer, interactive) {
@@ -242,11 +246,10 @@ export class Session extends Component {
 		this.#person = person ?? this.#person;
 		this.#watch.expires = answer.expires ?? null;
 		this.#retry.reset();
+		this.#host.reset();
 		this.#kind = null;
 		this.#trip.stop();
 		this.#notice.hide();
-		this.#guard.active = false;
-		this.#bar(null);
 		this.#held.settle(true);
 		this.#go('signed');
 		this.#channel.post();
@@ -258,10 +261,9 @@ export class Session extends Component {
 	#changed(person) {
 		this.#held.settle(false);
 		this.#retry.reset();
+		this.#host.reset();
 		this.#trip.stop();
 		this.#notice.hide();
-		this.#guard.active = false;
-		this.#bar(null);
 		this.#person = person;
 		this.#kind = null;
 		this.#go('signed');
@@ -279,13 +281,9 @@ export class Session extends Component {
 	/** Another tab renewed, or the sign-in window's landing spoke. */
 	async #heard() {
 		if (this.#trip.open) return this.#trip.wake();
-		if (this.#state !== 'asking' && this.#state !== 'reading') return;
+		if (this.#state !== 'asking') return;
 		const answer = await this.#reader.read();
 		if (answer.state === 'signed' && this.#state !== 'signed') this.#renewed(answer, true);
-	}
-
-	#bar(value) {
-		if (this.#options.bar) this.#options.bar.signin = value;
 	}
 
 	#go(state) {

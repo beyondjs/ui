@@ -173,10 +173,13 @@ void [line076, busy.names.en.opening, new Row({ items: [], name: 'web', labels: 
 import { Session } from '@beyond-js/ui';
 import { Landing } from '@beyond-js/ui/session/landed';
 const bar080 = new Bar({ product: 'conduict', brand: { src: '/brand.svg', href: '/' } });
-const session = new Session({ product: 'conduict', read: async () => ({ state: 'signed', person: { id: 'acc_1', name: 'Ada Lovelace' } }), start: mode => `/v1/auth/start?mode=${mode}`, bar: bar080, labels: Session.labels.es });
+const session = new Session({ product: 'conduict', read: async () => ({ state: 'signed', person: { id: 'acc_1', name: 'Ada Lovelace' } }), start: mode => `/v1/auth/start?mode=${mode}`, labels: Session.labels.es });
 const again080: Promise<boolean> = session.lost({ reason: 'expired', replay: 'write' });
 // @ts-expect-error replay is read, write or false
 void session.lost({ replay: true });
+// @ts-expect-error since 0.9.0 the bar has no "Sign in": the session's dialog cannot be dismissed
 bar080.signin = null;
+const state090: Promise<'signed' | 'renewing' | 'asking' | 'ended'> = session.check();
+void state090;
 const message080: string = new Landing(window).message.outcome;
 void [again080, message080, session.state, session.subscribe(event => event.type)];

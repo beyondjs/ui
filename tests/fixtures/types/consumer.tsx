@@ -126,7 +126,8 @@ export function Consequential() {
 // 0.8.0: a session that ended, in React
 import { useSession } from '@beyond-js/ui/react';
 export function Signed({ person }: { person: { id: string; name: string } | null }) {
-	const { session, signin } = useSession({ product: 'delegate', person, read: async () => ({ state: 'signed', person }), start: mode => `/v1/auth/start?mode=${mode}` });
+	const { session } = useSession({ product: 'delegate', person, read: async () => ({ state: 'signed', person }), start: mode => `/v1/auth/start?mode=${mode}` });
 	void session?.lost({ replay: 'read' });
-	return <Bar product="delegate" brand={{ src: '/w.svg', href: '/' }} signin={signin} />;
+	void session?.check().then(state => state === 'signed');
+	return <Bar product="delegate" brand={{ src: '/w.svg', href: '/' }} />;
 }
