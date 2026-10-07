@@ -28,7 +28,8 @@ test('the inbox says why notifications are unavailable when the relay names a kn
 	assert.match(inbox.element.textContent, /Notifications are unavailable right now because Beyond Projects did not answer\. Everything else works\./);
 	notices.reason = 'session_rejected';
 	await inbox.load();
-	assert.match(inbox.element.textContent, /because Beyond Accounts did not accept your session\./);
+	assert.match(inbox.element.textContent, /because Beyond Projects could not confirm your access to them yet\./);
+	assert.doesNotMatch(inbox.element.textContent, /session/i, 'only the session dialog speaks of the session');
 	notices.reason = 'Conduict did not answer.';
 	await inbox.load();
 	assert.match(inbox.element.textContent, /Notifications are unavailable right now\. Everything else works\./, 'a reason that is not a code is not shown');

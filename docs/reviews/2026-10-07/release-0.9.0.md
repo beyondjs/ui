@@ -1,4 +1,4 @@
-# Release 0.9.0 — 7 October 2026
+# Releases 0.9.0 and 0.9.1 — 7 October 2026
 
 The owner amended the family rule D63 on 2026-10-07 (S27 in the family reference; Beyond Suite's
 `docs/family/session-renewal.md`): **the session's dialog cannot be dismissed.**
@@ -39,3 +39,17 @@ Consumers drop `bar`, `signin`, `open()`, `data-session="free"` and any style on
 - The same `session` checks in Firefox and WebKit (Playwright's builds): 7 of 7 in each.
 - The whole acceptance in Chrome: 173 of 173 checks.
 - Packed as `dist-pack/beyond-ui-0.9.0.tgz` (`sha512-w32v36DtS6a56Nb2/YKrZWN11PCOKijkjn1DihkO8VoeGrTx1C4dZa2abQIoDiMEPtNLCWozswBlHxbp4K9DGA==`) and copied into every consumer's `tools/`; each product's adoption is its own record.
+
+## 0.9.1
+
+Delegate's adoption found the last sentence about the session spoken by something other than the
+dialog: the inbox's `session_rejected` reason, "… because Beyond Accounts did not accept your
+session …". A product shows that reason when Beyond Projects refuses the person's credential while the
+product's own session still reads `signed` (it asks `session.check()` first), for example before the
+revocation feed ends it. The sentence now speaks of access: "Notifications are unavailable right now
+because Beyond Projects could not confirm your access to them yet. Everything else works." («… porque
+Beyond Projects aún no pudo confirmar tu acceso a ellas …»). If the session did end, the dialog says
+so.
+
+`npm test`: 331 pass, 0 fail, with `wording.test.mjs` asserting the new sentence and that it does not
+mention the session; `npm run types` clean.

@@ -12,7 +12,7 @@ export const defaults = {
 	cause: 'Notifications are unavailable right now because {reason}. Everything else works.',
 	not_configured: 'this installation is not connected to Beyond Projects',
 	not_platform_session: 'your session is not a Beyond Accounts session',
-	session_rejected: 'Beyond Accounts did not accept your session',
+	session_rejected: 'Beyond Projects could not confirm your access to them yet',
 	projects_unavailable: 'Beyond Projects did not answer',
 	accounts_unavailable: 'Beyond Accounts did not answer',
 	partial: ({ products }) => `Some products could not be reached (${products}). Their notifications are hidden until they answer.`,
@@ -46,7 +46,7 @@ export const spanish = {
 	cause: 'Las notificaciones no están disponibles ahora porque {reason}. Todo lo demás funciona.',
 	not_configured: 'esta instalación no está conectada a Beyond Projects',
 	not_platform_session: 'tu sesión no es una sesión de Beyond Accounts',
-	session_rejected: 'Beyond Accounts no aceptó tu sesión',
+	session_rejected: 'Beyond Projects aún no pudo confirmar tu acceso a ellas',
 	projects_unavailable: 'Beyond Projects no respondió',
 	accounts_unavailable: 'Beyond Accounts no respondió',
 	partial: ({ products }) => `Algunos productos no respondieron (${products}). Sus notificaciones no se muestran hasta que respondan.`,
@@ -70,6 +70,8 @@ export const spanish = {
  * Why the inbox is unavailable, in the person's words (0.7.6). A relay's `{ available: false, reason }`
  * names the reason with one of `beyond-notifications/1`'s codes; the sentence says it when the code is
  * one of these, and is the plain `unavailable` sentence otherwise. Each code is also a label key.
+ * `session_rejected` speaks of access, never of the session (0.9.1): only `Session`'s dialog speaks of
+ * an ended session, and a product shows this reason only after `session.check()` answered `signed`.
  */
 export class Cause {
 	static codes = Object.freeze(['not_configured', 'not_platform_session', 'session_rejected', 'projects_unavailable', 'accounts_unavailable']);
