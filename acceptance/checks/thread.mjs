@@ -14,7 +14,7 @@ const words = {
 };
 const unlabeled = ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user'];
 const rem = 16;
-const sizes = { aside: 22 * rem, max: 30 * rem, wide: 48 * rem, thread: 52 * rem, form: 40 * rem, gap: 2 * rem };
+const sizes = { aside: 22 * rem, max: 40 * rem, wide: 48 * rem, thread: 52 * rem, form: 40 * rem, gap: 2 * rem };
 
 export async function open(browser, consumer, { width = 1440, height = 900, query = '', ...options } = {}) {
 	const view = await browser.open(consumer, { file: 'thread.html', query, viewport: { width, height }, ...options });
@@ -31,7 +31,7 @@ const measure = page =>
 
 export const checks = [
 	{
-		name: 'thread tier at 1440, 1920 and 2560 px in both themes: the panel beside with its head, fluid between the aside tier and its maximum, no band between thread and panel; the wide form grows it',
+		name: 'thread tier at 1440, 1920 and 2560 px in both themes: the panel beside with its head, fluid between the aside tier and its maximum (40rem since 0.11.2), no band between thread and panel; the wide form takes every width the thread leaves, to the region\'s edge',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const copy = words[consumer.language];
@@ -52,9 +52,15 @@ export const checks = [
 					await page.waitForFunction(() => document.querySelector('.bui-page').hasAttribute('data-panel-wide'));
 					await page.waitForTimeout(50);
 					const wide = await measure(page);
-					const expected = Math.min(sizes.wide, wide.body.width - sizes.form - sizes.gap);
-					expect(Math.abs(wide.panel.width - Math.max(sizes.aside, expected)) <= 1.5, `${at}: the wide form takes ${Math.max(sizes.aside, expected)}: ${wide.panel.width}`);
-					expect(wide.main.width >= sizes.form - 1 || wide.panel.width <= sizes.aside + 1, `${at}: the thread keeps the form tier: ${wide.main.width}`);
+					const region = await page.evaluate(() => {
+						const frame = document.querySelector('.bui-page-frame');
+						const style = getComputedStyle(frame);
+						return frame.getBoundingClientRect().right - parseFloat(style.paddingRight);
+					});
+					const thread = Math.min(sizes.thread, Math.max(sizes.aside, wide.body.width - sizes.gap - sizes.wide));
+					expect(Math.abs(wide.main.width - thread) <= 1.5, `${at}: the thread keeps its tier where it can, giving down to the aside tier: ${wide.main.width} for ${thread}`);
+					expect(Math.abs(wide.panel.right - region) <= 1.5, `${at}: the wide panel reaches the region's far edge: ${wide.panel.right} for ${region}`);
+					expect(wide.panel.width >= Math.min(sizes.wide, wide.body.width - sizes.aside - sizes.gap) - 1.5, `${at}: the wide panel takes at least its tier: ${wide.panel.width}`);
 					expect(!(await overflow(page)), `${at}: no sideways scroll`);
 					await context.close();
 				}

@@ -27,14 +27,16 @@ export interface ComposerProps {
 	/** The turn's choices at the toolbar's start, React content (0.11.0). */
 	settings?: ReactNode;
 	/** Files from paste, drop and Attach; callbacks read from the latest props (0.11.0). */
-	attach?: { label?: string | null; accept?: string | null; multiple?: boolean; onFiles: (files: File[], via: 'paste' | 'drop' | 'pick') => void; onRemove?: ((item: ComposerAttachment) => void) | null; onRetry?: ((item: ComposerAttachment) => void) | null } | null;
+	attach?: { label?: string | null; accept?: string | null; multiple?: boolean; onFiles: (files: File[], via: 'paste' | 'drop' | 'pick') => void; onRemove?: ((item: ComposerAttachment) => void) | null; onRetry?: ((item: ComposerAttachment) => void) | null; /** The work surface where a drop attaches too: an element or a ref to one, read after each render (0.11.2). */ zone?: Element | { readonly current: Element | null } | null } | null;
 	/** The chips (0.11.0). */
 	attachments?: ComposerAttachment[] | null;
 	/** Suggestions after the trigger, read from the latest props (0.11.0). */
 	onSuggest?: ((query: string, signal: AbortSignal) => Promise<ComposerSuggestAnswer> | ComposerSuggestAnswer) | null;
 	suggest?: ComposerSuggestSettings | null;
-	/** Under 30rem the settings and Attach fold behind Options; `false` keeps the wrapped toolbar (0.11.1). */
+	/** Keep the toolbar on one row: chips by their value, then Options (0.11.1; measured since 0.11.2); `false` keeps the wrapped toolbar. */
 	compact?: boolean;
+	/** What sending uses, said beside Options while folded (0.11.2). */
+	summary?: string | null;
 	locale?: string;
 	/** The toolbar's start, React content. */
 	tools?: ReactNode;

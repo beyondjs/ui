@@ -122,6 +122,24 @@
 .bui-copy-refused {
 	color: var(--color-text);
 }
+/* A copy confirmed in place (CopyButton, 0.11.2): the button says the result, with the check glyph,
+   and goes back to its words; nothing floats over the page. */
+.bui-copy-button {
+	display: inline-flex;
+	min-width: 0;
+}
+.bui-copy-button-said {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-1);
+}
+.bui-copy-button-said .bui-icon {
+	width: 14px;
+	height: 14px;
+}
+.bui-copy-button[data-result='copied'] .bui-button {
+	color: var(--color-success);
+}
 
 .bui-provider {
 	display: grid;

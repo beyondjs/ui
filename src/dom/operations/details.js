@@ -3,6 +3,7 @@ import { el, fill } from '../core/element.js';
 import { Labels } from '../core/labels.js';
 import { Clipboard } from '../core/clipboard.js';
 import { Button } from '../button.js';
+import { glyph } from '../core/icons.js';
 import { TimeWords } from '../time/words.js';
 import { details } from './labels.js';
 
@@ -11,7 +12,9 @@ import { details } from './labels.js';
  * a blocked step, holding the source's own words, the request identifier and the time, with one
  * action that copies all of it for support.
  *
- * It is a native `<details>`: the summary opens it with a press, Enter or Space. The copy goes through
+ * It is a native `<details>`: the summary opens it with a press, Enter or Space. Since 0.11.2 its summary
+ * is the family's one disclosure affordance (`bui-summary`: a chevron that turns, the words in the text
+ * color), never a link's look. The copy goes through
  * the Clipboard API under a bound; when the browser refuses it (no API, no permission, no answer
  * within `TechnicalDetails.bound`) the component says so in place and selects the text, so the person
  * copies it with the keyboard. The time is shown in the person's language and copied as ISO 8601.
@@ -46,7 +49,7 @@ export class TechnicalDetails extends Component {
 		this.#result = el('p', { class: 'bui-details-result', role: 'status' });
 		this.#button = new Button({ label: this.#labels.text('copy'), small: true, onclick: () => this.#button.run(() => this.copy()) });
 		this.#element = el('details', { class: 'bui-details', open }, [
-			el('summary', { class: 'bui-details-summary', text: this.#labels.text('summary') }),
+			el('summary', { class: 'bui-details-summary bui-summary' }, [glyph('chevron'), el('span', { text: this.#labels.text('summary') })]),
 			el('div', { class: 'bui-details-body' }, [this.#content, el('div', { class: 'bui-details-actions' }, [this.#button.element, this.#result])])
 		]);
 		this.update({ text, request, time });

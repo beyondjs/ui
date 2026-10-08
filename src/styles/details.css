@@ -24,14 +24,37 @@
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
 }
-.bui-details-summary {
+/* The family's one disclosure affordance (0.11.2): a `<summary class="bui-summary">` with the chevron
+   glyph before its words, turned toward the words while closed and down while open, in the text color,
+   so it never reads as a link. A product's own `<details>` uses the same class and glyph. */
+.bui-summary {
 	display: inline-flex;
 	align-items: center;
+	gap: var(--space-1);
 	min-height: var(--bui-target);
-	color: var(--color-link);
+	color: var(--color-text);
+	font-weight: var(--weight-medium);
+	list-style: none;
 	cursor: pointer;
 }
-.bui-details-summary:focus-visible {
+.bui-summary::-webkit-details-marker {
+	display: none;
+}
+.bui-summary > .bui-icon {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	color: var(--color-text-muted);
+	rotate: -90deg;
+	transition: rotate var(--motion-quick) var(--motion-ease);
+}
+details[open] > .bui-summary > .bui-icon {
+	rotate: 0deg;
+}
+.bui-summary:hover > .bui-icon {
+	color: var(--color-text);
+}
+.bui-summary:focus-visible {
 	outline: 2px solid var(--color-focus);
 	outline-offset: 2px;
 	border-radius: var(--radius-control);

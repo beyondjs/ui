@@ -4,12 +4,15 @@ import { Placement } from '../core/placement.js';
 import { Announcer } from '../operations/announcer.js';
 import { MentionToken } from './token.js';
 import { SuggestAsk } from './ask.js';
+import { CaretPoint } from './caret.js';
 
 /**
  * Suggestions after a trigger character in a composer's field (0.11.0), such as "@" for a file of the
- * repository: the listbox of the combobox pattern, kept by the field (`aria-controls`,
- * `aria-autocomplete="list"`, `aria-expanded`, `aria-activedescendant`), with the field keeping its own
- * role and focus. "Looking…", "No match" and "Unavailable · {reason}" are said apart; a polite region
+ * repository: a listbox kept by the field, which keeps its own role (a multi-line text box) and focus
+ * and says it with the attributes a text box takes (`aria-controls`, `aria-autocomplete="list"`,
+ * `aria-haspopup="listbox"`, `aria-activedescendant`; since 0.11.2 no `aria-expanded`, which a text box
+ * does not take). The list opens at the trigger being typed (0.11.2), each option on one line: its label,
+ * then its detail, cut at the line's end. "Looking…", "No match" and "Unavailable · {reason}" are said apart; a polite region
  * says each answer once. Up and Down move, Enter or Tab inserts, Escape closes (and the same token stays
  * closed); the token is replaced by the item's value and a space. Nothing is asked while an input method
  * composes, and Enter is taken only while an option is active in an open list.
@@ -31,6 +34,7 @@ export class ComposerSuggest {
 	#trigger;
 	#oninsert;
 	#placement = new Placement('auto');
+	#caret;
 	#token = null;
 	#closed = null;
 	#items = [];
@@ -62,7 +66,8 @@ export class ComposerSuggest {
 		this.#panel = el('div', { class: 'bui-menu bui-align-start bui-composer-suggest', hidden: true, onpointerdown: event => event.preventDefault() }, [this.#list, this.#line, this.#announcer.element]);
 		field.setAttribute('aria-autocomplete', 'list');
 		field.setAttribute('aria-controls', this.#list.id);
-		field.setAttribute('aria-expanded', 'false');
+		field.setAttribute('aria-haspopup', 'listbox');
+		this.#caret = new CaretPoint(field);
 		this.#on('input', event => (event.isComposing ? null : this.#read()));
 		this.#on('compositionstart', () => ((this.#composing = true), this.close()));
 		this.#on('compositionend', () => ((this.#composing = false), this.#read()));
@@ -114,7 +119,6 @@ export class ComposerSuggest {
 		this.#panel.hidden = true;
 		this.#items = [];
 		this.#active = -1;
-		this.#field.setAttribute('aria-expanded', 'false');
 		this.#field.removeAttribute('aria-activedescendant');
 	}
 
@@ -122,7 +126,7 @@ export class ComposerSuggest {
 		this.close();
 		for (const [type, handler] of this.#handlers) this.#field.removeEventListener(type, handler);
 		this.#handlers = [];
-		for (const name of ['aria-autocomplete', 'aria-controls', 'aria-expanded', 'aria-activedescendant']) this.#field.removeAttribute(name);
+		for (const name of ['aria-autocomplete', 'aria-controls', 'aria-haspopup', 'aria-activedescendant']) this.#field.removeAttribute(name);
 	}
 
 	#on(type, handler) {
@@ -162,9 +166,21 @@ export class ComposerSuggest {
 		else this.#list.removeAttribute('aria-describedby');
 		if (state !== 'looking') this.#announcer.say(cut?.said ?? (state === 'results' ? this.#labels.text('suggested', { count: this.#items.length }) : line));
 		this.#panel.hidden = false;
-		this.#field.setAttribute('aria-expanded', String(Boolean(this.#items.length)));
 		this.#move(this.#active);
+		this.#align();
 		this.#placement.place(this.#panel, this.#anchor);
+	}
+
+	/** Moves the list along the box to the trigger being typed, never past the box's end. */
+	#align() {
+		this.#panel.style.removeProperty('left');
+		const point = this.#token ? this.#caret.at(this.#token.start) : null;
+		if (!point) return;
+		const box = this.#anchor.getBoundingClientRect();
+		const field = this.#field.getBoundingClientRect();
+		const room = box.width - this.#panel.getBoundingClientRect().width;
+		const left = Math.max(0, Math.min(field.left - box.left + point.left, room));
+		if (left > 0) this.#panel.style.left = `${Math.round(left)}px`;
 	}
 
 	/** A cut list's last line and what is said with it, or null for a whole list. */

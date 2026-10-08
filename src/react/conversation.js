@@ -31,10 +31,13 @@ function slot(tag, name) {
  * `attachments` the chips; `onSuggest(query, signal)` lists suggestions after `suggest.trigger` (0.11.0).
  * `value` is applied when it changes; the ref has `focus()`, `submit(action?)`, `attach()`, `value`,
  * `busy` and `sending`. A change of `label`, `submit`, `min`, `max`, `name`, `labels` (memoize it),
- * `locale`, `suggest`, `compact` or whether there is `attach` or `onSuggest` creates a new box. Under
- * 30rem the settings and Attach fold behind Options unless `compact={false}` (0.11.1).
+ * `locale`, `suggest`, `compact` or whether there is `attach` or `onSuggest` creates a new box. The
+ * toolbar keeps one row, shortening the chips and last folding them behind Options, unless
+ * `compact={false}` (0.11.1; measured since 0.11.2); `summary` is what Options says beside its glyph and
+ * `attach.zone` (an element or a ref to one, read after each render) is the work surface where a drop
+ * attaches too (0.11.2).
  */
-export const Composer = forwardRef(function Composer({ label, placeholder = null, status = null, tools = null, extras = null, settings = null, actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value, min, max, name = null, onChange = null, onSubmit, explain, labels, attach = null, attachments = null, onSuggest = null, suggest = null, locale = undefined, compact = true }, ref) {
+export const Composer = forwardRef(function Composer({ label, placeholder = null, status = null, tools = null, extras = null, settings = null, actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value, min, max, name = null, onChange = null, onSubmit, explain, labels, attach = null, attachments = null, onSuggest = null, suggest = null, locale = undefined, compact = true, summary = null }, ref) {
 	const [slots] = useState(() => ({ tools: slot('span', 'bui-composer-slot'), extras: slot('span', 'bui-composer-slot'), settings: slot('span', 'bui-composer-slot'), status: slot('span', 'bui-composer-slot'), action: slot('span', 'bui-composer-slot') }));
 	const latest = useLatest({ onChange, onSubmit, explain, stop, attach, onSuggest, status });
 	const line = new StatusLine(status, slots, latest);
@@ -52,6 +55,7 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 				labels,
 				locale,
 				compact,
+				summary,
 				value: value ?? '',
 				status: line.value,
 				tools: tools ? [slots.tools] : [],
@@ -83,6 +87,9 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 	useSync(box, current => (current.stop = halt()), [stop?.label ?? null, Boolean(stop?.busy)]);
 	useSync(box, current => (current.disabled = disabled), [JSON.stringify(disabled ?? null)]);
 	useSync(box, current => (current.busy = busy), [busy]);
+	useSync(box, current => (current.summary = summary), [summary]);
+	const zone = attach?.zone && 'current' in attach.zone ? attach.zone.current : (attach?.zone ?? null);
+	useSync(box, current => (current.zone = attach?.zone && 'current' in attach.zone ? attach.zone.current : (attach?.zone ?? null)), [zone, attach?.zone]);
 	useSync(box, current => typeof value === 'string' && current.value !== value && (current.value = value), [value]);
 	useImperativeHandle(ref, () => ({ focus: () => box?.focus(), submit: action => box?.submit(action) ?? Promise.resolve(false), attach: () => box?.attach(), get value() { return box?.value ?? ''; }, get busy() { return box?.busy ?? false; }, get sending() { return box?.sending ?? false; } }), [box]);
 	const portal = (content, node) => (box && content ? ReactDOM.createPortal(content, node) : null);

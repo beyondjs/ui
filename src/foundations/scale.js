@@ -142,8 +142,8 @@ export const layout = {
 	'fluid-max': { value: '100rem', provenance: 'family', reason: 'Limit of a fluid collection, past which a row is lost between its first and last column (LR-02).' },
 	// Token set 0.4.0 (2026-10-08): the family proposal D67 (Q-B), adopted by Conduict; proposals, not approved family rules.
 	thread: { value: '52rem', provenance: 'proposed', reason: 'Width tier of a conversation thread (proposal D67, Q-B; Conduict\'s CB-Q4): wider than the reading measure so code and output keep a column, narrow enough that a message and its answer stay close. Not an approved family rule.' },
-	'aside-max': { value: '30rem', provenance: 'proposed', reason: 'Widest a page\'s panel kept in view grows on a wide region, so extra width goes to the panel rather than to an empty band (proposal D67, Conduict\'s CB-07 and CB-Q4). Not an approved family rule.' },
-	'aside-wide': { value: '48rem', provenance: 'proposed', reason: 'Widest a panel kept in view grows in its wide form, such as a review of changes beside a conversation (proposal D67, Conduict\'s CB-Q1). Not an approved family rule.' }
+	'aside-max': { value: '40rem', provenance: 'proposed', reason: 'Widest a page\'s panel kept in view grows on a wide region, so extra width goes to the panel rather than to an empty band (proposal D67, Conduict\'s CB-07 and CB-Q4). Token set 0.4.1 raises it from 30rem: at 1920 px beside a 250 px sidebar the panel stopped 294 px before the region\'s edge (Conduict\'s review M11). Not an approved family rule.' },
+	'aside-wide': { value: '48rem', provenance: 'proposed', reason: 'Width a panel kept in view takes first in its wide form, such as a diff beside a conversation, which since token set 0.4.1 grows on to the region\'s far edge while the main column gives down to the aside tier (proposal D67, Conduict\'s CB-Q1 and review M11). Not an approved family rule.' }
 };
 
 export const breakpoints = {

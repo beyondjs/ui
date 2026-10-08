@@ -2,7 +2,8 @@
 // the Sidebar with ages and a count; a Page at the thread tier whose header turns compact on scroll and
 // whose panel has its own head, Facts and Meters and a wide form; the composer with its state line and
 // action, settings chips, attachments and suggestions; since 0.11.1 its Options below 30rem, a product's
-// own glyph-only control with `useHint`, and an age said by `Age`.
+// own glyph-only control with `useHint`, and an age said by `Age`; since 0.11.2 `?dock=codex`, a refused
+// video and the page's main region as the drop surface.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
@@ -10,7 +11,7 @@ import { StrictMode, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { FamilyBar, Sidebar, Page, PageHeader, PanelToggle, Status, Button, Composer, ChoiceChip, Facts, Meter, Icon, Age, useHint } from '@beyond-js/ui/react';
 import { chosen, fallback, product } from '../data/family.js';
-import { shape, words, groups, rows, models, levels, suggest, paragraphs, minutes } from '../data/thread.js';
+import { shape, words, groups, rows, dock, refuses, suggest, paragraphs, minutes } from '../data/thread.js';
 import { es } from './labels.js';
 
 const copy = words.es;
@@ -22,6 +23,7 @@ let count = 0;
 const reset = Date.now() + 3 * 3_600_000;
 const stale = Date.now() - 26 * 3_600_000;
 const said = new Age({ locale: 'es' }).of(Date.now() - minutes[1] * 60_000);
+const turn = dock(copy);
 
 /** A product's own glyph-only control with the family tooltip, and an age in the Sidebar's words. */
 function Own() {
@@ -41,6 +43,7 @@ function Own() {
 function View() {
 	const [items, setItems] = useState([]);
 	const [wide, setWide] = useState(shape.wide);
+	const surface = useRef(null);
 	const latest = useRef(items);
 	latest.current = items;
 	const change = next => ((latest.current = next), setItems(next));
@@ -55,15 +58,20 @@ function View() {
 		accept: 'image/*,text/plain',
 		onFiles: (files, via) => {
 			log.push(`files:${via}:${files.map(file => file.name).join(',')}`);
-			for (const file of files) upload({ key: `f${(count += 1)}`, name: file.name, size: file.size, type: file.type, file });
+			for (const file of files) {
+				const item = { key: `f${(count += 1)}`, name: file.name, size: file.size, type: file.type, file };
+				if (refuses(file)) change([...latest.current, { ...item, state: 'refused', reason: copy.refused }]);
+				else upload(item);
+			}
 		},
+		zone: surface,
 		onRemove: item => (log.push(`remove:${item.name}`), change(latest.current.filter(other => other.key !== item.key))),
 		onRetry: item => (log.push(`retry:${item.name}`), upload({ ...item, name: item.name.replace('big', 'small') }))
 	};
 	const settings = (
 		<>
-			<ChoiceChip label={copy.model} options={models} value="opus" labels={labels.chip} onChange={value => log.push(`model:${value}`)} />
-			<ChoiceChip label={copy.autonomy} options={levels(copy)} value="ask" labels={labels.chip} onChange={value => log.push(`autonomy:${value}`)} />
+			<ChoiceChip label={copy.model} options={turn.models} value={turn.model} labels={labels.chip} onChange={value => log.push(`model:${value}`)} />
+			<ChoiceChip label={copy.autonomy} options={turn.levels} value={turn.level} labels={labels.chip} onChange={value => log.push(`autonomy:${value}`)} />
 		</>
 	);
 	const header = <PageHeader title={copy.title} status={<Status label={copy.status} tone="progress" />} facts={copy.facts} actions={<><Button label={copy.review} variant="quiet" onClick={() => setWide(value => !value)} /><PanelToggle label={copy.details} /></>} compact={{ actions: <Button label={copy.pull} variant="primary" /> }} />;
@@ -80,7 +88,7 @@ function View() {
 			<FamilyBar product={product} brand={{ src: '../brand/wordmark.svg', href: '/projects/' }} descriptor={chosen()} fallback={fallback} labels={es.family} account={{ signout: () => {} }} />
 			<div className="bui-shell">
 				<Sidebar product={copy.product} context={{ label: copy.project, name: 'Storefront' }} groups={groups(copy)} action={{ label: copy.action, href: '#/new' }} labels={labels.sidebar} />
-				<main id="main">
+				<main id="main" ref={surface}>
 					<Page template="detail" width="thread" header={header} aside={aside} label={copy.panel} panel={{ cut: '73rem', title: copy.details, head: true, wide, labels: labels.panel, onChange: shown => log.push(`panel:${shown}`) }}>
 						<div className="thread" id="thread">
 							<Own />
@@ -93,7 +101,7 @@ function View() {
 							</div>
 						</div>
 						<div className="dock">
-							<Composer label={copy.message} placeholder={copy.placeholder} labels={labels.composer} locale="es" status={{ text: copy.stopped, action: { label: copy.start, onSelect: () => log.push('start') } }} settings={settings} attach={attach} attachments={items} onSuggest={suggest} suggest={{ bound: 1500 }} compact={shape.compact} onSubmit={message => (log.push(`send:${message.text}:${(message.attachments ?? []).length}`), change([]), Promise.resolve())} />
+							<Composer label={copy.message} placeholder={copy.placeholder} labels={labels.composer} locale="es" status={{ text: copy.stopped, action: { label: copy.start, onSelect: () => log.push('start') } }} settings={settings} attach={attach} attachments={items} onSuggest={suggest} suggest={{ bound: 1500 }} compact={shape.compact} summary={turn.summary} actions={turn.actions} stop={turn.stop ? { label: turn.stop, onSelect: () => log.push('interrupt') } : null} onSubmit={message => (log.push(`send:${message.text}:${(message.attachments ?? []).length}`), change([]), Promise.resolve())} />
 						</div>
 					</Page>
 				</main>

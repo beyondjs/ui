@@ -64,7 +64,8 @@
 	gap: var(--space-1) var(--space-2);
 	min-width: 0;
 	margin: 0;
-	text-align: end;
+	/* A value that wraps reads from its start, never ragged at its left (0.11.2) */
+	text-align: start;
 }
 .bui-facts-value {
 	min-width: 0;
@@ -96,6 +97,13 @@
 	min-height: var(--bui-target);
 	padding-block: 0;
 	font-size: var(--text-small);
+}
+/* A long value in words goes under its label, left-aligned, as a sentence is read (0.11.2). */
+.bui-facts-row[data-long] {
+	grid-template-columns: minmax(0, 1fr);
+}
+.bui-facts-row[data-long] .bui-facts-data {
+	justify-content: flex-start;
 }
 /* A narrow container puts each value under its label (never decided by the window). */
 @container bui-facts (max-width: 16rem) {

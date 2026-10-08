@@ -15,6 +15,8 @@ export interface ReactFactsRow {
 	mono?: boolean;
 	action?: ReactNode;
 	stale?: boolean | string | null;
+	/** The value under its label (0.11.2); by default a long sentence that is not `mono`. */
+	long?: boolean | null;
 }
 /** Label and value rows, rendered by React with the DOM class's markup (0.11.0). */
 export function Facts(props: { head?: (Omit<FactsHead, 'title' | 'value'> & { title?: ReactNode; value?: ReactNode }) | null; rows?: Array<ReactFactsRow | null | false>; label?: string | null; labels?: { stale?: string } }): ReactElement;

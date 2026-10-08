@@ -1,6 +1,5 @@
 import { Component } from '../core/component.js';
 import { el, fill } from '../core/element.js';
-import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { ComposerKeys } from './keys.js';
 import { ComposerField } from './field.js';
@@ -8,7 +7,7 @@ import { ComposerActions } from './actions.js';
 import { ComposerStatus } from './status.js';
 import { ComposerContext } from './context.js';
 import { ComposerSend } from './send.js';
-import { ComposerFold } from './fold.js';
+import { ComposerToolbar } from './toolbar.js';
 import { composer as copy } from './labels.js';
 
 /**
@@ -34,8 +33,8 @@ import { composer as copy } from './labels.js';
  * its end (`status: { text, action }`); `settings` are nodes at the toolbar's start (the turn's
  * choices, such as `ChoiceChip`s); `attach` takes files from a paste, a drop and Attach, handed to the
  * product, whose `attachments` are drawn as removable chips; `onsuggest` lists suggestions after a
- * trigger character ("@" by default). A message with ready attachments may have no text. Since 0.11.1
- * a composer under 30rem folds its settings and Attach behind **Options** (`ComposerFold`).
+ * trigger character ("@" by default). A message with ready attachments may have no text. The toolbar
+ * keeps one row (`ComposerToolbar`: chips shortened, then **Options**, measured since 0.11.2).
  */
 export class Composer extends Component {
 	/** The copy in English and Spanish. */
@@ -44,12 +43,9 @@ export class Composer extends Component {
 
 	#element;
 	#status = new ComposerStatus();
-	#guide;
 	#sender;
-	#tools = el('div', { class: 'bui-composer-tools' });
-	#settings = el('div', { class: 'bui-composer-settings' });
 	#context;
-	#fold;
+	#toolbar;
 	#field;
 	#keys;
 	#actions;
@@ -78,46 +74,37 @@ export class Composer extends Component {
 	 * @param {(text: string) => void} [options.onchange] the text changed, by the person or by sending
 	 * @param {((error: unknown) => string|null)} [options.explain] what a rejected send says
 	 * @param {Array<Node|{element: Node}>} [options.settings] the turn's choices at the toolbar's start (0.11.0)
-	 * @param {object|null} [options.attach] `{ label?, accept?, multiple?, onfiles(files, via), onremove?(item), onretry?(item) }` (0.11.0)
+	 * @param {object|null} [options.attach] `{ label?, accept?, multiple?, onfiles(files, via), onremove?(item), onretry?(item), zone? }` (0.11.0; `zone` since 0.11.2)
 	 * @param {Array<object>} [options.attachments] the chips: `{ key, name, size?, type?, state, progress?, reason?, thumbnail?, file? }` (0.11.0)
 	 * @param {((query: string, signal: AbortSignal) => Promise<unknown>)|null} [options.onsuggest] suggestions after the trigger (0.11.0)
 	 * @param {{trigger?: string, bound?: number, delay?: number, label?: string|null, explain?: ((error: unknown) => string|null)|null}|null} [options.suggest]
 	 * @param {string} [options.locale] the language of sizes and percents (the runtime's by default)
-	 * @param {boolean} [options.compact] whether a narrow composer folds its settings and Attach behind Options (0.11.1, default true)
+	 * @param {boolean} [options.compact] whether the toolbar keeps one row by shortening its chips and, last, folding behind Options (0.11.1, measured since 0.11.2; default true)
+	 * @param {string|null} [options.summary] what sending uses, said by Options while the settings are folded (0.11.2)
 	 */
-	constructor({ label, onsubmit, placeholder = null, status = null, tools = [], extras = [], actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value = '', min = 1, max = 12, name = null, onchange = null, explain = undefined, labels = {}, settings = [], attach = null, attachments = [], onsuggest = null, suggest = null, locale = undefined, compact = true }) {
+	constructor({ label, onsubmit, placeholder = null, status = null, tools = [], extras = [], actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value = '', min = 1, max = 12, name = null, onchange = null, explain = undefined, labels = {}, settings = [], attach = null, attachments = [], onsuggest = null, suggest = null, locale = undefined, compact = true, summary = null }) {
 		super();
 		if (typeof onsubmit !== 'function') throw new TypeError('A composer sends through onsubmit');
 		this.#labels = new Labels(copy.en, labels);
 		this.#keys = new ComposerKeys({ submit, view: document.defaultView ?? null });
 		this.#onchange = onchange;
 		this.#field = new ComposerField({ label, placeholder, value, min, max, name });
-		this.#guide = el('span', { id: Ids.next('bui-composer-hint'), class: 'bui-hidden' });
 		const host = { alive: () => !this.destroyed, files: () => this.#context.files, primary: () => this.#actions.primary.id, draw: () => this.#draw(), root: () => this.#element };
 		this.#sender = new ComposerSend({ field: this.#field, labels: this.#labels, onsubmit, onchange, explain, host });
 		this.#actions = new ComposerActions({ labels: this.#labels, run: action => this.#send(action, true), refocus: () => this.focus() });
 		const box = el('div', { class: 'bui-composer-box' });
-		this.#element = el('div', { class: 'bui-composer', 'data-submit': submit }, [this.#status.element, box, this.#guide]);
+		this.#element = el('div', { class: 'bui-composer', 'data-submit': submit }, [this.#status.element, box, this.#keys.guide]);
 		const control = this.#field.control;
 		this.#context = new ComposerContext({ root: this.#element, box, field: control, labels: this.#labels, locale, attach, onsuggest, suggest, refocus: () => this.focus(), oninsert: (text, caret) => this.#write(text, caret) });
-		const start = el('div', { class: 'bui-composer-start' }, [...this.#context.controls, this.#settings, this.#tools]);
-		const bar = el('div', { class: 'bui-composer-bar' }, [start, this.#actions.element]);
-		this.#fold = new ComposerFold({ root: this.#element, bar, labels: this.#labels, enabled: compact !== false, parts: [this.#context.controls[0], this.#settings] });
-		box.prepend(this.#context.files.element, this.#field.element, this.#sender.element, bar);
+		this.#toolbar = new ComposerToolbar({ root: this.#element, controls: this.#context.controls, actions: this.#actions.element, labels: this.#labels, compact });
+		box.prepend(this.#context.files.element, this.#field.element, this.#sender.element, this.#toolbar.element);
 		this.#element.append(this.#context.files.announcer);
-		control.addEventListener('keydown', event => {
-			// Open suggestions take their keys first; otherwise the keys that send
-			const taken = this.#context.keys(event);
-			if (!taken && !this.#keys.sends(event)) return;
-			event.preventDefault();
-			if (taken) event.stopPropagation();
-			else this.#send(null, false);
-		});
+		this.#keys.watch(control, { take: event => this.#context.keys(event), send: () => this.#send(null, false) });
 		control.addEventListener('input', () => (this.#say(null), this.#onchange?.(control.value)));
 		// The touch screen may change (a keyboard attached): the hint is read again when the field takes focus
 		control.addEventListener('focus', () => this.#instruct());
 		// Through the setters, in this order
-		Object.assign(this, { status, settings, attachments, tools, extras, actions, stop });
+		Object.assign(this, { status, settings, attachments, tools, extras, actions, stop, summary });
 		this.#disabled = disabled || null;
 		this.#busy = Boolean(busy);
 		this.#draw();
@@ -153,14 +140,22 @@ export class Composer extends Component {
 
 	/** The turn's choices at the toolbar's start, before the tools (0.11.0). */
 	set settings(nodes) {
-		const list = Composer.#nodes(nodes);
-		fill(this.#settings, list);
-		this.#fold.available = list.length > 0 || Boolean(this.#context.intake);
+		this.#toolbar.settings = Composer.#nodes(nodes);
 	}
 
-	/** The narrow toolbar's Options (`ComposerFold`: `open`, `toggle(open?)`, `button`) (0.11.1). */
+	/** What sending uses ("Opus 5.5"), said beside Options while the settings are folded, or null (0.11.2). */
+	set summary(text) {
+		this.#toolbar.summary = text;
+	}
+
+	/** Options (`ComposerFold`: `open`, `toggle(open?)`, `button`, `available`) (0.11.1). */
 	get fold() {
-		return this.#fold;
+		return this.#toolbar.fold;
+	}
+
+	/** The toolbar (`ComposerToolbar`): its one-row `level` (`full`, `short` or `fold`) and `measure()` (0.11.2). */
+	get toolbar() {
+		return this.#toolbar;
 	}
 
 	/** The attachments as given (0.11.0). */
@@ -178,13 +173,18 @@ export class Composer extends Component {
 		return this.#context.suggest;
 	}
 
+	/** The product's work surface where a drop attaches too (a thread with its dock), or null; needs `attach` (0.11.2). */
+	set zone(element) {
+		if (this.#context.intake) this.#context.intake.zone.element = element;
+	}
+
 	/** Opens the platform's file chooser, as Attach does; nothing without `attach`. */
 	attach() {
 		this.#context.intake?.pick();
 	}
 
 	set tools(nodes) {
-		fill(this.#tools, Composer.#nodes(nodes));
+		this.#toolbar.tools = Composer.#nodes(nodes);
 	}
 
 	set extras(nodes) {
@@ -249,7 +249,7 @@ export class Composer extends Component {
 
 	destroy() {
 		this.#context.destroy();
-		this.#fold.destroy();
+		this.#toolbar.destroy();
 		this.#status.destroy();
 		this.#actions.destroy();
 		super.destroy();
@@ -258,7 +258,7 @@ export class Composer extends Component {
 	#send(action, pressed) {
 		if (this.#sender.sending || this.#busy || this.#disabled || this.destroyed) return Promise.resolve(false);
 		// What Options showed folds again once the message is sent (a refused one keeps it shown)
-		return this.#sender.send(action, pressed).then(sent => (sent && this.#fold.toggle(false), sent));
+		return this.#sender.send(action, pressed).then(sent => (sent && this.#toolbar.fold.toggle(false), sent));
 	}
 
 	/** Writes a suggestion's text with the caret after it, as typing would, and says the change. */
@@ -284,13 +284,13 @@ export class Composer extends Component {
 
 	/** Writes the hidden guide to the keys, read with the field. */
 	#instruct() {
-		this.#guide.textContent = this.#keys.hint(this.#labels, this.#actions.primary.label);
+		this.#keys.instruct(this.#labels, this.#actions.primary.label);
 	}
 
 	/** The field is described by the state line, the keys, the reason sending is unavailable and a failure. */
 	#describe() {
 		if (!this.#actions) return;
-		const ids = [this.#status.id, this.#guide.id, this.#disabled?.reason ? this.#actions.reason : null, this.#sender.id];
+		const ids = [this.#status.id, this.#keys.guide.id, this.#disabled?.reason ? this.#actions.reason : null, this.#sender.id];
 		this.#field.control.setAttribute('aria-describedby', ids.filter(Boolean).join(' '));
 	}
 

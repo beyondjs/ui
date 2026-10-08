@@ -1,0 +1,13 @@
+/* The diff pages' layout only (0.11.2): a page with the gutter of a narrow region and a reading width;
+   the component's styles come from the package. */
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+}
+main {
+	box-sizing: border-box;
+	max-width: 72rem;
+	padding: var(--space-4);
+}

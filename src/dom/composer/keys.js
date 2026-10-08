@@ -1,3 +1,6 @@
+import { el } from '../core/element.js';
+import { Ids } from '../core/ids.js';
+
 const submits = Object.freeze(['enter', 'mod']);
 
 /**
@@ -7,13 +10,15 @@ const submits = Object.freeze(['enter', 'mod']);
  * line; with `'mod'`, Enter adds a line. ⌘+Enter (Ctrl+Enter elsewhere) sends in both. On a touch
  * screen (no hover and a coarse pointer) Enter always adds a line and the button sends. Enter never
  * sends while an input method composes a character (`isComposing`, or Safari's key code 229 for the
- * Enter that ends a composition). Escape is not a composer key: it closes menus only.
+ * Enter that ends a composition). Escape is not a composer key: it closes menus only. The hint is a
+ * hidden line (`guide`) read with the field.
  */
 export class ComposerKeys {
 	static submits = submits;
 
 	#submit;
 	#view;
+	#guide = el('span', { id: Ids.next('bui-composer-hint'), class: 'bui-hidden' });
 
 	/**
 	 * @param {object} options
@@ -42,11 +47,35 @@ export class ComposerKeys {
 		return /mac|iphone|ipad|ipod/i.test(platform) ? '⌘' : 'Ctrl';
 	}
 
+	/**
+	 * Listens to the field's keys: what `take(event)` claims (open suggestions) is theirs; otherwise a
+	 * key that sends calls `send()`.
+	 */
+	watch(field, { take, send }) {
+		field.addEventListener('keydown', event => {
+			const taken = take(event);
+			if (!taken && !this.sends(event)) return;
+			event.preventDefault();
+			if (taken) event.stopPropagation();
+			else send();
+		});
+	}
+
 	/** Whether a keydown in the field sends the message. */
 	sends(event) {
 		if (event.key !== 'Enter' || event.isComposing || event.keyCode === 229) return false;
 		if (event.metaKey || event.ctrlKey) return true;
 		return this.#submit === 'enter' && !event.shiftKey && !event.altKey && !this.touch;
+	}
+
+	/** The hidden line that says the keys, read with the field. */
+	get guide() {
+		return this.#guide;
+	}
+
+	/** Writes the guide in the composer's words; `action` is the primary action's label. */
+	instruct(labels, action) {
+		this.#guide.textContent = this.hint(labels, action);
 	}
 
 	/** The hint read with the field, in the composer's words; `action` is the primary action's label. */

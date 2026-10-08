@@ -22,8 +22,10 @@ import { PanelHead } from './head.js';
  * control (in its sheet, the sheet's head and Close stand for it). On a wide region the panel's width
  * is fluid from `--layout-aside` up to `--layout-aside-max`, taking the width a capped main column
  * (the `thread` tier) leaves rather than an empty band; `wide` (a product's toggle, such as while it
- * shows a review of changes) lets it grow to `--layout-aside-wide`, the main column giving up to the
- * form tier.
+ * shows a diff) lets it grow: since 0.11.2 it takes every width the main column leaves, to the region's
+ * far edge, the main column keeping its tier where the region holds both and giving down to
+ * `--layout-aside` first (it took at most `--layout-aside-wide`, the main column giving down to the form
+ * tier, in 0.11.0 and 0.11.1). `--layout-aside-max` is 40rem since token set 0.4.1.
  */
 export class PagePanel extends Component {
 	/** The region width from which the panel sits beside the main column, by default (68rem). */

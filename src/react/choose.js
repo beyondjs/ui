@@ -6,6 +6,7 @@ import { RefChooser as Refs } from '../dom/refs/chooser.js';
 import { ProjectPicker as Projects } from '../dom/project.js';
 import { SecretField as Secret } from '../dom/secret.js';
 import { CopyMessage as Copy } from '../dom/copy.js';
+import { CopyButton as Copier } from '../dom/copy-button.js';
 import { StatusRow as Row } from '../dom/row.js';
 import { ProviderWindow as Provider } from '../dom/provider.js';
 import { Clock } from '../dom/time/clock.js';
@@ -94,6 +95,17 @@ export function CopyMessage({ text, kind = 'message', label = null, labels }) {
 	return h('div', { ref: host, className: 'bui-host' });
 }
 
+/**
+ * One action that copies a text and says "Copied" in place (0.11.2), driven by the DOM `CopyButton`:
+ * `text` (a string, or a function read at each press), `label`, `name`, `variant`, `small` and
+ * `onResult(copied)`; `labels` and `variant` create a new one.
+ */
+export function CopyButton({ text, label = null, name = null, variant = 'quiet', small = true, onResult = null, labels }) {
+	const latest = useLatest({ text, onResult });
+	const [host, copy] = useInstance(() => new Copier({ text: () => (typeof latest.current.text === 'function' ? latest.current.text() : latest.current.text), label, name, variant, small, labels, onresult: copied => latest.current.onResult?.(copied) }), [label, name, variant, small, labels]);
+	return h('span', { ref: host, className: 'bui-host' });
+}
+
 /** One thing with one state, its reason, who can change it and its one `action` (React content). `more`: `{ label, onSelect }`. */
 export function StatusRow({ title, kind = null, state, reason = null, owner = null, facts = [], action = null, more = [], level = 3, clock = Clock.system, locale = undefined, labels }) {
 	const [slot] = useState(() => document.createElement('span'));
@@ -118,5 +130,6 @@ RefChooser.labels = Refs.labels;
 ProjectPicker.labels = Projects.labels;
 SecretField.labels = Secret.labels;
 CopyMessage.labels = Copy.labels;
+CopyButton.labels = Copier.labels;
 StatusRow.labels = Row.labels;
 ProviderWindow.labels = Provider.labels;

@@ -1,0 +1,209 @@
+/* A change (Diff, 0.11.2): the summary line, the files to jump to, and files as flat bordered regions
+   (no elevation, D10), each with its header and its body; the lines are in diff-lines.css. Tokens only;
+   nothing moves under reduced motion. */
+.bui-diff {
+	display: grid;
+	gap: var(--space-3);
+	min-width: 0;
+	color: var(--color-text);
+}
+.bui-diff-top {
+	display: grid;
+	gap: var(--space-2);
+	min-width: 0;
+}
+.bui-diff-top:empty {
+	display: none;
+}
+.bui-diff-summary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1) var(--space-3);
+	min-width: 0;
+}
+.bui-diff-total {
+	margin: 0;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+}
+.bui-diff-actions {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: var(--space-1);
+	margin-inline-start: auto;
+}
+.bui-diff-count {
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.bui-diff-plus {
+	color: var(--color-success);
+}
+.bui-diff-minus {
+	color: var(--color-danger);
+}
+.bui-diff-note,
+.bui-diff-large {
+	margin: 0;
+	padding: var(--space-2) var(--space-3);
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+}
+.bui-diff-top > .bui-diff-note {
+	padding: 0;
+}
+.bui-diff-large {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1) var(--space-3);
+}
+
+/* The files to jump to: one row per file, its path whole. */
+.bui-diff-jump-list {
+	display: grid;
+	margin: 0;
+	padding: 0;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-base);
+	list-style: none;
+}
+.bui-diff-jump-list > li + li {
+	border-top: 1px solid var(--color-border);
+}
+.bui-diff-jump-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--space-1) var(--space-2);
+	box-sizing: border-box;
+	width: 100%;
+	min-height: var(--bui-target);
+	padding: var(--space-1) var(--space-3);
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+	text-align: start;
+	cursor: pointer;
+}
+.bui-diff-jump-item:hover {
+	background: var(--color-surface-sunken);
+}
+.bui-diff-jump-item:focus-visible {
+	outline-offset: -2px;
+}
+
+/* One file: its header (a heading holding the disclosure button, and Copy path) and its body. */
+.bui-diff-files {
+	display: grid;
+	gap: var(--space-3);
+	min-width: 0;
+}
+.bui-diff-file {
+	min-width: 0;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-base);
+	background: var(--color-surface);
+}
+.bui-diff-body > :last-child {
+	border-radius: 0 0 var(--radius-base) var(--radius-base);
+}
+.bui-diff-head {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+	min-width: 0;
+	padding: var(--space-1) var(--space-2);
+}
+.bui-diff-file[data-open] > .bui-diff-head {
+	border-bottom: 1px solid var(--color-border);
+}
+.bui-diff-heading {
+	flex: 1 1 auto;
+	min-width: 0;
+	margin: 0;
+	font: inherit;
+}
+.bui-diff-toggle {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--space-1) var(--space-2);
+	box-sizing: border-box;
+	width: 100%;
+	min-height: var(--bui-target);
+	padding: var(--space-1);
+	border: 0;
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+	text-align: start;
+	cursor: pointer;
+}
+.bui-diff-toggle:hover {
+	background: var(--color-surface-sunken);
+}
+.bui-diff-toggle:focus-visible {
+	outline-offset: -2px;
+}
+.bui-diff-chevron {
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	align-self: flex-start;
+	width: 16px;
+	height: 1lh;
+	color: var(--color-text-muted);
+}
+.bui-diff-chevron .bui-icon {
+	width: 16px;
+	height: 16px;
+	transform: rotate(-90deg);
+	transition: transform var(--motion-quick) var(--motion-ease);
+}
+.bui-diff-toggle[aria-expanded='true'] .bui-diff-chevron .bui-icon {
+	transform: none;
+}
+/* A path is never cut: it wraps anywhere, the directory muted and the name in medium weight. */
+.bui-diff-path {
+	flex: 1 1 12rem;
+	min-width: 0;
+	font-family: var(--font-mono);
+	overflow-wrap: anywhere;
+}
+.bui-diff-dir,
+.bui-diff-arrow {
+	color: var(--color-text-muted);
+}
+.bui-diff-name {
+	font-weight: var(--weight-medium);
+}
+.bui-diff-status {
+	color: var(--color-text-muted);
+	white-space: nowrap;
+}
+.bui-diff-head > .bui-copy-button {
+	flex: none;
+	align-self: center;
+}
+.bui-diff-body {
+	min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.bui-diff-chevron .bui-icon {
+		transition: none;
+	}
+}

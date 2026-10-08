@@ -1,5 +1,6 @@
 import { el } from '../core/element.js';
 import { Button } from '../button.js';
+import { ComposerZone } from './zone.js';
 
 const vias = Object.freeze(['paste', 'drop', 'pick']);
 
@@ -10,7 +11,8 @@ const vias = Object.freeze(['paste', 'drop', 'pick']);
  * the product checks types and sizes and sets the chips (a refused file is a failed chip with its reason).
  *
  * A paste that carries text is the text's: only a paste of files without text attaches (a screenshot, an
- * image copied from a page), so pasting rich text that also carries a picture never attaches it.
+ * image copied from a page), so pasting rich text that also carries a picture never attaches it. Since
+ * 0.11.2 a drop on the product's work surface (`attach.zone`, `ComposerZone`) attaches too.
  */
 export class ComposerIntake {
 	static vias = vias;
@@ -22,6 +24,7 @@ export class ComposerIntake {
 	#onfiles;
 	#depth = 0;
 	#handlers = [];
+	#zone;
 
 	/**
 	 * @param {object} options
@@ -29,7 +32,7 @@ export class ComposerIntake {
 	 * @param {HTMLElement} options.box the box the drop target covers
 	 * @param {HTMLTextAreaElement} options.field the field files are pasted into
 	 * @param {import('../core/labels.js').Labels} options.labels the composer's copy (`attach`, `drop`)
-	 * @param {{label?: string|null, accept?: string|null, multiple?: boolean, onfiles: (files: File[], via: 'paste'|'drop'|'pick') => void}} options.attach
+	 * @param {{label?: string|null, accept?: string|null, multiple?: boolean, onfiles: (files: File[], via: 'paste'|'drop'|'pick') => void, zone?: Element|null}} options.attach
 	 */
 	constructor({ root, box, field, labels, attach }) {
 		if (typeof attach?.onfiles !== 'function') throw new TypeError("A composer's attachments arrive through attach.onfiles");
@@ -49,6 +52,13 @@ export class ComposerIntake {
 		this.#on(root, 'dragover', event => this.#over(event));
 		this.#on(root, 'dragleave', event => this.#leave(event));
 		this.#on(root, 'drop', event => this.#drop(event));
+		this.#zone = new ComposerZone({ words: labels.text('drop'), give: files => this.#give(files, 'drop') });
+		this.#zone.element = attach.zone ?? null;
+	}
+
+	/** The product's work surface that takes dropped files too (`ComposerZone`), or null (0.11.2). */
+	get zone() {
+		return this.#zone;
 	}
 
 	/** The Attach button and its file input, for the toolbar's start. */
@@ -69,6 +79,7 @@ export class ComposerIntake {
 	destroy() {
 		for (const [target, type, handler] of this.#handlers) target.removeEventListener(type, handler);
 		this.#handlers = [];
+		this.#zone.destroy();
 		this.#button.destroy();
 		this.#target.remove();
 		this.#input.remove();

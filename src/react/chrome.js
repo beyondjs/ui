@@ -43,9 +43,9 @@ export function Header({ brand, context = null, nav = null, notifications = null
  * A disclosure button and panel (for example the account menu): `label` is the button content (a
  * string), `name` its accessible name, and `children` the panel content.
  */
-export function Disclosure({ label, name = null, align = 'start', onChange = null, children }) {
+export function Disclosure({ label, name = null, align = 'start', placement = 'auto', onChange = null, children }) {
 	const changed = useLatest(onChange);
-	const [host, panel] = useInstance(() => new Panel({ label, name, align, onchange: open => changed.current?.(open) }), [label, name, align]);
+	const [host, panel] = useInstance(() => new Panel({ label, name, align, placement, onchange: open => changed.current?.(open) }), [label, name, align, placement]);
 	return h('div', { ref: host, className: 'bui-host' }, panel ? ReactDOM.createPortal(children, panel.panel) : null);
 }
 

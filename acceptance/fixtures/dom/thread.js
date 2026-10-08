@@ -2,14 +2,15 @@
 // Page at the thread tier whose header turns compact on scroll and whose panel has its own head, Facts
 // and Meters and a wide form; the composer with its state line and action, settings chips, attachments
 // and suggestions; since 0.11.1 its Options below 30rem (`?compact=off` keeps the 0.11.0 toolbar), a
-// product's own glyph-only control with the family `Hint`, and an age said by `Age` beside the thread.
+// product's own glyph-only control with the family `Hint`, and an age said by `Age` beside the thread;
+// since 0.11.2 `?dock=codex`, a refused video and the page's main region as the drop surface.
 // window.fixture records what the page heard and drives it.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { FamilyBar, Sidebar, Page, PageHeader, Button, Composer, ChoiceChip, Facts, Meter, Hint, Age, icon, status, el } from '@beyond-js/ui';
 import { chosen, fallback, product } from '../data/family.js';
-import { shape, words, groups, rows, models, levels, suggest, paragraphs, minutes } from '../data/thread.js';
+import { shape, words, groups, rows, dock, refuses, suggest, paragraphs, minutes } from '../data/thread.js';
 
 const copy = words.en;
 const log = [];
@@ -33,8 +34,9 @@ const upload = item => {
 	setTimeout(() => attach(items.map(other => (other.key === item.key ? (/big/.test(other.name) ? { ...other, state: 'failed', reason: 'Larger than 10 MB' } : { ...other, state: 'ready', progress: null }) : other))), 140);
 };
 let count = 0;
-const model = new ChoiceChip({ label: copy.model, options: models, value: 'opus', onchange: value => log.push(`model:${value}`) });
-const autonomy = new ChoiceChip({ label: copy.autonomy, options: levels(copy), value: 'ask', onchange: value => log.push(`autonomy:${value}`) });
+const turn = dock(copy);
+const model = new ChoiceChip({ label: copy.model, options: turn.models, value: turn.model, onchange: value => log.push(`model:${value}`) });
+const autonomy = new ChoiceChip({ label: copy.autonomy, options: turn.levels, value: turn.level, onchange: value => log.push(`autonomy:${value}`) });
 const composer = new Composer({
 	label: copy.message,
 	placeholder: copy.placeholder,
@@ -44,14 +46,22 @@ const composer = new Composer({
 		accept: 'image/*,text/plain',
 		onfiles: (files, via) => {
 			log.push(`files:${via}:${files.map(file => file.name).join(',')}`);
-			for (const file of files) upload({ key: `f${(count += 1)}`, name: file.name, size: file.size, type: file.type, file });
+			for (const file of files) {
+				const item = { key: `f${(count += 1)}`, name: file.name, size: file.size, type: file.type, file };
+				if (refuses(file)) attach([...items, { ...item, state: 'refused', reason: copy.refused }]);
+				else upload(item);
+			}
 		},
+		zone: document.getElementById('main'),
 		onremove: item => (log.push(`remove:${item.name}`), attach(items.filter(other => other.key !== item.key))),
 		onretry: item => (log.push(`retry:${item.name}`), upload({ ...item, name: item.name.replace('big', 'small') }))
 	},
 	onsuggest: suggest,
 	suggest: { bound: 1500 },
 	compact: shape.compact,
+	summary: turn.summary,
+	actions: turn.actions,
+	stop: turn.stop ? { label: turn.stop, run: () => log.push('interrupt') } : null,
 	onsubmit: message => (log.push(`send:${message.text}:${(message.attachments ?? []).length}`), attach([]), Promise.resolve())
 });
 

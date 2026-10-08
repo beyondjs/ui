@@ -6,7 +6,8 @@
  */
 export { Icon, Button, useBusy, Lockup, Status, Badge, Callout, Loading, Skeleton } from './simple.js';
 export { Field, Select, Choices, useSuggestion } from './fields.js';
-export { ChoiceMenu, ChoiceChip, RefChooser, ProjectPicker, SecretField, CopyMessage, StatusRow, ProviderWindow } from './choose.js';
+export { ChoiceMenu, ChoiceChip, RefChooser, ProjectPicker, SecretField, CopyMessage, CopyButton, StatusRow, ProviderWindow } from './choose.js';
+export { Bytes } from '../dom/core/bytes.js';
 export { SideSheet } from './sheet.js';
 export { Draft } from '../dom/draft.js';
 export { Dialog, useConfirm, FocusedForm, Consequence } from './dialog.js';
@@ -33,3 +34,4 @@ export { PagePanel } from '../dom/page/panel.js';
 export { Composer, LiveText, ActivityRow, ActivityGroup } from './conversation.js';
 export { Facts, Meter } from './resource.js';
 export { useInstance } from './hooks.js';
+export { Diff } from './diff.js';

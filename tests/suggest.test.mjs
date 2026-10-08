@@ -39,7 +39,9 @@ test('after the trigger the field asks, says Looking…, then lists options as a
 	const { composer, asked, field, list, panel } = make();
 	assert.equal(field.getAttribute('aria-autocomplete'), 'list');
 	assert.equal(field.getAttribute('aria-controls'), list.id);
-	assert.equal(field.getAttribute('aria-expanded'), 'false');
+	assert.equal(field.getAttribute('aria-expanded'), null, 'a text box takes no aria-expanded (0.11.2)');
+	assert.equal(field.getAttribute('aria-haspopup'), 'listbox', 'it says it has a list');
+	assert.equal(field.getAttribute('role'), null, 'it keeps its own role: a multi-line text box');
 	assert.equal(list.getAttribute('aria-label'), 'Suggestions');
 	type(field, 'Fix @check');
 	await page.until(() => asked.length);
@@ -48,7 +50,7 @@ test('after the trigger the field asks, says Looking…, then lists options as a
 	await page.until(() => composer.suggestions.state === 'results');
 	const options = [...list.querySelectorAll('[role="option"]')];
 	assert.equal(options.length, 2);
-	assert.equal(field.getAttribute('aria-expanded'), 'true');
+	assert.equal(field.getAttribute('aria-expanded'), null);
 	assert.equal(field.getAttribute('aria-activedescendant'), options[0].id);
 	assert.equal(options[0].getAttribute('aria-selected'), 'true');
 	assert.match(options[0].textContent, /src\/checkout\/redirect\.js.*Modified/);
@@ -110,7 +112,7 @@ test('Escape closes, stops there and the same token stays closed; a new token as
 	assert.equal(escape.defaultPrevented, true);
 	assert.equal(outer, 0, 'an Escape the list takes reaches no dialog around it');
 	assert.equal(composer.suggestions.open, false);
-	assert.equal(field.getAttribute('aria-expanded'), 'false');
+	assert.equal(field.getAttribute('aria-activedescendant'), null);
 	type(field, '@check');
 	await wait(30);
 	assert.equal(composer.suggestions.open, false, 'the same token stays closed');

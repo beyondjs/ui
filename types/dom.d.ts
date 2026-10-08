@@ -78,6 +78,8 @@ export interface DisclosureOptions {
 	role?: string | null;
 	onchange?: ((open: boolean) => void) | null;
 	class?: string;
+	/** Where a floating panel opens (0.11.2): above when there is no room below (`auto`, default), or always on one side. */
+	placement?: 'auto' | 'above' | 'below';
 }
 export class Disclosure extends Component {
 	constructor(options: DisclosureOptions);
@@ -280,3 +282,4 @@ export * from './sidebar.js';
 export * from './conversation.js';
 export * from './resource.js';
 export * from './shared.js';
+export * from './diff.js';

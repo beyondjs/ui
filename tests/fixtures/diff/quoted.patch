@@ -1,0 +1,18 @@
+diff --git "a/docs/caf\303\251.txt" "b/docs/caf\303\251.txt"
+index 1111111..2222222 100644
+--- "a/docs/caf\303\251.txt"
++++ "b/docs/caf\303\251.txt"
+@@ -1 +1 @@
+-hola
++adiós
+diff --git "a/notes/tab\there.txt" "b/notes/quote\"d \\ name.txt"
+similarity index 100%
+rename from "notes/tab\there.txt"
+rename to "notes/quote\"d \\ name.txt"
+diff --git a/with space/file name.txt b/with space/file name.txt
+index 1111111..2222222 100644
+--- a/with space/file name.txt
++++ b/with space/file name.txt
+@@ -1 +1,2 @@
+ a
++b

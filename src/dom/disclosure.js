@@ -20,6 +20,11 @@ import { Hint } from './core/hint.js';
  * technology, removed as soon as its movement ends. With reduced motion there is no picture. The
  * picture keeps the panel's classes so it looks the same, so it never outlives a reopening: opening
  * again or destroying removes it, and an open panel has no copy beside it.
+ *
+ * A floating panel opens above its button when the viewport has no room for it below and more room
+ * above (0.11.2, `placement: 'auto'`), as menus do; `placement: 'above'` always opens it above, for a
+ * button whose page docks something under it (an answer's details over a docked composer), so it never
+ * opens under what is docked or extends the page.
  */
 export class Disclosure extends Component {
 	#element;
@@ -30,6 +35,7 @@ export class Disclosure extends Component {
 	#releases = [];
 	#hint = null;
 	#picture = null;
+	#placement;
 
 	/**
 	 * @param {object} options
@@ -39,9 +45,11 @@ export class Disclosure extends Component {
 	 * @param {'start'|'end'} [options.align] which edge of the button the panel aligns to
 	 * @param {(open: boolean) => void} [options.onchange]
 	 * @param {boolean} [options.hint] the button shows a glyph alone: its name appears as a tooltip (D11)
+	 * @param {'auto'|'above'|'below'} [options.placement] where a floating panel opens (0.11.2): above when there is no room below (`auto`), or always on one side
 	 */
-	constructor({ label, name = null, children = [], align = 'start', variant = 'plain', role = null, onchange = null, hint = false, class: extra = '' }) {
+	constructor({ label, name = null, children = [], align = 'start', variant = 'plain', role = null, onchange = null, hint = false, placement = 'auto', class: extra = '' }) {
 		super();
+		this.#placement = ['auto', 'above', 'below'].includes(placement) ? placement : 'auto';
 		this.#onchange = onchange;
 		const id = Ids.next('bui-panel');
 		this.#button = el(
@@ -102,6 +110,7 @@ export class Disclosure extends Component {
 		this.#open = true;
 		this.#picture?.remove();
 		this.#panel.hidden = false;
+		this.#place();
 		this.#button.setAttribute('aria-expanded', 'true');
 		const document = this.#element.ownerDocument;
 		this.#releases = [
@@ -161,6 +170,19 @@ export class Disclosure extends Component {
 		};
 		picture.addEventListener('animationend', remove, { once: true });
 		this.later(remove, 400);
+	}
+
+	/** A floating panel goes above its button when there is no room below and more room above. */
+	#place() {
+		this.#panel.classList.remove('bui-disclosure-above');
+		const view = this.#element.ownerDocument.defaultView;
+		if (!view || !this.#element.isConnected || view.getComputedStyle?.(this.#panel).position !== 'absolute' || this.#placement === 'below') return;
+		if (this.#placement === 'above') return void this.#panel.classList.add('bui-disclosure-above');
+		const box = this.#button.getBoundingClientRect();
+		const height = this.#panel.getBoundingClientRect().height;
+		const below = view.innerHeight - box.bottom - 8;
+		const above = box.top - 8;
+		this.#panel.classList.toggle('bui-disclosure-above', height > below && above > below);
 	}
 
 	#escape(event) {

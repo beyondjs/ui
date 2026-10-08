@@ -1,8 +1,11 @@
 /* A page's panel kept in view (PagePanel, 0.10.0): beside the main column from the region's cut,
    sticky under the family bar with a scroll of its own; below the cut it opens as a side sheet.
    Since 0.11.0 its width is fluid from --layout-aside to --layout-aside-max: it takes what a capped main
-   column (the thread tier) leaves, so no empty band opens between them; the wide form grows to
-   --layout-aside-wide, the main column giving up to the form tier. */
+   column (the thread tier) leaves, so no empty band opens between them. Since 0.11.2 (token set 0.4.1)
+   --layout-aside-max is 40rem, so a wide region keeps less empty width past the panel, and the wide form
+   (a diff beside a conversation) takes every width the main column leaves, to the region's far edge: the
+   main column keeps its tier when the region holds it and gives down to --layout-aside first, never
+   centered and still one gutter from the navigation (D52). */
 .bui-page {
 	--bui-page-main: 100%;
 	--bui-page-panel: var(--layout-aside-max);
@@ -10,15 +13,15 @@
 .bui-page[data-width='thread'] {
 	--bui-page-main: var(--layout-thread);
 }
-.bui-page[data-panel-wide] {
-	--bui-page-main: var(--layout-form);
-	--bui-page-panel: var(--layout-aside-wide);
-}
 .bui-page[data-panel='beside'] .bui-page-body:has(> .bui-page-panel:not([hidden])) {
 	grid-template-columns: minmax(0, 1fr) clamp(var(--layout-aside), calc(100% - var(--bui-page-main) - var(--space-8)), var(--bui-page-panel));
 }
 .bui-page[data-width='thread'][data-panel='beside'] .bui-page-body:has(> .bui-page-panel:not([hidden])) {
 	max-width: calc(var(--layout-thread) + var(--space-8) + var(--bui-page-panel));
+}
+.bui-page[data-panel-wide][data-panel='beside'] .bui-page-body:has(> .bui-page-panel:not([hidden])) {
+	grid-template-columns: clamp(var(--layout-aside), calc(100% - var(--space-8) - var(--layout-aside-wide)), var(--bui-page-main)) minmax(0, 1fr);
+	max-width: none;
 }
 .bui-page-panel {
 	position: sticky;

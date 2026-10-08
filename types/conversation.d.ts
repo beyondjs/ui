@@ -32,8 +32,12 @@ export interface ComposerAttachment {
 	size?: number | null;
 	/** Its media type; an image shows a thumbnail. */
 	type?: string | null;
-	/** `uploading` (with `progress`), `failed` (with `reason`, and Retry when `attach.onretry` is given) or `ready` (default). */
-	state?: 'uploading' | 'failed' | 'ready';
+	/**
+	 * `uploading` (with `progress`), `failed` (with `reason`, and Retry when `attach.onretry` is given),
+	 * `refused` (0.11.2: the product would not take it, "Not attached · {reason}", no Retry, never sent and
+	 * never holding a message back) or `ready` (default).
+	 */
+	state?: 'uploading' | 'failed' | 'refused' | 'ready';
 	/** 0 to 1 while uploading. */
 	progress?: number | null;
 	reason?: string | null;
@@ -55,6 +59,8 @@ export interface ComposerAttach {
 	onfiles: (files: File[], via: 'paste' | 'drop' | 'pick') => void;
 	onremove?: ((item: ComposerAttachment) => void) | null;
 	onretry?: ((item: ComposerAttachment) => void) | null;
+	/** The product's work surface (a thread with its dock) where a drop of files attaches too, with one target drawn over it (0.11.2). */
+	zone?: Element | null;
 }
 /** One suggestion after the trigger (0.11.0): `value` replaces the token. */
 export interface ComposerSuggestion {
@@ -82,14 +88,25 @@ export interface ComposerSuggestSettings {
  * words for the list's last line, which win). A cut list ends with "50 of 120 · keep typing to narrow".
  */
 export type ComposerSuggestAnswer = ComposerSuggestion[] | { items: ComposerSuggestion[]; total?: number | null; more?: boolean; note?: string | null };
-/** A narrow composer's Options (0.11.1), read from `composer.fold`. */
+/** A composer's Options (0.11.1), read from `composer.fold`: shown only when the toolbar folds. */
 export interface ComposerFold {
 	/** Whether the folded settings and Attach are shown. */
 	readonly open: boolean;
-	/** The Options control (the `more` glyph, named "Options"); placed only while there is something to fold. */
+	/** The Options control (the `more` glyph, named "Options", or "Options · {summary}"); placed only while there is something to fold. */
 	readonly button: HTMLButtonElement;
+	/** Whether there is something to fold (Attach or a setting) (0.11.2). */
+	readonly available: boolean;
 	/** Shows (`true`), folds (`false`) or switches what it folds. */
 	toggle(open?: boolean): void;
+}
+/** The level that keeps a composer's toolbar on one row (0.11.2): every word, chips by their value, or folded behind Options. */
+export type ComposerLevel = 'full' | 'short' | 'fold';
+/** A composer's toolbar (0.11.2), read from `composer.toolbar`. */
+export interface ComposerToolbar {
+	/** The level in use, also the root's `data-fit` (absent for `full`). */
+	readonly level: ComposerLevel;
+	/** Decides the level now, as a change of width, content or fonts does by itself. */
+	measure(): void;
 }
 /** The state line with an action at its end (0.11.0). */
 export interface ComposerStatusLine {
@@ -122,8 +139,14 @@ export interface ComposerOptions {
 	suggest?: ComposerSuggestSettings | null;
 	/** The language of sizes, percents and counts. */
 	locale?: string;
-	/** Under 30rem of composer, fold the settings and Attach behind one Options control so the toolbar keeps one row (0.11.1, default true). */
+	/**
+	 * Keep the toolbar on one row (default true): measured since 0.11.2, the chips first say their value
+	 * only (the label and a calm state in their name and tooltip), and last the settings and Attach fold
+	 * behind Options. `false` keeps 0.11.0's wrapped toolbar.
+	 */
 	compact?: boolean;
+	/** What sending uses ("Opus 5.5"), said beside Options while the settings are folded (0.11.2). */
+	summary?: string | null;
 	/** The toolbar's start (context choices). */
 	tools?: Part[];
 	/** The toolbar's end, before the actions. */
@@ -166,8 +189,14 @@ export class Composer extends Component {
 	attachments: ComposerAttachment[];
 	/** The suggestions, or null without `onsuggest` (0.11.0). */
 	readonly suggestions: ComposerSuggestions | null;
-	/** The narrow toolbar's Options (0.11.1). */
+	/** Options (0.11.1). */
 	readonly fold: ComposerFold;
+	/** The toolbar's one-row level (0.11.2). */
+	readonly toolbar: ComposerToolbar;
+	/** What Options says beside its glyph while folded (0.11.2). */
+	set summary(text: string | null);
+	/** The work surface where a drop attaches too; needs `attach` (0.11.2). */
+	set zone(element: Element | null);
 	/** Opens the platform's file chooser, as Attach does (0.11.0). */
 	attach(): void;
 	set tools(nodes: Part[]);

@@ -17,6 +17,10 @@ import { Interaction } from './interaction.js';
  * Public since 0.11.1 for a product's own glyph-only controls: `new Hint(root)` over the element that
  * holds them, each with `data-bui-hint` and an `aria-label` (and `data-bui-shortcut` to add a key);
  * `destroy()` releases every listener and leaves `root` as it was. One hint per root.
+ *
+ * Since 0.11.2 a control whose visible words are shortened (a composer's chip that shows only its
+ * value) carries its whole text in `data-bui-tip`; the hint shows that text instead of the name, and
+ * only while `when(target)` answers true (the words are shortened now).
  */
 export class Hint extends Component {
 	#root;
@@ -24,15 +28,20 @@ export class Hint extends Component {
 	#target = null;
 	#cancel = null;
 	#escape = null;
+	#when;
 
-	/** @param {Element} root the component's element */
-	constructor(root) {
+	/**
+	 * @param {Element} root the component's element
+	 * @param {{when?: ((target: Element) => boolean)|null}} [options] when a `data-bui-tip` text shows (0.11.2)
+	 */
+	constructor(root, { when = null } = {}) {
 		super();
 		this.#root = root;
+		this.#when = when;
 		root.setAttribute('data-bui-hints', '');
 		// A control belongs to the nearest hint root, so nested components never show two hints.
 		const find = event => {
-			const target = event.target.closest?.('[data-bui-hint]');
+			const target = event.target.closest?.('[data-bui-hint], [data-bui-tip]');
 			return target?.closest('[data-bui-hints]') === root ? target : null;
 		};
 		this.listen(root, 'pointerover', event => {
@@ -51,7 +60,7 @@ export class Hint extends Component {
 		this.listen(root, 'focusout', event => find(event) && this.hide());
 		// The control's own handler has run: a press hides the hint, and so does a control it removed.
 		this.listen(root, 'click', event => {
-			const target = event.target.closest?.('[data-bui-hint]');
+			const target = event.target.closest?.('[data-bui-hint], [data-bui-tip]');
 			if (target && (event.pointerType !== 'touch' || !target.isConnected)) this.hide();
 		});
 		this.listen(root, 'keydown', event => find(event) && event.key !== 'Tab' && event.key !== 'Escape' && this.hide());
@@ -75,7 +84,8 @@ export class Hint extends Component {
 	/** Shows the name of `target`, a control inside the root. */
 	show(target) {
 		this.#cancel?.();
-		const name = target.getAttribute('aria-label');
+		const tip = target.getAttribute('data-bui-tip');
+		const name = tip ? ((this.#when?.(target) ?? false) ? tip : null) : target.getAttribute('aria-label');
 		// An open menu or panel already says what the control does; the hint would cover it.
 		if (!name || !target.isConnected || target.getAttribute('aria-expanded') === 'true') return this.hide();
 		const shortcut = target.getAttribute('data-bui-shortcut');

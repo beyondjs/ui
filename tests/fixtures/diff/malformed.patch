@@ -1,0 +1,30 @@
+From 1234567 Mon Sep 17 00:00:00 2001
+Subject: [PATCH] Rename the greeting
+
+---
+ src/a.js | 2 +-
+ 1 file changed
+
+diff --git a/src/a.js b/src/a.js
+index 1111111..2222222 100644
+--- a/src/a.js
++++ b/src/a.js
+@@ -1,2 +1,2 @@
+-one
++uno
+ two
+@@ nonsense @@
++lost
+-gone
+@@ -9,3 +9,3 @@
+ nine
+-ten
+diff --git a/src/b.js b/src/b.js
+index 1111111..2222222 100644
+--- a/src/b.js
++++ b/src/b.js
+@@ -1 +1 @@
+-b
++B
+--
+2.40.0

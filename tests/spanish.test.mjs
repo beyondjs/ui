@@ -57,7 +57,7 @@ test('FocusedForm says a failure in Spanish', async () => {
 });
 
 test('every component a Spanish page shows carries a Spanish set', async () => {
-	const sets = { FamilyBar: ui.FamilyBar, NotificationEntry: ui.NotificationEntry, NotificationInbox: ui.NotificationInbox, Header: ui.Header, Help: ui.Help, Sidebar: ui.Sidebar, ProductNav: ui.ProductNav, Tabs: ui.Tabs, PageHeader: ui.PageHeader, FocusedForm: ui.FocusedForm, Dialog: ui.Dialog, Question: ui.Question, Unavailable: ui.Unavailable, Toaster: ui.Toaster, Field: ui.Field, Picker: ui.Picker, Collection: ui.Collection, ChoiceMenu: ui.ChoiceMenu, Composer: ui.Composer, LiveText: ui.LiveText, ActivityRow: ui.ActivityRow, ActivityGroup: ui.ActivityGroup, Facts: ui.Facts, Meter: ui.Meter, PagePanel: ui.PagePanel, ChoiceChip: ui.ChoiceChip, Age: ui.Age };
+	const sets = { FamilyBar: ui.FamilyBar, NotificationEntry: ui.NotificationEntry, NotificationInbox: ui.NotificationInbox, Header: ui.Header, Help: ui.Help, Sidebar: ui.Sidebar, ProductNav: ui.ProductNav, Tabs: ui.Tabs, PageHeader: ui.PageHeader, FocusedForm: ui.FocusedForm, Dialog: ui.Dialog, Question: ui.Question, Unavailable: ui.Unavailable, Toaster: ui.Toaster, Field: ui.Field, Picker: ui.Picker, Collection: ui.Collection, ChoiceMenu: ui.ChoiceMenu, Composer: ui.Composer, LiveText: ui.LiveText, ActivityRow: ui.ActivityRow, ActivityGroup: ui.ActivityGroup, Facts: ui.Facts, Meter: ui.Meter, PagePanel: ui.PagePanel, ChoiceChip: ui.ChoiceChip, Age: ui.Age, Diff: ui.Diff };
 	for (const [name, component] of Object.entries(sets)) {
 		const { en, es } = component.labels ?? {};
 		assert.ok(en && es && Object.isFrozen(component.labels), `${name}.labels has en and es`);

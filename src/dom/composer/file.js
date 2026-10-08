@@ -3,15 +3,16 @@ import { glyph } from '../core/icons.js';
 import { Cut, NameTip } from '../core/cut.js';
 import { Button } from '../button.js';
 
-const states = Object.freeze(['uploading', 'failed', 'ready']);
+const states = Object.freeze(['uploading', 'failed', 'refused', 'ready']);
 
 /**
  * One attachment of a composer (0.11.0), as a removable chip patched in place: a thumbnail for an image
  * (the product's object URL, or one made here from the `File` and revoked when it goes) or the `file`
- * glyph, its name (cut on one line only while a tooltip shows it whole on hover; Remove's name and
- * tooltip say it whole on focus, D44), its size and its state in words: uploading with its progress,
- * failed with its reason and Retry, or ready. Remove is the `close` glyph alone (D11's closed list),
- * named "Remove {name}".
+ * glyph, its name (cut on one line only while a tooltip shows it whole on hover anywhere on the chip;
+ * Remove's name and tooltip say it whole on focus, D44), its size and its state in words: uploading with
+ * its progress, failed with its reason and Retry, refused (0.11.2: the product would not take it, "Not
+ * attached · {reason}", no Retry, and it never holds the message back), or ready. Remove is the `close`
+ * glyph alone (D11's closed list), named "Remove {name}".
  */
 export class FileChip {
 	static states = states;
@@ -40,7 +41,8 @@ export class FileChip {
 		this.#remove = el('button', { type: 'button', class: 'bui-icon-button bui-composer-file-remove', 'data-bui-hint': true, onclick: () => onremove(this.#item) }, [glyph('close')]);
 		const text = el('span', { class: 'bui-composer-file-text' }, [this.#name, this.#meta, this.#bar]);
 		this.#element = el('li', { class: 'bui-composer-file' }, [this.#thumb, text, this.#retry.element, this.#remove]);
-		this.#tip = new NameTip(this.#name, { text: () => this.#name.textContent, cut: () => Cut.text(this.#name) });
+		// The whole chip is the hover target: a pointer on the thumbnail or the size shows the name too
+		this.#tip = new NameTip(this.#element, { text: () => this.#name.textContent, cut: () => Cut.text(this.#name) });
 	}
 
 	get element() {
@@ -52,7 +54,7 @@ export class FileChip {
 		return this.#item;
 	}
 
-	/** The state, normalized: `uploading`, `failed` or `ready`. */
+	/** The state, normalized: `uploading`, `failed`, `refused` or `ready`. */
 	get state() {
 		return this.#element.dataset.state;
 	}
@@ -71,7 +73,8 @@ export class FileChip {
 		this.#remove.setAttribute('aria-label', labels.text('remove', { name }));
 		const bytes = Number.isFinite(item.size) ? size(item.size) : null;
 		const progress = Number.isFinite(item.progress) ? Math.min(1, Math.max(0, item.progress)) : null;
-		const said = state === 'uploading' ? labels.text('uploading', { percent: progress === null ? '' : percent(progress) }).trim() : state === 'failed' ? labels.text('rejected', { reason: item.reason ?? labels.text('unknown') }) : null;
+		const reason = item.reason ?? labels.text('unknown');
+		const said = state === 'uploading' ? labels.text('uploading', { percent: progress === null ? '' : percent(progress) }).trim() : state === 'failed' ? labels.text('rejected', { reason }) : state === 'refused' ? labels.text('refused', { reason }) : null;
 		this.#meta.textContent = [bytes, said].filter(Boolean).join(' · ');
 		this.#bar.hidden = state !== 'uploading' || progress === null;
 		this.#bar.firstChild.style.setProperty('--bui-file', String(progress ?? 0));

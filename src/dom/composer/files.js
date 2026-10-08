@@ -3,6 +3,7 @@ import { Hint } from '../core/hint.js';
 import { KeyedList } from '../core/keyed.js';
 import { Announcer } from '../operations/announcer.js';
 import { FileChip } from './file.js';
+import { Bytes } from '../core/bytes.js';
 
 /**
  * A composer's attachments (0.11.0): the chips the product sets (`items`), patched by `key` so a live
@@ -53,6 +54,11 @@ export class ComposerFiles {
 		return [...this.#chips.values()].map(chip => chip.item);
 	}
 
+	/** What goes with a message: the items as given, except those the product refused (0.11.2). */
+	get attached() {
+		return [...this.#chips.values()].filter(chip => chip.state !== 'refused').map(chip => chip.item);
+	}
+
 	/** Whether any attachment is ready to go with the message. */
 	get ready() {
 		return [...this.#chips.values()].some(chip => chip.state === 'ready');
@@ -94,19 +100,12 @@ export class ComposerFiles {
 	#say(chip) {
 		const name = chip.item.name ?? '';
 		if (chip.state === 'failed') return this.#labels.text('failure', { name, reason: chip.item.reason ?? this.#labels.text('unknown') });
+		if (chip.state === 'refused') return this.#labels.text('turned', { name, reason: chip.item.reason ?? this.#labels.text('unknown') });
 		return this.#labels.text(chip.state === 'uploading' ? 'sending' : 'attached', { name });
 	}
 
-	#size(bytes) {
-		if (bytes < 1000) return this.#labels.text('bytes', { count: Math.max(0, Math.round(bytes)) });
-		const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'];
-		let value = Math.max(0, bytes);
-		let unit = 0;
-		while (value >= 1000 && unit < units.length - 1) {
-			value /= 1000;
-			unit += 1;
-		}
-		return new Intl.NumberFormat(this.#locale, { style: 'unit', unit: units[unit], unitDisplay: 'short', maximumFractionDigits: unit < 2 ? 0 : 1 }).format(value);
+	#size(count) {
+		return new Bytes({ locale: this.#locale, bytes: this.#labels.text('bytes') }).of(Math.max(0, count));
 	}
 
 	#percent(share) {

@@ -2,8 +2,18 @@
    under the family bar, one sticky line with the title and the one status. Its holder has no height and
    sits in the page's frame, so showing it shifts nothing; the line is drawn over the page, with the
    frame's divider under it and no shadow. Without motion under reduced motion (base.css). */
+:root,
 .bui-page {
 	--bui-page-compact: 3rem;
+}
+/* What a page scrolls to (an address's `#target` or `?turn=`, a heading focused by code, scrollIntoView)
+   lands below every sticky line (0.11.2): the family bar, the sidebar's row below its cut, and the
+   compact line, with a little room. */
+html:has(.bui-page-compact) {
+	scroll-padding-top: calc(var(--layout-family) + var(--bui-page-compact) + var(--space-2));
+}
+html:has(.bui-sidebar[data-mode='drawer']):has(.bui-page-compact) {
+	scroll-padding-top: calc(var(--layout-family) + var(--bui-sidebar-row, 44px) + var(--bui-page-compact) + var(--space-2));
 }
 .bui-page .bui-page-frame > .bui-page-compact {
 	position: sticky;

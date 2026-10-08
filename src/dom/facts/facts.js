@@ -94,6 +94,11 @@ export class Facts extends Component {
 		this.#list.hidden = !next.size;
 	}
 
+	/** Whether a row's value reads under its label (0.11.2): `long` when given, else a long sentence that is not `mono`. */
+	static long(row) {
+		return FactsRow.long(row ?? {});
+	}
+
 	/** A state as `{ label, tone }` from `[label, tone]` or `{ label, tone }`; null for none. */
 	static state(state) {
 		if (!state) return null;

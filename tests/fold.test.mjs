@@ -129,10 +129,15 @@ test('Spanish names it «Opciones»; a paste still attaches while Attach is fold
 	assert.equal(document.querySelectorAll('.bui-hint').length, 0);
 });
 
-test('the stylesheet folds only below 30rem of composer, only a compact one, and gives the shown start the row beside Options', () => {
-	const query = sheet.slice(sheet.indexOf('@container bui-composer (max-width: 30rem)'));
+test('the stylesheet folds only at the measured fold level, shortens the chips at the short level and keeps compact: false as 0.11.0 below 30rem (0.11.2)', () => {
 	assert.match(sheet, /\.bui-composer-more\s*\{[^}]*display:\s*none/);
-	assert.match(query, /\.bui-composer\[data-compact\] \.bui-composer-more\s*\{[^}]*display:\s*inline-grid/);
-	assert.match(query, /\.bui-composer\[data-compact\]:not\(\[data-options\]\) \.bui-composer-attach,\s*\.bui-composer\[data-compact\]:not\(\[data-options\]\) \.bui-composer-settings\s*\{[^}]*display:\s*none/);
-	assert.match(query, /\.bui-composer\[data-compact\]\[data-options\] \.bui-composer-start\s*\{[^}]*flex-basis:\s*calc\(100% - var\(--bui-control\) - var\(--space-2\)\)/);
+	assert.match(sheet, /\.bui-composer\[data-fit='fold'\] \.bui-composer-more\s*\{[^}]*display:\s*inline-grid/);
+	assert.match(sheet, /\.bui-composer\[data-fit='fold'\]:not\(\[data-options\]\) \.bui-composer-attach,\s*\.bui-composer\[data-fit='fold'\]:not\(\[data-options\]\) \.bui-composer-settings\s*\{[^}]*display:\s*none/);
+	assert.match(sheet, /\.bui-composer\[data-fit='fold'\]\[data-options\] \.bui-composer-start\s*\{[^}]*flex-basis:\s*calc\(100% - var\(--bui-control\) - var\(--space-2\)\)/);
+	assert.match(sheet, /\.bui-composer\[data-fit\] \.bui-composer-settings \.bui-choice-label,[^{]*\{[^}]*clip:\s*rect\(0 0 0 0\)/, 'a shortened chip keeps its label in its name');
+	assert.match(sheet, /\.bui-chip-state:not\(\[data-tone='warning'\], \[data-tone='danger'\]\)/, 'a state that asks for attention keeps its word');
+	assert.match(sheet, /\.bui-composer\[data-compact\] \.bui-composer-settings \.bui-choice-button\s*\{[^}]*flex-wrap:\s*nowrap/, 'a chip never wraps inside itself');
+	const query = sheet.slice(sheet.indexOf('@container bui-composer (max-width: 30rem)'));
+	assert.match(query, /\.bui-composer:not\(\[data-compact\]\) \.bui-composer-start\s*\{[^}]*flex-basis:\s*100%/);
+	assert.doesNotMatch(query.slice(0, query.indexOf('}\n}') + 3), /data-options|bui-composer-more/, 'no fold by a fixed width');
 });

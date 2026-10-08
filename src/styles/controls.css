@@ -174,7 +174,10 @@
 	min-height: var(--bui-control);
 	font-weight: var(--weight-medium);
 }
-/* Opened above its button when the viewport has no room below; it rises from the button. */
+/* Opened above its button when the viewport has no room below; it rises from the button (a disclosure's
+   floating panel too, since 0.11.2). */
+.bui-disclosure-panel.bui-disclosure-above,
+.bui-disclosure-leaving.bui-disclosure-above,
 .bui-menu.bui-menu-above {
 	top: auto;
 	bottom: calc(100% + var(--space-1));

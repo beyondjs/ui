@@ -1,0 +1,16 @@
+diff --git a/images/photo.png b/images/photo.png
+index 1234567..89abcde 100644
+Binary files a/images/photo.png and b/images/photo.png differ
+diff --git a/fonts/new.woff2 b/fonts/new.woff2
+new file mode 100644
+index 0000000000000000000000000000000000000000..c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0
+GIT binary patch
+literal 12
+TcmZ?wbhEHbWMp7q00RI3
+
+literal 0
+HcmV?d00001
+
+diff --git a/empty.txt b/empty.txt
+new file mode 100644
+index 0000000..e69de29

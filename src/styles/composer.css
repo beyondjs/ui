@@ -201,8 +201,8 @@
 	width: 14px;
 	height: 14px;
 }
-/* Options (0.11.1): shown only in a narrow composer that has something to fold, at the toolbar's control
-   size, so it lines up with Attach and Send. */
+/* Options (0.11.1): shown only when the toolbar folds, at the toolbar's control size, so it lines up with
+   Attach and Send; since 0.11.2 it may say what sending uses beside its glyph. */
 .bui-composer-more {
 	display: none;
 	flex: none;
@@ -214,28 +214,78 @@
 .bui-composer-more[aria-expanded='true'] {
 	color: var(--color-text);
 }
-/* A narrow composer gives the toolbar's start a row of its own: the choices, then the actions. Since
-   0.11.1 a composer with settings or Attach folds them behind Options, so its toolbar keeps one row;
-   pressing Options shows them beside it from the first row, wrapping as they need, and the actions take
-   the next row (`compact: false` keeps the 0.11.0 toolbar). */
+.bui-composer-more[data-summary] {
+	width: auto;
+	max-width: 12rem;
+	gap: var(--space-1);
+	padding-inline: var(--space-2);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-composer-summary {
+	min-width: 0;
+	overflow: hidden;
+	color: var(--color-text);
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.bui-composer-summary:empty {
+	display: none;
+}
+/* The width the fit watches: a line across the composer, with no height of its own. */
+.bui-composer-gauge {
+	position: absolute;
+	inset-block-start: 0;
+	inset-inline: 0;
+	height: 0;
+	visibility: hidden;
+	pointer-events: none;
+}
+/* One toolbar row (0.11.2, ComposerFit): a chip never wraps inside itself, so a toolbar that does not fit
+   is measured as such; then the chips say their value only (`short`), and last the settings and Attach
+   fold behind Options (`fold`). The label and a calm state stay in the chip's name and its tooltip; a
+   state that asks for attention keeps its word; a long value ends in an ellipsis while the tooltip and
+   the open menu say it whole (D44). */
+.bui-composer[data-compact] .bui-composer-settings .bui-choice-button {
+	flex-wrap: nowrap;
+	white-space: nowrap;
+}
+.bui-composer[data-fit] .bui-composer-settings .bui-choice-label,
+.bui-composer[data-fit] .bui-composer-settings .bui-chip-state:not([data-tone='warning'], [data-tone='danger']) {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+.bui-composer[data-fit] .bui-composer-settings .bui-choice-value {
+	display: inline-block;
+	max-width: 9rem;
+	overflow: hidden;
+	vertical-align: bottom;
+	text-overflow: ellipsis;
+	overflow-wrap: normal;
+}
+.bui-composer[data-fit='fold'] .bui-composer-more {
+	display: inline-grid;
+	grid-auto-flow: column;
+	align-items: center;
+}
+.bui-composer[data-fit='fold'][data-options] .bui-composer-more {
+	align-self: flex-start;
+}
+.bui-composer[data-fit='fold'][data-options] .bui-composer-start {
+	flex-basis: calc(100% - var(--bui-control) - var(--space-2));
+}
+.bui-composer[data-fit='fold']:not([data-options]) .bui-composer-attach,
+.bui-composer[data-fit='fold']:not([data-options]) .bui-composer-settings {
+	display: none;
+}
+/* `compact: false` keeps 0.11.0's toolbar: a narrow composer gives the toolbar's start a row of its own. */
 @container bui-composer (max-width: 30rem) {
-	.bui-composer-start {
+	.bui-composer:not([data-compact]) .bui-composer-start {
 		flex-basis: 100%;
-	}
-	.bui-composer[data-compact] .bui-composer-more {
-		display: inline-grid;
-	}
-	.bui-composer[data-compact]:not([data-options]) .bui-composer-start {
-		flex-basis: auto;
-	}
-	.bui-composer[data-compact][data-options] .bui-composer-more {
-		align-self: flex-start;
-	}
-	.bui-composer[data-compact][data-options] .bui-composer-start {
-		flex-basis: calc(100% - var(--bui-control) - var(--space-2));
-	}
-	.bui-composer[data-compact]:not([data-options]) .bui-composer-attach,
-	.bui-composer[data-compact]:not([data-options]) .bui-composer-settings {
-		display: none;
 	}
 }

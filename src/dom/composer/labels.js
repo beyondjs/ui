@@ -3,7 +3,7 @@
  * keyboard hint read with the field (by the way the composer sends), and what it says when a message
  * is empty or was not sent; since 0.11.0 its attachments (Attach, the drop target, the chips' states and
  * what is announced) and its suggestions (their states and what is announced); since 0.11.1 the narrow
- * toolbar's Options and a truncated list's last line. Public as
+ * toolbar's Options and a truncated list's last line; since 0.11.2 a file the product refused. Public as
  * `Composer.labels`.
  */
 const freeze = sets => Object.freeze({ en: Object.freeze(sets.en), es: Object.freeze(sets.es) });
@@ -26,7 +26,9 @@ export const composer = freeze({
 		retry: 'Retry',
 		uploading: 'Uploading {percent}',
 		rejected: 'Failed · {reason}',
+		refused: 'Not attached · {reason}',
 		failure: '{name} failed: {reason}',
+		turned: '{name} not attached: {reason}',
 		unknown: 'no reason given',
 		attached: '{name} attached',
 		sending: '{name} uploading',
@@ -59,7 +61,9 @@ export const composer = freeze({
 		retry: 'Reintentar',
 		uploading: 'Subiendo {percent}',
 		rejected: 'Falló · {reason}',
+		refused: 'No adjuntado · {reason}',
 		failure: '{name} falló: {reason}',
+		turned: '{name} no se adjuntó: {reason}',
 		unknown: 'sin motivo indicado',
 		attached: '{name} adjuntado',
 		sending: '{name} subiéndose',

@@ -9,7 +9,8 @@ import { tokens, TokenSheet, Contrast } from '@beyond-js/ui/tokens';
  * 2026-09-29) is that baseline plus exactly the recorded changes below, in place, and nothing else;
  * token set 0.3.0 (the family page system, D52, approved on 2026-10-04) adds the layout tokens, 0.3.1
  * narrows the reading measure from 68ch to the 54ch measured against LR-02, and 0.4.0 adds the thread
- * tier and the panel's widths of the family proposal D67 as pending, not approved.
+ * tier and the panel's widths of the family proposal D67 as pending, not approved; 0.4.1 raises the
+ * pending panel maximum to 40rem.
  * Imported through the package's own export, as consumers import it.
  */
 const fixture = new URL('./fixtures/branding-tokens-0.1.0.css', import.meta.url);
@@ -19,10 +20,10 @@ const dark = ['--color-border-control: #8e99bb;', '--elevation-window: 0 14px 30
 const changes = {
 	removed: ['/* Beyond family tokens 0.1.0 (proposed). Generated from src/foundations; do not edit. */', '\t--text-label: 0.6875rem;', '\t--tracking-label: 0.08em;', '\t--layout-measure: 68ch;'],
 	added: [
-		'/* Beyond family tokens 0.4.0 (approved). Generated from src/foundations; do not edit. */',
-		// 0.4.0: the family proposal D67, adopted by Conduict and shipped as pending, not approved
+		'/* Beyond family tokens 0.4.1 (approved). Generated from src/foundations; do not edit. */',
+		// 0.4.0: the family proposal D67, adopted by Conduict and shipped as pending, not approved; 0.4.1 raises the panel's maximum
 		'\t--layout-thread: 52rem;',
-		'\t--layout-aside-max: 30rem;',
+		'\t--layout-aside-max: 40rem;',
 		'\t--layout-aside-wide: 48rem;',
 		// 0.3.1: the reading measure, measured against LR-02 (no line of prose past 80 characters)
 		'\t--layout-measure: 54ch;',
@@ -55,7 +56,7 @@ const without = (lines, listed) => {
 	});
 };
 
-test('the 0.4.0 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
+test('the 0.4.1 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
 	const baseline = readFileSync(fixture, 'utf8').split('\n');
 	const current = `${new TokenSheet(tokens).css}\n`.split('\n');
 	for (const line of changes.removed) assert.ok(baseline.includes(line) && !current.includes(line), `removed: ${line}`);
@@ -68,7 +69,7 @@ test('the packed tokens.css is the generated sheet', () => {
 });
 
 test('version, status, approval and provenance of the token set are recorded', () => {
-	assert.equal(tokens.version, '0.4.0');
+	assert.equal(tokens.version, '0.4.1');
 	assert.deepEqual(tokens.pending.tokens, ['layout.thread', 'layout.aside-max', 'layout.aside-wide'], 'the proposals are recorded as pending');
 	for (const name of ['thread', 'aside-max', 'aside-wide']) assert.match(tokens.layout[name].reason, /Not an approved family rule/, name);
 	assert.equal(tokens.status, 'approved');

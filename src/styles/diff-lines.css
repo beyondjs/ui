@@ -1,0 +1,115 @@
+/* A change's lines (Diff, 0.11.2), in a unified view: additions and deletions differ by their sign and
+   their row's background; numbers and signs are generated and never selected, so a selection of the code
+   copies only code. Long lines scroll inside their file's box, never the page, with the numbers and signs
+   kept in view. Tokens only. */
+.bui-diff-lines {
+	overflow-x: auto;
+	min-width: 0;
+	background: var(--color-surface);
+	font-family: var(--font-mono);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+}
+.bui-diff-lines:focus-visible {
+	outline-offset: -2px;
+}
+.bui-diff-rows {
+	display: grid;
+	width: max-content;
+	min-width: 100%;
+}
+.bui-diff-line,
+.bui-diff-hunk,
+.bui-diff-gap,
+.bui-diff-more {
+	--bui-diff-row: var(--color-surface);
+	display: flex;
+	background: var(--bui-diff-row);
+}
+.bui-diff-line[data-kind='add'] {
+	--bui-diff-row: var(--color-success-surface);
+}
+.bui-diff-line[data-kind='delete'] {
+	--bui-diff-row: var(--color-danger-surface);
+}
+.bui-diff-hunk,
+.bui-diff-gap,
+.bui-diff-more {
+	--bui-diff-row: var(--color-surface-sunken);
+	color: var(--color-text-muted);
+}
+.bui-diff-hunk:focus-visible {
+	outline-offset: -2px;
+}
+.bui-diff-gutter {
+	position: sticky;
+	inset-inline-start: 0;
+	z-index: 1;
+	display: flex;
+	flex: none;
+	border-inline-end: 1px solid var(--color-border);
+	background: var(--bui-diff-row);
+	user-select: none;
+	-webkit-user-select: none;
+}
+.bui-diff-num {
+	box-sizing: content-box;
+	width: calc(var(--bui-diff-digits, 3) * 1ch);
+	padding: 0 var(--space-2);
+	color: var(--color-text-muted);
+	text-align: end;
+}
+.bui-diff-num::before {
+	content: attr(data-number);
+}
+.bui-diff-sign {
+	width: 1ch;
+	padding: 0 var(--space-1);
+	text-align: center;
+}
+.bui-diff-sign::before {
+	content: attr(data-sign);
+}
+.bui-diff-line[data-kind='add'] .bui-diff-sign {
+	color: var(--color-success);
+}
+.bui-diff-line[data-kind='delete'] .bui-diff-sign {
+	color: var(--color-danger);
+}
+.bui-diff-code {
+	flex: 1 0 auto;
+	padding: 0 var(--space-3) 0 var(--space-2);
+	white-space: pre;
+	tab-size: 4;
+}
+.bui-diff-said {
+	user-select: none;
+	-webkit-user-select: none;
+}
+.bui-diff-line[data-kind='note'] .bui-diff-code {
+	color: var(--color-text-muted);
+	font-family: var(--font-sans);
+}
+/* Hunk headers, gaps and folded runs keep their words in view while the lines scroll sideways. */
+.bui-diff-aside {
+	position: sticky;
+	inset-inline-start: 0;
+	padding: var(--space-1) var(--space-3);
+	white-space: pre;
+}
+.bui-diff-gap .bui-diff-aside,
+.bui-diff-more .bui-diff-aside {
+	font-family: var(--font-sans);
+	white-space: normal;
+}
+.bui-diff-reveal {
+	min-height: 24px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--color-link);
+	font: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+}

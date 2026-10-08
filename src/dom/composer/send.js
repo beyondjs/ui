@@ -27,7 +27,7 @@ export class ComposerSend {
 	 * @param {(message: {text: string, action: string, attachments: object[]}) => Promise<unknown>} options.onsubmit
 	 * @param {((text: string) => void)|null} options.onchange
 	 * @param {((error: unknown) => string|null)|undefined} options.explain
-	 * @param {{alive: () => boolean, files: () => {ready: boolean, items: object[]}, primary: () => string, draw: () => void, root: () => HTMLElement}} options.host
+	 * @param {{alive: () => boolean, files: () => {ready: boolean, attached: object[]}, primary: () => string, draw: () => void, root: () => HTMLElement}} options.host
 	 *   the composer: whether it still lives, its attachments, its primary action, a redraw and its element
 	 */
 	constructor({ field, labels, onsubmit, onchange, explain, host }) {
@@ -76,7 +76,7 @@ export class ComposerSend {
 		try {
 			// `attachments` is in the message only when there are some: a message without any keeps its 0.10.0 shape
 			const message = { text, action: action ?? this.#host.primary() };
-			await this.#onsubmit(files.items.length ? { ...message, attachments: files.items } : message);
+			await this.#onsubmit(files.attached.length ? { ...message, attachments: files.attached } : message);
 			return true;
 		} catch (error) {
 			if (!this.#host.alive()) return false;

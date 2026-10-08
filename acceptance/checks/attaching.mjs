@@ -173,7 +173,7 @@ export const checks = [
 				return { above: panel.bottom <= box.top + 1, inside: panel.top >= 0 && panel.left >= 0 && panel.right <= innerWidth };
 			}, dock);
 			expect(placed.above && placed.inside, `above the docked box, inside the window: ${JSON.stringify(placed)}`);
-			expect((await field.getAttribute('aria-expanded')) === 'true' && (await field.getAttribute('aria-activedescendant')) === (await list.locator('[role="option"]').first().getAttribute('id')), 'the first option active');
+			expect((await field.getAttribute('aria-expanded')) === null && (await field.getAttribute('aria-haspopup')) === 'listbox' && (await field.getAttribute('aria-activedescendant')) === (await list.locator('[role="option"]').first().getAttribute('id')), 'the first option active');
 			await page.keyboard.press('ArrowDown');
 			const active = await field.getAttribute('aria-activedescendant');
 			expect(active === (await list.locator('[role="option"]').nth(1).getAttribute('id')), 'Down moves');
