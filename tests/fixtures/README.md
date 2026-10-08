@@ -8,4 +8,4 @@
 - `operations.mjs`: a long operation for the 0.5.0 components: an environment's preparation as its record says it at a fixed start, with the usual times (median and 90th percentile), a step in progress with a phase and a blocked step with its reason and technical details.
 - `controls.mjs`: a scene of every component that draws an icon-only control, in the state that shows it, for the icon-only survey.
 - `shelf.mjs`: an in-memory `Storage` for `Preferences`, which can refuse every access as a browser with blocked site data does.
-- `types/`: a typed plain DOM consumer (`dom.ts`) and a typed React consumer (`consumer.tsx`), and since 0.10.0 the conversation pieces' consumers (`conversation.ts`, `conversation.tsx`), with their `tsconfig.json`; `npm run types` compiles them and never runs them.
+- `types/`: a typed plain DOM consumer (`dom.ts`) and a typed React consumer (`consumer.tsx`), and since 0.10.0 the conversation pieces' consumers (`conversation.ts`, `conversation.tsx`), and since 0.11.0 the consumers of its parts (`resource.ts`, `resource.tsx`), with their `tsconfig.json`; `npm run types` compiles them and never runs them.
