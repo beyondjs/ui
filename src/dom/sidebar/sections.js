@@ -1,66 +1,86 @@
-import { el, content } from '../core/element.js';
-import { Ids } from '../core/ids.js';
+import { SidebarView } from './view.js';
+import { SidebarSearch } from './search.js';
 
 /**
- * The content of a product's sidebar, drawn the same in the permanent sidebar and in the drawer: an
- * optional context block (what the sections belong to, such as the project in view, as text and
- * never as a control: the family bar chooses the project) and groups of links, the current one with
- * `aria-current="page"`. Each call to `navigation()` builds new nodes with their own ids.
+ * The content of a product's sidebar, drawn the same in the permanent sidebar and in the drawer: two
+ * copies (`panel` and `drawer`), each one `<nav>` patched in place from the same groups, context, top
+ * action and search, so either form shows what the other does. The search is one `SidebarSearch`
+ * that both copies draw: a query typed in one is the other's too.
+ *
+ * Groups are `[{ heading?, items: [{ label, href, current?, meta? }] }]` (sections) and, since 0.10.0,
+ * `{ kind: 'entries', key?, heading?, items: [{ key, label, href, current?, mark? }], more? }`: a
+ * product's own items, such as its person's conversations. An update patches each copy by keys, so a
+ * live change never redraws the navigation or moves focus.
  */
 export class SidebarSections {
-	#name;
+	#panel;
+	#drawer;
+	#search = null;
 	#groups = [];
-	#context = null;
 
 	/**
 	 * @param {object} options
 	 * @param {string} options.name the navigation's accessible name ("Delegate sections")
+	 * @param {import('../core/labels.js').Labels} options.labels the sidebar's copy
 	 */
-	constructor({ name }) {
-		this.#name = name;
+	constructor({ name, labels }) {
+		this.#panel = new SidebarView({ name, labels });
+		this.#drawer = new SidebarView({ name, labels });
 	}
 
-	/** `[{ heading?, items: [{ label, href, current?, meta? }] }]`; empty groups are left out. */
+	/** The permanent sidebar's `<nav>`. */
+	get panel() {
+		return this.#panel.element;
+	}
+
+	/** The drawer's `<nav>`. */
+	get drawer() {
+		return this.#drawer.element;
+	}
+
+	/** The shared search, or null. */
+	get search() {
+		return this.#search;
+	}
+
 	set groups(value) {
-		this.#groups = (Array.isArray(value) ? value : []).filter(group => group && Array.isArray(group.items) && group.items.some(Boolean));
+		this.#groups = Array.isArray(value) ? value : [];
+		this.#panel.groups = this.#groups;
+		this.#drawer.groups = this.#groups;
 	}
 
-	/** A name the sections belong to: a string, `{ label?, name }` or a node; null for none. */
 	set context(value) {
-		this.#context = value ?? null;
+		this.#panel.context = value ?? null;
+		this.#drawer.context = value ?? null;
+	}
+
+	set action(value) {
+		this.#panel.action = value ?? null;
+		this.#drawer.action = value ?? null;
+	}
+
+	/** `{ label, source, bound?, delay?, all?, placeholder? }`, or null; a new config keeps the query. */
+	set search(config) {
+		if (!config) {
+			this.#search?.destroy();
+			this.#search = null;
+		} else if (this.#search && this.#search.config.label === config.label && this.#search.config.placeholder === (config.placeholder ?? null)) this.#search.config = config;
+		else {
+			this.#search?.destroy();
+			this.#search = new SidebarSearch(config);
+		}
+		this.#panel.search = this.#search;
+		this.#drawer.search = this.#search;
 	}
 
 	/** The label of the current item, or null. */
 	get current() {
-		for (const group of this.#groups) for (const item of group.items) if (item?.current) return item.label;
-		return null;
+		return this.#panel.current;
 	}
 
-	/** A new `<nav>` with the context and the groups. */
-	navigation() {
-		return el('nav', { class: 'bui-sidebar-nav', 'aria-label': this.#name }, [this.#block(), ...this.#groups.map(group => this.#group(group))]);
-	}
-
-	#block() {
-		const value = this.#context;
-		if (!value) return null;
-		if (value.nodeType) return el('div', { class: 'bui-sidebar-context' }, [value.cloneNode(true)]);
-		const { label = null, name } = typeof value === 'string' ? { name: value } : value;
-		if (!name) return null;
-		return el('div', { class: 'bui-sidebar-context' }, [label ? el('span', { class: 'bui-sidebar-context-label', text: label }) : null, el('span', { class: 'bui-sidebar-context-name', text: name })]);
-	}
-
-	#group({ heading = null, items }) {
-		const id = heading ? Ids.next('bui-sidebar-heading') : null;
-		return el('div', { class: 'bui-sidebar-group' }, [
-			heading ? el('p', { id, class: 'bui-sidebar-heading' }, [content(heading)]) : null,
-			el('ul', { class: 'bui-sidebar-list', 'aria-labelledby': id }, items.filter(Boolean).map(item => el('li', {}, [SidebarSections.#item(item)])))
-		]);
-	}
-
-	static #item({ label, href = null, current = false, meta = null }) {
-		const children = [el('span', { class: 'bui-sidebar-label' }, [content(label)]), meta !== null && meta !== undefined && meta !== '' ? el('span', { class: 'bui-sidebar-meta' }, [content(meta)]) : null];
-		if (!href) return el('span', { class: 'bui-sidebar-item', 'aria-disabled': 'true', 'aria-current': current ? 'page' : null }, children);
-		return el('a', { class: 'bui-sidebar-item', href, 'aria-current': current ? 'page' : null }, children);
+	destroy() {
+		this.#search?.destroy();
+		this.#panel.destroy();
+		this.#drawer.destroy();
 	}
 }

@@ -20,7 +20,7 @@ export { PreferencesDialog } from './dom.js';
 export type { PageTemplate, PageWidth, PageCrumb, TabItem, FamilyPreferences, ArrivalLabels } from './dom.js';
 import type { PageTemplate, PageWidth, PageCrumb, TabItem, ArrivalLabels } from './dom.js';
 /** The content region (D52): edge to edge, one gutter from the navigation, blocks at their width tier. */
-export function Page(props: { template?: PageTemplate; width?: PageWidth; arrival?: ReactNode; header?: ReactNode; aside?: ReactNode; label?: string | null; children?: ReactNode }): ReactElement;
+export function Page(props: { template?: PageTemplate; width?: PageWidth; arrival?: ReactNode; header?: ReactNode; aside?: ReactNode; label?: string | null; /** The aside as a panel kept in view (0.10.0) */ panel?: { cut?: number | string; open?: boolean; onChange?: ((shown: boolean) => void) | null; title?: string | null; labels?: { close?: string } } | null; panelRef?: Ref<import('./dom.js').PagePanel | null> | null; children?: ReactNode }): ReactElement;
 /** The page's one header: crumbs, the H1, one status, facts, the line's actions and the tabs. */
 export function PageHeader(props: { title: ReactNode; crumbs?: Array<PageCrumb | null | false>; status?: ReactNode; facts?: ReactNode; actions?: ReactNode; tabs?: ReactNode; headingRef?: Ref<HTMLHeadingElement> | null; labels?: { crumbs?: string } }): ReactElement;
 /** A flat section: a heading, one description line, its actions and its content. */
@@ -206,7 +206,7 @@ export function FamilyBar(props: FamilyBarProps): ReactElement;
 /** `Session` for a React product (0.8.0): created once `person` is known (no `signin` for the bar since 0.9.0). */
 export function useSession(options: import('./session.js').SessionOptions): { session: import('./session.js').Session | null };
 /** A product's sections (0.4.0), driven by the DOM `Sidebar`; place it first in a `.bui-shell` element. */
-export function Sidebar(props: { product: string; groups?: SidebarGroup[]; context?: string | { label?: string | null; name: string } | null; cut?: number; section?: string | null; onNavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null; labels?: { sections?: string; close?: string } }): ReactElement;
+export function Sidebar(props: { product: string; groups?: Array<SidebarGroup | import('./dom.js').SidebarEntries>; context?: string | { label?: string | null; name: string } | null; cut?: number; section?: string | null; /** 0.10.0 */ action?: import('./dom.js').SidebarAction | null; /** 0.10.0: `source` and `all` are read from the latest props */ search?: import('./dom.js').SidebarSearchOptions | null; onNavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null; labels?: Copy }): ReactElement;
 export function ProductNav(props: { items: Array<ProductNavItem | null | false>; label?: string | null; sticky?: boolean; onNavigate?: ((item: ProductNavItem, event: MouseEvent) => void) | null; labels?: { nav?: string } }): ReactElement;
 export function Unavailable(props: { title: ReactNode; reason: ReactNode; owner?: ReactNode; action?: ReactNode; secondary?: ReactNode; kind?: UnavailableKind; code?: string | null; level?: 2 | 3 | 4 | 5 | 6; labels?: { owner?: string } }): ReactElement;
 export function Disclosure(props: { label: string; name?: string | null; align?: 'start' | 'end'; onChange?: (open: boolean) => void; children?: ReactNode }): ReactElement;
@@ -215,7 +215,7 @@ export function Help(props: { topic: string; text?: string | string[]; labels?: 
 export function Tooltip(props: { text: string; describe?: boolean; children: ReactElement }): ReactElement;
 
 /** The steps of an operation with their times (0.5.0, D50); `clock`, `locale` and `labels` (memoize) create a new list. */
-export function Steps(props: { label: string; steps?: Array<Step | null | false>; clock?: Clock; locale?: string; labels?: StepsLabels }): ReactElement;
+export function Steps(props: { label: string; steps?: Array<Step | null | false>; clock?: Clock; locale?: string; labels?: StepsLabels; /** false: no live region of its own (0.10.0) */ announce?: boolean }): ReactElement;
 /** The card a person waits on (0.5.0, E52): `check` and `onEnd` use the latest props; `ended` ends it once. */
 export function Awaited(props: {
 	title: string;
@@ -295,3 +295,4 @@ export namespace Loading { const labels: { readonly en: string; readonly es: str
 export function Consequence(props: { parts: { affected?: ReactNode; lost?: ReactNode; kept?: ReactNode; costing?: ReactNode; recovery?: ReactNode } | null; labels?: Copy }): ReactElement | null;
 export namespace Consequence { const labels: Copies; }
 export { consequence } from './dom.js';
+export * from './react-conversation.js';

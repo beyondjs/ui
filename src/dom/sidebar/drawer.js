@@ -73,7 +73,8 @@ export class Drawer extends Component {
 		this.#mark();
 		this.#overflow = document.documentElement.style.overflow;
 		document.documentElement.style.overflow = 'hidden';
-		const current = this.#body.querySelector('[aria-current="page"]');
+		// The current item, unless a search shows its results in the groups' place (0.10.0)
+		const current = [...this.#body.querySelectorAll('[aria-current="page"]')].find(node => !node.closest('[hidden]'));
 		const target = current?.matches('a[href]') ? current : (new Focus(this.#body).targets[0] ?? this.#element.querySelector('.bui-drawer-close'));
 		target.focus({ preventScroll: true });
 	}

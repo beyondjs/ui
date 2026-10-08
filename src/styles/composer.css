@@ -1,0 +1,174 @@
+/* The message box (Composer, 0.10.0): an optional state line, a field of one line that grows to twelve,
+   and a toolbar with the product's tools at its start and the actions at its end. Tokens only. */
+.bui-composer {
+	container: bui-composer / inline-size;
+	min-width: 0;
+	color: var(--color-text);
+}
+.bui-composer-box {
+	display: grid;
+	min-width: 0;
+	border: 1px solid var(--color-border-control);
+	border-radius: var(--radius-base);
+	background: var(--color-surface);
+}
+/* The field draws no ring of its own: the box shows focus around the whole message. */
+.bui-composer-box:has(.bui-composer-field:focus-visible) {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 1px;
+}
+.bui-composer-field:focus-visible {
+	outline: none;
+}
+.bui-composer-status {
+	margin: 0;
+	padding: var(--space-2) var(--space-3) 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+	overflow-wrap: anywhere;
+}
+.bui-composer-status a {
+	color: var(--color-link);
+}
+/* One line when empty, growing with the text to `max` lines, then scrolling; never animated. */
+.bui-composer-field {
+	box-sizing: border-box;
+	display: block;
+	width: 100%;
+	min-height: calc(var(--bui-composer-min, 1) * 1lh + var(--space-3) + var(--space-1));
+	max-height: calc(var(--bui-composer-max, 12) * 1lh + var(--space-3) + var(--space-1));
+	margin: 0;
+	padding: var(--space-3) var(--space-3) var(--space-1);
+	border: 0;
+	border-radius: var(--radius-base) var(--radius-base) 0 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	font-size: var(--text-body);
+	line-height: var(--leading-body);
+	resize: none;
+	overflow-y: auto;
+}
+/* The placeholder is the textarea's for assistive technology and drawn by the line laid over it: one line,
+   ending with an ellipsis when it is long, whatever the engine; an empty field never scrolls. */
+.bui-composer-input {
+	position: relative;
+	min-width: 0;
+}
+.bui-composer-field::placeholder {
+	color: transparent;
+}
+.bui-composer-field:placeholder-shown {
+	overflow: hidden;
+}
+.bui-composer-placeholder {
+	position: absolute;
+	inset-block-start: var(--space-3);
+	inset-inline: var(--space-3);
+	overflow: hidden;
+	color: var(--color-text-muted);
+	font-size: var(--text-body);
+	line-height: var(--leading-body);
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	pointer-events: none;
+}
+.bui-composer-field:not(:placeholder-shown) + .bui-composer-placeholder,
+.bui-composer-placeholder:empty {
+	display: none;
+}
+.bui-composer-problem {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+	margin: 0;
+	padding: var(--space-1) var(--space-3) 0;
+	color: var(--color-danger);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-composer-problem .bui-icon {
+	width: 16px;
+	height: 16px;
+	margin-top: calc((1lh - 16px) / 2);
+}
+.bui-composer-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+	min-width: 0;
+	padding: var(--space-2);
+}
+.bui-composer-tools,
+.bui-composer-extras {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+	min-width: 0;
+}
+.bui-composer-tools {
+	flex: 1 1 auto;
+}
+.bui-composer-tools:empty,
+.bui-composer-extras:empty {
+	display: none;
+}
+/* A product's React content keeps the toolbar's flow */
+.bui-composer-slot {
+	display: contents;
+}
+.bui-composer-end {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: var(--space-2);
+	min-width: 0;
+	margin-inline-start: auto;
+}
+/* Why sending is unavailable, said beside the action (D44). */
+.bui-composer-reason {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	overflow-wrap: anywhere;
+}
+/* The primary action and the menu of the other ways to send, joined by a hairline of the box. */
+.bui-composer-send {
+	display: inline-flex;
+	align-items: stretch;
+	gap: 1px;
+}
+.bui-composer-send > .bui-button:not(:last-child) {
+	border-start-end-radius: 0;
+	border-end-end-radius: 0;
+}
+.bui-composer-send .bui-menu-holder {
+	display: inline-flex;
+}
+.bui-composer-send .bui-menu-button {
+	min-height: var(--bui-control);
+	border-color: transparent;
+	border-start-start-radius: 0;
+	border-end-start-radius: 0;
+	background: var(--color-action);
+	color: var(--color-on-action);
+}
+.bui-composer-send .bui-menu-button:hover {
+	background: var(--color-action-hover);
+}
+.bui-composer-stop .bui-icon {
+	width: 14px;
+	height: 14px;
+}
+/* A narrow composer gives the toolbar's start a row of its own: the choices, then the actions. */
+@container bui-composer (max-width: 30rem) {
+	.bui-composer-tools {
+		flex-basis: 100%;
+	}
+}

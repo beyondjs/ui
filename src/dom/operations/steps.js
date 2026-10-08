@@ -21,6 +21,8 @@ import { steps as copy } from './labels.js';
  * What it shows is computed from the given steps and the clock only, so a reload shows the same. The
  * clock re-evaluates the times on its beat (not only when new steps arrive), and a polite live region
  * announces each change of a step's state and a step that becomes slow, never the ticking times.
+ * With `announce: false` (0.10.0) the steps have no live region of their own, for a page that already
+ * says changes through one region (a plan inside a conversation); `announced` still holds the words.
  * Nothing moves under reduced motion.
  */
 export class Steps extends Component {
@@ -46,8 +48,9 @@ export class Steps extends Component {
 	 * @param {Clock} [options.clock] the page's clock (`Clock.system`)
 	 * @param {string} [options.locale] the language of times of day
 	 * @param {object} [options.labels] replaces entries of `Steps.labels.en`; `labels.details` those of the technical details
+	 * @param {boolean} [options.announce] whether the steps say their changes in a live region of their own (default true)
 	 */
-	constructor({ label, steps = [], clock = Clock.system, locale = undefined, labels = {} }) {
+	constructor({ label, steps = [], clock = Clock.system, locale = undefined, labels = {}, announce = true }) {
 		super();
 		const { details = {}, ...own } = labels ?? {};
 		this.#labels = new Labels(copy.en, own);
@@ -56,7 +59,8 @@ export class Steps extends Component {
 		this.#clock = clock;
 		this.#locale = locale;
 		this.#list = el('ol', { class: 'bui-steps-list', 'aria-label': label });
-		this.#element = el('div', { class: 'bui-steps' }, [this.#list, this.#announcer.element]);
+		// Without its own region the words are still kept (`announced`), for the page's one region to say
+		this.#element = el('div', { class: 'bui-steps' }, [this.#list, announce === false ? null : this.#announcer.element]);
 		this.#draw(steps, false);
 		this.#release = clock.subscribe(() => this.tick());
 	}

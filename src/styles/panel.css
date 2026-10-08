@@ -1,0 +1,21 @@
+/* A page's panel kept in view (PagePanel, 0.10.0): beside the main column from the region's cut,
+   sticky under the family bar with a scroll of its own; below the cut it opens as a side sheet. */
+.bui-page[data-panel='beside'] .bui-page-body:has(> .bui-page-panel:not([hidden])) {
+	grid-template-columns: minmax(0, 1fr) var(--layout-aside);
+}
+.bui-page-panel {
+	position: sticky;
+	top: var(--bui-page-sticky, calc(var(--layout-family) + var(--space-6)));
+	max-height: calc(100dvh - var(--bui-page-sticky, calc(var(--layout-family) + var(--space-6))) - var(--space-6));
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+.bui-page-slot {
+	display: grid;
+	align-content: start;
+	gap: var(--space-6);
+	min-width: 0;
+}
+.bui-page-slot > * {
+	min-width: 0;
+}

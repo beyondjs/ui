@@ -1,12 +1,15 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { Page as Region } from '../dom/page/page.js';
+import { PagePanel } from '../dom/page/panel.js';
 import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
 import { PageHeader as Heading } from '../dom/page/header.js';
 import { Mark } from './simple.js';
-import { h, useInstance, useLatest, useSync } from './hooks.js';
+import { h, living, useInstance, useLatest, useSync } from './hooks.js';
 
-const { useId } = React;
+const { createContext, useContext, useId, useLayoutEffect, useRef, useState } = React;
+const Panel = createContext(null);
 
 /**
  * The family page system (decision D52), rendered by React with the markup and classes of the DOM
@@ -14,21 +17,62 @@ const { useId } = React;
  * to edge whose content starts one gutter after the navigation; see the DOM classes for the rules.
  */
 
-/** The content region: `template`, `width` (`fluid`, `standard`, `form`, `reading`), `arrival`, `header`, `aside`. */
-export function Page({ template = 'detail', width = 'standard', arrival = null, header = null, aside = null, label = null, children }) {
+/**
+ * The content region: `template`, `width` (`fluid`, `standard`, `form`, `reading`), `arrival`, `header`,
+ * `aside`. With `panel` (`{ cut?, open?, onChange?, title?, labels? }`, 0.10.0) the aside is a panel
+ * kept in view, driven by the DOM `PagePanel` (beside and sticky from `cut`, a side sheet below it);
+ * `panelRef` receives it (`open()`, `close()`, `toggle()`) and a `PanelToggle` inside the page toggles it.
+ */
+export function Page({ template = 'detail', width = 'standard', arrival = null, header = null, aside = null, label = null, panel = null, panelRef = null, children }) {
 	if (!Region.templates.includes(template)) throw new TypeError(`A page's template is one of ${Region.templates.join(', ')}`);
 	if (!Region.widths.includes(width)) throw new TypeError(`A page's width is one of ${Region.widths.join(', ')}`);
-	return h(
+	const frame = useRef(null);
+	const body = useRef(null);
+	const latest = useLatest(panel);
+	const [made, setMade] = useState(null);
+	const wanted = Boolean(panel);
+	useLayoutEffect(() => {
+		if (!wanted) return undefined;
+		const given = latest.current ?? {};
+		const instance = new PagePanel({ page: frame.current, body: body.current, cut: given.cut, open: given.open ?? true, title: given.title ?? null, label, labels: given.labels, onchange: shown => latest.current?.onChange?.(shown) });
+		setMade(instance);
+		assign(panelRef, instance);
+		return () => {
+			assign(panelRef, null);
+			setMade(current => (current === instance ? null : current));
+			instance.destroy();
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [wanted, panel?.cut, panel?.title ?? null, label]);
+	const instance = living(made);
+	useSync(instance, current => (current.present = Boolean(aside)), [Boolean(aside)]);
+	useSync(instance, current => (current.shown = panel?.open ?? true), [panel?.open]);
+	const region = h(
 		'div',
-		{ className: 'bui-page', 'data-template': template, 'data-width': width },
+		{ ref: frame, className: 'bui-page', 'data-template': template, 'data-width': width },
 		h(
 			'div',
 			{ className: 'bui-page-frame' },
 			arrival,
 			header,
-			h('div', { className: 'bui-page-body' }, h('div', { className: 'bui-page-main' }, children), aside ? h('aside', { className: 'bui-page-aside', 'aria-label': label ?? undefined }, aside) : null)
+			h('div', { ref: body, className: 'bui-page-body' }, h('div', { className: 'bui-page-main' }, children), !wanted && aside ? h('aside', { className: 'bui-page-aside', 'aria-label': label ?? undefined }, aside) : null)
 		)
 	);
+	return h(Panel.Provider, { value: instance }, region, instance && aside ? ReactDOM.createPortal(aside, instance.slot) : null);
+}
+
+/** The toggle of the page's panel ("Details"): a press shows or hides it, or opens its sheet; `aria-expanded` follows. */
+export function PanelToggle({ label, variant = 'quiet', glyph = null }) {
+	const panel = useContext(Panel);
+	const button = useRef(null);
+	useLayoutEffect(() => (panel && button.current ? panel.control(button.current) : undefined), [panel]);
+	return h('button', { ref: button, type: 'button', className: `bui-button bui-button-${variant}` }, glyph ? h(Mark, { name: glyph }) : null, h('span', null, label));
+}
+
+/** Gives a ref (an object or a function) its value. */
+function assign(ref, value) {
+	if (typeof ref === 'function') ref(value);
+	else if (ref) ref.current = value;
 }
 
 /**

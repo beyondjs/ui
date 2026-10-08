@@ -35,7 +35,14 @@
 .bui-toast-text,
 .bui-toast-detail,
 .bui-chip-reason,
-.bui-menu-reason {
+.bui-menu-reason,
+.bui-composer-status,
+.bui-composer-reason,
+.bui-composer-problem,
+.bui-live-body[data-plain],
+.bui-live-note,
+.bui-activity-whole,
+.bui-activity-note {
 	max-width: var(--layout-measure);
 }
 

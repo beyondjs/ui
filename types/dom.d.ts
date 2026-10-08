@@ -276,3 +276,5 @@ export * from './page.js';
 export * from './operations.js';
 export * from './choose.js';
 export * from './session.js';
+export * from './sidebar.js';
+export * from './conversation.js';

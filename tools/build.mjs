@@ -13,7 +13,7 @@ import { tokens, TokenSheet } from '../src/foundations/index.js';
  * runs this through `prepack`, and the tests run it first, so a stale copy is never packed.
  */
 class Build {
-	static order = ['base', 'icons', 'controls', 'choice', 'forms', 'picker', 'choose', 'overlays', 'session', 'sheet', 'feedback', 'collection', 'header', 'navigation', 'family', 'family-narrow', 'sidebar', 'page', 'arrival', 'notices', 'operations', 'details', 'rows', 'prose'];
+	static order = ['base', 'icons', 'controls', 'choice', 'forms', 'picker', 'choose', 'overlays', 'session', 'sheet', 'feedback', 'collection', 'header', 'navigation', 'family', 'family-narrow', 'sidebar', 'sidebar-entries', 'page', 'panel', 'arrival', 'notices', 'operations', 'details', 'rows', 'composer', 'activity', 'prose'];
 
 	#root = new URL('../', import.meta.url);
 

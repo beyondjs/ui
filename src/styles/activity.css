@@ -1,0 +1,215 @@
+/* Activity (ActivityRow, ActivityGroup, 0.10.0): rows of work, each with its state in words and a body
+   opened in place; groups that fold consecutive rows. Nothing moves under reduced motion. */
+.bui-activity {
+	display: grid;
+	min-width: 0;
+	color: var(--color-text);
+}
+.bui-activity-head {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+	box-sizing: border-box;
+	width: 100%;
+	min-width: 0;
+	min-height: var(--bui-target);
+	margin: 0;
+	padding: var(--space-1) var(--space-2);
+	border: 0;
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+	text-align: start;
+}
+button.bui-activity-head {
+	cursor: pointer;
+}
+button.bui-activity-head:hover {
+	background: var(--color-surface-sunken);
+}
+.bui-activity-head:focus-visible {
+	outline-offset: -2px;
+}
+.bui-activity-mark {
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	width: 18px;
+	height: 1lh;
+	color: var(--color-text-muted);
+}
+.bui-activity-mark .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-activity-mark .bui-spinner {
+	width: 11px;
+	height: 11px;
+}
+.bui-activity[data-state='failed'] > .bui-activity-head .bui-activity-mark {
+	color: var(--color-danger);
+}
+.bui-activity-text {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	column-gap: var(--space-2);
+	flex: 1 1 auto;
+	min-width: 0;
+}
+/* The title takes two lines, then is cut; a tooltip and the opened body show it whole (D44). */
+.bui-activity-title {
+	display: -webkit-box;
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	overflow-wrap: anywhere;
+}
+.bui-activity-meta,
+.bui-activity-time {
+	flex: none;
+	color: var(--color-text-muted);
+	font-variant-numeric: tabular-nums;
+}
+.bui-activity-word {
+	flex: none;
+}
+.bui-activity-word .bui-status {
+	font-weight: var(--weight-regular);
+}
+.bui-activity-chevron {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	margin-top: calc((1lh - 16px) / 2);
+	color: var(--color-text-muted);
+	transition: transform var(--motion-quick) var(--motion-ease);
+}
+.bui-activity-head[aria-expanded='true'] > .bui-activity-chevron {
+	transform: rotate(180deg);
+}
+/* The last lines of a running step's output, muted, under its title. */
+.bui-activity-tail,
+.bui-activity-body {
+	margin: 0 0 0 calc(18px + 2 * var(--space-2));
+}
+.bui-activity-tail {
+	padding: var(--space-1) var(--space-3);
+	border-radius: var(--radius-control);
+	background: var(--color-surface-sunken);
+	color: var(--color-text-muted);
+	font-family: var(--font-mono);
+	font-size: var(--text-label);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+.bui-activity-body,
+.bui-activity-content {
+	display: grid;
+	gap: var(--space-3);
+	min-width: 0;
+}
+.bui-activity-body {
+	padding: var(--space-1) 0 var(--space-2);
+}
+.bui-activity-whole,
+.bui-activity-note {
+	margin: 0;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	overflow-wrap: anywhere;
+}
+.bui-activity-section {
+	display: grid;
+	gap: var(--space-1);
+	min-width: 0;
+}
+.bui-activity-label {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	letter-spacing: var(--tracking-label);
+}
+/* Input, output and diffs use the column's width and scroll sideways only inside their own box. */
+.bui-activity-code {
+	max-width: 100%;
+	margin: 0;
+	padding: var(--space-2) var(--space-3);
+	overflow-x: auto;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	background: var(--color-surface-sunken);
+	color: var(--color-text);
+	font-family: var(--font-mono);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+	white-space: pre;
+}
+.bui-activity-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0 var(--space-3);
+}
+.bui-activity-result {
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-activity-list {
+	display: grid;
+	gap: 2px;
+	margin: 0;
+	padding: 0 0 0 calc(18px + var(--space-2));
+	list-style: none;
+}
+.bui-activity-item {
+	min-width: 0;
+}
+
+/* Text arriving in pieces (LiveText): paragraphs at the reading measure, a live mark at the end, still
+   under reduced motion; an unfinished draft muted with its note. */
+.bui-live {
+	min-width: 0;
+}
+.bui-live-body {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.bui-live-body[data-plain] {
+	white-space: pre-wrap;
+}
+.bui-live-body > :where(p, ul, ol, blockquote, dl, h1, h2, h3, h4, h5, h6) {
+	max-width: var(--layout-measure);
+}
+.bui-live-mark::after {
+	content: '';
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	margin-inline-start: var(--space-1);
+	border-radius: var(--radius-round);
+	background: var(--color-accent);
+	vertical-align: middle;
+	animation: bui-pulse 1.2s ease-in-out infinite;
+}
+.bui-live[data-state='abandoned'] .bui-live-body {
+	color: var(--color-text-muted);
+}
+.bui-live-note {
+	margin: var(--space-1) 0 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}

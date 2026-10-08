@@ -1,0 +1,106 @@
+/* A product's own entries in its sidebar (0.10.0): the top action, the search with its results in the
+   groups' place, and entries on one line with at most one mark in words. */
+.bui-sidebar-groups {
+	display: contents;
+}
+/* The navigation's column never grows past the sidebar for a line that does not wrap (an entry). */
+.bui-sidebar-nav,
+.bui-sidebar-list {
+	grid-template-columns: minmax(0, 1fr);
+}
+.bui-sidebar-action {
+	color: var(--color-link);
+	font-weight: var(--weight-medium);
+}
+.bui-sidebar-action .bui-icon {
+	flex: none;
+	width: 16px;
+	height: 16px;
+}
+.bui-sidebar-search {
+	position: relative;
+	display: flex;
+	align-items: center;
+	min-width: 0;
+}
+.bui-sidebar-search > .bui-icon {
+	position: absolute;
+	inset-inline-start: var(--space-2);
+	width: 16px;
+	height: 16px;
+	color: var(--color-text-muted);
+	pointer-events: none;
+}
+.bui-sidebar-query {
+	padding-inline-start: calc(var(--space-2) * 2 + 16px);
+	font-size: var(--text-small);
+	-webkit-appearance: none;
+	appearance: none;
+}
+.bui-sidebar-query::-webkit-search-cancel-button {
+	-webkit-appearance: none;
+	appearance: none;
+}
+.bui-sidebar-results {
+	display: grid;
+	gap: var(--space-2);
+	min-width: 0;
+}
+.bui-sidebar-line {
+	margin: 0;
+	padding: 0 var(--space-2);
+	color: var(--color-text-muted);
+	overflow-wrap: anywhere;
+}
+.bui-sidebar-retry {
+	justify-self: start;
+	margin-inline-start: var(--space-2);
+}
+/* An entry's title stays on one line, cut only while a tooltip shows it whole (D44). */
+.bui-sidebar-entry .bui-sidebar-label {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow-wrap: normal;
+}
+.bui-sidebar-mark {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-1);
+	flex: none;
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-regular);
+	white-space: nowrap;
+}
+.bui-sidebar-mark[data-tone='warning'],
+.bui-sidebar-mark[data-tone='danger'] {
+	color: var(--color-text);
+	font-weight: var(--weight-medium);
+}
+.bui-sidebar-dot {
+	flex: none;
+	width: 7px;
+	height: 7px;
+	border-radius: var(--radius-round);
+	background: var(--color-text-muted);
+}
+.bui-sidebar-mark[data-tone='success'] .bui-sidebar-dot {
+	background: var(--color-success);
+}
+.bui-sidebar-mark[data-tone='warning'] .bui-sidebar-dot {
+	background: var(--color-warning);
+}
+.bui-sidebar-mark[data-tone='danger'] .bui-sidebar-dot {
+	background: var(--color-danger);
+}
+.bui-sidebar-mark[data-tone='info'] .bui-sidebar-dot,
+.bui-sidebar-mark[data-tone='progress'] .bui-sidebar-dot {
+	background: var(--color-info);
+}
+.bui-sidebar-mark[data-tone='progress'] .bui-sidebar-dot {
+	animation: bui-pulse 1.2s ease-in-out infinite;
+}
+.bui-sidebar-more {
+	color: var(--color-link);
+}

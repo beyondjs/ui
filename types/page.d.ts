@@ -21,6 +21,46 @@ export interface PageOptions {
 	aside?: Node[] | null;
 	/** The side panel's accessible name. */
 	label?: string | null;
+	/** The aside as a panel kept in view (0.10.0): beside and sticky from `cut`, a side sheet below it. */
+	panel?: PagePanelOptions | null;
+}
+
+export interface PagePanelOptions {
+	/** The region width from which it sits beside the main column: CSS pixels, or a `rem` or `px` length (`'68rem'`). */
+	cut?: number | string;
+	/** Shown beside on a wide region (default true): the person's kept choice. */
+	open?: boolean;
+	/** The person showed or hid it beside; keep it on the device. */
+	onchange?: ((shown: boolean) => void) | null;
+	/** The sheet's title (the label by default). */
+	title?: string | null;
+	labels?: { close?: string };
+}
+
+/** A page's side panel kept in view (0.10.0): beside and sticky from its cut, hideable there, a `SideSheet` below. */
+export class PagePanel extends Component {
+	/** The default cut, `'68rem'`. */
+	static cut: number | string;
+	constructor(options: PagePanelOptions & { page: HTMLElement; body: HTMLElement; label?: string | null });
+	/** `beside` from the cut, `sheet` below it. */
+	readonly mode: 'beside' | 'sheet' | null;
+	/** The kept choice of showing it beside; setting it reports nothing. */
+	shown: boolean;
+	/** Whether it is in view now: beside and shown, or open in its sheet. */
+	readonly expanded: boolean;
+	/** The element that holds its content. */
+	readonly slot: HTMLElement;
+	set content(children: Node[] | null);
+	set present(value: boolean);
+	/** Shows it beside, or opens its sheet; closing the sheet returns focus to `from`, else to its first toggle. */
+	open(from?: HTMLElement | null): void;
+	close(): void;
+	/** `from`: the toggle pressed, where focus returns from the sheet. */
+	toggle(from?: HTMLElement | null): void;
+	/** Makes a button the panel's toggle (`aria-expanded`, `aria-controls`); returns the release. */
+	control(button: HTMLElement): () => void;
+	/** Decides beside or sheet from the region's width now. */
+	measure(): void;
 }
 
 /** The content region beside the navigation: edge to edge, one gutter from the navigation, blocks at their width tier. */
@@ -30,6 +70,8 @@ export class Page extends Component {
 	constructor(options?: PageOptions);
 	/** The main column's element. */
 	readonly region: HTMLElement;
+	/** The panel kept in view, when made with `panel` (0.10.0). */
+	readonly panel: PagePanel | null;
 	main: Node[];
 	aside: Node[] | null;
 	width: PageWidth;

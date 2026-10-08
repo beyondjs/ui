@@ -64,10 +64,10 @@
 }
 /* A resource page's side panel moves beside the main column once a form column and the panel fit (LR-03). */
 @container bui-page (min-width: 68rem) {
-	.bui-page-body:has(> .bui-page-aside) {
+	.bui-page-body:has(> .bui-page-aside:not(.bui-page-panel)) {
 		grid-template-columns: minmax(var(--layout-form), 1fr) var(--layout-aside);
 	}
-	.bui-page[data-width='form'] .bui-page-body:has(> .bui-page-aside) {
+	.bui-page[data-width='form'] .bui-page-body:has(> .bui-page-aside:not(.bui-page-panel)) {
 		max-width: calc(var(--layout-form) + var(--layout-aside) + var(--space-8));
 	}
 }

@@ -6,7 +6,31 @@ import { Labels } from '../core/labels.js';
 import { SidebarSections } from './sections.js';
 import { Drawer } from './drawer.js';
 
-const defaults = { sections: '{product} sections', close: 'Close' };
+const words = {
+	en: {
+		sections: '{product} sections',
+		close: 'Close',
+		searching: 'Searching…',
+		none: 'Nothing matches “{query}”.',
+		unavailable: 'The search didn’t answer, so results can’t be listed now.',
+		retry: 'Try again',
+		results: 'Results',
+		all: 'See all results',
+		count: ({ count }) => (count === 1 ? '1 result' : `${count} results`)
+	},
+	es: {
+		sections: 'Secciones de {product}',
+		close: 'Cerrar',
+		searching: 'Buscando…',
+		none: 'Nada coincide con «{query}».',
+		unavailable: 'La búsqueda no respondió, así que ahora no se pueden mostrar resultados.',
+		retry: 'Reintentar',
+		results: 'Resultados',
+		all: 'Ver todos los resultados',
+		count: ({ count }) => (count === 1 ? '1 resultado' : `${count} resultados`)
+	}
+};
+const defaults = words.en;
 
 /**
  * A product's own sections, the same in every product that has them (Delegate, Conduict, CDN's
@@ -25,10 +49,15 @@ const defaults = { sections: '{product} sections', close: 'Close' };
  * permanent sidebar out as a column and the product row above the content. `onnavigate(item, event)`
  * takes over plain primary clicks on same-origin links; a destination chosen in the drawer closes it
  * first, and the product moves focus to its new heading.
+ *
+ * Since 0.10.0 a product may also list its person's own items as groups of entries (`kind:
+ * 'entries'`, with a mark in words and a `more` link), put a top `action` link ("New conversation")
+ * and a `search` of its service; every setter patches both forms by keys, so a live change never
+ * redraws the navigation or moves focus (`SidebarSections`).
  */
 export class Sidebar extends Component {
 	/** The copy in English and Spanish (0.7.2). */
-	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ sections: 'Secciones de {product}', close: 'Cerrar' }) });
+	static labels = Object.freeze({ en: Object.freeze({ ...words.en }), es: Object.freeze({ ...words.es }) });
 
 	#element;
 	#panel;
@@ -46,14 +75,16 @@ export class Sidebar extends Component {
 	/**
 	 * @param {object} options
 	 * @param {string} options.product the product's display name
-	 * @param {Array<{heading?: string|null, items: Array<{label: string, href?: string, current?: boolean, meta?: string|number|null}|null>}>} [options.groups]
+	 * @param {Array<{kind?: 'sections'|'entries', key?: string, heading?: string|null, items: Array<object|null>, more?: {label: string, href: string}|null}>} [options.groups]
 	 * @param {string|{label?: string, name: string}|Node|null} [options.context] what the sections belong to
 	 * @param {number} [options.cut] the narrowest width, in CSS pixels, with a permanent sidebar (default 1024)
 	 * @param {string|null} [options.section] the row's text; the current item's label by default
+	 * @param {{label: string, href: string, glyph?: string}|null} [options.action] a top link ("New conversation", 0.10.0)
+	 * @param {{label: string, source: Function, bound?: number, delay?: number, all?: Function|null, placeholder?: string|null}|null} [options.search] a search of the product's entries (0.10.0)
 	 * @param {(item: {href: string, url: string, label: string}, event: MouseEvent) => void} [options.onnavigate]
-	 * @param {{sections?: string, close?: string}} [options.labels]
+	 * @param {object} [options.labels] replaces entries of `Sidebar.labels.en`
 	 */
-	constructor({ product, groups = [], context = null, cut = 1024, section = null, onnavigate = null, labels = {} }) {
+	constructor({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onnavigate = null, labels = {} }) {
 		super();
 		this.#labels = new Labels(defaults, labels);
 		this.#cut = Number.isFinite(cut) && cut > 0 ? cut : 1024;
@@ -61,15 +92,18 @@ export class Sidebar extends Component {
 		this.#product = product;
 		const name = this.#labels.text('sections', { product });
 		const id = Ids.next('bui-drawer');
-		this.#sections = new SidebarSections({ name });
-		this.#panel = el('div', { class: 'bui-sidebar-panel' });
+		this.#sections = new SidebarSections({ name, labels: this.#labels });
+		this.#panel = el('div', { class: 'bui-sidebar-panel' }, [this.#sections.panel]);
 		this.#button = el('button', { type: 'button', class: 'bui-sidebar-button', 'aria-haspopup': 'dialog', 'aria-expanded': 'false', 'aria-controls': id, onclick: () => this.open() });
 		this.#row = el('div', { class: 'bui-sidebar-row' }, [this.#button]);
 		this.#drawer = new Drawer({ id, title: product, name, close: this.#labels.text('close'), onclose: () => this.#button.setAttribute('aria-expanded', 'false') });
 		this.#element = el('div', { class: 'bui-sidebar' }, [this.#panel, this.#row, this.#drawer.element]);
 		this.#element.addEventListener('click', event => this.#navigate(event));
+		this.#drawer.fill(this.#sections.drawer);
 		this.#sections.groups = groups;
 		this.#sections.context = context;
+		this.#sections.action = action;
+		this.#sections.search = search;
 		this.#section = section;
 		this.#draw();
 		this.#watch();
@@ -89,16 +123,25 @@ export class Sidebar extends Component {
 		return this.#drawer.shown;
 	}
 
-	/** Replaces the groups of links and redraws both forms. */
+	/** Replaces the groups of links, patching both forms by keys (focus stays where it is). */
 	set groups(value) {
 		this.#sections.groups = value;
 		this.#draw();
 	}
 
-	/** Replaces the context block and redraws. */
+	/** Replaces the context block. */
 	set context(value) {
 		this.#sections.context = value;
-		this.#draw();
+	}
+
+	/** Replaces the top action link (`{ label, href, glyph? }`), or removes it with null (0.10.0). */
+	set action(value) {
+		this.#sections.action = value;
+	}
+
+	/** Replaces the search (`{ label, source, … }`), or removes it with null; the same label keeps the query (0.10.0). */
+	set search(value) {
+		this.#sections.search = value;
 	}
 
 	/** Replaces the row's text (null: the current item's label). */
@@ -121,17 +164,16 @@ export class Sidebar extends Component {
 
 	destroy() {
 		this.#drawer.destroy();
+		this.#sections.destroy();
 		super.destroy();
 	}
 
+	/** The row's button names the section in view; the navigation itself is patched, never redrawn. */
 	#draw() {
 		const label = this.#section ?? this.#sections.current ?? this.#product;
+		const shown = this.#button.querySelector('.bui-sidebar-section');
+		if (shown?.textContent === label) return;
 		this.#button.replaceChildren(glyph('menu'), el('span', { class: 'bui-sidebar-section', text: label }));
-		this.#panel.replaceChildren(this.#sections.navigation());
-		// A redraw while the drawer is open keeps focus inside it, on the current item.
-		const inside = this.#drawer.shown && this.#drawer.element.contains(this.#element.ownerDocument.activeElement);
-		this.#drawer.fill(this.#sections.navigation());
-		if (inside) (this.#drawer.element.querySelector('a[aria-current="page"]') ?? this.#drawer.element.querySelector('.bui-drawer-close'))?.focus({ preventScroll: true });
 	}
 
 	/** Follows the viewport across the cut. */

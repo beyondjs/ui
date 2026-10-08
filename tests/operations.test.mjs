@@ -166,3 +166,16 @@ test('Freshness: disconnected, the last known form with a neutral dot and its ti
 	assert.equal(spanish.text, 'En marcha · Comprobado hace 3 min');
 	spanish.destroy();
 });
+
+test('Steps with announce: false has no live region of its own and keeps the words for the page to say (0.10.0)', () => {
+	const moving = clock(3);
+	const plan = new ui.Steps({ label: 'Plan', steps: preparing, clock: moving, announce: false }).mount(document.body);
+	assert.equal(plan.element.querySelector('[aria-live]'), null, 'no region of its own');
+	plan.steps = blocked;
+	assert.match(plan.announced, /Startup: Done/, 'the words are kept for the page to say');
+	assert.equal(document.querySelector('[aria-live]'), null, 'nothing is said');
+	plan.destroy();
+	const said = new ui.Steps({ label: 'Plan', steps: preparing, clock: moving }).mount(document.body);
+	assert.equal(said.element.querySelector('.bui-announcer').getAttribute('aria-live'), 'polite', 'the default still says its changes');
+	said.destroy();
+});

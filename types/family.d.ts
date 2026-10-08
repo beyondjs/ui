@@ -1,4 +1,4 @@
-/** Types of the family patterns, re-exported by `@beyond-js/ui/dom`: FamilyBar, productNames (0.4.1), ProductNav, Sidebar (0.4.0), Unavailable and availability. */
+/** Types of the family patterns, re-exported by `@beyond-js/ui/dom`: FamilyBar, productNames (0.4.1), ProductNav, Unavailable and availability (`Sidebar` is in `sidebar.d.ts`). */
 import type { Component, Content, Copy, Tone } from './dom.js';
 
 /** Why a product entry is unavailable, as Beyond Projects reports it; other codes read "Not available". */
@@ -197,46 +197,6 @@ export class FamilyBar extends Component {
 	expanded: boolean;
 }
 
-/** One link of a product's sidebar. */
-export interface SidebarItem {
-	label: Content;
-	href?: string | null;
-	current?: boolean;
-	/** A short count or note at the row's end. */
-	meta?: string | number | null;
-}
-export interface SidebarGroup {
-	heading?: Content | null;
-	items: Array<SidebarItem | null | false>;
-}
-export interface SidebarOptions {
-	/** The product's display name: the drawer's heading and its name, "{product} sections". */
-	product: string;
-	groups?: SidebarGroup[];
-	/** What the sections belong to, as text: `"Storefront"` or `{ label: 'Project', name: 'Storefront' }`. */
-	context?: string | { label?: string | null; name: string } | Node | null;
-	/** The narrowest width, in CSS pixels, with a permanent sidebar: 1024, the family's one cut (D49); another only with a recorded measurement. */
-	cut?: number;
-	/** The row's text below the cut; the current item's label by default. */
-	section?: string | null;
-	onnavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null;
-	/** `sections` "{product} sections", `close` "Close". */
-	labels?: { sections?: string; close?: string };
-}
-/** A product's own sections (0.4.0): permanent above the cut, a product row and a modal drawer below it. */
-export class Sidebar extends Component {
-	/** The copy in English and Spanish (0.7.2). */
-	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
-	constructor(options: SidebarOptions);
-	readonly mode: 'permanent' | 'drawer';
-	/** Whether the drawer is open. */
-	readonly expanded: boolean;
-	set groups(value: SidebarGroup[]);
-	set context(value: SidebarOptions['context']);
-	set section(value: string | null);
-	open(): void;
-	close(): void;
-}
 
 export interface ProductNavItem {
 	label: Content;

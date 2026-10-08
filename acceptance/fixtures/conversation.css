@@ -1,0 +1,47 @@
+/* The conversation fixture's layout only: the page fills the region beside the sidebar, the thread is
+   a column of entries and the composer sits in a dock that sticks to the bottom of the window. */
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+	font-size: var(--text-body);
+	line-height: var(--leading-body);
+}
+main {
+	display: flex;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+.thread {
+	display: grid;
+	gap: var(--space-3);
+	min-width: 0;
+	padding-bottom: 60vh;
+}
+.message {
+	justify-self: end;
+	max-width: var(--layout-measure);
+	margin: 0;
+	padding: var(--space-2) var(--space-3);
+	border-radius: var(--radius-base);
+	background: var(--color-surface-sunken);
+}
+.dock {
+	position: sticky;
+	bottom: 0;
+	padding: var(--space-2) 0 var(--space-3);
+	background: var(--color-canvas);
+}
+.fresh {
+	display: grid;
+	gap: var(--space-2);
+}
+.facts {
+	display: grid;
+	gap: var(--space-1);
+	margin: 0;
+}

@@ -2,7 +2,8 @@
  * The family's one outline icon catalog (decision D11): paths on a 24 px grid, drawn with one 1.8 px
  * round stroke by `.bui-icon`. The catalog merges the package's first glyphs, the family reference's
  * set and Workspace's client set (redrawn to this stroke, duplicates removed), the Desktop's window
- * controls and CDN's step markers. New glyphs may be drawn on the Lucide grid (ISC licence).
+ * controls and CDN's step markers; 0.10.0 adds `file` and `terminal` for activity rows. New glyphs may
+ * be drawn on the Lucide grid (ISC licence).
  *
  * This file is data only: `Glyph` (`icons.js`) builds elements from it. A name says what the glyph
  * shows or means in plain English; a product that used another name maps it (see the catalog guide).
@@ -58,6 +59,8 @@ export const paths = Object.freeze({
 
 	// Things and work
 	folder: 'M3.5 6.5h6l2 2h9v10h-17z',
+	file: ['M6 3h8l5 5v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z', 'M14 3v5h5'],
+	terminal: ['M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z', 'M7 9l3 3-3 3', 'M12 15h5'],
 	archive: ['M4 8h16v12H4z', 'M8 8V5h8v3', 'M9 14h6'],
 	book: ['M5 4.5h9.5a2.5 2.5 0 0 1 2.5 2.5v12.5H7.5A2.5 2.5 0 0 1 5 17z', 'M5 17a2.5 2.5 0 0 1 2.5-2.5H17'],
 	code: ['M8.5 8l-4 4 4 4', 'M15.5 8l4 4-4 4', 'M13.5 5.5l-3 13'],

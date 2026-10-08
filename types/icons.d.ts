@@ -41,6 +41,8 @@ export type IconName =
 	| 'globe'
 	| 'chat'
 	| 'folder'
+	| 'file'
+	| 'terminal'
 	| 'archive'
 	| 'book'
 	| 'code'

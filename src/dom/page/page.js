@@ -1,5 +1,6 @@
 import { Component } from '../core/component.js';
 import { el, fill } from '../core/element.js';
+import { PagePanel } from './panel.js';
 
 const templates = Object.freeze(['overview', 'list', 'detail', 'settings', 'task', 'tool']);
 const widths = Object.freeze(['fluid', 'standard', 'form', 'reading']);
@@ -19,6 +20,10 @@ const widths = Object.freeze(['fluid', 'standard', 'form', 'reading']);
  * the panel (68rem), and below it otherwise. `template` names the page's kind (overview, list,
  * detail, settings, task or tool) as `data-template`, for checks and for the tool template, which has
  * no gutter (D22's departures).
+ *
+ * With `panel` (0.10.0) the aside is a panel kept in view instead (`PagePanel`, `page.panel`): beside
+ * the main column and sticky from the region's `cut`, hideable there, and a side sheet below it that
+ * `page.panel.open()` shows. Without `panel` the aside flows as it always did.
  */
 export class Page extends Component {
 	static templates = templates;
@@ -29,6 +34,7 @@ export class Page extends Component {
 	#body;
 	#main;
 	#aside;
+	#panel = null;
 
 	/**
 	 * @param {object} [options]
@@ -39,8 +45,10 @@ export class Page extends Component {
 	 * @param {Node[]} [options.children] the main column
 	 * @param {Node[]|null} [options.aside] the side panel's content; no panel without it
 	 * @param {string} [options.label] the side panel's accessible name
+	 * @param {{cut?: number|string, open?: boolean, onchange?: (shown: boolean) => void, title?: string|null, labels?: {close?: string}}|null} [options.panel]
+	 *   the aside as a panel kept in view (0.10.0): beside and sticky from `cut`, a side sheet below it
 	 */
-	constructor({ template = 'detail', width = 'standard', arrival = null, header = null, children = [], aside = null, label = null } = {}) {
+	constructor({ template = 'detail', width = 'standard', arrival = null, header = null, children = [], aside = null, label = null, panel = null } = {}) {
 		super();
 		if (!templates.includes(template)) throw new TypeError(`A page's template is one of ${templates.join(', ')}`);
 		if (!widths.includes(width)) throw new TypeError(`A page's width is one of ${widths.join(', ')}`);
@@ -49,8 +57,14 @@ export class Page extends Component {
 		this.#body = el('div', { class: 'bui-page-body' }, [this.#main]);
 		this.#frame = el('div', { class: 'bui-page-frame' }, [Page.#node(arrival), Page.#node(header), this.#body]);
 		this.#element = el('div', { class: 'bui-page', dataset: { template, width } }, [this.#frame]);
+		if (panel) this.#panel = new PagePanel({ ...panel, page: this.#element, body: this.#body, label });
 		this.main = children;
 		this.aside = aside;
+	}
+
+	/** The panel kept in view (`PagePanel`), when the page was made with `panel`; null otherwise. */
+	get panel() {
+		return this.#panel;
 	}
 
 	get element() {
@@ -69,6 +83,10 @@ export class Page extends Component {
 
 	/** Replaces the side panel's content; `null` removes the panel. */
 	set aside(children) {
+		if (this.#panel) {
+			this.#panel.content = children;
+			return;
+		}
 		if (!children) {
 			this.#aside.remove();
 			return;
@@ -81,6 +99,17 @@ export class Page extends Component {
 	set width(width) {
 		if (!widths.includes(width)) throw new TypeError(`A page's width is one of ${widths.join(', ')}`);
 		this.#element.dataset.width = width;
+	}
+
+	mount(parent, before = null) {
+		super.mount(parent, before);
+		this.#panel?.measure();
+		return this;
+	}
+
+	destroy() {
+		this.#panel?.destroy();
+		super.destroy();
 	}
 
 	static #node(part) {

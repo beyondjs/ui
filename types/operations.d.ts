@@ -59,7 +59,8 @@ export type StepsLabels = Copy & { details?: Copy };
 
 export class Steps extends Component {
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
-	constructor(options: { label: string; steps?: Array<Step | null | false>; clock?: Clock; locale?: string; labels?: StepsLabels });
+	/** `announce: false` (0.10.0): no live region of its own; the page's one region says the changes. */
+	constructor(options: { label: string; steps?: Array<Step | null | false>; clock?: Clock; locale?: string; labels?: StepsLabels; announce?: boolean });
 	/** The steps as drawn: `key` (the id, else the place), `label` and `state`. */
 	get steps(): Array<{ key: string; label: string; state: StepState }>;
 	set steps(value: Array<Step | null | false>);

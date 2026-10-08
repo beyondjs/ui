@@ -13,9 +13,9 @@ import { h, useInstance, useLatest, useSync } from './hooks.js';
  * (memoize them) and `level` create a new instance.
  */
 
-/** The steps of an operation with their times. */
-export function Steps({ label, steps = [], clock = Clock.system, locale = undefined, labels }) {
-	const [host, list] = useInstance(() => new List({ label, steps, clock, locale, labels }), [label, clock, locale, labels]);
+/** The steps of an operation with their times; `announce: false` (0.10.0) leaves the saying to the page's own region. */
+export function Steps({ label, steps = [], clock = Clock.system, locale = undefined, labels, announce = true }) {
+	const [host, list] = useInstance(() => new List({ label, steps, clock, locale, labels, announce }), [label, clock, locale, labels, announce]);
 	useSync(list, current => (current.steps = steps), [JSON.stringify(steps)]);
 	return h('div', { ref: host, className: 'bui-host' });
 }

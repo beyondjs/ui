@@ -14,6 +14,12 @@ export class Cut {
 		return node.scrollWidth > node.clientWidth + 0.5;
 	}
 
+	/** Whether the text of a block clamped to a number of lines (`line-clamp`) has more lines than it shows (0.10.0). */
+	static clamp(node) {
+		if (!node?.isConnected) return false;
+		return node.scrollHeight > node.clientHeight + 0.5 || Cut.text(node);
+	}
+
 	/**
 	 * Whether a native select's chosen text is wider than the room its box gives it: a select clips
 	 * without an ellipsis and reports no overflow, so the text is measured in the select's own font.
