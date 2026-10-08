@@ -140,8 +140,9 @@ export const checks = [
 				const field = document.querySelector(`${selector} .bui-composer-field`);
 				const paste = (data) => {
 					const event = new ClipboardEvent('paste', { bubbles: true, cancelable: true, clipboardData: data });
-					// An engine that ignores clipboardData in the constructor gets the same data as a property
-					if (!event.clipboardData) Object.defineProperty(event, 'clipboardData', { value: data });
+					// An engine that ignores clipboardData in the constructor (WebKit), or keeps only its text
+					// (Firefox), gets the same data as a property
+					if (event.clipboardData?.files.length !== data.files.length || event.clipboardData?.types.length !== data.types.length) Object.defineProperty(event, 'clipboardData', { value: data });
 					field.dispatchEvent(event);
 					return event.defaultPrevented;
 				};
