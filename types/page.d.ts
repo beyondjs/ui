@@ -3,7 +3,8 @@ import type { Component, Copy } from './dom.js';
 import type { Preferences } from './preferences.js';
 
 export type PageTemplate = 'overview' | 'list' | 'detail' | 'settings' | 'task' | 'tool';
-export type PageWidth = 'fluid' | 'standard' | 'form' | 'reading';
+/** `thread` (0.11.0): a conversation's thread at `--layout-thread`, the family proposal D67 adopted by Conduict, not an approved rule. */
+export type PageWidth = 'fluid' | 'standard' | 'form' | 'reading' | 'thread';
 type Part = Node | { element: Node } | null;
 
 export interface PageOptions {
@@ -32,15 +33,25 @@ export interface PagePanelOptions {
 	open?: boolean;
 	/** The person showed or hid it beside; keep it on the device. */
 	onchange?: ((shown: boolean) => void) | null;
-	/** The sheet's title (the label by default). */
+	/** The sheet's title (the label by default), and the head's title with `head`. */
 	title?: string | null;
-	labels?: { close?: string };
+	labels?: { close?: string; hide?: string };
+	/** A head of its own beside the main column: the title and a hide control, "Hide {title}" (0.11.0). */
+	head?: boolean;
+	/** The wide form, up to `--layout-aside-wide` (0.11.0). */
+	wide?: boolean;
 }
 
 /** A page's side panel kept in view (0.10.0): beside and sticky from its cut, hideable there, a `SideSheet` below. */
 export class PagePanel extends Component {
 	/** The default cut, `'68rem'`. */
 	static cut: number | string;
+	/** The copy in English and Spanish (0.11.0): `hide` ("Hide {title}") and `close`. */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
+	/** The wide form: beside, it may grow to `--layout-aside-wide`; the page carries `data-panel-wide` (0.11.0). */
+	wide: boolean;
+	/** The head's title (0.11.0). */
+	set title(text: string);
 	constructor(options: PagePanelOptions & { page: HTMLElement; body: HTMLElement; label?: string | null });
 	/** `beside` from the cut, `sheet` below it. */
 	readonly mode: 'beside' | 'sheet' | null;
@@ -96,6 +107,8 @@ export interface PageHeaderOptions {
 	/** The page's `Tabs`. */
 	tabs?: Part;
 	labels?: { crumbs?: string };
+	/** The compact line once the title has scrolled out: the title and the status, and the product's own `actions` (0.11.0). */
+	compact?: boolean | { actions?: Array<Node | { element: Node } | null> } | null;
 }
 
 /** A page's one header: crumbs, the H1, one status, facts, the line's actions and the tabs. */
@@ -113,6 +126,12 @@ export class PageHeader extends Component {
 	tabs: Part;
 	/** Moves focus to the H1 without scrolling. */
 	focus(): void;
+	/** The compact line's holder, placed right before the header (`Page` does it); null without `compact` (0.11.0). */
+	readonly bar: HTMLElement | null;
+	/** Whether the compact line is shown now (0.11.0). */
+	readonly compacted: boolean;
+	/** Decides at once whether the compact line shows (0.11.0). */
+	measure(): void;
 }
 
 export interface TabItem {

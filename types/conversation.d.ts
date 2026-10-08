@@ -18,10 +18,74 @@ export interface ComposerStop {
 	run: () => unknown;
 	busy?: boolean;
 }
-/** What `onsubmit` receives: the trimmed text and the id of the action that sent it. */
+/** What `onsubmit` receives: the trimmed text, the id of the action that sent it and, when there are some, the attachments as given (0.11.0). */
 export interface ComposerMessage {
 	text: string;
 	action: string;
+	attachments?: ComposerAttachment[];
+}
+/** One attachment's chip (0.11.0); the product sets the list and keeps it current. */
+export interface ComposerAttachment {
+	key: string;
+	name: string;
+	/** Bytes, said as "1.2 MB". */
+	size?: number | null;
+	/** Its media type; an image shows a thumbnail. */
+	type?: string | null;
+	/** `uploading` (with `progress`), `failed` (with `reason`, and Retry when `attach.onretry` is given) or `ready` (default). */
+	state?: 'uploading' | 'failed' | 'ready';
+	/** 0 to 1 while uploading. */
+	progress?: number | null;
+	reason?: string | null;
+	/** The product's object URL for an image's thumbnail, or a Blob (an object URL is then made and revoked here). */
+	thumbnail?: string | Blob | null;
+	/** The File: an image's thumbnail is made from it when no `thumbnail` is given. */
+	file?: File | null;
+	/** `false` offers no Retry for this one. */
+	retry?: boolean;
+}
+/** How files reach the composer (0.11.0); the product checks types and sizes and sets the chips. */
+export interface ComposerAttach {
+	/** Attach's word ("Attach" by default). */
+	label?: string | null;
+	/** The file input's `accept`. */
+	accept?: string | null;
+	/** More than one file at a time (default true). */
+	multiple?: boolean;
+	onfiles: (files: File[], via: 'paste' | 'drop' | 'pick') => void;
+	onremove?: ((item: ComposerAttachment) => void) | null;
+	onretry?: ((item: ComposerAttachment) => void) | null;
+}
+/** One suggestion after the trigger (0.11.0): `value` replaces the token. */
+export interface ComposerSuggestion {
+	value: string;
+	label?: string | null;
+	detail?: string | null;
+	/** The label in the monospaced face (a path). */
+	mono?: boolean;
+}
+export interface ComposerSuggestSettings {
+	/** One character, `@` by default. */
+	trigger?: string;
+	/** Milliseconds before an ask is unavailable (8000). */
+	bound?: number;
+	/** Milliseconds after the last keystroke (120). */
+	delay?: number;
+	/** The listbox's name ("Suggestions"). */
+	label?: string | null;
+	/** The words of a failure, "Unavailable · {reason}". */
+	explain?: ((error: unknown) => string | null) | null;
+}
+/** The state line with an action at its end (0.11.0). */
+export interface ComposerStatusLine {
+	text: Content;
+	action?: Part | { label: string; run: () => unknown } | null;
+}
+/** The open suggestions, read from `composer.suggestions`. */
+export interface ComposerSuggestions {
+	readonly open: boolean;
+	readonly state: 'closed' | 'looking' | 'results' | 'none' | 'unavailable';
+	close(): void;
 }
 export type ComposerSubmit = 'enter' | 'mod';
 export interface ComposerOptions {
@@ -30,8 +94,19 @@ export interface ComposerOptions {
 	/** Sends; a rejection gives the text back to the field. */
 	onsubmit: (message: ComposerMessage) => Promise<unknown>;
 	placeholder?: string | null;
-	/** The state line: one sentence, only when it changes what sending does. */
-	status?: Content | null;
+	/** The state line above the box: one sentence, only when it changes what sending does, with its action (0.11.0). */
+	status?: Content | ComposerStatusLine | null;
+	/** The turn's choices at the toolbar's start, before the tools (0.11.0). */
+	settings?: Part[];
+	/** Files from paste, drop and Attach (0.11.0). */
+	attach?: ComposerAttach | null;
+	/** The chips (0.11.0). */
+	attachments?: ComposerAttachment[];
+	/** Suggestions after the trigger (0.11.0); every ask is bounded and aborted by `signal`. */
+	onsuggest?: ((query: string, signal: AbortSignal) => Promise<ComposerSuggestion[] | { items: ComposerSuggestion[] }> | ComposerSuggestion[]) | null;
+	suggest?: ComposerSuggestSettings | null;
+	/** The language of sizes and percents. */
+	locale?: string;
 	/** The toolbar's start (context choices). */
 	tools?: Part[];
 	/** The toolbar's end, before the actions. */
@@ -68,7 +143,14 @@ export class Composer extends Component {
 	/** Replaces the text without calling `onchange`. */
 	value: string;
 	set placeholder(text: string | null);
-	set status(value: Content | null);
+	set status(value: Content | ComposerStatusLine | null);
+	set settings(nodes: Part[]);
+	/** The chips as given (0.11.0). */
+	attachments: ComposerAttachment[];
+	/** The suggestions, or null without `onsuggest` (0.11.0). */
+	readonly suggestions: ComposerSuggestions | null;
+	/** Opens the platform's file chooser, as Attach does (0.11.0). */
+	attach(): void;
 	set tools(nodes: Part[]);
 	set extras(nodes: Part[]);
 	set actions(list: ComposerAction[] | null);

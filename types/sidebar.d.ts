@@ -25,6 +25,17 @@ export interface SidebarEntry {
 	href: string;
 	current?: boolean;
 	mark?: SidebarMark | null;
+	/**
+	 * Its age at its end (0.11.0): a moment (a Date, milliseconds or an ISO string) said in short words
+	 * ("now", "5 min", "2 h", "3 d", "2 w", then the day) with the full moment read and in its tooltip, or
+	 * the product's own `{ label, title }`.
+	 */
+	age?: Date | number | string | SidebarAge | null;
+}
+/** An entry's age in the product's own words (0.11.0): `label` shown, `title` read and in the tooltip. */
+export interface SidebarAge {
+	label: string;
+	title?: string | null;
 }
 /** A group of sections, as since 0.4.0. */
 export interface SidebarGroup {
@@ -38,6 +49,8 @@ export interface SidebarEntries {
 	kind: 'entries';
 	key?: string;
 	heading?: Content | null;
+	/** How many items the group holds, beside its heading ("Recent, 12"; 0.11.0). */
+	count?: number | string | null;
 	items: Array<SidebarEntry | null | false>;
 	more?: { label: string; href: string } | null;
 }

@@ -7,7 +7,7 @@ import { expect } from '../support/browser.mjs';
  * hint, a refusal's reason, a step's reason) must stop at about 80 characters wherever it sits.
  */
 const paragraph = 'A public repository needs none for Conduict; Delegate reads every repository with one, and it is kept in Beyond Projects until an owner or an administrator of the organization removes it from every project that uses it, which never deletes the repository on GitHub.';
-const pages = ['index.html', 'layout.html', 'choosing.html', 'operations.html', 'family.html', 'conversation.html'];
+const pages = ['index.html', 'layout.html', 'choosing.html', 'operations.html', 'family.html', 'conversation.html', 'thread.html'];
 // The parts that hold sentences, by their role in the class name; labels, titles, times and counts are not prose
 const prose = '^bui-[a-z-]+-(hint|reason|description|note|why|summary|detail|message|text|status|body)$';
 

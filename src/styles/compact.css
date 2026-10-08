@@ -15,6 +15,10 @@
 	/* No room of its own between the frame's rows */
 	margin-block-end: calc(-1 * var(--space-6));
 }
+/* Below the sidebar's cut its product row is sticky under the bar too: the line goes under the row. */
+.bui-shell:has(.bui-sidebar[data-mode='drawer']) .bui-page .bui-page-frame > .bui-page-compact {
+	top: calc(var(--layout-family) + var(--bui-sidebar-row, 44px));
+}
 .bui-page[data-template='tool'] .bui-page-frame > .bui-page-compact {
 	margin-block-end: 0;
 }

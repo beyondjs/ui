@@ -278,3 +278,4 @@ export * from './choose.js';
 export * from './session.js';
 export * from './sidebar.js';
 export * from './conversation.js';
+export * from './resource.js';

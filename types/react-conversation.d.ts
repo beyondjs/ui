@@ -1,8 +1,8 @@
 /** Types of the React forms of the 0.10.0 pieces (`Composer`, `LiveText`, `ActivityRow`, `ActivityGroup`, `PanelToggle`), re-exported by `@beyond-js/ui/react`. */
 import type { ForwardRefExoticComponent, ReactElement, ReactNode, RefAttributes } from 'react';
 import type { Copy } from './notifications.js';
-import type { ActivitySection, ActivityState, Clock, ComposerAction, ComposerMessage, ComposerSubmit, IconName, Moment } from './dom.js';
-export type { ActivitySection, ActivityState, ComposerAction, ComposerMessage, ComposerSubmit, PagePanelOptions, SidebarAction, SidebarEntries, SidebarEntry, SidebarMark, SidebarSearchOptions } from './dom.js';
+import type { ActivitySection, ActivityState, Clock, ComposerAction, ComposerAttachment, ComposerMessage, ComposerSubmit, ComposerSuggestion, ComposerSuggestSettings, IconName, Moment } from './dom.js';
+export type { ActivitySection, ActivityState, ComposerAction, ComposerAttachment, ComposerMessage, ComposerSubmit, ComposerSuggestion, ComposerSuggestSettings, PagePanelOptions, SidebarAction, SidebarEntries, SidebarEntry, SidebarMark, SidebarSearchOptions } from './dom.js';
 export { PagePanel } from './dom.js';
 
 type Copies = { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
@@ -14,14 +14,26 @@ export interface ComposerHandle {
 	readonly value: string;
 	readonly busy: boolean;
 	readonly sending: boolean;
+	/** Opens the platform's file chooser, as Attach does (0.11.0). */
+	attach(): void;
 }
 export interface ComposerProps {
 	label: string;
 	/** Sends; a rejection gives the text back. Read from the latest props. */
 	onSubmit: (message: ComposerMessage) => Promise<unknown> | unknown;
 	placeholder?: string | null;
-	/** The state line: text, or React content. */
-	status?: ReactNode;
+	/** The state line above the box: text, React content, or `{ text, action }` with the action React content or `{ label, onSelect }` (0.11.0). */
+	status?: ReactNode | { text: ReactNode; action?: ReactNode | { label: string; onSelect?: (() => unknown) | null } | null };
+	/** The turn's choices at the toolbar's start, React content (0.11.0). */
+	settings?: ReactNode;
+	/** Files from paste, drop and Attach; callbacks read from the latest props (0.11.0). */
+	attach?: { label?: string | null; accept?: string | null; multiple?: boolean; onFiles: (files: File[], via: 'paste' | 'drop' | 'pick') => void; onRemove?: ((item: ComposerAttachment) => void) | null; onRetry?: ((item: ComposerAttachment) => void) | null } | null;
+	/** The chips (0.11.0). */
+	attachments?: ComposerAttachment[] | null;
+	/** Suggestions after the trigger, read from the latest props (0.11.0). */
+	onSuggest?: ((query: string, signal: AbortSignal) => Promise<ComposerSuggestion[] | { items: ComposerSuggestion[] }> | ComposerSuggestion[]) | null;
+	suggest?: ComposerSuggestSettings | null;
+	locale?: string;
 	/** The toolbar's start, React content. */
 	tools?: ReactNode;
 	/** The toolbar's end before the actions, React content. */

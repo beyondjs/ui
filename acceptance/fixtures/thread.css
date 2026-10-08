@@ -1,0 +1,15 @@
+/* The thread fixture's layout only (0.11.0), over the conversation fixture's: a thread long enough to
+   scroll past the header, the person's message at the measure's end, and a narrow box for Facts. */
+.thread .answer {
+	max-width: var(--layout-measure);
+	margin: 0;
+}
+.thread .message {
+	justify-self: start;
+	margin-inline-start: auto;
+}
+.narrow {
+	width: 15rem;
+	padding: var(--space-2);
+	border: 1px dashed var(--color-border);
+}

@@ -20,9 +20,9 @@ export { PreferencesDialog } from './dom.js';
 export type { PageTemplate, PageWidth, PageCrumb, TabItem, FamilyPreferences, ArrivalLabels } from './dom.js';
 import type { PageTemplate, PageWidth, PageCrumb, TabItem, ArrivalLabels } from './dom.js';
 /** The content region (D52): edge to edge, one gutter from the navigation, blocks at their width tier. */
-export function Page(props: { template?: PageTemplate; width?: PageWidth; arrival?: ReactNode; header?: ReactNode; aside?: ReactNode; label?: string | null; /** The aside as a panel kept in view (0.10.0) */ panel?: { cut?: number | string; open?: boolean; onChange?: ((shown: boolean) => void) | null; title?: string | null; labels?: { close?: string } } | null; panelRef?: Ref<import('./dom.js').PagePanel | null> | null; children?: ReactNode }): ReactElement;
+export function Page(props: { template?: PageTemplate; width?: PageWidth; arrival?: ReactNode; header?: ReactNode; aside?: ReactNode; label?: string | null; /** The aside as a panel kept in view (0.10.0; `head` and `wide` since 0.11.0) */ panel?: { cut?: number | string; open?: boolean; onChange?: ((shown: boolean) => void) | null; title?: string | null; labels?: { close?: string; hide?: string }; head?: boolean; wide?: boolean } | null; panelRef?: Ref<import('./dom.js').PagePanel | null> | null; children?: ReactNode }): ReactElement;
 /** The page's one header: crumbs, the H1, one status, facts, the line's actions and the tabs. */
-export function PageHeader(props: { title: ReactNode; crumbs?: Array<PageCrumb | null | false>; status?: ReactNode; facts?: ReactNode; actions?: ReactNode; tabs?: ReactNode; headingRef?: Ref<HTMLHeadingElement> | null; labels?: { crumbs?: string } }): ReactElement;
+export function PageHeader(props: { title: ReactNode; crumbs?: Array<PageCrumb | null | false>; status?: ReactNode; facts?: ReactNode; actions?: ReactNode; tabs?: ReactNode; headingRef?: Ref<HTMLHeadingElement> | null; labels?: { crumbs?: string }; /** The compact line on scroll, before the header (0.11.0) */ compact?: boolean | { actions?: ReactNode } | null }): ReactElement;
 /** A flat section: a heading, one description line, its actions and its content. */
 export function Section(props: { title: ReactNode; description?: ReactNode; actions?: ReactNode; level?: 2 | 3; children?: ReactNode }): ReactElement;
 /** The arrival line (D54), driven by the DOM `Arrival`. */
@@ -296,3 +296,4 @@ export function Consequence(props: { parts: { affected?: ReactNode; lost?: React
 export namespace Consequence { const labels: Copies; }
 export { consequence } from './dom.js';
 export * from './react-conversation.js';
+export * from './react-resource.js';

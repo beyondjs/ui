@@ -53,8 +53,8 @@ export class Consumer {
 		if (this.#react) Object.assign(dependencies, { react: this.#react, 'react-dom': this.#react });
 		writeFileSync(join(this.#directory, 'package.json'), JSON.stringify({ name: `ui-consumer-${this.#name}`, private: true, type: 'module', dependencies }, null, '\t'));
 		execFileSync('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error'], { cwd: this.#directory, stdio: 'pipe' });
-		// The React fixture has eight pages: the full consumer, one under an external store, the family bar, the icons with preferences, the long operations, the page system, "Choose, never type" and the conversation (0.10.0).
-		const entries = (this.#page === 'react' ? ['main.jsx', 'store.jsx', 'family.jsx', 'icons.jsx', 'operations.jsx', 'layout.jsx', 'choosing.jsx', 'conversation.jsx'] : ['main.js', 'family.js', 'icons.js', 'operations.js', 'layout.js', 'choosing.js', 'session.js', 'landed.js', 'conversation.js']).map(file => join(this.#directory, 'fixtures', this.#page, file));
+		// The React fixture has nine pages: the full consumer, one under an external store, the family bar, the icons with preferences, the long operations, the page system, "Choose, never type", the conversation (0.10.0) and the thread (0.11.0).
+		const entries = (this.#page === 'react' ? ['main.jsx', 'store.jsx', 'family.jsx', 'icons.jsx', 'operations.jsx', 'layout.jsx', 'choosing.jsx', 'conversation.jsx', 'thread.jsx'] : ['main.js', 'family.js', 'icons.js', 'operations.js', 'layout.js', 'choosing.js', 'session.js', 'landed.js', 'conversation.js', 'thread.js']).map(file => join(this.#directory, 'fixtures', this.#page, file));
 		await build({ entryPoints: entries, bundle: true, format: 'esm', outdir: join(this.#directory, 'fixtures', this.#page, 'out'), jsx: 'automatic', loader: { '.woff2': 'file' }, define: { 'process.env.NODE_ENV': '"development"' }, logLevel: 'error', absWorkingDir: this.#directory });
 		this.#server = await new Server(this.#directory).start();
 		return this;

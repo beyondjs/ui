@@ -42,7 +42,11 @@
 .bui-live-body[data-plain],
 .bui-live-note,
 .bui-activity-whole,
-.bui-activity-note {
+.bui-activity-note,
+.bui-facts-summary,
+.bui-facts-note,
+.bui-meter-note,
+.bui-composer-suggest-line {
 	max-width: var(--layout-measure);
 }
 
