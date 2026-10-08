@@ -6,7 +6,8 @@ import { inside, alone } from './family.mjs';
  * Every package component that draws an icon-only control, mounted in the state that shows it: the
  * header's navigation toggle, an open dialog's close button, a toast's dismiss button, a picker's chip
  * remove buttons, help, the notification entry, an action menu shown as its glyph alone, an open side
- * sheet's close button, a status row's "More actions" (0.7.0), and the family bar for a named person, for one without an organization and while it loads (no name yet). `build(ui)` takes the DOM module;
+ * sheet's close button, a status row's "More actions" (0.7.0), and the family bar for a named person, for one without an organization and while it loads (no name yet), and since 0.11.0 a composer's
+ * attachment chips (Remove) with Attach, and a page panel's own head (Hide). `build(ui)` takes the DOM module;
  * `destroy()` releases everything.
  */
 export class Scene {
@@ -30,6 +31,9 @@ export class Scene {
 		keep(new ui.ActionMenu({ label: null, name: 'More actions', items: [{ label: 'Duplicate', run: () => {} }] })).mount(document.body);
 		keep(new ui.SideSheet({ title: 'Add repositories' })).open();
 		keep(new ui.StatusRow({ title: 'acme', state: { label: 'Active', tone: 'success' }, more: [{ label: 'Disconnect', run: () => {} }] })).mount(document.body);
+		const composer = keep(new ui.Composer({ label: 'Message', onsubmit: () => Promise.resolve(), attach: { onfiles: () => {}, onremove: () => {}, onretry: () => {} } })).mount(document.body);
+		composer.attachments = [{ key: 'a', name: 'a.png', state: 'failed', reason: 'Too large' }];
+		keep(new ui.Page({ aside: [document.createElement('p')], label: 'Details', panel: { cut: 100, title: 'Details', head: true } })).mount(document.body);
 		const brand = { src: '/brand/wordmark.svg', href: '/' };
 		keep(new ui.FamilyBar({ product: 'delegate', brand, descriptor: inside, account: { signout: () => {} } })).mount(document.body);
 		keep(new ui.FamilyBar({ product: 'cdn', brand, descriptor: alone, account: { signout: () => {} } })).mount(document.body);

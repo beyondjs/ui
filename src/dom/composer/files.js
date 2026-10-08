@@ -98,6 +98,7 @@ export class ComposerFiles {
 	}
 
 	#size(bytes) {
+		if (bytes < 1000) return this.#labels.text('bytes', { count: Math.max(0, Math.round(bytes)) });
 		const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'];
 		let value = Math.max(0, bytes);
 		let unit = 0;
