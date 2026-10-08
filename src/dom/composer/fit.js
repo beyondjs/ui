@@ -31,6 +31,7 @@ export class ComposerFit {
 	#mutation = null;
 	#fonts = null;
 	#done = false;
+	#frame = 0;
 	#leave = event => event.target === this.#fold.button && queueMicrotask(() => this.measure());
 
 	/**
@@ -54,7 +55,9 @@ export class ComposerFit {
 				const next = entries.at(-1)?.contentRect.width ?? null;
 				if (next === width) return;
 				width = next;
-				this.measure();
+				// Decided in the next frame: a change of layout inside an observer's callback is a loop other
+				// observers of the page (a panel's, WebKit's own) report
+				this.#later();
 			});
 			this.#resize.observe(this.#gauge);
 		}
@@ -92,11 +95,21 @@ export class ComposerFit {
 
 	destroy() {
 		this.#done = true;
+		if (this.#frame) this.#root.ownerDocument.defaultView?.cancelAnimationFrame?.(this.#frame);
 		this.#root.removeEventListener('focusout', this.#leave);
 		this.#resize?.disconnect();
 		this.#mutation?.disconnect();
 		if (this.#fonts) this.#root.ownerDocument.fonts?.removeEventListener?.('loadingdone', this.#fonts);
 		this.#gauge.remove();
+	}
+
+	#later() {
+		const view = this.#root.ownerDocument.defaultView;
+		if (this.#frame || !view?.requestAnimationFrame) return void (this.#frame || this.measure());
+		this.#frame = view.requestAnimationFrame(() => {
+			this.#frame = 0;
+			this.measure();
+		});
 	}
 
 	#set(level) {
