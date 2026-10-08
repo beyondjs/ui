@@ -58,7 +58,7 @@ stay `pending`, proposals and not approved family rules.
 On this checkout at `b14f445` (macOS, Node.js 22.21.1, `playwright-core` 1.63.0):
 
 - `npm test`: 485 tests, 485 pass (Node's test runner with happy-dom), among them `fit.test.mjs` 7,
-  `refuse.test.mjs` 7, `reading.test.mjs` 5, `react-fixes.test.mjs` 2 and `Diff`'s 25 (parser 8, view 8,
+  `refuse.test.mjs` 7, `reading.test.mjs` 5, `react-fixes.test.mjs` 2 and `Diff`'s 24 (parser 8, view 7,
   keys and budget 4, update and destroy 3, React 2); `react18.test.mjs` runs the React suites, the new two
   included, on React 18.3.1. `npm run types` passes with the typed consumers `fixes.ts`, `fixes.tsx`,
   `diff.ts` and `diff.tsx`.
