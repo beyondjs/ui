@@ -65,19 +65,20 @@ export class ChoiceMenu extends Component {
 	 * @param {boolean} [options.statement] one option is stated as text (default true)
 	 * @param {string|null} [options.name] submits the value with a form in a hidden input
 	 * @param {(value: string) => void} [options.onchange]
+	 * @param {{state?: [string, string]|null}|null} [options.face] a chip's face, read at each drawing (`ChoiceChip`, 0.11.0)
 	 */
-	constructor({ label, options, value = null, placeholder = null, actions = [], disabled = false, align = 'start', placement = 'auto', search = 'auto', statement = true, name = null, onchange = null, labels = {} }) {
+	constructor({ label, options, value = null, placeholder = null, actions = [], disabled = false, align = 'start', placement = 'auto', search = 'auto', statement = true, name = null, onchange = null, labels = {}, face = null }) {
 		super();
 		this.#label = label;
 		this.#labels = new Labels(copy.en, placeholder ? { ...labels, placeholder } : labels);
-		this.#settings = { search, statement, name };
+		this.#settings = { search, statement, name, face };
 		this.#onchange = onchange;
 		this.#placement = new Placement(placement);
 		const id = Ids.next('bui-choice');
 		this.#button = el('button', { type: 'button', class: 'bui-choice-button', 'aria-haspopup': 'menu', 'aria-expanded': 'false', 'aria-controls': id, disabled, onclick: () => (this.#open ? this.close(true) : this.open()), onkeydown: event => this.#opener(event) });
 		this.#list = el('ul', { id, class: 'bui-choice-items', role: 'menu', 'aria-label': label });
 		this.#panel = el('div', { class: `bui-menu bui-choice-list bui-align-${align}`, hidden: true, onkeydown: event => this.#keys(event) }, [this.#list]);
-		this.#element = el('div', { class: 'bui-menu-holder bui-choice' });
+		this.#element = el('div', { class: `bui-menu-holder bui-choice${face ? ' bui-chip' : ''}` });
 		this.#value = value;
 		this.#actions = actions.filter(Boolean);
 		this.options = options;
@@ -186,7 +187,7 @@ export class ChoiceMenu extends Component {
 			this.#element.replaceChildren(ChoiceFace.stated(this.#label, one, this.#settings.name));
 			return;
 		}
-		ChoiceFace.draw(this.#button, this.#label, this.chosen, this.#labels.text('placeholder'));
+		ChoiceFace.draw(this.#button, this.#label, this.chosen, this.#labels.text('placeholder'), this.#settings.face);
 		const parts = [this.#button, this.#panel, this.#input].filter(Boolean);
 		// Replaced only when they differ: moving the focused button would drop its focus.
 		if (parts.length !== this.#element.childNodes.length || parts.some((part, index) => this.#element.childNodes[index] !== part)) this.#element.replaceChildren(...parts);

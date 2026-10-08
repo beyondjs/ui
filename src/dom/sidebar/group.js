@@ -1,6 +1,7 @@
 import { el, fill, content } from '../core/element.js';
 import { Ids } from '../core/ids.js';
 import { KeyedList } from '../core/keyed.js';
+import { hidden } from '../feedback.js';
 import { SidebarItem } from './item.js';
 
 /**
@@ -9,6 +10,8 @@ import { SidebarItem } from './item.js';
  * (else `href`, else label), so an update changes only what differs, keeps every link that stays in
  * place (the one holding focus is never moved) and removes what left; focus on a removed link moves
  * to the one now at its place.
+ *
+ * Since 0.11.0 a group may say how many items it holds (`count`, "Recent, 12") beside its heading.
  */
 export class SidebarGroup {
 	#element;
@@ -18,10 +21,12 @@ export class SidebarGroup {
 	#more = null;
 	#items = new Map();
 	#entries;
+	#labels;
 
-	/** @param {{kind: 'sections'|'entries'}} options */
-	constructor({ kind }) {
+	/** @param {{kind: 'sections'|'entries', labels?: import('../core/labels.js').Labels|null}} options */
+	constructor({ kind, labels = null }) {
 		this.#entries = kind === 'entries';
+		this.#labels = labels;
 		this.#element = el('div', { class: `bui-sidebar-group${this.#entries ? ' bui-sidebar-entries' : ''}` }, [this.#list]);
 	}
 
@@ -39,9 +44,9 @@ export class SidebarGroup {
 		return null;
 	}
 
-	/** @param {{heading?: string|Node|null, items: Array<object|null|false>, more?: {label: string, href: string}|null}} group */
-	update({ heading = null, items = [], more = null }) {
-		this.#head(heading);
+	/** @param {{heading?: string|Node|null, count?: number|string|null, items: Array<object|null|false>, more?: {label: string, href: string}|null}} group */
+	update({ heading = null, count = null, items = [], more = null }) {
+		this.#head(heading, count);
 		const seen = new Map();
 		const next = new Map();
 		for (const item of items.filter(Boolean)) {
@@ -49,7 +54,7 @@ export class SidebarGroup {
 			const count = seen.get(base) ?? 0;
 			seen.set(base, count + 1);
 			const key = count ? `${base}\u0000${count}` : base;
-			const view = this.#items.get(key) ?? new SidebarItem({ entry: this.#entries });
+			const view = this.#items.get(key) ?? new SidebarItem({ entry: this.#entries, labels: this.#labels });
 			view.update(item);
 			next.set(key, view);
 		}
@@ -64,7 +69,7 @@ export class SidebarGroup {
 		this.#items.clear();
 	}
 
-	#head(heading) {
+	#head(heading, count) {
 		if (heading === null || heading === undefined || heading === '') {
 			this.#heading?.remove();
 			this.#heading = null;
@@ -75,7 +80,9 @@ export class SidebarGroup {
 			this.#heading = el('p', { id: Ids.next('bui-sidebar-heading'), class: 'bui-sidebar-heading' });
 			this.#element.prepend(this.#heading);
 		}
-		if (typeof heading !== 'string' || this.#heading.textContent !== heading) fill(this.#heading, [content(heading)]);
+		const counted = count === null || count === undefined || count === '' ? null : String(count);
+		const text = counted === null ? heading : `${heading}, ${counted}`;
+		if (typeof heading !== 'string' || this.#heading.textContent !== text) fill(this.#heading, [content(heading), counted === null ? null : [hidden(', '), el('span', { class: 'bui-sidebar-count', text: counted })]]);
 		this.#list.setAttribute('aria-labelledby', this.#heading.id);
 	}
 

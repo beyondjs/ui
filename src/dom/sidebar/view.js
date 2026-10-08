@@ -50,7 +50,7 @@ export class SidebarView {
 			const base = String(group.key ?? (typeof group.heading === 'string' && group.heading ? group.heading : `#${index}`));
 			const key = next.has(base) ? `${base}\u0000${index}` : base;
 			let view = this.#views.get(key);
-			if (!view || view.kind !== kind) view = new SidebarGroup({ kind });
+			if (!view || view.kind !== kind) view = new SidebarGroup({ kind, labels: this.#labels });
 			view.update(group);
 			next.set(key, view);
 		});

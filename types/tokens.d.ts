@@ -10,6 +10,8 @@ export interface Tokens {
 	source: string;
 	attribute: 'data-beyond-mode';
 	approval?: { date: string; by: string; decisions: string[]; note: string };
+	/** Entries shipped as proposals, not approved family rules (token set 0.4.0: D67's thread tier and panel widths). */
+	pending?: { date: string; decisions: string[]; tokens: string[]; note: string };
 	provenance: { origin: string; revision: string; moved: string; note: string };
 	color: { primitives: Record<string, Primitive>; themes: { light: Record<string, string>; dark: Record<string, string> }; pairs: Pair[] };
 	typography: {

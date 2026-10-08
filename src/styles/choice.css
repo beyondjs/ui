@@ -112,3 +112,26 @@
 	margin: var(--space-1) var(--space-2);
 	background: var(--color-border);
 }
+/* A compact choice (ChoiceChip, 0.11.0): a muted label, the value and the state's word with its dot
+   beside it, at the target size (44 px on touch screens). It wraps, never cuts its words. */
+.bui-chip .bui-choice-button {
+	gap: 0 var(--space-1);
+	min-height: var(--bui-target);
+	padding: 0 var(--space-1) 0 var(--space-2);
+}
+.bui-chip .bui-choice-button > .bui-icon {
+	width: 16px;
+	height: 16px;
+	margin-left: 0;
+}
+.bui-chip-state {
+	font-size: var(--text-label);
+}
+.bui-chip .bui-choice-button[data-tone='danger'] .bui-chip-state {
+	color: var(--color-danger);
+}
+.bui-chip.bui-choice-statement .bui-statement {
+	min-height: var(--bui-target);
+	align-items: center;
+	font-size: var(--text-small);
+}

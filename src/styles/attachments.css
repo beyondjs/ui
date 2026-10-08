@@ -1,0 +1,162 @@
+/* A composer's attachments and suggestions (0.11.0): removable chips at the box's top, a drop target
+   over the box while files are dragged over it, and the suggestions' list opened against the box.
+   Tokens only; the list is a menu, the one part that overlaps (D10). */
+.bui-composer-files {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	min-width: 0;
+	margin: 0;
+	padding: var(--space-2) var(--space-2) 0;
+	list-style: none;
+}
+.bui-composer-files[hidden] {
+	display: none;
+}
+.bui-composer-file {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	max-width: min(100%, 20rem);
+	min-width: 0;
+	padding: var(--space-1);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	background: var(--color-surface-sunken);
+}
+.bui-composer-file[data-state='failed'] {
+	border-color: var(--color-danger);
+}
+.bui-composer-thumb {
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	width: var(--bui-target);
+	height: var(--bui-target);
+	overflow: hidden;
+	border-radius: var(--radius-control);
+	background: var(--color-surface);
+	color: var(--color-text-muted);
+}
+.bui-composer-thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.bui-composer-thumb .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-composer-file-text {
+	display: grid;
+	min-width: 0;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+}
+/* The name on one line, cut only while a tooltip shows it whole (D44). */
+.bui-composer-file-name {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.bui-composer-file-meta {
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	overflow-wrap: anywhere;
+}
+.bui-composer-file[data-state='failed'] .bui-composer-file-meta {
+	color: var(--color-danger);
+}
+.bui-composer-file-bar {
+	position: relative;
+	height: 2px;
+	margin-top: 2px;
+	overflow: hidden;
+	background: var(--color-border);
+}
+.bui-composer-file-bar[hidden],
+.bui-composer-file-retry[hidden] {
+	display: none;
+}
+.bui-composer-file-bar > span {
+	position: absolute;
+	inset-block: 0;
+	inset-inline-start: 0;
+	width: calc(var(--bui-file, 0) * 100%);
+	background: var(--color-action);
+	transition: width var(--motion-standard) var(--motion-ease);
+}
+.bui-composer-file-retry {
+	flex: none;
+	min-height: var(--bui-target);
+	padding-block: 0;
+	font-size: var(--text-small);
+}
+.bui-composer-file-remove {
+	flex: none;
+}
+/* While files are dragged over the composer: the box says where they go. */
+.bui-composer-drop {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	display: none;
+	place-items: center;
+	border: 2px dashed var(--color-action);
+	border-radius: var(--radius-base);
+	background: var(--color-surface-selected);
+	color: var(--color-text);
+	font-weight: var(--weight-medium);
+	pointer-events: none;
+}
+.bui-composer[data-drop] .bui-composer-drop {
+	display: grid;
+}
+/* The suggestions after a trigger: a menu against the box, above it where there is no room below. */
+.bui-composer-suggest {
+	min-width: min(100%, 18rem);
+	max-height: 16rem;
+}
+.bui-composer-options {
+	display: grid;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.bui-composer-options[hidden],
+.bui-composer-suggest-line[hidden] {
+	display: none;
+}
+.bui-composer-option {
+	display: grid;
+	gap: 2px;
+	min-height: var(--bui-target);
+	padding: var(--space-1) var(--space-3);
+	border-radius: var(--radius-control);
+	cursor: pointer;
+}
+.bui-composer-option[aria-selected='true'] {
+	background: var(--color-surface-selected);
+	box-shadow: inset 2px 0 0 var(--color-accent);
+}
+.bui-composer-option-label[data-mono] {
+	font-family: var(--font-mono);
+}
+.bui-composer-option-label {
+	font-size: var(--text-small);
+	overflow-wrap: anywhere;
+}
+.bui-composer-option-detail {
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-regular);
+	overflow-wrap: anywhere;
+}
+.bui-composer-suggest-line {
+	margin: 0;
+	padding: var(--space-2) var(--space-3);
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}

@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ChoiceMenu as Menu } from '../dom/choice/menu.js';
+import { ChoiceChip as Chip } from '../dom/choice/chip.js';
 import { RefChooser as Refs } from '../dom/refs/chooser.js';
 import { ProjectPicker as Projects } from '../dom/project.js';
 import { SecretField as Secret } from '../dom/secret.js';
@@ -26,9 +27,20 @@ function relay(actions, latest, key) {
 const shape = actions => JSON.stringify((actions ?? []).filter(Boolean).map(({ onSelect, ...rest }) => rest));
 
 /** One choice among a few things that have a state (CNT-94). Actions: `{ label, onSelect, disabled?, reason? }`. */
-export function ChoiceMenu({ label, options, value = null, placeholder = null, actions = [], disabled = false, align = 'start', placement = 'auto', search = 'auto', statement = true, name = null, onChange = null, labels }) {
+export function ChoiceMenu(props) {
+	return useChoice(Menu, props);
+}
+
+/** A compact choice (0.11.0): a muted label, the value and a state in words; `state` (`[label, tone]`) is its own. */
+export function ChoiceChip(props) {
+	return useChoice(Chip, props);
+}
+
+/** The React form of a `ChoiceMenu` or a `ChoiceChip`, driven by its DOM class. */
+function useChoice(Class, { label, options, value = null, placeholder = null, actions = [], disabled = false, align = 'start', placement = 'auto', search = 'auto', statement = true, name = null, onChange = null, labels, state = null }) {
 	const latest = useLatest({ onChange, actions });
-	const [host, menu] = useInstance(() => new Menu({ label, options: [], placeholder, align, placement, search, statement, name, labels, onchange: chosen => latest.current.onChange?.(chosen) }), [label, placeholder, align, placement, String(search), statement, name, labels]);
+	const [host, menu] = useInstance(() => new Class({ label, options: [], placeholder, align, placement, search, statement, name, labels, onchange: chosen => latest.current.onChange?.(chosen) }), [label, placeholder, align, placement, String(search), statement, name, labels]);
+	useSync(menu, current => Class === Chip && (current.state = state), [JSON.stringify(state)]);
 	useSync(menu, current => {
 		current.actions = relay(actions, latest, 'actions');
 		current.options = options;
@@ -101,6 +113,7 @@ export const ProviderWindow = forwardRef(function ProviderWindow({ provider, hre
 
 // The copy in English and Spanish, as on the DOM classes.
 ChoiceMenu.labels = Menu.labels;
+ChoiceChip.labels = Chip.labels;
 RefChooser.labels = Refs.labels;
 ProjectPicker.labels = Projects.labels;
 SecretField.labels = Secret.labels;

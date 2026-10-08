@@ -5,6 +5,8 @@ import { PagePanel } from '../dom/page/panel.js';
 import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
 import { PageHeader as Heading } from '../dom/page/header.js';
+import { PageCompact } from '../dom/page/compact.js';
+import { Cut, NameTip } from '../dom/core/cut.js';
 import { Mark } from './simple.js';
 import { h, living, useInstance, useLatest, useSync } from './hooks.js';
 
@@ -19,9 +21,10 @@ const Panel = createContext(null);
 
 /**
  * The content region: `template`, `width` (`fluid`, `standard`, `form`, `reading`), `arrival`, `header`,
- * `aside`. With `panel` (`{ cut?, open?, onChange?, title?, labels? }`, 0.10.0) the aside is a panel
- * kept in view, driven by the DOM `PagePanel` (beside and sticky from `cut`, a side sheet below it);
- * `panelRef` receives it (`open()`, `close()`, `toggle()`) and a `PanelToggle` inside the page toggles it.
+ * `aside`. With `panel` (`{ cut?, open?, onChange?, title?, labels?, head?, wide? }`, 0.10.0) the aside is
+ * a panel kept in view, driven by the DOM `PagePanel` (beside and sticky from `cut`, a side sheet below
+ * it; since 0.11.0 with a head of its own and a wide form); `panelRef` receives it (`open()`, `close()`,
+ * `toggle()`) and a `PanelToggle` inside the page toggles it. `width` takes `thread` since 0.11.0.
  */
 export function Page({ template = 'detail', width = 'standard', arrival = null, header = null, aside = null, label = null, panel = null, panelRef = null, children }) {
 	if (!Region.templates.includes(template)) throw new TypeError(`A page's template is one of ${Region.templates.join(', ')}`);
@@ -34,7 +37,7 @@ export function Page({ template = 'detail', width = 'standard', arrival = null, 
 	useLayoutEffect(() => {
 		if (!wanted) return undefined;
 		const given = latest.current ?? {};
-		const instance = new PagePanel({ page: frame.current, body: body.current, cut: given.cut, open: given.open ?? true, title: given.title ?? null, label, labels: given.labels, onchange: shown => latest.current?.onChange?.(shown) });
+		const instance = new PagePanel({ page: frame.current, body: body.current, cut: given.cut, open: given.open ?? true, title: given.title ?? null, label, labels: given.labels, head: Boolean(given.head), wide: Boolean(given.wide), onchange: shown => latest.current?.onChange?.(shown) });
 		setMade(instance);
 		assign(panelRef, instance);
 		return () => {
@@ -43,10 +46,11 @@ export function Page({ template = 'detail', width = 'standard', arrival = null, 
 			instance.destroy();
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [wanted, panel?.cut, panel?.title ?? null, label]);
+	}, [wanted, panel?.cut, panel?.title ?? null, label, Boolean(panel?.head)]);
 	const instance = living(made);
 	useSync(instance, current => (current.present = Boolean(aside)), [Boolean(aside)]);
 	useSync(instance, current => (current.shown = panel?.open ?? true), [panel?.open]);
+	useSync(instance, current => (current.wide = Boolean(panel?.wide)), [Boolean(panel?.wide)]);
 	const region = h(
 		'div',
 		{ ref: frame, className: 'bui-page', 'data-template': template, 'data-width': width },
@@ -78,21 +82,43 @@ function assign(ref, value) {
 /**
  * The page's one header: `crumbs` (`{ label, href? }`, the levels above), the H1 `title`, one
  * `status`, a `facts` line, the title line's `actions` and the `tabs`. `headingRef` reaches the H1
- * for focus after a navigation.
+ * for focus after a navigation. `compact` (`true` or `{ actions }`, 0.11.0) adds the sticky line that
+ * shows the title and the status once the title has scrolled out, placed right before the header.
  */
-export function PageHeader({ title, crumbs = [], status = null, facts = null, actions = null, tabs = null, headingRef = null, labels = {} }) {
+export function PageHeader({ title, crumbs = [], status = null, facts = null, actions = null, tabs = null, headingRef = null, labels = {}, compact = null }) {
 	const id = `bui-page-title-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 	const levels = (crumbs ?? []).filter(Boolean);
-	return h(
+	const bar = useRef(null);
+	const line = useRef(null);
+	const named = useRef(null);
+	useLayoutEffect(() => {
+		if (!compact || !bar.current || !line.current) return undefined;
+		const watch = new PageCompact({ header: line.current, bar: bar.current });
+		const tip = new NameTip(named.current, { text: () => named.current?.textContent ?? '', cut: () => Cut.text(named.current) });
+		return () => {
+			watch.destroy();
+			tip.destroy();
+		};
+	}, [Boolean(compact)]);
+	const tools = compact?.actions ?? null;
+	const held = compact
+		? h(
+				'div',
+				{ ref: bar, className: 'bui-page-compact' },
+				h('div', { className: 'bui-page-compact-line' }, h('div', { className: 'bui-page-compact-text', 'aria-hidden': 'true' }, h('span', { ref: named, className: 'bui-page-compact-title' }, title), h('span', { className: 'bui-page-compact-status' }, status)), h('div', { className: 'bui-page-compact-actions', hidden: !tools }, tools))
+			)
+		: null;
+	const header = h(
 		'header',
 		{ className: 'bui-page-header' },
 		levels.length
 			? h('nav', { className: 'bui-crumbs', 'aria-label': labels.crumbs ?? 'Breadcrumb' }, h('ol', null, levels.map((level, index) => h('li', { key: index }, level.href ? h('a', { href: level.href }, level.label) : h('span', null, level.label)))))
 			: null,
-		h('div', { className: 'bui-page-title' }, h('h1', { id, className: 'bui-page-heading', tabIndex: -1, ref: headingRef }, title), status ? h('span', { className: 'bui-page-status' }, status) : null, actions ? h('div', { className: 'bui-page-actions' }, actions) : null),
+		h('div', { ref: line, className: 'bui-page-title' }, h('h1', { id, className: 'bui-page-heading', tabIndex: -1, ref: headingRef }, title), status ? h('span', { className: 'bui-page-status' }, status) : null, actions ? h('div', { className: 'bui-page-actions' }, actions) : null),
 		facts ? h('p', { className: 'bui-page-facts' }, facts) : null,
 		tabs ? h('div', { className: 'bui-page-tabs' }, tabs) : null
 	);
+	return held ? h(React.Fragment, null, held, header) : header;
 }
 
 /** A flat section: `title`, one `description` line, its `actions` and its content. */

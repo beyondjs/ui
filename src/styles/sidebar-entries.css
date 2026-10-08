@@ -104,3 +104,17 @@
 .bui-sidebar-more {
 	color: var(--color-link);
 }
+/* An entry's age at its end and a group's count beside its heading (0.11.0), both quiet. */
+.bui-sidebar-age {
+	flex: none;
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-regular);
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.bui-sidebar-count {
+	margin-inline-start: var(--space-1);
+	font-weight: var(--weight-regular);
+	font-variant-numeric: tabular-nums;
+}

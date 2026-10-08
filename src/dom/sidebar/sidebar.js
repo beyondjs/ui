@@ -16,7 +16,12 @@ const words = {
 		retry: 'Try again',
 		results: 'Results',
 		all: 'See all results',
-		count: ({ count }) => (count === 1 ? '1 result' : `${count} results`)
+		count: ({ count }) => (count === 1 ? '1 result' : `${count} results`),
+		now: 'now',
+		minutes: '{count} min',
+		hours: '{count} h',
+		days: '{count} d',
+		weeks: '{count} w'
 	},
 	es: {
 		sections: 'Secciones de {product}',
@@ -27,7 +32,12 @@ const words = {
 		retry: 'Reintentar',
 		results: 'Resultados',
 		all: 'Ver todos los resultados',
-		count: ({ count }) => (count === 1 ? '1 resultado' : `${count} resultados`)
+		count: ({ count }) => (count === 1 ? '1 resultado' : `${count} resultados`),
+		now: 'ahora',
+		minutes: '{count} min',
+		hours: '{count} h',
+		days: '{count} d',
+		weeks: '{count} sem'
 	}
 };
 const defaults = words.en;

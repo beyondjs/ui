@@ -24,18 +24,21 @@ function slot(tag, name) {
 }
 
 /**
- * The message box. `tools`, `extras` and a non-text `status` are React content; `stop` is
- * `{ label, onSelect, busy? }`; `onSubmit({ text, action })` returns a promise (a rejection gives the
- * text back). `value` is applied when it changes; the ref has `focus()`, `submit(action?)`, `value`,
- * `busy` and `sending`. A change of `label`, `submit`, `min`, `max`, `name` or `labels` (memoize it)
- * creates a new box.
+ * The message box. `tools`, `extras`, `settings` and a non-text `status` are React content; `status` may
+ * also be `{ text, action }` with the action React content or `{ label, onSelect }` (0.11.0); `stop` is
+ * `{ label, onSelect, busy? }`; `onSubmit({ text, action, attachments? })` returns a promise (a rejection
+ * gives the text back). `attach` is `{ label?, accept?, multiple?, onFiles, onRemove?, onRetry? }` and
+ * `attachments` the chips; `onSuggest(query, signal)` lists suggestions after `suggest.trigger` (0.11.0).
+ * `value` is applied when it changes; the ref has `focus()`, `submit(action?)`, `attach()`, `value`,
+ * `busy` and `sending`. A change of `label`, `submit`, `min`, `max`, `name`, `labels` (memoize it),
+ * `locale`, `suggest` or whether there is `attach` or `onSuggest` creates a new box.
  */
-export const Composer = forwardRef(function Composer({ label, placeholder = null, status = null, tools = null, extras = null, actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value, min, max, name = null, onChange = null, onSubmit, explain, labels }, ref) {
-	const [slots] = useState(() => ({ tools: slot('span', 'bui-composer-slot'), extras: slot('span', 'bui-composer-slot'), status: slot('span', 'bui-composer-slot') }));
-	const latest = useLatest({ onChange, onSubmit, explain, stop });
-	const node = status !== null && status !== undefined && typeof status !== 'string' && typeof status !== 'number';
-	const shown = () => (node ? slots.status : (status ?? null));
+export const Composer = forwardRef(function Composer({ label, placeholder = null, status = null, tools = null, extras = null, settings = null, actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value, min, max, name = null, onChange = null, onSubmit, explain, labels, attach = null, attachments = null, onSuggest = null, suggest = null, locale = undefined }, ref) {
+	const [slots] = useState(() => ({ tools: slot('span', 'bui-composer-slot'), extras: slot('span', 'bui-composer-slot'), settings: slot('span', 'bui-composer-slot'), status: slot('span', 'bui-composer-slot'), action: slot('span', 'bui-composer-slot') }));
+	const latest = useLatest({ onChange, onSubmit, explain, stop, attach, onSuggest, status });
+	const line = new StatusLine(status, slots, latest);
 	const halt = () => (stop?.label ? { label: stop.label, busy: Boolean(stop.busy), run: () => latest.current.stop?.onSelect?.() } : null);
+	const intake = attach ? { label: attach.label ?? null, accept: attach.accept ?? null, multiple: attach.multiple !== false, onfiles: (files, via) => latest.current.attach?.onFiles?.(files, via), onremove: item => latest.current.attach?.onRemove?.(item), onretry: attach.onRetry ? item => latest.current.attach?.onRetry?.(item) : null } : null;
 	const [host, box] = useInstance(
 		() =>
 			new Box({
@@ -46,34 +49,87 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 				max,
 				name,
 				labels,
+				locale,
 				value: value ?? '',
-				status: shown(),
+				status: line.value,
 				tools: tools ? [slots.tools] : [],
 				extras: extras ? [slots.extras] : [],
+				settings: settings ? [slots.settings] : [],
 				actions,
 				stop: halt(),
 				disabled,
 				busy,
+				attach: intake,
+				attachments: attachments ?? [],
+				suggest,
+				onsuggest: onSuggest ? (query, signal) => latest.current.onSuggest?.(query, signal) ?? [] : null,
 				onsubmit: message => Promise.resolve(latest.current.onSubmit?.(message)),
 				onchange: text => latest.current.onChange?.(text),
 				explain: explain === undefined ? undefined : error => latest.current.explain?.(error) ?? null
 			}),
-		[label, submit, min, max, name, labels, explain === undefined]
+		[label, submit, min, max, name, labels, locale, explain === undefined, Boolean(attach), Boolean(attach?.onRetry), Boolean(onSuggest), JSON.stringify(suggest ?? null)]
 	);
 	// The adapter places the element itself, so the field's height is fitted once it is in the page
 	useSync(box, current => current.fit(), []);
 	useSync(box, current => (current.placeholder = placeholder), [placeholder]);
-	useSync(box, current => (current.status = shown()), [node ? 'node' : (status ?? null)]);
+	useSync(box, current => (current.status = line.value), [line.key]);
 	useSync(box, current => (current.tools = tools ? [slots.tools] : []), [Boolean(tools)]);
 	useSync(box, current => (current.extras = extras ? [slots.extras] : []), [Boolean(extras)]);
+	useSync(box, current => (current.settings = settings ? [slots.settings] : []), [Boolean(settings)]);
+	useSync(box, current => (current.attachments = attachments ?? []), [attachments]);
 	useSync(box, current => (current.actions = actions), [JSON.stringify(actions)]);
 	useSync(box, current => (current.stop = halt()), [stop?.label ?? null, Boolean(stop?.busy)]);
 	useSync(box, current => (current.disabled = disabled), [JSON.stringify(disabled ?? null)]);
 	useSync(box, current => (current.busy = busy), [busy]);
 	useSync(box, current => typeof value === 'string' && current.value !== value && (current.value = value), [value]);
-	useImperativeHandle(ref, () => ({ focus: () => box?.focus(), submit: action => box?.submit(action) ?? Promise.resolve(false), get value() { return box?.value ?? ''; }, get busy() { return box?.busy ?? false; }, get sending() { return box?.sending ?? false; } }), [box]);
-	return h(React.Fragment, null, h('div', { ref: host, className: 'bui-host' }), box && tools ? ReactDOM.createPortal(tools, slots.tools) : null, box && extras ? ReactDOM.createPortal(extras, slots.extras) : null, box && node ? ReactDOM.createPortal(status, slots.status) : null);
+	useImperativeHandle(ref, () => ({ focus: () => box?.focus(), submit: action => box?.submit(action) ?? Promise.resolve(false), attach: () => box?.attach(), get value() { return box?.value ?? ''; }, get busy() { return box?.busy ?? false; }, get sending() { return box?.sending ?? false; } }), [box]);
+	const portal = (content, node) => (box && content ? ReactDOM.createPortal(content, node) : null);
+	return h(React.Fragment, null, h('div', { ref: host, className: 'bui-host' }), portal(tools, slots.tools), portal(extras, slots.extras), portal(settings, slots.settings), portal(line.node, slots.status), portal(line.action, slots.action));
 });
+
+/**
+ * A React state line as the DOM `Composer` takes it: text stays text, React content goes into a slot,
+ * and `{ text, action }` keeps its text and its action (React content in a slot, or `{ label, onSelect }`
+ * as the composer's own button, its `onSelect` read from the latest props). `key` changes when the DOM
+ * value must be set again.
+ */
+class StatusLine {
+	#value;
+	#key;
+	#node = null;
+	#action = null;
+
+	constructor(status, slots, latest) {
+		const text = value => typeof value === 'string' || typeof value === 'number';
+		const framed = status && typeof status === 'object' && !React.isValidElement(status) && 'text' in status;
+		const body = framed ? status.text : status;
+		this.#node = body !== null && body !== undefined && body !== '' && !text(body) ? body : null;
+		const shown = this.#node ? slots.status : (body ?? null);
+		const action = framed ? status.action : null;
+		const plain = action && typeof action === 'object' && !React.isValidElement(action) && 'label' in action;
+		this.#action = action && !plain ? action : null;
+		this.#value = framed ? { text: shown, action: plain ? { label: action.label, run: () => latest.current.status?.action?.onSelect?.() } : action ? slots.action : null } : shown;
+		this.#key = JSON.stringify([this.#node ? 'node' : shown, framed, plain ? action.label : Boolean(action)]);
+	}
+
+	get value() {
+		return this.#value;
+	}
+
+	get key() {
+		return this.#key;
+	}
+
+	/** React content of the sentence, or null. */
+	get node() {
+		return this.#node;
+	}
+
+	/** React content of the action, or null. */
+	get action() {
+		return this.#action;
+	}
+}
 
 /**
  * Text that arrives in pieces. `text` is the text so far (a longer text that starts with the shown one

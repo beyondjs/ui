@@ -139,7 +139,11 @@ export const layout = {
 	form: { value: '40rem', provenance: 'family', reason: 'Width tier of inputs, settings groups and task pages (LR-02); the help panel already stops there.' },
 	standard: { value: '90rem', provenance: 'family', reason: 'Width tier of a main column with its aside (LR-02); it re-derives the marketing container `content`.' },
 	aside: { value: '22rem', provenance: 'family', reason: 'Width of a resource page\'s side panel (LR-03), between the 20 and 24rem the analysis measured.' },
-	'fluid-max': { value: '100rem', provenance: 'family', reason: 'Limit of a fluid collection, past which a row is lost between its first and last column (LR-02).' }
+	'fluid-max': { value: '100rem', provenance: 'family', reason: 'Limit of a fluid collection, past which a row is lost between its first and last column (LR-02).' },
+	// Token set 0.4.0 (2026-10-08): the family proposal D67 (Q-B), adopted by Conduict; proposals, not approved family rules.
+	thread: { value: '52rem', provenance: 'proposed', reason: 'Width tier of a conversation thread (proposal D67, Q-B; Conduict\'s CB-Q4): wider than the reading measure so code and output keep a column, narrow enough that a message and its answer stay close. Not an approved family rule.' },
+	'aside-max': { value: '30rem', provenance: 'proposed', reason: 'Widest a page\'s panel kept in view grows on a wide region, so extra width goes to the panel rather than to an empty band (proposal D67, Conduict\'s CB-07 and CB-Q4). Not an approved family rule.' },
+	'aside-wide': { value: '48rem', provenance: 'proposed', reason: 'Widest a panel kept in view grows in its wide form, such as a review of changes beside a conversation (proposal D67, Conduict\'s CB-Q1). Not an approved family rule.' }
 };
 
 export const breakpoints = {

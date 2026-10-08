@@ -1,11 +1,17 @@
 /* The message box (Composer, 0.10.0): an optional state line, a field of one line that grows to twelve,
-   and a toolbar with the product's tools at its start and the actions at its end. Tokens only. */
+   and a toolbar with the product's tools at its start and the actions at its end. Since 0.11.0 the state
+   line is a line of its own above the box, and the toolbar's start holds Attach, the turn's settings and
+   the tools. Tokens only. */
 .bui-composer {
 	container: bui-composer / inline-size;
+	position: relative;
+	display: grid;
+	gap: var(--space-1);
 	min-width: 0;
 	color: var(--color-text);
 }
 .bui-composer-box {
+	position: relative;
 	display: grid;
 	min-width: 0;
 	border: 1px solid var(--color-border-control);
@@ -20,9 +26,30 @@
 .bui-composer-field:focus-visible {
 	outline: none;
 }
+/* The state line above the box, with its action at its end; it is not the field's content. */
+.bui-composer-line {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0 var(--space-2);
+	min-width: 0;
+	padding-inline: var(--space-1);
+}
+.bui-composer-line[hidden] {
+	display: none;
+}
+.bui-composer-status-action {
+	display: inline-flex;
+	margin-inline-start: auto;
+}
+.bui-composer-status-action .bui-button {
+	min-height: var(--bui-target);
+	padding-block: 0;
+}
 .bui-composer-status {
+	flex: 1 1 16rem;
+	min-width: 0;
 	margin: 0;
-	padding: var(--space-2) var(--space-3) 0;
 	color: var(--color-text-muted);
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
@@ -102,6 +129,8 @@
 	min-width: 0;
 	padding: var(--space-2);
 }
+.bui-composer-start,
+.bui-composer-settings,
 .bui-composer-tools,
 .bui-composer-extras {
 	display: flex;
@@ -110,12 +139,18 @@
 	gap: var(--space-2);
 	min-width: 0;
 }
-.bui-composer-tools {
+.bui-composer-start {
 	flex: 1 1 auto;
 }
+.bui-composer-start:not(:has(> :not(:empty))),
+.bui-composer-settings:empty,
 .bui-composer-tools:empty,
 .bui-composer-extras:empty {
 	display: none;
+}
+.bui-composer-attach .bui-icon {
+	width: 16px;
+	height: 16px;
 }
 /* A product's React content keeps the toolbar's flow */
 .bui-composer-slot {
@@ -168,7 +203,7 @@
 }
 /* A narrow composer gives the toolbar's start a row of its own: the choices, then the actions. */
 @container bui-composer (max-width: 30rem) {
-	.bui-composer-tools {
+	.bui-composer-start {
 		flex-basis: 100%;
 	}
 }

@@ -16,12 +16,14 @@ import { typography, space, radius, elevation, overlay, motion, density, layout,
  * and `approval` records the decisions. On 2026-10-04 the owner approved the family page system
  * (D52), whose layout tokens (gutters by band, the width tiers and the compact band) make token set 0.3.0
  * (`approval.layout`); token set 0.3.1 narrows the reading measure to what was measured against
- * LR-02. Each entry's own `provenance` still says whether its value
+ * LR-02. Token set 0.4.0 adds three layout proposals (`pending`: the thread tier and the panel's
+ * widths of the family proposal D67, adopted by Conduict); they are not approved family rules, and the
+ * rest of the set stays approved. Each entry's own `provenance` still says whether its value
  * was captured or introduced by the family reference. `version` identifies the token set; a product
  * review cites it together with the package version.
  */
 export const tokens = {
-	version: '0.3.1',
+	version: '0.4.0',
 	status: 'approved',
 	source: 'Verified capture of the public Beyond site, 2026-09-18, with the family reference\'s additions',
 	approval: {
@@ -35,6 +37,12 @@ export const tokens = {
 			decisions: ['D52'],
 			note: 'The family page system (D52, settled contract S23: LR-01 to LR-09 and LR-11): the gutter by band, the form, standard, aside and fluid width tiers and the compact 640px band, their values engineering defaults to be measured. Token set 0.3.0; 0.3.1 sets the reading measure to the 54ch measured against LR-02.'
 		}
+	},
+	pending: {
+		date: '2026-10-08',
+		decisions: ['D67'],
+		tokens: ['layout.thread', 'layout.aside-max', 'layout.aside-wide'],
+		note: 'Proposals in the family reference\'s register, adopted by Conduict (its CB-Q4): a thread width tier and the widths a page\'s panel kept in view grows to. Shipped so a product can adopt them; not approved family rules.'
 	},
 	attribute: 'data-beyond-mode',
 	provenance: {

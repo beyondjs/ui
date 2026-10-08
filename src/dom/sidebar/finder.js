@@ -21,7 +21,7 @@ export class SidebarFinder {
 	#field;
 	#line = el('p', { class: 'bui-sidebar-line' });
 	#retry;
-	#list = new SidebarGroup({ kind: 'entries' });
+	#list;
 	#results;
 	#announcer = new Announcer();
 	#release;
@@ -37,6 +37,7 @@ export class SidebarFinder {
 		this.#search = search;
 		this.#labels = labels;
 		this.#groups = groups;
+		this.#list = new SidebarGroup({ kind: 'entries', labels });
 		const { label, placeholder } = search.config;
 		// With no placeholder of its own the field shows its name, the only words it has on screen
 		this.#input = el('input', { type: 'search', class: 'bui-input bui-sidebar-query', 'aria-label': label, placeholder: placeholder ?? label, autocomplete: 'off', spellcheck: 'false', enterkeyhint: 'search' });

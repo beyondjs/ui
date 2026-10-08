@@ -2,7 +2,9 @@ import { Component } from '../core/component.js';
 import { el, fill } from '../core/element.js';
 import { Ids } from '../core/ids.js';
 import { Focus } from '../core/focus.js';
+import { Labels } from '../core/labels.js';
 import { SideSheet } from '../sheet.js';
+import { PanelHead } from './head.js';
 
 /**
  * A page's side panel kept in view (0.10.0), such as a conversation's context: beside the main column
@@ -15,10 +17,19 @@ import { SideSheet } from '../sheet.js';
  * the product draws ("Details") is joined with `control(button)`: a press shows or hides the panel, or
  * opens its sheet, and the button's `aria-expanded` and `aria-controls` follow. Crossing the cut while
  * the sheet is open closes it and shows the panel beside, focus included.
+ *
+ * Since 0.11.0, `head: true` gives it a head of its own beside the main column: its title and a hide
+ * control (in its sheet, the sheet's head and Close stand for it). On a wide region the panel's width
+ * is fluid from `--layout-aside` up to `--layout-aside-max`, taking the width a capped main column
+ * (the `thread` tier) leaves rather than an empty band; `wide` (a product's toggle, such as while it
+ * shows a review of changes) lets it grow to `--layout-aside-wide`, the main column giving up to the
+ * form tier.
  */
 export class PagePanel extends Component {
 	/** The region width from which the panel sits beside the main column, by default (68rem). */
 	static cut = '68rem';
+	/** The copy in English and Spanish (0.11.0): the hide control's name. */
+	static labels = Object.freeze({ en: Object.freeze({ hide: 'Hide {title}', close: 'Close' }), es: Object.freeze({ hide: 'Ocultar {title}', close: 'Cerrar' }) });
 
 	#page;
 	#body;
@@ -32,6 +43,8 @@ export class PagePanel extends Component {
 	#onchange;
 	#controls = new Map();
 	#observer = null;
+	#head = null;
+	#wide = false;
 
 	/**
 	 * @param {object} options
@@ -42,9 +55,11 @@ export class PagePanel extends Component {
 	 * @param {(shown: boolean) => void} [options.onchange] the person showed or hid it beside
 	 * @param {string|null} [options.label] its accessible name
 	 * @param {string|null} [options.title] the sheet's title (the label by default)
-	 * @param {{close?: string}} [options.labels] the sheet's copy
+	 * @param {{close?: string, hide?: string}} [options.labels] the sheet's and the head's copy
+	 * @param {boolean} [options.head] a head of its own beside the main column: the title and a hide control (0.11.0)
+	 * @param {boolean} [options.wide] the wide form, up to `--layout-aside-wide` (0.11.0)
 	 */
-	constructor({ page, body, cut = PagePanel.cut, open = true, onchange = null, label = null, title = null, labels = {} }) {
+	constructor({ page, body, cut = PagePanel.cut, open = true, onchange = null, label = null, title = null, labels = {}, head = false, wide = false }) {
 		super();
 		this.#page = page;
 		this.#body = body;
@@ -52,7 +67,13 @@ export class PagePanel extends Component {
 		this.#shown = open !== false;
 		this.#onchange = onchange;
 		this.#element = el('aside', { id: Ids.next('bui-panel'), class: 'bui-page-aside bui-page-panel', 'aria-label': label, hidden: true }, [this.#slot]);
-		this.#sheet = new SideSheet({ title: title ?? label ?? '', label: title ? null : label, labels, onclose: () => this.#back() });
+		const copy = new Labels(PagePanel.labels.en, labels);
+		if (head) {
+			this.#head = new PanelHead({ title: title ?? label ?? '', labels: copy, onhide: () => this.close() });
+			this.#element.prepend(this.#head.element);
+		}
+		this.wide = wide;
+		this.#sheet = new SideSheet({ title: title ?? label ?? '', label: title ? null : label, labels: { close: copy.text('close') }, onclose: () => this.#back() });
 		this.#sheet.element.id = Ids.next('bui-panel-sheet');
 		this.#observe();
 		this.measure();
@@ -76,6 +97,22 @@ export class PagePanel extends Component {
 	set shown(value) {
 		this.#shown = value !== false;
 		this.#paint();
+	}
+
+	/** Whether it is in the wide form (0.11.0). */
+	get wide() {
+		return this.#wide;
+	}
+
+	/** The wide form: beside, it may grow to `--layout-aside-wide`, such as while it shows a review of changes. */
+	set wide(value) {
+		this.#wide = Boolean(value);
+		this.#page.toggleAttribute('data-panel-wide', this.#wide);
+	}
+
+	/** The head's title (beside) and the sheet's, when it has a head (0.11.0). */
+	set title(text) {
+		if (this.#head) this.#head.title = text;
 	}
 
 	/** Whether it is in view now: beside and shown, or open in its sheet. */
@@ -125,7 +162,10 @@ export class PagePanel extends Component {
 		this.#paint();
 	}
 
-	/** Hides it beside (focus inside goes to its toggle), or closes its sheet. */
+	/**
+	 * Hides it beside (focus inside goes to its toggle, else to the page's heading), or closes its
+	 * sheet.
+	 */
 	close() {
 		if (this.#mode === 'sheet') return void this.#sheet.close(null);
 		if (!this.#shown) return;
@@ -133,7 +173,7 @@ export class PagePanel extends Component {
 		this.#shown = false;
 		this.#onchange?.(false);
 		this.#paint();
-		if (inside) [...this.#controls.keys()][0]?.focus({ preventScroll: true });
+		if (inside) ([...this.#controls.keys()][0] ?? this.#page.querySelector('h1[tabindex]'))?.focus({ preventScroll: true });
 	}
 
 	/** @param {HTMLElement|null} [from] the toggle pressed, where focus returns from the sheet */
@@ -183,7 +223,9 @@ export class PagePanel extends Component {
 		for (const [button, press] of this.#controls) button.removeEventListener('click', press);
 		this.#controls.clear();
 		this.#sheet.destroy();
+		this.#head?.destroy();
 		delete this.#page.dataset.panel;
+		this.#page.removeAttribute('data-panel-wide');
 		super.destroy();
 	}
 

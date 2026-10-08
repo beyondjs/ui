@@ -42,6 +42,7 @@ export type IconName =
 	| 'chat'
 	| 'folder'
 	| 'file'
+	| 'attach'
 	| 'terminal'
 	| 'archive'
 	| 'book'

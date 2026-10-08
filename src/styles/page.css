@@ -42,6 +42,10 @@
 .bui-page[data-width='reading'] .bui-page-body {
 	max-width: var(--layout-measure);
 }
+/* The thread tier (0.11.0, the family proposal D67 adopted by Conduict): a conversation's thread. */
+.bui-page[data-width='thread'] .bui-page-body {
+	max-width: var(--layout-thread);
+}
 .bui-page[data-template='tool'] .bui-page-frame > * {
 	max-width: none;
 }
