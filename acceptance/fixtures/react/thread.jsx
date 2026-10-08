@@ -1,15 +1,16 @@
 // The thread page of the React consumers (0.11.0), in Spanish through the components' own `labels.es`:
 // the Sidebar with ages and a count; a Page at the thread tier whose header turns compact on scroll and
 // whose panel has its own head, Facts and Meters and a wide form; the composer with its state line and
-// action, settings chips, attachments and suggestions.
+// action, settings chips, attachments and suggestions; since 0.11.1 its Options below 30rem, a product's
+// own glyph-only control with `useHint`, and an age said by `Age`.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { StrictMode, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { FamilyBar, Sidebar, Page, PageHeader, PanelToggle, Status, Button, Composer, ChoiceChip, Facts, Meter } from '@beyond-js/ui/react';
+import { FamilyBar, Sidebar, Page, PageHeader, PanelToggle, Status, Button, Composer, ChoiceChip, Facts, Meter, Icon, Age, useHint } from '@beyond-js/ui/react';
 import { chosen, fallback, product } from '../data/family.js';
-import { shape, words, groups, rows, models, levels, suggest, paragraphs } from '../data/thread.js';
+import { shape, words, groups, rows, models, levels, suggest, paragraphs, minutes } from '../data/thread.js';
 import { es } from './labels.js';
 
 const copy = words.es;
@@ -20,6 +21,22 @@ const labels = { sidebar: Sidebar.labels.es, composer: Composer.labels.es, chip:
 let count = 0;
 const reset = Date.now() + 3 * 3_600_000;
 const stale = Date.now() - 26 * 3_600_000;
+const said = new Age({ locale: 'es' }).of(Date.now() - minutes[1] * 60_000);
+
+/** A product's own glyph-only control with the family tooltip, and an age in the Sidebar's words. */
+function Own() {
+	const ref = useHint();
+	return (
+		<div className="own" id="own" ref={ref}>
+			<button type="button" className="bui-icon-button" aria-label={copy.more} data-bui-hint>
+				<Icon name="more" />
+			</button>
+			<time id="age" dateTime={said.datetime}>
+				{said.label}
+			</time>
+		</div>
+	);
+}
 
 function View() {
 	const [items, setItems] = useState([]);
@@ -66,16 +83,17 @@ function View() {
 				<main id="main">
 					<Page template="detail" width="thread" header={header} aside={aside} label={copy.panel} panel={{ cut: '73rem', title: copy.details, head: true, wide, labels: labels.panel, onChange: shown => log.push(`panel:${shown}`) }}>
 						<div className="thread" id="thread">
+							<Own />
 							<p className="message">También añade una prueba de un pago fallido que conserve el carrito.</p>
 							{paragraphs.map(text => (
 								<p key={text} className="answer">{text}</p>
 							))}
 							<div className="narrow" id="narrow">
-								<Facts label={copy.changes} rows={rows(copy, null).slice(0, 2)} />
+								<Facts label={copy.changes} rows={rows(copy, <Button label={copy.copy} variant="quiet" />).slice(0, 2)} />
 							</div>
 						</div>
 						<div className="dock">
-							<Composer label={copy.message} placeholder={copy.placeholder} labels={labels.composer} locale="es" status={{ text: copy.stopped, action: { label: copy.start, onSelect: () => log.push('start') } }} settings={settings} attach={attach} attachments={items} onSuggest={suggest} suggest={{ bound: 1500 }} onSubmit={message => (log.push(`send:${message.text}:${(message.attachments ?? []).length}`), change([]), Promise.resolve())} />
+							<Composer label={copy.message} placeholder={copy.placeholder} labels={labels.composer} locale="es" status={{ text: copy.stopped, action: { label: copy.start, onSelect: () => log.push('start') } }} settings={settings} attach={attach} attachments={items} onSuggest={suggest} suggest={{ bound: 1500 }} compact={shape.compact} onSubmit={message => (log.push(`send:${message.text}:${(message.attachments ?? []).length}`), change([]), Promise.resolve())} />
 						</div>
 					</Page>
 				</main>

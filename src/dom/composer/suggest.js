@@ -13,16 +13,21 @@ import { SuggestAsk } from './ask.js';
  * says each answer once. Up and Down move, Enter or Tab inserts, Escape closes (and the same token stays
  * closed); the token is replaced by the item's value and a space. Nothing is asked while an input method
  * composes, and Enter is taken only while an option is active in an open list.
+ *
+ * A list the source cut (0.11.1: `{ items, total }`, `{ items, more: true }` or `{ items, note }`) ends
+ * with a line that says so ("50 of 120 · keep typing to narrow"), kept in view at the list's end, which
+ * describes the list and is said once with the answer ("50 of 120 suggestions · keep typing to narrow").
  */
 export class ComposerSuggest {
 	#field;
 	#anchor;
 	#panel;
 	#list;
-	#line = el('p', { class: 'bui-composer-suggest-line' });
+	#line = el('p', { id: Ids.next('bui-composer-suggest-line'), class: 'bui-composer-suggest-line' });
 	#announcer = new Announcer();
 	#ask;
 	#labels;
+	#numbers;
 	#trigger;
 	#oninsert;
 	#placement = new Placement('auto');
@@ -41,13 +46,15 @@ export class ComposerSuggest {
 	 * @param {(query: string, signal: AbortSignal) => Promise<unknown>} options.source the product's `onsuggest`
 	 * @param {{trigger?: string, bound?: number, delay?: number, label?: string|null, explain?: ((error: unknown) => string|null)|null}} [options.settings]
 	 * @param {(text: string, caret: number) => void} options.oninsert writes the new text and caret into the field
+	 * @param {string} [options.locale] the language of the counts in a cut list's last line
 	 */
-	constructor({ field, anchor, labels, source, settings = {}, oninsert }) {
+	constructor({ field, anchor, labels, source, settings = {}, oninsert, locale = undefined }) {
 		const { trigger = '@', bound, delay, label = null, explain = null } = settings ?? {};
 		if (typeof trigger !== 'string' || [...trigger].length !== 1 || /\s/.test(trigger)) throw new TypeError("A suggestion's trigger is one character that is not a space");
 		this.#field = field;
 		this.#anchor = anchor;
 		this.#labels = labels;
+		this.#numbers = new Intl.NumberFormat(locale);
 		this.#trigger = trigger;
 		this.#oninsert = oninsert;
 		this.#ask = new SuggestAsk({ source, bound, delay, explain, labels });
@@ -140,20 +147,32 @@ export class ComposerSuggest {
 		this.#ask.ask(token.query, answer => this.#show(answer));
 	}
 
-	#show({ state, items = [], reason = null }) {
+	#show({ state, items = [], reason = null, total = null, more = false, note = null }) {
 		this.#panel.dataset.state = state;
 		this.#items = state === 'results' ? items : [];
 		this.#active = this.#items.length ? 0 : -1;
 		fill(this.#list, this.#items.map((item, index) => this.#option(item, index)));
 		this.#list.hidden = !this.#items.length;
-		const line = { looking: this.#labels.text('looking'), none: this.#labels.text('nomatch'), unavailable: this.#labels.text('unavailable', { reason }) }[state] ?? '';
+		const cut = state === 'results' ? this.#cut(this.#items.length, total, more, note) : null;
+		const line = cut?.line ?? { looking: this.#labels.text('looking'), none: this.#labels.text('nomatch'), unavailable: this.#labels.text('unavailable', { reason }) }[state] ?? '';
 		this.#line.textContent = line;
 		this.#line.hidden = !line;
-		if (state !== 'looking') this.#announcer.say(state === 'results' ? this.#labels.text('suggested', { count: this.#items.length }) : line);
+		this.#panel.toggleAttribute('data-cut', Boolean(cut));
+		if (cut) this.#list.setAttribute('aria-describedby', this.#line.id);
+		else this.#list.removeAttribute('aria-describedby');
+		if (state !== 'looking') this.#announcer.say(cut?.said ?? (state === 'results' ? this.#labels.text('suggested', { count: this.#items.length }) : line));
 		this.#panel.hidden = false;
 		this.#field.setAttribute('aria-expanded', String(Boolean(this.#items.length)));
 		this.#move(this.#active);
 		this.#placement.place(this.#panel, this.#anchor);
+	}
+
+	/** A cut list's last line and what is said with it, or null for a whole list. */
+	#cut(count, total, more, note) {
+		if (note) return { line: note, said: `${this.#labels.text('suggested', { count })} · ${note}` };
+		if (!more) return null;
+		const values = { count: this.#numbers.format(count), total: total === null ? null : this.#numbers.format(total) };
+		return { line: this.#labels.text('narrow', values), said: this.#labels.text('narrowed', values) };
 	}
 
 	#option(item, index) {

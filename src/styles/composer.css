@@ -201,9 +201,41 @@
 	width: 14px;
 	height: 14px;
 }
-/* A narrow composer gives the toolbar's start a row of its own: the choices, then the actions. */
+/* Options (0.11.1): shown only in a narrow composer that has something to fold, at the toolbar's control
+   size, so it lines up with Attach and Send. */
+.bui-composer-more {
+	display: none;
+	flex: none;
+	width: var(--bui-control);
+	height: var(--bui-control);
+	color: var(--color-text-muted);
+}
+.bui-composer-more:hover,
+.bui-composer-more[aria-expanded='true'] {
+	color: var(--color-text);
+}
+/* A narrow composer gives the toolbar's start a row of its own: the choices, then the actions. Since
+   0.11.1 a composer with settings or Attach folds them behind Options, so its toolbar keeps one row;
+   pressing Options shows them beside it from the first row, wrapping as they need, and the actions take
+   the next row (`compact: false` keeps the 0.11.0 toolbar). */
 @container bui-composer (max-width: 30rem) {
 	.bui-composer-start {
 		flex-basis: 100%;
+	}
+	.bui-composer[data-compact] .bui-composer-more {
+		display: inline-grid;
+	}
+	.bui-composer[data-compact]:not([data-options]) .bui-composer-start {
+		flex-basis: auto;
+	}
+	.bui-composer[data-compact][data-options] .bui-composer-more {
+		align-self: flex-start;
+	}
+	.bui-composer[data-compact][data-options] .bui-composer-start {
+		flex-basis: calc(100% - var(--bui-control) - var(--space-2));
+	}
+	.bui-composer[data-compact]:not([data-options]) .bui-composer-attach,
+	.bui-composer[data-compact]:not([data-options]) .bui-composer-settings {
+		display: none;
 	}
 }

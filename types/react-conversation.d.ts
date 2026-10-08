@@ -1,8 +1,8 @@
 /** Types of the React forms of the 0.10.0 pieces (`Composer`, `LiveText`, `ActivityRow`, `ActivityGroup`, `PanelToggle`), re-exported by `@beyond-js/ui/react`. */
 import type { ForwardRefExoticComponent, ReactElement, ReactNode, RefAttributes } from 'react';
 import type { Copy } from './notifications.js';
-import type { ActivitySection, ActivityState, Clock, ComposerAction, ComposerAttachment, ComposerMessage, ComposerSubmit, ComposerSuggestion, ComposerSuggestSettings, IconName, Moment } from './dom.js';
-export type { ActivitySection, ActivityState, ComposerAction, ComposerAttachment, ComposerMessage, ComposerSubmit, ComposerSuggestion, ComposerSuggestSettings, PagePanelOptions, SidebarAction, SidebarEntries, SidebarEntry, SidebarMark, SidebarSearchOptions } from './dom.js';
+import type { ActivitySection, ActivityState, Clock, ComposerAction, ComposerAttachment, ComposerMessage, ComposerSubmit, ComposerSuggestAnswer, ComposerSuggestion, ComposerSuggestSettings, IconName, Moment } from './dom.js';
+export type { ActivitySection, ActivityState, ComposerAction, ComposerAttachment, ComposerMessage, ComposerSubmit, ComposerSuggestAnswer, ComposerSuggestion, ComposerSuggestSettings, PagePanelOptions, SidebarAction, SidebarEntries, SidebarEntry, SidebarMark, SidebarSearchOptions } from './dom.js';
 export { PagePanel } from './dom.js';
 
 type Copies = { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
@@ -31,8 +31,10 @@ export interface ComposerProps {
 	/** The chips (0.11.0). */
 	attachments?: ComposerAttachment[] | null;
 	/** Suggestions after the trigger, read from the latest props (0.11.0). */
-	onSuggest?: ((query: string, signal: AbortSignal) => Promise<ComposerSuggestion[] | { items: ComposerSuggestion[] }> | ComposerSuggestion[]) | null;
+	onSuggest?: ((query: string, signal: AbortSignal) => Promise<ComposerSuggestAnswer> | ComposerSuggestAnswer) | null;
 	suggest?: ComposerSuggestSettings | null;
+	/** Under 30rem the settings and Attach fold behind Options; `false` keeps the wrapped toolbar (0.11.1). */
+	compact?: boolean;
 	locale?: string;
 	/** The toolbar's start, React content. */
 	tools?: ReactNode;

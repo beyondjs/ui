@@ -25,6 +25,7 @@ import { checks as composing } from './checks/composing.mjs';
 import { checks as panels } from './checks/panels.mjs';
 import { checks as thread } from './checks/thread.mjs';
 import { checks as attaching } from './checks/attaching.mjs';
+import { checks as folding } from './checks/folding.mjs';
 
 /**
  * Browser acceptance of the packed package: `npm pack` → three consumers installed from the tarball
@@ -34,7 +35,7 @@ import { checks as attaching } from './checks/attaching.mjs';
 class Acceptance {
 	#root = fileURLToPath(new URL('..', import.meta.url));
 	#consumers = [new Consumer('dom', 'dom'), new Consumer('react19', 'react', '19.3.0'), new Consumer('react18', 'react', '18.3.1')];
-	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...choosing, ...icons, ...prose, ...session, ...composing, ...panels, ...thread, ...attaching];
+	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...choosing, ...icons, ...prose, ...session, ...composing, ...panels, ...thread, ...attaching, ...folding];
 	#filter = process.argv[2] ?? '';
 
 	async run() {

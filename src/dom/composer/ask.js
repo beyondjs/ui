@@ -5,8 +5,10 @@
  * and said unavailable ("didn't answer in time"), a rejection is unavailable with `explain(error)`'s
  * words (or "couldn't be read"), never "No match".
  *
- * Answers reach `onanswer` as `{ state: 'looking' }`, then `{ state: 'results', items }`,
- * `{ state: 'none' }` or `{ state: 'unavailable', reason }`.
+ * Answers reach `onanswer` as `{ state: 'looking' }`, then `{ state: 'results', items, total, more,
+ * note }`, `{ state: 'none' }` or `{ state: 'unavailable', reason }`. A source that lists only part of
+ * what matches says so (0.11.1) with `{ items, total }` (how many match), `{ items, more: true }` (more
+ * match, how many unknown) or `{ items, note }` (its own words for the list's last line).
  */
 export class SuggestAsk {
 	static bound = 8000;
@@ -70,7 +72,7 @@ export class SuggestAsk {
 			const answer = await Promise.race([Promise.resolve().then(() => this.#source(query, controller.signal)), bounded]);
 			if (count !== this.#count) return;
 			const items = (Array.isArray(answer) ? answer : (answer?.items ?? [])).filter(item => item && item.value !== undefined && item.value !== null);
-			onanswer(items.length ? { state: 'results', items } : { state: 'none' });
+			onanswer(items.length ? { state: 'results', items, ...SuggestAsk.#part(answer, items.length) } : { state: 'none' });
 		} catch (error) {
 			if (count !== this.#count) return;
 			const reason = late ? this.#labels.text('late') : (this.#explain?.(error) ?? this.#labels.text('unread'));
@@ -78,6 +80,14 @@ export class SuggestAsk {
 		} finally {
 			if (count === this.#count) this.cancel();
 		}
+	}
+
+	/** What a partial answer says of the rest: a total past the items, more of unknown count, or its own note. */
+	static #part(answer, count) {
+		if (Array.isArray(answer) || !answer) return { total: null, more: false, note: null };
+		const total = Number.isFinite(answer.total) && answer.total > count ? answer.total : null;
+		const note = typeof answer.note === 'string' && answer.note.trim() ? answer.note.trim() : null;
+		return { total, more: total !== null || answer.more === true, note };
 	}
 
 	#later(work, delay) {

@@ -81,10 +81,16 @@
 	color: var(--color-text-muted);
 	font-size: var(--text-label);
 }
+/* A row's own action (Copy) reads on the value's first line, at its end: its words share the value's
+   baseline, whether the value is beside its label or under it, its target grows around them, and a long
+   value wraps beside it rather than pushing it to a line of its own (0.11.1). */
 .bui-facts-action {
 	display: inline-flex;
 	flex: none;
-	align-self: center;
+	align-self: baseline;
+}
+.bui-facts-data:has(> .bui-facts-action) {
+	flex-wrap: nowrap;
 }
 .bui-facts-action .bui-button {
 	min-height: var(--bui-target);

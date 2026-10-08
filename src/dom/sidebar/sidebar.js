@@ -5,6 +5,7 @@ import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { SidebarSections } from './sections.js';
 import { Drawer } from './drawer.js';
+import { Age } from '../time/age.js';
 
 const words = {
 	en: {
@@ -17,11 +18,7 @@ const words = {
 		results: 'Results',
 		all: 'See all results',
 		count: ({ count }) => (count === 1 ? '1 result' : `${count} results`),
-		now: 'now',
-		minutes: '{count} min',
-		hours: '{count} h',
-		days: '{count} d',
-		weeks: '{count} w'
+		...Age.labels.en
 	},
 	es: {
 		sections: 'Secciones de {product}',
@@ -33,11 +30,7 @@ const words = {
 		results: 'Resultados',
 		all: 'Ver todos los resultados',
 		count: ({ count }) => (count === 1 ? '1 resultado' : `${count} resultados`),
-		now: 'ahora',
-		minutes: '{count} min',
-		hours: '{count} h',
-		days: '{count} d',
-		weeks: '{count} sem'
+		...Age.labels.es
 	}
 };
 const defaults = words.en;

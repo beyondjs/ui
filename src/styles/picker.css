@@ -25,7 +25,9 @@
 .bui-chips[hidden] {
 	display: none;
 }
-.bui-chip {
+/* A chosen entity's chip in the picker's list. Scoped to the list: a `ChoiceChip`'s holder also carries
+   `bui-chip` and draws no box of its own (its button has the one border, 0.11.1). */
+.bui-chips > .bui-chip {
 	display: inline-flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -41,7 +43,7 @@
 .bui-chip-label {
 	overflow-wrap: anywhere;
 }
-.bui-chip-problem {
+.bui-chips > .bui-chip-problem {
 	border-color: var(--color-warning);
 	background: var(--color-warning-surface);
 }

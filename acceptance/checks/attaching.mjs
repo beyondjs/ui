@@ -18,14 +18,14 @@ const logged = (page, text) => page.waitForFunction(entry => window.fixture.log.
 
 export const checks = [
 	{
-		name: 'composer state line above the box with its action at its end; settings chips at the toolbar\'s start, wrapping at 320 px; both themes',
+		name: 'composer state line above the box with its action at its end; settings chips at the toolbar\'s start, wrapping at 320 px with compact: false (the 0.11.0 toolbar); both themes',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const copy = words[consumer.language];
 			for (const scheme of ['light', 'dark']) {
 				for (const width of [1440, 390, 320]) {
 					const at = `${width}px ${scheme}`;
-					const { page, context } = await open(browser, consumer, { width, colorScheme: scheme });
+					const { page, context } = await open(browser, consumer, { width, colorScheme: scheme, query: '?compact=off' });
 					const found = await page.evaluate(selector => {
 						const root = document.querySelector(selector);
 						const box = node => node.getBoundingClientRect();

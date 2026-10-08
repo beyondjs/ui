@@ -5,6 +5,7 @@ import { Disclosure as Panel } from '../dom/disclosure.js';
 import { ActionMenu as Menu } from '../dom/menu.js';
 import { Help as Explanation } from '../dom/help.js';
 import { Tooltip as Hint } from '../dom/tooltip.js';
+import { Hint as Names } from '../dom/core/hint.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 
 const { useLayoutEffect, useRef, useState } = React;
@@ -83,6 +84,22 @@ export function Tooltip({ text, describe = true, children }) {
 	}, []);
 	useSync(hint, current => (current.text = text), [text]);
 	return h('span', { ref: holder, className: 'bui-tooltip-anchor' }, children);
+}
+
+/**
+ * The family tooltip for a product's own glyph-only controls (0.11.1): returns a ref for the element
+ * that holds them. Every control inside it with `data-bui-hint` and an `aria-label` (a glyph on the
+ * closed list, D11) shows its name on hover, on keyboard focus and on a touch press, as the shared
+ * components' own icon buttons do (`Hint`).
+ */
+export function useHint() {
+	const root = useRef(null);
+	useLayoutEffect(() => {
+		if (!root.current) return undefined;
+		const hint = new Names(root.current);
+		return () => hint.destroy();
+	}, []);
+	return root;
 }
 
 // The copy in English and Spanish, as on the DOM classes (0.7.2).

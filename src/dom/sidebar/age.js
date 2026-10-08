@@ -1,15 +1,15 @@
-import { TimeWords } from '../time/words.js';
+import { Age } from '../time/age.js';
 
 /**
- * An entry's age (0.11.0): short at the entry's end ("now", "5 min", "2 h", "3 d", "2 w", then the
- * day, "6 Oct", with the year when it is another), and the full moment for assistive technology and
- * the tooltip, in the page's language (`<html lang>`). A product may give both words itself
- * (`{ label, title }`); a moment (a Date, a number or an ISO string) is said here, against `now`.
+ * An entry's age (0.11.0): short at the entry's end and the full moment for assistive technology and
+ * the tooltip, in the page's language (`<html lang>`), in the family's one wording (`Age`, public since
+ * 0.11.1). A product may give both words itself (`{ label, title }`); a moment (a Date, a number or an
+ * ISO string) is said by `Age`, against `now`.
  */
 export class EntryAge {
 	#label;
 	#title;
-	#moment;
+	#datetime;
 
 	/**
 	 * @param {import('../operations/steps.js').Moment|{label: string, title?: string|null}} age
@@ -22,18 +22,13 @@ export class EntryAge {
 		if (age && typeof age === 'object' && !(age instanceof Date)) {
 			this.#label = String(age.label ?? '');
 			this.#title = String(age.title ?? age.label ?? '');
-			this.#moment = null;
+			this.#datetime = null;
 			return;
 		}
-		const time = TimeWords.moment(age);
-		this.#moment = time;
-		if (time === null) {
-			this.#label = '';
-			this.#title = '';
-			return;
-		}
-		this.#label = EntryAge.#short(time, now, labels, locale);
-		this.#title = new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short', hourCycle: 'h23' }).format(new Date(time));
+		const said = new Age({ locale, labels, now: () => now }).of(age);
+		this.#label = said?.label ?? '';
+		this.#title = said?.title ?? '';
+		this.#datetime = said?.datetime ?? null;
 	}
 
 	/** The short words at the entry's end; empty for no age. */
@@ -48,20 +43,6 @@ export class EntryAge {
 
 	/** The moment as an ISO string for `<time datetime>`, or null when the product gave words. */
 	get datetime() {
-		return this.#moment === null ? null : new Date(this.#moment).toISOString();
-	}
-
-	static #short(time, now, labels, locale) {
-		const minutes = Math.max(0, Math.floor((now - time) / 60_000));
-		if (minutes < 1) return labels.text('now');
-		if (minutes < 60) return labels.text('minutes', { count: minutes });
-		const hours = Math.floor(minutes / 60);
-		if (hours < 24) return labels.text('hours', { count: hours });
-		const days = Math.floor(hours / 24);
-		if (days < 7) return labels.text('days', { count: days });
-		if (days < 35) return labels.text('weeks', { count: Math.floor(days / 7) });
-		const date = new Date(time);
-		const year = date.getFullYear() === new Date(now).getFullYear() ? {} : { year: 'numeric' };
-		return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', ...year }).format(date);
+		return this.#datetime;
 	}
 }

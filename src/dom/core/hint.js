@@ -13,6 +13,10 @@ import { Interaction } from './interaction.js';
  * keyboard focus, and on a touch press for a moment; a click, leaving, blur and Escape hide it.
  * It listens on `root` only (and on the document for Escape while it shows), and lives in the dialog
  * that holds `root` or else in the body, so it is drawn above a modal dialog.
+ *
+ * Public since 0.11.1 for a product's own glyph-only controls: `new Hint(root)` over the element that
+ * holds them, each with `data-bui-hint` and an `aria-label` (and `data-bui-shortcut` to add a key);
+ * `destroy()` releases every listener and leaves `root` as it was. One hint per root.
  */
 export class Hint extends Component {
 	#root;
@@ -31,27 +35,27 @@ export class Hint extends Component {
 			const target = event.target.closest?.('[data-bui-hint]');
 			return target?.closest('[data-bui-hints]') === root ? target : null;
 		};
-		root.addEventListener('pointerover', event => {
+		this.listen(root, 'pointerover', event => {
 			const target = find(event);
 			if (!target || event.pointerType === 'touch' || target === this.#target) return;
 			this.#soon(target);
 		});
-		root.addEventListener('pointerout', event => {
+		this.listen(root, 'pointerout', event => {
 			const target = find(event);
 			if (target && !target.contains(event.relatedTarget)) this.hide();
 		});
-		root.addEventListener('focusin', event => {
+		this.listen(root, 'focusin', event => {
 			const target = find(event);
 			if (target && Hint.#visible(target)) this.show(target);
 		});
-		root.addEventListener('focusout', event => find(event) && this.hide());
+		this.listen(root, 'focusout', event => find(event) && this.hide());
 		// The control's own handler has run: a press hides the hint, and so does a control it removed.
-		root.addEventListener('click', event => {
+		this.listen(root, 'click', event => {
 			const target = event.target.closest?.('[data-bui-hint]');
 			if (target && (event.pointerType !== 'touch' || !target.isConnected)) this.hide();
 		});
-		root.addEventListener('keydown', event => find(event) && event.key !== 'Tab' && event.key !== 'Escape' && this.hide());
-		root.addEventListener('pointerdown', event => {
+		this.listen(root, 'keydown', event => find(event) && event.key !== 'Tab' && event.key !== 'Escape' && this.hide());
+		this.listen(root, 'pointerdown', event => {
 			const target = find(event);
 			if (!target || event.pointerType !== 'touch') return;
 			this.show(target);
@@ -100,6 +104,7 @@ export class Hint extends Component {
 
 	destroy() {
 		this.hide();
+		if (!this.destroyed) this.#root.removeAttribute('data-bui-hints');
 		super.destroy();
 	}
 

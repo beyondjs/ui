@@ -1,13 +1,15 @@
 // The thread page of the plain DOM consumer (0.11.0), in English: the Sidebar with ages and a count; a
 // Page at the thread tier whose header turns compact on scroll and whose panel has its own head, Facts
 // and Meters and a wide form; the composer with its state line and action, settings chips, attachments
-// and suggestions. window.fixture records what the page heard and drives it.
+// and suggestions; since 0.11.1 its Options below 30rem (`?compact=off` keeps the 0.11.0 toolbar), a
+// product's own glyph-only control with the family `Hint`, and an age said by `Age` beside the thread.
+// window.fixture records what the page heard and drives it.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { FamilyBar, Sidebar, Page, PageHeader, Button, Composer, ChoiceChip, Facts, Meter, status, el } from '@beyond-js/ui';
+import { FamilyBar, Sidebar, Page, PageHeader, Button, Composer, ChoiceChip, Facts, Meter, Hint, Age, icon, status, el } from '@beyond-js/ui';
 import { chosen, fallback, product } from '../data/family.js';
-import { shape, words, groups, rows, models, levels, suggest, paragraphs } from '../data/thread.js';
+import { shape, words, groups, rows, models, levels, suggest, paragraphs, minutes } from '../data/thread.js';
 
 const copy = words.en;
 const log = [];
@@ -49,6 +51,7 @@ const composer = new Composer({
 	},
 	onsuggest: suggest,
 	suggest: { bound: 1500 },
+	compact: shape.compact,
 	onsubmit: message => (log.push(`send:${message.text}:${(message.attachments ?? []).length}`), attach([]), Promise.resolve())
 });
 
@@ -57,12 +60,16 @@ const changes = new Facts({ head: { title: copy.changes, value: copy.summary, st
 const engine = new Facts({ head: { title: copy.engine, value: 'Claude Code · Max plan' }, rows: [{ key: 'model', label: copy.model, value: 'claude-opus-5-5', mono: true }] });
 const window5 = new Meter({ label: copy.window, value: 0.86, reset: Date.now() + 3 * 3_600_000 });
 const week = new Meter({ label: copy.week, value: 0.4, stale: Date.now() - 26 * 3_600_000 });
-const narrow = el('div', { class: 'narrow', id: 'narrow' }, [new Facts({ label: copy.changes, rows: rows(copy, null).slice(0, 2) }).element]);
+const copied = new Button({ label: copy.copy, variant: 'quiet' });
+const narrow = el('div', { class: 'narrow', id: 'narrow' }, [new Facts({ label: copy.changes, rows: rows(copy, copied).slice(0, 2) }).element]);
+const said = new Age({ locale: 'en' }).of(Date.now() - minutes[1] * 60_000);
+const own = el('div', { class: 'own', id: 'own' }, [el('button', { type: 'button', class: 'bui-icon-button', 'aria-label': copy.more, 'data-bui-hint': true }, [icon('more')]), el('time', { id: 'age', datetime: said.datetime, text: said.label })]);
+const hint = new Hint(own);
 const details = new Button({ label: copy.details, variant: 'quiet' });
 const review = new Button({ label: copy.review, variant: 'quiet', onclick: () => (page.panel.wide = !page.panel.wide) });
 const pull = new Button({ label: copy.pull, variant: 'primary' });
 const header = new PageHeader({ title: copy.title, status: status(copy.status, 'progress'), facts: copy.facts, actions: [review, details], compact: { actions: [pull] } });
-const thread = el('div', { class: 'thread', id: 'thread' }, [el('p', { class: 'message', text: 'Also add a test for a failed payment that keeps the cart.' }), ...paragraphs.map(text => el('p', { class: 'answer', text })), narrow]);
+const thread = el('div', { class: 'thread', id: 'thread' }, [own, el('p', { class: 'message', text: 'Also add a test for a failed payment that keeps the cart.' }), ...paragraphs.map(text => el('p', { class: 'answer', text })), narrow]);
 const page = new Page({ template: 'detail', width: 'thread', header, children: [thread, el('div', { class: 'dock' }, [composer.element])], aside: [changes.element, engine.element, window5.element, week.element], label: copy.panel, panel: { cut: '73rem', title: copy.details, head: true, wide: shape.wide, onchange: shown => log.push(`panel:${shown}`) } }).mount(main);
 page.panel.control(details.element);
 
@@ -76,7 +83,7 @@ Object.assign(fixture, {
 		return items;
 	},
 	destroy() {
-		for (const component of [page, header, composer, model, autonomy, changes, engine, window5, week, copier, details, review, pull, sidebar, bar]) component.destroy();
+		for (const component of [page, header, composer, model, autonomy, changes, engine, window5, week, copier, copied, hint, details, review, pull, sidebar, bar]) component.destroy();
 	},
 	ready: true
 });

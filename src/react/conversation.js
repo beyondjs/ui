@@ -31,9 +31,10 @@ function slot(tag, name) {
  * `attachments` the chips; `onSuggest(query, signal)` lists suggestions after `suggest.trigger` (0.11.0).
  * `value` is applied when it changes; the ref has `focus()`, `submit(action?)`, `attach()`, `value`,
  * `busy` and `sending`. A change of `label`, `submit`, `min`, `max`, `name`, `labels` (memoize it),
- * `locale`, `suggest` or whether there is `attach` or `onSuggest` creates a new box.
+ * `locale`, `suggest`, `compact` or whether there is `attach` or `onSuggest` creates a new box. Under
+ * 30rem the settings and Attach fold behind Options unless `compact={false}` (0.11.1).
  */
-export const Composer = forwardRef(function Composer({ label, placeholder = null, status = null, tools = null, extras = null, settings = null, actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value, min, max, name = null, onChange = null, onSubmit, explain, labels, attach = null, attachments = null, onSuggest = null, suggest = null, locale = undefined }, ref) {
+export const Composer = forwardRef(function Composer({ label, placeholder = null, status = null, tools = null, extras = null, settings = null, actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value, min, max, name = null, onChange = null, onSubmit, explain, labels, attach = null, attachments = null, onSuggest = null, suggest = null, locale = undefined, compact = true }, ref) {
 	const [slots] = useState(() => ({ tools: slot('span', 'bui-composer-slot'), extras: slot('span', 'bui-composer-slot'), settings: slot('span', 'bui-composer-slot'), status: slot('span', 'bui-composer-slot'), action: slot('span', 'bui-composer-slot') }));
 	const latest = useLatest({ onChange, onSubmit, explain, stop, attach, onSuggest, status });
 	const line = new StatusLine(status, slots, latest);
@@ -50,6 +51,7 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 				name,
 				labels,
 				locale,
+				compact,
 				value: value ?? '',
 				status: line.value,
 				tools: tools ? [slots.tools] : [],
@@ -67,7 +69,7 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 				onchange: text => latest.current.onChange?.(text),
 				explain: explain === undefined ? undefined : error => latest.current.explain?.(error) ?? null
 			}),
-		[label, submit, min, max, name, labels, locale, explain === undefined, Boolean(attach), Boolean(attach?.onRetry), Boolean(onSuggest), JSON.stringify(suggest ?? null)]
+		[label, submit, min, max, name, labels, locale, compact !== false, explain === undefined, Boolean(attach), Boolean(attach?.onRetry), Boolean(onSuggest), JSON.stringify(suggest ?? null)]
 	);
 	// The adapter places the element itself, so the field's height is fitted once it is in the page
 	useSync(box, current => current.fit(), []);

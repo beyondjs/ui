@@ -30,7 +30,7 @@ export class ComposerContext {
 		if (attach) this.#intake = new ComposerIntake({ root, box, field, labels, attach });
 		if (onsuggest) {
 			if (typeof onsuggest !== 'function') throw new TypeError("A composer's suggestions come from onsuggest(query, signal)");
-			this.#suggest = new ComposerSuggest({ field, anchor: box, labels, source: onsuggest, settings: suggest, oninsert });
+			this.#suggest = new ComposerSuggest({ field, anchor: box, labels, source: onsuggest, settings: suggest, oninsert, locale });
 			box.append(this.#suggest.element);
 		}
 	}

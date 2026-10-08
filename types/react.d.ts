@@ -297,3 +297,4 @@ export namespace Consequence { const labels: Copies; }
 export { consequence } from './dom.js';
 export * from './react-conversation.js';
 export * from './react-resource.js';
+export * from './react-shared.js';

@@ -8,6 +8,7 @@ import { ComposerActions } from './actions.js';
 import { ComposerStatus } from './status.js';
 import { ComposerContext } from './context.js';
 import { ComposerSend } from './send.js';
+import { ComposerFold } from './fold.js';
 import { composer as copy } from './labels.js';
 
 /**
@@ -33,7 +34,8 @@ import { composer as copy } from './labels.js';
  * its end (`status: { text, action }`); `settings` are nodes at the toolbar's start (the turn's
  * choices, such as `ChoiceChip`s); `attach` takes files from a paste, a drop and Attach, handed to the
  * product, whose `attachments` are drawn as removable chips; `onsuggest` lists suggestions after a
- * trigger character ("@" by default). A message with ready attachments may have no text.
+ * trigger character ("@" by default). A message with ready attachments may have no text. Since 0.11.1
+ * a composer under 30rem folds its settings and Attach behind **Options** (`ComposerFold`).
  */
 export class Composer extends Component {
 	/** The copy in English and Spanish. */
@@ -47,6 +49,7 @@ export class Composer extends Component {
 	#tools = el('div', { class: 'bui-composer-tools' });
 	#settings = el('div', { class: 'bui-composer-settings' });
 	#context;
+	#fold;
 	#field;
 	#keys;
 	#actions;
@@ -80,8 +83,9 @@ export class Composer extends Component {
 	 * @param {((query: string, signal: AbortSignal) => Promise<unknown>)|null} [options.onsuggest] suggestions after the trigger (0.11.0)
 	 * @param {{trigger?: string, bound?: number, delay?: number, label?: string|null, explain?: ((error: unknown) => string|null)|null}|null} [options.suggest]
 	 * @param {string} [options.locale] the language of sizes and percents (the runtime's by default)
+	 * @param {boolean} [options.compact] whether a narrow composer folds its settings and Attach behind Options (0.11.1, default true)
 	 */
-	constructor({ label, onsubmit, placeholder = null, status = null, tools = [], extras = [], actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value = '', min = 1, max = 12, name = null, onchange = null, explain = undefined, labels = {}, settings = [], attach = null, attachments = [], onsuggest = null, suggest = null, locale = undefined }) {
+	constructor({ label, onsubmit, placeholder = null, status = null, tools = [], extras = [], actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value = '', min = 1, max = 12, name = null, onchange = null, explain = undefined, labels = {}, settings = [], attach = null, attachments = [], onsuggest = null, suggest = null, locale = undefined, compact = true }) {
 		super();
 		if (typeof onsubmit !== 'function') throw new TypeError('A composer sends through onsubmit');
 		this.#labels = new Labels(copy.en, labels);
@@ -97,31 +101,23 @@ export class Composer extends Component {
 		const control = this.#field.control;
 		this.#context = new ComposerContext({ root: this.#element, box, field: control, labels: this.#labels, locale, attach, onsuggest, suggest, refocus: () => this.focus(), oninsert: (text, caret) => this.#write(text, caret) });
 		const start = el('div', { class: 'bui-composer-start' }, [...this.#context.controls, this.#settings, this.#tools]);
-		box.prepend(this.#context.files.element, this.#field.element, this.#sender.element, el('div', { class: 'bui-composer-bar' }, [start, this.#actions.element]));
+		const bar = el('div', { class: 'bui-composer-bar' }, [start, this.#actions.element]);
+		this.#fold = new ComposerFold({ root: this.#element, bar, labels: this.#labels, enabled: compact !== false, parts: [this.#context.controls[0], this.#settings] });
+		box.prepend(this.#context.files.element, this.#field.element, this.#sender.element, bar);
 		this.#element.append(this.#context.files.announcer);
 		control.addEventListener('keydown', event => {
-			if (this.#context.keys(event)) {
-				event.preventDefault();
-				event.stopPropagation();
-				return;
-			}
-			if (!this.#keys.sends(event)) return;
+			// Open suggestions take their keys first; otherwise the keys that send
+			const taken = this.#context.keys(event);
+			if (!taken && !this.#keys.sends(event)) return;
 			event.preventDefault();
-			this.#send(null, false);
+			if (taken) event.stopPropagation();
+			else this.#send(null, false);
 		});
-		control.addEventListener('input', () => {
-			this.#say(null);
-			this.#onchange?.(control.value);
-		});
+		control.addEventListener('input', () => (this.#say(null), this.#onchange?.(control.value)));
 		// The touch screen may change (a keyboard attached): the hint is read again when the field takes focus
 		control.addEventListener('focus', () => this.#instruct());
-		this.status = status;
-		this.settings = settings;
-		this.attachments = attachments;
-		this.tools = tools;
-		this.extras = extras;
-		this.actions = actions;
-		this.stop = stop;
+		// Through the setters, in this order
+		Object.assign(this, { status, settings, attachments, tools, extras, actions, stop });
 		this.#disabled = disabled || null;
 		this.#busy = Boolean(busy);
 		this.#draw();
@@ -157,7 +153,14 @@ export class Composer extends Component {
 
 	/** The turn's choices at the toolbar's start, before the tools (0.11.0). */
 	set settings(nodes) {
-		fill(this.#settings, Composer.#nodes(nodes));
+		const list = Composer.#nodes(nodes);
+		fill(this.#settings, list);
+		this.#fold.available = list.length > 0 || Boolean(this.#context.intake);
+	}
+
+	/** The narrow toolbar's Options (`ComposerFold`: `open`, `toggle(open?)`, `button`) (0.11.1). */
+	get fold() {
+		return this.#fold;
 	}
 
 	/** The attachments as given (0.11.0). */
@@ -246,6 +249,7 @@ export class Composer extends Component {
 
 	destroy() {
 		this.#context.destroy();
+		this.#fold.destroy();
 		this.#status.destroy();
 		this.#actions.destroy();
 		super.destroy();
@@ -253,7 +257,8 @@ export class Composer extends Component {
 
 	#send(action, pressed) {
 		if (this.#sender.sending || this.#busy || this.#disabled || this.destroyed) return Promise.resolve(false);
-		return this.#sender.send(action, pressed);
+		// What Options showed folds again once the message is sent (a refused one keeps it shown)
+		return this.#sender.send(action, pressed).then(sent => (sent && this.#fold.toggle(false), sent));
 	}
 
 	/** Writes a suggestion's text with the caret after it, as typing would, and says the change. */

@@ -76,6 +76,21 @@ export interface ComposerSuggestSettings {
 	/** The words of a failure, "Unavailable · {reason}". */
 	explain?: ((error: unknown) => string | null) | null;
 }
+/**
+ * What a source answers (0.11.0): the suggestions, or (0.11.1) a part of what matches with what it says
+ * of the rest: `total` (how many match), `more: true` (more match, how many unknown) or `note` (its own
+ * words for the list's last line, which win). A cut list ends with "50 of 120 · keep typing to narrow".
+ */
+export type ComposerSuggestAnswer = ComposerSuggestion[] | { items: ComposerSuggestion[]; total?: number | null; more?: boolean; note?: string | null };
+/** A narrow composer's Options (0.11.1), read from `composer.fold`. */
+export interface ComposerFold {
+	/** Whether the folded settings and Attach are shown. */
+	readonly open: boolean;
+	/** The Options control (the `more` glyph, named "Options"); placed only while there is something to fold. */
+	readonly button: HTMLButtonElement;
+	/** Shows (`true`), folds (`false`) or switches what it folds. */
+	toggle(open?: boolean): void;
+}
 /** The state line with an action at its end (0.11.0). */
 export interface ComposerStatusLine {
 	text: Content;
@@ -103,10 +118,12 @@ export interface ComposerOptions {
 	/** The chips (0.11.0). */
 	attachments?: ComposerAttachment[];
 	/** Suggestions after the trigger (0.11.0); every ask is bounded and aborted by `signal`. */
-	onsuggest?: ((query: string, signal: AbortSignal) => Promise<ComposerSuggestion[] | { items: ComposerSuggestion[] }> | ComposerSuggestion[]) | null;
+	onsuggest?: ((query: string, signal: AbortSignal) => Promise<ComposerSuggestAnswer> | ComposerSuggestAnswer) | null;
 	suggest?: ComposerSuggestSettings | null;
-	/** The language of sizes and percents. */
+	/** The language of sizes, percents and counts. */
 	locale?: string;
+	/** Under 30rem of composer, fold the settings and Attach behind one Options control so the toolbar keeps one row (0.11.1, default true). */
+	compact?: boolean;
 	/** The toolbar's start (context choices). */
 	tools?: Part[];
 	/** The toolbar's end, before the actions. */
@@ -149,6 +166,8 @@ export class Composer extends Component {
 	attachments: ComposerAttachment[];
 	/** The suggestions, or null without `onsuggest` (0.11.0). */
 	readonly suggestions: ComposerSuggestions | null;
+	/** The narrow toolbar's Options (0.11.1). */
+	readonly fold: ComposerFold;
 	/** Opens the platform's file chooser, as Attach does (0.11.0). */
 	attach(): void;
 	set tools(nodes: Part[]);
