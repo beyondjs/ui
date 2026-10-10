@@ -103,6 +103,10 @@ button.bui-activity-head:hover {
 .bui-activity-head[aria-expanded='true'] > .bui-activity-chevron {
 	transform: rotate(180deg);
 }
+/* An opened row says its output in its body: the lines kept under its title are not said twice (0.12.0). */
+.bui-activity-head[aria-expanded='true'] ~ .bui-activity-tail {
+	display: none;
+}
 /* The last lines of a running step's output, muted, under its title. */
 .bui-activity-tail,
 .bui-activity-body {

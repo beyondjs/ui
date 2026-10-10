@@ -84,6 +84,12 @@ export const checks = [
 			);
 			expect(parts.length === 2 && parts[0].label === copy.in && parts[1].label === copy.out, `In and Out in one box: ${JSON.stringify(parts)}`);
 			expect(parts.every(part => part.beside && part.top <= 4), `each label beside its text: ${JSON.stringify(parts)}`);
+			const actions = await box.evaluate(node => [...node.querySelectorAll(':scope > .bui-activity-section')].map(part => {
+				const code = part.querySelector('.bui-activity-code').getBoundingClientRect();
+				const copy = part.querySelector('.bui-activity-actions')?.getBoundingClientRect();
+				return copy ? copy.left >= code.right - 0.5 && Math.abs(copy.top - code.top) <= 6 : true;
+			}));
+			expect(actions.every(Boolean), `each part's Copy at its row's end: ${JSON.stringify(actions)}`);
 			expect(!(await overflow(page)), 'still no sideways scroll once opened');
 			await page.close();
 		}

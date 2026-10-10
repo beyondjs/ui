@@ -9,7 +9,8 @@ The owner compared Conduict's conversation page with Claude Code's own conversat
 | `Rail` (new) | One line down a column of marks. It adopts a product's container (`element`) or makes one, and is a named group only with `label`. `ActivityRow` and `ActivityGroup` sit on it unchanged |
 | `RailItem` (new) | Any other event on the rail: the kind's glyph, a dot without one or a spinner while `progress`, colored by `tone`, with the product's content beside it; `update()` keeps focus inside the content |
 | `RailMoment` (new) | A time of day at the line's far end, with its whole moment in `datetime` and `title` |
-| `ActivityExchange` (new) | `{ exchange: [{ label, text }, …] }` in an opened row: one box, each part a row with its label beside its text and its own fold and Copy; a part without text is left out |
+| `ActivityExchange` (new) | `{ exchange: [{ label, text }, …] }` in an opened row: one box, each part a row with its label beside its text and its own fold and Copy at the row's end; a part without text is left out |
+| `ActivityRow` tail | Hidden while the row is open: its body says the output whole, so the kept lines are not said twice |
 | `ActivityRow` marks | Colored by state beside its words: `running` info, `waiting` and `denied` warning (`failed` was already danger) |
 | React | `Rail`, `RailItem` (driven by the DOM class, children through a portal) and `RailMoment` |
 

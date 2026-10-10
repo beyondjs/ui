@@ -86,7 +86,7 @@
 }
 
 /* What a step was given and gave back in one box (ActivityExchange): each part a row, its label beside
-   its text, the text scrolling sideways inside the box only. */
+   its text and its own Show all and Copy at the row's end, the text scrolling sideways inside the box only. */
 .bui-activity-exchange {
 	display: grid;
 	min-width: 0;
@@ -96,7 +96,7 @@
 	background: var(--color-surface-sunken);
 }
 .bui-activity-exchange > .bui-activity-section {
-	grid-template-columns: minmax(2.5rem, max-content) minmax(0, 1fr);
+	grid-template-columns: minmax(2.5rem, max-content) minmax(0, 1fr) auto;
 	column-gap: var(--space-3);
 	padding: var(--space-2) var(--space-3);
 }
@@ -107,9 +107,15 @@
 	grid-column: 1;
 	line-height: var(--leading-small);
 }
-.bui-activity-exchange .bui-activity-code,
-.bui-activity-exchange .bui-activity-actions {
+.bui-activity-exchange .bui-activity-code {
 	grid-column: 2;
+}
+.bui-activity-exchange .bui-activity-actions {
+	grid-column: 3;
+	grid-row: 1;
+	align-self: start;
+	justify-content: flex-end;
+	font-size: var(--text-small);
 }
 .bui-activity-exchange .bui-activity-code {
 	padding: 0;
