@@ -1,6 +1,5 @@
 import { Component } from '../core/component.js';
 import { el } from '../core/element.js';
-import { badge } from '../feedback.js';
 import { NavigationMenu, entry } from './menu.js';
 
 /**
@@ -12,7 +11,8 @@ import { NavigationMenu, entry } from './menu.js';
  * drawn here, except the bar's own product, which is always listed as the current one. Inside a
  * project the menu lists the project's entries in each product as Beyond Projects reports them, each
  * with its availability: an unavailable entry states its reason ("Not offered here", "Not open to you
- * yet") and is a link only when it has an address and the reason is advisory. Outside a project it
+ * yet") as the row's quiet state at its end, as the project menu states a project's (0.13.0), and is a
+ * link only when it has an address and the reason is advisory. Outside a project it
  * lists the products of the organization. Without a descriptor it holds the current product alone.
  *
  * It also carries the location's sections (`carried`), hidden until a touch screen too narrow for a
@@ -72,7 +72,8 @@ export class ProductSwitcher extends Component {
 			meta: meta || null,
 			href: places.open(item) ? item.url : null,
 			current: item.product === product ? 'page' : null,
-			note: off ? badge(this.#reason(item.reason), item.reason === 'NOT_ADMITTED' ? 'warning' : 'neutral') : null
+			state: off ? this.#reason(item.reason) : null,
+			class: off && item.reason === 'NOT_ADMITTED' ? 'bui-navmenu-advisory' : ''
 		});
 	}
 

@@ -52,7 +52,11 @@ export interface FamilyManage {
 /** The `beyond-family/1` descriptor a product relays from Beyond Projects (`GET /v1/family`). */
 export interface FamilyDescriptor {
 	protocol?: 'beyond-family/1';
-	person?: { id?: string; name: string; email?: string; locale?: string } | null;
+	/**
+	 * `email` (0.13.0) heads the profile menu under the name; `avatar` (0.13.0, D81) is the person's
+	 * picture, an `https:` or image `data:` address laid over the initials once it loads.
+	 */
+	person?: { id?: string; name: string; email?: string; locale?: string; avatar?: string } | null;
 	organizations?: FamilyOrganization[];
 	organization?: { id: string; name: string; role?: string } | null;
 	projects?: Array<{ id: string; name: string; current?: boolean; here?: FamilyHere }>;
@@ -74,7 +78,7 @@ export interface FamilyUnavailable {
 
 /** Names the product knows itself, shown while the descriptor loads or is unavailable. */
 export interface FamilyFallback {
-	person?: string | { name: string; email?: string } | null;
+	person?: string | { name: string; email?: string; avatar?: string } | null;
 	organization?: string | null;
 	project?: string | null;
 	/** The person's organizations from the product's Accounts standing (0.4.0), for the organization menu without a descriptor. */

@@ -6,7 +6,7 @@ import { Labels } from '../core/labels.js';
 import { Select } from '../select.js';
 import { callout, loading } from '../feedback.js';
 import { Cause, defaults, copies } from './labels.js';
-import { Moment } from './moment.js';
+import { Age } from '../time/age.js';
 import { Feed } from './feed.js';
 import { NoticeList } from './list.js';
 import { Actions } from './actions.js';
@@ -56,7 +56,7 @@ export class NotificationInbox extends Component {
 		this.#feed = new Feed(adapter);
 		const go = onopen ?? (destination => this.#element.ownerDocument.defaultView.location.assign(destination));
 		const actions = new Actions({ adapter, feed: this.#feed, onopen: go, changed: () => this.#draw(), say: key => this.#say(this.#labels.text(key)) });
-		this.#list = new NoticeList({ labels: this.#labels, moment: new Moment(locale), products, actions, grouped: true });
+		this.#list = new NoticeList({ labels: this.#labels, age: new Age({ locale }), products, actions, grouped: true, days: true });
 		const id = Ids.next('bui-inbox');
 		this.#buttons = ['unread', 'all'].map(value =>
 			el('button', { type: 'button', class: 'bui-toggle', 'aria-pressed': 'false', onclick: () => this.#change({ state: value }) }, [this.#labels.text(value === 'all' ? 'every' : 'unread')])

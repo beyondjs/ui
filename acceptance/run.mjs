@@ -29,6 +29,7 @@ import { checks as folding } from './checks/folding.mjs';
 import { checks as fitting } from './checks/fitting.mjs';
 import { checks as diffing } from './checks/diffing.mjs';
 import { checks as railing } from './checks/railing.mjs';
+import { checks as ending } from './checks/ending.mjs';
 
 /**
  * Browser acceptance of the packed package: `npm pack` → three consumers installed from the tarball
@@ -38,7 +39,7 @@ import { checks as railing } from './checks/railing.mjs';
 class Acceptance {
 	#root = fileURLToPath(new URL('..', import.meta.url));
 	#consumers = [new Consumer('dom', 'dom'), new Consumer('react19', 'react', '19.3.0'), new Consumer('react18', 'react', '18.3.1')];
-	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...choosing, ...icons, ...prose, ...session, ...composing, ...panels, ...thread, ...attaching, ...folding, ...fitting, ...diffing, ...railing];
+	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...choosing, ...icons, ...prose, ...session, ...composing, ...panels, ...thread, ...attaching, ...folding, ...fitting, ...diffing, ...railing, ...ending];
 	#filter = process.argv[2] ?? '';
 
 	async run() {

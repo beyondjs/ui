@@ -135,7 +135,8 @@ export const checks = [
 			const trigger = page.locator('.bui-family [data-part="account"] .bui-navmenu-button');
 			await trigger.focus();
 			await page.keyboard.press('Enter');
-			const headings = await page.locator('.bui-family [data-part="account"] .bui-navmenu-heading').allInnerTexts();
+			// Read, not drawn: the role sits at the heading's end and the separator is said (0.13.0)
+			const headings = await page.locator('.bui-family [data-part="account"] .bui-navmenu-heading').allTextContents();
 			expect(headings.some(text => text.startsWith('Northwind Studio · ')), `the organization's group: ${headings}`);
 			const hrefs = await page.locator('.bui-family [data-part="account"] a[data-manage]').evaluateAll(nodes => nodes.map(node => node.href));
 			expect(hrefs.length === 4, `account, organizations, members and settings: ${hrefs.length}`);

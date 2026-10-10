@@ -16,7 +16,14 @@ const brand = { src: '/brand/wordmark.svg', href: '/own-home' };
 const account = { signout: () => {}, items: [{ label: 'Delegate settings', href: '/settings' }, { label: 'Language and appearance', run: () => {} }] };
 const make = (options = {}) => new ui.FamilyBar({ product: 'delegate', brand, account, ...options }).mount(document.body);
 const profile = bar => bar.element.querySelector('[data-part="account"]');
-const groups = bar => [...profile(bar).querySelectorAll('.bui-navmenu-section')].map(section => [section.querySelector('.bui-navmenu-heading')?.textContent ?? null, [...section.querySelectorAll('.bui-navmenu-label')].map(node => node.textContent)]);
+// A heading's words as read: the avatar beside the person's name is aria-hidden (0.13.0)
+const read = node => {
+	if (!node) return null;
+	const copy = node.cloneNode(true);
+	for (const hidden of copy.querySelectorAll('[aria-hidden="true"]')) hidden.remove();
+	return copy.textContent;
+};
+const groups = bar => [...profile(bar).querySelectorAll('.bui-navmenu-section')].map(section => [read(section.querySelector('.bui-navmenu-heading')), [...section.querySelectorAll('.bui-navmenu-label')].map(node => node.textContent)]);
 const link = (bar, text) => [...profile(bar).querySelectorAll('a.bui-navmenu-item')].find(node => node.textContent === text);
 const back = (bar, text) => new URL(link(bar, text).getAttribute('href')).searchParams;
 
@@ -31,6 +38,9 @@ test('groups: the person, the account, the organization in view, the product, Do
 	]);
 	assert.equal(profile(bar).querySelector('.bui-family-person .bui-family-name').textContent, 'Ana Pérez');
 	assert.equal(profile(bar).querySelectorAll('a.bui-family-person, .bui-family-person a').length, 0, 'the person is a heading, not a link');
+	assert.equal(profile(bar).querySelector('.bui-family-person .bui-family-avatar-large').textContent, 'AP', 'the head carries the avatar beside the name (D78)');
+	assert.equal(profile(bar).querySelector('.bui-family-role').textContent, 'Owner', 'the role sits at the heading\'s end');
+	assert.equal(profile(bar).querySelector('.bui-family-account .bui-navmenu-button > .bui-icon'), null, 'the avatar has no chevron (D78)');
 	bar.destroy();
 });
 
@@ -111,4 +121,30 @@ test('the profile menu closes when focus leaves it, stays open for a press on it
 	assert.ok(document.activeElement === trigger, 'Escape returns focus to the avatar');
 	bar.destroy();
 	outside.remove();
+});
+
+test('the person\'s picture lies over the initials; one that fails or is not https is never shown (D81)', () => {
+	const picture = (avatar, name = 'Ana Pérez') => make({ descriptor: { ...annotated, person: { ...annotated.person, name, avatar } } });
+	const shown = picture('https://pictures.example.test/ana.png');
+	const [bar, head] = [...profile(shown).querySelectorAll('.bui-family-avatar')];
+	for (const avatar of [bar, head]) {
+		assert.equal(avatar.querySelector('img').getAttribute('src'), 'https://pictures.example.test/ana.png');
+		assert.equal(avatar.querySelector('img').getAttribute('referrerpolicy'), 'no-referrer', 'the provider never learns which product asked');
+		assert.equal(avatar.querySelector('img').getAttribute('alt'), '', 'the name is said once, by the button');
+	}
+	bar.querySelector('img').dispatchEvent(new Event('error'));
+	assert.equal(bar.querySelector('img'), null, 'a picture that fails is removed');
+	assert.equal(bar.textContent, 'AP', 'the initials remain');
+	shown.destroy();
+	for (const refused of ['http://pictures.example.test/ana.png', 'javascript:alert(1)', 'not an address']) {
+		const other = picture(refused);
+		assert.equal(profile(other).querySelector('.bui-family-avatar img'), null, refused);
+		other.destroy();
+	}
+	const inline = picture('data:image/png;base64,iVBORw0KGgo=');
+	assert.ok(profile(inline).querySelector('.bui-family-avatar img'), 'an image data address is shown');
+	inline.destroy();
+	const handle = picture(null, 'boxenrique');
+	assert.equal(profile(handle).querySelector('.bui-family-account .bui-navmenu-button .bui-family-avatar').textContent, 'B', 'a handle is one word: one initial');
+	handle.destroy();
 });

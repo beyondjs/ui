@@ -1,29 +1,34 @@
 /* Notification items (panel and inbox) and the inbox tools. */
+/* A notification row (D79, 0.13.0): the whole row opens the item. The title's button is stretched over
+   the row; what else the row holds (the mark, the earlier updates) sits above that layer. */
 .bui-notices {
 	display: grid;
+	gap: 2px;
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 .bui-notice {
+	position: relative;
 	display: grid;
-	grid-template-columns: 10px 1fr;
-	gap: var(--space-2);
-	padding: var(--space-3) var(--space-1);
-	border-bottom: 1px solid var(--color-border);
+	grid-template-columns: 8px minmax(0, 1fr);
+	column-gap: var(--space-2);
+	padding: var(--space-2);
+	border-radius: var(--radius-control);
 }
-.bui-notice:last-child {
-	border-bottom: 0;
+.bui-notice:hover,
+.bui-notice:has(> .bui-notice-text > .bui-notice-open:focus-visible) {
+	background: var(--color-surface-sunken);
 }
-/* The dot is centred on the first line of the title, whose line box is one target tall. */
+/* The dot is centred on the title's first line. */
 .bui-notice-dot {
 	width: 8px;
 	height: 8px;
-	margin-top: calc((var(--bui-target) - 8px) / 2);
+	margin-top: calc((1lh - 8px) / 2);
 	border-radius: var(--radius-round);
 }
-.bui-notice[data-read='false'] .bui-notice-dot {
-	background: var(--color-action);
+.bui-notice[data-read='false'] > .bui-notice-dot {
+	background: var(--color-accent);
 }
 .bui-notice-text {
 	display: grid;
@@ -32,21 +37,31 @@
 	min-width: 0;
 }
 .bui-notice-open {
-	padding: calc((var(--bui-target) - 1lh) / 2) 0;
+	padding: 0;
 	border: 0;
 	background: none;
-	color: var(--color-link);
+	color: var(--color-text);
 	font: inherit;
 	font-weight: var(--weight-regular);
 	text-align: left;
 	overflow-wrap: anywhere;
 	cursor: pointer;
 }
+.bui-notice-open::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+}
+.bui-notice-open:focus-visible {
+	outline: none;
+}
+.bui-notice:has(> .bui-notice-text > .bui-notice-open:focus-visible) {
+	outline: 2px solid var(--color-focus);
+	outline-offset: -2px;
+}
 .bui-notice[data-read='false'] .bui-notice-open {
 	font-weight: var(--weight-medium);
-}
-.bui-notice-open:hover {
-	text-decoration: underline;
 }
 .bui-notice-summary,
 .bui-notice-meta {
@@ -55,17 +70,92 @@
 	font-weight: var(--weight-regular);
 	overflow-wrap: anywhere;
 }
-.bui-notice-meta {
+.bui-notice-summary {
 	color: var(--color-text-muted);
+}
+.bui-notice-meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--space-1) var(--space-3);
+	width: 100%;
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+}
+/* Mark as read: quiet, at the details' end, shown while the row is pointed at or holds focus, and
+   always where nothing hovers (touch). It stays in the tab order, so it shows when it takes focus. */
+.bui-notice-mark,
+.bui-notice-toggle,
+.bui-notice-earlier {
+	position: relative;
+	z-index: 1;
+}
+/* On a pointer they are 24 px targets that keep the details' line, as crumbs are (arrival.css); on
+   touch the family target. */
+.bui-notice-mark,
+.bui-notice-toggle {
+	min-height: 0;
+	padding-block: 4px;
+	padding-block: max(1px, calc((26px - 1lh) / 2));
+	margin-block: -4px;
+	margin-block: min(-1px, calc((1lh - 26px) / 2));
+}
+@media (pointer: coarse) {
+	.bui-notice-mark,
+	.bui-notice-toggle {
+		min-height: var(--bui-target);
+		margin-block: 0;
+	}
+}
+.bui-notice-mark {
+	margin-left: auto;
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	text-decoration: none;
+	opacity: 0;
+}
+.bui-notice:hover > .bui-notice-text > .bui-notice-meta > .bui-notice-mark,
+.bui-notice:focus-within > .bui-notice-text > .bui-notice-meta > .bui-notice-mark {
+	opacity: 1;
+}
+.bui-notice-mark:hover,
+.bui-notice-mark:focus-visible {
+	color: var(--color-link);
+	text-decoration: underline;
+}
+@media (hover: none) {
+	.bui-notice-mark {
+		opacity: 1;
+	}
+}
+.bui-notice-toggle {
+	margin-top: var(--space-1);
+	font-size: var(--text-label);
 }
 .bui-notice-earlier {
 	width: 100%;
 	margin-top: var(--space-1);
-	padding-left: var(--space-3);
+	padding-left: var(--space-2);
 	border-left: 2px solid var(--color-border);
 }
 .bui-notice-earlier[hidden] {
 	display: none;
+}
+.bui-notice-day {
+	margin: var(--space-2) 0 var(--space-1);
+	padding: 0 var(--space-2);
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	letter-spacing: var(--tracking-label);
+}
+.bui-notice-day:first-child {
+	margin-top: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+	.bui-notice-mark {
+		transition: opacity var(--motion-quick) var(--motion-ease);
+	}
 }
 
 .bui-inbox {

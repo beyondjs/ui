@@ -34,12 +34,13 @@ export class NavigationMenu extends Component {
 	 * @param {string} [options.part] names the menu for focus restoration after a redraw
 	 * @param {string} [options.class]
 	 * @param {boolean} [options.hint] the button shows glyphs alone: its name appears as a tooltip (D11)
+	 * @param {boolean} [options.chevron] whether the disclosure chevron follows the label; the avatar has none (D78, 0.13.0)
 	 * @param {(open: boolean) => void} [options.onchange] after the menu opens or closes
 	 */
-	constructor({ label, name, sections, align = 'start', part = null, hint = false, onchange = null, class: extra = '' }) {
+	constructor({ label, name, sections, align = 'start', part = null, hint = false, chevron = true, onchange = null, class: extra = '' }) {
 		super();
 		this.#disclosure = new Disclosure({
-			label: [].concat(label, glyph('chevron')),
+			label: [].concat(label, chevron ? glyph('chevron') : []),
 			name,
 			align,
 			hint,

@@ -43,14 +43,18 @@ test('FamilyBar product menu: products only, in order with availability, reasons
 	assert.deepEqual(items.map(item => item.querySelector('.bui-navmenu-meta').textContent), ['This project in Workspace', 'This project in Delegate', 'This project in CDN', 'This project in Snapshots']);
 	const [workspace, delegate, cdn, snapshots] = items;
 	assert.equal(workspace.tagName, 'A', 'an advisory reason with an address stays a link');
-	assert.equal(workspace.querySelector('.bui-badge').textContent, 'Not open to you yet');
-	assert.ok(workspace.querySelector('.bui-badge-warning'));
+	// A reason is the row's quiet state at its end, as in the project menu (0.13.0)
+	const reason = item => item.querySelector('.bui-navmenu-state').lastChild.textContent;
+	assert.equal(reason(workspace), 'Not open to you yet');
+	assert.ok(workspace.classList.contains('bui-navmenu-advisory'), 'a reason the person can act on keeps the warning color');
+	assert.equal(workspace.querySelector('.bui-badge'), null, 'no badge');
 	assert.equal(cdn.tagName, 'SPAN', 'no address: not a link');
 	assert.equal(cdn.getAttribute('href'), null);
 	assert.deepEqual(['aria-disabled', 'role', 'tabindex'].map(name => cdn.getAttribute(name)), ['true', 'link', '0'], 'unavailable: disabled, named and focusable');
-	assert.equal(cdn.querySelector('.bui-badge').textContent, 'Not offered here');
+	assert.equal(reason(cdn), 'Not offered here');
+	assert.equal(cdn.classList.contains('bui-navmenu-advisory'), false);
 	assert.equal(snapshots.tagName, 'SPAN', 'a reason that is not advisory is not a link even with an address');
-	assert.equal(snapshots.querySelector('.bui-badge').textContent, 'Project archived');
+	assert.equal(reason(snapshots), 'Project archived');
 	assert.equal(delegate.getAttribute('aria-current'), 'page');
 	assert.equal(items.filter(item => item.hasAttribute('aria-current')).length, 1);
 	bar.destroy();
@@ -215,7 +219,7 @@ test('FamilyBar labels: Spanish copy replaces the English defaults; product name
 	assert.equal(button(bar, 'product').getAttribute('aria-label'), 'Producto: Delegate. Cambiar de producto');
 	assert.equal(button(bar, 'organization').getAttribute('aria-label'), 'Organización: Northwind. Cambiar de organización');
 	assert.equal(button(bar, 'project').getAttribute('aria-label'), 'Proyecto: Storefront. Cambiar de proyecto');
-	assert.equal(entries(bar, 'product')[0].querySelector('.bui-badge').textContent, 'Aún no está abierto para ti');
+	assert.equal(entries(bar, 'product')[0].querySelector('.bui-navmenu-state').textContent, ', Aún no está abierto para ti');
 	assert.equal(menu(bar, 'account').querySelector('.bui-family-signout').textContent, 'Cerrar sesión');
 	bar.destroy();
 });

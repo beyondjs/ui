@@ -17,8 +17,10 @@ export const checks = [
 			expect((await bell(page).getAttribute('aria-label')).includes('4'), 'the accessible name says the count');
 			await bell(page).click();
 			await panel(page).locator('.bui-notice').first().waitFor();
+			// The first row is one matter of two unread comments: marking it marks both (0.13.0)
+			await panel(page).locator('.bui-notice').first().hover();
 			await panel(page).getByRole('button', { name: copy.markRead }).first().click();
-			await page.waitForFunction(() => document.querySelector('.bui-notify .bui-count').textContent === '3');
+			await page.waitForFunction(() => document.querySelector('.bui-notify .bui-count').textContent === '2');
 			await page.keyboard.press('Escape');
 			expect(await page.evaluate(() => document.activeElement.closest('.bui-notify') && document.activeElement.getAttribute('aria-expanded') === 'false'), 'focus back on the bell');
 			expect(await panel(page).locator('.bui-notice').count() === 0, 'no item text kept after closing');

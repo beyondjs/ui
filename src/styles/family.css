@@ -6,6 +6,10 @@
    the letters: each part keeps its box (and its target) and moves its ink by `--bui-family-axis`. */
 .bui-family {
 	--bui-family-axis: calc(var(--bui-lockup-height, 21px) * -0.0555);
+	/* The bar's side padding, which the panels of its end keep from the viewport's edge (0.13.0). */
+	--bui-family-gutter: var(--space-4);
+	/* One width for the panels of the bar's end: notifications and the profile menu (0.13.0). */
+	--bui-family-panel: 22.5rem;
 	position: sticky;
 	top: 0;
 	z-index: var(--bui-family-layer, 45);
@@ -13,6 +17,7 @@
 	column-gap: var(--space-3);
 	height: var(--layout-family);
 	padding-block: 0;
+	padding-inline: var(--bui-family-gutter);
 }
 /* The edge: a line in the shared border token under the bar, so the bar never floats over a page or a
    sidebar of its own color (the dark sunken surface). A border, not a shadow, survives forced colors. */
@@ -32,7 +37,7 @@
 .bui-family-thread .bui-navmenu-button > *,
 .bui-family-docs > *,
 .bui-family-account .bui-navmenu-button > *,
-.bui-family .bui-disclosure-bell > .bui-icon,
+.bui-family .bui-disclosure-bell > .bui-bell,
 .bui-family .bui-header-toggle > .bui-icon {
 	translate: 0 var(--bui-family-axis);
 }
@@ -127,12 +132,12 @@
 .bui-family-narrow {
 	display: none;
 }
+/* The same line as the lockup's divider: one formula for every rule the bar draws (0.13.0). */
 .bui-family-divider {
 	flex: none;
 	width: 1px;
 	height: calc(var(--bui-lockup-height, 21px) * 0.714);
-	background: var(--color-family-muted);
-	opacity: 0.5;
+	background: color-mix(in srgb, currentColor 45%, transparent);
 }
 .bui-family-separator {
 	flex: none;
@@ -168,10 +173,23 @@
 }
 .bui-family-static {
 	display: inline-flex;
+	align-items: center;
 	min-width: 0;
+	min-height: var(--bui-target);
+	/* The menu buttons' line box, so a name shown as text and one in a button share one baseline (0.13.0). */
+	line-height: 1;
 	padding: 0 var(--space-2);
 	font-size: var(--text-small);
 	font-weight: var(--weight-medium);
+}
+/* "Choose a project" is an invitation, not a project's name: quiet until it is pointed at or open (0.13.0). */
+.bui-family-choose .bui-navmenu-button {
+	color: var(--color-family-muted);
+	font-weight: var(--weight-regular);
+}
+.bui-family-choose .bui-navmenu-button:hover,
+.bui-family-choose .bui-navmenu-button[aria-expanded='true'] {
+	color: var(--color-family-text);
 }
 .bui-family-placeholder {
 	display: inline-block;
@@ -182,10 +200,18 @@
 	background: var(--overlay-lift);
 }
 
+/* The bar's end: Docs, the notification entry and the avatar, every ink the same distance from the
+   next (0.13.0, D78). The bell's glyph sits 7 px inside its round target and the avatar 2 px inside its
+   own, so 4 px after Docs' padding and 10 px before the avatar leave 19 px between inks. The end holds
+   the panels of its menus, so both end at the bar's padding with one width. */
 .bui-family-end {
+	position: relative;
 	display: flex;
 	align-items: center;
-	gap: var(--space-2);
+	gap: var(--space-1);
+}
+.bui-family-end .bui-disclosure {
+	position: static;
 }
 .bui-family-docs {
 	display: inline-flex;
@@ -197,22 +223,70 @@
 	font-size: var(--text-small);
 	font-weight: var(--weight-medium);
 }
+.bui-family .bui-disclosure-bell,
 .bui-family-account .bui-navmenu-button {
-	padding: 0 var(--space-1);
+	justify-content: center;
+	width: var(--bui-target);
+	min-width: var(--bui-target);
+	height: var(--bui-target);
+	padding: 0;
+	border-radius: var(--radius-round);
+}
+.bui-family-account {
+	margin-left: calc(var(--space-2) - 2px);
+}
+.bui-family .bui-disclosure-bell[aria-expanded='true'] {
+	background: var(--overlay-lift);
 }
 .bui-family-avatar {
+	position: relative;
 	display: grid;
+	flex: none;
 	place-items: center;
 	width: 28px;
 	height: 28px;
+	overflow: hidden;
 	border-radius: var(--radius-round);
 	background: var(--color-family-marker);
 	color: var(--color-family-bar);
 	font-size: var(--text-label);
 	font-weight: var(--weight-medium);
 	letter-spacing: 0.02em;
+	line-height: 1;
 }
 .bui-family-avatar > .bui-icon {
 	width: 16px;
 	height: 16px;
+}
+/* The person's picture lies over the initials once it loads (D81); one that fails is removed. */
+.bui-family-picture {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.bui-family-avatar-large {
+	width: 40px;
+	height: 40px;
+	font-size: var(--text-body);
+}
+.bui-family-avatar-large > .bui-icon {
+	width: 20px;
+	height: 20px;
+}
+
+/* The panels of the bar: each opens one gap below the bar's edge, never over it (0.13.0). */
+.bui-family :is(.bui-navmenu-panel, .bui-disclosure-panel, .bui-disclosure-leaving) {
+	top: calc(100% + (var(--layout-family) - var(--bui-target)) / 2 + var(--space-1));
+	max-height: calc(100dvh - var(--layout-family) - 2 * var(--space-4));
+}
+.bui-family .bui-family-end :is(.bui-navmenu-panel, .bui-disclosure-panel, .bui-disclosure-leaving) {
+	left: auto;
+	right: 0;
+	width: min(var(--bui-family-panel), 100vw - 2 * var(--bui-family-gutter));
+	min-width: 0;
+	max-width: none;
+	padding: var(--space-2);
+	transform-origin: top right;
 }

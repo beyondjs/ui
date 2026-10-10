@@ -238,7 +238,9 @@ export const checks = [
 			expect((await page.locator('.bui-notify > button').getAttribute('aria-label')) === 'Notificaciones, 4 sin leer', 'entry name in Spanish');
 			await page.locator('#inbox .bui-notice').first().waitFor();
 			const text = await page.locator('#inbox').textContent();
-			expect(/Sin leer/.test(text) && /hace \d+ minutos/.test(text), `inbox copy and relative time in Spanish: ${text.slice(0, 160)}`);
+			// The family's short age, with the full moment in the language on hover (0.13.0)
+			const moment = await page.locator('#inbox time').first().getAttribute('title');
+			expect(/Sin leer/.test(text) && /\d+ min/.test(text) && / de /.test(moment), `inbox copy and time in Spanish: ${text.slice(0, 160)} / ${moment}`);
 			expect(/elegido/.test(await page.locator('#picking .bui-picker-count').textContent()), 'picker count in Spanish');
 		}
 	}

@@ -76,7 +76,12 @@ export const radius = {
 // (cards, panels, tables, sections) are flat. An entry with `dark` takes that value in the dark theme.
 export const elevation = {
 	flat: { value: 'none', provenance: 'captured', source: 'Flat, border-defined surfaces' },
-	menu: { value: '0 8px 16px 0 rgba(0, 0, 0, .08), 0 4px 8px 0 rgba(0, 0, 0, .06)', provenance: 'captured', source: '--shadow-5' },
+	menu: {
+		value: '0 8px 16px 0 rgba(0, 0, 0, .08), 0 4px 8px 0 rgba(0, 0, 0, .06)',
+		dark: '0 12px 28px -6px rgba(0, 0, 0, .5), 0 4px 10px 0 rgba(0, 0, 0, .32)',
+		provenance: 'captured',
+		source: '--shadow-5; its dark value (token set 0.4.2) is the family reference\'s: at 8% black a menu cast nothing on the navy page, so only its 1px border told it from what it covered'
+	},
 	dialog: {
 		value: '0 32px 64px -4px rgba(0, 0, 0, .12), 0 12px 24px -2px rgba(0, 0, 0, .06)',
 		provenance: 'captured',

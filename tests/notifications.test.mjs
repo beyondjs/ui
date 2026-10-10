@@ -46,8 +46,9 @@ test('the panel lists recent items with product and time, and forgets them when 
 	const notices = new Notices();
 	const entry = new NotificationEntry({ adapter: notices.adapter, href: '/notifications', products, limit: 3, locale: 'es' }).mount(document.body);
 	await opened(entry);
-	assert.deepEqual(notices.calls.find(([name]) => name === 'list')[1], { state: 'all', product: null, cursor: null, limit: 3 });
-	assert.equal(titles(entry.panel).length, 3);
+	assert.deepEqual(notices.calls.find(([name]) => name === 'list')[1], { state: 'all', product: null, cursor: null, limit: 9 }, 'up to three items per matter (0.13.0)');
+	assert.equal(titles(entry.panel).length, 3, 'three matters: the two comments on one request are one row');
+	assert.equal(entry.panel.querySelector('.bui-notice-toggle').textContent, '2 updates');
 	assert.match(titles(entry.panel)[0], /Export invoices” \(Unread\)/);
 	assert.match(entry.panel.textContent, /Delegate · /);
 	assert.ok(entry.panel.querySelector('time[datetime]'));
@@ -66,8 +67,9 @@ test('opening an item hands over its destination and marks it read; a gone item 
 	await opened(entry);
 	entry.panel.querySelectorAll('.bui-notice-open')[1].click();
 	await page.until(() => /no longer available/.test(entry.panel.textContent));
-	assert.equal(titles(entry.panel).some(title => title.includes('Luis')), false);
-	assert.equal(entry.panel.querySelectorAll('.bui-notice').length, 5);
+	assert.equal(entry.panel.querySelector('[data-id="n2"]'), null, 'the gone update is removed');
+	assert.equal(entry.panel.querySelector('[data-id="n1"] .bui-notice-toggle'), null, 'its matter is one update again');
+	assert.equal(entry.panel.querySelectorAll('.bui-notices > .bui-notice').length, 6, 'six matters, as the limit asks');
 	entry.panel.querySelector('.bui-notice-open').click();
 	await page.until(() => visits.length === 1);
 	assert.deepEqual(visits, ['/app/n1']);
@@ -84,9 +86,10 @@ test('mark as read and mark all as read change read state only, and refresh the 
 	assert.equal(mark.textContent, 'Mark as read');
 	mark.focus();
 	mark.click();
-	await page.until(() => entry.count === 2);
+	await page.until(() => entry.count === 1);
+	assert.equal(notices.items.filter(item => item.group === 'request:r1').every(item => item.read), true, 'marking a matter marks each of its updates');
 	assert.equal(document.activeElement.textContent, 'Mark as unread', 'focus stays on the same item');
-	entry.panel.querySelector('.bui-notify-foot .bui-link-button').click();
+	entry.panel.querySelector('.bui-notify-head .bui-notify-everything').click();
 	await page.until(() => entry.count === 0);
 	const [, target] = notices.calls.filter(([name]) => name === 'read').at(-1);
 	assert.ok(target.before, 'mark all is bounded by when the list was loaded');
@@ -150,4 +153,39 @@ test('the inbox marks all read for its product filter and survives an unavailabl
 	assert.match(inbox.element.textContent, /unavailable right now/);
 	inbox.destroy();
 	assert.equal(inbox.element.isConnected, false);
+});
+
+test('opened from the keyboard, focus goes to the first matter; arrows, Home and End move between rows and "View all"', async () => {
+	const notices = new Notices();
+	const entry = new NotificationEntry({ adapter: notices.adapter, href: '/notifications', limit: 3 }).mount(document.body);
+	bell(entry).focus();
+	page.key(bell(entry), 'Enter');
+	bell(entry).click();
+	await page.until(() => document.activeElement?.classList.contains('bui-notice-open'));
+	const rows = [...entry.panel.querySelectorAll('.bui-notice-open, .bui-notice-toggle, .bui-notify-all')].filter(node => !node.closest('[hidden]'));
+	assert.equal(document.activeElement, rows[0], 'the first row');
+	page.key(document.activeElement, 'ArrowDown');
+	assert.equal(document.activeElement, rows[1], 'the matter\'s earlier updates are reachable');
+	page.key(document.activeElement, 'End');
+	assert.equal(document.activeElement, entry.panel.querySelector('.bui-notify-all'), '"View all" is the last row');
+	page.key(document.activeElement, 'ArrowDown');
+	assert.equal(document.activeElement, rows[0], 'wraps');
+	page.key(document.activeElement, 'Escape');
+	assert.equal(document.activeElement, bell(entry));
+	entry.destroy();
+});
+
+test('rows from today and from earlier days are set under "Today" and "Earlier"; a matter keeps one row', async () => {
+	const notices = new Notices(Date.now());
+	// The matter's two comments a minute ago; the published versions three days ago
+	const days = 3 * 86400000;
+	notices.items = notices.items.map(item => (item.id.startsWith('m') ? { ...item, occurred: new Date(Date.now() - days).toISOString() } : item.group ? { ...item, occurred: new Date(Date.now() - 60000).toISOString() } : item));
+	const entry = new NotificationEntry({ adapter: notices.adapter, limit: 6, labels: NotificationEntry.labels.es, locale: 'es' }).mount(document.body);
+	await opened(entry);
+	const headings = [...entry.panel.querySelectorAll('.bui-notice-day')].map(node => node.textContent);
+	assert.deepEqual(headings, ['Hoy', 'Anteriores']);
+	assert.equal(entry.panel.querySelectorAll('[data-id="n1"]').length, 1);
+	assert.match(entry.panel.querySelector('[data-id="n1"] time').textContent, /\d/, 'the family\'s short age');
+	assert.ok(entry.panel.querySelector('[data-id="n1"] time').title, 'the full moment on hover');
+	entry.destroy();
 });

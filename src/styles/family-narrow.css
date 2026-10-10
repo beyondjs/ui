@@ -11,17 +11,15 @@
 	.bui-family .bui-navmenu {
 		position: static;
 	}
-	/* Panels are placed against the bar (the closing picture keeps these classes too). */
-	.bui-family .bui-navmenu-panel {
-		top: 100%;
-		left: var(--space-2);
+	/* The start's panels are placed against the bar, one gap below its edge and from its padding (the
+	   closing picture keeps these classes too); the end's stay with the end (family.css). */
+	.bui-family .bui-family-brand .bui-navmenu-panel,
+	.bui-family .bui-family-thread .bui-navmenu-panel {
+		top: calc(100% + var(--space-1));
+		left: var(--bui-family-gutter);
 		right: auto;
-		min-width: min(16rem, 100% - 2 * var(--space-2));
-		max-width: calc(100% - 2 * var(--space-2));
-	}
-	.bui-family .bui-navmenu-panel.bui-align-end {
-		left: auto;
-		right: var(--space-2);
+		min-width: min(16rem, 100% - 2 * var(--bui-family-gutter));
+		max-width: calc(100% - 2 * var(--bui-family-gutter));
 	}
 }
 /* Docs always shows its label (D11: the book glyph never stands alone); below 600 px, where the label
@@ -40,8 +38,8 @@
 /* Phones: the location keeps the room the other parts can give up (see the dated record's widths). */
 @media (max-width: 479px) {
 	.bui-family {
+		--bui-family-gutter: var(--space-2);
 		column-gap: var(--space-1);
-		padding-inline: var(--space-2);
 	}
 	.bui-family .bui-navmenu-button {
 		padding-right: var(--space-1);
@@ -63,21 +61,30 @@
 	.bui-family .bui-header-toggle {
 		width: 32px;
 	}
-	.bui-family-account .bui-navmenu-button {
-		padding: 0;
-	}
 	.bui-family .bui-header-end,
 	.bui-family-end {
 		gap: 0;
 	}
-	.bui-family-divider,
-	.bui-family-account .bui-navmenu-button > .bui-icon:last-child {
+	/* The avatar's target is the avatar itself, and the count moves 2 px further over the bell, so the
+	   end keeps the width it had and the count stays clear of the avatar. */
+	.bui-family-account {
+		margin-left: 2px;
+	}
+	.bui-family-account .bui-navmenu-button {
+		width: auto;
+		min-width: 0;
+		padding: 0;
+	}
+	.bui-family .bui-bell > .bui-count {
+		right: calc(-1 * var(--space-1));
+	}
+	.bui-family-divider {
 		display: none;
 	}
 }
 @media (max-width: 359px) {
 	.bui-family {
-		padding-inline: var(--space-1);
+		--bui-family-gutter: var(--space-1);
 	}
 }
 /* Touch screens below 480 px: every control of the bar is a 44 × 44 target (the toggle, the location
@@ -96,8 +103,14 @@
 	.bui-family .bui-header-toggle {
 		width: var(--bui-target);
 	}
-	.bui-family-narrow .bui-navmenu-button,
+	/* 44 px targets leave the count well clear of the avatar: the targets touch. */
+	.bui-family-account {
+		margin-left: 0;
+	}
 	.bui-family-account .bui-navmenu-button {
+		min-width: var(--bui-target);
+	}
+	.bui-family-narrow .bui-navmenu-button {
 		justify-content: center;
 		min-width: var(--bui-target);
 	}

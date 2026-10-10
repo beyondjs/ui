@@ -29,7 +29,9 @@ export const defaults = {
 	product: 'Product',
 	products: 'All products',
 	updates: ({ count }) => (count === 1 ? '1 update' : `${count} updates`),
-	hide: 'Hide earlier updates'
+	hide: 'Hide earlier updates',
+	today: 'Today',
+	earlier: 'Earlier'
 };
 
 /** The notification entry's and inbox's copy in Spanish (0.7.2; `NotificationEntry.labels.es`). */
@@ -63,7 +65,9 @@ export const spanish = {
 	product: 'Producto',
 	products: 'Todos los productos',
 	updates: ({ count }) => (count === 1 ? '1 novedad' : `${count} novedades`),
-	hide: 'Ocultar las novedades anteriores'
+	hide: 'Ocultar las novedades anteriores',
+	today: 'Hoy',
+	earlier: 'Anteriores'
 };
 
 /**

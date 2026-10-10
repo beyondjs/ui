@@ -1,18 +1,20 @@
 import { Component } from '../core/component.js';
 import { el } from '../core/element.js';
-import { glyph } from '../core/icons.js';
+import { hidden } from '../feedback.js';
 import { NavigationMenu, entry } from './menu.js';
+import { Avatar } from './avatar.js';
 import { Leave } from './leave.js';
 import { PreferencesDialog } from '../preferences/dialog.js';
 
 /**
  * The profile menu at the end of the family bar: a disclosure of links in groups.
  *
- * 1. The person: name and email, a heading.
+ * 1. The person: the avatar beside the name and the email, a heading the person reads to confirm
+ *    which account is signed in (D78, 0.13.0).
  * 2. The account: "Account and sign-in" and "Your organizations" ("Create an organization" for a
  *    person with none), at Accounts.
- * 3. The organization in view, headed "{organization} · {role}": "Members and invitations" and, when
- *    Accounts gives it (owners and administrators), "Organization settings"; then "GitHub" for every
+ * 3. The organization in view, headed by its name with the role at the heading's end: "Members and
+ *    invitations" and, when Accounts gives it (owners and administrators), "Organization settings"; then "GitHub" for every
  *    member when the descriptor carries `links.github` (D51 amending D48, since 0.7.4): Projects'
  *    GitHub section of that organization, an absolute address followed as given.
  * 4. The product's own entries, headed by the product's name: "Language and appearance" first when
@@ -27,6 +29,9 @@ import { PreferencesDialog } from '../preferences/dialog.js';
  * 0.5.0 it reads "Sign out of Beyond" (Q09) and its supported form is `signout: { end, before?,
  * after? }` (`Leave`): the product ends its own session and the bar goes to Accounts' `/leave`. The
  * earlier forms, a callback or `{ href }`, still work, and `label` rewords it.
+ *
+ * The button is the avatar alone, with no chevron (D78): its name ("Account: {name}") shows as a
+ * tooltip, and `person.avatar` lays the person's picture over the initials (D81).
  */
 export class AccountMenu extends Component {
 	#menu;
@@ -36,7 +41,7 @@ export class AccountMenu extends Component {
 
 	/**
 	 * @param {object} options
-	 * @param {{name?: string, email?: string}|null} options.person
+	 * @param {{name?: string, email?: string, avatar?: string}|null} options.person
 	 * @param {{account?: string, members?: string, docs?: string}} options.links
 	 * @param {import('./manage.js').Manage} options.manage
 	 * @param {{name: string, role?: string|null}|null} options.organization the organization in view
@@ -61,17 +66,24 @@ export class AccountMenu extends Component {
 			this.#preferences = new PreferencesDialog({ ...preferences, everywhere });
 			own.unshift(entry({ label: labels.text('preferences'), run: () => this.#open(), class: 'bui-family-preferences' }));
 		}
-		const heading = person ? el('span', { class: 'bui-family-person' }, [el('span', { class: 'bui-family-name', text: name ?? '' }), person.email ? el('span', { class: 'bui-family-email', text: person.email }) : null]) : null;
+		const picture = person?.avatar ?? null;
+		const heading = person
+			? el('span', { class: 'bui-family-person' }, [
+					new Avatar({ name, picture, size: 'large' }).element,
+					el('span', { class: 'bui-family-who' }, [el('span', { class: 'bui-family-name', text: name ?? '' }), person.email ? el('span', { class: 'bui-family-email', text: person.email }) : null])
+				])
+			: null;
 		const groups = manage.present ? this.#groups({ organization, any, labels }) : AccountMenu.#earlier({ links, organization, labels });
 		// Projects' GitHub section, for every member and only with an organization in view (PRJ-14)
 		if (organization && links.github) groups.organization.push(entry({ label: labels.text('github'), href: links.github, class: 'bui-family-github' }));
 		this.#menu = new NavigationMenu({
-			label: AccountMenu.#avatar(name),
+			label: new Avatar({ name, picture }).element,
 			name: name ? labels.text('account', { name }) : labels.text('anonymous'),
 			align: 'end',
 			part: 'account',
-			// Without a name the avatar is a person glyph alone (D11).
-			hint: !name,
+			// The avatar stands alone (D78): its name shows as a tooltip, as an icon-only control's does (D11).
+			hint: true,
+			chevron: false,
 			class: 'bui-family-account',
 			onchange: open => open && this.#complete(),
 			sections: [
@@ -150,10 +162,21 @@ export class AccountMenu extends Component {
 		}
 	}
 
-	/** "{organization} · {role}", or the name alone when the role is unknown. */
+	/**
+	 * The organization's name, with the role at the heading's end (D78), or the name alone when the role
+	 * is unknown. The separator is read, not drawn, so the heading still reads "{organization} · {role}".
+	 */
 	static #title(organization, labels) {
 		if (!organization?.role) return organization?.name ?? null;
-		return labels.text('group', { organization: organization.name, role: labels.text('role', { role: organization.role }) });
+		const role = labels.text('role', { role: organization.role });
+		const [before, after] = labels.text('group', { organization: '\u0000', role: '\u0001' }).split('\u0000');
+		const [between] = (after ?? '').split('\u0001');
+		return el('span', { class: 'bui-family-organization-heading' }, [
+			before ? hidden(before) : null,
+			el('span', { class: 'bui-family-organization-name', text: organization.name }),
+			hidden(between),
+			el('span', { class: 'bui-family-role', text: role })
+		]);
 	}
 
 	/** A callback, a link (`{ href }`), or the sign-out of Beyond (`{ end, before, after }`). */
@@ -162,16 +185,5 @@ export class AccountMenu extends Component {
 		if (typeof signout.href === 'string') return entry({ label, href: signout.href, class: 'bui-family-signout' });
 		this.#leave = new Leave({ signout, address, manage: this.#manage, product: id, label, labels, onfinish: () => this.#menu?.close(true) });
 		return this.#leave.element;
-	}
-
-	/** Initials of the name (up to two), or a person glyph when no name is known. */
-	static #avatar(name) {
-		const initials = (name ?? '')
-			.split(/\s+/)
-			.filter(Boolean)
-			.slice(0, 2)
-			.map(word => word[0].toUpperCase())
-			.join('');
-		return el('span', { class: 'bui-family-avatar', 'aria-hidden': 'true' }, [initials || glyph('user')]);
 	}
 }

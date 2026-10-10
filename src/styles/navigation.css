@@ -30,13 +30,46 @@
 	font-weight: var(--weight-medium);
 	letter-spacing: var(--tracking-label);
 }
+/* The profile menu's head: the avatar beside the name and the address, so the person confirms at a
+   glance which account is signed in (D78, 0.13.0). */
 .bui-family-person {
-	display: grid;
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	padding-block: var(--space-1) var(--space-2);
 	letter-spacing: normal;
+}
+.bui-family-who {
+	display: grid;
+	min-width: 0;
 }
 .bui-family-name {
 	color: var(--color-text);
+	font-size: var(--text-body);
+	font-weight: var(--weight-medium);
+	line-height: var(--leading-small);
+	overflow-wrap: anywhere;
+}
+.bui-family-email {
+	color: var(--color-text-muted);
 	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	overflow-wrap: anywhere;
+}
+/* The organization's group: its name, and the role quiet at the heading's end. */
+.bui-family-organization-heading {
+	display: flex;
+	align-items: baseline;
+	gap: var(--space-2);
+}
+.bui-family-organization-name {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.bui-family-role {
+	flex: none;
+	margin-left: auto;
+	font-weight: var(--weight-regular);
 }
 .bui-navmenu-list {
 	display: grid;
@@ -73,8 +106,12 @@ button.bui-navmenu-item:hover,
 .bui-navmenu-item:focus-visible {
 	background: var(--color-surface-sunken);
 }
+/* The current row is marked as the sidebar marks its current section: a sunken surface, the accent
+   at its leading edge and the link's color (0.13.0), so "here" reads the same in every list. */
 .bui-navmenu-item[aria-current] {
-	background: var(--color-surface-selected);
+	background: var(--color-surface-sunken);
+	box-shadow: inset 2px 0 0 var(--color-accent);
+	color: var(--color-link);
 	font-weight: var(--weight-medium);
 }
 /* An unavailable row: reachable and named, muted (4.5:1 on the panel), no hover and no pointer. */
@@ -91,6 +128,10 @@ button.bui-navmenu-item:hover,
 	font-size: var(--text-label);
 	font-weight: var(--weight-regular);
 	white-space: nowrap;
+}
+/* A reason a person can act on ("Not open to you yet") keeps the warning's color. */
+.bui-navmenu-advisory .bui-navmenu-state {
+	color: var(--color-warning);
 }
 .bui-navmenu-label {
 	overflow-wrap: anywhere;

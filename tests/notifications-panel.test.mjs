@@ -37,7 +37,8 @@ test('an empty inbox is one quiet line with no "View all"; with history it offer
 	entry.button.click();
 	await settled(entry);
 	assert.equal(all(entry).hidden, false, 'read items are history: "View all" shows');
-	assert.equal(entry.panel.querySelector('.bui-notify-foot .bui-link-button').hidden, true, 'nothing unread: no "Mark all as read"');
+	assert.equal(entry.panel.querySelector('.bui-notify-everything').hidden, true, 'nothing unread: no "Mark all as read"');
+	assert.equal(entry.panel.querySelector('.bui-notify-caught').textContent, 'You are all caught up.', 'nothing unread is said above the rows (0.13.0)');
 	entry.destroy();
 });
 

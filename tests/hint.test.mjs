@@ -74,7 +74,7 @@ test('toasts, chips, the anonymous account and a glyph-only action menu carry hi
 	const bar = new ui.FamilyBar({ product: 'cdn', brand: { src: '/w.svg', href: '/' }, descriptor: null, account: { signout: () => {} } }).mount(document.body);
 	assert.ok(bar.element.querySelector('[data-part="account"] .bui-navmenu-button').hasAttribute('data-bui-hint'));
 	const named = new ui.FamilyBar({ product: 'cdn', brand: { src: '/w.svg', href: '/' }, descriptor: null, fallback: { person: 'Ana Pérez' }, account: { signout: () => {} } }).mount(document.body);
-	assert.equal(named.element.querySelector('[data-part="account"] .bui-navmenu-button').hasAttribute('data-bui-hint'), false, 'initials are a visible label');
+	assert.ok(named.element.querySelector('[data-part="account"] .bui-navmenu-button').hasAttribute('data-bui-hint'), 'the avatar stands alone, so its name shows as a tooltip (D78)');
 	const bare = new ui.ActionMenu({ label: null, name: 'More actions', items: [{ label: 'Duplicate', run: () => {} }] }).mount(document.body);
 	const labelled = new ui.ActionMenu({ label: 'More', name: 'More actions', items: [{ label: 'Duplicate', run: () => {} }] }).mount(document.body);
 	assert.ok(bare.element.querySelector('.bui-menu-button').hasAttribute('data-bui-hint'));

@@ -19,12 +19,14 @@ import { typography, space, radius, elevation, overlay, motion, density, layout,
  * LR-02. Token set 0.4.0 adds three layout proposals (`pending`: the thread tier and the panel's
  * widths of the family proposal D67, adopted by Conduict); they are not approved family rules, and the
  * rest of the set stays approved. Token set 0.4.1 (2026-10-08) raises the pending `aside-max` to 40rem and
- * lets the wide form grow past `aside-wide`, still proposals. Each entry's own `provenance` still says whether its value
+ * lets the wide form grow past `aside-wide`, still proposals. Token set 0.4.2 (2026-10-09) gives the menu
+ * elevation a dark value, so a menu, a popover and the family bar's panels lift off the navy page as
+ * D10 intends instead of casting nothing. Each entry's own `provenance` still says whether its value
  * was captured or introduced by the family reference. `version` identifies the token set; a product
  * review cites it together with the package version.
  */
 export const tokens = {
-	version: '0.4.1',
+	version: '0.4.2',
 	status: 'approved',
 	source: 'Verified capture of the public Beyond site, 2026-09-18, with the family reference\'s additions',
 	approval: {

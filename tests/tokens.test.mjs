@@ -10,17 +10,17 @@ import { tokens, TokenSheet, Contrast } from '@beyond-js/ui/tokens';
  * token set 0.3.0 (the family page system, D52, approved on 2026-10-04) adds the layout tokens, 0.3.1
  * narrows the reading measure from 68ch to the 54ch measured against LR-02, and 0.4.0 adds the thread
  * tier and the panel's widths of the family proposal D67 as pending, not approved; 0.4.1 raises the
- * pending panel maximum to 40rem.
+ * pending panel maximum to 40rem; 0.4.2 gives the menu elevation a dark value.
  * Imported through the package's own export, as consumers import it.
  */
 const fixture = new URL('./fixtures/branding-tokens-0.1.0.css', import.meta.url);
 const built = new URL('../dist/tokens.css', import.meta.url);
 const { primitives, themes, pairs } = tokens.color;
-const dark = ['--color-border-control: #8e99bb;', '--elevation-window: 0 14px 30px -12px rgba(12, 21, 37, .9);', '--elevation-window-focus: 0 30px 64px -16px rgba(12, 21, 37, .96);'];
+const dark = ['--color-border-control: #8e99bb;', '--elevation-menu: 0 12px 28px -6px rgba(0, 0, 0, .5), 0 4px 10px 0 rgba(0, 0, 0, .32);', '--elevation-window: 0 14px 30px -12px rgba(12, 21, 37, .9);', '--elevation-window-focus: 0 30px 64px -16px rgba(12, 21, 37, .96);'];
 const changes = {
 	removed: ['/* Beyond family tokens 0.1.0 (proposed). Generated from src/foundations; do not edit. */', '\t--text-label: 0.6875rem;', '\t--tracking-label: 0.08em;', '\t--layout-measure: 68ch;'],
 	added: [
-		'/* Beyond family tokens 0.4.1 (approved). Generated from src/foundations; do not edit. */',
+		'/* Beyond family tokens 0.4.2 (approved). Generated from src/foundations; do not edit. */',
 		// 0.4.0: the family proposal D67, adopted by Conduict and shipped as pending, not approved; 0.4.1 raises the panel's maximum
 		'\t--layout-thread: 52rem;',
 		'\t--layout-aside-max: 40rem;',
@@ -56,7 +56,7 @@ const without = (lines, listed) => {
 	});
 };
 
-test('the 0.4.1 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
+test('the 0.4.2 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
 	const baseline = readFileSync(fixture, 'utf8').split('\n');
 	const current = `${new TokenSheet(tokens).css}\n`.split('\n');
 	for (const line of changes.removed) assert.ok(baseline.includes(line) && !current.includes(line), `removed: ${line}`);
@@ -69,7 +69,7 @@ test('the packed tokens.css is the generated sheet', () => {
 });
 
 test('version, status, approval and provenance of the token set are recorded', () => {
-	assert.equal(tokens.version, '0.4.1');
+	assert.equal(tokens.version, '0.4.2');
 	assert.deepEqual(tokens.pending.tokens, ['layout.thread', 'layout.aside-max', 'layout.aside-wide'], 'the proposals are recorded as pending');
 	for (const name of ['thread', 'aside-max', 'aside-wide']) assert.match(tokens.layout[name].reason, /Not an approved family rule/, name);
 	assert.equal(tokens.status, 'approved');
@@ -103,6 +103,7 @@ test('elevation: menu, dialog and the two window levels; the window levels chang
 	const sheet = new TokenSheet(tokens);
 	assert.ok(sheet.shared.includes(`--elevation-window: ${tokens.elevation.window.value};`));
 	assert.ok(sheet.theme('dark').includes(`--elevation-window-focus: ${tokens.elevation['window-focus'].dark};`));
+	assert.ok(sheet.theme('dark').includes(`--elevation-menu: ${tokens.elevation.menu.dark};`), 'a menu lifts off the dark page (0.4.2)');
 	assert.ok(!sheet.theme('light').some(line => line.startsWith('--elevation-')));
 });
 
