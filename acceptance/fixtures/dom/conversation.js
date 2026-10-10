@@ -5,7 +5,7 @@
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { FamilyBar, Sidebar, Page, PageHeader, Section, Button, Composer, LiveText, ActivityRow, ActivityGroup, Steps, ChoiceMenu, status, el } from '@beyond-js/ui';
+import { FamilyBar, Sidebar, Page, PageHeader, Section, Button, Composer, LiveText, ActivityRow, ActivityGroup, Steps, ChoiceMenu, Rail, RailItem, RailMoment, status, el } from '@beyond-js/ui';
 import { chosen, fallback, product } from '../data/family.js';
 import { shape, words, groups, search, output, plan, answer } from '../data/conversation.js';
 
@@ -35,7 +35,10 @@ const failed = new ActivityRow({ glyph: 'terminal', title: 'Ran npm test', meta:
 const running = new ActivityRow({ glyph: 'terminal', title: 'Running npm test -- --reporter=spec test/checkout/failed-payment.test.js test/checkout/redirect.test.js', state: shape.running ? 'running' : 'done', since: Date.now() - 4000, tail: 'ok 1 - keeps the cart\nok 2 - shows the error', body: () => [{ label: 'Input', text: 'npm test -- --reporter=spec' }] });
 const steps = new Steps({ label: copy.plan, steps: plan(['Read the checkout', 'Write the failing test', 'Commit']), announce: false });
 const live = new LiveText({ render: paragraphs });
-const thread = el('div', { class: 'thread' }, [el('p', { class: 'message', text: 'Also add a test for a failed payment that keeps the cart, then commit it.' }), read.element, edit.element, failed.element, running.element, steps.element, live.element]);
+// The rail of 0.12.0: rows and events on one line, a time where the clock moved, a command's exchange in one box
+const exchanged = new ActivityRow({ glyph: 'terminal', title: 'Ran npm test -- login', meta: 'exit 1', state: 'failed', duration: 4_000, body: () => [{ exchange: [{ label: 'In', text: 'npm test -- login' }, { label: 'Out', text: output }] }] });
+const rail = new Rail({ label: 'Work of this turn', children: [new RailItem({ glyph: 'clock', content: el('p', { class: 'said', text: 'Thought for 9 s' }) }), exchanged, new RailItem({ content: el('p', { class: 'said', text: 'The session check reads the cookie before the clock is set.' }) }), new RailMoment({ text: '10:51', datetime: '2026-10-09T10:51:00Z', title: '9 Oct 2026, 10:51' }), new ActivityRow({ glyph: 'terminal', title: 'Run git commit', state: 'waiting' }), new RailItem({ glyph: 'alert', tone: 'danger', content: el('p', { class: 'said', text: "Didn't reach Claude Code" }) })] });
+const thread = el('div', { class: 'thread' }, [el('p', { class: 'message', text: 'Also add a test for a failed payment that keeps the cart, then commit it.' }), read.element, edit.element, failed.element, running.element, steps.element, live.element, rail.element]);
 
 const composer = new Composer({ label: copy.message, placeholder: copy.placeholder, actions: [{ id: 'queue', label: copy.queue }], stop: shape.running ? { label: copy.interrupt, run: () => new Promise(resolve => setTimeout(() => (log.push('interrupt'), resolve()), 800)) } : null, onsubmit: send });
 const environment = new ChoiceMenu({ label: copy.environment, options: [{ value: 'web', label: 'web', status: ['Stopped', 'neutral'] }, { value: 'lab', label: 'lab' }], value: 'web' });
@@ -53,7 +56,7 @@ Object.assign(fixture, {
 	composer,
 	fresh,
 	live,
-	rows: { read, edit, failed, running },
+	rows: { read, edit, failed, running, exchanged },
 	sidebar,
 	page: view,
 	/** Streams the answer in pieces of `size` characters every `every` ms; resolves with the frames that passed. */

@@ -1,0 +1,118 @@
+/* A rail of work (Rail, RailItem, RailMoment, 0.12.0): one thin line down the column of marks, each
+   activity row's own mark or a RailItem's sitting on it, colored by its state beside its words; a time
+   of day at the far end where the clock moved. The surface under the marks is the rail's background
+   (`--bui-rail-surface`, the canvas unless a product's container says otherwise), so the line passes
+   behind them. Nothing moves under reduced motion (the spinner's own rule). */
+.bui-rail {
+	--bui-rail-surface: var(--color-canvas);
+	position: relative;
+	min-width: 0;
+}
+.bui-rail::before {
+	content: '';
+	position: absolute;
+	inset-block: calc(var(--space-1) + 0.5lh);
+	inset-inline-start: calc(var(--space-2) + 8px);
+	width: 1px;
+	background: var(--color-border-strong);
+	pointer-events: none;
+}
+.bui-rail:empty::before {
+	content: none;
+}
+.bui-rail .bui-activity-mark,
+.bui-rail-mark {
+	position: relative;
+	border-radius: var(--radius-round);
+	background: var(--bui-rail-surface);
+}
+.bui-rail button.bui-activity-head:hover .bui-activity-mark {
+	background: var(--color-surface-sunken);
+}
+.bui-rail-item {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+	min-width: 0;
+	padding-inline-start: var(--space-2);
+}
+.bui-rail-mark {
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	width: 18px;
+	height: 1lh;
+	color: var(--color-text-muted);
+}
+.bui-rail-mark .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-rail-mark .bui-spinner {
+	width: 11px;
+	height: 11px;
+}
+.bui-rail-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: var(--radius-round);
+	background: currentColor;
+}
+.bui-rail-content {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+.bui-rail-item[data-tone='success'] > .bui-rail-mark {
+	color: var(--color-success);
+}
+.bui-rail-item[data-tone='info'] > .bui-rail-mark,
+.bui-rail-item[data-tone='progress'] > .bui-rail-mark {
+	color: var(--color-info);
+}
+.bui-rail-item[data-tone='warning'] > .bui-rail-mark {
+	color: var(--color-warning);
+}
+.bui-rail-item[data-tone='danger'] > .bui-rail-mark {
+	color: var(--color-danger);
+}
+.bui-rail-moment {
+	margin: 0;
+	padding-inline-start: calc(18px + 2 * var(--space-2));
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-regular);
+	font-variant-numeric: tabular-nums;
+	text-align: end;
+}
+
+/* What a step was given and gave back in one box (ActivityExchange): each part a row, its label beside
+   its text, the text scrolling sideways inside the box only. */
+.bui-activity-exchange {
+	display: grid;
+	min-width: 0;
+	overflow: hidden;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	background: var(--color-surface-sunken);
+}
+.bui-activity-exchange > .bui-activity-section {
+	grid-template-columns: minmax(2.5rem, max-content) minmax(0, 1fr);
+	column-gap: var(--space-3);
+	padding: var(--space-2) var(--space-3);
+}
+.bui-activity-exchange > .bui-activity-section + .bui-activity-section {
+	border-top: 1px solid var(--color-border);
+}
+.bui-activity-exchange .bui-activity-label {
+	grid-column: 1;
+	line-height: var(--leading-small);
+}
+.bui-activity-exchange .bui-activity-code,
+.bui-activity-exchange .bui-activity-actions {
+	grid-column: 2;
+}
+.bui-activity-exchange .bui-activity-code {
+	padding: 0;
+	border: 0;
+	background: transparent;
+}

@@ -7,7 +7,7 @@ import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { StrictMode, useLayoutEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { FamilyBar, Sidebar, Page, PageHeader, PanelToggle, Section, Status, Composer, LiveText, ActivityRow, ActivityGroup, Steps, ChoiceMenu } from '@beyond-js/ui/react';
+import { FamilyBar, Sidebar, Page, PageHeader, PanelToggle, Section, Status, Composer, LiveText, ActivityRow, ActivityGroup, Steps, ChoiceMenu, Rail, RailItem, RailMoment } from '@beyond-js/ui/react';
 import { chosen, fallback, product } from '../data/family.js';
 import { shape, words, groups, search, output, plan, answer } from '../data/conversation.js';
 import { es } from './labels.js';
@@ -70,6 +70,20 @@ function View() {
 							<ActivityRow glyph="terminal" title="Ejecutando npm test -- --reporter=spec test/checkout/failed-payment.test.js test/checkout/redirect.test.js" state={shape.running ? 'running' : 'done'} since={Date.now() - 4000} tail={'ok 1 - conserva el carrito\nok 2 - muestra el error'} body={[{ label: 'Entrada', text: 'npm test -- --reporter=spec' }]} labels={activityLabels} />
 							<Steps label={copy.plan} steps={plan(['Leer el pago', 'Escribir la prueba que falla', 'Confirmar'])} announce={false} labels={stepsLabels} />
 							<LiveText ref={live} labels={liveLabels} render={text => <Drawn text={text} />} />
+							<Rail label="Trabajo de este turno">
+								<RailItem glyph="clock">
+									<p className="said">Pensó 9 s</p>
+								</RailItem>
+								<ActivityRow glyph="terminal" title="Ejecutó npm test -- login" meta="salida 1" state="failed" duration={4_000} body={[{ exchange: [{ label: 'Entrada', text: 'npm test -- login' }, { label: 'Salida', text: output }] }]} labels={activityLabels} />
+								<RailItem>
+									<p className="said">La comprobación de la sesión lee la cookie antes de fijar el reloj.</p>
+								</RailItem>
+								<RailMoment text="10:51" datetime="2026-10-09T10:51:00Z" title="9 oct 2026, 10:51" />
+								<ActivityRow glyph="terminal" title="Ejecutar git commit" state="waiting" labels={activityLabels} />
+								<RailItem glyph="alert" tone="danger">
+									<p className="said">No llegó a Claude Code</p>
+								</RailItem>
+							</Rail>
 						</div>
 						<div className="dock">
 							<Composer label={copy.message} placeholder={copy.placeholder} actions={[{ id: 'queue', label: copy.queue }]} stop={shape.running ? { label: copy.interrupt, onSelect: () => new Promise(resolve => setTimeout(() => (log.push('interrupt'), resolve()), 800)) } : null} onSubmit={send} labels={composerLabels} />

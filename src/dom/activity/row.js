@@ -5,6 +5,7 @@ import { Labels } from '../core/labels.js';
 import { Clock } from '../time/clock.js';
 import { TimeWords } from '../time/words.js';
 import { ActivityHead } from './head.js';
+import { ActivityExchange } from './exchange.js';
 import { ActivitySection } from './section.js';
 import { activity as copy } from './labels.js';
 
@@ -15,7 +16,9 @@ import { activity as copy } from './labels.js';
  * how long it took or has run on the page's `Clock`.
  *
  * Opening it builds its body once, from `body()`: nodes, components or section records such as
- * `{ label: 'Output', text }` (`ActivitySection`: the first 12 lines, "Show all", "Copy"). `update()`
+ * `{ label: 'Output', text }` (`ActivitySection`: the first 12 lines, "Show all", "Copy"), or
+ * `{ exchange: [{ label: 'In', text }, { label: 'Out', text }] }` for what a step was given and gave back
+ * in one box (`ActivityExchange`, 0.12.0). `update()`
  * patches only what changed, so a live change keeps the row open or closed and keeps focus; a new
  * `body` is built again at once when open, at the next opening otherwise. A running row may show the
  * last lines of its output under it (`tail`), which the product clears when the step ends. A row
@@ -192,6 +195,7 @@ export class ActivityRow extends Component {
 		if (part.nodeType) return part;
 		if (part.element?.nodeType) return part.element;
 		if (typeof part === 'string') return el('p', { class: 'bui-activity-note', text: part });
+		if (Array.isArray(part.exchange)) return new ActivityExchange(part.exchange, this.#labels).element;
 		return new ActivitySection(part, this.#labels).element;
 	}
 

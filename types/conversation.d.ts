@@ -233,7 +233,9 @@ export class LiveText extends Component {
 export type ActivityState = 'running' | 'done' | 'failed' | 'denied' | 'waiting';
 /** A section of an opened row: text in a code box (first `lines`, "Show all", "Copy"), a sentence, or the product's node. */
 export type ActivitySection = { label?: Content | null; text: string; code?: boolean; lines?: number; copy?: boolean } | { label?: Content | null; content: Part };
-export type ActivityPart = Node | { element: Node } | string | ActivitySection;
+/** What a step was given and gave back, in one box: each part a row with its label beside its text (0.12.0). */
+export type ActivityExchangePart = { label: string; text?: string | null; lines?: number; copy?: boolean };
+export type ActivityPart = Node | { element: Node } | string | ActivitySection | { exchange: ActivityExchangePart[] };
 export interface ActivityValues {
 	glyph?: IconName;
 	title?: Content;
@@ -282,6 +284,5 @@ export class ActivityGroup extends Component {
 	close(): void;
 	toggle(): void;
 }
-
 // Only the declarations marked `export` are public.
 export {};

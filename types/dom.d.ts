@@ -280,6 +280,7 @@ export * from './choose.js';
 export * from './session.js';
 export * from './sidebar.js';
 export * from './conversation.js';
+export * from './rail.js';
 export * from './resource.js';
 export * from './shared.js';
 export * from './diff.js';

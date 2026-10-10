@@ -45,3 +45,6 @@ main {
 	gap: var(--space-1);
 	margin: 0;
 }
+.said {
+	margin: 0;
+}

@@ -10,5 +10,5 @@
 		"lib": ["ES2023", "DOM", "DOM.Iterable"],
 		"types": []
 	},
-	"include": ["consumer.tsx", "dom.ts", "conversation.ts", "conversation.tsx", "resource.ts", "resource.tsx", "shared.ts", "shared.tsx", "diff.ts", "diff.tsx", "fixes.ts", "fixes.tsx", "../../../types/*.d.ts"]
+	"include": ["consumer.tsx", "dom.ts", "conversation.ts", "conversation.tsx", "resource.ts", "resource.tsx", "shared.ts", "shared.tsx", "diff.ts", "diff.tsx", "fixes.ts", "fixes.tsx", "rail.ts", "rail.tsx", "../../../types/*.d.ts"]
 }

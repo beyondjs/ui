@@ -53,6 +53,14 @@ button.bui-activity-head:hover {
 .bui-activity[data-state='failed'] > .bui-activity-head .bui-activity-mark {
 	color: var(--color-danger);
 }
+/* A row's mark follows its state beside its words (0.12.0): what runs, what waits for the person, what was denied. */
+.bui-activity[data-state='running'] > .bui-activity-head .bui-activity-mark {
+	color: var(--color-info);
+}
+.bui-activity[data-state='waiting'] > .bui-activity-head .bui-activity-mark,
+.bui-activity[data-state='denied'] > .bui-activity-head .bui-activity-mark {
+	color: var(--color-warning);
+}
 .bui-activity-text {
 	display: flex;
 	flex-wrap: wrap;

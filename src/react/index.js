@@ -32,6 +32,7 @@ export { PreferencesDialog } from '../dom/preferences/dialog.js';
 export { Page, PageHeader, Section, Arrival, Tabs, ListDetail, PanelToggle } from './page.js';
 export { PagePanel } from '../dom/page/panel.js';
 export { Composer, LiveText, ActivityRow, ActivityGroup } from './conversation.js';
+export { Rail, RailItem, RailMoment } from './rail.js';
 export { Facts, Meter } from './resource.js';
 export { useInstance } from './hooks.js';
 export { Diff } from './diff.js';

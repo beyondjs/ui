@@ -1,4 +1,4 @@
-/** Types of the React forms of the 0.10.0 pieces (`Composer`, `LiveText`, `ActivityRow`, `ActivityGroup`, `PanelToggle`), re-exported by `@beyond-js/ui/react`. */
+/** Types of the React forms of the 0.10.0 pieces (`Composer`, `LiveText`, `ActivityRow`, `ActivityGroup`, `PanelToggle`) and 0.12.0's rail (`Rail`, `RailItem`, `RailMoment`), re-exported by `@beyond-js/ui/react`. */
 import type { ForwardRefExoticComponent, ReactElement, ReactNode, RefAttributes } from 'react';
 import type { Copy } from './notifications.js';
 import type { ActivitySection, ActivityState, Clock, ComposerAction, ComposerAttachment, ComposerMessage, ComposerSubmit, ComposerSuggestAnswer, ComposerSuggestion, ComposerSuggestSettings, IconName, Moment } from './dom.js';
@@ -96,6 +96,13 @@ export function ActivityGroup(props: { glyph?: IconName; title: string | ((count
 export namespace ActivityGroup { const labels: Copies; }
 /** The toggle of the page's panel ("Details"), rendered inside a `Page` with `panel` (0.10.0). */
 export function PanelToggle(props: { label: ReactNode; variant?: 'primary' | 'secondary' | 'quiet' | 'danger'; glyph?: IconName | null }): ReactElement;
+/** A rail of work in React (0.12.0): one line down the column of its children's marks. */
+export function Rail(props: { label?: string | null; children?: ReactNode }): ReactElement;
+/** One event on a rail, driven by the DOM `RailItem` (0.12.0): a mark and the children beside it. */
+export function RailItem(props: { glyph?: IconName | null; tone?: 'neutral' | 'success' | 'info' | 'progress' | 'warning' | 'danger'; children?: ReactNode }): ReactElement;
+export namespace RailItem { const tones: readonly ('neutral' | 'success' | 'info' | 'progress' | 'warning' | 'danger')[]; }
+/** A time of day at a rail's far end, driven by the DOM `RailMoment` (0.12.0). */
+export function RailMoment(props: { text: string; datetime?: string | null; title?: string | null }): ReactElement;
 
 // Only the declarations marked `export` are public.
 export {};
