@@ -128,8 +128,11 @@ export const checks = [
 				const top = (await place()).top;
 				expect(Math.abs(top - found.top) <= 1 || Math.abs(top - 68) <= 2, `${scheme}: it stays in view while the page scrolls: ${top}`);
 				await toggle.click();
+				// Since 0.14.0 (D95) it leaves before its column goes: the toggle says it at once, the panel once its exit played
+				expect((await toggle.getAttribute('aria-expanded')) === 'false', `${scheme}: the toggle says it at once`);
+				await page.waitForFunction(() => document.querySelector('.bui-page-panel').hidden);
 				found = await place();
-				expect(!found.shown && (await toggle.getAttribute('aria-expanded')) === 'false', `${scheme}: hidden by its toggle`);
+				expect(!found.shown, `${scheme}: hidden by its toggle`);
 				expect(await page.evaluate(() => window.fixture.log.includes('panel:false')), 'the choice is reported');
 				await toggle.click();
 				expect((await place()).shown, 'shown again');

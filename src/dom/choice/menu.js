@@ -199,8 +199,9 @@ export class ChoiceMenu extends Component {
 		}
 		ChoiceFace.draw(this.#button, this.#label, this.chosen, this.#labels.text('placeholder'), this.#settings.face);
 		const parts = [this.#button, this.#panel, this.#input].filter(Boolean);
-		// Replaced only when they differ: moving the focused button would drop its focus.
-		if (parts.length !== this.#element.childNodes.length || parts.some((part, index) => this.#element.childNodes[index] !== part)) this.#element.replaceChildren(...parts);
+		// Replaced only when they differ (a leaving picture aside): moving the focused button would drop its focus.
+		const present = [...this.#element.childNodes].filter(node => !node.classList?.contains('bui-leaving'));
+		if (parts.length !== present.length || parts.some((part, index) => present[index] !== part)) this.#element.replaceChildren(...parts);
 		if (typing) return this.#finder.field?.focus({ preventScroll: true });
 		if (!active) return;
 		const same = active.option ? this.#entries.find(entry => entry.option?.value === active.option.value) : null;

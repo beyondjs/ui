@@ -31,7 +31,7 @@ const measure = page =>
 
 export const checks = [
 	{
-		name: 'thread tier at 1440, 1920 and 2560 px in both themes: the panel beside with its head, fluid between the aside tier and its maximum (40rem since 0.11.2), no band between thread and panel; the wide form takes every width the thread leaves, to the region\'s edge',
+		name: 'thread tier at 1440, 1920 and 2560 px in both themes: the panel beside with its head, fluid between the aside tier and its maximum (40rem since 0.11.2), next to the lane since 0.14.0, no band between thread and panel; the wide form takes every width the thread leaves, to the region\'s edge',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const copy = words[consumer.language];
@@ -44,7 +44,15 @@ export const checks = [
 					expect(found.panel.width >= sizes.aside - 1 && found.panel.width <= sizes.max + 1, `${at}: the panel between its tiers: ${found.panel.width}`);
 					expect(Math.abs(found.panel.left - found.main.right - sizes.gap) <= 1.5, `${at}: one gap between thread and panel, no band: ${found.panel.left - found.main.right}`);
 					expect(found.main.width <= sizes.thread + 1, `${at}: the thread at most its tier: ${found.main.width}`);
-					if (width >= 1920) expect(Math.abs(found.panel.width - sizes.max) <= 1 && Math.abs(found.main.width - sizes.thread) <= 1, `${at}: thread at its tier and the panel at its maximum: ${JSON.stringify(found)}`);
+					// Since 0.14.0 (D96) the panel comes next to the lane: the main column is the lane, the panel at its maximum
+					const lane = await page.evaluate(() => {
+						const probe = document.querySelector('.bui-page-main').appendChild(document.createElement('div'));
+						probe.style.width = 'var(--layout-lane)';
+						const measured = probe.getBoundingClientRect().width;
+						probe.remove();
+						return measured;
+					});
+					if (width >= 1920) expect(Math.abs(found.panel.width - sizes.max) <= 1 && Math.abs(found.main.width - lane) <= 1, `${at}: the thread at its lane and the panel at its maximum: ${JSON.stringify({ ...found, lane })}`);
 					if (width === 1440) expect(found.panel.width > sizes.aside - 1 && found.main.width < sizes.thread, `${at}: the thread gives first: ${JSON.stringify(found)}`);
 					const head = page.locator('.bui-page-panel-head');
 					expect((await head.locator('h2').textContent()) === copy.details && (await head.locator('.bui-page-panel-hide').getAttribute('aria-label')) === copy.hide, `${at}: the panel's head`);

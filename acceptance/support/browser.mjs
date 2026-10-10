@@ -7,7 +7,12 @@ import { chromium, firefox, webkit } from 'playwright-core';
  * viewport, color scheme, motion and touch never leak between checks.
  */
 export class Browser {
-	static ENGINES = { chrome: () => chromium.launch({ channel: 'chrome', headless: true }), firefox: () => firefox.launch(), webkit: () => webkit.launch() };
+	// Chrome and Firefox answer getUserMedia with a fake microphone and no prompt (0.14.0's dictation check)
+	static ENGINES = {
+		chrome: () => chromium.launch({ channel: 'chrome', headless: true, args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] }),
+		firefox: () => firefox.launch({ firefoxUserPrefs: { 'media.navigator.streams.fake': true, 'media.navigator.permission.disabled': true } }),
+		webkit: () => webkit.launch()
+	};
 
 	#browser = null;
 	#engine;
