@@ -102,3 +102,17 @@ already drew no picture.
 
 Family reference: no reference impact. The reference models D95 as stated (nothing moves under reduced motion);
 0.14.1 corrects the package toward that rule for hosts with a reduced-motion preference of their own.
+
+## Addendum: 0.14.2
+
+Found while verifying Conduict's adoption of the round: an `ActionLine` quieted its `Button`s, links and link
+buttons but not a `Disclosure` (`.bui-disclosure-button`), so an answer's **Details** kept its bordered look
+beside the quiet Copy and Copy link, against D102 (one control style per quiet line). 0.14.2 adds the disclosure
+button to the line's quiet rule and to its hover, focus and open state; `tests/quiet.test.mjs` holds both rules to
+it. No API or declaration changed. Re-vendored into Conduict, where the defect was seen.
+
+| Check (0.14.2) | Result |
+| --- | --- |
+| `npm test` | 568 passing |
+| `npm run types` | Passes |
+| `npm run acceptance` | 283 of 283 in Chrome, Firefox and WebKit (`BEYOND_UI_BROWSER`), each engine run whole |

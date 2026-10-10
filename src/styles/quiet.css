@@ -19,7 +19,7 @@
 	min-width: 0;
 	margin-inline-start: calc(-1 * var(--space-2));
 }
-.bui-action-line-actions :is(.bui-button, a, .bui-link-button) {
+.bui-action-line-actions :is(.bui-button, a, .bui-link-button, .bui-disclosure-button) {
 	min-height: var(--bui-target);
 	padding: 0 var(--space-2);
 	border-color: transparent;
@@ -30,7 +30,7 @@
 	font-weight: var(--weight-regular);
 	text-decoration: none;
 }
-.bui-action-line-actions :is(.bui-button, a, .bui-link-button):is(:hover, :focus-visible, [aria-expanded='true']) {
+.bui-action-line-actions :is(.bui-button, a, .bui-link-button, .bui-disclosure-button):is(:hover, :focus-visible, [aria-expanded='true']) {
 	background: var(--color-surface-sunken);
 	color: var(--color-text);
 }

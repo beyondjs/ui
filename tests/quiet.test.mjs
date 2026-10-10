@@ -162,3 +162,11 @@ test('a host that removes animations by its own preference gets no still picture
 		page.window.getComputedStyle = computed;
 	}
 });
+
+test('an action line quiets every kind of action it holds, a disclosure (an answer\'s Details) included (0.14.2)', async () => {
+	const { readFileSync } = await import('node:fs');
+	const sheet = readFileSync(new URL('../src/styles/quiet.css', import.meta.url), 'utf8');
+	const rules = sheet.match(/\.bui-action-line-actions :is\([^)]*\)/g) ?? [];
+	assert.ok(rules.length >= 2, 'the quiet rule and its hover rule');
+	for (const rule of rules) assert.match(rule, /\.bui-disclosure-button/, `${rule} leaves a disclosure bordered`);
+});
