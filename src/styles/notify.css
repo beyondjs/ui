@@ -17,7 +17,8 @@
 }
 .bui-bell > .bui-count {
 	position: absolute;
-	top: calc(-1 * var(--space-2));
+	/* 6 px above the glyph's box: the count stays inside a host's low bar (the Desktop's 34 px). */
+	top: calc(2px - var(--space-2));
 	/* The glyph ends 7 px inside the bell's round target: the count ends 1 px inside it. */
 	right: calc(2px - var(--space-2));
 	min-width: 16px;
@@ -50,7 +51,9 @@
 	.bui-notify {
 		position: static;
 	}
-	.bui-header:not(.bui-family) .bui-notify :is(.bui-disclosure-panel, .bui-disclosure-leaving) {
+	/* Any bell's panel spans the viewport less a gutter on each side (a host's own header included,
+	   as the Desktop's); the family bar's end places its panels itself (family.css, more specific). */
+	.bui-notify :is(.bui-disclosure-panel, .bui-disclosure-leaving) {
 		left: var(--space-4);
 		right: var(--space-4);
 		width: auto;

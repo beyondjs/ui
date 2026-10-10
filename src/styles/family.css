@@ -142,6 +142,8 @@
 .bui-family-separator {
 	flex: none;
 	color: var(--color-family-muted);
+	/* The names' line box, so "/" sits on their baseline (0.13.1). */
+	line-height: 1;
 }
 /* Wide, the organization and the project share the location's width: each grows from nothing, in
    equal parts, up to its whole name, so a short name is shown whole and the longer one takes the

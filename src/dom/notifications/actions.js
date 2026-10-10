@@ -21,7 +21,12 @@ export class Actions {
 		this.#say = say;
 	}
 
-	async open(item) {
+	/**
+	 * Opens `item`; `members` are the updates of its matter (0.13.1), all marked read once it opens, so a
+	 * matter the person opened is no longer unread. A failure to mark the others leaves them as they were
+	 * and never holds the opening back.
+	 */
+	async open(item, members = [item]) {
 		let answer;
 		try {
 			answer = await this.#adapter.open(item.id);
@@ -32,7 +37,17 @@ export class Actions {
 		}
 		const destination = answer?.destination ?? null;
 		if (!destination) return this.#gone(item);
-		this.#feed.update(item.id, { read: item.read || new Date().toISOString() });
+		const now = new Date().toISOString();
+		this.#feed.update(item.id, { read: item.read || now });
+		const others = members.filter(member => member.id !== item.id && !member.read);
+		if (others.length) {
+			try {
+				await this.#adapter.read(others.map(member => member.id));
+				for (const member of others) this.#feed.update(member.id, { read: now });
+			} catch {
+				// The opened item is read at its producer; the matter's other updates stay unread
+			}
+		}
 		this.#changed();
 		this.#onopen(destination, item);
 	}

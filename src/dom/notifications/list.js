@@ -130,7 +130,7 @@ export class NoticeList {
 	#item(item, members) {
 		const unread = members.some(member => !member.read);
 		const product = this.#products[item.product] ?? item.product;
-		const open = el('button', { type: 'button', class: 'bui-notice-open', 'data-control': 'open', onclick: () => this.#actions.open(item) }, [
+		const open = el('button', { type: 'button', class: 'bui-notice-open', 'data-control': 'open', onclick: () => this.#actions.open(item, members) }, [
 			content(item.title),
 			unread ? hidden(` (${this.#labels.text('unread')})`) : null
 		]);

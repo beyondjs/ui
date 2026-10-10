@@ -32,7 +32,7 @@ import { Reach } from './reach.js';
  * business action.
  *
  * Since 0.13.0 (D79, D80) the panel shows one row per matter: items that share a `group` collapse into
- * their latest, and `limit` counts matters, read from up to three times as many items. With nothing
+ * their latest, and `limit` counts matters, read from a page of `NotificationEntry.reach` items (50) since 0.13.1. With nothing
  * unread it says "You are all caught up." above the rows. The count sits on the bell's glyph. Opened
  * from the keyboard, focus goes to the first row, and the arrow keys, Home and End move between the
  * rows and "View all", as in the family bar's other menus.
@@ -45,6 +45,12 @@ export class NotificationEntry extends Disclosure {
 	 * review measured a one-frame flash at once and a 900 ms wait, so a quick answer never shows it.
 	 */
 	static delay = 250;
+	/**
+	 * Items the panel reads to show `limit` matters (0.13.1): one matter can hold many updates (a
+	 * connection that needs attention repeats its notice), so the panel reads a bounded page wide enough
+	 * for several busy matters; Beyond Projects answers up to 100.
+	 */
+	static reach = 50;
 
 	#adapter;
 	#labels;
@@ -164,8 +170,7 @@ export class NotificationEntry extends Disclosure {
 
 	async #load() {
 		this.#stamp = new Date().toISOString();
-		// Up to three items per matter, so `limit` rows of matters fill the panel.
-		const pending = this.#feed.load({ state: 'all', product: null, limit: Math.min(this.#limit * 3, 100) });
+		const pending = this.#feed.load({ state: 'all', product: null, limit: Math.max(this.#limit, NotificationEntry.reach) });
 		this.#draw();
 		if (await pending) this.#draw();
 	}

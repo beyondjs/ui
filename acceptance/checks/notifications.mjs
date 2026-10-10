@@ -112,7 +112,7 @@ export const checks = [
 			const copy = words[consumer.language];
 			const inbox = page.locator('#inbox');
 			await inbox.locator('.bui-notice').first().waitFor();
-			expect(await inbox.locator('.bui-inbox-body > .bui-notices > .bui-notice').count() === 3, 'three unread entries (one group of two)');
+			expect(await inbox.locator('.bui-inbox-body .bui-notices:not(.bui-notice-earlier) > .bui-notice').count() === 3, 'three unread entries (one group of two)');
 			await inbox.locator('[data-control="group"]').click();
 			expect(await inbox.locator('.bui-notice-earlier').isVisible(), 'the earlier update is revealed');
 			await inbox.getByRole('button', { name: copy.all, exact: true }).click();

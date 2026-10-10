@@ -99,5 +99,28 @@ export const checks = [
 			const pressed = await page.evaluate(([x, y]) => Boolean(document.elementFromPoint(x, y)?.closest('.bui-notice-open')), [rect.x + rect.width - 12, rect.y + 10]);
 			expect(pressed, 'the whole row opens the item');
 		}
+	},
+	{
+		name: 'a bell in a host\'s own bar (no shared header) at 390 px: its panel spans the viewport less a gutter on each side, and the count stays inside the bar (0.13.1)',
+		consumers: ['dom'],
+		async run(browser, consumer) {
+			const { page } = await browser.open(consumer, { viewport: { width: 390, height: 760 } });
+			await page.locator('.bui-notify .bui-count:not([hidden])').waitFor();
+			// A low bar of the host's own, as the Desktop's: the entry moved out of the shared header
+			await page.evaluate(() => {
+				const bar = Object.assign(document.createElement('div'), { id: 'host-bar' });
+				Object.assign(bar.style, { position: 'relative', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', height: '34px' });
+				document.body.prepend(bar);
+				bar.append(document.querySelector('.bui-notify'));
+				scrollTo(0, 0);
+			});
+			const count = await box(page, '#host-bar .bui-count');
+			expect(count.top >= 0, `the count stays inside the host's bar (${count.top})`);
+			await page.locator('#host-bar .bui-disclosure-bell').click();
+			await page.locator('#host-bar .bui-disclosure-panel .bui-notice').first().waitFor();
+			await rest(page);
+			const panel = await box(page, '#host-bar .bui-disclosure-panel');
+			expect(Math.abs(panel.left - 16) <= 0.5 && Math.abs(390 - panel.right - 16) <= 0.5, `one gutter on each side: ${panel.left} to ${panel.right}`);
+		}
 	}
 ];

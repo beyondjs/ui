@@ -46,7 +46,7 @@ test('the panel lists recent items with product and time, and forgets them when 
 	const notices = new Notices();
 	const entry = new NotificationEntry({ adapter: notices.adapter, href: '/notifications', products, limit: 3, locale: 'es' }).mount(document.body);
 	await opened(entry);
-	assert.deepEqual(notices.calls.find(([name]) => name === 'list')[1], { state: 'all', product: null, cursor: null, limit: 9 }, 'up to three items per matter (0.13.0)');
+	assert.deepEqual(notices.calls.find(([name]) => name === 'list')[1], { state: 'all', product: null, cursor: null, limit: 50 }, 'a page wide enough for busy matters (0.13.1)');
 	assert.equal(titles(entry.panel).length, 3, 'three matters: the two comments on one request are one row');
 	assert.equal(entry.panel.querySelector('.bui-notice-toggle').textContent, '2 updates');
 	assert.match(titles(entry.panel)[0], /Export invoices” \(Unread\)/);
@@ -187,5 +187,33 @@ test('rows from today and from earlier days are set under "Today" and "Earlier";
 	assert.equal(entry.panel.querySelectorAll('[data-id="n1"]').length, 1);
 	assert.match(entry.panel.querySelector('[data-id="n1"] time').textContent, /\d/, 'the family\'s short age');
 	assert.ok(entry.panel.querySelector('[data-id="n1"] time').title, 'the full moment on hover');
+	entry.destroy();
+});
+
+test('opening a matter marks each of its updates read, so it is no longer counted (0.13.1)', async () => {
+	const notices = new Notices();
+	const visits = [];
+	const entry = new NotificationEntry({ adapter: notices.adapter, onopen: destination => visits.push(destination) }).mount(document.body);
+	await page.until(() => entry.count === 3);
+	await opened(entry);
+	entry.panel.querySelector('[data-id="n1"] .bui-notice-open').click();
+	await page.until(() => visits.length === 1);
+	assert.deepEqual(visits, ['/app/n1'], 'the latest update opens');
+	assert.ok(notices.calls.some(([name, target]) => name === 'read' && Array.isArray(target) && target.includes('n2') && !target.includes('n1')), 'the earlier update is marked read by identifier');
+	assert.equal(notices.items.filter(item => item.group === 'request:r1').every(item => item.read), true);
+	// The fixture relay counts unread items: of n1, n2 and n4 only n4 is left
+	await page.until(() => entry.count === 1);
+	entry.destroy();
+});
+
+test('a matter whose other updates cannot be marked still opens, and they stay unread', async () => {
+	const notices = new Notices();
+	const visits = [];
+	const adapter = { ...notices.adapter, read: async () => Promise.reject(new Error('relay down')) };
+	const entry = new NotificationEntry({ adapter, onopen: destination => visits.push(destination) }).mount(document.body);
+	await opened(entry);
+	entry.panel.querySelector('[data-id="n1"] .bui-notice-open').click();
+	await page.until(() => visits.length === 1);
+	assert.equal(notices.items.find(item => item.id === 'n2').read, null, 'the earlier update stays unread');
 	entry.destroy();
 });
