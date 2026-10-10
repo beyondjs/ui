@@ -69,3 +69,36 @@ The family reference (`branding/`, owned by the suite) models these rules in its
 visible in every product that re-vendors it; each product's adoption is its own assignment. Synchronization
 outcome for this repository: **synchronization pending in the family reference's own assignment** (the
 reference re-vendors 0.14.0 and models it; nothing in it was changed here).
+
+## Addendum: 0.14.1
+
+The Desktop's adoption of 0.14.0 (its `docs/reviews/2026-10-10/ui-0.14.0-adoption.md`) found that `Leaving.play`
+decided whether to draw an exit picture only from `prefers-reduced-motion`. A host that removes animations by a
+preference of its own (the Desktop's `data-motion="reduced"`, chosen in its account menu while the system allows
+motion, sets every animation to `none`) got a picture that never sent `animationend`: a still, inert copy of the
+closed menu, disclosure or side sheet stood in place until `Leaving.bound` (400 ms) removed it. The Desktop hid
+the pictures with a rule of its own.
+
+| Where | 0.14.1 |
+| --- | --- |
+| `src/dom/core/leaving.js` | Once drawn, a picture whose computed `animation-name` is `none` for every animation, or whose every `animation-duration` is zero, is removed at once with its veil, and `play` returns null, as under reduced motion. A value an engine does not report (empty) is not taken as still: the bound still ends that picture. A host needs no rule of its own for the pictures (FR-2: symmetric entry and exit, nothing animates under reduced motion) |
+| `tests/quiet.test.mjs` | A menu and a side sheet under a host stylesheet that computes `none`, a zero duration or a list of zero durations leave no picture and no veil; with motion allowed again they leave as before and end on `animationend`; an unreported animation keeps its picture to the bound. The test fails on 0.14.0 |
+| `acceptance/checks/moving.mjs` | A host stylesheet removing every animation under `:root[data-motion='reduced']`: one frame after a composer chip's menu and the side sheet close, no picture and no veil are in the document; with motion allowed again the menu leaves with `bui-leave`. The check fails on 0.14.0 in Chrome ("no picture of the menu one frame after it closed") |
+
+### Verification
+
+Local, on one machine, against the packed tarball `beyond-ui-0.14.1.tgz`
+(`sha512-S125DFighLMgZHQIUEwIDVhsLPVrBRGRmPN7GHTa1VbTTUR+/YmbfYpAJ6q6vUltzgW77wfRSEyK3FTVF9NGvA==`, the same bytes for every engine's run and `npm run pack:consumers`).
+
+| Check | Result |
+| --- | --- |
+| `npm test` | 567 passing (566 in 0.14.0) |
+| `npm run types` | Passes; no declaration changed (`Leaving` is internal) |
+| `npm run acceptance` | 283 of 283 checks in Chrome 154, Firefox 155 and WebKit 26.6, each engine run whole (282 in 0.14.0; `moving` adds the host's own reduced motion) |
+
+Re-vendored into the Desktop only (its own addendum of the same record); the other products keep 0.14.0 until their
+own assignments, which lose nothing by it: their stylesheets follow `prefers-reduced-motion` alone, where 0.14.0
+already drew no picture.
+
+Family reference: no reference impact. The reference models D95 as stated (nothing moves under reduced motion);
+0.14.1 corrects the package toward that rule for hosts with a reduced-motion preference of their own.

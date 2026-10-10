@@ -5,7 +5,7 @@ import { open } from './anchoring.mjs';
  * Motion of 0.14.0 in a real engine (D95): what the person opens or closes animates on entry and exit, a
  * pressed control never moves, a side panel's columns change once (the thread never reflows during its
  * motion), menus, the side sheet and inline disclosures leave as they came, and under reduced motion
- * nothing moves. `getAnimations()` is read right after each press; layout shifts without input are
+ * nothing moves, including under a host's own reduced-motion preference (0.14.1). `getAnimations()` is read right after each press; layout shifts without input are
  * counted where the engine reports them (Chrome).
  */
 const moving = page => page.evaluate(() => document.getAnimations().filter(animation => animation.playState === 'running' && animation.effect?.getComputedTiming().iterations !== Infinity).map(animation => `${animation.effect?.target?.className ?? ''}${animation.effect?.pseudoElement ?? ''}:${animation.animationName ?? animation.transitionProperty ?? ''}`));
@@ -111,6 +111,37 @@ export const checks = [
 			expect((await moving(page)).length === 0 && (await page.locator('.bui-leaving').count()) === 0, 'no menu picture');
 			await page.locator('.bui-activity-head').first().click();
 			expect((await moving(page)).length === 0, 'the row at once');
+		}
+	},
+	{
+		name: 'a host that removes animations by its own preference leaves no still picture: a closed menu and the sheet are gone within a frame (0.14.1)',
+		consumers: ['dom'],
+		async run(browser, consumer) {
+			// The Desktop's way: a choice of its own on the root, while the system allows motion, sets every animation to none
+			const still = `:root[data-motion='reduced'] *, :root[data-motion='reduced'] *::before, :root[data-motion='reduced'] *::after { animation: none !important; transition: none !important; }`;
+			const prefer = page => page.evaluate(css => {
+				document.head.append(Object.assign(document.createElement('style'), { textContent: css }));
+				document.documentElement.dataset.motion = 'reduced';
+			}, still);
+			const left = page => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => resolve(document.querySelectorAll('.bui-leaving, .bui-sheet-veil').length))));
+			const { page } = await open(browser, consumer, { width: 1600, height: 900 });
+			await prefer(page);
+			await page.locator('.bui-composer .bui-choice-button').first().click();
+			await page.keyboard.press('Escape');
+			expect((await left(page)) === 0, 'no picture of the menu one frame after it closed');
+			expect(await page.evaluate(() => [...document.querySelectorAll('.bui-composer .bui-choice-list')].every(list => list.hidden)), 'the menu itself is closed');
+			const narrow = await open(browser, consumer, { width: 1000, height: 800 });
+			await prefer(narrow.page);
+			await narrow.page.locator('.bui-page-header .bui-button', { hasText: 'Details' }).click();
+			await narrow.page.waitForSelector('dialog.bui-sheet[open]');
+			await narrow.page.keyboard.press('Escape');
+			expect((await left(narrow.page)) === 0, 'no picture of the sheet or its veil one frame after it closed');
+			// Recovery: the host allows motion again and the pictures ease out as before
+			await page.evaluate(() => delete document.documentElement.dataset.motion);
+			await page.locator('.bui-composer .bui-choice-button').first().click();
+			await page.keyboard.press('Escape');
+			const menu = await moving(page);
+			expect(menu.some(entry => entry.includes('bui-leaving') && entry.includes('bui-leave')), `with motion allowed again the menu leaves: ${menu}`);
 		}
 	}
 ];

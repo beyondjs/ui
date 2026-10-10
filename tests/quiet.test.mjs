@@ -126,3 +126,39 @@ test('a side sheet closes at once and slides out as a picture over a fading veil
 	}
 	sheet.destroy();
 });
+
+test('a host that removes animations by its own preference gets no still picture: the menu and the sheet leave none (0.14.1)', () => {
+	const computed = page.window.getComputedStyle;
+	// What a host's stylesheet computes for a picture; happy-dom reports no animation, so it is given here
+	let motion = { animationName: 'none', animationDuration: '0s' };
+	page.window.getComputedStyle = node => (node.classList?.contains('bui-leaving') ? { position: 'absolute', ...motion } : { ...computed(node), position: 'absolute' });
+	try {
+		const menu = new dom.ActionMenu({ label: 'More', items: [{ label: 'Rename', run: () => {} }] }).mount(document.body);
+		const sheet = new dom.SideSheet({ title: 'Add repositories', children: [Object.assign(document.createElement('p'), { textContent: 'Body' })] });
+		const close = () => {
+			menu.open();
+			menu.close(true);
+			sheet.open();
+			sheet.close();
+			return [document.querySelectorAll('.bui-leaving').length, document.querySelectorAll('.bui-sheet-veil').length];
+		};
+		assert.deepEqual(close(), [0, 0], 'an animation named none: removed at once, veil and all');
+		motion = { animationName: 'bui-leave', animationDuration: '0s' };
+		assert.deepEqual(close(), [0, 0], 'an animation that lasts no time: removed at once');
+		motion = { animationName: 'bui-leave, none', animationDuration: '0ms, 0s' };
+		assert.deepEqual(close(), [0, 0], 'every listed duration zero');
+		// A recovery: once the host allows motion again, the pictures ease out as before
+		motion = { animationName: 'bui-leave', animationDuration: '120ms' };
+		assert.deepEqual(close(), [2, 1], 'a moving picture stays until its animation ends');
+		for (const picture of document.querySelectorAll('.bui-leaving')) picture.dispatchEvent(new page.window.Event('animationend'));
+		assert.equal(document.querySelectorAll('.bui-leaving, .bui-sheet-veil').length, 0, 'and removes itself, veil and all');
+		// An engine that reports nothing is not taken as still: the bound ends that picture
+		motion = { animationName: '', animationDuration: '' };
+		assert.deepEqual(close(), [2, 1], 'an unreported animation keeps the picture to its bound');
+		menu.destroy();
+		sheet.destroy();
+		assert.equal(document.querySelectorAll('.bui-leaving, .bui-sheet-veil').length, 0);
+	} finally {
+		page.window.getComputedStyle = computed;
+	}
+});
