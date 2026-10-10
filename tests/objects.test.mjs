@@ -36,6 +36,7 @@ const drawer = sidebar => sidebar.element.querySelector('dialog nav');
 test('order: the context, the sections, then the objects with their heading line (action and search icon), their groups and their more link, in both copies', () => {
 	const sidebar = scene();
 	for (const nav of [panel(sidebar), drawer(sidebar)]) {
+		assert.ok(nav.firstElementChild.classList.contains('bui-sidebar-context'), 'the context line stays the first child: a stable hook products anchor after');
 		const object = nav.querySelector('.bui-sidebar-object');
 		assert.ok(nav.querySelector('.bui-sidebar-context').compareDocumentPosition(object) & 4);
 		const sections = [...nav.querySelectorAll('.bui-sidebar-group')].find(node => !node.closest('.bui-sidebar-object'));

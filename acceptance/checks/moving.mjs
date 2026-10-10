@@ -67,18 +67,21 @@ export const checks = [
 			await page.waitForTimeout(300);
 			await row.click();
 			const closing = await moving(page);
-			expect(closing.some(entry => entry.includes('bui-activity-body')), `and closed: ${closing}`);
+			// Its exit needs a transition of `display`, which Firefox does not run yet: there it closes at once
+			if (browser.engine !== 'firefox') expect(closing.some(entry => entry.includes('bui-activity-body')), `and closed: ${closing}`);
 			expect(scrolled === (await page.evaluate(() => window.scrollY)), 'nothing scrolls for the person');
 			// A disclosure's content eases where the engine has ::details-content: its height where it interpolates to an
 			// automatic size (Chrome), its opacity elsewhere. Engines do not list a ::details-content transition in
 			// getAnimations(), so it is sampled.
 			const eased = await page.evaluate(async () => {
+				// Where the engine cannot read the pseudo-element's style (Firefox), its easing is not measured
 				if (!CSS.supports('selector(::details-content)')) return null;
 				const details = document.getElementById('more');
 				const read = () => getComputedStyle(details, '::details-content');
 				details.open = true;
 				await new Promise(resolve => setTimeout(resolve, 40));
 				const early = { height: parseFloat(read().height), opacity: parseFloat(read().opacity) };
+				if (Number.isNaN(early.height)) return null;
 				await new Promise(resolve => setTimeout(resolve, 400));
 				return { early, late: { height: parseFloat(read().height), opacity: parseFloat(read().opacity) }, sized: CSS.supports('interpolate-size', 'allow-keywords') };
 			});
