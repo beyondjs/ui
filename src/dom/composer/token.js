@@ -22,11 +22,12 @@ export class MentionToken {
 	 * @param {string} text the field's text
 	 * @param {number} caret the caret's place (`selectionStart`, with an empty selection)
 	 * @param {string} trigger one character
+	 * @param {boolean} [start] only at the start of the text, as a command's "/" (0.14.0)
 	 */
-	static at(text, caret, trigger) {
+	static at(text, caret, trigger, start = false) {
 		const before = text.slice(0, caret);
 		const index = before.lastIndexOf(trigger);
-		if (index < 0) return null;
+		if (index < 0 || (start && index > 0)) return null;
 		if (index > 0 && !/\s/.test(before[index - 1])) return null;
 		const query = before.slice(index + trigger.length);
 		if (/\s/.test(query) || query.includes(trigger)) return null;
@@ -46,6 +47,13 @@ export class MentionToken {
 	/** The same token: the same place and the same query. */
 	same(other) {
 		return Boolean(other) && other.start === this.#start && other.query === this.#query;
+	}
+
+	/** The text without this token (and one space after it), and the caret where it was (0.14.0, a command that runs). */
+	remove(text) {
+		const end = this.#start + this.#trigger.length + this.#query.length;
+		const rest = text.slice(end).replace(/^ /, '');
+		return { text: `${text.slice(0, this.#start)}${rest}`, caret: this.#start };
 	}
 
 	/** The text with this token replaced by `value` and a space, and the caret after them. */

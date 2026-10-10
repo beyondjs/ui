@@ -26,8 +26,13 @@ import { labels as copy } from './labels.js';
  * draws `Diff.chunk` rows per animation frame. A folded file holds no line nodes until it first opens.
  *
  * Keys: on a file's header, the arrows, Home and End move between files; anywhere inside, `]` and `[`
- * move between hunks and Alt+ArrowDown and Alt+ArrowUp between files. There is no syntax highlighting:
- * the package ships no highlighter, and the code is shown as written in the monospaced face.
+ * move between hunks and Alt+ArrowDown and Alt+ArrowUp between files.
+ *
+ * Code is highlighted (0.14.0, `Highlighter`) in the language a file names (`language`, where one the
+ * highlighter does not read, such as `text`, keeps it plain), or else in its path's; a file of no known
+ * language is shown as written, and `highlight: false` turns it off.
+ * Each line is read on its own, so a construct that spans lines in the file (a block comment, a template
+ * literal) is colored only on the line where it starts.
  */
 export class Diff extends Component {
 	/** The copy in English and Spanish. */
@@ -54,6 +59,7 @@ export class Diff extends Component {
 	#level;
 	#mode;
 	#summary;
+	#highlight;
 	#views = [];
 	#entries = [];
 
@@ -65,15 +71,17 @@ export class Diff extends Component {
 	 * @param {2|3|4} [options.level] the files' heading level (3)
 	 * @param {'auto'|'all'|'none'} [options.open] which files open first (`auto`: within the budget)
 	 * @param {boolean} [options.summary] the summary line at the top (true)
+	 * @param {boolean} [options.highlight] code colored by the language of each file (true)
 	 * @param {object} [options.labels] entries replacing the English copy
 	 * @param {string} [options.locale] a BCP 47 tag for the counts
 	 */
-	constructor({ patch = null, files = null, label = null, level = 3, open = 'auto', summary = true, labels = {}, locale = undefined } = {}) {
+	constructor({ patch = null, files = null, label = null, level = 3, open = 'auto', summary = true, highlight = true, labels = {}, locale = undefined } = {}) {
 		super();
 		this.#words = new DiffWords(labels, locale);
 		this.#level = level;
 		this.#mode = ['all', 'none'].includes(open) ? open : 'auto';
 		this.#summary = summary !== false;
+		this.#highlight = highlight !== false;
 		this.#keys.textContent = this.#words.text('keys');
 		this.#element = el('section', { class: 'bui-diff', 'aria-label': label ?? this.#words.text('label'), 'aria-describedby': this.#keys.id }, [this.#keys, this.#top, this.#content]);
 		const keys = new DiffKeys(this.#element);
@@ -152,7 +160,7 @@ export class Diff extends Component {
 		let full = false;
 		this.#views = entries.map(entry => {
 			const large = entry.size > budget.file;
-			const view = new DiffFileView(entry, { words: this.#words, rows, level: this.#level, large, chunk: Diff.chunk });
+			const view = new DiffFileView(entry, { words: this.#words, rows, level: this.#level, large, chunk: Diff.chunk, highlight: this.#highlight });
 			let open = before.get(entry.path);
 			if (open === undefined && this.#mode !== 'auto') open = this.#mode === 'all';
 			if (open === undefined) {

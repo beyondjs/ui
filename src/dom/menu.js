@@ -4,6 +4,7 @@ import { Glyph } from './core/icons.js';
 import { Hint } from './core/hint.js';
 import { Ids } from './core/ids.js';
 import { Placement } from './core/placement.js';
+import { Leaving } from './core/leaving.js';
 
 /**
  * A menu button of actions: the ARIA menu pattern.
@@ -20,6 +21,9 @@ import { Placement } from './core/placement.js';
  * the button never scrolls the page or a scroll container around the menu.
  *
  * Items: `{ label, run?, href?, disabled?, reason?, tone? }`; `tone: 'danger'` marks destructive ones.
+ *
+ * Since 0.14.0 (D95) a closed menu leaves as it came: the list is hidden at once and an inert picture of
+ * it eases out (`Leaving`), none under reduced motion.
  */
 export class ActionMenu extends Component {
 	#hint;
@@ -30,6 +34,7 @@ export class ActionMenu extends Component {
 	#open = false;
 	#release = null;
 	#placement;
+	#picture = null;
 
 	/**
 	 * @param {object} options
@@ -72,6 +77,7 @@ export class ActionMenu extends Component {
 
 	destroy() {
 		this.#hint?.destroy();
+		this.#picture?.remove();
 		super.destroy();
 	}
 
@@ -90,6 +96,7 @@ export class ActionMenu extends Component {
 		if (this.destroyed) return;
 		if (!this.#open) {
 			this.#open = true;
+			this.#picture?.remove();
 			this.#list.hidden = false;
 			this.#button.setAttribute('aria-expanded', 'true');
 			this.#placement.place(this.#list, this.#button);
@@ -104,6 +111,8 @@ export class ActionMenu extends Component {
 	close(refocus = false) {
 		if (!this.#open) return;
 		this.#open = false;
+		this.#picture?.remove();
+		this.#picture = Leaving.play(this.#list);
 		this.#list.hidden = true;
 		this.#button.setAttribute('aria-expanded', 'false');
 		this.#release?.();

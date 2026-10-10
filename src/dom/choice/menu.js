@@ -3,6 +3,7 @@ import { el } from '../core/element.js';
 import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { Placement } from '../core/placement.js';
+import { Leaving } from '../core/leaving.js';
 import { single } from '../core/statement.js';
 import { ChoiceEntry } from './entry.js';
 import { ChoiceFace } from './face.js';
@@ -53,6 +54,7 @@ export class ChoiceMenu extends Component {
 	#placement;
 	#open = false;
 	#release = null;
+	#picture = null;
 
 	/**
 	 * @param {object} options
@@ -139,6 +141,7 @@ export class ChoiceMenu extends Component {
 		if (this.destroyed || this.#button.disabled || this.stated) return;
 		if (!this.#open) {
 			this.#open = true;
+			this.#picture?.remove();
 			this.#panel.hidden = false;
 			this.#button.setAttribute('aria-expanded', 'true');
 			this.#placement.place(this.#panel, this.#button);
@@ -154,12 +157,19 @@ export class ChoiceMenu extends Component {
 	close(refocus = false) {
 		if (!this.#open) return;
 		this.#open = false;
+		// It leaves as it came (0.14.0, D95): hidden at once, an inert picture eases out
+		this.#picture = Leaving.play(this.#panel);
 		this.#panel.hidden = true;
 		this.#button.setAttribute('aria-expanded', 'false');
 		this.#release?.();
 		this.#finder.clear();
 		this.#filter();
 		if (refocus) this.#button.focus({ preventScroll: true });
+	}
+
+	destroy() {
+		this.#picture?.remove();
+		super.destroy();
 	}
 
 	/** Draws the button, or the statement, and the list; an open list keeps the entry that had focus. */
@@ -207,16 +217,7 @@ export class ChoiceMenu extends Component {
 
 	/** Lists the options that match the query; actions always stay. */
 	#filter() {
-		const query = this.#finder?.query ?? '';
-		let shown = 0;
-		for (const entry of this.#entries) {
-			entry.shown = !entry.option || ChoiceFinder.match(entry.text, query);
-			if (entry.option && entry.shown) shown += 1;
-		}
-		const none = this.#finder?.none;
-		if (!none) return;
-		none.textContent = query && !shown ? this.#labels.text('none', { query }) : '';
-		none.hidden = !none.textContent;
+		this.#finder?.filter(this.#entries, query => this.#labels.text('none', { query }));
 	}
 
 	#choose(item, option) {

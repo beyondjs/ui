@@ -35,9 +35,9 @@ export function Facts({ head = null, rows = [], label = null, labels = {} }) {
 			shown.map((row, index) =>
 				h(
 					'div',
-					{ key: row.key ?? (typeof row.label === 'string' ? row.label : index), className: 'bui-facts-row', 'data-stale': stale(row) ? '' : undefined, 'data-long': Rows.long(row) ? '' : undefined },
+					{ key: row.key ?? (typeof row.label === 'string' ? row.label : index), className: 'bui-facts-row', 'data-stale': stale(row) ? '' : undefined, 'data-long': Rows.long(row) ? '' : undefined, 'data-numeric': Rows.numeric(row) ? '' : undefined },
 					h('dt', { className: 'bui-facts-label' }, row.label),
-					h('dd', { className: 'bui-facts-data' }, h('span', { className: 'bui-facts-value', 'data-mono': row.mono ? '' : undefined }, row.value ?? ''), stale(row) ? h('span', { className: 'bui-facts-note' }, stale(row)) : null, row.action ? h('span', { className: 'bui-facts-action' }, row.action) : null)
+					h('dd', { className: 'bui-facts-data' }, h('span', { className: 'bui-facts-value', 'data-mono': row.mono ? '' : undefined }, typeof row.value === 'number' ? String(row.value) : (row.value ?? '')), stale(row) ? h('span', { className: 'bui-facts-note' }, stale(row)) : null, row.action ? h('span', { className: 'bui-facts-action' }, row.action) : null)
 				)
 			)
 		)

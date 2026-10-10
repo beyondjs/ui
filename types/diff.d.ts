@@ -27,6 +27,8 @@ export interface DiffFile {
 	/** Counted from the lines when absent. */
 	added?: number;
 	removed?: number;
+	/** Its code's language for highlighting (0.14.0); a named language wins over the path, an unknown one keeps it plain. */
+	language?: string | null;
 }
 /** A file as `Diff.parse` and `diff.files` give it: every field present, lines as objects, with the parts that could not be read. */
 export interface DiffData extends Required<Omit<DiffFile, 'hunks' | 'mode' | 'previous'>> {
@@ -52,8 +54,10 @@ export interface DiffOptions {
 	labels?: Copy;
 	/** A BCP 47 tag for the counts. */
 	locale?: string;
+	/** Highlights each file's code by its language (0.14.0, default true). */
+	highlight?: boolean;
 }
-/** A change a developer can trust (0.11.2): files as regions named by their paths, unified lines that are never invented, keys between files and hunks, a bounded budget. No syntax highlighting. */
+/** A change a developer can trust (0.11.2): files as regions named by their paths, unified lines that are never invented, keys between files and hunks, a bounded budget; since 0.14.0 its code highlighted line by line (`Highlighter`). */
 export class Diff extends Component {
 	static readonly labels: Copies;
 	/** Unchanged lines kept at each end of a folded run (3). */

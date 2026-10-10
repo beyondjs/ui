@@ -99,7 +99,8 @@
 	background: var(--color-info);
 }
 .bui-sidebar-mark[data-tone='progress'] .bui-sidebar-dot {
-	animation: bui-pulse 1.2s ease-in-out infinite;
+	/* A live dot pulses about five seconds, then holds (D95) */
+	animation: bui-pulse 1.2s ease-in-out 4;
 }
 .bui-sidebar-more {
 	color: var(--color-link);
@@ -117,4 +118,126 @@
 	margin-inline-start: var(--space-1);
 	font-weight: var(--weight-regular);
 	font-variant-numeric: tabular-nums;
+}
+
+/* A group of entries under a disclosure heading (0.14.0, D97): the chevron turned toward the words while
+   folded, the count kept; folded, only the current item stays listed, and a group that needs the person
+   keeps its tone. */
+.bui-sidebar-folding {
+	padding: 0;
+}
+.bui-sidebar-fold {
+	display: flex;
+	align-items: center;
+	gap: var(--space-1);
+	width: 100%;
+	min-height: var(--bui-target);
+	padding: 0 var(--space-2);
+	border: 0;
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: var(--color-text-muted);
+	font: inherit;
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	letter-spacing: var(--tracking-label);
+	text-align: start;
+	cursor: pointer;
+}
+.bui-sidebar-fold:hover {
+	color: var(--color-text);
+}
+.bui-sidebar-fold:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: -2px;
+}
+.bui-sidebar-fold .bui-icon {
+	width: 14px;
+	height: 14px;
+	transition: rotate var(--motion-quick) var(--motion-ease);
+}
+.bui-sidebar-fold[aria-expanded='false'] .bui-icon {
+	rotate: -90deg;
+}
+.bui-sidebar-fold-label {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.bui-sidebar-group[data-folded] .bui-sidebar-list > li:not([data-current]),
+.bui-sidebar-group[data-folded] > .bui-sidebar-more {
+	display: none;
+}
+.bui-sidebar-group[data-folded][data-attention] .bui-sidebar-fold {
+	color: var(--color-warning);
+}
+
+/* The product's own objects (0.14.0, D97): after the sections and a divider, their heading line with the
+   primary action and the search's icon, which expands into the field over the line. */
+.bui-sidebar-object {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--space-2);
+	min-width: 0;
+}
+.bui-sidebar-nav > .bui-sidebar-object:not(:first-child),
+.bui-sidebar-groups > .bui-sidebar-object:not(:first-child) {
+	padding-top: var(--space-3);
+	border-top: 1px solid var(--color-border);
+}
+.bui-sidebar-object-head {
+	display: flex;
+	align-items: center;
+	gap: var(--space-1);
+	min-width: 0;
+	min-height: var(--bui-target);
+}
+.bui-sidebar-object-title {
+	flex: 1 1 auto;
+	min-width: 0;
+	margin: 0;
+	padding: 0 var(--space-2);
+	color: var(--color-text);
+	font-size: var(--text-small);
+	font-weight: var(--weight-medium);
+	overflow-wrap: anywhere;
+}
+.bui-sidebar-object-action {
+	flex: none;
+	color: var(--color-link);
+	font-weight: var(--weight-medium);
+}
+.bui-sidebar-object-action .bui-icon,
+.bui-sidebar-start .bui-icon {
+	flex: none;
+	width: 16px;
+	height: 16px;
+}
+.bui-sidebar-seek {
+	flex: none;
+	width: var(--bui-target);
+	height: var(--bui-target);
+	color: var(--color-text-muted);
+}
+.bui-sidebar-seek .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-sidebar-object-head[data-searching] > :not(.bui-sidebar-search) {
+	display: none;
+}
+.bui-sidebar-object-head > .bui-sidebar-search {
+	flex: 1 1 auto;
+}
+.bui-sidebar-object-groups {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--space-3);
+	min-width: 0;
+}
+/* Below the cut the objects' action may end the product row (SB-07). */
+.bui-sidebar-start {
+	flex: none;
+	margin-inline-start: auto;
+	color: var(--color-link);
+	font-weight: var(--weight-medium);
 }

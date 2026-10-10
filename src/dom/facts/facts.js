@@ -99,6 +99,11 @@ export class Facts extends Component {
 		return FactsRow.long(row ?? {});
 	}
 
+	/** Whether a row's value is a number aligned to the end, in tabular figures (0.14.0, D99): `numeric`, else a `number` value. */
+	static numeric(row) {
+		return FactsRow.numeric(row ?? {}) && !FactsRow.long(row ?? {});
+	}
+
 	/** A state as `{ label, tone }` from `[label, tone]` or `{ label, tone }`; null for none. */
 	static state(state) {
 		if (!state) return null;

@@ -3,6 +3,7 @@ import { Ids } from '../core/ids.js';
 import { KeyedList } from '../core/keyed.js';
 import { hidden } from '../feedback.js';
 import { SidebarItem } from './item.js';
+import { SidebarFold } from './fold.js';
 
 /**
  * One group of a sidebar, patched by key: a heading when it has one (naming its list), its items and,
@@ -12,6 +13,10 @@ import { SidebarItem } from './item.js';
  * to the one now at its place.
  *
  * Since 0.11.0 a group may say how many items it holds (`count`, "Recent, 12") beside its heading.
+ *
+ * Since 0.14.0 (D97) the heading of a group of entries is a disclosure (`SidebarFold`) when the sidebar
+ * keeps folds and the group does not say `fold: false`: folded, it lists only its current item; a group
+ * whose items need the person (`attention`) keeps its tone folded and opens by itself when one arrives.
  */
 export class SidebarGroup {
 	#element;
@@ -22,11 +27,14 @@ export class SidebarGroup {
 	#items = new Map();
 	#entries;
 	#labels;
+	#folds;
+	#fold = null;
 
-	/** @param {{kind: 'sections'|'entries', labels?: import('../core/labels.js').Labels|null}} options */
-	constructor({ kind, labels = null }) {
+	/** @param {{kind: 'sections'|'entries', labels?: import('../core/labels.js').Labels|null, folds?: import('./folds.js').SidebarFolds|null}} options */
+	constructor({ kind, labels = null, folds = null }) {
 		this.#entries = kind === 'entries';
 		this.#labels = labels;
+		this.#folds = folds;
 		this.#element = el('div', { class: `bui-sidebar-group${this.#entries ? ' bui-sidebar-entries' : ''}` }, [this.#list]);
 	}
 
@@ -44,9 +52,21 @@ export class SidebarGroup {
 		return null;
 	}
 
-	/** @param {{heading?: string|Node|null, count?: number|string|null, items: Array<object|null|false>, more?: {label: string, href: string}|null}} group */
-	update({ heading = null, count = null, items = [], more = null }) {
-		this.#head(heading, count);
+	/**
+	 * @param {{key?: string|null, heading?: string|Node|null, count?: number|string|null, items: Array<object|null|false>, more?: {label: string, href: string}|null, fold?: boolean, attention?: boolean}} group
+	 *   `fold: false` keeps a plain heading over entries; `attention` marks entries that need the person (0.14.0)
+	 */
+	update({ key = null, heading = null, count = null, items = [], more = null, fold = true, attention = false }) {
+		const counted = count === null || count === undefined || count === '' ? null : String(count);
+		const folding = this.#entries && fold !== false && Boolean(this.#folds) && heading !== null && heading !== undefined && heading !== '';
+		if (folding) this.#unhead();
+		else this.#unfold();
+		if (folding) {
+			this.#fold ??= new SidebarFold({ folds: this.#folds, group: this.#element, list: this.#list });
+			if (!this.#fold.element.isConnected) this.#element.prepend(this.#fold.element);
+			this.#fold.update({ key: String(key ?? heading), heading, count: counted, attention, items: items.filter(Boolean).map(item => String(item.key ?? item.href ?? item.label)) });
+			this.#list.setAttribute('aria-labelledby', this.#fold.element.id);
+		} else this.#head(heading, count);
 		const seen = new Map();
 		const next = new Map();
 		for (const item of items.filter(Boolean)) {
@@ -67,6 +87,22 @@ export class SidebarGroup {
 	destroy() {
 		for (const view of this.#items.values()) view.destroy();
 		this.#items.clear();
+		this.#unfold();
+	}
+
+	/** Whether the group is folded now (0.14.0). */
+	get folded() {
+		return this.#fold?.folded ?? false;
+	}
+
+	#unfold() {
+		this.#fold?.destroy();
+		this.#fold = null;
+	}
+
+	#unhead() {
+		this.#heading?.remove();
+		this.#heading = null;
 	}
 
 	#head(heading, count) {

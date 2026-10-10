@@ -57,6 +57,8 @@ export class SidebarItem {
 		if (link && this.#node.getAttribute('href') !== href) this.#node.setAttribute('href', href);
 		if (current) this.#node.setAttribute('aria-current', 'page');
 		else this.#node.removeAttribute('aria-current');
+		// A folded group still lists its current item (0.14.0)
+		this.#holder.toggleAttribute('data-current', Boolean(current));
 		if (typeof label !== 'string' || this.#label.textContent !== label || this.#label.childNodes.length !== 1) fill(this.#label, [content(label)]);
 		if (this.#entry) {
 			this.#mark(mark);

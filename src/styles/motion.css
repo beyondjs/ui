@@ -1,0 +1,124 @@
+/* Motion follows the person's action and never moves what they read (0.14.0, D95). Only what the person
+   opens or closes, and what overlaps, animates, with a symmetric entry and exit: surfaces with transform
+   and opacity only, an inline disclosure's height as a progressive enhancement (no script measures it).
+   Live content never moves. Under reduced motion nothing here moves (base.css): state changes still say
+   themselves in words. Tokens only. */
+
+/* A page's panel kept in view: it enters from its edge and leaves toward it, the columns changing once. */
+.bui-page-panel[data-motion='in'] {
+	animation: bui-panel-in var(--motion-standard) var(--motion-ease);
+}
+.bui-page-panel[data-motion='out'] {
+	animation: bui-panel-out var(--motion-exit) var(--motion-ease-exit) forwards;
+}
+@keyframes bui-panel-in {
+	from {
+		opacity: 0;
+		transform: translateX(var(--space-6));
+	}
+}
+@keyframes bui-panel-out {
+	to {
+		opacity: 0;
+		transform: translateX(var(--space-6));
+	}
+}
+
+/* The picture of what just closed (`Leaving`): inert, hidden from assistive technology, it eases out where
+   it was and is removed. Menus fade and settle toward their button; a side sheet slides back to its edge
+   over a scrim that fades. */
+.bui-leaving {
+	pointer-events: none;
+}
+.bui-menu.bui-leaving {
+	animation: bui-leave var(--motion-exit) var(--motion-ease-exit) forwards;
+}
+.bui-sheet.bui-leaving {
+	position: fixed;
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	animation: bui-sheet-out var(--motion-exit) var(--motion-ease-exit) forwards;
+}
+.bui-sheet.bui-leaving:dir(rtl) {
+	inset-inline: 0 auto;
+	animation-name: bui-sheet-out-rtl;
+}
+.bui-sheet-veil {
+	position: fixed;
+	inset: 0;
+	z-index: 999;
+	background: var(--overlay-scrim);
+	animation: bui-veil-out var(--motion-exit) var(--motion-ease-exit) forwards;
+}
+@keyframes bui-sheet-out {
+	to {
+		transform: translateX(100%);
+	}
+}
+@keyframes bui-sheet-out-rtl {
+	to {
+		transform: translateX(-100%);
+	}
+}
+@keyframes bui-veil-out {
+	to {
+		opacity: 0;
+	}
+}
+
+/* Inline disclosures ease their height where the engine interpolates to an automatic size; elsewhere they
+   only fade. Their content keeps its place: nothing is scrolled for the person. */
+.bui-activity-body,
+.bui-activity-list {
+	interpolate-size: allow-keywords;
+	overflow: clip;
+	transition:
+		height var(--motion-standard) var(--motion-ease),
+		opacity var(--motion-standard) var(--motion-ease),
+		display var(--motion-standard) allow-discrete;
+}
+.bui-activity-body[hidden],
+.bui-activity-list[hidden] {
+	height: 0;
+	opacity: 0;
+	transition:
+		height var(--motion-exit) var(--motion-ease-exit),
+		opacity var(--motion-exit) var(--motion-ease-exit),
+		display var(--motion-exit) allow-discrete;
+}
+@starting-style {
+	.bui-activity-body:not([hidden]),
+	.bui-activity-list:not([hidden]) {
+		height: 0;
+		opacity: 0;
+	}
+}
+/* The family's disclosure (`bui-summary`) eases its content's height where `::details-content` exists. */
+@supports selector(::details-content) {
+	details:has(> .bui-summary) {
+		interpolate-size: allow-keywords;
+	}
+	details:has(> .bui-summary)::details-content {
+		height: 0;
+		overflow: clip;
+		opacity: 0;
+		transition:
+			height var(--motion-exit) var(--motion-ease-exit),
+			opacity var(--motion-exit) var(--motion-ease-exit),
+			content-visibility var(--motion-exit) allow-discrete;
+	}
+	details[open]:has(> .bui-summary)::details-content {
+		height: auto;
+		opacity: 1;
+		transition:
+			height var(--motion-standard) var(--motion-ease),
+			opacity var(--motion-standard) var(--motion-ease),
+			content-visibility var(--motion-standard) allow-discrete;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	details:has(> .bui-summary)::details-content {
+		transition: none !important;
+	}
+}

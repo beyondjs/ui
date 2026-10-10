@@ -21,12 +21,16 @@ import { typography, space, radius, elevation, overlay, motion, density, layout,
  * rest of the set stays approved. Token set 0.4.1 (2026-10-08) raises the pending `aside-max` to 40rem and
  * lets the wide form grow past `aside-wide`, still proposals. Token set 0.4.2 (2026-10-09) gives the menu
  * elevation a dark value, so a menu, a popover and the family bar's panels lift off the navy page as
- * D10 intends instead of casting nothing. Each entry's own `provenance` still says whether its value
+ * D10 intends instead of casting nothing. Token set 0.5.0 (2026-10-10) records the owner's decisions D94 to
+ * D102 of settled contract S29 that need tokens (`approval.conversation`): the exit duration and easing of
+ * D95 and the thread's lane, its rail indent and its wide lane (`thread`, approved by D96, which amends
+ * D67's tier); the panel's widths of D67 stay pending, joined by the code colors of Conduict's audit
+ * (P3), a proposal. Each entry's own `provenance` still says whether its value
  * was captured or introduced by the family reference. `version` identifies the token set; a product
  * review cites it together with the package version.
  */
 export const tokens = {
-	version: '0.4.2',
+	version: '0.5.0',
 	status: 'approved',
 	source: 'Verified capture of the public Beyond site, 2026-09-18, with the family reference\'s additions',
 	approval: {
@@ -39,13 +43,21 @@ export const tokens = {
 			by: 'owner',
 			decisions: ['D52'],
 			note: 'The family page system (D52, settled contract S23: LR-01 to LR-09 and LR-11): the gutter by band, the form, standard, aside and fluid width tiers and the compact 640px band, their values engineering defaults to be measured. Token set 0.3.0; 0.3.1 sets the reading measure to the 54ch measured against LR-02.'
+		},
+		conversation: {
+			date: '2026-10-10',
+			by: 'owner',
+			decisions: ['D95', 'D96'],
+			contract: 'S29',
+			tokens: ['motion.exit', 'motion.ease-exit', 'layout.thread', 'layout.indent', 'layout.lane'],
+			note: 'The conversation round (settled contract S29, D94 to D102): motion follows the person\'s action, with an exit a little faster than the entry (D95), and one edge, one lane in a thread, with code, diffs, tool output and approval cards in the wide lane (D96, amending D67\'s thread tier). The reading measure stays 54ch. Values are engineering defaults to be measured. Token set 0.5.0.'
 		}
 	},
 	pending: {
-		date: '2026-10-08',
+		date: '2026-10-10',
 		decisions: ['D67'],
-		tokens: ['layout.thread', 'layout.aside-max', 'layout.aside-wide'],
-		note: 'Proposals in the family reference\'s register, adopted by Conduict (its CB-Q4): a thread width tier and the widths a page\'s panel kept in view grows to (aside-max raised to 40rem in token set 0.4.1 for wide regions, Conduict\'s review M11). Shipped so a product can adopt them; not approved family rules.'
+		tokens: ['layout.aside-max', 'layout.aside-wide', 'color.code-comment', 'color.code-keyword', 'color.code-string', 'color.code-number', 'color.code-name', 'color.code-tag'],
+		note: 'Proposals: the widths a page\'s panel kept in view grows to (D67 in the family reference\'s register, adopted by Conduict; aside-max raised to 40rem in token set 0.4.1, Conduict\'s review M11), and since token set 0.5.0 the code colors of Conduict\'s audit of 2026-10-10 (P3), contrast-checked in both themes. Shipped so a product can adopt them; not approved family rules.'
 	},
 	attribute: 'data-beyond-mode',
 	provenance: {

@@ -1,5 +1,5 @@
 /* Label and value rows (Facts, 0.11.0) and a use against a limit (Meter, 0.11.0): flat, no card and no
-   elevation (D10, D52, D53); values at the row's end, identifiers monospaced, a stale value muted with
+   elevation (D10, D52, D53); values in a column after their label (D99), identifiers monospaced, a stale value muted with
    its note. Tokens only. */
 .bui-facts {
 	container: bui-facts / inline-size;
@@ -41,10 +41,14 @@
 	margin: 0;
 	min-width: 0;
 }
-/* A row: the label at its start, the value at its end; a long value wraps inside its own column. */
+/* A row (0.14.0, D99): the label in a column of its own, the value in a fixed column right after it, so
+   label and value read together; only a number aligns to the end. A long value wraps inside its column. */
+.bui-facts {
+	--bui-facts-label: 9.5rem;
+}
 .bui-facts-row {
 	display: grid;
-	grid-template-columns: fit-content(50%) minmax(0, 1fr);
+	grid-template-columns: minmax(0, var(--bui-facts-label)) minmax(0, 1fr);
 	align-items: baseline;
 	gap: var(--space-1) var(--space-3);
 	min-width: 0;
@@ -60,7 +64,7 @@
 	display: flex;
 	flex-wrap: wrap;
 	align-items: baseline;
-	justify-content: flex-end;
+	justify-content: flex-start;
 	gap: var(--space-1) var(--space-2);
 	min-width: 0;
 	margin: 0;
@@ -74,6 +78,17 @@
 }
 .bui-facts-value[data-mono] {
 	font-family: var(--font-mono);
+}
+/* A number aligns to the end, in tabular figures (D99). */
+.bui-facts-row[data-numeric] .bui-facts-data {
+	justify-content: flex-end;
+}
+.bui-facts-row[data-numeric] .bui-facts-value {
+	font-variant-numeric: tabular-nums;
+}
+/* A row's own action keeps the row's end, whatever the value's length. */
+.bui-facts-data > .bui-facts-action {
+	margin-inline-start: auto;
 }
 .bui-facts-row[data-stale] .bui-facts-value {
 	color: var(--color-text-muted);
@@ -110,7 +125,8 @@
 	.bui-facts-row {
 		grid-template-columns: minmax(0, 1fr);
 	}
-	.bui-facts-data {
+	.bui-facts-data,
+	.bui-facts-row[data-numeric] .bui-facts-data {
 		justify-content: flex-start;
 		text-align: start;
 	}

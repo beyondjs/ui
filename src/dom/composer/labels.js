@@ -3,7 +3,8 @@
  * keyboard hint read with the field (by the way the composer sends), and what it says when a message
  * is empty or was not sent; since 0.11.0 its attachments (Attach, the drop target, the chips' states and
  * what is announced) and its suggestions (their states and what is announced); since 0.11.1 the narrow
- * toolbar's Options and a truncated list's last line; since 0.11.2 a file the product refused. Public as
+ * toolbar's Options and a truncated list's last line; since 0.11.2 a file the product refused; since
+ * 0.14.0 the commands' list and the taller editor's Expand and Collapse. Public as
  * `Composer.labels`.
  */
 const freeze = sets => Object.freeze({ en: Object.freeze(sets.en), es: Object.freeze(sets.es) });
@@ -41,6 +42,9 @@ export const composer = freeze({
 		unread: 'couldn’t be read',
 		suggested: ({ count }) => (count === 1 ? '1 suggestion' : `${count} suggestions`),
 		options: 'Options',
+		commands: 'Commands',
+		expand: 'Expand',
+		collapse: 'Collapse',
 		narrow: ({ count, total }) => (total ? `${count} of ${total} · keep typing to narrow` : `First ${count} · keep typing to narrow`),
 		narrowed: ({ count, total }) => (total ? `${count} of ${total} suggestions · keep typing to narrow` : `First ${count} suggestions · keep typing to narrow`)
 	},
@@ -76,6 +80,9 @@ export const composer = freeze({
 		unread: 'no se pudo leer',
 		suggested: ({ count }) => (count === 1 ? '1 sugerencia' : `${count} sugerencias`),
 		options: 'Opciones',
+		commands: 'Comandos',
+		expand: 'Ampliar',
+		collapse: 'Reducir',
 		narrow: ({ count, total }) => (total ? `${count} de ${total} · sigue escribiendo para acotar` : `Primeras ${count} · sigue escribiendo para acotar`),
 		narrowed: ({ count, total }) => (total ? `${count} de ${total} sugerencias · sigue escribiendo para acotar` : `Primeras ${count} sugerencias · sigue escribiendo para acotar`)
 	}

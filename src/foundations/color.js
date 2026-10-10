@@ -99,6 +99,12 @@ export const primitives = {
  * is the boundary of inputs, selects, checkboxes, toggles and other controls, held to 3:1 because a
  * person must see where a control is (WCAG 1.4.11).
  *
+ * `code-*` roles (token set 0.5.0, a proposal: Conduict's audit of 2026-10-10, P3) color the kinds of a
+ * highlighted code's text (`Highlighter`): comments, keywords, strings, numbers and literals, names
+ * (keys, properties, attributes, variables) and tags. They are held to 4.5:1 on every surface code is
+ * drawn on, a diff's added and deleted rows included, in both themes; the words stay readable without
+ * them (D42).
+ *
  * `family-*` roles belong to the family bar, the one piece of chrome every product shares. It is
  * navy in both themes, which is also where the published wordmark reads best: its gray "JS" is
  * 2.55:1 on white but 6.45:1 on navy.
@@ -127,6 +133,12 @@ export const themes = {
 		'family-marker': 'coral-400',
 		code: 'navy-750',
 		'on-code': 'gray-50',
+		'code-comment': 'gray-600',
+		'code-keyword': 'lavender-700',
+		'code-string': 'green-700',
+		'code-number': 'coral-600',
+		'code-name': 'amber-800',
+		'code-tag': 'red-700',
 		success: 'green-700',
 		'success-surface': 'green-50',
 		warning: 'amber-800',
@@ -161,6 +173,12 @@ export const themes = {
 		'family-marker': 'coral-400',
 		code: 'navy-950',
 		'on-code': 'gray-50',
+		'code-comment': 'slate-300',
+		'code-keyword': 'lavender-300',
+		'code-string': 'green-300',
+		'code-number': 'coral-200',
+		'code-name': 'amber-400',
+		'code-tag': 'red-300',
 		success: 'green-300',
 		'success-surface': 'green-950',
 		warning: 'amber-400',
@@ -208,5 +226,35 @@ export const pairs = [
 	['danger', 'surface', 'text'],
 	['info', 'info-surface', 'text'],
 	['info', 'surface', 'text'],
-	['reference', 'reference-surface', 'text']
+	['reference', 'reference-surface', 'text'],
+	['code-comment', 'canvas', 'text'],
+	['code-comment', 'surface', 'text'],
+	['code-comment', 'surface-sunken', 'text'],
+	['code-comment', 'success-surface', 'text'],
+	['code-comment', 'danger-surface', 'text'],
+	['code-keyword', 'canvas', 'text'],
+	['code-keyword', 'surface', 'text'],
+	['code-keyword', 'surface-sunken', 'text'],
+	['code-keyword', 'success-surface', 'text'],
+	['code-keyword', 'danger-surface', 'text'],
+	['code-string', 'canvas', 'text'],
+	['code-string', 'surface', 'text'],
+	['code-string', 'surface-sunken', 'text'],
+	['code-string', 'success-surface', 'text'],
+	['code-string', 'danger-surface', 'text'],
+	['code-number', 'canvas', 'text'],
+	['code-number', 'surface', 'text'],
+	['code-number', 'surface-sunken', 'text'],
+	['code-number', 'success-surface', 'text'],
+	['code-number', 'danger-surface', 'text'],
+	['code-name', 'canvas', 'text'],
+	['code-name', 'surface', 'text'],
+	['code-name', 'surface-sunken', 'text'],
+	['code-name', 'success-surface', 'text'],
+	['code-name', 'danger-surface', 'text'],
+	['code-tag', 'canvas', 'text'],
+	['code-tag', 'surface', 'text'],
+	['code-tag', 'surface-sunken', 'text'],
+	['code-tag', 'success-surface', 'text'],
+	['code-tag', 'danger-surface', 'text']
 ];

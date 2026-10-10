@@ -1,0 +1,61 @@
+/* A quiet line of secondary actions (ActionLine, 0.14.0, D102): one control style, muted until hover or
+   focus; the facts a muted group of their own in tabular figures; a path as code, underlined only on
+   hover. Tokens only. */
+.bui-action-line {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1) var(--space-4);
+	min-width: 0;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+}
+.bui-action-line-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1);
+	min-width: 0;
+	margin-inline-start: calc(-1 * var(--space-2));
+}
+.bui-action-line-actions :is(.bui-button, a, .bui-link-button) {
+	min-height: var(--bui-target);
+	padding: 0 var(--space-2);
+	border-color: transparent;
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	text-decoration: none;
+}
+.bui-action-line-actions :is(.bui-button, a, .bui-link-button):is(:hover, :focus-visible, [aria-expanded='true']) {
+	background: var(--color-surface-sunken);
+	color: var(--color-text);
+}
+.bui-action-line-actions a {
+	display: inline-flex;
+	align-items: center;
+}
+.bui-action-line-facts {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-variant-numeric: tabular-nums;
+}
+.bui-action-line-facts[hidden],
+.bui-action-line-actions[hidden] {
+	display: none;
+}
+/* A path is code: monospaced, in the text's color, underlined only on hover. */
+.bui-path {
+	font-family: var(--font-mono);
+	font-size: 0.95em;
+	color: inherit;
+	text-decoration: none;
+	overflow-wrap: anywhere;
+}
+a.bui-path:hover,
+a:hover > .bui-path {
+	text-decoration: underline;
+}

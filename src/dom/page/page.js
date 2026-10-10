@@ -1,8 +1,9 @@
 import { Component } from '../core/component.js';
 import { el, fill } from '../core/element.js';
 import { PagePanel } from './panel.js';
+import { PageDock } from './dock.js';
 
-const templates = Object.freeze(['overview', 'list', 'detail', 'settings', 'task', 'tool']);
+const templates = Object.freeze(['overview', 'list', 'detail', 'settings', 'task', 'tool', 'thread']);
 const widths = Object.freeze(['fluid', 'standard', 'form', 'reading', 'thread']);
 
 /**
@@ -26,6 +27,17 @@ const widths = Object.freeze(['fluid', 'standard', 'form', 'reading', 'thread'])
  * With `panel` (0.10.0) the aside is a panel kept in view instead (`PagePanel`, `page.panel`): beside
  * the main column and sticky from the region's `cut`, hideable there, and a side sheet below it that
  * `page.panel.open()` shows. Without `panel` the aside flows as it always did.
+ *
+ * The `thread` template (0.14.0, D94 and D96) is a conversation's page: its width is `thread` unless
+ * given, the frame keeps no padding under its content and fills the window under the chrome
+ * (`--bui-page-chrome`, the family bar by default and the sidebar's row below its cut), the main column
+ * is a column whose last block is the `dock` (`PageDock`): pushed to the column's end and sticky at
+ * the window's bottom with one gutter and the safe area under it, at the same distance from the bottom
+ * whatever the scroll and the content's length. The header ends at the thread's edge, so a toggle in it
+ * never moves when the panel shows or hides; the person's message, prose, the rail and the dock share
+ * one lane (`--layout-lane`) and only code, diffs, tool output and approval cards widen to the thread
+ * (`.bui-lane-wide`); a panel kept in view comes next to the lane and takes what is left up to its
+ * maximum, the rest falling on the far side.
  */
 export class Page extends Component {
 	static templates = templates;
@@ -37,11 +49,12 @@ export class Page extends Component {
 	#main;
 	#aside;
 	#panel = null;
+	#dock = null;
 
 	/**
 	 * @param {object} [options]
 	 * @param {'overview'|'list'|'detail'|'settings'|'task'|'tool'} [options.template] the page's kind (default `detail`)
-	 * @param {'fluid'|'standard'|'form'|'reading'|'thread'} [options.width] the main column's tier (default `standard`)
+	 * @param {'fluid'|'standard'|'form'|'reading'|'thread'|null} [options.width] the main column's tier (default `standard`, `thread` in the thread template)
 	 * @param {Node|{element: Node}|null} [options.arrival] the arrival line (`Arrival`), first in the region
 	 * @param {Node|{element: Node}|null} [options.header] the page's header (`PageHeader`)
 	 * @param {Node[]} [options.children] the main column
@@ -50,10 +63,13 @@ export class Page extends Component {
 	 * @param {{cut?: number|string, open?: boolean, onchange?: (shown: boolean) => void, title?: string|null, head?: boolean, wide?: boolean, labels?: {close?: string, hide?: string}}|null} [options.panel]
 	 *   the aside as a panel kept in view (0.10.0): beside and sticky from `cut`, a side sheet below it;
 	 *   since 0.11.0 with a head of its own (`head`) and a wide form (`wide`)
+	 * @param {Node|{element: Node}|Array<Node|{element: Node}>|null} [options.dock] what the thread template docks at the window's bottom, such as its composer (0.14.0)
 	 */
-	constructor({ template = 'detail', width = 'standard', arrival = null, header = null, children = [], aside = null, label = null, panel = null } = {}) {
+	constructor({ template = 'detail', width = null, arrival = null, header = null, children = [], aside = null, label = null, panel = null, dock = null } = {}) {
 		super();
 		if (!templates.includes(template)) throw new TypeError(`A page's template is one of ${templates.join(', ')}`);
+		width ??= template === 'thread' ? 'thread' : 'standard';
+		if (dock && template !== 'thread') throw new TypeError("A page's dock belongs to the thread template");
 		if (!widths.includes(width)) throw new TypeError(`A page's width is one of ${widths.join(', ')}`);
 		this.#main = el('div', { class: 'bui-page-main' });
 		this.#aside = el('aside', { class: 'bui-page-aside', 'aria-label': label });
@@ -62,7 +78,9 @@ export class Page extends Component {
 		this.#frame = el('div', { class: 'bui-page-frame' }, [Page.#node(arrival), header?.bar ?? null, Page.#node(header), this.#body]);
 		this.#element = el('div', { class: 'bui-page', dataset: { template, width } }, [this.#frame]);
 		if (panel) this.#panel = new PagePanel({ ...panel, page: this.#element, body: this.#body, label });
+		if (template === 'thread') this.#dock = new PageDock();
 		this.main = children;
+		this.dock = dock;
 		this.aside = aside;
 	}
 
@@ -80,9 +98,24 @@ export class Page extends Component {
 		return this.#main;
 	}
 
-	/** Replaces the main column's content. */
+	/** Replaces the main column's content; the thread template's dock stays its last block. */
 	set main(children) {
 		fill(this.#main, children);
+		if (this.#dock) this.#main.append(this.#dock.element, this.#dock.end);
+	}
+
+	/** The thread template's dock (`PageDock`: `element`, `stuck`), or null in any other template (0.14.0). */
+	get dock() {
+		return this.#dock;
+	}
+
+	/** Replaces what the thread template docks at the window's bottom (0.14.0). */
+	set dock(children) {
+		if (!this.#dock) {
+			if (children) throw new TypeError("A page's dock belongs to the thread template");
+			return;
+		}
+		this.#dock.content = children;
 	}
 
 	/** Replaces the side panel's content; `null` removes the panel. */
@@ -113,6 +146,7 @@ export class Page extends Component {
 
 	destroy() {
 		this.#panel?.destroy();
+		this.#dock?.destroy();
 		super.destroy();
 	}
 

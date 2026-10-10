@@ -114,6 +114,17 @@ export const motion = {
 		value: 'cubic-bezier(0.2, 0.7, 0.3, 1)',
 		provenance: 'proposed',
 		reason: 'One easing for entering elements; the capture mixes linear and ease-in.'
+	},
+	// Token set 0.5.0 (D95, approved on 2026-10-10: motion follows the person's action; engineering defaults, to be measured)
+	exit: {
+		value: '120ms',
+		provenance: 'family',
+		reason: 'What the person closes leaves a little faster than it came (D95): menus, sheets, a side panel and a disclosure\'s content, with transform and opacity only.'
+	},
+	'ease-exit': {
+		value: 'cubic-bezier(0.4, 0, 1, 1)',
+		provenance: 'family',
+		reason: 'One easing for leaving elements (D95): it accelerates away, the mirror of `ease`.'
 	}
 };
 
@@ -145,8 +156,10 @@ export const layout = {
 	standard: { value: '90rem', provenance: 'family', reason: 'Width tier of a main column with its aside (LR-02); it re-derives the marketing container `content`.' },
 	aside: { value: '22rem', provenance: 'family', reason: 'Width of a resource page\'s side panel (LR-03), between the 20 and 24rem the analysis measured.' },
 	'fluid-max': { value: '100rem', provenance: 'family', reason: 'Limit of a fluid collection, past which a row is lost between its first and last column (LR-02).' },
-	// Token set 0.4.0 (2026-10-08): the family proposal D67 (Q-B), adopted by Conduict; proposals, not approved family rules.
-	thread: { value: '52rem', provenance: 'proposed', reason: 'Width tier of a conversation thread (proposal D67, Q-B; Conduict\'s CB-Q4): wider than the reading measure so code and output keep a column, narrow enough that a message and its answer stay close. Not an approved family rule.' },
+	// Token set 0.4.0 (2026-10-08): the family proposal D67 (Q-B), adopted by Conduict; token set 0.5.0 (D96, approved on 2026-10-10: one edge, one lane) settles the thread's lanes.
+	thread: { value: '52rem', provenance: 'family', reason: 'The thread\'s wide lane (D96, which amends D67\'s thread tier; Conduict\'s CB-Q4): only code, diffs, tool output and approval cards widen to it, so they keep a column while a message and its answer stay at the lane.' },
+	indent: { value: '2.125rem', provenance: 'family', reason: 'The rail\'s indent (D96): the column of a rail\'s marks before its content (8 px, an 18 px mark and an 8 px gap).' },
+	lane: { value: 'calc(var(--layout-measure) + var(--layout-indent))', provenance: 'family', reason: 'A thread\'s one lane (D96): the person\'s message, prose, the rail\'s marks and the composer share its right edge, the reading measure after the rail\'s indent, so prose keeps LR-02\'s measure.' },
 	'aside-max': { value: '40rem', provenance: 'proposed', reason: 'Widest a page\'s panel kept in view grows on a wide region, so extra width goes to the panel rather than to an empty band (proposal D67, Conduict\'s CB-07 and CB-Q4). Token set 0.4.1 raises it from 30rem: at 1920 px beside a 250 px sidebar the panel stopped 294 px before the region\'s edge (Conduict\'s review M11). Not an approved family rule.' },
 	'aside-wide': { value: '48rem', provenance: 'proposed', reason: 'Width a panel kept in view takes first in its wide form, such as a diff beside a conversation, which since token set 0.4.1 grows on to the region\'s far edge while the main column gives down to the aside tier (proposal D67, Conduict\'s CB-Q1 and review M11). Not an approved family rule.' }
 };

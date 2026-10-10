@@ -16,15 +16,18 @@ export function Rail({ label = null, children = null }) {
 	return h('div', { className: 'bui-rail', role: label ? 'group' : undefined, 'aria-label': label ?? undefined }, children);
 }
 
-/** One event on a rail: a mark (`glyph`, a dot without one, a spinner while `progress`) and the children. */
-export function RailItem({ glyph = null, tone = 'neutral', children = null }) {
+/**
+ * One event on a rail: a mark (`glyph`, a dot without one, a spinner while `progress`) and the children;
+ * `wide` (0.14.0) widens it to a thread's wide lane, for code, a diff, tool output or an approval card.
+ */
+export function RailItem({ glyph = null, tone = 'neutral', wide = false, children = null }) {
 	const [holder] = useState(() => {
 		const node = document.createElement('div');
 		node.setAttribute('data-bui-slot', '');
 		return node;
 	});
-	const [host, item] = useInstance(() => new Item({ glyph, tone, content: holder }), []);
-	useSync(item, current => current.update({ glyph, tone }), [glyph, tone]);
+	const [host, item] = useInstance(() => new Item({ glyph, tone, wide, content: holder }), []);
+	useSync(item, current => current.update({ glyph, tone, wide }), [glyph, tone, Boolean(wide)]);
 	return h(React.Fragment, null, h('div', { ref: host, className: 'bui-host' }), ReactDOM.createPortal(children, holder));
 }
 

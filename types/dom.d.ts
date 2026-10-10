@@ -284,3 +284,4 @@ export * from './rail.js';
 export * from './resource.js';
 export * from './shared.js';
 export * from './diff.js';
+export * from './edges.js';

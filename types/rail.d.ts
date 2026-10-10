@@ -19,10 +19,10 @@ export class Rail extends Component {
 }
 /** An event on a rail: a mark (a glyph, a dot, a spinner while `progress`) and the product's content (0.12.0). */
 export class RailItem extends Component {
-	constructor(options?: { glyph?: IconName | null; tone?: RailTone; content?: Content | { element: Node } | null });
+	constructor(options?: { glyph?: IconName | null; tone?: RailTone; content?: Content | { element: Node } | null; /** The thread's wide lane (0.14.0, D96). */ wide?: boolean });
 	/** The element the content is placed in. */
 	readonly body: HTMLElement;
-	update(values: { glyph?: IconName | null; tone?: RailTone; content?: Content | { element: Node } | null }): this;
+	update(values: { glyph?: IconName | null; tone?: RailTone; content?: Content | { element: Node } | null; wide?: boolean }): this;
 }
 /** A time of day at a rail's far end, where the clock moved between two events (0.12.0). */
 export class RailMoment extends Component {

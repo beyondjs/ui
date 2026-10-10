@@ -31,6 +31,8 @@ export interface FactsRow {
 	stale?: boolean | string | null;
 	/** The value under its label, left-aligned (0.11.2); by default a sentence longer than 40 characters that is not `mono`. */
 	long?: boolean | null;
+	/** A number aligned to the end in tabular figures (0.14.0, D99); by default a `number` value. */
+	numeric?: boolean | null;
 }
 /** Label and value rows for a resource's panel (0.11.0), flat, patched by key. */
 export class Facts extends Component {
@@ -38,6 +40,8 @@ export class Facts extends Component {
 	static readonly tones: readonly FactsTone[];
 	/** A state as `{ label, tone }`, or null for none. */
 	static state(state: FactsHead['state']): { label: string; tone: FactsTone } | null;
+	/** Whether a row's value aligns to the end (0.14.0). */
+	static numeric(row: FactsRow): boolean;
 	/** Whether a row's value reads under its label (0.11.2). */
 	static long(row: Pick<FactsRow, 'value' | 'mono' | 'long'>): boolean;
 	constructor(options?: { head?: FactsHead | null; rows?: Array<FactsRow | null | false>; label?: string | null; labels?: { stale?: string } });

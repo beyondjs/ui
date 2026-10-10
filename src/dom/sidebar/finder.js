@@ -11,7 +11,8 @@ import { SidebarGroup } from './group.js';
  * the sentence) once each answer arrives, never while typing.
  *
  * Escape in the field clears it and brings the groups back (an empty field lets Escape through, to
- * close the drawer); Enter opens every result when the product gives that address.
+ * close the drawer); Enter opens every result when the product gives that address. A field drawn in place
+ * of its search icon (0.14.0, `escape`) hands every Escape to that callback after clearing the query.
  */
 export class SidebarFinder {
 	#search;
@@ -26,14 +27,17 @@ export class SidebarFinder {
 	#announcer = new Announcer();
 	#release;
 	#state = 'idle';
+	#escape;
 
 	/**
 	 * @param {object} options
 	 * @param {import('./search.js').SidebarSearch} options.search the shared search
 	 * @param {import('../core/labels.js').Labels} options.labels the sidebar's copy
 	 * @param {Element} options.groups the view's groups, hidden while a query is typed
+	 * @param {(() => void)|null} [options.escape] takes every Escape in the field, after the query is cleared (0.14.0)
 	 */
-	constructor({ search, labels, groups }) {
+	constructor({ search, labels, groups, escape = null }) {
+		this.#escape = escape;
 		this.#search = search;
 		this.#labels = labels;
 		this.#groups = groups;
@@ -59,6 +63,16 @@ export class SidebarFinder {
 		return this.#field;
 	}
 
+	/** The text field. */
+	get input() {
+		return this.#input;
+	}
+
+	/** Moves focus to the field. */
+	focus() {
+		this.#input.focus({ preventScroll: true });
+	}
+
 	/** The results, shown in the groups' place while a query is typed. */
 	get results() {
 		return this.#results;
@@ -73,7 +87,13 @@ export class SidebarFinder {
 	}
 
 	#keys(event) {
-		if (event.key === 'Escape' && this.#search.query) {
+		if (event.key === 'Escape' && this.#escape) {
+			event.preventDefault();
+			event.stopPropagation();
+			this.#input.value = '';
+			this.#search.clear();
+			this.#escape();
+		} else if (event.key === 'Escape' && this.#search.query) {
 			event.preventDefault();
 			event.stopPropagation();
 			this.#input.value = '';

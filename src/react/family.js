@@ -105,24 +105,35 @@ function relay(notice, latest) {
  * modal drawer below it. `groups` (patched by keys since 0.10.0, entries included), `context`,
  * `section`, `action` and `search` are applied when they change; `search.source` and `search.all` are
  * read from the latest props. A change of `product`, `cut`, `labels` (memoize it) or whether
- * `onNavigate` is given creates a new sidebar.
+ * `onNavigate` is given creates a new sidebar. Since 0.14.0 a group of `kind: 'object'` carries its own
+ * `action` and `search` (its `source` and `all` read from the latest props too), and `shortcut` makes
+ * ⌘K / Ctrl+K open the search.
  */
-export function Sidebar({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onNavigate = null, labels }) {
-	const latest = useLatest({ onNavigate, search });
-	const [host, sidebar] = useInstance(() => new Sections({ product, groups, context, cut, section, action, search: finding(search, latest), labels, onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null }), [product, cut, labels, Boolean(onNavigate)]);
-	useSync(sidebar, current => (current.groups = groups), [JSON.stringify(groups)]);
+export function Sidebar({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onNavigate = null, labels, shortcut = false }) {
+	const latest = useLatest({ onNavigate, search, groups });
+	const objects = () => objected(groups, latest);
+	const [host, sidebar] = useInstance(() => new Sections({ product, groups: objects(), context, cut, section, action, search: finding(search, () => latest.current.search), labels, shortcut, onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null }), [product, cut, labels, Boolean(onNavigate), Boolean(shortcut)]);
+	useSync(sidebar, current => (current.groups = objects()), [JSON.stringify(groups)]);
 	useSync(sidebar, current => (current.context = context), [JSON.stringify(context)]);
 	useSync(sidebar, current => (current.section = section), [section]);
 	useSync(sidebar, current => (current.action = action), [JSON.stringify(action)]);
-	useSync(sidebar, current => (current.search = finding(search, latest)), [Boolean(search), search?.label, search?.placeholder ?? null, search?.bound, search?.delay, Boolean(search?.all)]);
+	useSync(sidebar, current => (current.search = finding(search, () => latest.current.search)), [Boolean(search), search?.label, search?.placeholder ?? null, search?.bound, search?.delay, Boolean(search?.all)]);
 	return h('div', { ref: host, className: 'bui-host bui-sidebar-host' });
 }
 
-/** The DOM search for a `search` prop: its `source` and `all` are read from the latest props when asked. */
-function finding(search, latest) {
+/** The DOM search for a `search` prop: its `source` and `all` are read from `now()`, the latest props, when asked. */
+function finding(search, now) {
 	if (!search?.label) return null;
-	const now = () => latest.current.search;
 	return { label: search.label, placeholder: search.placeholder ?? null, bound: search.bound, delay: search.delay, source: request => now()?.source?.(request), all: search.all ? query => now()?.all?.(query) ?? null : null };
+}
+
+/** The groups with each object's search read from the latest props (0.14.0). */
+function objected(groups, latest) {
+	return (groups ?? []).map(group => {
+		if (group?.kind !== 'object' || !group.search) return group;
+		const key = group.key ?? group.heading;
+		return { ...group, search: finding(group.search, () => (latest.current.groups ?? []).find(other => other?.kind === 'object' && (other.key ?? other.heading) === key)?.search) };
+	});
 }
 
 /** The product's own navigation row under the family bar, driven by the DOM `ProductNav` class. */

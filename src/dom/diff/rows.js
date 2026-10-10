@@ -61,10 +61,14 @@ export class DiffRows {
 	}
 
 	/**
-	 * One row's node. `reveal(row, node)` is called when a folded run's button is pressed.
+	 * One row's node. `reveal(row, node)` is called when a folded run's button is pressed; a line's code is
+	 * drawn by `highlighter` when there is one, each line read on its own.
+	 * @param {object} row
+	 * @param {(row: object, node: HTMLElement) => void} reveal
+	 * @param {import('../code/highlighter.js').Highlighter|null} [highlighter]
 	 * @returns {HTMLElement}
 	 */
-	node(row, reveal) {
+	node(row, reveal, highlighter = null) {
 		if (row.type === 'hunk') return el('div', { class: 'bui-diff-hunk', tabindex: '-1' }, [el('span', { class: 'bui-diff-aside' }, [row.text])]);
 		if (row.type === 'gap') return el('div', { class: 'bui-diff-gap' }, [el('span', { class: 'bui-diff-aside' }, [this.#words.count('gap', row.count)])]);
 		if (row.type === 'more') {
@@ -73,20 +77,22 @@ export class DiffRows {
 			node.append(el('span', { class: 'bui-diff-aside' }, [button]));
 			return node;
 		}
-		return this.#line(row);
+		return this.#line(row, highlighter);
 	}
 
-	#line(row) {
+	#line(row, highlighter) {
 		const number = row.kind === 'add' ? row.new : row.kind === 'delete' ? row.old : row.new;
 		const said = row.kind === 'note' ? null : el('span', { class: 'bui-hidden bui-diff-said' }, [this.#words.text(prefixes[row.kind], { number: this.#words.number(number) })]);
 		const text = row.kind === 'note' ? this.#words.text('newline') : row.text;
+		// Highlighted code is held in one span of its own after the said prefix, so the line's last child is its whole code
+		const colored = highlighter?.language && row.kind !== 'note' && text ? highlighter.fill(el('span', { class: 'bui-diff-text' }), text) : text;
 		return el('div', { class: 'bui-diff-line', dataset: { kind: row.kind } }, [
 			el('span', { class: 'bui-diff-gutter', 'aria-hidden': 'true' }, [
 				el('span', { class: 'bui-diff-num', 'data-number': row.old ?? '' }),
 				el('span', { class: 'bui-diff-num', 'data-number': row.new ?? '' }),
 				el('span', { class: 'bui-diff-sign', 'data-sign': signs[row.kind] })
 			]),
-			el('span', { class: 'bui-diff-code' }, [said, text])
+			el('span', { class: 'bui-diff-code' }, [said, colored])
 		]);
 	}
 

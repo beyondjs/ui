@@ -3,8 +3,8 @@
  * round stroke by `.bui-icon`. The catalog merges the package's first glyphs, the family reference's
  * set and Workspace's client set (redrawn to this stroke, duplicates removed), the Desktop's window
  * controls and CDN's step markers; 0.10.0 adds `file` and `terminal` for activity rows, and 0.11.0
- * `attach` (a paper clip) for a composer's Attach, always beside its word. New glyphs may
- * be drawn on the Lucide grid (ISC licence).
+ * `attach` (a paper clip) for a composer's Attach, always beside its word; 0.14.0 adds `microphone` for a
+ * composer's Dictate, always beside its word. New glyphs may be drawn on the Lucide grid (ISC licence).
  *
  * This file is data only: `Glyph` (`icons.js`) builds elements from it. A name says what the glyph
  * shows or means in plain English; a product that used another name maps it (see the catalog guide).
@@ -62,6 +62,7 @@ export const paths = Object.freeze({
 	folder: 'M3.5 6.5h6l2 2h9v10h-17z',
 	file: ['M6 3h8l5 5v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z', 'M14 3v5h5'],
 	attach: 'M20.5 11.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l7.9-7.9',
+	microphone: ['M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z', 'M19 11a7 7 0 0 1-14 0', 'M12 18v3'],
 	terminal: ['M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z', 'M7 9l3 3-3 3', 'M12 15h5'],
 	archive: ['M4 8h16v12H4z', 'M8 8V5h8v3', 'M9 14h6'],
 	book: ['M5 4.5h9.5a2.5 2.5 0 0 1 2.5 2.5v12.5H7.5A2.5 2.5 0 0 1 5 17z', 'M5 17a2.5 2.5 0 0 1 2.5-2.5H17'],

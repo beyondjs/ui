@@ -3,6 +3,7 @@ import { glyph } from '../core/icons.js';
 import { KeyedList } from '../core/keyed.js';
 import { SidebarGroup } from './group.js';
 import { SidebarFinder } from './finder.js';
+import { SidebarObject } from './object.js';
 
 /**
  * One copy of a sidebar's navigation (the permanent sidebar's, or the drawer's), patched in place: the
@@ -10,6 +11,10 @@ import { SidebarFinder } from './finder.js';
  * conversation"), the search, and the groups: sections, and groups of entries with their `more` link.
  * Groups are matched by `key` (else heading, else place), so a live change patches only what differs
  * and never moves focus. While a query is typed the search's results take the groups' place.
+ *
+ * Since 0.14.0 (D97) a group of `kind: 'object'` is the product's own objects (`SidebarObject`), drawn
+ * after the sections with a divider: their heading line with the primary action and the search's icon,
+ * their groups of entries (folding, `SidebarFolds`) and their `more` link.
  */
 export class SidebarView {
 	#element;
@@ -20,14 +25,20 @@ export class SidebarView {
 	#order = new KeyedList(this.#groups);
 	#views = new Map();
 	#labels;
+	#folds;
+	#shortcut;
 
 	/**
 	 * @param {object} options
 	 * @param {string} options.name the navigation's accessible name ("Delegate sections")
 	 * @param {import('../core/labels.js').Labels} options.labels the sidebar's copy
+	 * @param {import('./folds.js').SidebarFolds|null} [options.folds] the kept folds of its groups of entries (0.14.0)
+	 * @param {{text: string, keys: string}|null} [options.shortcut] the search's shortcut, when the sidebar has one (0.14.0)
 	 */
-	constructor({ name, labels }) {
+	constructor({ name, labels, folds = null, shortcut = null }) {
 		this.#labels = labels;
+		this.#folds = folds;
+		this.#shortcut = shortcut;
 		this.#element = el('nav', { class: 'bui-sidebar-nav', 'aria-label': name }, [this.#groups]);
 	}
 
@@ -45,13 +56,13 @@ export class SidebarView {
 	set groups(groups) {
 		const next = new Map();
 		(Array.isArray(groups) ? groups : []).forEach((group, index) => {
-			if (!group || !Array.isArray(group.items) || !(group.items.some(Boolean) || (group.kind === 'entries' && group.more?.href))) return;
-			const kind = group.kind === 'entries' ? 'entries' : 'sections';
+			const kind = ['entries', 'object'].includes(group?.kind) ? group.kind : 'sections';
+			if (!group || (kind !== 'object' && (!Array.isArray(group.items) || !(group.items.some(Boolean) || (kind === 'entries' && group.more?.href))))) return;
 			const base = String(group.key ?? (typeof group.heading === 'string' && group.heading ? group.heading : `#${index}`));
 			const key = next.has(base) ? `${base}\u0000${index}` : base;
 			let view = this.#views.get(key);
-			if (!view || view.kind !== kind) view = new SidebarGroup({ kind, labels: this.#labels });
-			view.update(group);
+			if (!view || view.kind !== kind) view = kind === 'object' ? new SidebarObject({ labels: this.#labels, folds: this.#folds, shortcut: this.#shortcut }) : new SidebarGroup({ kind, labels: this.#labels, folds: this.#folds });
+			view.update({ ...group, key });
 			next.set(key, view);
 		});
 		this.#order.order([...next.values()].map(view => view.element));
@@ -95,6 +106,18 @@ export class SidebarView {
 		if (this.#finder) this.#element.insertBefore(this.#finder.field, this.#groups);
 		if (this.#finder) this.#element.append(this.#finder.results);
 		this.#groups.hidden = Boolean(this.#finder?.search.query);
+	}
+
+	/**
+	 * Opens the search and moves focus to its field (⌘K / Ctrl+K, 0.14.0): the first objects' search
+	 * icon, else the top search's field. Returns whether there was a search.
+	 */
+	seek() {
+		const object = [...this.#views.values()].find(view => view.kind === 'object' && view.seek);
+		if (object) return object.seek.open(), true;
+		if (!this.#finder) return false;
+		this.#finder.focus();
+		return true;
 	}
 
 	destroy() {

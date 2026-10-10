@@ -3,6 +3,7 @@ import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { Button } from '../button.js';
 import { CopyButton } from '../copy-button.js';
+import { Highlighter } from '../code/highlighter.js';
 import { DiffLines } from './lines.js';
 
 /**
@@ -12,6 +13,7 @@ import { DiffLines } from './lines.js';
  *
  * The body is built when the file first opens, so a folded file holds no line nodes. A file larger than
  * the diff's per-file budget opens on "Large diff · {n} lines" with Show, which draws its lines in chunks.
+ * Its code is highlighted in the file's named language, or its path's, unless `highlight` is false.
  */
 export class DiffFileView {
 	#entry;
@@ -29,7 +31,7 @@ export class DiffFileView {
 
 	/**
 	 * @param {import('./entry.js').DiffEntry} entry
-	 * @param {{words: import('./words.js').DiffWords, rows: import('./rows.js').DiffRows, level: number, large: boolean, chunk: number, onchange?: () => void}} options
+	 * @param {{words: import('./words.js').DiffWords, rows: import('./rows.js').DiffRows, level: number, large: boolean, chunk: number, highlight?: boolean, onchange?: () => void}} options
 	 */
 	constructor(entry, options) {
 		this.#entry = entry;
@@ -145,7 +147,10 @@ export class DiffFileView {
 	}
 
 	#make() {
-		this.#lines = new DiffLines(this.#rows, this.#rows.plan(this.#entry), this.#words.text('lines', { path: this.#entry.path }));
+		const entry = this.#entry;
+		// A language the product named wins, even one not read (`text` keeps a file plain); else the path's
+		const highlighter = new Highlighter(this.#options.highlight === false ? null : (entry.language ?? Highlighter.from(entry.path)));
+		this.#lines = new DiffLines(this.#rows, this.#rows.plan(entry), this.#words.text('lines', { path: entry.path }), highlighter);
 		return this.#lines;
 	}
 }

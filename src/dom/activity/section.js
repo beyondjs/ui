@@ -1,11 +1,14 @@
 import { el, content } from '../core/element.js';
 import { Ids } from '../core/ids.js';
 import { Clipboard } from '../core/clipboard.js';
+import { Highlighter } from '../code/highlighter.js';
 
 /**
  * One section of an opened activity row, from a record the product gives: `{ label, text, code?,
- * lines?, copy? }` draws its label ("Input", "Output", "Diff") above the text, in a code box by
- * default (`code: false` for a sentence), or `{ label, content }` above the product's own node.
+ * lines?, copy?, language? }` draws its label ("Input", "Output", "Diff") above the text, in a code box
+ * by default (`code: false` for a sentence), or `{ label, content }` above the product's own node. A code
+ * box whose `language` the `Highlighter` reads is colored (0.14.0), folded or whole; without one, or with
+ * one it does not read, the text is shown as written.
  *
  * Code longer than `lines` (12) shows its first lines with "Show all {count} lines" (`aria-expanded`),
  * which shows the rest and then "Show fewer lines". "Copy" copies the whole text under a bound (D40)
@@ -23,12 +26,13 @@ export class ActivitySection {
 	#lines;
 	#labels;
 	#all = false;
+	#highlighter = null;
 
 	/**
-	 * @param {{label?: string|Node|null, text?: string, content?: Node|null, code?: boolean, lines?: number, copy?: boolean}} record
+	 * @param {{label?: string|Node|null, text?: string, content?: Node|null, code?: boolean, lines?: number, copy?: boolean, language?: string|null}} record
 	 * @param {import('../core/labels.js').Labels} labels the row's copy
 	 */
-	constructor({ label = null, text = '', content: node = null, code = true, lines = 12, copy = true }, labels) {
+	constructor({ label = null, text = '', content: node = null, code = true, lines = 12, copy = true, language = null }, labels) {
 		this.#labels = labels;
 		this.#text = String(text ?? '');
 		this.#lines = Number.isFinite(lines) && lines > 0 ? lines : 12;
@@ -37,7 +41,9 @@ export class ActivitySection {
 		let shown = null;
 		if (node) shown = node.element ?? node;
 		else if (code) {
-			this.#code = el('code', {});
+			const highlighter = new Highlighter(language);
+			this.#highlighter = highlighter.language ? highlighter : null;
+			this.#code = el('code', { 'data-language': highlighter.language });
 			shown = el('pre', { class: 'bui-activity-code' }, [this.#code]);
 		} else shown = el('p', { class: 'bui-activity-note', text: this.#text });
 		const actions = this.#code ? this.#actions(copy, shown) : null;
@@ -84,7 +90,9 @@ export class ActivitySection {
 	#show() {
 		const lines = this.#text.split('\n');
 		const cut = !this.#all && lines.length > this.#lines;
-		this.#code.textContent = cut ? lines.slice(0, this.#lines).join('\n') : this.#text;
+		const shown = cut ? lines.slice(0, this.#lines).join('\n') : this.#text;
+		if (this.#highlighter) this.#highlighter.fill(this.#code, shown);
+		else this.#code.textContent = shown;
 		if (!this.#fold) return;
 		this.#fold.setAttribute('aria-expanded', String(this.#all));
 		this.#fold.textContent = this.#all ? this.#labels.text('less') : this.#labels.text('more', { count: lines.length });

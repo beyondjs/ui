@@ -5,13 +5,15 @@ import { DiffRows } from './rows.js';
  * One file's lines in their own box: long lines scroll sideways inside it (never the page), it is
  * reachable by the keyboard (`tabindex="0"`) and named "Lines of {path}". Its rows are drawn at once, or
  * in chunks of `chunk` rows per animation frame for a large file so the page never stops answering
- * (`aria-busy` while it draws); `destroy()` cancels the next frame.
+ * (`aria-busy` while it draws); `destroy()` cancels the next frame. Its lines' code is drawn by its
+ * highlighter, and the box names the language in `data-language` when there is one.
  */
 export class DiffLines {
 	#element;
 	#rows = el('div', { class: 'bui-diff-rows' });
 	#builder;
 	#plan;
+	#highlighter;
 	#frame = null;
 	#view;
 	#done = false;
@@ -20,11 +22,13 @@ export class DiffLines {
 	 * @param {DiffRows} builder
 	 * @param {object[]} plan the rows as `DiffRows.plan` gives them
 	 * @param {string} label the box's accessible name
+	 * @param {import('../code/highlighter.js').Highlighter|null} [highlighter] what draws each line's code
 	 */
-	constructor(builder, plan, label) {
+	constructor(builder, plan, label, highlighter = null) {
 		this.#builder = builder;
 		this.#plan = plan;
-		this.#element = el('div', { class: 'bui-diff-lines', role: 'group', tabindex: '0', 'aria-label': label }, [this.#rows]);
+		this.#highlighter = highlighter;
+		this.#element = el('div', { class: 'bui-diff-lines', role: 'group', tabindex: '0', 'aria-label': label, 'data-language': highlighter?.language ?? null }, [this.#rows]);
 		this.#element.style.setProperty('--bui-diff-digits', String(DiffRows.digits(plan)));
 	}
 
@@ -87,7 +91,7 @@ export class DiffLines {
 	}
 
 	#node(row) {
-		return this.#builder.node(row, (folded, node) => this.#reveal(folded, node));
+		return this.#builder.node(row, (folded, node) => this.#reveal(folded, node), this.#highlighter);
 	}
 
 	/** Puts a folded run's lines in place of its button and keeps focus in the box. */

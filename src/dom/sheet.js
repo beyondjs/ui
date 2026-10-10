@@ -6,6 +6,7 @@ import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 import { Focus } from './core/focus.js';
 import { Interaction } from './core/interaction.js';
+import { Leaving } from './core/leaving.js';
 
 const widths = Object.freeze(['form', 'standard']);
 
@@ -22,7 +23,9 @@ const widths = Object.freeze(['form', 'standard']);
  * A task sheet never closes on a press outside. Escape and the close button close it, except while
  * `busy` (the hosted task is working): then nothing closes it. `error(node)` shows a failure at its
  * top, such as "Beyond Projects didn't answer" with Try again, without closing it or losing what the
- * person did. It slides in with `--motion-standard`, and appears at once under reduced motion.
+ * person did. It slides in with `--motion-standard` and, since 0.14.0 (D95), slides back out with
+ * `--motion-exit` (an inert picture, `Leaving`, while the sheet itself is closed at once); it appears
+ * and goes at once under reduced motion.
  * `open()` resolves with the value given to `close(value)`; a dismissal gives null.
  */
 export class SideSheet extends Component {
@@ -46,6 +49,7 @@ export class SideSheet extends Component {
 	#settle = null;
 	#overflow = null;
 	#closing = false;
+	#picture = null;
 
 	/**
 	 * @param {object} options
@@ -152,6 +156,7 @@ export class SideSheet extends Component {
 			this.#adopted = true;
 		}
 		this.#settle = SideSheet.#resolvers();
+		this.#picture?.remove();
 		this.#element.showModal();
 		this.#overflow = document.documentElement.style.overflow;
 		document.documentElement.style.overflow = 'hidden';
@@ -169,6 +174,7 @@ export class SideSheet extends Component {
 	close(value = null) {
 		if (!this.#element.open || this.#busy) return false;
 		this.#closing = true;
+		this.#picture = Leaving.play(this.#element, { host: this.#element.ownerDocument.body, tag: 'div', floating: false, veil: 'bui-sheet-veil' });
 		this.#element.close();
 		this.#closing = false;
 		this.#finish(value);
@@ -183,6 +189,7 @@ export class SideSheet extends Component {
 	destroy() {
 		this.#busy = false;
 		if (this.#element.open) this.close(null);
+		this.#picture?.remove();
 		this.#hint.destroy();
 		super.destroy();
 	}

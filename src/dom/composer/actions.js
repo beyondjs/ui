@@ -82,6 +82,11 @@ export class ComposerActions {
 		this.#items();
 	}
 
+	/** The Dictate button (0.14.0), placed at the end right before the stop action and the primary action. */
+	set voice(button) {
+		this.#element.insertBefore(button, this.#stopper?.element ?? this.#split);
+	}
+
 	/** `{ label, run, busy? }` while work runs, or null. */
 	set stop(value) {
 		if (!value?.label) {

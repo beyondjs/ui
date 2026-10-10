@@ -5,7 +5,8 @@ const signs = Object.freeze({ ' ': 'context', '-': 'delete', '+': 'add', '\\': '
 /**
  * One file of a change as `Diff` shows it, read from a parsed patch or from a product's `files`: its
  * path (and the earlier one of a rename or copy), its status (inferred when absent), binary, its mode
- * change, its hunks with lines as `{ kind, text }`, and its counts (from the lines when absent).
+ * change, its hunks with lines as `{ kind, text }`, its counts (from the lines when absent) and the
+ * language its code is highlighted in when the product names one (`language`).
  *
  * What cannot be read is counted in `unread` and left out, never guessed: a line that is neither a
  * string with a sign nor a `{ kind, text }` of a known kind, or a hunk without line numbers.
@@ -20,6 +21,7 @@ export class DiffEntry {
 	#added;
 	#removed;
 	#unread;
+	#language;
 
 	/** A file from data, or null when it names no path. */
 	static from(raw) {
@@ -30,6 +32,7 @@ export class DiffEntry {
 	constructor(raw) {
 		this.#path = raw.path;
 		this.#binary = Boolean(raw.binary);
+		this.#language = typeof raw.language === 'string' && raw.language.trim() ? raw.language.trim() : null;
 		const mode = raw.mode && typeof raw.mode === 'object' ? { old: raw.mode.old ?? null, new: raw.mode.new ?? null } : null;
 		this.#mode = mode && (mode.old || mode.new) ? mode : null;
 		this.#unread = Number.isInteger(raw.unread) && raw.unread > 0 ? raw.unread : 0;
@@ -81,6 +84,11 @@ export class DiffEntry {
 		return this.#removed;
 	}
 
+	/** The language the product named for this file's code, as given, or null to infer it from the path. */
+	get language() {
+		return this.#language;
+	}
+
 	/** The parts of this file that could not be read. */
 	get unread() {
 		return this.#unread;
@@ -119,7 +127,9 @@ export class DiffEntry {
 	/** The file as plain data, the shape of `files`, with its counts. */
 	get data() {
 		const hunks = this.#hunks.map(hunk => ({ old: hunk.old, new: hunk.new, header: hunk.header, lines: hunk.lines.map(line => ({ ...line })) }));
-		return { path: this.#path, previous: this.#previous, status: this.#status, binary: this.#binary, mode: this.#mode ? { ...this.#mode } : null, hunks, added: this.#added, removed: this.#removed, unread: this.#unread };
+		const data = { path: this.#path, previous: this.#previous, status: this.#status, binary: this.#binary, mode: this.#mode ? { ...this.#mode } : null, hunks, added: this.#added, removed: this.#removed, unread: this.#unread };
+		// Only a language the product named travels with the data; a parsed patch names none
+		return this.#language ? { ...data, language: this.#language } : data;
 	}
 
 	#hunk(hunk) {

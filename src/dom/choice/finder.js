@@ -57,6 +57,21 @@ export class ChoiceFinder {
 		if (this.#field) this.#field.value = '';
 	}
 
+	/**
+	 * Shows the entries that match the query (actions always stay) and, below them, says when no option
+	 * does: `words(query)` is that sentence.
+	 */
+	filter(entries, words) {
+		const query = this.query;
+		let shown = 0;
+		for (const entry of entries) {
+			entry.shown = !entry.option || ChoiceFinder.match(entry.text, query);
+			if (entry.option && entry.shown) shown += 1;
+		}
+		this.#none.textContent = query && !shown ? words(query) : '';
+		this.#none.hidden = !this.#none.textContent;
+	}
+
 	/** Text without case or accents, for comparing. */
 	static fold(text) {
 		return String(text ?? '')

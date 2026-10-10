@@ -1,0 +1,11 @@
+/* The code block
+   in both themes */
+@media (min-width: 40em) {
+	.bui-code > pre#main:hover,
+	code[data-language="js"] {
+		color: var(--color-code-keyword) !important;
+		margin: -2px 1.5em 0 10%;
+		background: url(images/back.png) #fafafa;
+		font-family: "Rubik", sans-serif;
+	}
+}

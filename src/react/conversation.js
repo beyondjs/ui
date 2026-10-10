@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Composer as Box } from '../dom/composer/composer.js';
+import { ComposerContext } from '../dom/composer/context.js';
 import { LiveText as Live } from '../dom/live/text.js';
 import { ActivityRow as Row } from '../dom/activity/row.js';
 import { ActivityGroup as Fold } from '../dom/activity/group.js';
@@ -35,11 +36,14 @@ function slot(tag, name) {
  * toolbar keeps one row, shortening the chips and last folding them behind Options, unless
  * `compact={false}` (0.11.1; measured since 0.11.2); `summary` is what Options says beside its glyph and
  * `attach.zone` (an element or a ref to one, read after each render) is the work surface where a drop
- * attaches too (0.11.2).
+ * attaches too (0.11.2). Since 0.14.0: `tray` is React content on the box's lower edge; `commands` (a list
+ * or a source), `recall` and `dictation` (`{ transcribe, cap?, bound?, minimum?, explain? }`) are read from
+ * the latest props, and whether they are given (or the dictation's cap, bound or minimum) creates a new box.
  */
-export const Composer = forwardRef(function Composer({ label, placeholder = null, status = null, tools = null, extras = null, settings = null, actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value, min, max, name = null, onChange = null, onSubmit, explain, labels, attach = null, attachments = null, onSuggest = null, suggest = null, locale = undefined, compact = true, summary = null }, ref) {
-	const [slots] = useState(() => ({ tools: slot('span', 'bui-composer-slot'), extras: slot('span', 'bui-composer-slot'), settings: slot('span', 'bui-composer-slot'), status: slot('span', 'bui-composer-slot'), action: slot('span', 'bui-composer-slot') }));
-	const latest = useLatest({ onChange, onSubmit, explain, stop, attach, onSuggest, status });
+export const Composer = forwardRef(function Composer({ label, placeholder = null, status = null, tools = null, extras = null, settings = null, actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value, min, max, name = null, onChange = null, onSubmit, explain, labels, attach = null, attachments = null, onSuggest = null, suggest = null, locale = undefined, compact = true, summary = null, tray = null, commands = null, recall = null, dictation = null }, ref) {
+	const [slots] = useState(() => ({ tools: slot('span', 'bui-composer-slot'), extras: slot('span', 'bui-composer-slot'), settings: slot('span', 'bui-composer-slot'), status: slot('span', 'bui-composer-slot'), action: slot('span', 'bui-composer-slot'), tray: slot('span', 'bui-composer-slot') }));
+	const latest = useLatest({ onChange, onSubmit, explain, stop, attach, onSuggest, status, commands, recall, dictation });
+	const voice = dictation ? { labels: dictation.labels, cap: dictation.cap, bound: dictation.bound, minimum: dictation.minimum, transcribe: (blob, options) => latest.current.dictation?.transcribe?.(blob, options), explain: dictation.explain ? error => latest.current.dictation?.explain?.(error) : undefined } : null;
 	const line = new StatusLine(status, slots, latest);
 	const halt = () => (stop?.label ? { label: stop.label, busy: Boolean(stop.busy), run: () => latest.current.stop?.onSelect?.() } : null);
 	const intake = attach ? { label: attach.label ?? null, accept: attach.accept ?? null, multiple: attach.multiple !== false, onfiles: (files, via) => latest.current.attach?.onFiles?.(files, via), onremove: item => latest.current.attach?.onRemove?.(item), onretry: attach.onRetry ? item => latest.current.attach?.onRetry?.(item) : null } : null;
@@ -67,13 +71,17 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 				busy,
 				attach: intake,
 				attachments: attachments ?? [],
+				tray: tray ? [slots.tray] : [],
+				commands: commands ? (query, signal) => (typeof latest.current.commands === 'function' ? latest.current.commands(query, signal) : ComposerContext.filter(latest.current.commands, query)) : null,
+				recall: recall ? () => latest.current.recall?.() ?? null : null,
+				dictation: voice,
 				suggest,
 				onsuggest: onSuggest ? (query, signal) => latest.current.onSuggest?.(query, signal) ?? [] : null,
 				onsubmit: message => Promise.resolve(latest.current.onSubmit?.(message)),
 				onchange: text => latest.current.onChange?.(text),
 				explain: explain === undefined ? undefined : error => latest.current.explain?.(error) ?? null
 			}),
-		[label, submit, min, max, name, labels, locale, compact !== false, explain === undefined, Boolean(attach), Boolean(attach?.onRetry), Boolean(onSuggest), JSON.stringify(suggest ?? null)]
+		[label, submit, min, max, name, labels, locale, compact !== false, explain === undefined, Boolean(attach), Boolean(attach?.onRetry), Boolean(onSuggest), JSON.stringify(suggest ?? null), Boolean(commands), Boolean(recall), Boolean(dictation), dictation?.cap, dictation?.bound, dictation?.minimum, Boolean(dictation?.explain)]
 	);
 	// The adapter places the element itself, so the field's height is fitted once it is in the page
 	useSync(box, current => current.fit(), []);
@@ -88,12 +96,13 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 	useSync(box, current => (current.disabled = disabled), [JSON.stringify(disabled ?? null)]);
 	useSync(box, current => (current.busy = busy), [busy]);
 	useSync(box, current => (current.summary = summary), [summary]);
+	useSync(box, current => (current.tray = tray ? [slots.tray] : []), [Boolean(tray)]);
 	const zone = attach?.zone && 'current' in attach.zone ? attach.zone.current : (attach?.zone ?? null);
 	useSync(box, current => (current.zone = attach?.zone && 'current' in attach.zone ? attach.zone.current : (attach?.zone ?? null)), [zone, attach?.zone]);
 	useSync(box, current => typeof value === 'string' && current.value !== value && (current.value = value), [value]);
 	useImperativeHandle(ref, () => ({ focus: () => box?.focus(), submit: action => box?.submit(action) ?? Promise.resolve(false), attach: () => box?.attach(), get value() { return box?.value ?? ''; }, get busy() { return box?.busy ?? false; }, get sending() { return box?.sending ?? false; } }), [box]);
 	const portal = (content, node) => (box && content ? ReactDOM.createPortal(content, node) : null);
-	return h(React.Fragment, null, h('div', { ref: host, className: 'bui-host' }), portal(tools, slots.tools), portal(extras, slots.extras), portal(settings, slots.settings), portal(line.node, slots.status), portal(line.action, slots.action));
+	return h(React.Fragment, null, h('div', { ref: host, className: 'bui-host' }), portal(tools, slots.tools), portal(extras, slots.extras), portal(settings, slots.settings), portal(line.node, slots.status), portal(line.action, slots.action), portal(tray, slots.tray));
 });
 
 /**

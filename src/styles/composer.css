@@ -18,11 +18,7 @@
 	border-radius: var(--radius-base);
 	background: var(--color-surface);
 }
-/* The field draws no ring of its own: the box shows focus around the whole message. */
-.bui-composer-box:has(.bui-composer-field:focus-visible) {
-	outline: 2px solid var(--color-focus);
-	outline-offset: 1px;
-}
+/* The field draws no ring of its own: the box's own border shows focus (editor.css, 0.14.0). */
 .bui-composer-field:focus-visible {
 	outline: none;
 }
@@ -65,7 +61,7 @@
 	display: block;
 	width: 100%;
 	min-height: calc(var(--bui-composer-min, 1) * 1lh + var(--space-3) + var(--space-1));
-	max-height: calc(var(--bui-composer-max, 12) * 1lh + var(--space-3) + var(--space-1));
+	max-height: min(calc(var(--bui-composer-max, 12) * 1lh + var(--space-3) + var(--space-1)), var(--bui-composer-cap, 33dvh));
 	margin: 0;
 	padding: var(--space-3) var(--space-3) var(--space-1);
 	border: 0;

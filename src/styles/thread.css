@@ -1,0 +1,101 @@
+/* A conversation's page (the `thread` template, 0.14.0): an anchored dock (D94) and one edge, one lane
+   (D96). The frame fills the window under the chrome and keeps no padding under its content; the main
+   column is a column whose last block is the dock, pushed to its end and sticky at the window's bottom
+   with one gutter and the safe area under it, so its distance to the bottom never changes. Tokens only. */
+.bui-page[data-template='thread'] {
+	--bui-page-gap: var(--space-8);
+}
+/* The chrome above the page: the family bar, and below the sidebar's cut its product row too. A host
+   with other chrome (a Desktop window) sets --bui-page-chrome itself. */
+.bui-shell:has(.bui-sidebar[data-mode='drawer']) .bui-page[data-template='thread'] {
+	--bui-page-chrome: calc(var(--layout-family) + var(--bui-sidebar-row, 44px));
+}
+.bui-page[data-template='thread'] .bui-page-frame {
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	min-height: calc(100dvh - var(--bui-page-chrome, var(--layout-family)));
+	padding-bottom: 0;
+}
+.bui-page[data-template='thread'] .bui-page-frame > .bui-page-body {
+	flex: 1 0 auto;
+	align-items: stretch;
+}
+.bui-page[data-template='thread'] .bui-page-main {
+	display: flex;
+	flex-direction: column;
+	gap: var(--bui-page-gap);
+}
+.bui-page[data-template='thread'] .bui-page-panel {
+	align-self: start;
+}
+/* The header and its compact line end at the thread's edge: a toggle in them never moves when the panel
+   shows or hides (D95). */
+.bui-page[data-template='thread'] .bui-page-frame > .bui-page-header {
+	max-width: var(--layout-thread);
+}
+.bui-page[data-template='thread'] .bui-page-compact-line {
+	padding-inline-end: max(var(--layout-gutter), calc(100% - var(--layout-gutter) - var(--layout-thread)));
+}
+
+/* The dock: at the column's end, sticky at the window's bottom, over the canvas so what passes beneath is
+   hidden; a hairline above it only while content passes beneath (`data-stuck`, from its end mark). */
+.bui-page-dock {
+	position: sticky;
+	bottom: 0;
+	z-index: 2;
+	display: grid;
+	gap: var(--space-2);
+	min-width: 0;
+	margin-top: auto;
+	padding: var(--space-2) 0 calc(var(--layout-gutter) + env(safe-area-inset-bottom, 0px));
+	background: var(--color-canvas);
+}
+.bui-page-dock::before {
+	content: '';
+	position: absolute;
+	inset-block-start: 0;
+	inset-inline: 0;
+	height: 1px;
+	background: var(--color-border);
+	opacity: 0;
+	transition: opacity var(--motion-quick) var(--motion-ease);
+	pointer-events: none;
+}
+.bui-page-dock[data-stuck]::before {
+	opacity: 1;
+}
+.bui-page-dock:empty {
+	padding-block: 0;
+}
+.bui-page-dock > * {
+	min-width: 0;
+	max-width: var(--layout-lane);
+}
+/* The end mark takes no room: it sits on the dock's lower edge, inside the column's last gap. */
+.bui-page-dock-end {
+	flex: none;
+	height: 1px;
+	margin-block-start: calc(-1px - var(--bui-page-gap, 0px));
+	pointer-events: none;
+}
+
+/* One edge, one lane (D96): the person's message, prose, the rail's marks and the composer share the
+   lane's right edge; code, diffs, tool output and approval cards widen to the thread (the wide lane). */
+.bui-lane {
+	min-width: 0;
+	max-width: var(--layout-lane);
+}
+.bui-lane-wide {
+	min-width: 0;
+	max-width: var(--layout-thread);
+}
+.bui-page[data-template='thread'] :is(.bui-rail-item:not([data-wide]), .bui-activity-head, .bui-activity-tail, .bui-live) {
+	max-width: var(--layout-lane);
+}
+/* A panel kept in view comes next to the lane and grows up to its maximum; what is left falls on the far
+   side, never inside the thread (D96). */
+.bui-page[data-width='thread'][data-panel='beside']:not([data-panel-wide]) .bui-page-body:has(> .bui-page-panel:not([hidden])) {
+	grid-template-columns: minmax(0, var(--layout-lane)) clamp(var(--layout-aside), calc(100% - var(--layout-lane) - var(--space-8)), var(--layout-aside-max));
+	max-width: calc(var(--layout-lane) + var(--space-8) + var(--layout-aside-max));
+}

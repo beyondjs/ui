@@ -8,6 +8,10 @@ import { el, fill, content } from '../core/element.js';
  * A long value (0.11.2: `long: true`, or by default a sentence longer than `FactsRow.measure` characters
  * that is not an identifier) goes under its label, left-aligned, as a sentence is read, rather than
  * right-aligned over several lines at the row's end.
+ *
+ * Since 0.14.0 (D99) the value starts in a fixed column right after its label's (`--bui-facts-label`,
+ * 9.5rem), not at the row's far end; a number (a `number` value, or `numeric: true`) aligns to the end
+ * in tabular figures (`data-numeric`).
  */
 export class FactsRow {
 	/** Characters past which a value in words reads under its label. */
@@ -35,12 +39,18 @@ export class FactsRow {
 		return this.#element;
 	}
 
+	/** Whether a row's value is a number, aligned to the end: `numeric` when given, else a `number` value (0.14.0). */
+	static numeric({ value = null, numeric = null }) {
+		return typeof numeric === 'boolean' ? numeric : typeof value === 'number';
+	}
+
 	/**
-	 * @param {{label: string|Node, value?: string|number|Node|null, mono?: boolean, action?: Node|{element: Node}|null, stale?: boolean|string|null, long?: boolean|null}} row
+	 * @param {{label: string|Node, value?: string|number|Node|null, mono?: boolean, action?: Node|{element: Node}|null, stale?: boolean|string|null, long?: boolean|null, numeric?: boolean|null}} row
 	 * @param {import('../core/labels.js').Labels} labels the copy (`stale`, said when `stale` is true)
 	 */
-	update({ label, value = null, mono = false, action = null, stale = null, long = null }, labels) {
+	update({ label, value = null, mono = false, action = null, stale = null, long = null, numeric = null }, labels) {
 		this.#element.toggleAttribute('data-long', FactsRow.long({ value, mono, long }));
+		this.#element.toggleAttribute('data-numeric', FactsRow.numeric({ value, numeric }) && !FactsRow.long({ value, mono, long }));
 		if (this.#shown.label !== label) fill(this.#label, [content(label)]);
 		const shown = value === null || value === undefined ? '' : value;
 		if (this.#shown.value !== shown || typeof shown !== 'string') fill(this.#value, [content(typeof shown === 'number' ? String(shown) : shown)]);

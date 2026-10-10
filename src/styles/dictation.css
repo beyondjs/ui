@@ -1,0 +1,118 @@
+/* A composer's dictation (0.14.0): Dictate in the toolbar's end, with its glyph beside its word, and the
+   line inside the box between the field and the toolbar: a mark, the state in words, the time against the
+   cap, a note, the decorative level meter and the ways on. The row is hidden while idle; the announcer
+   beside it is visually hidden. Tokens only; nothing moves under reduced motion (the base rule). */
+.bui-dictation-button .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-dictation-button[aria-disabled='true'] {
+	color: var(--color-text-muted);
+	cursor: default;
+}
+.bui-dictation-button[aria-disabled='true']:hover {
+	background: transparent;
+}
+.bui-dictation {
+	min-width: 0;
+}
+.bui-dictation-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1) var(--space-2);
+	min-width: 0;
+	padding: var(--space-1) var(--space-3) 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+}
+.bui-dictation-row[hidden] {
+	display: none;
+}
+.bui-dictation-mark {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 16px;
+	height: 16px;
+}
+.bui-dictation-mark:empty {
+	display: none;
+}
+.bui-dictation-mark .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-dictation-mark .bui-spinner {
+	width: 12px;
+	height: 12px;
+}
+.bui-dictation[data-state='failed'] .bui-dictation-mark {
+	color: var(--color-danger);
+}
+/* The recording dot: the meaning is in the word beside it, never in the color alone. */
+.bui-dictation-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: var(--radius-round);
+	background: var(--color-danger);
+	/* Pulses about five seconds, then holds (D95) */
+	animation: bui-pulse 1.2s ease-in-out 4;
+}
+.bui-dictation-text {
+	min-width: 0;
+	color: var(--color-text);
+	overflow-wrap: anywhere;
+}
+.bui-dictation[data-state='failed'] .bui-dictation-text {
+	flex: 1 1 16rem;
+	max-width: var(--layout-measure);
+}
+.bui-dictation-time {
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.bui-dictation-note {
+	color: var(--color-warning);
+	white-space: nowrap;
+}
+.bui-dictation-time[hidden],
+.bui-dictation-note[hidden],
+.bui-dictation-text[hidden] {
+	display: none;
+}
+/* The level meter: a few bars, decorative, raised by the loudness the script writes as a number. */
+.bui-dictation-level {
+	display: none;
+	align-items: center;
+	gap: 2px;
+	height: 16px;
+}
+.bui-dictation[data-state='recording'] .bui-dictation-level {
+	display: inline-flex;
+}
+.bui-dictation-bar {
+	width: 3px;
+	height: 16px;
+	border-radius: var(--radius-round);
+	background: var(--color-text-muted);
+	transform: scaleY(calc(0.2 + 0.8 * var(--bui-dictation-level, 0) * var(--bui-dictation-weight, 1)));
+	transition: transform var(--motion-quick) var(--motion-ease);
+}
+.bui-dictation-actions {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+	margin-inline-start: auto;
+}
+.bui-dictation-actions:empty {
+	display: none;
+}
+.bui-dictation-actions .bui-button .bui-icon {
+	width: 14px;
+	height: 14px;
+}

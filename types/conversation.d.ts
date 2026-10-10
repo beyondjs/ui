@@ -2,6 +2,7 @@
 import type { Component, Content, Copy } from './dom.js';
 import type { IconName } from './icons.js';
 import type { Clock, Moment } from './operations.js';
+import type { ComposerEdges, ComposerDictation, ComposerEditor } from './edges.js';
 
 type Copies = { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 type Part = Node | { element: Node };
@@ -120,7 +121,7 @@ export interface ComposerSuggestions {
 	close(): void;
 }
 export type ComposerSubmit = 'enter' | 'mod';
-export interface ComposerOptions {
+export interface ComposerOptions extends ComposerEdges {
 	/** The field's accessible name; never drawn. */
 	label: string;
 	/** Sends; a rejection gives the text back to the field. */
@@ -212,6 +213,10 @@ export class Composer extends Component {
 	focus(): void;
 	/** Fits the field's height to its text (`mount` does it). */
 	fit(): void;
+	/** The context tray (0.14.0); null or an empty list takes it away. */
+	set tray(nodes: Array<Node | { element: Node } | null> | null);
+	readonly dictation: ComposerDictation | null;
+	readonly editor: ComposerEditor;
 }
 
 /** Text that arrives in pieces: drawn at most once per frame, marked live, then settled or abandoned (0.10.0). */
@@ -232,9 +237,9 @@ export class LiveText extends Component {
 
 export type ActivityState = 'running' | 'done' | 'failed' | 'denied' | 'waiting';
 /** A section of an opened row: text in a code box (first `lines`, "Show all", "Copy"), a sentence, or the product's node. */
-export type ActivitySection = { label?: Content | null; text: string; code?: boolean; lines?: number; copy?: boolean } | { label?: Content | null; content: Part };
+export type ActivitySection = { label?: Content | null; text: string; code?: boolean; lines?: number; copy?: boolean; /** Highlights the code (0.14.0). */ language?: string | null } | { label?: Content | null; content: Part };
 /** What a step was given and gave back, in one box: each part a row with its label beside its text (0.12.0). */
-export type ActivityExchangePart = { label: string; text?: string | null; lines?: number; copy?: boolean };
+export type ActivityExchangePart = { label: string; text?: string | null; lines?: number; copy?: boolean; language?: string | null };
 export type ActivityPart = Node | { element: Node } | string | ActivitySection | { exchange: ActivityExchangePart[] };
 export interface ActivityValues {
 	glyph?: IconName;

@@ -20,6 +20,10 @@ import { CaretPoint } from './caret.js';
  * A list the source cut (0.11.1: `{ items, total }`, `{ items, more: true }` or `{ items, note }`) ends
  * with a line that says so ("50 of 120 · keep typing to narrow"), kept in view at the list's end, which
  * describes the list and is said once with the answer ("50 of 120 suggestions · keep typing to narrow").
+ *
+ * Since 0.14.0 a composer's commands use it too (`start`: the trigger only at the field's start, "/"):
+ * an item with `run` is not inserted; its token leaves the field and `run({ value })` is the product's,
+ * never sent to anyone by the composer.
  */
 export class ComposerSuggest {
 	#field;
@@ -40,6 +44,7 @@ export class ComposerSuggest {
 	#items = [];
 	#active = -1;
 	#composing = false;
+	#start;
 	#handlers = [];
 
 	/**
@@ -53,7 +58,8 @@ export class ComposerSuggest {
 	 * @param {string} [options.locale] the language of the counts in a cut list's last line
 	 */
 	constructor({ field, anchor, labels, source, settings = {}, oninsert, locale = undefined }) {
-		const { trigger = '@', bound, delay, label = null, explain = null } = settings ?? {};
+		const { trigger = '@', bound, delay, label = null, explain = null, start = false } = settings ?? {};
+		this.#start = Boolean(start);
 		if (typeof trigger !== 'string' || [...trigger].length !== 1 || /\s/.test(trigger)) throw new TypeError("A suggestion's trigger is one character that is not a space");
 		this.#field = field;
 		this.#anchor = anchor;
@@ -138,7 +144,7 @@ export class ComposerSuggest {
 	#read() {
 		if (this.#composing) return;
 		const { value, selectionStart, selectionEnd } = this.#field;
-		const token = selectionStart === selectionEnd ? MentionToken.at(value, selectionStart, this.#trigger) : null;
+		const token = selectionStart === selectionEnd ? MentionToken.at(value, selectionStart, this.#trigger, this.#start) : null;
 		if (!token) {
 			this.#token = null;
 			this.#closed = null;
@@ -166,6 +172,7 @@ export class ComposerSuggest {
 		else this.#list.removeAttribute('aria-describedby');
 		if (state !== 'looking') this.#announcer.say(cut?.said ?? (state === 'results' ? this.#labels.text('suggested', { count: this.#items.length }) : line));
 		this.#panel.hidden = false;
+		this.#field.setAttribute('aria-controls', this.#list.id);
 		this.#move(this.#active);
 		this.#align();
 		this.#placement.place(this.#panel, this.#anchor);
@@ -212,9 +219,11 @@ export class ComposerSuggest {
 	#insert(item) {
 		const token = this.#token;
 		if (!token) return;
-		const { text, caret } = token.replace(this.#field.value, String(item.value));
+		const runs = typeof item.run === 'function';
+		const { text, caret } = runs ? token.remove(this.#field.value) : token.replace(this.#field.value, String(item.value));
 		this.#token = null;
 		this.close();
 		this.#oninsert(text, caret);
+		if (runs) item.run({ value: item.value });
 	}
 }

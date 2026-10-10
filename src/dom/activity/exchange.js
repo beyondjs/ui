@@ -17,7 +17,7 @@ export class ActivityExchange {
 	 */
 	constructor(parts, labels) {
 		const given = (Array.isArray(parts) ? parts : []).filter(part => part && part.text !== null && part.text !== undefined && part.text !== '');
-		this.#parts = given.map(part => new ActivitySection({ label: part.label, text: part.text, lines: part.lines, copy: part.copy ?? true }, labels));
+		this.#parts = given.map(part => new ActivitySection({ label: part.label, text: part.text, lines: part.lines, copy: part.copy ?? true, language: part.language ?? null }, labels));
 		this.#element = el('div', { class: 'bui-activity-exchange' }, this.#parts.map(part => part.element));
 	}
 

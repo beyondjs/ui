@@ -1,0 +1,23 @@
+/* Highlighted code (Highlighter, 0.14.0): the six kinds of token a highlighter draws as spans inside a
+   code block, a Diff line or an activity section, each in its --color-code-* role. Every role holds 4.5:1
+   on canvas, surface, surface-sunken, success-surface and danger-surface in both themes, so a colored
+   token reads on an added or a removed line too. Only the color changes: weight, style and size are the
+   code's own. Under forced colors the system's text color replaces them. Tokens only. */
+.bui-code-comment {
+	color: var(--color-code-comment);
+}
+.bui-code-keyword {
+	color: var(--color-code-keyword);
+}
+.bui-code-string {
+	color: var(--color-code-string);
+}
+.bui-code-number {
+	color: var(--color-code-number);
+}
+.bui-code-name {
+	color: var(--color-code-name);
+}
+.bui-code-tag {
+	color: var(--color-code-tag);
+}

@@ -57,6 +57,14 @@ export interface ComposerProps {
 	explain?: ((error: unknown) => string | null) | null;
 	/** Memoize: a new object creates a new box. */
 	labels?: Copy;
+	/** The context tray on the box's lower edge, React content (0.14.0). */
+	tray?: ReactNode;
+	/** Commands after "/" at the start, read from the latest props (0.14.0). */
+	commands?: import('./dom.js').ComposerEdges['commands'];
+	/** ArrowUp in an empty field brings this text back, read from the latest props (0.14.0). */
+	recall?: import('./dom.js').ComposerEdges['recall'];
+	/** Offers Dictate; `transcribe` and `explain` read from the latest props (0.14.0). */
+	dictation?: import('./dom.js').DictationOptions | null;
 }
 /** A message box driven by the DOM `Composer` (0.10.0). */
 export const Composer: ForwardRefExoticComponent<ComposerProps & RefAttributes<ComposerHandle>> & { labels: Copies };
@@ -99,7 +107,7 @@ export function PanelToggle(props: { label: ReactNode; variant?: 'primary' | 'se
 /** A rail of work in React (0.12.0): one line down the column of its children's marks. */
 export function Rail(props: { label?: string | null; children?: ReactNode }): ReactElement;
 /** One event on a rail, driven by the DOM `RailItem` (0.12.0): a mark and the children beside it. */
-export function RailItem(props: { glyph?: IconName | null; tone?: 'neutral' | 'success' | 'info' | 'progress' | 'warning' | 'danger'; children?: ReactNode }): ReactElement;
+export function RailItem(props: { glyph?: IconName | null; tone?: 'neutral' | 'success' | 'info' | 'progress' | 'warning' | 'danger'; /** 0.14.0, D96 */ wide?: boolean; children?: ReactNode }): ReactElement;
 export namespace RailItem { const tones: readonly ('neutral' | 'success' | 'info' | 'progress' | 'warning' | 'danger')[]; }
 /** A time of day at a rail's far end, driven by the DOM `RailMoment` (0.12.0). */
 export function RailMoment(props: { text: string; datetime?: string | null; title?: string | null }): ReactElement;

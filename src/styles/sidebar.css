@@ -104,10 +104,11 @@ a.bui-sidebar-item:hover {
 	outline: 2px solid var(--color-focus);
 	outline-offset: -2px;
 }
+/* The current item is not a link (D98): the text color at weight 500, with the accent bar and its surface. */
 .bui-sidebar-item[aria-current='page'] {
 	background: var(--color-surface);
 	box-shadow: inset 2px 0 0 var(--color-accent);
-	color: var(--color-link);
+	color: var(--color-text);
 	font-weight: var(--weight-medium);
 }
 .bui-sidebar-item[aria-disabled='true'] {

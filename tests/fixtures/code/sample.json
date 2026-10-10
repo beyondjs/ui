@@ -1,0 +1,9 @@
+{
+	"name": "@beyond-js/ui",
+	"version": "0.14.0",
+	// JSONC comments are read too
+	"private": true,
+	"files": ["src", "dist"],
+	"size": -1.25e3,
+	"parent": null
+}

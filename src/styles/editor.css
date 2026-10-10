@@ -1,0 +1,91 @@
+/* The composer's edges (0.14.0, D100): focus as the box's own border, the context tray on its lower edge,
+   the growth cap near a third of the window with Expand, and the taller editor over the content. */
+
+/* Focus draws the box's border in the focus color, 2 px, with no offset ring beside it (CV-16). */
+.bui-composer-box:has(.bui-composer-field:focus-visible) {
+	border-color: var(--color-focus);
+	box-shadow: inset 0 0 0 1px var(--color-focus);
+}
+
+/* The context tray: one line of compact chips attached to the box's lower edge, inside its frame, wrapping
+   on a narrow screen. */
+.bui-composer-tray {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1) var(--space-2);
+	min-width: 0;
+	padding: var(--space-1) var(--space-2) var(--space-2);
+	border-top: 1px solid var(--color-border);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-composer-tray > * {
+	min-width: 0;
+}
+
+/* Expand: offered once the field reached its cap, at the box's top end, over the field's scrollbar's side. */
+.bui-composer-grow {
+	position: absolute;
+	inset-block-start: var(--space-1);
+	inset-inline-end: var(--space-1);
+	z-index: 1;
+	display: none;
+}
+.bui-composer[data-capped] .bui-composer-grow {
+	display: inline-flex;
+}
+.bui-composer[data-capped] .bui-composer-field {
+	padding-inline-end: calc(var(--bui-target) + var(--space-2));
+}
+.bui-composer-expand {
+	width: var(--bui-target);
+	height: var(--bui-target);
+	color: var(--color-text-muted);
+	background: var(--color-surface);
+}
+.bui-composer-expand .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+
+/* The taller editor: the same box in a modal dialog over the content, as tall as the window allows. */
+.bui-composer-editor {
+	box-sizing: border-box;
+	width: min(var(--layout-thread), calc(100vw - 2 * var(--space-4)));
+	max-width: none;
+	height: min(48rem, calc(100dvh - 2 * var(--space-6)));
+	max-height: none;
+	margin: auto;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--color-text);
+	overflow: visible;
+}
+.bui-composer-editor[open] {
+	display: flex;
+}
+.bui-composer-editor::backdrop {
+	background: var(--overlay-scrim);
+}
+.bui-composer-editor > .bui-composer-box {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+	box-shadow: var(--elevation-dialog);
+}
+.bui-composer-editor > .bui-composer-box:has(.bui-composer-field:focus-visible) {
+	box-shadow: inset 0 0 0 1px var(--color-focus), var(--elevation-dialog);
+}
+.bui-composer-editor .bui-composer-input {
+	display: flex;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+.bui-composer-editor .bui-composer-field {
+	height: auto !important;
+	max-height: none;
+	flex: 1 1 auto;
+}

@@ -5,6 +5,9 @@ import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { SidebarSections } from './sections.js';
 import { Drawer } from './drawer.js';
+import { SidebarFolds } from './folds.js';
+import { SidebarShortcut } from './shortcut.js';
+import { Hint } from '../core/hint.js';
 import { Age } from '../time/age.js';
 
 const words = {
@@ -57,6 +60,14 @@ const defaults = words.en;
  * 'entries'`, with a mark in words and a `more` link), put a top `action` link ("New conversation")
  * and a `search` of its service; every setter patches both forms by keys, so a live change never
  * redraws the navigation or moves focus (`SidebarSections`).
+ *
+ * Since 0.14.0 (D97, D98) the product's own objects are a group of `kind: 'object'` after its sections
+ * and a divider: their heading line carries the primary action ("New", with `plus`) and the search as
+ * its icon, which expands into the field in place; their groups of entries fold under disclosure
+ * headings that keep their count, kept per device and product; their `more` link ends them. `shortcut:
+ * true` makes ⌘K / Ctrl+K open the search (the drawer below the cut); `sidebar.shortcut = false` lets a
+ * host keep the key. Below the cut the objects' action may sit at the product row's end (`action.row`).
+ * The current item is drawn in the text color at weight 500 with the accent bar, never as a link.
  */
 export class Sidebar extends Component {
 	/** The copy in English and Spanish (0.7.2). */
@@ -74,6 +85,10 @@ export class Sidebar extends Component {
 	#section = null;
 	#query = null;
 	#onnavigate;
+	#folds;
+	#shortcut;
+	#hint;
+	#start = null;
 
 	/**
 	 * @param {object} options
@@ -86,8 +101,9 @@ export class Sidebar extends Component {
 	 * @param {{label: string, source: Function, bound?: number, delay?: number, all?: Function|null, placeholder?: string|null}|null} [options.search] a search of the product's entries (0.10.0)
 	 * @param {(item: {href: string, url: string, label: string}, event: MouseEvent) => void} [options.onnavigate]
 	 * @param {object} [options.labels] replaces entries of `Sidebar.labels.en`
+	 * @param {boolean} [options.shortcut] ⌘K / Ctrl+K opens the search (0.14.0)
 	 */
-	constructor({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onnavigate = null, labels = {} }) {
+	constructor({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onnavigate = null, labels = {}, shortcut = false }) {
 		super();
 		this.#labels = new Labels(defaults, labels);
 		this.#cut = Number.isFinite(cut) && cut > 0 ? cut : 1024;
@@ -95,15 +111,20 @@ export class Sidebar extends Component {
 		this.#product = product;
 		const name = this.#labels.text('sections', { product });
 		const id = Ids.next('bui-drawer');
-		this.#sections = new SidebarSections({ name, labels: this.#labels });
+		const view = globalThis.document?.defaultView ?? null;
+		this.#folds = new SidebarFolds({ product, view });
+		this.#shortcut = new SidebarShortcut({ view, run: () => this.seek(), enabled: shortcut });
+		this.#sections = new SidebarSections({ name, labels: this.#labels, folds: this.#folds, shortcut: shortcut ? this.#shortcut.words : null });
 		this.#panel = el('div', { class: 'bui-sidebar-panel' }, [this.#sections.panel]);
 		this.#button = el('button', { type: 'button', class: 'bui-sidebar-button', 'aria-haspopup': 'dialog', 'aria-expanded': 'false', 'aria-controls': id, onclick: () => this.open() });
 		this.#row = el('div', { class: 'bui-sidebar-row' }, [this.#button]);
 		this.#drawer = new Drawer({ id, title: product, name, close: this.#labels.text('close'), onclose: () => this.#button.setAttribute('aria-expanded', 'false') });
 		this.#element = el('div', { class: 'bui-sidebar' }, [this.#panel, this.#row, this.#drawer.element]);
 		this.#element.addEventListener('click', event => this.#navigate(event));
+		this.#hint = new Hint(this.#panel);
 		this.#drawer.fill(this.#sections.drawer);
 		this.#sections.groups = groups;
+		this.#place(groups);
 		this.#sections.context = context;
 		this.#sections.action = action;
 		this.#sections.search = search;
@@ -129,6 +150,7 @@ export class Sidebar extends Component {
 	/** Replaces the groups of links, patching both forms by keys (focus stays where it is). */
 	set groups(value) {
 		this.#sections.groups = value;
+		this.#place(value);
 		this.#draw();
 	}
 
@@ -153,6 +175,33 @@ export class Sidebar extends Component {
 		this.#draw();
 	}
 
+	/** Whether ⌘K / Ctrl+K opens the search (0.14.0); a host that keeps the key sets it false. */
+	get shortcut() {
+		return this.#shortcut.enabled;
+	}
+
+	set shortcut(value) {
+		this.#shortcut.enabled = value;
+	}
+
+	/** The kept folds of the groups of entries (`SidebarFolds`: `folded(key)`, `keep(key, folded)`) (0.14.0). */
+	get folds() {
+		return this.#folds;
+	}
+
+	/**
+	 * Opens the search with focus in its field, as ⌘K / Ctrl+K does: in the permanent sidebar, or in the
+	 * drawer below the cut, which opens first. Answers whether there was a search to open (0.14.0).
+	 */
+	seek() {
+		if (this.mode === 'drawer') {
+			if (!this.#sections.searches.length && !this.#sections.search) return false;
+			this.open();
+			return this.#sections.seek('drawer');
+		}
+		return this.#sections.seek('panel');
+	}
+
 	/** Opens the drawer (below the cut only). */
 	open() {
 		if (this.mode !== 'drawer' || this.#drawer.shown) return;
@@ -166,6 +215,9 @@ export class Sidebar extends Component {
 	}
 
 	destroy() {
+		this.#shortcut.destroy();
+		this.#hint.destroy();
+		this.#folds.destroy();
 		this.#drawer.destroy();
 		this.#sections.destroy();
 		super.destroy();
@@ -177,6 +229,20 @@ export class Sidebar extends Component {
 		const shown = this.#button.querySelector('.bui-sidebar-section');
 		if (shown?.textContent === label) return;
 		this.#button.replaceChildren(glyph('menu'), el('span', { class: 'bui-sidebar-section', text: label }));
+	}
+
+	/** The objects' action at the product row's end below the cut, when it says `row: true` (SB-07). */
+	#place(groups) {
+		const action = (Array.isArray(groups) ? groups : []).find(group => group?.kind === 'object' && group.action?.row && group.action.href && group.action.label)?.action ?? null;
+		if (!action) {
+			this.#start?.remove();
+			this.#start = null;
+			return;
+		}
+		this.#start ??= el('a', { class: 'bui-sidebar-item bui-sidebar-start' });
+		if (this.#start.getAttribute('href') !== action.href) this.#start.setAttribute('href', action.href);
+		if (this.#start.textContent !== action.label) this.#start.replaceChildren(glyph(action.glyph ?? 'plus'), el('span', { class: 'bui-sidebar-label', text: action.label }));
+		if (this.#start.parentNode !== this.#row) this.#row.append(this.#start);
 	}
 
 	/** Follows the viewport across the cut. */

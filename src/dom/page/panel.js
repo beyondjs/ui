@@ -2,6 +2,7 @@ import { Component } from '../core/component.js';
 import { el, fill } from '../core/element.js';
 import { Ids } from '../core/ids.js';
 import { Focus } from '../core/focus.js';
+import { Motion } from '../core/motion.js';
 import { Labels } from '../core/labels.js';
 import { SideSheet } from '../sheet.js';
 import { PanelHead } from './head.js';
@@ -47,6 +48,7 @@ export class PagePanel extends Component {
 	#observer = null;
 	#head = null;
 	#wide = false;
+	#motion;
 
 	/**
 	 * @param {object} options
@@ -69,6 +71,7 @@ export class PagePanel extends Component {
 		this.#shown = open !== false;
 		this.#onchange = onchange;
 		this.#element = el('aside', { id: Ids.next('bui-panel'), class: 'bui-page-aside bui-page-panel', 'aria-label': label, hidden: true }, [this.#slot]);
+		this.#motion = new Motion(this.#element, (work, delay) => this.later(work, delay));
 		const copy = new Labels(PagePanel.labels.en, labels);
 		if (head) {
 			this.#head = new PanelHead({ title: title ?? label ?? '', labels: copy, onhide: () => this.close() });
@@ -98,6 +101,7 @@ export class PagePanel extends Component {
 	/** Sets the kept choice without reporting it (a product's stored value). */
 	set shown(value) {
 		this.#shown = value !== false;
+		this.#motion.stop();
 		this.#paint();
 	}
 
@@ -157,9 +161,14 @@ export class PagePanel extends Component {
 			if (this.#sheet.shown) return;
 			this.#sheet.body.append(this.#slot);
 			this.#sheet.open({ restore: from ?? [...this.#controls.keys()][0] ?? null });
-		} else if (!this.#shown) {
+		} else if (!this.#shown || this.#motion.leaving) {
+			const leaving = this.#motion.leaving;
+			this.#motion.stop();
+			if (!this.#shown) this.#onchange?.(true);
 			this.#shown = true;
-			this.#onchange?.(true);
+			this.#paint();
+			if (!leaving) this.#motion.enter();
+			return;
 		}
 		this.#paint();
 	}
@@ -174,8 +183,10 @@ export class PagePanel extends Component {
 		const inside = this.#element.contains(this.#element.ownerDocument.activeElement);
 		this.#shown = false;
 		this.#onchange?.(false);
-		this.#paint();
 		if (inside) ([...this.#controls.keys()][0] ?? this.#page.querySelector('h1[tabindex]'))?.focus({ preventScroll: true });
+		// It leaves where it is; the columns change once its exit has played
+		this.#motion.leave(() => this.#paint());
+		this.#paint();
 	}
 
 	/** @param {HTMLElement|null} [from] the toggle pressed, where focus returns from the sheet */
@@ -208,6 +219,7 @@ export class PagePanel extends Component {
 		const document = this.#page.ownerDocument;
 		const inside = this.#sheet.element.contains(document.activeElement) || this.#element.contains(document.activeElement);
 		const open = this.#sheet.shown;
+		this.#motion.stop();
 		this.#mode = mode;
 		this.#page.dataset.panel = mode;
 		if (mode === 'beside' && open) {
@@ -221,6 +233,7 @@ export class PagePanel extends Component {
 	}
 
 	destroy() {
+		this.#motion.stop();
 		this.#observer?.disconnect();
 		for (const [button, press] of this.#controls) button.removeEventListener('click', press);
 		this.#controls.clear();
@@ -237,7 +250,7 @@ export class PagePanel extends Component {
 	}
 
 	#paint() {
-		this.#element.hidden = this.#empty || this.#mode === 'sheet' || !this.#shown;
+		this.#element.hidden = this.#empty || this.#mode === 'sheet' || (!this.#shown && !this.#motion.leaving);
 		const expanded = String(this.expanded);
 		const target = this.#mode === 'sheet' ? this.#sheet.element.id : this.#element.id;
 		for (const button of this.#controls.keys()) {

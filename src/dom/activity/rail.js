@@ -65,11 +65,13 @@ export class RailItem extends Component {
 	 * @param {string|null} [options.glyph] a name of the icon catalog; none draws a dot
 	 * @param {'neutral'|'success'|'info'|'progress'|'warning'|'danger'} [options.tone] (default `neutral`)
 	 * @param {string|Node|{element: Node}|null} [options.content] what the event says
+	 * @param {boolean} [options.wide] in a thread page, it holds code, a diff, tool output or an approval card and
+	 *   widens to the thread's wide lane instead of the lane (0.14.0, D96)
 	 */
-	constructor({ glyph: name = null, tone = 'neutral', content: node = null } = {}) {
+	constructor({ glyph: name = null, tone = 'neutral', content: node = null, wide = false } = {}) {
 		super();
 		this.#element = el('div', { class: 'bui-rail-item' }, [this.#mark, this.#content]);
-		this.update({ glyph: name, tone, content: node });
+		this.update({ glyph: name, tone, content: node, wide });
 	}
 
 	get element() {
@@ -81,7 +83,7 @@ export class RailItem extends Component {
 		return this.#content;
 	}
 
-	/** Changes what is given (`glyph`, `tone`, `content`) and leaves the rest as it is. */
+	/** Changes what is given (`glyph`, `tone`, `content`, `wide`) and leaves the rest as it is. */
 	update(values = {}) {
 		if (this.destroyed) return this;
 		const given = key => Object.hasOwn(values, key);
@@ -90,6 +92,7 @@ export class RailItem extends Component {
 		if (given('tone')) this.#values.tone = Rail.tone(values.tone);
 		if (!this.#mark.firstChild || before.glyph !== this.#values.glyph || (before.tone === 'progress') !== (this.#values.tone === 'progress')) this.#draw();
 		this.#element.dataset.tone = this.#values.tone;
+		if (given('wide')) this.#element.toggleAttribute('data-wide', Boolean(values.wide));
 		if (given('content')) {
 			const node = values.content?.element ?? values.content;
 			fill(this.#content, node === null || node === undefined ? [] : [content(node)]);

@@ -2,16 +2,17 @@
 import type { Component, Copy } from './dom.js';
 import type { Preferences } from './preferences.js';
 
-export type PageTemplate = 'overview' | 'list' | 'detail' | 'settings' | 'task' | 'tool';
-/** `thread` (0.11.0): a conversation's thread at `--layout-thread`, the family proposal D67 adopted by Conduict, not an approved rule. */
+/** `thread` (0.14.0, D94): a conversation's page, its main column ending with the anchored `dock`. */
+export type PageTemplate = 'overview' | 'list' | 'detail' | 'settings' | 'task' | 'tool' | 'thread';
+/** `thread` (0.11.0): a conversation's thread at `--layout-thread`, the wide lane of D96 since 0.14.0. */
 export type PageWidth = 'fluid' | 'standard' | 'form' | 'reading' | 'thread';
 type Part = Node | { element: Node } | null;
 
 export interface PageOptions {
 	/** The page's kind (default `detail`); `tool` has full-bleed panes and no gutter. */
 	template?: PageTemplate;
-	/** The main column's tier (default `standard`). */
-	width?: PageWidth;
+	/** The main column's tier (default `standard`; `thread` in the thread template). */
+	width?: PageWidth | null;
 	/** The arrival line, first in the region. */
 	arrival?: Part;
 	/** The page's `PageHeader`. */
@@ -24,6 +25,20 @@ export interface PageOptions {
 	label?: string | null;
 	/** The aside as a panel kept in view (0.10.0): beside and sticky from `cut`, a side sheet below it. */
 	panel?: PagePanelOptions | null;
+	/** What the thread template docks at the window's bottom, such as its composer (0.14.0, D94); other templates throw. */
+	dock?: Part | Part[];
+}
+
+/** A thread page's dock (0.14.0, D94): sticky at the window's bottom with one gutter and the safe area under it. */
+export class PageDock {
+	constructor(options?: { element?: HTMLElement | null; end?: HTMLElement | null });
+	readonly element: HTMLElement;
+	/** The end mark after the dock, watched by an `IntersectionObserver`. */
+	readonly end: HTMLElement;
+	/** Whether content passes beneath the dock now (`data-stuck`, its hairline). */
+	readonly stuck: boolean;
+	set content(children: Part | Part[]);
+	destroy(): void;
 }
 
 export interface PagePanelOptions {
@@ -86,6 +101,9 @@ export class Page extends Component {
 	main: Node[];
 	aside: Node[] | null;
 	width: PageWidth;
+	/** The thread template's dock, or null in any other template (0.14.0). */
+	get dock(): PageDock | null;
+	set dock(children: Part | Part[]);
 }
 
 export interface PageCrumb {

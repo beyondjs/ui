@@ -7,7 +7,7 @@ export type { DiffData, DiffFile, DiffHunk, DiffLine, DiffStatus } from './dom.j
 type Copies = { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 
 /** A change, driven by the DOM `Diff`: `patch` or `files` are applied when they change; the other props create a new one. */
-export function Diff(props: { patch?: string | null; files?: DiffFile[] | null; label?: string | null; level?: 2 | 3 | 4; open?: 'auto' | 'all' | 'none'; summary?: boolean; labels?: Copy; locale?: string }): ReactElement;
+export function Diff(props: { patch?: string | null; files?: DiffFile[] | null; label?: string | null; level?: 2 | 3 | 4; open?: 'auto' | 'all' | 'none'; summary?: boolean; labels?: Copy; locale?: string; /** 0.14.0, default true */ highlight?: boolean }): ReactElement;
 export namespace Diff {
 	const labels: Copies;
 	/** Reads a unified diff into files as data. */

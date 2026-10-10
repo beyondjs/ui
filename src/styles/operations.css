@@ -48,7 +48,8 @@
 	height: 10px;
 	border-radius: var(--radius-round);
 	background: var(--color-info);
-	animation: bui-pulse 1.2s ease-in-out infinite;
+	/* A live dot pulses about five seconds, then holds (D95) */
+	animation: bui-pulse 1.2s ease-in-out 4;
 }
 .bui-step-body {
 	display: grid;

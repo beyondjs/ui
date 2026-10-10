@@ -30,7 +30,8 @@
 	background: var(--color-info);
 }
 .bui-status-progress .bui-status-dot {
-	animation: bui-pulse 1.2s ease-in-out infinite;
+	/* A live dot pulses about five seconds, then holds (D95) */
+	animation: bui-pulse 1.2s ease-in-out 4;
 }
 
 .bui-badge {

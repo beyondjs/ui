@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Page as Region } from '../dom/page/page.js';
 import { PagePanel } from '../dom/page/panel.js';
+import { PageDock } from '../dom/page/dock.js';
 import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
 import { PageHeader as Heading } from '../dom/page/header.js';
@@ -24,10 +25,14 @@ const Panel = createContext(null);
  * `aside`. With `panel` (`{ cut?, open?, onChange?, title?, labels?, head?, wide? }`, 0.10.0) the aside is
  * a panel kept in view, driven by the DOM `PagePanel` (beside and sticky from `cut`, a side sheet below
  * it; since 0.11.0 with a head of its own and a wide form); `panelRef` receives it (`open()`, `close()`,
- * `toggle()`) and a `PanelToggle` inside the page toggles it. `width` takes `thread` since 0.11.0.
+ * `toggle()`) and a `PanelToggle` inside the page toggles it. `width` takes `thread` since 0.11.0. The
+ * `thread` template (0.14.0, D94) takes `dock`, React content docked at the window's bottom (the composer),
+ * as the DOM `Page`'s; its width is `thread` unless given.
  */
-export function Page({ template = 'detail', width = 'standard', arrival = null, header = null, aside = null, label = null, panel = null, panelRef = null, children }) {
+export function Page({ template = 'detail', width = null, arrival = null, header = null, aside = null, label = null, panel = null, panelRef = null, dock = null, children }) {
 	if (!Region.templates.includes(template)) throw new TypeError(`A page's template is one of ${Region.templates.join(', ')}`);
+	width ??= template === 'thread' ? 'thread' : 'standard';
+	if (dock && template !== 'thread') throw new TypeError("A page's dock belongs to the thread template");
 	if (!Region.widths.includes(width)) throw new TypeError(`A page's width is one of ${Region.widths.join(', ')}`);
 	const frame = useRef(null);
 	const body = useRef(null);
@@ -48,6 +53,15 @@ export function Page({ template = 'detail', width = 'standard', arrival = null, 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [wanted, panel?.cut, panel?.title ?? null, label, Boolean(panel?.head)]);
 	const instance = living(made);
+	const docking = template === 'thread';
+	const holder = useRef(null);
+	const end = useRef(null);
+	useLayoutEffect(() => {
+		if (!docking) return undefined;
+		const watched = new PageDock({ element: holder.current, end: end.current });
+		return () => watched.destroy();
+	}, [docking]);
+	const docked = docking ? [h('div', { key: 'dock', ref: holder, className: 'bui-page-dock' }, dock), h('div', { key: 'end', ref: end, className: 'bui-page-dock-end', 'aria-hidden': 'true' })] : null;
 	useSync(instance, current => (current.present = Boolean(aside)), [Boolean(aside)]);
 	useSync(instance, current => (current.shown = panel?.open ?? true), [panel?.open]);
 	useSync(instance, current => (current.wide = Boolean(panel?.wide)), [Boolean(panel?.wide)]);
@@ -59,7 +73,7 @@ export function Page({ template = 'detail', width = 'standard', arrival = null, 
 			{ className: 'bui-page-frame' },
 			arrival,
 			header,
-			h('div', { ref: body, className: 'bui-page-body' }, h('div', { className: 'bui-page-main' }, children), !wanted && aside ? h('aside', { className: 'bui-page-aside', 'aria-label': label ?? undefined }, aside) : null)
+			h('div', { ref: body, className: 'bui-page-body' }, h('div', { className: 'bui-page-main' }, children, docked), !wanted && aside ? h('aside', { className: 'bui-page-aside', 'aria-label': label ?? undefined }, aside) : null)
 		)
 	);
 	return h(Panel.Provider, { value: instance }, region, instance && aside ? ReactDOM.createPortal(aside, instance.slot) : null);

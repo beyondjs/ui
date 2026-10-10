@@ -3,6 +3,7 @@ import { el, content } from './core/element.js';
 import { Ids } from './core/ids.js';
 import { Interaction } from './core/interaction.js';
 import { Hint } from './core/hint.js';
+import { Leaving } from './core/leaving.js';
 
 /**
  * A button that shows and hides a panel: the disclosure pattern.
@@ -152,24 +153,7 @@ export class Disclosure extends Component {
 	 */
 	#leave() {
 		this.#picture?.remove();
-		const view = this.#element.ownerDocument.defaultView;
-		if (!this.#element.isConnected || view?.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-		const position = view?.getComputedStyle?.(this.#panel).position;
-		if (position !== 'absolute' && position !== 'fixed') return;
-		const picture = this.#panel.cloneNode(true);
-		for (const node of [picture, ...picture.querySelectorAll('[id]')]) node.removeAttribute('id');
-		picture.removeAttribute('role');
-		picture.classList.replace('bui-disclosure-panel', 'bui-disclosure-leaving');
-		picture.setAttribute('aria-hidden', 'true');
-		picture.inert = true;
-		this.#element.append(picture);
-		this.#picture = picture;
-		const remove = () => {
-			picture.remove();
-			if (this.#picture === picture) this.#picture = null;
-		};
-		picture.addEventListener('animationend', remove, { once: true });
-		this.later(remove, 400);
+		this.#picture = Leaving.play(this.#panel, { host: this.#element, swap: ['bui-disclosure-panel', 'bui-disclosure-leaving'] });
 	}
 
 	/** A floating panel goes above its button when there is no room below and more room above. */
