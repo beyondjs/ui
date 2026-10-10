@@ -25,12 +25,15 @@ import { typography, space, radius, elevation, overlay, motion, density, layout,
  * D102 of settled contract S29 that need tokens (`approval.conversation`): the exit duration and easing of
  * D95 and the thread's lane, its rail indent and its wide lane (`thread`, approved by D96, which amends
  * D67's tier); the panel's widths of D67 stay pending, joined by the code colors of Conduict's audit
- * (P3), a proposal. Each entry's own `provenance` still says whether its value
+ * (P3), a proposal. Token set 0.5.1 (2026-10-10) records the panel's widths as approved with the
+ * conversation round: the owner approved D67 as amended by D96 in S29, whose rule makes the panel grow to
+ * `aside-max` and its wide form start at `aside-wide`; values unchanged, and only the code colors stay
+ * pending. Each entry's own `provenance` still says whether its value
  * was captured or introduced by the family reference. `version` identifies the token set; a product
  * review cites it together with the package version.
  */
 export const tokens = {
-	version: '0.5.0',
+	version: '0.5.1',
 	status: 'approved',
 	source: 'Verified capture of the public Beyond site, 2026-09-18, with the family reference\'s additions',
 	approval: {
@@ -47,17 +50,17 @@ export const tokens = {
 		conversation: {
 			date: '2026-10-10',
 			by: 'owner',
-			decisions: ['D95', 'D96'],
+			decisions: ['D67', 'D95', 'D96'],
 			contract: 'S29',
-			tokens: ['motion.exit', 'motion.ease-exit', 'layout.thread', 'layout.indent', 'layout.lane'],
-			note: 'The conversation round (settled contract S29, D94 to D102): motion follows the person\'s action, with an exit a little faster than the entry (D95), and one edge, one lane in a thread, with code, diffs, tool output and approval cards in the wide lane (D96, amending D67\'s thread tier). The reading measure stays 54ch. Values are engineering defaults to be measured. Token set 0.5.0.'
+			tokens: ['motion.exit', 'motion.ease-exit', 'layout.thread', 'layout.indent', 'layout.lane', 'layout.aside-max', 'layout.aside-wide'],
+			note: 'The conversation round (settled contract S29, D94 to D102): motion follows the person\'s action, with an exit a little faster than the entry (D95), and one edge, one lane in a thread, with code, diffs, tool output and approval cards in the wide lane (D96, amending D67\'s thread tier), and the widths a page\'s panel kept in view grows to (D67 as amended by D96, approved in S29; recorded in token set 0.5.1). The reading measure stays 54ch. Values are engineering defaults to be measured. Token set 0.5.0; 0.5.1 adds the panel\'s widths.'
 		}
 	},
 	pending: {
 		date: '2026-10-10',
-		decisions: ['D67'],
-		tokens: ['layout.aside-max', 'layout.aside-wide', 'color.code-comment', 'color.code-keyword', 'color.code-string', 'color.code-number', 'color.code-name', 'color.code-tag'],
-		note: 'Proposals: the widths a page\'s panel kept in view grows to (D67 in the family reference\'s register, adopted by Conduict; aside-max raised to 40rem in token set 0.4.1, Conduict\'s review M11), and since token set 0.5.0 the code colors of Conduict\'s audit of 2026-10-10 (P3), contrast-checked in both themes. Shipped so a product can adopt them; not approved family rules.'
+		decisions: [],
+		tokens: ['color.code-comment', 'color.code-keyword', 'color.code-string', 'color.code-number', 'color.code-name', 'color.code-tag'],
+		note: 'Proposals: the code colors of Conduict\'s audit of 2026-10-10 (P3), contrast-checked in both themes, since token set 0.5.0. Shipped so a product can adopt them; not approved family rules. The panel\'s widths (D67), pending from token set 0.4.0, are approved since token set 0.5.1 (approval.conversation).'
 	},
 	attribute: 'data-beyond-mode',
 	provenance: {

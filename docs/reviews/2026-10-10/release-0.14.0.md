@@ -116,3 +116,28 @@ it. No API or declaration changed. Re-vendored into Conduict, where the defect w
 | `npm test` | 568 passing |
 | `npm run types` | Passes |
 | `npm run acceptance` | 283 of 283 in Chrome, Firefox and WebKit (`BEYOND_UI_BROWSER`), each engine run whole |
+
+## Addendum: 0.14.3
+
+The family reference's work item FAM-61: token set 0.5.0 approved D96's `--layout-thread`, `--layout-indent` and
+`--layout-lane` but kept `--layout-aside-max` and `--layout-aside-wide` under D67 in `tokens.pending`, although
+the owner approved D67 as amended by D96 on 2026-10-10 (S29) and its rule makes the panel grow to that maximum.
+0.14.3 carries token set **0.5.1**, which records the two widths as approved; values are unchanged (40rem and 48rem).
+
+| Where | 0.14.3 |
+| --- | --- |
+| `src/foundations/tokens.js` | `version` 0.5.1; `approval.conversation` takes D67 beside D95 and D96 and lists `layout.aside-max` and `layout.aside-wide`; `pending` keeps only the code colors (`color.code-*`, Conduict's audit P3) with no family decision |
+| `src/foundations/scale.js` | The two widths' provenance becomes `family` like the round's other approved tokens; their reasons cite D67 as amended by D96 instead of "Not an approved family rule" |
+| `types/tokens.d.ts` | The `pending` comment names what stays pending; no type changed |
+| `tests/tokens.test.mjs` | Version 0.5.1, the pending list of the code colors alone, the round's approved tokens with the widths, no approved token pending and the widths' values kept. The test fails on 0.14.2 |
+| `dist/tokens.css` | Only the version line changes (`0.5.1`); every custom property is the same |
+
+| Check (0.14.3) | Result |
+| --- | --- |
+| `npm test` | 568 passing |
+| `npm run types` | Passes |
+| `npm run acceptance` | 283 of 283 in Chrome 154 (`BEYOND_UI_BROWSER=chrome`); Firefox and WebKit not run, as the change is data with no custom property changed |
+
+Packed by `npm run pack:consumers` as `beyond-ui-0.14.3.tgz`
+(`sha512-oR6rfdXG/+i1O1INb9ZffBd0mRGxyU+8fWXuX9HaumanJ3iVq5N1ZuPiulcq77TxWl4pOWzSvDPb4BjftomWxQ==`). Not re-vendored
+into any product by this release; the family reference reads the token set from the installed package.

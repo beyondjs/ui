@@ -12,7 +12,8 @@ import { tokens, TokenSheet, Contrast } from '@beyond-js/ui/tokens';
  * tier and the panel's widths of the family proposal D67 as pending, not approved; 0.4.1 raises the
  * pending panel maximum to 40rem; 0.4.2 gives the menu elevation a dark value; 0.5.0 adds the exit motion
  * of D95, the thread's lane and rail indent of D96 (which approves the thread tier as the wide lane) and
- * the proposed code colors.
+ * the proposed code colors; 0.5.1 records the panel's widths as approved (D67 as amended by D96, S29),
+ * with no line of the sheet changed but its version.
  * Imported through the package's own export, as consumers import it.
  */
 const fixture = new URL('./fixtures/branding-tokens-0.1.0.css', import.meta.url);
@@ -26,7 +27,7 @@ const code = {
 const changes = {
 	removed: ['/* Beyond family tokens 0.1.0 (proposed). Generated from src/foundations; do not edit. */', '\t--text-label: 0.6875rem;', '\t--tracking-label: 0.08em;', '\t--layout-measure: 68ch;'],
 	added: [
-		'/* Beyond family tokens 0.5.0 (approved). Generated from src/foundations; do not edit. */',
+		'/* Beyond family tokens 0.5.1 (approved). Generated from src/foundations; do not edit. */',
 		// 0.5.0: D95's exit motion and D96's lane (approved, S29)
 		'\t--motion-exit: 120ms;',
 		'\t--motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);',
@@ -36,7 +37,7 @@ const changes = {
 		...code.light.map(line => `\t${line}`),
 		...code.dark.map(line => `\t${line}`),
 		...code.dark.map(line => `\t${line}`),
-		// 0.4.0: the family proposal D67, adopted by Conduict and shipped as pending, not approved; 0.4.1 raises the panel's maximum
+		// 0.4.0: the family proposal D67, adopted by Conduict and shipped as pending; 0.4.1 raises the panel's maximum; 0.5.1 records them approved (D67 as amended by D96)
 		'\t--layout-thread: 52rem;',
 		'\t--layout-aside-max: 40rem;',
 		'\t--layout-aside-wide: 48rem;',
@@ -71,7 +72,7 @@ const without = (lines, listed) => {
 	});
 };
 
-test('the 0.5.0 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
+test('the 0.5.1 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
 	const baseline = readFileSync(fixture, 'utf8').split('\n');
 	const current = `${new TokenSheet(tokens).css}\n`.split('\n');
 	for (const line of changes.removed) assert.ok(baseline.includes(line) && !current.includes(line), `removed: ${line}`);
@@ -84,11 +85,15 @@ test('the packed tokens.css is the generated sheet', () => {
 });
 
 test('version, status, approval and provenance of the token set are recorded', () => {
-	assert.equal(tokens.version, '0.5.0');
-	assert.deepEqual(tokens.pending.tokens, ['layout.aside-max', 'layout.aside-wide', 'color.code-comment', 'color.code-keyword', 'color.code-string', 'color.code-number', 'color.code-name', 'color.code-tag'], 'the proposals are recorded as pending');
-	for (const name of ['aside-max', 'aside-wide']) assert.match(tokens.layout[name].reason, /Not an approved family rule/, name);
+	assert.equal(tokens.version, '0.5.1');
+	assert.deepEqual(tokens.pending.tokens, ['color.code-comment', 'color.code-keyword', 'color.code-string', 'color.code-number', 'color.code-name', 'color.code-tag'], 'only the code colors are pending');
+	assert.deepEqual(tokens.pending.decisions, [], 'no family decision is pending');
 	const round = tokens.approval.conversation;
-	assert.deepEqual([round.date, round.decisions, round.contract], ['2026-10-10', ['D95', 'D96'], 'S29']);
+	assert.deepEqual([round.date, round.decisions, round.contract], ['2026-10-10', ['D67', 'D95', 'D96'], 'S29']);
+	assert.deepEqual(round.tokens, ['motion.exit', 'motion.ease-exit', 'layout.thread', 'layout.indent', 'layout.lane', 'layout.aside-max', 'layout.aside-wide'], 'the panel\'s widths are approved with the round');
+	for (const name of round.tokens) assert.ok(!tokens.pending.tokens.includes(name), `${name} is not pending`);
+	for (const name of ['aside-max', 'aside-wide']) assert.doesNotMatch(tokens.layout[name].reason, /Not an approved family rule/, name);
+	assert.deepEqual([tokens.layout['aside-max'].value, tokens.layout['aside-wide'].value], ['40rem', '48rem'], 'the panel\'s widths keep their values');
 	for (const name of round.tokens) {
 		const [group, key] = name.split('.');
 		assert.equal(tokens[group][key].provenance, 'family', name);
