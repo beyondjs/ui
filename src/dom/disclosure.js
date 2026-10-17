@@ -27,8 +27,8 @@ import { Floating } from './core/floating.js';
  * in the top layer, on its preferred side (`placement: 'auto'` and `'below'` prefer below, `'above'` above,
  * for a button whose page docks something under it) and flipped when that side has no room and the other
  * has more, shifted and capped to the room, never under the family bar, and placed again on scroll and
- * resize. A panel inside a header (the family bar's menus, a bell in a host's own bar) keeps the header's
- * own geometry, and a panel in the page's flow (help) is not moved. A button that is not drawn opens
+ * resize. A panel inside a header (the family bar's menus) and a bell's panel (`NotificationEntry`, also in
+ * a host's own bar) keep their own geometry, and a panel in the page's flow (help) is not moved. A button that is not drawn opens
  * nothing: `open()` returns false.
  */
 export class Disclosure extends Component {
@@ -169,7 +169,8 @@ export class Disclosure extends Component {
 	/** Whether the panel floats over the page and is not a header's (which places its panels itself). */
 	#floats() {
 		const view = this.#element.ownerDocument.defaultView;
-		if (!view || !this.#element.isConnected || this.#element.closest('.bui-header')) return false;
+		// A bell's panel (`bui-notify`) keeps its own geometry wherever its bar is (0.13.1)
+		if (!view || !this.#element.isConnected || this.#element.closest('.bui-header') || this.#element.classList.contains('bui-notify')) return false;
 		const position = view.getComputedStyle?.(this.#panel).position;
 		return position === 'absolute' || position === 'fixed';
 	}

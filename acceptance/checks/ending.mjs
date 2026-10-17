@@ -49,7 +49,14 @@ export const checks = [
 					expect(count.right <= button.right + 0.5, `${at}: the count grows over the bell, not past it (${count.right} > ${button.right})`);
 					expect(avatar.left - count.right >= 4, `${at}: the count keeps clear of the avatar (${(avatar.left - count.right).toFixed(1)} px)`);
 					const colors = [await paint(page, '.bui-family .bui-count', 'backgroundColor'), await paint(page, '.bui-family-account .bui-navmenu-button .bui-family-avatar', 'backgroundColor')];
-					expect(colors[0] === colors[1], `${at}: one coral on the bar: ${colors}`);
+					// The count is the bar's one coral; the avatar is a person, drawn neutral since token set 0.6.0 (C2)
+					const marker = await page.evaluate(() => {
+						const probe = document.body.appendChild(Object.assign(document.createElement('span'), { style: 'color: var(--color-family-marker)' }));
+						const color = getComputedStyle(probe).color;
+						probe.remove();
+						return color;
+					});
+					expect(colors[0] === marker && colors[1] !== marker, `${at}: one coral on the bar, the count's: ${colors} (${marker})`);
 					await page.locator('.bui-family .bui-disclosure-bell').click();
 					await page.locator('.bui-family .bui-notify .bui-disclosure-panel .bui-notice').first().waitFor();
 					await rest(page);

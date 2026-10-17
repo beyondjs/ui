@@ -79,7 +79,8 @@ export const checks = [
 				probe.remove();
 				return { current: getComputedStyle(current).color, weight: getComputedStyle(current).fontWeight, text, link };
 			});
-			expect(colors.current === colors.text && colors.current !== colors.link && colors.weight === '500', `the current item in the text color at 500: ${JSON.stringify(colors)}`);
+			// Since token set 0.6.0 (C2) every link takes the text's color too; the current item is told apart by weight and its marker
+			expect(colors.current === colors.text && colors.weight === '500', `the current item in the text color at 500: ${JSON.stringify(colors)}`);
 		}
 	},
 	{
