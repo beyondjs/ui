@@ -24,6 +24,9 @@ import { ProjectList } from './projects.js';
  * A name cut to its share of the width shows whole in a tooltip on hover and on keyboard focus of its
  * menu button (D44, since 0.5.0), whose accessible name already carries it; a name shown as text has
  * its tooltip on hover. The opened menus list every name whole.
+ *
+ * Since 0.16.1 a project the descriptor says is archived (`project.state: 'archived'`) carries an
+ * "Archived" mark beside its name, in the button and in its accessible name.
  */
 export class Location extends Component {
 	#element;
@@ -138,10 +141,10 @@ export class Location extends Component {
 		if (!this.#chooser() && !this.#organizations.several) return [this.#text(this.#name ?? organization.name, this.#name ? 'project' : 'organization')];
 		const { labels } = this.#options;
 		const project = this.#name;
-		const place = project ? `${organization.name} / ${project}` : organization.name;
+		const place = project ? `${organization.name} / ${this.#said(project)}` : organization.name;
 		return [
 			this.#keep(new NavigationMenu({
-				label: Location.#place(project ?? organization.name),
+				label: [Location.#place(project ?? organization.name), project ? this.#mark() : null].filter(Boolean),
 				name: labels.text('location', { place }),
 				part: 'location',
 				class: 'bui-family-places',
@@ -172,8 +175,8 @@ export class Location extends Component {
 		const { labels } = this.#options;
 		const name = this.#name;
 		return this.#keep(new NavigationMenu({
-			label: Location.#place(name ?? labels.text('choose')),
-			name: name ? labels.text('project', { name }) : labels.text('choose'),
+			label: [Location.#place(name ?? labels.text('choose')), name ? this.#mark() : null].filter(Boolean),
+			name: name ? labels.text('project', { name: this.#said(name) }) : labels.text('choose'),
 			part: 'project',
 			class: `bui-family-project${name ? '' : ' bui-family-choose'}`,
 			sections: this.#projects.sections()
@@ -186,6 +189,21 @@ export class Location extends Component {
 		if (this.#name) return [this.#text(this.#name, 'project')];
 		if (state !== 'loading') return [];
 		return [el('span', { class: 'bui-family-placeholder', 'aria-hidden': 'true' }), hidden(labels.text('loading'))];
+	}
+
+	/** Whether the project in view is archived (0.16.1). */
+	get #archived() {
+		return this.#ready && this.#options.descriptor.project?.state === 'archived';
+	}
+
+	/** The project's name as said, with its archived state (0.16.1). */
+	#said(name) {
+		return this.#archived ? `${name} (${this.#options.labels.text('archived')})` : name;
+	}
+
+	/** The "Archived" mark beside the project's name, or null (0.16.1). */
+	#mark() {
+		return this.#archived ? el('span', { class: 'bui-family-archived', text: this.#options.labels.text('archived') }) : null;
 	}
 
 	static #place(name) {

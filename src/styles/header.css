@@ -170,3 +170,15 @@
 		translate: 0 calc(var(--bui-lockup-height, 21px) * -0.0555);
 	}
 }
+/* An archived project's mark beside its name (0.16.1): quiet words, never a color alone. */
+.bui-family-archived {
+	flex: none;
+	margin-inline-start: var(--space-1);
+	padding: 0 var(--space-1);
+	border: 1px solid var(--color-border-strong);
+	border-radius: var(--radius-control);
+	color: var(--color-family-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	white-space: nowrap;
+}

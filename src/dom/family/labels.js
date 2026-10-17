@@ -13,7 +13,9 @@ const areas = {
 	cdn: 'Applications',
 	snapshots: 'Captures',
 	conduict: 'Environments and conversations',
-	accounts: 'Members and invitations'
+	accounts: 'Members and invitations',
+	home: 'Your projects, recent work and what needs you',
+	desktop: 'Your projects, recent work and what needs you'
 };
 
 const roles = { owner: 'Owner', admin: 'Administrator', developer: 'Developer', viewer: 'Viewer', member: 'Member' };
@@ -30,6 +32,7 @@ export const defaults = {
 	overview: 'Project overview',
 	entry: 'This project in {product}',
 	area: ({ product }) => areas[product] ?? '',
+	archived: 'Archived',
 	back: 'Your organizations and projects',
 	UNCONFIGURED: 'Not offered here',
 	NOT_ADMITTED: 'Not open to you yet',
@@ -79,7 +82,9 @@ const translated = {
 		cdn: 'Aplicaciones',
 		snapshots: 'Capturas',
 		conduict: 'Entornos y conversaciones',
-		accounts: 'Miembros e invitaciones'
+		accounts: 'Miembros e invitaciones',
+		home: 'Tus proyectos, el trabajo reciente y lo que te necesita',
+		desktop: 'Tus proyectos, el trabajo reciente y lo que te necesita'
 	},
 	roles: { owner: 'Propietario', admin: 'Administrador', developer: 'Desarrollador', viewer: 'Lector', member: 'Miembro' }
 };
@@ -97,6 +102,7 @@ export const spanish = {
 	overview: 'Resumen del proyecto',
 	entry: 'Este proyecto en {product}',
 	area: ({ product }) => translated.areas[product] ?? '',
+	archived: 'Archivado',
 	back: 'Tus organizaciones y proyectos',
 	UNCONFIGURED: 'No se ofrece aquí',
 	NOT_ADMITTED: 'Aún no está abierto para ti',
@@ -141,7 +147,8 @@ export const spanish = {
  * Display names of the family's products, never translated. Public as `productNames` (since 0.4.1),
  * so a product names another one (a notice's product, a link) the way the bar does instead of keeping
  * its own copy; a product passes the bar's `products` option to add or rename one. Packages is one of
- * them since 0.15.0 (SNP-16).
+ * them since 0.15.0 (SNP-16). Since 0.16.1 Beyond Home (`home`, decision E5) is one, and `desktop` reads
+ * "Beyond Home" too, the name of the product the Desktop became (in Spanish as well: it is a name).
  */
 export const names = Object.freeze({
 	projects: 'Projects',
@@ -152,6 +159,7 @@ export const names = Object.freeze({
 	snapshots: 'Snapshots',
 	conduict: 'Conduict',
 	accounts: 'Accounts',
-	desktop: 'Desktop',
+	home: 'Beyond Home',
+	desktop: 'Beyond Home',
 	docs: 'Docs'
 });

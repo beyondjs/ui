@@ -62,3 +62,14 @@ tarball, three consumers, the affected checks by name in each engine: the three 
 the composer (`composer`, `suggestions`, `attachments`), `sidebar`, `family bar`, `CommandCard`, `floating`,
 `keyboard` and `thread` checks: 125 checks in each of Chrome, Firefox 155 and WebKit 26.6, all passing.
 A full 290-plus-check run per engine was not repeated for this release.
+
+## Addendum 0.16.1
+
+- `productNames.home` is "Beyond Home" (E5), `desktop` reads "Beyond Home" too (an alias for the product the
+  Desktop became); the switcher's area for both: "Your projects, recent work and what needs you" /
+  «Tus proyectos, el trabajo reciente y lo que te necesita». Types: `FamilyProductId` includes `home`.
+- `FamilyBar` draws a descriptor's `project.state: 'archived'` (sent by Beyond Projects) as an "Archived" /
+  «Archivado» mark beside the project's name (`.bui-family-archived`), said in the button's name, and marks
+  `projects[i].state: 'archived'` rows in the project menu. New label `archived` in `FamilyBar.labels`.
+- Adoption: the Desktop (Beyond Home) passes `product: 'home'` or keeps `desktop`; products re-vendoring get the
+  name and the mark with no change. Tests: `audit-family.test.mjs`; the family bar checks in three engines.

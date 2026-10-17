@@ -59,8 +59,10 @@ export interface FamilyDescriptor {
 	person?: { id?: string; name: string; email?: string; locale?: string; avatar?: string } | null;
 	organizations?: FamilyOrganization[];
 	organization?: { id: string; name: string; role?: string } | null;
-	projects?: Array<{ id: string; name: string; current?: boolean; here?: FamilyHere }>;
-	project?: { id: string; name: string } | null;
+	/** `state: 'archived'` (0.16.1) marks an archived project in the menu. */
+	projects?: Array<{ id: string; name: string; current?: boolean; here?: FamilyHere; state?: 'archived' | (string & {}) | null }>;
+	/** `state: 'archived'` (0.16.1) draws an "Archived" mark beside the project's name. */
+	project?: { id: string; name: string; state?: 'archived' | (string & {}) | null } | null;
 	products?: FamilyProduct[];
 	/**
 	 * `leave` (0.5.0): the absolute address of Accounts' `/leave` page, with no query. `github` (0.7.4):
@@ -184,7 +186,7 @@ export interface FamilyNone {
 }
 
 /** The id of a product of the family, as `productNames` keys it (`packages` since 0.15.0). */
-export type FamilyProductId = 'projects' | 'packages' | 'workspace' | 'delegate' | 'cdn' | 'snapshots' | 'conduict' | 'accounts' | 'desktop' | 'docs';
+export type FamilyProductId = 'projects' | 'packages' | 'workspace' | 'delegate' | 'cdn' | 'snapshots' | 'conduict' | 'accounts' | 'home' | 'desktop' | 'docs';
 
 /**
  * Display names by product id: every family product is named. It is a `Record<string, string>`, so it

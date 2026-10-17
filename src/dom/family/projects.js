@@ -75,7 +75,8 @@ export class ProjectList {
 		const sorted = [...projects].filter(item => item && item.id && item.name).sort((a, b) => Number(b.id === current) - Number(a.id === current) || collator.compare(a.name, b.name));
 		return sorted.map(item => {
 			const state = ProjectList.state(item.here);
-			const words = state === 'unset' || state === 'denied' ? labels.text(state, { product }) : null;
+			// An archived project says so (0.16.1), before the product's own state
+			const words = item.state === 'archived' ? labels.text('archived') : state === 'unset' || state === 'denied' ? labels.text(state, { product }) : null;
 			const node = el('li', {}, [entry({ label: item.name, href: places.project(item.id, item.here), current: item.id === current ? 'true' : null, state: words })]);
 			return { node, text: item.name, state };
 		});

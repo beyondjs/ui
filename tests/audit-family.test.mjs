@@ -65,3 +65,32 @@ test('productNames names Packages', () => {
 	assert.equal(ui.productNames.packages, 'Packages');
 	assert.ok(Object.isFrozen(ui.productNames));
 });
+
+test('Beyond Home is a family product (0.16.1); desktop reads Beyond Home; the switcher names it with its area', () => {
+	assert.equal(ui.productNames.home, 'Beyond Home');
+	assert.equal(ui.productNames.desktop, 'Beyond Home', 'the Desktop became Beyond Home (E5)');
+	const descriptor = { ...inside, project: null, products: [{ product: 'home', available: true, url: '/home/' }, { product: 'conduict', available: true, url: '/conduict/' }] };
+	const bar = make({ product: 'conduict', descriptor });
+	const rows = [...bar.element.querySelectorAll('.bui-family-brand .bui-navmenu-item')].map(node => node.textContent);
+	assert.ok(rows.some(text => /Beyond Home/.test(text) && /Your projects, recent work and what needs you/.test(text)), JSON.stringify(rows));
+	bar.destroy();
+	const home = make({ product: 'desktop', descriptor: { context: 'none' }, labels: ui.FamilyBar.labels.es });
+	assert.equal(home.element.querySelector('.bui-lockup-name').textContent, 'Beyond Home', 'a name, the same in Spanish');
+	assert.equal(ui.FamilyBar.labels.es.area({ product: 'home' }), 'Tus proyectos, el trabajo reciente y lo que te necesita');
+	home.destroy();
+});
+
+test('an archived project is marked "Archived" beside its name, in the bar and in the project menu (0.16.1)', () => {
+	const archived = { ...inside, project: { ...inside.project, state: 'archived' }, projects: inside.projects.map(item => (item.id === inside.project.id ? { ...item, state: 'archived' } : item)) };
+	const bar = make({ product: 'conduict', descriptor: archived });
+	const button = bar.element.querySelector('.bui-family-wide [data-part="project"] .bui-navmenu-button');
+	assert.equal(button.querySelector('.bui-family-archived').textContent, 'Archived');
+	assert.match(button.getAttribute('aria-label'), /Storefront \(Archived\)/);
+	assert.ok([...bar.element.querySelectorAll('.bui-family-wide [data-part="project"] .bui-navmenu-item')].some(node => /Archived/.test(node.textContent)), 'the menu row says it too');
+	bar.descriptor = inside;
+	assert.equal(bar.element.querySelector('.bui-family-archived'), null, 'not archived, no mark');
+	bar.destroy();
+	const spanish = make({ product: 'conduict', descriptor: archived, labels: ui.FamilyBar.labels.es });
+	assert.equal(spanish.element.querySelector('.bui-family-archived').textContent, 'Archivado');
+	spanish.destroy();
+});
