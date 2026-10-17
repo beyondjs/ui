@@ -119,3 +119,22 @@ Additive unless listed here. Every behavior change below is visible; a product r
   Options; Status shapes distinct in both themes; ListRow and DataTable rows short at 390 px; tabs saying they
   hold more; a sidebar label kept on one line beside a long count; a CommandCard answering Enter once. The
   results of the runs, by engine, are in the addendum below.
+
+## Addendum: acceptance runs (2026-10-17, local)
+
+Packed tarball, three consumers (plain DOM, React 19.3.0, React 18.3.1), 290 checks each run.
+
+- **Chrome** (full run on the commit before the notification contract update): 288 passed, 2 failed, both
+  in the new `patterns` check (the audit fixture's own grid column overflowing at 390 px, and a narrow
+  `DataTable` row keeping the table's row height): both corrected and the `patterns`, notification, bar end,
+  bell, floating, `choose:`, keyboard and CommandCard checks rerun on the final code, all passing.
+- **Firefox 155** (full run): 283 passed, 7 failed: the same `patterns` check (corrected), the ref chooser's
+  long list (a floating list re-placed for its own scrolling, never stable to a click: corrected in
+  `Floating`, with a unit test) and the attachments announcement check, which installed its listener after
+  the fixture's 140 ms uploads could end (the listener now starts before the files are picked; the baseline
+  0.14.3 passed it narrowly). The affected checks rerun on the final code: all passing.
+- **WebKit 26.6** (full run): 290 passed, 0 failed; the `choose:`, floating, patterns and keyboard checks rerun
+  on the final code: all passing.
+
+Not run end to end after the last corrections: a full three-engine pass on the final commit (only the
+affected checks were rerun).
