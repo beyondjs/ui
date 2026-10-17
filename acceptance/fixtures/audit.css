@@ -1,0 +1,25 @@
+/* The 0.15.0 audit fixture: a page long enough to scroll under the sticky bar, a box that scrolls with a
+   menu at its end, and the patterns side by side. Tokens only. */
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+}
+.audit-page {
+	display: grid;
+	gap: var(--space-6);
+	padding: var(--space-4);
+	padding-bottom: 120vh;
+}
+.audit-scroller {
+	height: 160px;
+	overflow: auto;
+	border: 1px solid var(--color-border);
+}
+.audit-scroller-inner {
+	display: flex;
+	align-items: flex-end;
+	height: 300px;
+	padding: var(--space-2);
+}

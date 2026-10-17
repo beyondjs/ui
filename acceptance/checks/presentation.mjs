@@ -210,23 +210,25 @@ export const checks = [
 		}
 	},
 	{
-		name: 'Rubik from @beyond-js/ui/fonts.css: 300, 400 and 500 load from the installed package, latin-ext only when the text needs it',
+		name: 'Inter and Rubik from @beyond-js/ui/fonts.css (C2): Inter 400, 500 and 600 for the page and Rubik for the lockup load from the installed package, latin-ext only when the text needs it',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const { page } = await browser.open(consumer);
 			const found = await page.evaluate(async () => {
 				await document.fonts.ready;
-				const base = await Promise.all(['300', '400', '500'].map(weight => document.fonts.load(`${weight} 16px Rubik`, 'Beyond')));
+				const base = await Promise.all([...['400', '500', '600'].map(weight => document.fonts.load(`${weight} 16px Inter`, 'Beyond')), document.fonts.load('500 16px Rubik', 'Beyond')]);
 				const before = performance.getEntriesByType('resource').map(entry => entry.name).filter(name => /\.woff2$/.test(name));
-				await document.fonts.load('400 16px Rubik', 'Łódź');
+				await document.fonts.load('400 16px Inter', 'Łódź');
 				const after = performance.getEntriesByType('resource').map(entry => entry.name).filter(name => /\.woff2$/.test(name));
-				return { loaded: base.map(list => list.length), before, after, family: getComputedStyle(document.body).fontFamily };
+				const lockup = document.querySelector('.bui-lockup-name');
+				return { loaded: base.map(list => list.length), before, after, family: getComputedStyle(document.body).fontFamily, brand: lockup ? getComputedStyle(lockup).fontFamily : 'Rubik' };
 			});
 			const names = list => list.map(name => name.split('/').at(-1)).sort();
 			expect(found.loaded.every(count => count >= 1), `each weight has a face: ${JSON.stringify(found)}`);
-			expect(['300', '400', '500'].every(weight => found.before.some(name => new RegExp(`rubik-latin-${weight}-normal`).test(name))), `latin files: ${names(found.before)}`);
-			expect(!found.before.some(name => /latin-ext/.test(name)) && found.after.some(name => /rubik-latin-ext-400-normal/.test(name)), `latin-ext on demand: ${names(found.after)}`);
-			expect(/Rubik/.test(found.family), `the page uses Rubik: ${found.family}`);
+			expect(['400', '500', '600'].every(weight => found.before.some(name => new RegExp(`inter-latin-${weight}-normal`).test(name))), `latin files: ${names(found.before)}`);
+			expect(!found.before.some(name => /inter-latin-ext/.test(name)) && found.after.some(name => /inter-latin-ext-400-normal/.test(name)), `latin-ext on demand: ${names(found.after)}`);
+			expect(/^"?Inter/.test(found.family), `the page uses Inter: ${found.family}`);
+			expect(/Rubik/.test(found.brand), `the lockup's name uses Rubik: ${found.brand}`);
 		}
 	},
 	{

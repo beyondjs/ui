@@ -3,7 +3,8 @@ import { Geometry } from '../support/geometry.mjs';
 
 /** The family bar at the family's widths and in both themes, its keyboard, its states and the lockup. */
 const widths = [1440, 1024, 768, 600, 480, 390, 360, 320];
-const navy = { light: 'rgb(18, 31, 54)', dark: 'rgb(12, 21, 37)' };
+// The light bar sits on the page's surface since token set 0.6.0 (C2, DQ-23); the dark one stays navy.
+const navy = { light: 'rgb(255, 255, 255)', dark: 'rgb(12, 21, 37)' };
 
 async function open(browser, consumer, { width = 1440, family = 'inside', ...options } = {}) {
 	const view = await browser.open(consumer, { file: 'family.html', query: `?family=${family}`, viewport: { width, height: 800 }, prepare: Geometry.install, ...options });
@@ -22,7 +23,7 @@ export const checks = [
 					const found = await Geometry.bar(page);
 					const at = `${width}px ${scheme}`;
 					expect(found.height === 44 && found.top === 0, `${at}: one 44px row at the top: ${JSON.stringify([found.height, found.top])}`);
-					expect(found.background === navy[scheme], `${at}: navy bar ${found.background}`);
+					expect(found.background === navy[scheme], `${at}: the bar's surface ${found.background}`);
 					expect(!(await overflow(page)), `${at}: no sideways scroll`);
 					expect(found.outside.length === 0, `${at}: parts outside the bar: ${found.outside.join(', ')}`);
 					expect(found.overlaps.length === 0, `${at}: overlapping parts: ${found.overlaps.join(', ')}`);
@@ -156,8 +157,14 @@ export const checks = [
 			await page.keyboard.press('Escape');
 			expect((await product.getAttribute('aria-expanded')) === 'false', 'Escape closes');
 			expect(await product.evaluate(node => node === document.activeElement), 'focus returns to the product button');
-			const outline = await product.evaluate(node => getComputedStyle(node).outlineColor);
-			expect(outline === 'rgb(228, 111, 78)', `focus ring in the family marker: ${outline}`);
+			// The marker is the theme's (coral-600 on the light bar since token set 0.6.0, coral-400 on navy)
+			const [outline, marker] = await product.evaluate(node => {
+				const probe = document.body.appendChild(Object.assign(document.createElement('span'), { style: 'color: var(--color-family-marker)' }));
+				const color = getComputedStyle(probe).color;
+				probe.remove();
+				return [getComputedStyle(node).outlineColor, color];
+			});
+			expect(outline === marker, `focus ring in the family marker: ${outline} (${marker})`);
 			const account = page.locator('.bui-family [data-part="account"] .bui-navmenu-button');
 			await account.focus();
 			await page.keyboard.press('Space');

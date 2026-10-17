@@ -21,10 +21,11 @@ import { CaretPoint } from './caret.js';
  * with a line that says so ("50 of 120 · keep typing to narrow"), kept in view at the list's end, which
  * describes the list and is said once with the answer ("50 of 120 suggestions · keep typing to narrow").
  *
- * Since 0.15.0 (DQ-01, OWN-21) the list hangs from the line being typed, not from the composer's box: its
- * anchor is the trigger's character (`CaretPoint`), placed by `Floating` below that line or above it
- * without room, in the top layer, never under the family bar, and placed again while the page scrolls or
- * the phone's keyboard opens. Without a caret point (a field not drawn) it falls back to the box.
+ * Since 0.15.0 (DQ-01, OWN-21) the list starts at the trigger being typed (`CaretPoint`), placed by
+ * `Floating`: above the composer, never covering its own field and controls, or, without room there (a
+ * composer under the family bar), right under the line being typed; in the top layer, never under the
+ * family bar, and placed again while the page scrolls or the phone's keyboard opens. Without a caret point
+ * (a field not drawn) it falls back to the box.
  *
  * Since 0.14.0 a composer's commands use it too (`start`: the trigger only at the field's start, "/"):
  * an item with `run` is not inserted; its token leaves the field and `run({ value })` is the product's,
@@ -79,7 +80,7 @@ export class ComposerSuggest {
 		field.setAttribute('aria-controls', this.#list.id);
 		field.setAttribute('aria-haspopup', 'listbox');
 		this.#caret = new CaretPoint(field);
-		this.#floating = new Floating(this.#panel, { anchor: this.#point(), placement: 'below', align: 'start', quiet: true });
+		this.#floating = new Floating(this.#panel, { anchor: this.#point(), placement: 'above', align: 'start', quiet: true });
 		this.#on('input', event => (event.isComposing ? null : this.#read()));
 		this.#on('compositionstart', () => ((this.#composing = true), this.close()));
 		this.#on('compositionend', () => ((this.#composing = false), this.#read()));
@@ -185,8 +186,9 @@ export class ComposerSuggest {
 	}
 
 	/**
-	 * A virtual anchor at the trigger's character: one line high at the caret's line, or the composer's
-	 * box when the field cannot say where its characters are.
+	 * A virtual anchor at the trigger's character: from the composer's top down to the caret's line, at the
+	 * trigger's left, so above means above the composer and below means under the line being typed; the
+	 * composer's box when the field cannot say where its characters are.
 	 */
 	#point() {
 		const field = this.#field;
@@ -199,8 +201,9 @@ export class ComposerSuggest {
 				const style = field.ownerDocument.defaultView.getComputedStyle(field);
 				const line = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.5 || 20;
 				const left = box.left + point.left;
-				const top = box.top + point.top;
-				return { left, top, right: left, bottom: top + line, width: 0, height: line, x: left, y: top };
+				const top = Math.min(this.#anchor.getBoundingClientRect().top, box.top + point.top);
+				const bottom = box.top + point.top + line;
+				return { left, top, right: left, bottom, width: 0, height: bottom - top, x: left, y: top };
 			}
 		};
 	}
