@@ -132,6 +132,12 @@
 	margin-top: var(--space-1);
 	font-size: var(--text-label);
 }
+/* A matter whose earlier updates no page loaded says how many it holds (0.15.0, X-07). */
+.bui-notice-count {
+	margin-top: var(--space-1);
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+}
 .bui-notice-earlier {
 	width: 100%;
 	margin-top: var(--space-1);

@@ -156,8 +156,13 @@ export interface FamilyBarOptions {
 	product: string;
 	/** The wordmark asset the product carries, and its own home address (used without a descriptor). */
 	brand: { src: string; href: string };
-	descriptor?: FamilyDescriptor | FamilyUnavailable | null;
+	/** `{ context: 'none' }` (0.15.0): nothing to load, no placeholder; null loads for `bound` milliseconds at most. */
+	descriptor?: FamilyDescriptor | FamilyUnavailable | FamilyNone | null;
 	fallback?: FamilyFallback | null;
+	/** False for a product without projects (Accounts): no project crumb or chooser (0.15.0). */
+	projects?: boolean;
+	/** Milliseconds a null descriptor is drawn as loading before it is drawn as unavailable (0.15.0; default 15000, 0 for never). */
+	bound?: number;
 	/** Display names by product id, added to the family's (never translated). */
 	products?: Record<string, string>;
 	notifications?: Node | null;
@@ -173,8 +178,13 @@ export interface FamilyBarOptions {
 	labels?: FamilyLabels;
 }
 
-/** The id of a product of the family, as `productNames` keys it. */
-export type FamilyProductId = 'projects' | 'workspace' | 'delegate' | 'cdn' | 'snapshots' | 'conduict' | 'accounts' | 'desktop' | 'docs';
+/** A product with no place to load yet (0.15.0, PKG-14): the bar draws no placeholder. */
+export interface FamilyNone {
+	context: 'none';
+}
+
+/** The id of a product of the family, as `productNames` keys it (`packages` since 0.15.0). */
+export type FamilyProductId = 'projects' | 'packages' | 'workspace' | 'delegate' | 'cdn' | 'snapshots' | 'conduict' | 'accounts' | 'desktop' | 'docs';
 
 /**
  * Display names by product id: every family product is named. It is a `Record<string, string>`, so it
@@ -193,8 +203,8 @@ export class FamilyBar extends Component {
 	/** The copy in English and Spanish (0.7.2). */
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: FamilyBarOptions);
-	readonly state: 'loading' | 'unavailable' | 'ready';
-	descriptor: FamilyDescriptor | FamilyUnavailable | null;
+	readonly state: 'loading' | 'unavailable' | 'none' | 'ready';
+	descriptor: FamilyDescriptor | FamilyUnavailable | FamilyNone | null;
 	set fallback(value: FamilyFallback | null);
 	/** `notice` replaces the project menu's notice (0.4.0). */
 	notice: FamilyNotice | null;
@@ -213,9 +223,14 @@ export class ProductNav extends Component {
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: { items?: Array<ProductNavItem | null | false>; label?: string | null; sticky?: boolean; onnavigate?: ((item: ProductNavItem, event: MouseEvent) => void) | null; labels?: { nav?: string } });
 	set items(items: Array<ProductNavItem | null | false>);
+	/** Which ends of the row hold tabs it does not show (0.15.0): a fade and a chevron say so. */
+	readonly more: Array<'start' | 'end'>;
 }
 
-export type UnavailableKind = 'access' | 'association' | 'capability';
+/** `outage` (0.15.0): a service that does not answer, drawn with a globe, never as a denial. */
+export type UnavailableKind = 'access' | 'association' | 'capability' | 'outage';
+/** Technical details of a failure or a refusal (D43, 0.15.0): the request identifier and the time, copyable. */
+export interface FailureDetails { request?: string | null; time?: string | number | Date | null; text?: string; locale?: string; labels?: Copy }
 export interface UnavailableOptions {
 	title: Content;
 	reason: Content;
@@ -225,6 +240,8 @@ export interface UnavailableOptions {
 	kind?: UnavailableKind;
 	code?: string | null;
 	level?: 2 | 3 | 4 | 5 | 6;
+	/** Technical details shown closed under it (0.15.0, D43). */
+	details?: FailureDetails | null;
 	/** `owner`: "Who can change this: " */
 	labels?: { owner?: string };
 }
@@ -233,6 +250,8 @@ export class Unavailable extends Component {
 	/** The copy in English and Spanish (0.7.1). */
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: UnavailableOptions);
+	/** The technical details shown, or null (0.15.0). */
+	readonly details: import('./dom.js').TechnicalDetails | null;
 	static level(value: unknown): 2 | 3 | 4 | 5 | 6;
 }
 

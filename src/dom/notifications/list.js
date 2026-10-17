@@ -113,22 +113,27 @@ export class NoticeList {
 	#entry(group) {
 		const [latest, ...earlier] = group;
 		const node = this.#item(latest, group);
-		if (!earlier.length) return node;
+		// A matter says all its updates (0.15.0: Beyond Projects' `matter.updates`), loaded or not
+		const count = Math.max(group.length, Number(latest.matter?.updates) || 0);
+		if (!earlier.length) {
+			if (count > 1) node.querySelector('.bui-notice-text').append(el('span', { class: 'bui-notice-count', text: this.#labels.text('updates', { count }) }));
+			return node;
+		}
 		const id = Ids.next('bui-group');
 		const rest = el('ul', { id, class: 'bui-notices bui-notice-earlier', hidden: true }, earlier.map(item => this.#item(item, [item])));
-		const toggle = el('button', { type: 'button', class: 'bui-link-button bui-notice-toggle', 'data-control': 'group', 'aria-expanded': 'false', 'aria-controls': id }, [this.#labels.text('updates', { count: group.length })]);
+		const toggle = el('button', { type: 'button', class: 'bui-link-button bui-notice-toggle', 'data-control': 'group', 'aria-expanded': 'false', 'aria-controls': id }, [this.#labels.text('updates', { count })]);
 		toggle.addEventListener('click', () => {
 			const open = rest.hidden;
 			rest.hidden = !open;
 			toggle.setAttribute('aria-expanded', String(open));
-			toggle.textContent = open ? this.#labels.text('hide') : this.#labels.text('updates', { count: group.length });
+			toggle.textContent = open ? this.#labels.text('hide') : this.#labels.text('updates', { count });
 		});
 		node.querySelector('.bui-notice-text').append(toggle, rest);
 		return node;
 	}
 
 	#item(item, members) {
-		const unread = members.some(member => !member.read);
+		const unread = members.some(member => !member.read || Number(member.matter?.unread) > 0);
 		const product = this.#products[item.product] ?? item.product;
 		const open = el('button', { type: 'button', class: 'bui-notice-open', 'data-control': 'open', onclick: () => this.#actions.open(item, members) }, [
 			content(item.title),

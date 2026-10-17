@@ -1,6 +1,7 @@
 import { el, content } from './core/element.js';
 import { glyph } from './core/icons.js';
 import { Labels } from './core/labels.js';
+import { TechnicalDetails } from './operations/details.js';
 
 /**
  * Stateless feedback builders: status, badge, count, callout, loading and skeleton. Each returns a
@@ -25,15 +26,17 @@ export function badge(label, tone = 'neutral') {
 
 /**
  * A callout: information, warning, danger or success, with optional actions. `live` announces it:
- * politely, or assertively for danger.
+ * politely, or assertively for danger. Since 0.15.0 (D43) a failure carries `details` (`{ request, time,
+ * text }`): the closed "Technical details" with the request identifier and the time, copyable.
  */
-export function callout({ tone = 'info', title, body = null, actions = [], live = false }) {
+export function callout({ tone = 'info', title, body = null, actions = [], live = false, details = null }) {
 	return el('div', { class: `bui-callout bui-callout-${tone}`, role: live ? (tone === 'danger' ? 'alert' : 'status') : null }, [
 		glyph(glyphs[tone] ?? 'info'),
 		el('div', { class: 'bui-callout-body' }, [
 			el('p', { class: 'bui-callout-title' }, [content(title)]),
 			body ? el('p', { class: 'bui-callout-text' }, [content(body)]) : null,
-			actions.length ? el('div', { class: 'bui-callout-actions' }, actions) : null
+			actions.length ? el('div', { class: 'bui-callout-actions' }, actions) : null,
+			details ? new TechnicalDetails(details).element : null
 		])
 	]);
 }

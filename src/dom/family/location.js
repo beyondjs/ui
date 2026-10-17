@@ -35,7 +35,8 @@ export class Location extends Component {
 
 	/**
 	 * @param {object} options
-	 * @param {'loading'|'unavailable'|'ready'} options.state
+	 * @param {'loading'|'unavailable'|'none'|'ready'} options.state `none` (0.15.0): nothing to load, no placeholder
+	 * @param {boolean} [options.projects] false for a product without projects: no project crumb or chooser (0.15.0)
 	 * @param {object|null} options.descriptor the descriptor when ready
 	 * @param {{organization?: string|null, project?: string|null, organizations?: Array<object>|null}} options.fallback names the product knows itself
 	 * @param {string} options.product the product's display name
@@ -51,7 +52,7 @@ export class Location extends Component {
 		this.#organizations = new Organizations({ descriptor: ready ? descriptor : null, fallback, places, labels });
 		const organization = this.#organizations.current;
 		const stale = !ready;
-		const project = ready ? descriptor.project ?? null : fallback.project ? { name: fallback.project } : null;
+		const project = options.projects === false ? null : ready ? descriptor.project ?? null : fallback.project ? { name: fallback.project } : null;
 		this.#projects = new ProjectList({ organization, projects: ready ? descriptor.projects ?? [] : [], project, product, notice, places, labels, stale });
 		this.#element = el('div', { class: 'bui-family-location' }, [el('div', { class: 'bui-family-wide' }, this.#wide()), el('div', { class: 'bui-family-narrow' }, this.#narrow())]);
 	}
@@ -95,15 +96,16 @@ export class Location extends Component {
 		return this.#options.state === 'ready';
 	}
 
-	/** The name of the project in view: the descriptor's, or the one the product passed; null outside one. */
+	/** The name of the project in view: the descriptor's, or the one the product passed; null outside one or without projects. */
 	get #name() {
-		const { descriptor, fallback } = this.#options;
+		const { descriptor, fallback, projects } = this.#options;
+		if (projects === false) return null;
 		return (this.#ready ? descriptor.project?.name : fallback.project) ?? null;
 	}
 
 	/** Whether the project menu is offered: always with a descriptor, and on the product's notice without one. */
 	#chooser() {
-		if (!this.#organizations.current) return false;
+		if (!this.#organizations.current || this.#options.projects === false) return false;
 		return this.#ready || (this.#options.state === 'unavailable' && Boolean(this.#options.notice?.text));
 	}
 
@@ -126,14 +128,14 @@ export class Location extends Component {
 		if (!organization) return this.#ready ? [] : this.#still();
 		const parts = [this.#organization()];
 		if (this.#chooser()) parts.push(Location.#separator(), this.#project());
-		else if (fallback.project) parts.push(Location.#separator(), this.#text(fallback.project, 'project'));
+		else if (this.#name && fallback.project) parts.push(Location.#separator(), this.#text(fallback.project, 'project'));
 		return parts;
 	}
 
 	#narrow() {
 		const organization = this.#organizations.current;
 		if (!organization) return this.#ready ? [] : this.#still();
-		if (!this.#chooser() && !this.#organizations.several) return [this.#text(this.#options.fallback.project ?? organization.name, this.#options.fallback.project ? 'project' : 'organization')];
+		if (!this.#chooser() && !this.#organizations.several) return [this.#text(this.#name ?? organization.name, this.#name ? 'project' : 'organization')];
 		const { labels } = this.#options;
 		const project = this.#name;
 		const place = project ? `${organization.name} / ${project}` : organization.name;
@@ -180,8 +182,8 @@ export class Location extends Component {
 
 	/** No organization while loading or unavailable: a project name as text, or a placeholder while loading. */
 	#still() {
-		const { state, fallback, labels } = this.#options;
-		if (fallback.project) return [this.#text(fallback.project, 'project')];
+		const { state, labels } = this.#options;
+		if (this.#name) return [this.#text(this.#name, 'project')];
 		if (state !== 'loading') return [];
 		return [el('span', { class: 'bui-family-placeholder', 'aria-hidden': 'true' }), hidden(labels.text('loading'))];
 	}

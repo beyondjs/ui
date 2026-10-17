@@ -143,7 +143,7 @@ export const checks = [
 		}
 	},
 	{
-		name: "Facts: a long value in words reads under its label from its start, beside the panel's other rows, in both themes",
+		name: "Facts: a long value in words reads under its label from its start in a narrow panel and stays in the value column in a wide one (D99, PKG-19), in both themes",
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			for (const scheme of ['light', 'dark']) {
@@ -153,10 +153,12 @@ export const checks = [
 					const long = rows.find(row => row.hasAttribute('data-long'));
 					const short = rows.find(row => !row.hasAttribute('data-long') && !row.querySelector('.bui-facts-action'));
 					const box = node => node.getBoundingClientRect();
-					return { count: rows.filter(row => row.hasAttribute('data-long')).length, label: box(long.querySelector('dt')), value: box(long.querySelector('.bui-facts-value')), align: getComputedStyle(long.querySelector('.bui-facts-data')).textAlign, beside: box(short.querySelector('dt')).top === box(short.querySelector('.bui-facts-value')).top || Math.abs(box(short.querySelector('dt')).top - box(short.querySelector('.bui-facts-value')).top) < 2 };
+					const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+					return { narrow: box(long.closest('.bui-facts')).width <= 30 * rem, count: rows.filter(row => row.hasAttribute('data-long')).length, label: box(long.querySelector('dt')), value: box(long.querySelector('.bui-facts-value')), column: box(short.querySelector('.bui-facts-value')).left, align: getComputedStyle(long.querySelector('.bui-facts-data')).textAlign, beside: box(short.querySelector('dt')).top === box(short.querySelector('.bui-facts-value')).top || Math.abs(box(short.querySelector('dt')).top - box(short.querySelector('.bui-facts-value')).top) < 2 };
 				});
 				expect(found.count === 1, `one long row: ${found.count}`);
-				expect(found.value.top >= found.label.bottom - 0.5 && Math.abs(found.value.left - found.label.left) <= 1, `${scheme}: under its label, from its start: ${JSON.stringify(found)}`);
+				if (found.narrow) expect(found.value.top >= found.label.bottom - 0.5 && Math.abs(found.value.left - found.label.left) <= 1, `${scheme}: under its label, from its start: ${JSON.stringify(found)}`);
+				else expect(Math.abs(found.value.left - found.column) <= 1 && Math.abs(found.value.top - found.label.top) < 2, `${scheme}: in the value column beside its label: ${JSON.stringify(found)}`);
 				expect(found.align === 'start', `${scheme}: read from its start: ${found.align}`);
 				expect(found.beside, `${scheme}: a short value stays beside its label`);
 				await context.close();

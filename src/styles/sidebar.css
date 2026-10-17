@@ -115,13 +115,19 @@ a.bui-sidebar-item:hover {
 	color: var(--color-text-muted);
 	cursor: default;
 }
+/* A section's label keeps its words on its line whatever its meta says (0.15.0, MCH-10): the meta gives
+   way, cut at its end and shown whole in a tooltip. An entry's own label is cut instead (sidebar-entries.css). */
 .bui-sidebar-label {
-	flex: 1;
-	min-width: 0;
-	overflow-wrap: anywhere;
+	flex: 1 0 auto;
+	max-width: 100%;
+	overflow-wrap: break-word;
 }
 .bui-sidebar-meta {
-	flex: none;
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 	color: var(--color-text-muted);
 	font-size: var(--text-label);
 	font-weight: var(--weight-regular);

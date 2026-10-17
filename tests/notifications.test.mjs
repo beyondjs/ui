@@ -113,7 +113,8 @@ test('the panel states failure with retry, and partial results name the unreacha
 test('the inbox filters unread and all by product, groups, pages and reports its state', async () => {
 	const notices = new Notices();
 	const states = [];
-	const inbox = new NotificationInbox({ adapter: notices.adapter, products, limit: 10, onstate: state => states.push(state), labels: { updates: ({ count }) => `${count} novedades` } }).mount(document.body);
+	// `limit` counts matters since 0.15.0 (X-07): pages are read until five matters or the end
+	const inbox = new NotificationInbox({ adapter: notices.adapter, products, limit: 5, onstate: state => states.push(state), labels: { updates: ({ count }) => `${count} novedades` } }).mount(document.body);
 	await page.until(() => inbox.element.querySelector('.bui-notice'));
 	assert.deepEqual(titles(inbox.element).map(title => title.replace(' (Unread)', '')), ['New comment on “Export invoices”', 'You were added to Storefront']);
 	const group = inbox.element.querySelector('[data-control="group"]');
@@ -123,11 +124,13 @@ test('the inbox filters unread and all by product, groups, pages and reports its
 	const [unread, all] = inbox.element.querySelectorAll('.bui-toggle');
 	assert.equal(unread.getAttribute('aria-pressed'), 'true');
 	all.click();
-	await page.until(() => inbox.element.querySelectorAll('.bui-notice').length >= 9);
+	await page.until(() => inbox.element.querySelectorAll('.bui-notice').length >= 10);
 	assert.deepEqual(states.at(-1), { state: 'all', product: '' });
 	const more = inbox.element.querySelector('.bui-inbox > .bui-button-quiet');
 	assert.equal(more.hidden, false);
 	more.click();
+	await page.until(() => inbox.element.querySelectorAll('.bui-notice').length >= 15);
+	inbox.element.querySelector('.bui-inbox > .bui-button-quiet').click();
 	await page.until(() => inbox.element.querySelector('.bui-inbox > .bui-button-quiet').hidden);
 	assert.equal(inbox.element.querySelectorAll('.bui-notice').length, 16);
 	const select = inbox.element.querySelector('select');

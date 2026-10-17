@@ -5,6 +5,7 @@ import { ProductNav as Row } from '../dom/nav.js';
 import { Unavailable as Missing, glyphs } from '../dom/unavailable.js';
 import { Sidebar as Sections } from '../dom/sidebar/sidebar.js';
 import { Mark, Badge } from './simple.js';
+import { TechnicalDetails } from './operations.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 
 const { useId, useState } = React;
@@ -22,7 +23,7 @@ const { useId, useState } = React;
  * the latest props. A change of `product`, `brand`, `products`, `labels` (memoize it), `advisory`,
  * `transient`, the account entries or `toggle` creates a new bar.
  */
-export function FamilyBar({ product, brand, descriptor = null, fallback = null, products = {}, notifications = null, account = {}, toggle = null, onNavigate = null, advisory = ['NOT_ADMITTED'], notice = null, transient = [], labels }) {
+export function FamilyBar({ product, brand, descriptor = null, fallback = null, products = {}, notifications = null, account = {}, toggle = null, onNavigate = null, advisory = ['NOT_ADMITTED'], notice = null, transient = [], labels, projects = true, bound = 15000 }) {
 	const [slot] = useState(() => document.createElement('div'));
 	const latest = useLatest({ account, toggle, onNavigate, notice });
 	const items = (account.items ?? []).filter(Boolean);
@@ -47,9 +48,11 @@ export function FamilyBar({ product, brand, descriptor = null, fallback = null, 
 			onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null,
 			toggle: toggle ? { controls: toggle.controls, expanded: toggle.expanded, onchange: expanded => latest.current.toggle?.onChange?.(expanded) } : null,
 			notice: relay(notice, latest),
-			transient
+			transient,
+			projects,
+			bound
 		});
-	}, [product, brand.src, brand.href, JSON.stringify(products), JSON.stringify(advisory), JSON.stringify(transient), labels, account.label, typeof signout === 'function' ? 'function' : (signout?.href ?? (signout ? `leave:${signout.bound ?? ''}` : null)), JSON.stringify(items.map(item => [item.label, item.href ?? null])), account.preferences?.preferences, JSON.stringify(account.preferences?.locales ?? null), Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
+	}, [projects, bound, product, brand.src, brand.href, JSON.stringify(products), JSON.stringify(advisory), JSON.stringify(transient), labels, account.label, typeof signout === 'function' ? 'function' : (signout?.href ?? (signout ? `leave:${signout.bound ?? ''}` : null)), JSON.stringify(items.map(item => [item.label, item.href ?? null])), account.preferences?.preferences, JSON.stringify(account.preferences?.locales ?? null), Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
 	useSync(bar, current => (current.notice = relay(notice, latest)), [notice?.text, notice?.href, notice?.action?.label, notice?.action?.href]);
 	useSync(bar, current => (current.descriptor = descriptor), [JSON.stringify(descriptor)]);
 	useSync(bar, current => (current.fallback = fallback ?? {}), [JSON.stringify(fallback)]);
@@ -148,7 +151,7 @@ export function ProductNav({ items, label = null, sticky = false, onNavigate = n
  * "Not available here", rendered by React with the markup of the DOM `Unavailable`: `action` and
  * `secondary` are React content.
  */
-export function Unavailable({ title, reason, owner = null, action = null, secondary = null, kind = 'access', code = null, level = 2, labels = {} }) {
+export function Unavailable({ title, reason, owner = null, action = null, secondary = null, kind = 'access', code = null, level = 2, labels = {}, details = null }) {
 	const id = `bui-unavailable-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 	const type = glyphs[kind] ? kind : 'access';
 	return h(
@@ -162,7 +165,8 @@ export function Unavailable({ title, reason, owner = null, action = null, second
 			h('p', { className: 'bui-unavailable-reason' }, reason),
 			owner ? h('p', { className: 'bui-unavailable-owner' }, h('span', { className: 'bui-unavailable-label' }, labels.owner ?? Missing.labels.en.owner), owner) : null,
 			code ? h('p', { className: 'bui-unavailable-code' }, h(Badge, { label: code, tone: 'neutral' })) : null,
-			action || secondary ? h('div', { className: 'bui-unavailable-actions' }, action, secondary) : null
+			action || secondary ? h('div', { className: 'bui-unavailable-actions' }, action, secondary) : null,
+			details ? h(TechnicalDetails, details) : null
 		)
 	);
 }

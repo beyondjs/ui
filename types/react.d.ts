@@ -49,7 +49,7 @@ export function useBusy(): [boolean, <T>(work: () => Promise<T>) => Promise<T | 
 export function Lockup(props: { src: string; name?: ReactNode; alt?: string }): ReactElement;
 export function Status(props: { label: ReactNode; tone?: Tone | 'progress' }): ReactElement;
 export function Badge(props: { label: ReactNode; tone?: Tone }): ReactElement;
-export function Callout(props: { tone?: Exclude<Tone, 'neutral'>; title: ReactNode; body?: ReactNode; actions?: ReactNode; live?: boolean; children?: ReactNode }): ReactElement;
+export function Callout(props: { tone?: Exclude<Tone, 'neutral'>; title: ReactNode; body?: ReactNode; actions?: ReactNode; live?: boolean; /** 0.15.0, D43 */ details?: import('./family.js').FailureDetails | null; children?: ReactNode }): ReactElement;
 export function Loading(props: { label?: string }): ReactElement;
 export function Skeleton(props: { lines?: number }): ReactElement;
 
@@ -182,25 +182,6 @@ export interface HeaderProps {
 	labels?: Copy;
 }
 export function Header(props: HeaderProps): ReactElement;
-export interface FamilyBarProps {
-	product: string;
-	brand: { src: string; href: string };
-	descriptor?: FamilyDescriptor | FamilyUnavailable | null;
-	fallback?: FamilyFallback | null;
-	products?: Record<string, string>;
-	notifications?: ReactNode;
-	/** `signout`: `{ end, before?, after?, bound? }` (0.5.0), whose functions are read from the latest props, or the earlier callback or link. */
-	account?: { signout?: FamilySignout | (() => void) | { href: string } | null; items?: Array<{ label: string; href?: string | null; onSelect?: (() => void) | null } | null | false>; label?: string | null; preferences?: import('./page.js').FamilyPreferences | null };
-	toggle?: { controls: string; expanded: boolean; onChange?: (expanded: boolean) => void } | null;
-	onNavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null;
-	advisory?: string[];
-	/** One line at the top of the project menu (0.4.0); its action's `onSelect` is called with the latest props. */
-	notice?: { text: string; href?: string | null; action?: { label: string; href?: string | null; onSelect?: (() => void) | null } | null } | null;
-	/** The product's own dialog markers, left out of the address Accounts returns to (0.4.0). */
-	transient?: string[];
-	/** Memoize: a new object creates a new bar */
-	labels?: Copy;
-}
 /** The family bar, driven by the DOM `FamilyBar`; `descriptor` and `fallback` are applied when they change. */
 export function FamilyBar(props: FamilyBarProps): ReactElement;
 /** `Session` for a React product (0.8.0): created once `person` is known (no `signin` for the bar since 0.9.0). */
@@ -208,7 +189,7 @@ export function useSession(options: import('./session.js').SessionOptions): { se
 /** A product's sections (0.4.0), driven by the DOM `Sidebar`; place it first in a `.bui-shell` element. */
 export function Sidebar(props: { product: string; groups?: Array<SidebarGroup | import('./dom.js').SidebarEntries | import('./dom.js').SidebarObject>; /** ⌘K / Ctrl+K (0.14.0), off by default */ shortcut?: boolean; context?: string | { label?: string | null; name: string } | null; cut?: number; section?: string | null; /** 0.10.0 */ action?: import('./dom.js').SidebarAction | null; /** 0.10.0: `source` and `all` are read from the latest props */ search?: import('./dom.js').SidebarSearchOptions | null; onNavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null; labels?: Copy }): ReactElement;
 export function ProductNav(props: { items: Array<ProductNavItem | null | false>; label?: string | null; sticky?: boolean; onNavigate?: ((item: ProductNavItem, event: MouseEvent) => void) | null; labels?: { nav?: string } }): ReactElement;
-export function Unavailable(props: { title: ReactNode; reason: ReactNode; owner?: ReactNode; action?: ReactNode; secondary?: ReactNode; kind?: UnavailableKind; code?: string | null; level?: 2 | 3 | 4 | 5 | 6; labels?: { owner?: string } }): ReactElement;
+export function Unavailable(props: { title: ReactNode; reason: ReactNode; owner?: ReactNode; action?: ReactNode; secondary?: ReactNode; kind?: UnavailableKind; code?: string | null; level?: 2 | 3 | 4 | 5 | 6; labels?: { owner?: string }; /** 0.15.0, D43 */ details?: import('./family.js').FailureDetails | null }): ReactElement;
 export function Disclosure(props: { label: string; name?: string | null; align?: 'start' | 'end'; /** Where the floating panel opens (0.11.2) */ placement?: 'auto' | 'above' | 'below'; onChange?: (open: boolean) => void; children?: ReactNode }): ReactElement;
 export function ActionMenu(props: { label?: string | null; name?: string | null; items: Array<(Omit<MenuItem, 'run'> & { onSelect?: (event: MouseEvent) => void }) | null | false>; align?: 'start' | 'end'; glyph?: string | null; placement?: 'auto' | 'below' | 'above' }): ReactElement;
 export function Help(props: { topic: string; text?: string | string[]; labels?: Copy; children?: ReactNode }): ReactElement;
@@ -298,3 +279,5 @@ export * from './react-conversation.js';
 export * from './react-resource.js';
 export * from './react-shared.js';
 export * from './react-patterns.js';
+export * from './react-family.js';
+import type { FamilyBarProps } from './react-family.js';

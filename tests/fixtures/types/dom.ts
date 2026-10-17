@@ -23,7 +23,8 @@ const descriptor: FamilyDescriptor = { person: { name: 'Ana', email: 'ana@exampl
 const family = new FamilyBar({ product: 'delegate', brand: { src: '/wordmark.svg', href: '/' }, descriptor: null, fallback: { organization: 'Northwind', links: { account: '/account', docs: '/docs/' } }, notifications: entry.element, account: { signout: { href: '/signout' }, items: [{ label: 'Settings', href: '/settings' }] }, onnavigate: item => item.url, labels: { NOT_ADMITTED: 'Aún no está abierto para ti' } }).mount(document.body);
 family.descriptor = descriptor;
 family.descriptor = { unavailable: true };
-const state: 'loading' | 'unavailable' | 'ready' = family.state;
+const state: 'loading' | 'unavailable' | 'none' | 'ready' = family.state;
+family.descriptor = { context: 'none' };
 const annotated: FamilyDescriptor = { organization: { id: 'org_1', name: 'Northwind' }, organizations: [{ id: 'org_1', name: 'Northwind', role: 'owner', url: '/?organization=org_1' }], projects: [{ id: 'p', name: 'Shop', here: { mapped: 0, url: '/?project=p', state: 'unset' } }], links: { manage: { account: '/account', members: '/m' } } };
 family.descriptor = annotated;
 const notice: FamilyNotice = { text: 'Beyond Projects did not answer.', action: { label: 'Try again', run: () => undefined } };

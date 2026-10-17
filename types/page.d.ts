@@ -165,6 +165,8 @@ export class Tabs extends Component {
 	/** `label` is the accessible name as given; `name` names what the tabs belong to ("Sections of {name}", 0.7.6). */
 	constructor(options: { items?: Array<TabItem | null | false>; label?: string | null; name?: string | null; onnavigate?: ((item: TabItem, event: MouseEvent) => void) | null; labels?: { nav?: string; named?: string } });
 	items: Array<TabItem | null | false>;
+	/** Which ends of the row hold tabs it does not show (0.15.0): a fade and a chevron say so. */
+	readonly more: Array<'start' | 'end'>;
 }
 
 /** A flat section: a heading, one description line, its actions and its content. */

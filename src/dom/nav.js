@@ -1,6 +1,7 @@
 import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
 import { Labels } from './core/labels.js';
+import { ScrollEdges } from './core/edges.js';
 
 const defaults = { nav: 'Product' };
 
@@ -11,7 +12,8 @@ const defaults = { nav: 'Product' };
  * The row scrolls sideways when it is narrower than its tabs and keeps the current tab in view; a
  * tab's focus ring is drawn inside it so the scrolling row never clips it. The current tab carries
  * `aria-current="page"`. It is not sticky unless `sticky` asks for it, in which case it stays under
- * the family bar.
+ * the family bar. Since 0.15.0 (X-15, PKG-19) an end that holds more tabs than it shows says so with a
+ * fade and a chevron that scrolls the row (`ScrollEdges`).
  */
 export class ProductNav extends Component {
 	/** The copy in English and Spanish (0.7.2). */
@@ -20,6 +22,7 @@ export class ProductNav extends Component {
 	#element;
 	#list;
 	#onnavigate;
+	#edges;
 
 	/**
 	 * @param {object} options
@@ -33,7 +36,18 @@ export class ProductNav extends Component {
 		this.#onnavigate = onnavigate;
 		this.#list = el('ul', { class: 'bui-productnav-list' });
 		this.#element = el('nav', { class: `bui-productnav${sticky ? ' bui-productnav-sticky' : ''}`, 'aria-label': label ?? new Labels(defaults, labels).text('nav') }, [this.#list]);
+		this.#edges = new ScrollEdges(this.#element, this.#list);
 		this.items = items;
+	}
+
+	/** Which ends of the row hold tabs it does not show: `start`, `end`, both or none (0.15.0). */
+	get more() {
+		return this.#edges.more;
+	}
+
+	destroy() {
+		this.#edges.destroy();
+		super.destroy();
 	}
 
 	get element() {
@@ -44,6 +58,7 @@ export class ProductNav extends Component {
 	set items(items) {
 		this.#list.replaceChildren(...items.filter(Boolean).map(item => el('li', {}, [this.#link(item)])));
 		this.#reveal();
+		this.#edges?.update();
 	}
 
 	mount(parent, before = null) {
@@ -58,7 +73,7 @@ export class ProductNav extends Component {
 	 */
 	#reveal() {
 		this.#scroll();
-		this.#element.ownerDocument.fonts?.ready.then(() => !this.destroyed && this.#scroll());
+		this.#element.ownerDocument.fonts?.ready.then(() => !this.destroyed && (this.#scroll(), this.#edges.update()));
 	}
 
 	/**

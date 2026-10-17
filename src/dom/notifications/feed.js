@@ -11,8 +11,16 @@ import { Reach } from './reach.js';
  * name products whose items are hidden because they did not answer (see `Reach`).
  * Only the latest request publishes. Nothing is kept once `clear()` runs, so no private text
  * outlives the view that showed it.
+ *
+ * Since 0.15.0 (X-07) a request with `by: 'group'` asks for a page of matters: `limit` counts matters.
+ * A relay that answers `grouped: true` did so; one that ignores it answers items, and the feed then reads
+ * further pages (at most `Feed.pages` per request) until it holds `limit` matters or the end, so one
+ * noisy matter never hides the others.
  */
 export class Feed {
+	/** Pages read at most for one request of matters from a relay that does not group. */
+	static pages = 5;
+
 	#adapter;
 	#sequence = 0;
 	#items = [];
@@ -69,6 +77,11 @@ export class Feed {
 		return this.#request ? this.#run(this.#request, this.#request.cursor !== null) : Promise.resolve();
 	}
 
+	/** How many matters `items` hold: those that share a product's `group` count once. */
+	static matters(items) {
+		return new Set(items.map(item => (item.group ? `${item.product ?? ''}\u0000${item.group}` : `\u0001${item.id}`))).size;
+	}
+
 	/** Replaces one item (after it was marked read or unread) or removes it with null. */
 	update(id, change) {
 		this.#items = this.#items.flatMap(item => (item.id !== id ? [item] : change === null ? [] : [{ ...item, ...change }]));
@@ -93,7 +106,8 @@ export class Feed {
 		this.#error = null;
 		this.#reason = null;
 		try {
-			const answer = await this.#adapter.list(request);
+			const before = append ? Feed.matters(this.#items) : 0;
+			let answer = await this.#adapter.list(request);
 			if (sequence !== this.#sequence) return false;
 			if (answer?.available === false) {
 				this.#items = [];
@@ -101,7 +115,15 @@ export class Feed {
 				this.#reason = answer.reason ?? null;
 				return true;
 			}
-			this.#items = append ? [...this.#items, ...(answer?.items ?? [])] : [...(answer?.items ?? [])];
+			let items = append ? [...this.#items, ...(answer?.items ?? [])] : [...(answer?.items ?? [])];
+			// A relay that does not group: more pages until `limit` matters, within a bound
+			for (let read = 1; request.by === 'group' && answer?.grouped !== true && answer?.next && read < Feed.pages && Feed.matters(items) - before < request.limit; read += 1) {
+				answer = await this.#adapter.list({ ...request, cursor: answer.next });
+				if (sequence !== this.#sequence) return false;
+				if (answer?.available === false) break;
+				items = [...items, ...(answer?.items ?? [])];
+			}
+			this.#items = items;
 			this.#next = answer?.next ?? null;
 			this.#missing = Reach.missing(answer);
 			this.#state = 'ready';

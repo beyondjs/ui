@@ -19,13 +19,17 @@ import { Manage } from './manage.js';
  * `beyond-family/1` descriptor the product relays from Beyond Projects, and it is identical in
  * every product: a product's own navigation belongs in its sidebar or in `ProductNav`, never here.
  *
- * It never blocks a page: `descriptor: null` is still loading (the lockup and placeholders show),
- * and `{ unavailable: true }` shows the names the product passed as `fallback`; the product's
+ * It never blocks a page: `descriptor: null` is still loading (the lockup and placeholders show), for
+ * at most `bound` milliseconds (0.15.0, D40: then it is drawn as unavailable), `{ unavailable: true }`
+ * shows the names the product passed as `fallback`, and `{ context: 'none' }` says there is nothing to
+ * load (0.15.0, PKG-14: a product not yet connected to a place, such as Packages before a connection is
+ * chosen): no placeholder, no crumb but what `fallback` names; the product's
  * `fallback.organizations` keep the organization menu working in both, and `fallback.links` supplies
  * the addresses (home, account, members, docs, the product's projects page, Accounts' `manage`) the
  * descriptor does not. It places links and decides nothing about access: the product annotates each
  * project's state in the descriptor (`projects[i].here.state`) and may add one `notice` line to the
- * project menu.
+ * project menu. A product that has no projects (Accounts) passes `projects: false` (0.15.0, DQ-19): the
+ * bar then shows the organization only, never "Choose a project".
  */
 export class FamilyBar extends Component {
 	/** The copy in English and Spanish (0.7.2): `new FamilyBar({ …, labels: FamilyBar.labels.es })`. */
@@ -42,6 +46,8 @@ export class FamilyBar extends Component {
 	#thread;
 	#end;
 	#parts = [];
+	#late = false;
+	#wait = null;
 
 	/**
 	 * @param {object} options
@@ -59,10 +65,12 @@ export class FamilyBar extends Component {
 	 * @param {string[]} [options.advisory] reasons whose entries stay links when they have an address
 	 * @param {{text: string, href?: string, action?: {label: string, href?: string, run?: () => void}}|null} [options.notice] one line at the top of the project menu
 	 * @param {string[]} [options.transient] the product's own dialog markers, left out of the address Accounts returns to
+	 * @param {boolean} [options.projects] whether the product has projects (0.15.0); false shows no project crumb or chooser
+	 * @param {number} [options.bound] milliseconds a missing descriptor is drawn as loading before it is drawn as unavailable (0.15.0)
 	 */
-	constructor({ product, brand, descriptor = null, fallback = {}, products = {}, notifications = null, account = {}, toggle = null, onnavigate = null, advisory = ['NOT_ADMITTED'], notice = null, transient = [], labels = {} }) {
+	constructor({ product, brand, descriptor = null, fallback = {}, products = {}, notifications = null, account = {}, toggle = null, onnavigate = null, advisory = ['NOT_ADMITTED'], notice = null, transient = [], labels = {}, projects = true, bound = 15000 }) {
 		super();
-		this.#options = { product, brand, notifications, account, onnavigate, advisory, transient };
+		this.#options = { product, brand, notifications, account, onnavigate, advisory, transient, projects: projects !== false, bound };
 		this.#notice = notice;
 		this.#labels = new Labels(defaults, labels);
 		this.#names = { ...names, ...products };
@@ -83,6 +91,7 @@ export class FamilyBar extends Component {
 		this.#start = bar.querySelector('.bui-header-start');
 		this.#start.classList.add('bui-family-brand');
 		bar.addEventListener('click', event => this.#navigate(event));
+		this.#watch();
 		this.#draw();
 	}
 
@@ -90,9 +99,13 @@ export class FamilyBar extends Component {
 		return this.#header.element;
 	}
 
-	/** `loading` (no descriptor yet), `unavailable` (the relay failed) or `ready`. */
+	/**
+	 * `loading` (no descriptor yet), `unavailable` (the relay failed, or no descriptor within `bound`),
+	 * `none` (no context to load, 0.15.0) or `ready`.
+	 */
 	get state() {
-		if (!this.#descriptor) return 'loading';
+		if (!this.#descriptor) return this.#late ? 'unavailable' : 'loading';
+		if (this.#descriptor.context === 'none') return 'none';
 		return this.#descriptor.unavailable ? 'unavailable' : 'ready';
 	}
 
@@ -103,6 +116,7 @@ export class FamilyBar extends Component {
 	/** Replaces the descriptor and redraws; focus on a part of the bar stays on that part. */
 	set descriptor(value) {
 		this.#descriptor = value ?? null;
+		this.#watch();
 		this.#draw();
 	}
 
@@ -132,10 +146,28 @@ export class FamilyBar extends Component {
 	}
 
 	destroy() {
+		this.#wait?.();
 		for (const part of this.#parts) part.destroy();
 		this.#parts = [];
 		this.#header.destroy();
 		super.destroy();
+	}
+
+	/** A missing descriptor is loading for `bound` milliseconds at most, then unavailable (every wait ends, D40). */
+	#watch() {
+		this.#wait?.();
+		this.#wait = null;
+		this.#late = false;
+		const { bound } = this.#options;
+		if (this.#descriptor || !(bound > 0) || !Number.isFinite(bound)) return;
+		// A timer that never keeps a process alive (a server rendering or a test runner)
+		const timer = setTimeout(() => {
+			if (this.destroyed) return;
+			this.#late = true;
+			this.#draw();
+		}, bound);
+		timer.unref?.();
+		this.#wait = () => clearTimeout(timer);
 	}
 
 	#draw() {
@@ -148,7 +180,7 @@ export class FamilyBar extends Component {
 		const labels = this.#labels;
 		const name = this.#names[product] ?? product;
 		const person = ready?.person ?? FamilyBar.#person(this.#fallback.person);
-		const location = new Location({ state, descriptor: ready, fallback: this.#fallback, places, labels, product: name, notice: this.#notice });
+		const location = new Location({ state, descriptor: ready, fallback: this.#fallback, places, labels, product: name, notice: this.#notice, projects: this.#options.projects });
 		const switcher = new ProductSwitcher({ product, names: this.#names, descriptor: ready, places, labels, carried: location.sections() });
 		const manage = new Manage({ links: places.links.manage ?? null, product, transient });
 		const menu = new AccountMenu({ person, links: places.links, manage, organization: location.organization, any: location.any, product: name, id: product, account, labels });

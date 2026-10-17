@@ -208,8 +208,44 @@ button.bui-navmenu-item:hover,
 
 /* The product's own navigation under the family bar. */
 .bui-productnav {
+	--bui-nav-surface: var(--color-surface);
+	position: relative;
 	border-bottom: 1px solid var(--color-border);
 	background: var(--color-surface);
+}
+/* An end that holds more tabs than it shows (0.15.0, X-15): a fade over the row's surface with a chevron
+   that scrolls it; pointer only, never focused (each tab is reached with Tab). */
+.bui-scroll-edge {
+	position: absolute;
+	inset-block: 0;
+	z-index: 1;
+	display: inline-flex;
+	align-items: center;
+	width: var(--space-8);
+	padding: 0;
+	border: 0;
+	color: var(--color-text-muted);
+	cursor: pointer;
+}
+.bui-scroll-edge[hidden] {
+	display: none;
+}
+.bui-scroll-edge-start {
+	inset-inline-start: 0;
+	justify-content: flex-start;
+	background: linear-gradient(to right, var(--bui-nav-surface) 45%, transparent);
+}
+.bui-scroll-edge-end {
+	inset-inline-end: 0;
+	justify-content: flex-end;
+	background: linear-gradient(to left, var(--bui-nav-surface) 45%, transparent);
+}
+.bui-scroll-edge > .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-scroll-edge:hover {
+	color: var(--color-text);
 }
 .bui-productnav-sticky {
 	position: sticky;

@@ -16,6 +16,9 @@ const tones = Object.freeze(['neutral', 'success', 'warning', 'danger', 'info', 
  * Since 0.11.0 an entry may end with its `age` ("2 h", "3 d"): the full moment is read with the entry
  * ("Fix the redirect, Needs you, Tuesday 6 October 2026 at 10:42") and shown in its tooltip on hover
  * and focus, with the title when the title is cut.
+ *
+ * Since 0.15.0 (MCH-10) a long `meta` never squeezes the label: the label keeps its words on its line and
+ * the meta is cut at its end, shown whole in a tooltip on hover and focus while it is cut.
  */
 export class SidebarItem {
 	#holder = el('li');
@@ -80,7 +83,8 @@ export class SidebarItem {
 		this.#node.append(this.#label, this.#end);
 		this.#tip?.destroy();
 		const whole = () => [Cut.text(this.#label) ? this.#label.textContent : null, this.#when || null].filter(Boolean).join(' · ');
-		this.#tip = this.#entry ? new NameTip(this.#node, { text: whole, cut: () => Cut.text(this.#label) || Boolean(this.#when) }) : null;
+		const meta = () => this.#end.parentNode === this.#node && Cut.text(this.#end);
+		this.#tip = this.#entry ? new NameTip(this.#node, { text: whole, cut: () => Cut.text(this.#label) || Boolean(this.#when) }) : new NameTip(this.#node, { text: () => this.#end.textContent, cut: meta });
 		if (old) old.replaceWith(this.#node);
 		else this.#holder.append(this.#node);
 		if (focused && link) this.#node.focus({ preventScroll: true });

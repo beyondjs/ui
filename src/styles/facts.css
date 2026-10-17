@@ -113,12 +113,15 @@
 	padding-block: 0;
 	font-size: var(--text-small);
 }
-/* A long value in words goes under its label, left-aligned, as a sentence is read (0.11.2). */
-.bui-facts-row[data-long] {
-	grid-template-columns: minmax(0, 1fr);
-}
+/* A long value in words stays in the value column, wrapping inside it (D99; 0.15.0, PKG-19); in a narrow
+   container (a side panel under 30rem) it goes under its label, left-aligned, as a sentence is read (0.11.2). */
 .bui-facts-row[data-long] .bui-facts-data {
 	justify-content: flex-start;
+}
+@container bui-facts (max-width: 30rem) {
+	.bui-facts-row[data-long] {
+		grid-template-columns: minmax(0, 1fr);
+	}
 }
 /* A narrow container puts each value under its label (never decided by the window). */
 @container bui-facts (max-width: 16rem) {

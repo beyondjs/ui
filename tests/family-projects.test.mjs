@@ -93,7 +93,7 @@ test('a row without `here.url` stays in the product whose entry is open, inside 
 });
 
 test('productNames: the family\'s display names, the ones the bar draws, frozen, from both entry points', async () => {
-	assert.deepEqual({ ...ui.productNames }, { projects: 'Projects', workspace: 'Workspace', delegate: 'Delegate', cdn: 'CDN', snapshots: 'Snapshots', conduict: 'Conduict', accounts: 'Accounts', desktop: 'Desktop', docs: 'Docs' });
+	assert.deepEqual({ ...ui.productNames }, { projects: 'Projects', packages: 'Packages', workspace: 'Workspace', delegate: 'Delegate', cdn: 'CDN', snapshots: 'Snapshots', conduict: 'Conduict', accounts: 'Accounts', desktop: 'Desktop', docs: 'Docs' });
 	assert.ok(Object.isFrozen(ui.productNames));
 	assert.throws(() => { 'use strict'; ui.productNames.cdn = 'Content'; }, TypeError, 'a consumer cannot rename a product for every other');
 	assert.equal(ui.productNames.cdn, 'CDN');

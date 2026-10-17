@@ -2,6 +2,7 @@ import React from 'react';
 import { Glyph } from '../dom/core/icons.js';
 import { loading } from '../dom/feedback.js';
 import { h } from './hooks.js';
+import { TechnicalDetails } from './operations.js';
 
 const { useCallback, useRef, useState, useEffect } = React;
 
@@ -98,12 +99,13 @@ export function Badge({ label, tone = 'neutral' }) {
 
 const glyphs = { info: 'info', warning: 'alert', danger: 'alert', success: 'check', neutral: 'info' };
 
-export function Callout({ tone = 'info', title, body = null, actions = null, live = false, children }) {
+/** A callout; `details` (0.15.0, D43) adds the closed "Technical details" with the request identifier and the time. */
+export function Callout({ tone = 'info', title, body = null, actions = null, live = false, details = null, children }) {
 	return h(
 		'div',
 		{ className: `bui-callout bui-callout-${tone}`, role: live ? (tone === 'danger' ? 'alert' : 'status') : undefined },
 		h(Mark, { name: glyphs[tone] ?? 'info' }),
-		h('div', { className: 'bui-callout-body' }, h('p', { className: 'bui-callout-title' }, title), body ? h('p', { className: 'bui-callout-text' }, body) : null, children, actions ? h('div', { className: 'bui-callout-actions' }, actions) : null)
+		h('div', { className: 'bui-callout-body' }, h('p', { className: 'bui-callout-title' }, title), body ? h('p', { className: 'bui-callout-text' }, body) : null, children, actions ? h('div', { className: 'bui-callout-actions' }, actions) : null, details ? h(TechnicalDetails, details) : null)
 	);
 }
 

@@ -147,6 +147,7 @@
 	padding: 0;
 }
 .bui-tabs {
+	--bui-nav-surface: var(--color-canvas);
 	background: transparent;
 }
 /* Under a 640 px region the status and the actions follow the title (LR-05, LR-09). */

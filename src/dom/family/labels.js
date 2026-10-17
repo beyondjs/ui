@@ -140,10 +140,12 @@ export const spanish = {
 /**
  * Display names of the family's products, never translated. Public as `productNames` (since 0.4.1),
  * so a product names another one (a notice's product, a link) the way the bar does instead of keeping
- * its own copy; a product passes the bar's `products` option to add or rename one.
+ * its own copy; a product passes the bar's `products` option to add or rename one. Packages is one of
+ * them since 0.15.0 (SNP-16).
  */
 export const names = Object.freeze({
 	projects: 'Projects',
+	packages: 'Packages',
 	workspace: 'Workspace',
 	delegate: 'Delegate',
 	cdn: 'CDN',
