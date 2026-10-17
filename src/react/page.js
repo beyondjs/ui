@@ -29,7 +29,7 @@ const Panel = createContext(null);
  * `thread` template (0.14.0, D94) takes `dock`, React content docked at the window's bottom (the composer),
  * as the DOM `Page`'s; its width is `thread` unless given.
  */
-export function Page({ template = 'detail', width = null, arrival = null, header = null, aside = null, label = null, panel = null, panelRef = null, dock = null, children }) {
+export function Page({ template = 'detail', width = null, arrival = null, header = null, aside = null, label = null, panel = null, panelRef = null, dock = null, lane = 'start', children }) {
 	if (!Region.templates.includes(template)) throw new TypeError(`A page's template is one of ${Region.templates.join(', ')}`);
 	width ??= template === 'thread' ? 'thread' : 'standard';
 	if (dock && template !== 'thread') throw new TypeError("A page's dock belongs to the thread template");
@@ -67,7 +67,7 @@ export function Page({ template = 'detail', width = null, arrival = null, header
 	useSync(instance, current => (current.wide = Boolean(panel?.wide)), [Boolean(panel?.wide)]);
 	const region = h(
 		'div',
-		{ ref: frame, className: 'bui-page', 'data-template': template, 'data-width': width },
+		{ ref: frame, className: 'bui-page', 'data-template': template, 'data-width': width, 'data-lane': template === 'thread' && lane === 'center' ? lane : undefined },
 		h(
 			'div',
 			{ className: 'bui-page-frame' },
@@ -136,11 +136,11 @@ export function PageHeader({ title, crumbs = [], status = null, facts = null, ac
 }
 
 /** A flat section: `title`, one `description` line, its `actions` and its content. */
-export function Section({ title, description = null, actions = null, level = 2, children }) {
+export function Section({ title, description = null, actions = null, level = 2, raised = false, children }) {
 	const id = `bui-section-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 	return h(
 		'section',
-		{ className: 'bui-section', 'aria-labelledby': id },
+		{ className: 'bui-section', 'aria-labelledby': id, 'data-raised': raised ? '' : undefined },
 		h('div', { className: 'bui-section-head' }, h(level === 3 ? 'h3' : 'h2', { id, className: 'bui-section-title' }, title), actions ? h('div', { className: 'bui-section-actions' }, actions) : null),
 		description ? h('p', { className: 'bui-section-description' }, description) : null,
 		h('div', { className: 'bui-section-body' }, children)

@@ -44,6 +44,11 @@ export const primitives = {
 	'navy-400': { value: '#617096', provenance: 'captured', source: '--secondary-light (dark)' },
 	'navy-300': { value: '#8e99bb', provenance: 'captured', source: '--secondary-accent (dark)' },
 	'slate-300': { value: '#99a3b1', provenance: 'captured', source: '--secondary-text-color and the wordmark "JS"' },
+	'mist-100': {
+		value: '#e6e9ef',
+		provenance: 'proposed',
+		reason: 'Text on the dark theme (token set 0.6.0, DQ-10): pure white on navy blooms; an off-white keeps 13:1 or more on every dark surface.'
+	},
 
 	white: { value: '#ffffff', provenance: 'captured', source: '--background' },
 	'gray-50': { value: '#f5f5f5', provenance: 'captured', source: '--surface / --color-gray-5' },
@@ -105,9 +110,15 @@ export const primitives = {
  * drawn on, a diff's added and deleted rows included, in both themes; the words stay readable without
  * them (D42).
  *
- * `family-*` roles belong to the family bar, the one piece of chrome every product shares. It is
- * navy in both themes, which is also where the published wordmark reads best: its gray "JS" is
- * 2.55:1 on white but 6.45:1 on navy.
+ * `family-*` roles belong to the family bar, the one piece of chrome every product shares. Until token
+ * set 0.5.1 it was navy in both themes; since 0.6.0 (decision C2, DQ-23) the light bar sits on the page's
+ * own surface, so the light theme has one surface family, and the dark bar stays the darkest navy.
+ *
+ * Token set 0.6.0 (decision C2): `link` is the text's color in both themes (coral is kept for the
+ * primary action, the selection and focus); `disabled`/`on-disabled` draw a disabled control as a neutral
+ * surface with muted words, never a dimmed coral; `surface-raised` is a card or panel raised inside a
+ * page; `sidebar` and `sidebar-hover` put the sidebar on the page's surface in light; `tooltip` and
+ * `on-tooltip` keep tooltips dark in both themes, now that the light bar is not. Dark text is `mist-100`.
  */
 export const themes = {
 	light: {
@@ -121,16 +132,23 @@ export const themes = {
 		text: 'navy-800',
 		'text-muted': 'gray-600',
 		'text-inverse': 'white',
-		link: 'coral-600',
+		link: 'navy-800',
 		accent: 'coral-500',
 		focus: 'coral-500',
 		action: 'coral-600',
 		'action-hover': 'coral-700',
 		'on-action': 'white',
-		'family-bar': 'navy-800',
-		'family-text': 'white',
-		'family-muted': 'slate-300',
-		'family-marker': 'coral-400',
+		disabled: 'gray-100',
+		'on-disabled': 'gray-600',
+		'surface-raised': 'white',
+		sidebar: 'white',
+		'sidebar-hover': 'gray-50',
+		tooltip: 'navy-800',
+		'on-tooltip': 'white',
+		'family-bar': 'white',
+		'family-text': 'navy-800',
+		'family-muted': 'gray-600',
+		'family-marker': 'coral-600',
 		code: 'navy-750',
 		'on-code': 'gray-50',
 		'code-comment': 'gray-600',
@@ -158,17 +176,24 @@ export const themes = {
 		border: 'navy-700',
 		'border-strong': 'navy-500',
 		'border-control': 'navy-300',
-		text: 'white',
+		text: 'mist-100',
 		'text-muted': 'slate-300',
 		'text-inverse': 'navy-900',
-		link: 'coral-200',
+		link: 'mist-100',
 		accent: 'coral-500',
 		focus: 'coral-200',
 		action: 'coral-400',
 		'action-hover': 'coral-200',
 		'on-action': 'navy-900',
+		disabled: 'navy-750',
+		'on-disabled': 'slate-300',
+		'surface-raised': 'navy-750',
+		sidebar: 'navy-950',
+		'sidebar-hover': 'navy-850',
+		tooltip: 'navy-600',
+		'on-tooltip': 'mist-100',
 		'family-bar': 'navy-950',
-		'family-text': 'white',
+		'family-text': 'mist-100',
 		'family-muted': 'slate-300',
 		'family-marker': 'coral-400',
 		code: 'navy-950',
@@ -208,6 +233,14 @@ export const pairs = [
 	['link', 'surface', 'text'],
 	['on-action', 'action', 'text'],
 	['on-action', 'action-hover', 'text'],
+	['on-disabled', 'disabled', 'text'],
+	['text', 'surface-raised', 'text'],
+	['text-muted', 'surface-raised', 'text'],
+	['text', 'sidebar', 'text'],
+	['text-muted', 'sidebar', 'text'],
+	['text', 'sidebar-hover', 'text'],
+	['on-tooltip', 'tooltip', 'text'],
+	['family-bar', 'family-marker', 'text'],
 	['family-text', 'family-bar', 'text'],
 	['family-muted', 'family-bar', 'text'],
 	['family-marker', 'family-bar', 'graphic'],

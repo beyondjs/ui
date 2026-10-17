@@ -13,7 +13,10 @@ import { tokens, TokenSheet, Contrast } from '@beyond-js/ui/tokens';
  * pending panel maximum to 40rem; 0.4.2 gives the menu elevation a dark value; 0.5.0 adds the exit motion
  * of D95, the thread's lane and rail indent of D96 (which approves the thread tier as the wide lane) and
  * the proposed code colors; 0.5.1 records the panel's widths as approved (D67 as amended by D96, S29),
- * with no line of the sheet changed but its version.
+ * with no line of the sheet changed but its version; 0.6.0 carries decision C2 (2026-10-17): Inter and
+ * the brand face, weight 600, links in the text color, off-white text on dark, the light bar and sidebar
+ * on the page's surface, neutral disabled controls, raised surfaces, tooltips' own roles and the bar's
+ * hover per theme.
  * Imported through the package's own export, as consumers import it.
  */
 const fixture = new URL('./fixtures/branding-tokens-0.1.0.css', import.meta.url);
@@ -24,10 +27,46 @@ const code = {
 	light: ['--color-code-comment: #5f5f5f;', '--color-code-keyword: #0033e8;', '--color-code-string: #2b6a3f;', '--color-code-number: #9e533e;', '--color-code-name: #7a5200;', '--color-code-tag: #b3261e;'],
 	dark: ['--color-code-comment: #99a3b1;', '--color-code-keyword: #9fb5ff;', '--color-code-string: #7fd19b;', '--color-code-number: #ffa385;', '--color-code-name: #f7c700;', '--color-code-tag: #ff8a80;']
 };
+// 0.6.0 (decision C2): the roles every theme adds, light first, then dark (twice)
+const visual = {
+	light: ['--color-link: #121f36;', '--color-disabled: #e4e4e4;', '--color-on-disabled: #5f5f5f;', '--color-surface-raised: #ffffff;', '--color-sidebar: #ffffff;', '--color-sidebar-hover: #f5f5f5;', '--color-tooltip: #121f36;', '--color-on-tooltip: #ffffff;', '--color-family-bar: #ffffff;', '--color-family-text: #121f36;', '--color-family-muted: #5f5f5f;', '--color-family-marker: #9e533e;'],
+	dark: ['--color-text: #e6e9ef;', '--color-link: #e6e9ef;', '--color-disabled: #1d2b3d;', '--color-on-disabled: #99a3b1;', '--color-surface-raised: #1d2b3d;', '--color-sidebar: #0c1525;', '--color-sidebar-hover: #112036;', '--color-tooltip: #313c50;', '--color-on-tooltip: #e6e9ef;', '--color-family-text: #e6e9ef;', '--elevation-raised: 0 1px 2px rgba(0, 0, 0, .45);']
+};
 const changes = {
-	removed: ['/* Beyond family tokens 0.1.0 (proposed). Generated from src/foundations; do not edit. */', '\t--text-label: 0.6875rem;', '\t--tracking-label: 0.08em;', '\t--layout-measure: 68ch;'],
+	removed: [
+		'/* Beyond family tokens 0.1.0 (proposed). Generated from src/foundations; do not edit. */',
+		'\t--text-label: 0.6875rem;',
+		'\t--tracking-label: 0.08em;',
+		'\t--layout-measure: 68ch;',
+		// 0.6.0: Rubik leaves the interface; the light link, bar and its words change; dark text is off-white
+		"\t--font-sans: 'Rubik', system-ui, sans-serif;",
+		'\t--color-link: #9e533e;',
+		'\t--color-family-bar: #121f36;',
+		'\t--color-family-text: #ffffff;',
+		'\t--color-family-text: #ffffff;',
+		'\t--color-family-text: #ffffff;',
+		'\t--color-family-muted: #99a3b1;',
+		'\t--color-family-marker: #e46f4e;',
+		'\t--color-text: #ffffff;',
+		'\t--color-text: #ffffff;',
+		'\t--color-link: #ffa385;',
+		'\t--color-link: #ffa385;',
+		'\t--overlay-lift: rgb(255 255 255 / 0.1);'
+	],
 	added: [
-		'/* Beyond family tokens 0.5.1 (approved). Generated from src/foundations; do not edit. */',
+		'/* Beyond family tokens 0.6.0 (approved). Generated from src/foundations; do not edit. */',
+		// 0.6.0: decision C2
+		"\t--font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;",
+		"\t--font-brand: 'Rubik', system-ui, sans-serif;",
+		'\t--weight-semibold: 600;',
+		'\t--elevation-raised: 0 1px 2px rgba(18, 31, 54, .08), 0 1px 1px rgba(18, 31, 54, .04);',
+		'\t--overlay-lift: rgb(18 31 54 / 0.06);',
+		// The bar's white lift moved from the shared block to the dark theme's two blocks
+		'\t--overlay-lift: rgb(255 255 255 / 0.1);',
+		'\t--overlay-lift: rgb(255 255 255 / 0.1);',
+		...visual.light.map(line => `\t${line}`),
+		...visual.dark.map(line => `\t${line}`),
+		...visual.dark.map(line => `\t${line}`),
 		// 0.5.0: D95's exit motion and D96's lane (approved, S29)
 		'\t--motion-exit: 120ms;',
 		'\t--motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);',
@@ -72,10 +111,12 @@ const without = (lines, listed) => {
 	});
 };
 
-test('the 0.5.1 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
+test('the 0.6.0 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
 	const baseline = readFileSync(fixture, 'utf8').split('\n');
 	const current = `${new TokenSheet(tokens).css}\n`.split('\n');
-	for (const line of changes.removed) assert.ok(baseline.includes(line) && !current.includes(line), `removed: ${line}`);
+	// A line removed as many times as listed (a dark value may stay in the other theme block)
+	const count = (lines, line) => lines.filter(each => each === line).length;
+	for (const line of new Set(changes.removed)) if (!changes.added.includes(line)) assert.ok(count(baseline, line) - count(current, line) >= count(changes.removed, line), `removed: ${line}`);
 	for (const line of changes.added) assert.ok(current.includes(line), `added: ${line}`);
 	assert.deepEqual(without(current, changes.added), without(baseline, changes.removed));
 });
@@ -85,7 +126,13 @@ test('the packed tokens.css is the generated sheet', () => {
 });
 
 test('version, status, approval and provenance of the token set are recorded', () => {
-	assert.equal(tokens.version, '0.5.1');
+	assert.equal(tokens.version, '0.6.0');
+	const visual = tokens.approval.visual;
+	assert.deepEqual([visual.date, visual.decisions, visual.amends], ['2026-10-17', ['C2'], ['D08', 'D09', 'D10', 'D12', 'D52']]);
+	assert.match(visual.by, /delegation/, 'decided under the owner\'s delegation, not the owner\'s approval');
+	for (const theme of ['light', 'dark']) assert.equal(themes[theme].link, themes[theme].text, `links in the text color (${theme})`);
+	assert.equal(themes.light['family-bar'], themes.light.canvas, 'the light bar on the page\'s surface (DQ-23)');
+	assert.equal(themes.light.sidebar, themes.light.canvas, 'and the light sidebar');
 	assert.deepEqual(tokens.pending.tokens, ['color.code-comment', 'color.code-keyword', 'color.code-string', 'color.code-number', 'color.code-name', 'color.code-tag'], 'only the code colors are pending');
 	assert.deepEqual(tokens.pending.decisions, [], 'no family decision is pending');
 	const round = tokens.approval.conversation;
@@ -118,19 +165,22 @@ test('controls have their own boundary role, held to 3:1 in both themes; divider
 
 test('the type scale: weight 400 below body size, a 0.75rem label with at most 0.02em tracking', () => {
 	const { weight, size } = tokens.typography;
-	assert.deepEqual(Object.fromEntries(Object.entries(weight).map(([name, entry]) => [name, entry.value])), { light: 300, regular: 400, medium: 500 });
+	assert.deepEqual(Object.fromEntries(Object.entries(weight).map(([name, entry]) => [name, entry.value])), { light: 300, regular: 400, medium: 500, semibold: 600 });
+	assert.match(tokens.typography.family.sans.value, /^'Inter'/, 'Inter for the interface (C2)');
+	assert.match(tokens.typography.family.brand.value, /^'Rubik'/, 'Rubik for the wordmark');
 	assert.equal(size.label.value, '0.75rem');
 	assert.ok(parseFloat(size.label.tracking) <= 0.02, size.label.tracking);
 	assert.doesNotMatch(size.label.reason, /uppercase/i);
 	for (const entry of [...Object.values(weight), ...Object.values(size)]) assert.ok(entry.source ?? entry.reason, JSON.stringify(entry));
 });
 
-test('elevation: menu, dialog and the two window levels; the window levels change with the theme', () => {
-	assert.deepEqual(Object.keys(tokens.elevation), ['flat', 'menu', 'dialog', 'window', 'window-focus']);
+test('elevation: raised, menu, dialog and the two window levels; raised and the window levels change with the theme', () => {
+	assert.deepEqual(Object.keys(tokens.elevation), ['flat', 'raised', 'menu', 'dialog', 'window', 'window-focus']);
 	const sheet = new TokenSheet(tokens);
 	assert.ok(sheet.shared.includes(`--elevation-window: ${tokens.elevation.window.value};`));
 	assert.ok(sheet.theme('dark').includes(`--elevation-window-focus: ${tokens.elevation['window-focus'].dark};`));
 	assert.ok(sheet.theme('dark').includes(`--elevation-menu: ${tokens.elevation.menu.dark};`), 'a menu lifts off the dark page (0.4.2)');
+	assert.ok(sheet.theme('dark').includes(`--elevation-raised: ${tokens.elevation.raised.dark};`), 'a raised card lifts off the dark page (0.6.0)');
 	assert.ok(!sheet.theme('light').some(line => line.startsWith('--elevation-')));
 });
 

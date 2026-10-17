@@ -38,6 +38,9 @@ const widths = Object.freeze(['fluid', 'standard', 'form', 'reading', 'thread'])
  * one lane (`--layout-lane`) and only code, diffs, tool output and approval cards widen to the thread
  * (`.bui-lane-wide`); a panel kept in view comes next to the lane and takes what is left up to its
  * maximum, the rest falling on the far side.
+ *
+ * Since 0.15.0 (decision C2, amending D52 for this template; DQ-14) `lane: 'center'` centers the thread's
+ * column, its header with it, in the region left beside a panel kept in view (or the whole region).
  */
 export class Page extends Component {
 	static templates = templates;
@@ -64,8 +67,9 @@ export class Page extends Component {
 	 *   the aside as a panel kept in view (0.10.0): beside and sticky from `cut`, a side sheet below it;
 	 *   since 0.11.0 with a head of its own (`head`) and a wide form (`wide`)
 	 * @param {Node|{element: Node}|Array<Node|{element: Node}>|null} [options.dock] what the thread template docks at the window's bottom, such as its composer (0.14.0)
+	 * @param {'start'|'center'} [options.lane] where the thread template's column sits (0.15.0)
 	 */
-	constructor({ template = 'detail', width = null, arrival = null, header = null, children = [], aside = null, label = null, panel = null, dock = null } = {}) {
+	constructor({ template = 'detail', width = null, arrival = null, header = null, children = [], aside = null, label = null, panel = null, dock = null, lane = 'start' } = {}) {
 		super();
 		if (!templates.includes(template)) throw new TypeError(`A page's template is one of ${templates.join(', ')}`);
 		width ??= template === 'thread' ? 'thread' : 'standard';
@@ -76,7 +80,7 @@ export class Page extends Component {
 		this.#body = el('div', { class: 'bui-page-body' }, [this.#main]);
 		// A header's compact line (0.11.0) goes right before it in the frame, so it stays in view as the page scrolls
 		this.#frame = el('div', { class: 'bui-page-frame' }, [Page.#node(arrival), header?.bar ?? null, Page.#node(header), this.#body]);
-		this.#element = el('div', { class: 'bui-page', dataset: { template, width } }, [this.#frame]);
+		this.#element = el('div', { class: 'bui-page', dataset: template === 'thread' && lane === 'center' ? { template, width, lane } : { template, width } }, [this.#frame]);
 		if (panel) this.#panel = new PagePanel({ ...panel, page: this.#element, body: this.#body, label });
 		if (template === 'thread') this.#dock = new PageDock();
 		this.main = children;

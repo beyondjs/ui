@@ -152,6 +152,7 @@
 }
 .bui-lockup-name {
 	padding-left: var(--space-2);
+	font-family: var(--font-brand);
 	border-left: 1px solid color-mix(in srgb, currentColor 45%, transparent);
 	font-size: calc(var(--bui-lockup-height, 21px) * 0.714);
 	font-weight: var(--weight-medium);

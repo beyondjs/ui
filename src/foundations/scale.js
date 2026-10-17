@@ -10,9 +10,14 @@
 export const typography = {
 	family: {
 		sans: {
+			value: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+			provenance: 'family',
+			reason: 'The interface face since token set 0.6.0 (decision C2, DQ-10): Inter at 400, 500 and 600, shipped by fonts.css; Rubik read as consumer and light where a precise tool needs to be crisp.'
+		},
+		brand: {
 			value: "'Rubik', system-ui, sans-serif",
 			provenance: 'captured',
-			source: '--font-family ("Rubik", sans-serif); system-ui fallback proposed'
+			source: '--font-family ("Rubik", sans-serif): the wordmark\'s face, kept for the lockup\'s product name (decision C2)'
 		},
 		mono: {
 			value: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
@@ -21,13 +26,14 @@ export const typography = {
 		}
 	},
 	weight: {
-		light: { value: 300, provenance: 'captured', source: 'Rubik 300, the body weight; only at body size and larger' },
+		light: { value: 300, provenance: 'captured', source: 'Rubik 300, the body weight of token sets up to 0.5.1; no component uses it, and Inter ships no 300 (body text is regular since 0.6.0)' },
 		regular: {
 			value: 400,
 			provenance: 'proposed',
 			reason: 'Text below body size (small, tables, reasons, hints): Rubik 300 thins out at 13 px and less (D09).'
 		},
-		medium: { value: 500, provenance: 'captured', source: 'Rubik 500, the heading weight; labels, buttons and names' }
+		medium: { value: 500, provenance: 'captured', source: 'Rubik 500, the heading weight; labels, buttons and names' },
+		semibold: { value: 600, provenance: 'family', reason: 'Headings and emphasis in Inter (decision C2, token set 0.6.0): weight tells a heading from body text, not only size.' }
 	},
 	// Product interfaces use a tighter scale than the marketing site (h1 2.7rem there).
 	size: {
@@ -72,10 +78,18 @@ export const radius = {
 // The capture defines shadows but uses none: surfaces are flat and separated by 1px borders (D10).
 // Only what overlaps other content casts a shadow: `menu` (menus, popovers, tooltips, toasts,
 // drawers), `dialog`, and `window` / `window-focus` (Desktop windows at rest and focused). Inset or
-// ring shadows that mark a state or draw focus are marks, not elevation. Surfaces inside the page
-// (cards, panels, tables, sections) are flat. An entry with `dark` takes that value in the dark theme.
+// ring shadows that mark a state or draw focus are marks, not elevation. Since token set 0.6.0
+// (decision C2, amending D10) a card or panel may be raised inside a page (`raised`), so an inspector, a
+// checklist or an approval card reads as an object; sections stay flat. An entry with `dark` takes that
+// value in the dark theme.
 export const elevation = {
 	flat: { value: 'none', provenance: 'captured', source: 'Flat, border-defined surfaces' },
+	raised: {
+		value: '0 1px 2px rgba(18, 31, 54, .08), 0 1px 1px rgba(18, 31, 54, .04)',
+		dark: '0 1px 2px rgba(0, 0, 0, .45)',
+		provenance: 'family',
+		reason: 'A card or panel raised inside a page (decision C2, token set 0.6.0): a hairline of shadow under its border, so it reads as an object without floating.'
+	},
 	menu: {
 		value: '0 8px 16px 0 rgba(0, 0, 0, .08), 0 4px 8px 0 rgba(0, 0, 0, .06)',
 		dark: '0 12px 28px -6px rgba(0, 0, 0, .5), 0 4px 10px 0 rgba(0, 0, 0, .32)',
@@ -104,7 +118,7 @@ export const elevation = {
 // Translucent layers over any surface; they are not colors of their own.
 export const overlay = {
 	scrim: { value: 'rgb(0 0 0 / 0.4)', provenance: 'proposed', reason: 'Backdrop behind a modal dialog.' },
-	lift: { value: 'rgb(255 255 255 / 0.1)', provenance: 'proposed', reason: 'Hover on the navy family bar.' }
+	lift: { value: 'rgb(18 31 54 / 0.06)', dark: 'rgb(255 255 255 / 0.1)', provenance: 'proposed', reason: 'Hover on the family bar: a navy tint on the light bar (token set 0.6.0), white on the dark one.' }
 };
 
 export const motion = {

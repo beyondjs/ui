@@ -4,9 +4,10 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 /**
- * The shipped typeface (D09): `@beyond-js/ui/fonts.css` declares Rubik 300, 400 and 500 in the latin
- * and latin-ext subsets, each face's woff2 resolves through the package's own `exports` as
- * `@beyond-js/ui/fonts/<file>`, and the licence travels with them. `styles.css` never loads a font.
+ * The shipped typefaces (D09; decision C2 since 0.15.0): `@beyond-js/ui/fonts.css` declares Inter 400,
+ * 500 and 600 for the interface and Rubik 300, 400 and 500 for the wordmark, in the latin and latin-ext
+ * subsets; each face's woff2 resolves through the package's own `exports` as `@beyond-js/ui/fonts/<file>`,
+ * and both licences travel with them. `styles.css` never loads a font.
  */
 const sheet = import.meta.resolve('@beyond-js/ui/fonts.css');
 const text = readFileSync(fileURLToPath(sheet), 'utf8');
@@ -18,12 +19,13 @@ const faces = [...text.matchAll(/@font-face\s*\{([^}]*)\}/g)].map(([, body]) => 
 	range: /unicode-range:\s*([^;]+);/.exec(body)?.[1]
 }));
 
-test('six faces: Rubik 300, 400 and 500, each in latin and latin-ext, swapped while loading', () => {
-	assert.equal(faces.length, 6);
-	const keys = faces.map(face => `${face.weight} ${/latin-ext/.test(face.url) ? 'latin-ext' : 'latin'}`).sort();
-	assert.deepEqual(keys, ['300 latin', '300 latin-ext', '400 latin', '400 latin-ext', '500 latin', '500 latin-ext']);
+test('twelve faces: Inter 400, 500 and 600 and Rubik 300, 400 and 500, each in latin and latin-ext, swapped while loading', () => {
+	assert.equal(faces.length, 12);
+	const keys = family => faces.filter(face => face.family === family).map(face => `${face.weight} ${/latin-ext/.test(face.url) ? 'latin-ext' : 'latin'}`).sort();
+	assert.deepEqual(keys('Inter'), ['400 latin', '400 latin-ext', '500 latin', '500 latin-ext', '600 latin', '600 latin-ext']);
+	assert.deepEqual(keys('Rubik'), ['300 latin', '300 latin-ext', '400 latin', '400 latin-ext', '500 latin', '500 latin-ext']);
 	for (const face of faces) {
-		assert.equal(face.family, 'Rubik');
+		assert.ok(['Inter', 'Rubik'].includes(face.family));
 		assert.equal(face.display, 'swap');
 		assert.match(face.range, /^U\+/, face.url);
 	}
@@ -41,8 +43,9 @@ test('every face resolves through the package exports to a woff2 file beside the
 	}
 });
 
-test('the OFL licence ships with the fonts, and the package publishes the directory', () => {
+test('the OFL licences ship with the fonts, and the package publishes the directory', () => {
 	assert.match(readFileSync(fileURLToPath(import.meta.resolve('@beyond-js/ui/fonts/OFL.txt')), 'utf8'), /SIL Open Font License, Version 1\.1/);
+	assert.match(readFileSync(fileURLToPath(import.meta.resolve('@beyond-js/ui/fonts/OFL-Inter.txt')), 'utf8'), /Inter Project Authors[\s\S]*SIL Open Font License, Version 1\.1/);
 	const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 	assert.ok(manifest.files.includes('fonts/'));
 });

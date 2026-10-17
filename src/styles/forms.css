@@ -166,8 +166,8 @@
 	max-width: min(18rem, calc(100vw - 16px));
 	padding: var(--space-1) var(--space-2);
 	border-radius: var(--radius-control);
-	background: var(--color-family-bar);
-	color: var(--color-family-text);
+	background: var(--color-tooltip);
+	color: var(--color-on-tooltip);
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
 	line-height: var(--leading-small);

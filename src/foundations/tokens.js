@@ -28,12 +28,17 @@ import { typography, space, radius, elevation, overlay, motion, density, layout,
  * (P3), a proposal. Token set 0.5.1 (2026-10-10) records the panel's widths as approved with the
  * conversation round: the owner approved D67 as amended by D96 in S29, whose rule makes the panel grow to
  * `aside-max` and its wide form start at `aside-wide`; values unchanged, and only the code colors stay
- * pending. Each entry's own `provenance` still says whether its value
+ * pending. Token set 0.6.0 (2026-10-17) carries decision C2 (`approval.visual`, decided under the owner's
+ * delegation, amending D08, D09, D10, D12 and D52): links in the text's color with coral kept for the
+ * primary action, the selection and focus; Inter for the interface at 400, 500 and 600 with Rubik kept for
+ * the wordmark (`font-brand`); raised surfaces inside a page; neutral disabled controls; one surface
+ * family in the light theme (the bar and the sidebar on the page's surface); off-white text on dark.
+ * Each entry's own `provenance` still says whether its value
  * was captured or introduced by the family reference. `version` identifies the token set; a product
  * review cites it together with the package version.
  */
 export const tokens = {
-	version: '0.5.1',
+	version: '0.6.0',
 	status: 'approved',
 	source: 'Verified capture of the public Beyond site, 2026-09-18, with the family reference\'s additions',
 	approval: {
@@ -54,6 +59,14 @@ export const tokens = {
 			contract: 'S29',
 			tokens: ['motion.exit', 'motion.ease-exit', 'layout.thread', 'layout.indent', 'layout.lane', 'layout.aside-max', 'layout.aside-wide'],
 			note: 'The conversation round (settled contract S29, D94 to D102): motion follows the person\'s action, with an exit a little faster than the entry (D95), and one edge, one lane in a thread, with code, diffs, tool output and approval cards in the wide lane (D96, amending D67\'s thread tier), and the widths a page\'s panel kept in view grows to (D67 as amended by D96, approved in S29; recorded in token set 0.5.1). The reading measure stays 54ch. Values are engineering defaults to be measured. Token set 0.5.0; 0.5.1 adds the panel\'s widths.'
+		},
+		visual: {
+			date: '2026-10-17',
+			by: 'agent under the owner\'s delegation of 2026-10-17',
+			decisions: ['C2'],
+			amends: ['D08', 'D09', 'D10', 'D12', 'D52'],
+			tokens: ['color.link', 'color.text', 'color.disabled', 'color.on-disabled', 'color.surface-raised', 'color.sidebar', 'color.sidebar-hover', 'color.tooltip', 'color.on-tooltip', 'color.family-bar', 'color.family-text', 'color.family-muted', 'color.family-marker', 'typography.family.sans', 'typography.family.brand', 'typography.weight.semibold', 'elevation.raised', 'overlay.lift'],
+			note: 'The family audit\'s visual rules (decision C2 of 2026-10-17, decided under the owner\'s delegation; the owner may override it): coral only for the primary action, the selection and focus, links in the text color and underlined on hover; Inter for the interface at 400/500/600 and Rubik for the wordmark; a monospace for identifiers; raised surfaces inside pages; status told apart by shape; neutral disabled controls; one surface family in the light theme. Values are engineering defaults to be measured. Token set 0.6.0.'
 		}
 	},
 	pending: {

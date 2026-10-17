@@ -1,0 +1,45 @@
+/* Links, identifiers and raised surfaces (token set 0.6.0, decision C2). Late in the cascade, so a
+   component's own decoration shorthand does not undo them.
+
+   Links take the text's color (`--color-link` is the text's since 0.6.0): coral is kept for the primary
+   action, the selection and focus. A standalone link (a crumb, a way back, a list's object, a row's
+   name) is underlined on hover; a link inside a sentence, and a link-styled button, keeps a quiet
+   underline at rest so it is told from its sentence without color (WCAG 1.4.1), full on hover. */
+:is(.bui-crumbs a, .bui-arrival-back, .bui-listdetail-link, .bui-sidebar-more, .bui-row-link, .bui-navmenu-action) {
+	text-decoration: none;
+}
+:is(.bui-crumbs a, .bui-arrival-back, .bui-listdetail-link, .bui-sidebar-more, .bui-row-link, .bui-navmenu-action):hover {
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+:is(.bui-link-button, .bui-composer-status a, .bui-navmenu-notice a, .bui-reading a, .bui-callout-text a, .bui-unavailable-reason a) {
+	text-decoration-line: underline;
+	text-decoration-color: var(--color-border-strong);
+	text-underline-offset: 2px;
+}
+:is(.bui-link-button, .bui-composer-status a, .bui-navmenu-notice a, .bui-reading a, .bui-callout-text a, .bui-unavailable-reason a):hover {
+	text-decoration-color: currentColor;
+}
+
+/* Identifiers, paths, hashes and versions in the monospace face, a little smaller to sit on the line. */
+.bui-mono,
+[data-mono] {
+	font-family: var(--font-mono);
+	font-size: 0.95em;
+	font-variant-ligatures: none;
+}
+
+/* A card or panel raised inside a page (amends D10): its own surface, a border and a hairline shadow.
+   Sections stay flat; `Section` takes `raised` for a panel that is an object of its own. */
+.bui-raised,
+.bui-section[data-raised] {
+	padding: var(--space-4);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-base);
+	background: var(--color-surface-raised);
+	box-shadow: var(--elevation-raised);
+}
+.bui-command,
+.bui-checklist {
+	box-shadow: var(--elevation-raised);
+}

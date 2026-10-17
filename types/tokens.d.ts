@@ -9,21 +9,24 @@ export interface Tokens {
 	status: 'proposed' | 'approved';
 	source: string;
 	attribute: 'data-beyond-mode';
-	approval?: { date: string; by: string; decisions: string[]; note: string };
+	approval?: { date: string; by: string; decisions: string[]; note: string; layout?: object; conversation?: object; /** Decision C2 (token set 0.6.0) */ visual?: { date: string; by: string; decisions: string[]; amends: string[]; tokens: string[]; note: string } };
 	/** Entries shipped as proposals, not approved family rules (since token set 0.5.1 only the code colors of Conduict's audit, P3). */
 	pending?: { date: string; decisions: string[]; tokens: string[]; note: string };
 	provenance: { origin: string; revision: string; moved: string; note: string };
 	color: { primitives: Record<string, Primitive>; themes: { light: Record<string, string>; dark: Record<string, string> }; pairs: Pair[] };
 	typography: {
-		family: Record<'sans' | 'mono', { value: string; provenance: string }>;
-		weight: Record<'light' | 'regular' | 'medium', { value: number; provenance: string }>;
+		/** `brand` (0.6.0): Rubik, the wordmark's face; `sans` is Inter since 0.6.0 */
+		family: Record<'sans' | 'mono' | 'brand', { value: string; provenance: string }>;
+		/** `semibold` (600) since token set 0.6.0 */
+		weight: Record<'light' | 'regular' | 'medium' | 'semibold', { value: number; provenance: string }>;
 		size: Record<string, { value: string; line: number; tracking?: string; provenance: string }>;
 	};
 	space: { provenance: string; reason: string; steps: Record<string, string> };
 	radius: Record<string, { value: string; provenance: string }>;
 	/** `dark`, when present, is the value in the dark theme (the window levels). */
 	elevation: Record<string, { value: string; dark?: string; provenance: string }>;
-	overlay: Record<string, { value: string; provenance: string }>;
+	/** `dark`, when present, is the value in the dark theme (the bar's lift since 0.6.0). */
+	overlay: Record<string, { value: string; dark?: string; provenance: string }>;
 	motion: Record<string, { value: string; provenance: string }>;
 	density: Record<string, { control: string; row: string; provenance: string }>;
 	layout: Record<string, { value: string; provenance: string }>;

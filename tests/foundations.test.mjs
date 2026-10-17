@@ -19,6 +19,19 @@ test('no capitals by style: nothing is transformed to upper case (D20)', () => {
 	}
 });
 
+test('the interface face is Inter at 400, 500 and 600; Rubik draws only the lockup\'s name (C2)', () => {
+	assert.ok(find('.bui-lockup-name').some(rule => /font-family:\s*var\(--font-brand\)/.test(rule.body)));
+	assert.doesNotMatch(sheet, /font-family:\s*['"]?Rubik/);
+	assert.ok(find('.bui-page-heading').some(rule => /font-weight:\s*var\(--weight-semibold\)/.test(rule.body)), 'a heading told apart by weight');
+	assert.ok(find('.bui-mono').some(rule => /font-family:\s*var\(--font-mono\)/.test(rule.body)), 'identifiers in mono');
+});
+
+test('coral is kept for the primary action, the selection and focus (C2): links in the text color, a neutral disabled primary', () => {
+	assert.ok(find('.bui-button-primary:disabled').some(rule => /var\(--color-disabled\)/.test(rule.body) && /var\(--color-on-disabled\)/.test(rule.body)));
+	assert.ok(find('.bui-family-avatar').some(rule => !/--color-family-marker/.test(rule.body)), 'a person is not an action');
+	assert.ok(find('.bui-sidebar-item[aria-current=\'page\']').some(rule => /--color-surface-selected/.test(rule.body)), 'the selection');
+});
+
 test('text below body size never uses Rubik 300 (D09)', () => {
 	const small = rules.filter(rule => /font-size:\s*var\(--text-(small|label)\)/.test(rule.body));
 	assert.ok(small.length > 20, `${small.length} rules`);
@@ -41,11 +54,15 @@ test('controls take border-control; dividers and tags keep border-strong (D08)',
 	assert.ok(find('.bui-badge').some(rule => /--color-border-strong/.test(rule.body)));
 });
 
-test('elevation only on what overlaps the page: menus, panels, tooltips, toasts, dialogs, side sheets, the sidebar drawer and a composer’s taller editor (D10)', () => {
+test('elevation only on what overlaps the page, and since 0.15.0 the raised surfaces inside it (D10 as amended by C2)', () => {
 	const overlapping = /\.bui-(menu|disclosure-panel|disclosure-leaving|tooltip|toast|dialog|drawer-panel|sheet|composer-editor)\b/;
+	const inside = /^(\.bui-raised|\.bui-section\[data-raised\]|\.bui-command|\.bui-checklist)(, |$)/;
 	const raised = rules.filter(rule => /box-shadow:\s*var\(--elevation-/.test(rule.body));
 	assert.ok(raised.length >= 4, `${raised.length} rules`);
-	for (const rule of raised) assert.match(rule.selector, overlapping, rule.selector);
+	for (const rule of raised) {
+		if (/--elevation-raised/.test(rule.body)) assert.match(rule.selector, inside, `only a raised in-page surface: ${rule.selector}`);
+		else assert.match(rule.selector, overlapping, rule.selector);
+	}
 	// Every other shadow is a mark (inset) or none.
 	for (const rule of rules.filter(rule => /box-shadow:/.test(rule.body) && !/box-shadow:\s*var\(--elevation-/.test(rule.body))) {
 		assert.match(rule.body, /box-shadow:\s*(none|inset\b)/, rule.selector);

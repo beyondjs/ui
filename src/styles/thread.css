@@ -38,6 +38,22 @@
 	padding-inline-end: max(var(--layout-gutter), calc(100% - var(--layout-gutter) - var(--layout-thread)));
 }
 
+/* A centred thread (0.15.0, decision C2 amending D52 for this template; DQ-14): the thread's column and its
+   header sit in the middle of the region, or of what a panel kept in view leaves of it. */
+.bui-page[data-lane='center'] .bui-page-frame > .bui-page-header {
+	width: 100%;
+	margin-inline: auto;
+}
+.bui-page[data-lane='center'] .bui-page-frame > .bui-page-body:not(:has(> .bui-page-panel:not([hidden]))) {
+	width: 100%;
+	margin-inline: auto;
+}
+.bui-page[data-lane='center'] .bui-page-body:has(> .bui-page-panel:not([hidden])) > .bui-page-main {
+	width: 100%;
+	max-width: var(--layout-thread);
+	margin-inline: auto;
+}
+
 /* The dock: at the column's end, sticky at the window's bottom, over the canvas so what passes beneath is
    hidden; a hairline above it only while content passes beneath (`data-stuck`, from its end mark). */
 .bui-page-dock {

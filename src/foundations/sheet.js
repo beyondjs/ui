@@ -38,12 +38,13 @@ export class TokenSheet {
 		return lines;
 	}
 
-	/** Custom properties of one theme: colors resolved to hex values, then the elevations the theme changes. */
+	/** Custom properties of one theme: colors resolved to hex values, then the elevations and overlays the theme changes. */
 	theme(name) {
 		const { primitives, themes } = this.#tokens.color;
 		const colors = Object.entries(themes[name]).map(([role, primitive]) => `--color-${role}: ${primitives[primitive].value};`);
 		const shadows = Object.entries(this.#tokens.elevation).filter(([, entry]) => entry[name]).map(([level, entry]) => `--elevation-${level}: ${entry[name]};`);
-		return [...colors, ...shadows];
+		const overlays = Object.entries(this.#tokens.overlay ?? {}).filter(([, entry]) => entry[name]).map(([layer, entry]) => `--overlay-${layer}: ${entry[name]};`);
+		return [...colors, ...shadows, ...overlays];
 	}
 
 	/** The complete stylesheet text. */

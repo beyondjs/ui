@@ -249,8 +249,10 @@
 	height: 28px;
 	overflow: hidden;
 	border-radius: var(--radius-round);
-	background: var(--color-family-marker);
-	color: var(--color-family-bar);
+	/* A person, not an action: a neutral disc (token set 0.6.0, C2 keeps coral for action and selection) */
+	background: var(--color-surface-sunken);
+	box-shadow: inset 0 0 0 1px var(--color-border-strong);
+	color: var(--color-text);
 	font-size: var(--text-label);
 	font-weight: var(--weight-medium);
 	letter-spacing: 0.02em;

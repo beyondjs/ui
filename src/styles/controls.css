@@ -57,6 +57,15 @@
 	opacity: 0.6;
 	cursor: not-allowed;
 }
+/* A disabled primary is a neutral surface with muted words, never a dimmed coral (token set 0.6.0, C2,
+   DQ-17); a busy one keeps its color, since it is working, not refused. */
+.bui-button-primary:disabled,
+.bui-button-primary[aria-disabled='true']:not([data-busy]) {
+	border-color: transparent;
+	background: var(--color-disabled);
+	color: var(--color-on-disabled);
+	opacity: 1;
+}
 .bui-button[data-busy] {
 	cursor: progress;
 }

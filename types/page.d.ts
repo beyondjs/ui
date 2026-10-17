@@ -27,6 +27,8 @@ export interface PageOptions {
 	panel?: PagePanelOptions | null;
 	/** What the thread template docks at the window's bottom, such as its composer (0.14.0, D94); other templates throw. */
 	dock?: Part | Part[];
+	/** Where the thread template's column sits (0.15.0, C2 amending D52): `center` centers it. */
+	lane?: 'start' | 'center';
 }
 
 /** A thread page's dock (0.14.0, D94): sticky at the window's bottom with one gutter and the safe area under it. */
@@ -171,7 +173,7 @@ export class Tabs extends Component {
 
 /** A flat section: a heading, one description line, its actions and its content. */
 export class Section extends Component {
-	constructor(options: { title: string | Node; description?: string | Node | null; actions?: Array<Node | { element: Node } | null>; children?: Node[]; level?: 2 | 3 });
+	constructor(options: { title: string | Node; description?: string | Node | null; actions?: Array<Node | { element: Node } | null>; children?: Node[]; level?: 2 | 3; /** A raised surface inside the page (0.15.0, C2) */ raised?: boolean });
 	children: Node[];
 }
 
