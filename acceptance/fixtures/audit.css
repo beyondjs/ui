@@ -8,6 +8,8 @@ body {
 }
 .audit-page {
 	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	min-width: 0;
 	gap: var(--space-6);
 	padding: var(--space-4);
 	padding-bottom: 120vh;

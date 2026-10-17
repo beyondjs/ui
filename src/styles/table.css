@@ -90,10 +90,12 @@
 	}
 	.bui-data th[scope='row'] {
 		flex-basis: 100%;
+		height: auto;
 		padding: 0;
 		border: 0;
 	}
 	.bui-data td {
+		height: auto;
 		padding: 0;
 		border: 0;
 		color: var(--color-text-muted);

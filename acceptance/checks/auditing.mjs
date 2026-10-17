@@ -112,7 +112,8 @@ export const checks = [
 				expect(!label || label.height <= label.line * 1.5, `${scheme}: the label keeps one line beside a long count: ${JSON.stringify(label)}`);
 				await context.close();
 				({ page, context } = await open(browser, consumer, { width: 390, height: 844, scheme }));
-				expect(!(await overflow(page)), `${scheme} 390 px: no sideways scroll`);
+				const wide = await page.evaluate(() => [...document.querySelectorAll('body *')].filter(node => node.getBoundingClientRect().right > innerWidth + 1 && !node.closest('[data-bui-floating], .bui-sidebar dialog')).slice(0, 6).map(node => `${node.tagName.toLowerCase()}.${node.className}:${Math.round(node.getBoundingClientRect().right)}`));
+				expect(!(await overflow(page)), `${scheme} 390 px: no sideways scroll: ${wide.join(', ')}`);
 				const rows = await page.evaluate(() => ({ list: Math.max(...[...document.querySelectorAll('#rows .bui-row')].map(row => row.getBoundingClientRect().height)), table: Math.max(...[...document.querySelectorAll('.bui-data tbody tr')].map(row => row.getBoundingClientRect().height)), more: document.querySelector('.bui-tabs')?.dataset.more ?? '' }));
 				expect(rows.list <= 96, `${scheme} 390 px: a ListRow stays short, never a card of labels: ${rows.list}`);
 				expect(rows.table <= 80, `${scheme} 390 px: a DataTable row is two short lines: ${rows.table}`);
