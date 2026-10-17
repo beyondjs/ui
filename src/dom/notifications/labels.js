@@ -29,6 +29,8 @@ export const defaults = {
 	product: 'Product',
 	products: 'All products',
 	updates: ({ count }) => (count === 1 ? '1 update' : `${count} updates`),
+	many: '{count}+ updates',
+	resolved: 'Resolved on {date}',
 	hide: 'Hide earlier updates',
 	today: 'Today',
 	earlier: 'Earlier'
@@ -65,6 +67,8 @@ export const spanish = {
 	product: 'Producto',
 	products: 'Todos los productos',
 	updates: ({ count }) => (count === 1 ? '1 novedad' : `${count} novedades`),
+	many: 'Más de {count} novedades',
+	resolved: 'Resuelto el {date}',
 	hide: 'Ocultar las novedades anteriores',
 	today: 'Hoy',
 	earlier: 'Anteriores'

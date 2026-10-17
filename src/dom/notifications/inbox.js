@@ -103,7 +103,7 @@ export class NotificationInbox extends Component {
 	async load() {
 		this.#stamp = new Date().toISOString();
 		// A page of matters (0.15.0, X-07): one noisy matter never hides the others
-		const pending = this.#feed.load({ ...this.#request(), by: 'group', limit: this.#options.limit ?? 20 });
+		const pending = this.#feed.load({ ...this.#request(), by: 'matter', limit: this.#options.limit ?? 20 });
 		this.#draw();
 		if (await pending) this.#draw();
 	}

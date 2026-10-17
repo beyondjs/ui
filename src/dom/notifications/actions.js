@@ -6,10 +6,11 @@
  * revoked or the resource is gone — is removed with a plain message instead of opening. Marking is
  * idempotent and never a business action. Every outcome ends in `changed`, which redraws.
  *
- * Since 0.15.0 (X-07) a whole matter is read at once when the adapter has `readGroup(group, { product })`
- * (Beyond Projects' `POST /v1/notifications/read` with `{ group, product }`): opening a matter, or marking
- * it read, reads every update of it, also those no page has loaded. Without it, or when it fails, the
- * loaded updates are marked one by one as before.
+ * Since 0.15.0 (X-07) a matter is a product's `group` (an item without a group is a matter of its own), and
+ * a whole matter is read or made unread at once when the adapter has `readGroup({ product, group })` and
+ * `unreadGroup({ product, group })` (Beyond Projects' `POST /v1/notifications/read` and `/unread` with the
+ * body `{ product, group }`): opening a matter, or marking it, reaches every update of it, also those no
+ * page has loaded. Without them, or when they fail, the loaded updates are marked by their ids as before.
  */
 export class Actions {
 	#adapter;
@@ -61,37 +62,48 @@ export class Actions {
 		const ids = items.map(item => item.id);
 		try {
 			if (read) await this.#read(items, items);
-			else await this.#adapter.unread(ids);
+			else await this.#whole('unreadGroup', items, () => this.#adapter.unread(ids));
 		} catch {
 			this.#say('update');
 			return;
 		}
 		const now = new Date().toISOString();
-		for (const item of items) this.#feed.update(item.id, read ? { read: now, ...Actions.#settled(item) } : { read: null });
+		for (const item of items) this.#feed.update(item.id, read ? { read: now, ...Actions.#settled(item) } : { read: null, ...Actions.#reopened(item) });
 		this.#changed();
 	}
 
+	/** Reads a matter: the whole of it through `readGroup`, else the unread `ids` one by one. */
+	#read(items, unread) {
+		const ids = unread.map(item => item.id);
+		return this.#whole('readGroup', items, () => (ids.length ? this.#adapter.read(ids) : undefined));
+	}
+
 	/**
-	 * Reads a matter: the whole of it through `readGroup` when the adapter has it and the items share one
-	 * group, else `ids` one by one; a failed `readGroup` falls back to the ids.
+	 * Calls the adapter's `kind` (`readGroup` or `unreadGroup`) with the matter `{ product, group }` when it
+	 * has it and the items are one matter with a group; otherwise, or when it fails (a relay or a Projects
+	 * that does not answer by matter yet), `fallback`.
 	 */
-	async #read(items, unread) {
+	async #whole(kind, items, fallback) {
 		const [first] = items;
 		const group = first?.group;
-		if (group && typeof this.#adapter.readGroup === 'function' && items.every(item => item.group === group && item.product === first.product)) {
+		if (group && typeof this.#adapter[kind] === 'function' && items.every(item => item.group === group && item.product === first.product)) {
 			try {
-				return await this.#adapter.readGroup(group, { product: first.product });
+				return await this.#adapter[kind]({ product: first.product, group });
 			} catch {
-				// The relay or Projects does not read by matter yet: the loaded updates instead
+				// Not answered by matter: the loaded updates instead
 			}
 		}
-		const ids = unread.map(item => item.id);
-		if (ids.length) await this.#adapter.read(ids);
+		return fallback();
 	}
 
 	/** A matter read whole has no unread update left. */
 	static #settled(item) {
-		return item.matter ? { matter: { ...item.matter, unread: 0 } } : {};
+		return item.updates ? { updates: { ...item.updates, unread: 0 } } : {};
+	}
+
+	/** A matter made unread counts its updates unread again. */
+	static #reopened(item) {
+		return item.updates ? { updates: { ...item.updates, unread: item.updates.count ?? 1 } } : {};
 	}
 
 	/** Whether an adapter failure means the item is not (or no longer) visible to this person. */

@@ -12,8 +12,9 @@ import { Reach } from './reach.js';
  * Only the latest request publishes. Nothing is kept once `clear()` runs, so no private text
  * outlives the view that showed it.
  *
- * Since 0.15.0 (X-07) a request with `by: 'group'` asks for a page of matters: `limit` counts matters.
- * A relay that answers `grouped: true` did so; one that ignores it answers items, and the feed then reads
+ * Since 0.15.0 (X-07) a request with `by: 'matter'` asks for a page of matters (Beyond Projects'
+ * `GET /v1/notifications?by=matter`): `limit` counts matters, and each item is a matter's newest update with
+ * `updates: { count, unread, more? }`. A relay that ignores it answers items, and the feed then reads
  * further pages (at most `Feed.pages` per request) until it holds `limit` matters or the end, so one
  * noisy matter never hides the others.
  */
@@ -77,6 +78,11 @@ export class Feed {
 		return this.#request ? this.#run(this.#request, this.#request.cursor !== null) : Promise.resolve();
 	}
 
+	/** Whether a relay answered by matter: it says so, or its items carry their matter's `updates`. */
+	static #grouped(answer) {
+		return answer?.grouped === true || answer?.by === 'matter' || (answer?.items ?? []).some(item => item?.updates && typeof item.updates === 'object');
+	}
+
 	/** How many matters `items` hold: those that share a product's `group` count once. */
 	static matters(items) {
 		return new Set(items.map(item => (item.group ? `${item.product ?? ''}\u0000${item.group}` : `\u0001${item.id}`))).size;
@@ -117,7 +123,7 @@ export class Feed {
 			}
 			let items = append ? [...this.#items, ...(answer?.items ?? [])] : [...(answer?.items ?? [])];
 			// A relay that does not group: more pages until `limit` matters, within a bound
-			for (let read = 1; request.by === 'group' && answer?.grouped !== true && answer?.next && read < Feed.pages && Feed.matters(items) - before < request.limit; read += 1) {
+			for (let read = 1; request.by === 'matter' && !Feed.#grouped(answer) && answer?.next && read < Feed.pages && Feed.matters(items) - before < request.limit; read += 1) {
 				answer = await this.#adapter.list({ ...request, cursor: answer.next });
 				if (sequence !== this.#sequence) return false;
 				if (answer?.available === false) break;

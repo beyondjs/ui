@@ -113,10 +113,11 @@ export class NoticeList {
 	#entry(group) {
 		const [latest, ...earlier] = group;
 		const node = this.#item(latest, group);
-		// A matter says all its updates (0.15.0: Beyond Projects' `matter.updates`), loaded or not
-		const count = Math.max(group.length, Number(latest.matter?.updates) || 0);
+		// A matter says all its updates (0.15.0: Beyond Projects' `updates.count`, "100+" past what it counted), loaded or not
+		const count = Math.max(group.length, Number(latest.updates?.count) || 0);
 		if (!earlier.length) {
-			if (count > 1) node.querySelector('.bui-notice-text').append(el('span', { class: 'bui-notice-count', text: this.#labels.text('updates', { count }) }));
+			const words = latest.updates?.more ? this.#labels.text('many', { count }) : this.#labels.text('updates', { count });
+			if (count > 1) node.querySelector('.bui-notice-text').append(el('span', { class: 'bui-notice-count', text: words }));
 			return node;
 		}
 		const id = Ids.next('bui-group');
@@ -133,7 +134,9 @@ export class NoticeList {
 	}
 
 	#item(item, members) {
-		const unread = members.some(member => !member.read || Number(member.matter?.unread) > 0);
+		// A resolved matter (0.15.0) left the unread count; a later update reopens it on the server
+		const resolved = item.resolved ? this.#age.of(item.resolved) : null;
+		const unread = !item.resolved && members.some(member => !member.read || Number(member.updates?.unread) > 0);
 		const product = this.#products[item.product] ?? item.product;
 		const open = el('button', { type: 'button', class: 'bui-notice-open', 'data-control': 'open', onclick: () => this.#actions.open(item, members) }, [
 			content(item.title),
@@ -142,11 +145,12 @@ export class NoticeList {
 		const mark = el('button', { type: 'button', class: 'bui-link-button bui-notice-mark', 'data-control': 'mark', onclick: () => this.#actions.mark(members, unread) }, [this.#labels.text(unread ? 'mark' : 'unmark')]);
 		const age = this.#age.of(item.occurred);
 		const when = age ? el('time', { datetime: age.datetime, title: age.title, text: age.label }) : null;
-		return el('li', { class: 'bui-notice', 'data-id': item.id, 'data-read': String(!unread) }, [
+		return el('li', { class: 'bui-notice', 'data-id': item.id, 'data-read': String(!unread), 'data-resolved': resolved ? '' : null }, [
 			el('span', { class: 'bui-notice-dot', 'aria-hidden': 'true' }),
 			el('div', { class: 'bui-notice-text' }, [
 				open,
 				item.summary ? el('p', { class: 'bui-notice-summary' }, [content(item.summary)]) : null,
+				resolved ? el('p', { class: 'bui-notice-resolved' }, [this.#labels.text('resolved', { date: resolved.title || resolved.label })]) : null,
 				el('div', { class: 'bui-notice-meta' }, [el('span', { class: 'bui-notice-where' }, [product ? el('span', { text: product }) : null, product && when ? ' · ' : null, when]), mark])
 			])
 		]);

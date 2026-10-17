@@ -24,7 +24,7 @@ product yet: adoption is the next wave, one assignment per product.
 | D43, PKG-16: failures | `Unavailable` and a danger `callout()` take `details` (`{ request, time, text }`) and draw "Technical details"; `Unavailable`'s `kind: 'outage'` draws a globe, never a lock |
 | MCH-10, DQ-22: the sidebar | A section entry's label keeps its words beside a long `meta`, which is cut at its end and shown whole in a tooltip |
 | X-15, DQ-19: key hints on touch | `Hint` leaves out a shortcut when shown by a touch press; `.bui-keys` / `[data-bui-keys]` are hidden where there is no keyboard (`hover: none` and `pointer: coarse`) |
-| X-07: notifications by matter | The adapter's optional `readGroup(group, { product })` reads a whole matter when it is opened or marked; the inbox asks for a page of matters (`by: 'group'`, `limit` counts matters) and reads on (at most `Feed.pages`) from a relay that ignores it; a matter says all its updates (`matter: { updates, unread }`) |
+| X-07: notifications by matter | The adapter's optional `readGroup({ product, group })` and `unreadGroup({ product, group })` reach a whole matter when it is opened or marked; the inbox asks for a page of matters (`by: 'matter'`, `limit` counts matters) and reads on (at most `Feed.pages`) from a relay that ignores it; a matter says all its updates (`updates: { count, unread, more? }`, "100+" past what was counted) and a resolved matter says when (`resolved`) |
 | C2: visual rules (token set 0.6.0) | Inter 400/500/600 shipped in `fonts/` (with `OFL-Inter.txt`), `--font-sans` Inter and `--font-brand` Rubik for the lockup's name, `--weight-semibold`; `--color-link` is the text's color; standalone links underline on hover and links in sentences keep a quiet underline (WCAG 1.4.1); `.bui-mono`; `--color-surface-raised`, `--elevation-raised`, `.bui-raised` and `Section`'s `raised`; neutral disabled primaries (`--color-disabled`, `--color-on-disabled`); the light bar and sidebar on the page's surface (`--color-sidebar`, `--color-sidebar-hover`), tooltips' own roles (`--color-tooltip`, `--color-on-tooltip`), the bar's hover per theme; off-white text on dark (`mist-100`, DQ-10); the page title at 600; the avatar neutral; the sidebar's current item on the selection's surface |
 | C2, DQ-14: a centred thread | `Page`'s `lane: 'center'` in the thread template |
 
@@ -64,8 +64,8 @@ Additive unless listed here. Every behavior change below is visible; a product r
 - **Facts.** A long value (`data-long`) stays beside its label unless the facts container is under 30rem.
 - **Sidebar.** The panel and the drawer use `--color-sidebar`; the current item sits on
   `--color-surface-selected`.
-- **Notifications.** The inbox sends `by: 'group'` in `list()`; a relay may ignore it. A relay that forwards it
-  should forward `by=group` to Beyond Projects once Projects implements it.
+- **Notifications.** The inbox sends `by: 'matter'` in `list()`; a relay may ignore it. A relay that forwards it
+  should forward `by=matter` to Beyond Projects once Projects implements it.
 - **Status.** `.bui-status-dot` is 9 px and takes a shape by tone (`warning` a diamond, `danger` a square,
   `progress` an open ring).
 
@@ -79,12 +79,14 @@ Additive unless listed here. Every behavior change below is visible; a product r
   `focus()` it). Replace the empty project Overview with `EmptyState` + `Checklist`. Use `Page`'s
   `lane: 'center'` for a conversation and `Section`'s `raised` for the inspector's panels. Put "/ for commands"
   and "⌘K to search" in `.bui-keys`. Give failures `details` (request id, time) and outages `kind: 'outage'`.
-  Replace `.conduict-fold` with `Disclosure`. Give the inbox relay `readGroup` and forward `by=group`. Remove
+  Replace `.conduict-fold` with `Disclosure`. Give the inbox relay `readGroup` and forward `by=matter`. Remove
   identifiers from sentences into `CopyValue` (D104).
-- **Projects.** Add `POST /v1/notifications/read` with `{ group, product }` (marks every update of that matter
-  of that product read for the person; idempotent; `{protocol}`), and `GET /v1/notifications?by=group`, where
-  `limit` counts matters, each matter answered by its latest item with `matter: { updates, unread }`, `next`
-  paging by matter and the answer carrying `grouped: true`. Draw the hosted repository picker with `ListRow`
+- **Projects.** Its notification routes by matter (built on its branch `audit/2026-10-17-projects-notices`,
+  the contract the package follows): a matter is `(product, group)`, an item without a group its own matter;
+  `POST /v1/notifications/read` and `/unread` with `{ product, group }` (exclusive with the other body forms);
+  `GET /v1/notifications?by=matter`, `limit` counting matters, one item per matter (its newest visible update)
+  with `updates: { count, unread, more? }`; an update may carry `resolved` (the package says "Resolved on
+  {date}" and does not count it unread). The package detects a page of matters by `updates` on its items. Draw the hosted repository picker with `ListRow`
   rows in `select` mode (DQ-05) and quiet row actions (DQ-09; "Allow writing" out of the list's primary
   style). Give its own inbox adapter `readGroup`.
 - **Accounts.** Pass `projects: false` to `FamilyBar`. Draw members with `ListRow` (Remove in its menu, the
@@ -95,7 +97,7 @@ Additive unless listed here. Every behavior change below is visible; a product r
 - **Snapshots.** Remove the local product-name patch (`frontend/src/pages/facts.tsx`) and use `productNames`;
   give the notification relay `readGroup`; use `Status`, `CopyValue` (content hashes) and `DataTable` for
   snapshot lists.
-- **Delegate.** Give the notification relay `readGroup` and `by=group`; adopt `Status`, `ListRow`/`DataTable`
+- **Delegate.** Give the notification relay `readGroup` and `by=matter`; adopt `Status`, `ListRow`/`DataTable`
   for requests and `EmptyState` for "no agent connected" with its way on.
 - **CDN (administration).** `CopyValue` with `href` for a release's testing address (E7's Visit and Copy URL),
   `DataTable` for releases and outputs, `details` on every failure.

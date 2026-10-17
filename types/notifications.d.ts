@@ -10,8 +10,10 @@ export interface Notice {
 	/** ISO time it was read, or null while unread. */
 	read: string | null;
 	group?: string | null;
-	/** The whole matter of a page read `by: 'group'` (0.15.0): how many updates it holds and how many are unread. */
-	matter?: { updates: number; unread: number } | null;
+	/** The whole matter of a page read `by: 'matter'` (0.15.0): its updates, unread ones, and `more` past what was counted. */
+	updates?: { count: number; unread: number; more?: boolean } | null;
+	/** When the matter was resolved (0.15.0): it leaves the unread count; a later update reopens it. */
+	resolved?: string | null;
 }
 
 /** One product's reach in a Beyond Projects answer; `unavailable` means its items are hidden. */
@@ -45,18 +47,19 @@ export interface NoticePage {
 	unavailable?: string[];
 	/** Each product's reach (Beyond Projects' shape); `state: 'unavailable'` is the partial signal. */
 	sources?: NoticeSource[];
-	/** True when the relay answered a request `by: 'group'` with a page of matters (0.15.0). */
+	/** True (or `by: 'matter'`) when the relay answered a page of matters (0.15.0); items carrying `updates` say it too. */
 	grouped?: boolean;
+	by?: 'matter';
 }
 
 export interface NoticeRequest {
 	state: 'unread' | 'all';
 	product: string | null;
 	cursor: unknown;
-	/** Items, or matters when `by` is `group`. */
+	/** Items, or matters when `by` is `matter`. */
 	limit: number;
-	/** 0.15.0 (X-07): a page of matters; a relay that ignores it answers items and the inbox reads on. */
-	by?: 'group';
+	/** 0.15.0 (X-07): a page of matters (`GET /v1/notifications?by=matter`); a relay that ignores it answers items and the inbox reads on. */
+	by?: 'matter';
 }
 
 /** What the notification components call. They never perform business actions. */
@@ -67,9 +70,11 @@ export interface NotificationAdapter {
 	unread(ids: string[]): Promise<unknown>;
 	/**
 	 * Marks every update of one matter read (0.15.0, X-07), loaded or not: Beyond Projects'
-	 * `POST /v1/notifications/read` with `{ group, product }`. Optional: without it the loaded updates are marked.
+	 * `POST /v1/notifications/read` with `{ product, group }`. Optional: without it the loaded updates are marked.
 	 */
-	readGroup?(group: string, scope: { product: string }): Promise<unknown>;
+	readGroup?(matter: { product: string; group: string }): Promise<unknown>;
+	/** Marks every update of one matter unread (0.15.0): `POST /v1/notifications/unread` with `{ product, group }`. Optional. */
+	unreadGroup?(matter: { product: string; group: string }): Promise<unknown>;
 	/** Rechecks access, marks read and returns the destination; rejects with `code: 'NOT_FOUND'` when gone. */
 	open(id: string): Promise<{ destination: string | null }>;
 }
