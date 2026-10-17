@@ -150,6 +150,7 @@ export class Floating {
 		const anchor = this.#anchor.getBoundingClientRect();
 		const room = Bounds.of(view, Bounds.element(this.#anchor));
 		const style = element.style;
+		const scrolled = element.scrollTop;
 		for (const name of ['max-height', 'max-width']) style.removeProperty(name);
 		style.removeProperty('translate');
 		Object.assign(style, { left: '0px', top: '0px', right: 'auto', bottom: 'auto' });
@@ -176,6 +177,7 @@ export class Floating {
 		element.dataset.buiSide = side;
 		if (this.#above) element.classList.toggle(this.#above, side === 'above');
 		element.toggleAttribute('data-bui-away', Bounds.away(anchor, room));
+		if (scrolled) element.scrollTop = scrolled;
 	}
 
 	/**
@@ -197,8 +199,9 @@ export class Floating {
 	#watch() {
 		const view = this.#element.ownerDocument.defaultView;
 		if (!view) return;
-		const schedule = () => {
-			if (this.#frame || !this.#open) return;
+		// The surface's own scrolling (a long list) never moves it
+		const schedule = event => {
+			if (this.#frame || !this.#open || (event?.type === 'scroll' && event.target instanceof view.Node && this.#element.contains(event.target))) return;
 			const frame = view.requestAnimationFrame ?? (work => view.setTimeout(work, 16));
 			this.#frame = frame(() => {
 				this.#frame = 0;

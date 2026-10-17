@@ -128,6 +128,10 @@ test('it is placed again on scroll and resize while open, once per frame, and an
 	document.dispatchEvent(new page.window.Event('scroll'));
 	await frame();
 	assert.equal(surface.hasAttribute('data-bui-away'), false, 'back in view');
+	move(box(100, 260, 80, 32));
+	surface.dispatchEvent(new page.window.Event('scroll'));
+	await frame();
+	assert.equal(surface.style.top, '236px', "its own list scrolling never moves it (Firefox kept re-placing a long list)");
 	floating.hide();
 	move(box(100, 500, 80, 32));
 	document.dispatchEvent(new page.window.Event('scroll'));

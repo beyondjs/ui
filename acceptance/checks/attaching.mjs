@@ -82,13 +82,15 @@ export const checks = [
 		async run(browser, consumer) {
 			const copy = words[consumer.language];
 			const { page } = await open(browser, consumer);
+			// Listen before the files are picked: the fixture's uploads end within 140 ms, which a slower page
+			// could pass before a listener installed afterwards (0.15.0: it raced in Firefox)
+			const said = [];
+			await page.exposeFunction('heard', text => said.push(text));
+			await page.evaluate(selector => new MutationObserver(() => window.heard(document.querySelector(`${selector} > .bui-announcer`).textContent)).observe(document.querySelector(`${selector} > .bui-announcer`), { childList: true, characterData: true, subtree: true }), dock);
 			const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.locator(`${dock} .bui-composer-attach`).click()]);
 			expect(chooser.isMultiple(), 'more than one file at a time');
 			await chooser.setFiles([{ name: 'shot.png', mimeType: 'image/png', buffer: png }, { name: 'big.png', mimeType: 'image/png', buffer: png }]);
 			await logged(page, 'files:pick:shot.png,big.png');
-			const said = [];
-			await page.exposeFunction('heard', text => said.push(text));
-			await page.evaluate(selector => new MutationObserver(() => window.heard(document.querySelector(`${selector} > .bui-announcer`).textContent)).observe(document.querySelector(`${selector} > .bui-announcer`), { childList: true, characterData: true, subtree: true }), dock);
 			await page.waitForSelector(`${dock} .bui-composer-file[data-state="failed"]`);
 			await page.waitForSelector(`${dock} .bui-composer-file[data-state="ready"]`);
 			const chips = await page.evaluate(selector => [...document.querySelectorAll(`${selector} .bui-composer-file`)].map(chip => ({ state: chip.dataset.state, meta: chip.querySelector('.bui-composer-file-meta').textContent, image: Boolean(chip.querySelector('img')), retry: !chip.querySelector('.bui-composer-file-retry').hidden })), dock);
