@@ -1,0 +1,15 @@
+/* The 0.16.0 fixture: the family bar merged with the sidebar, the palette, cards, a composer that needs a
+   step and an approval card with scoped decisions. Tokens only. */
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+}
+.wave-page {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--space-6);
+	min-width: 0;
+	padding: var(--space-4);
+}
