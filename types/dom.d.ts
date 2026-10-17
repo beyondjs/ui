@@ -269,7 +269,8 @@ export namespace loading {
 	const names: { readonly en: Readonly<Record<'loading' | 'opening' | 'reading', string>>; readonly es: Readonly<Record<'loading' | 'opening' | 'reading', string>> };
 	function text(options: { name: string; kind?: 'loading' | 'opening' | 'reading'; language?: 'en' | 'es' }): string;
 }
-export function skeleton(lines?: number): HTMLElement;
+/** `skeleton(3)`, or since 0.15.0 `skeleton({ rows, kind })` in the shape of what comes. */
+export function skeleton(shape?: number | { rows?: number; kind?: 'lines' | 'list' | 'table' }): HTMLElement;
 export function hidden(text: string): HTMLElement;
 
 export * from './parts.js';

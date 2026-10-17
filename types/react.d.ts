@@ -47,11 +47,11 @@ export function Button(props: ButtonProps): ReactElement;
 /** `[busy, run]`: `run(work)` runs an action once and ignores presses meanwhile. */
 export function useBusy(): [boolean, <T>(work: () => Promise<T>) => Promise<T | undefined>];
 export function Lockup(props: { src: string; name?: ReactNode; alt?: string }): ReactElement;
-export function Status(props: { label: ReactNode; tone?: Tone | 'progress' }): ReactElement;
+export function Status(props: { label?: ReactNode; tone?: Tone | 'progress'; /** 0.15.0: a state's shape and the family's words */ state?: import('./patterns.js').StatusState | null; variant?: 'dot' | 'badge'; labels?: Record<string, string> | null }): ReactElement;
 export function Badge(props: { label: ReactNode; tone?: Tone }): ReactElement;
 export function Callout(props: { tone?: Exclude<Tone, 'neutral'>; title: ReactNode; body?: ReactNode; actions?: ReactNode; live?: boolean; /** 0.15.0, D43 */ details?: import('./family.js').FailureDetails | null; children?: ReactNode }): ReactElement;
 export function Loading(props: { label?: string }): ReactElement;
-export function Skeleton(props: { lines?: number }): ReactElement;
+export function Skeleton(props: { lines?: number; /** 0.15.0 */ rows?: number; kind?: 'lines' | 'list' | 'table' }): ReactElement;
 
 export function Field(props: { label: ReactNode; hint?: ReactNode; error?: ReactNode; optional?: boolean; /** Marks the value as suggested (0.7.0, `useSuggestion`) */ suggested?: boolean; labels?: { optional?: string; suggested?: string }; children: ReactNode }): ReactElement;
 /** A suggested value that follows `suggestion` until the person edits it (0.7.0). */

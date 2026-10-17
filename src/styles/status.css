@@ -1,1 +1,96 @@
-/* 0.15.0 (being implemented). */
+/* A state's mark differs by shape as well as hue (0.15.0, decision C2, DQ-04): a filled circle for done
+   or ready, an open ring for work in progress, a diamond for what needs the person, a square for a
+   failure, a hollow circle for what rests, a dashed circle for what is not known. It follows `status()`'s
+   tones too: `warning` is drawn as attention and `danger` as a failure. Tokens only. */
+.bui-status-dot {
+	box-sizing: border-box;
+	width: 9px;
+	height: 9px;
+	margin-top: calc((1lh - 9px) / 2);
+}
+.bui-status-label {
+	min-width: 0;
+}
+.bui-status-success .bui-status-dot {
+	background: var(--color-success);
+}
+.bui-status-progress .bui-status-dot {
+	border: 2px solid var(--color-info);
+	border-inline-end-color: transparent;
+	background: none;
+	animation: bui-pulse 1.2s ease-in-out 4;
+}
+.bui-status-attention .bui-status-dot,
+.bui-status-warning .bui-status-dot {
+	border-radius: 1px;
+	background: var(--color-warning);
+	transform: rotate(45deg) scale(0.85);
+}
+.bui-status-failure .bui-status-dot,
+.bui-status-danger .bui-status-dot {
+	border-radius: 2px;
+	background: var(--color-danger);
+}
+.bui-status-idle .bui-status-dot {
+	border: 1.5px solid var(--color-text-muted);
+	background: none;
+}
+.bui-status-unknown .bui-status-dot {
+	border: 1.5px dashed var(--color-text-muted);
+	background: none;
+}
+/* The badge: the mark and the words in a pill, in the tone's own surface. */
+.bui-status-badge {
+	align-items: center;
+	padding: 1px var(--space-2);
+	border: 1px solid var(--color-border-strong);
+	border-radius: var(--radius-round);
+	font-size: var(--text-label);
+	white-space: nowrap;
+}
+.bui-status-badge .bui-status-dot {
+	margin-top: 0;
+}
+.bui-status-badge.bui-status-success {
+	border-color: var(--color-success);
+	background: var(--color-success-surface);
+}
+.bui-status-badge.bui-status-attention {
+	border-color: var(--color-warning);
+	background: var(--color-warning-surface);
+}
+.bui-status-badge.bui-status-failure {
+	border-color: var(--color-danger);
+	background: var(--color-danger-surface);
+}
+.bui-status-badge.bui-status-progress {
+	border-color: var(--color-info);
+	background: var(--color-info-surface);
+}
+
+/* Skeleton rows in the shape of what comes (0.15.0): a list's mark and two lines, a table's three cells. */
+.bui-skeleton-row {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	min-height: var(--bui-target);
+}
+.bui-skeleton-row > .bui-skeleton-line {
+	flex: 1;
+}
+.bui-skeleton-mark {
+	flex: none;
+	width: 9px;
+	height: 9px;
+	border-radius: var(--radius-round);
+	background: var(--color-surface-sunken);
+}
+.bui-skeleton-text {
+	display: grid;
+	flex: 1;
+	gap: var(--space-1);
+}
+.bui-skeleton-text > .bui-skeleton-line:last-child {
+	width: 45%;
+	height: 10px;
+}

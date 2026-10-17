@@ -3,6 +3,8 @@ import { Glyph } from '../dom/core/icons.js';
 import { loading } from '../dom/feedback.js';
 import { h } from './hooks.js';
 import { TechnicalDetails } from './operations.js';
+import { Status as Shape } from '../dom/status/status.js';
+import { tones } from '../dom/status/labels.js';
 
 const { useCallback, useRef, useState, useEffect } = React;
 
@@ -89,8 +91,17 @@ export function Lockup({ src, name = null, alt = 'Beyond' }) {
 	return h('span', { className: 'bui-lockup' }, h('img', { className: 'bui-lockup-mark', src, alt }), name ? h('span', { className: 'bui-lockup-name' }, name) : null);
 }
 
-export function Status({ label, tone = 'neutral' }) {
-	return h('span', { className: `bui-status bui-status-${tone}` }, h('span', { className: 'bui-status-dot', 'aria-hidden': 'true' }), label);
+/**
+ * A state in words with its mark, as the DOM `status(label, tone)` builds it; since 0.15.0 a `state` of
+ * `Status.states` (`ready`, `busy`, `failed`…) draws its shape, with the family's words when no `label`
+ * is given, and `variant: 'badge'` draws a pill, as the DOM `Status` does.
+ */
+export function Status({ label = null, tone = 'neutral', state = null, variant = 'dot', labels = null }) {
+	if (!state) return h('span', { className: `bui-status bui-status-${tone}` }, h('span', { className: 'bui-status-dot', 'aria-hidden': 'true' }), label);
+	const known = Object.hasOwn(tones, state) ? state : 'unknown';
+	const shape = Shape.tone(known);
+	const words = label ?? (labels ?? Shape.labels.en)[known];
+	return h('span', { className: `bui-status${variant === 'badge' ? ' bui-status-badge' : ''} bui-status-${shape}`, 'data-state': known, 'data-tone': shape }, h('span', { className: 'bui-status-dot', 'aria-hidden': 'true' }), h('span', { className: 'bui-status-label' }, words));
 }
 
 export function Badge({ label, tone = 'neutral' }) {
@@ -113,8 +124,15 @@ export function Loading({ label = Loading.labels.en }) {
 	return h('div', { className: 'bui-loading', role: 'status' }, h('span', { className: 'bui-spinner', 'aria-hidden': 'true' }), h('span', null, label));
 }
 
-export function Skeleton({ lines = 3 }) {
-	return h('div', { className: 'bui-skeleton', 'aria-hidden': 'true' }, Array.from({ length: lines }, (_, index) => h('span', { key: index, className: 'bui-skeleton-line' })));
+/** Placeholders in the shape of what comes (`kind`: `lines`, `list` or `table`, 0.15.0), as the DOM `skeleton`. */
+export function Skeleton({ lines = 3, rows = lines, kind = 'lines' }) {
+	const type = ['lines', 'list', 'table'].includes(kind) ? kind : 'lines';
+	const line = key => h('span', { key, className: 'bui-skeleton-line' });
+	const row = index =>
+		type === 'list'
+			? h('span', { key: index, className: 'bui-skeleton-row' }, h('span', { className: 'bui-skeleton-mark' }), h('span', { className: 'bui-skeleton-text' }, line(0), line(1)))
+			: h('span', { key: index, className: 'bui-skeleton-row' }, line(0), line(1), line(2));
+	return h('div', { className: `bui-skeleton${type === 'lines' ? '' : ` bui-skeleton-${type}`}`, 'aria-hidden': 'true' }, Array.from({ length: rows }, (_, index) => (type === 'lines' ? line(index) : row(index))));
 }
 
 // The default label in English and Spanish, and the named lines (0.7.6), as the DOM `loading` builder's.

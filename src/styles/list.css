@@ -1,1 +1,183 @@
-/* 0.15.0 (being implemented). */
+/* One object in a list (ListRow, 0.15.0, DQ-12): a dense row, its name in the text color with a muted
+   line under it, its end's facts and quiet actions, the whole row opening the object. Narrow rows (under
+   30rem, measured on the row) stay two or three short lines. A copyable value (CopyValue) is mono. */
+.bui-rows {
+	display: grid;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.bui-rows .bui-row {
+	border-top: 1px solid var(--color-border);
+	border-radius: 0;
+}
+/* A React row is hosted in an element of its own (`display: contents`). */
+.bui-rows > .bui-row:first-child,
+.bui-rows > :first-child > .bui-row {
+	border-top: 0;
+}
+.bui-row {
+	container: bui-row / inline-size;
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	min-height: var(--bui-target);
+	padding: var(--space-2) var(--space-3);
+	border-radius: var(--radius-control);
+	color: var(--color-text);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+}
+.bui-row[data-open]:hover {
+	background: var(--color-surface-sunken);
+}
+.bui-row[data-current] {
+	background: var(--color-surface-selected);
+}
+.bui-row-lead:empty {
+	display: none;
+}
+.bui-row-lead {
+	display: inline-flex;
+	flex: none;
+	color: var(--color-text-muted);
+}
+.bui-row-lead > .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+/* The lead's state is its mark; its words stay for assistive technology. */
+.bui-row-mark .bui-status-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+.bui-row-main {
+	display: grid;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+.bui-row-title {
+	min-width: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--color-text);
+	font: inherit;
+	font-size: var(--text-body);
+	font-weight: var(--weight-medium);
+	text-align: start;
+	text-decoration: none;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	cursor: pointer;
+}
+span.bui-row-title {
+	cursor: default;
+}
+/* The name's target covers the row, so the whole row opens the object. */
+.bui-row[data-open] .bui-row-title::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+}
+.bui-row-title:focus-visible {
+	outline: none;
+}
+.bui-row[data-open]:has(.bui-row-title:focus-visible) {
+	outline: 2px solid var(--color-focus);
+	outline-offset: -2px;
+}
+.bui-row-title:hover {
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+.bui-row-meta {
+	min-width: 0;
+	margin: 0;
+	color: var(--color-text-muted);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.bui-row-meta[hidden],
+.bui-row-end[hidden] {
+	display: none;
+}
+.bui-row-end {
+	display: flex;
+	flex: none;
+	align-items: center;
+	gap: var(--space-2) var(--space-3);
+	color: var(--color-text-muted);
+}
+.bui-row-fact {
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+/* Everything that acts on its own stays above the name's target. */
+.bui-row-check,
+.bui-row-actions,
+.bui-row-end .bui-menu-holder,
+.bui-row-end a,
+.bui-row-end button {
+	position: relative;
+	z-index: 1;
+}
+.bui-row-check {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	margin: 0;
+	accent-color: var(--color-action);
+}
+.bui-row-actions {
+	display: flex;
+	gap: var(--space-1);
+}
+@container bui-row (max-width: 30rem) {
+	.bui-row-end {
+		flex-wrap: wrap;
+		justify-content: flex-start;
+	}
+	.bui-row-fact {
+		display: none;
+	}
+}
+
+/* A copyable value: mono, cut at its end (or in its middle) and shown whole in a tooltip, then Copy. */
+.bui-copy-value {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-1);
+	max-width: 100%;
+	min-width: 0;
+}
+.bui-copy-value-text {
+	display: inline-flex;
+	min-width: 0;
+	color: var(--color-text);
+	font-family: var(--font-mono);
+	font-size: var(--text-small);
+	text-decoration: none;
+}
+a.bui-copy-value-text:hover {
+	text-decoration: underline;
+}
+.bui-copy-value-start {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.bui-copy-value-tail {
+	flex: none;
+	white-space: pre;
+}

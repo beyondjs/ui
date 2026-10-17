@@ -49,13 +49,20 @@ export function loading(label = loading.labels.en) {
 	]);
 }
 
-/** Placeholder lines while content loads; hidden from assistive technology, which hears `loading`. */
-export function skeleton(lines = 3) {
-	return el(
-		'div',
-		{ class: 'bui-skeleton', 'aria-hidden': 'true' },
-		Array.from({ length: lines }, () => el('span', { class: 'bui-skeleton-line' }))
-	);
+/**
+ * Placeholders while content loads, in the shape of what comes (0.15.0): `skeleton(3)` draws three lines;
+ * `skeleton({ rows, kind })` draws `lines`, `list` rows (a mark and two lines, as `ListRow`) or `table`
+ * rows (three cells). Hidden from assistive technology, which hears the named `loading` line instead.
+ */
+export function skeleton(shape = 3) {
+	const { rows = 3, kind = 'lines' } = typeof shape === 'number' ? { rows: shape } : (shape ?? {});
+	const type = ['lines', 'list', 'table'].includes(kind) ? kind : 'lines';
+	const line = () => el('span', { class: 'bui-skeleton-line' });
+	const row = () =>
+		type === 'list'
+			? el('span', { class: 'bui-skeleton-row' }, [el('span', { class: 'bui-skeleton-mark' }), el('span', { class: 'bui-skeleton-text' }, [line(), line()])])
+			: el('span', { class: 'bui-skeleton-row' }, [line(), line(), line()]);
+	return el('div', { class: `bui-skeleton${type === 'lines' ? '' : ` bui-skeleton-${type}`}`, 'aria-hidden': 'true' }, Array.from({ length: rows }, type === 'lines' ? line : row));
 }
 
 /** A visually hidden text for assistive technology only. */

@@ -1,1 +1,77 @@
-/* 0.15.0 (being implemented). */
+/* A request waiting for the person's answer (CommandCard, 0.15.0, DQ-13): a neutral raised surface with
+   an attention edge, the command whole in a wrapping monospace block, the answers with their keys. */
+.bui-command {
+	display: grid;
+	gap: var(--space-2);
+	padding: var(--space-3) var(--space-4);
+	border: 1px solid var(--color-border);
+	border-inline-start: 3px solid var(--color-warning);
+	border-radius: var(--radius-base);
+	background: var(--color-surface-raised, var(--color-surface));
+	color: var(--color-text);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-command:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+}
+.bui-command[data-state='allowed'] {
+	border-inline-start-color: var(--color-success);
+}
+.bui-command[data-state='denied'] {
+	border-inline-start-color: var(--color-border-strong);
+}
+.bui-command-title {
+	margin: 0;
+	font-size: var(--text-body);
+	font-weight: var(--weight-medium);
+}
+.bui-command-detail,
+.bui-command-line {
+	margin: 0;
+	color: var(--color-text-muted);
+}
+.bui-command-line:empty {
+	display: none;
+}
+.bui-command-code {
+	margin: 0;
+	padding: var(--space-2) var(--space-3);
+	border-radius: var(--radius-control);
+	background: var(--color-code);
+	color: var(--color-on-code);
+	font-family: var(--font-mono);
+	font-size: var(--text-small);
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+.bui-command-code[data-folded] {
+	max-height: calc(8lh + 2 * var(--space-2));
+	overflow: hidden;
+}
+.bui-command-toggle {
+	justify-self: start;
+	font-size: var(--text-label);
+}
+.bui-command-choice {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-2);
+}
+.bui-command-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+}
+.bui-command-actions[hidden] {
+	display: none;
+}
+.bui-command-actions .bui-keys {
+	padding: 0 var(--space-1);
+	border: 1px solid currentColor;
+	border-radius: var(--radius-control);
+	font-family: var(--font-mono);
+	font-size: var(--text-label);
+	opacity: 0.75;
+}
