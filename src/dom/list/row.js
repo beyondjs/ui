@@ -145,7 +145,7 @@ export class ListRow extends Component {
 			this.#menu = null;
 		}
 		this.#menu?.element.querySelector('.bui-menu-button')?.setAttribute('aria-label', this.#text('more', title));
-		const shown = [...facts.filter(Boolean).map(fact => el('span', { class: 'bui-row-fact' }, [content(fact)])), status ? (status.state ? ListRow.#status(status, false) : status) : null].filter(Boolean);
+		const shown = [...facts.filter(fact => fact !== null && fact !== undefined && fact !== false && fact !== '').map(fact => el('span', { class: 'bui-row-fact' }, [content(fact)])), status ? (status.state ? ListRow.#status(status, false) : status) : null].filter(Boolean);
 		fill(this.#end, [...shown, this.#buttons.length ? this.#actions : null, this.#menu?.element ?? null].filter(Boolean));
 		this.#end.hidden = !this.#end.childElementCount;
 	}

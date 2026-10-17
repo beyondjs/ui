@@ -113,33 +113,34 @@
 	font-weight: var(--weight-regular);
 }
 
+/* A collection's table on a phone; a DataTable draws its own narrow rows (table.css). */
 @media (max-width: 640px) {
-	.bui-table thead {
+	.bui-table:not(.bui-data) thead {
 		position: absolute;
 		width: 1px;
 		height: 1px;
 		overflow: hidden;
 		clip: rect(0 0 0 0);
 	}
-	.bui-table,
-	.bui-table tbody,
-	.bui-table tr,
-	.bui-table th,
-	.bui-table td {
+	.bui-table:not(.bui-data),
+	.bui-table:not(.bui-data) tbody,
+	.bui-table:not(.bui-data) tr,
+	.bui-table:not(.bui-data) th,
+	.bui-table:not(.bui-data) td {
 		display: block;
 		width: 100%;
 	}
-	.bui-table tbody tr {
+	.bui-table:not(.bui-data) tbody tr {
 		padding: var(--space-2) 0;
 		border-bottom: 1px solid var(--color-border);
 	}
-	.bui-table tbody th,
-	.bui-table tbody td {
+	.bui-table:not(.bui-data) tbody th,
+	.bui-table:not(.bui-data) tbody td {
 		height: auto;
 		padding: var(--space-1) 0;
 		border: 0;
 	}
-	.bui-table tbody td::before {
+	.bui-table:not(.bui-data) tbody td::before {
 		content: attr(data-label);
 		display: block;
 		color: var(--color-text-muted);
@@ -147,7 +148,7 @@
 		font-weight: var(--weight-medium);
 		letter-spacing: var(--tracking-label);
 	}
-	.bui-table .bui-numeric {
+	.bui-table:not(.bui-data) .bui-numeric {
 		text-align: left;
 	}
 	.bui-pager {

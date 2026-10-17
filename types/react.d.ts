@@ -168,6 +168,7 @@ export interface CollectionProps<Row> {
 	empty?: { title?: string; body?: string } | null;
 	explain?: ((error: unknown) => string) | null;
 	labels?: Copy;
+	/** `list` (0.15.0): rows as `ListRow`s */ presentation?: 'table' | 'list';
 }
 export function Collection<Row = Record<string, unknown>>(props: CollectionProps<Row>): ReactElement;
 

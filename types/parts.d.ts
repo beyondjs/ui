@@ -77,7 +77,7 @@ export class Picker extends Component {
 	focus(): void;
 }
 
-export interface Column<Row> { key: string; label: string; value?: (row: Row) => Content; numeric?: boolean; primary?: boolean; /** Hidden as the region narrows, the highest number first (0.7.0) */ priority?: number }
+export interface Column<Row> { key: string; label: string; value?: (row: Row) => Content; numeric?: boolean; primary?: boolean; /** Hidden as the region narrows, the highest number first (0.7.0) */ priority?: number; /** With `presentation: 'list'`, at the row's end (0.15.0) */ end?: boolean }
 export interface CollectionState { query: string; filters: Record<string, string>; page: number }
 export interface CollectionOptions<Row> {
 	label: string;
@@ -95,6 +95,8 @@ export interface CollectionOptions<Row> {
 	delay?: number;
 	empty?: { title?: Content; body?: Content; action?: Node } | null;
 	explain?: ((error: unknown) => string) | null;
+	/** `list` (0.15.0, DQ-12): rows as `ListRow`s, two short lines on a phone. */
+	presentation?: 'table' | 'list';
 	labels?: Copy;
 }
 export class Collection<Row = Record<string, unknown>> extends Component {

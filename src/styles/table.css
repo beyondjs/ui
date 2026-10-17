@@ -1,1 +1,111 @@
-/* 0.15.0 (being implemented). */
+/* A table of rows the product holds (DataTable, 0.15.0, DQ-12): a compact search with its placeholder,
+   headers that sort, group headings with their count, rows that open with the whole row, and on a narrow
+   region two short lines a row instead of a card of labels and values. It reuses the collection's table. */
+.bui-data-table {
+	container: bui-data / inline-size;
+	display: grid;
+	gap: var(--space-3);
+	min-width: 0;
+}
+.bui-data-tools[hidden] {
+	display: none;
+}
+.bui-data-tools {
+	max-width: var(--layout-form);
+}
+.bui-data-body {
+	min-width: 0;
+	overflow-x: auto;
+}
+.bui-data-sorter {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-1);
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+.bui-data-sorter:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+}
+.bui-data-sort {
+	width: 14px;
+	height: 14px;
+	opacity: 0;
+}
+.bui-data-sorter:hover .bui-data-sort,
+.bui-data-sort[data-order] {
+	opacity: 1;
+}
+.bui-data-sort[data-order='ascending'] {
+	transform: rotate(180deg);
+}
+.bui-data-group th {
+	padding-top: var(--space-4);
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	text-align: start;
+}
+/* A row opened in place: its primary cell is a button drawn as the name, its target the whole row. */
+.bui-data button.bui-row-link {
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	text-align: start;
+	cursor: pointer;
+}
+.bui-data .bui-row-link {
+	position: static;
+	z-index: auto;
+	color: var(--color-text);
+}
+.bui-data .bui-mono {
+	font-family: var(--font-mono);
+}
+/* A narrow region: each row is its primary cell, then the others in one muted line. */
+@container bui-data (max-width: 36rem) {
+	.bui-data thead {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+	}
+	.bui-data,
+	.bui-data tbody {
+		display: block;
+	}
+	.bui-data tr {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 var(--space-2);
+		padding: var(--space-2) 0;
+		border-bottom: 1px solid var(--color-border);
+	}
+	.bui-data th[scope='row'] {
+		flex-basis: 100%;
+		padding: 0;
+		border: 0;
+	}
+	.bui-data td {
+		padding: 0;
+		border: 0;
+		color: var(--color-text-muted);
+		font-size: var(--text-small);
+	}
+	.bui-data td:not(:last-child)::after {
+		content: ' ·';
+	}
+	.bui-data td::before {
+		content: none;
+	}
+	.bui-data-group {
+		border-bottom: 0;
+	}
+}

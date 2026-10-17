@@ -7,6 +7,7 @@ import { Select } from '../select.js';
 import { callout, skeleton } from '../feedback.js';
 import { Loader, local } from './loader.js';
 import { Table } from './table.js';
+import { CollectionRows } from './rows.js';
 import { ColumnFit } from './columns.js';
 import { defaults, spanish } from './labels.js';
 
@@ -20,6 +21,11 @@ import { defaults, spanish } from './labels.js';
  * back, forward or a reload. The source decides what the person may see. Columns with a `priority`
  * leave, the highest number first, as the region narrows, and "Show 2 more columns" brings them back
  * (0.7.0, `ColumnFit`).
+ *
+ * Since 0.15.0 (DQ-12): what fits on one page shows no range and no pager; the search is one compact
+ * field whose placeholder names what it searches (its label is kept for assistive technology); and
+ * `presentation: 'list'` draws the rows as `ListRow`s (the primary column the name, `end` columns at the
+ * row's end, the others its muted line), which stay two short lines on a phone.
  */
 export class Collection extends Component {
 	static local = local;
@@ -39,6 +45,7 @@ export class Collection extends Component {
 	#status;
 	#paged = false;
 	#columns;
+	#rows = null;
 
 	/**
 	 * @param {object} options
@@ -60,10 +67,10 @@ export class Collection extends Component {
 		this.#state = { query: state.query ?? '', filters: { ...(state.filters ?? {}) }, page: Math.max(1, Number(state.page) || 1) };
 		const id = Ids.next('bui-collection');
 		this.#input = search
-			? el('input', { id: `${id}-search`, type: 'search', class: 'bui-input', value: this.#state.query, autocomplete: 'off', placeholder: this.#labels.text('placeholder'), oninput: () => this.#typed() })
+			? el('input', { id: `${id}-search`, type: 'search', class: 'bui-input', value: this.#state.query, autocomplete: 'off', placeholder: typeof label === 'string' ? this.#labels.text('search', { label }) : this.#labels.text('placeholder'), oninput: () => this.#typed() })
 			: null;
 		const tools = [
-			this.#input ? el('div', { class: 'bui-collection-search' }, [el('label', { for: this.#input.id, class: 'bui-field-label' }, [this.#labels.text('search', { label })]), el('span', { class: 'bui-picker-search' }, [glyph('search'), this.#input])]) : null,
+			this.#input ? el('div', { class: 'bui-collection-search' }, [el('label', { for: this.#input.id, class: 'bui-hidden' }, [this.#labels.text('search', { label })]), el('span', { class: 'bui-picker-search' }, [glyph('search'), this.#input])]) : null,
 			...filters.map(filter => this.#filter(filter, id))
 		];
 		this.#region = el('div', { class: 'bui-collection-body', tabindex: '-1', 'aria-busy': 'false' });
@@ -102,7 +109,7 @@ export class Collection extends Component {
 		const limit = this.#options.limit ?? 20;
 		this.#region.setAttribute('aria-busy', 'true');
 		this.#status.textContent = this.#labels.text('loading');
-		if (!this.#region.querySelector('table')) fill(this.#region, [skeleton(4)]);
+		if (!this.#region.querySelector('table, .bui-rows')) fill(this.#region, [skeleton({ rows: 4, kind: this.#options.presentation === 'list' ? 'list' : 'table' })]);
 		const result = await this.#loader.load({ ...this.state, limit });
 		if (result.stale || this.destroyed) return;
 		this.#region.setAttribute('aria-busy', 'false');
@@ -110,9 +117,11 @@ export class Collection extends Component {
 		const { rows = [], total = null, more = null } = result.answer ?? {};
 		const pages = total !== null ? Math.max(1, Math.ceil(total / limit)) : null;
 		if (!rows.length && this.#state.page > 1 && (pages === null || this.#state.page > pages)) return this.#go(pages ?? this.#state.page - 1);
-		const table = rows.length ? this.#table(rows).element : null;
+		this.#rows?.destroy?.();
+		this.#rows = rows.length ? this.#table(rows) : null;
+		const table = this.#rows?.element ?? null;
 		fill(this.#region, [table ?? this.#nothing()]);
-		this.#columns.attach(table, this.#region);
+		this.#columns.attach(table?.localName === 'table' ? table : null, this.#region);
 		this.#options.onrender?.();
 		const summary = this.#paging({ rows, total, more: more ?? (pages !== null ? this.#state.page < pages : false), pages, limit });
 		this.#status.textContent = rows.length ? summary : this.#region.textContent;
@@ -123,14 +132,15 @@ export class Collection extends Component {
 
 	destroy() {
 		this.#loader.cancel();
+		this.#rows?.destroy?.();
 		this.#columns.release();
 		for (const filter of this.#filters) filter.select.destroy();
 		super.destroy();
 	}
 
 	#table(rows) {
-		const { label, columns, link = null, onopen = null, key } = this.#options;
-		return new Table({ label, columns, rows, link, onopen, key });
+		const { label, columns, link = null, onopen = null, key, presentation = 'table' } = this.#options;
+		return presentation === 'list' ? new CollectionRows({ label, columns, rows, link, onopen, key }) : new Table({ label, columns, rows, link, onopen, key });
 	}
 
 	#filter(filter, id) {
@@ -204,8 +214,9 @@ export class Collection extends Component {
 		const summary = total !== null ? this.#labels.text('range', { first, last: first + rows.length - 1, total }) : this.#labels.text('page', { page });
 		const button = (text, target, enabled) =>
 			el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', disabled: !enabled, onclick: () => this.#go(target) }, [text]);
-		const single = page === 1 && !more;
-		fill(this.#pager, single && total !== null ? [el('p', { class: 'bui-pager-summary', text: summary })] : [
+		// What fits on one page needs no range and no pager (0.15.0, DQ-12): the status still says the count
+		if (page === 1 && !more) return fill(this.#pager, []), summary;
+		fill(this.#pager, [
 			button(this.#labels.text('previous'), page - 1, page > 1),
 			el('p', { class: 'bui-pager-summary', text: pages ? `${summary} · ${this.#labels.text('of', { page, pages })}` : summary }),
 			button(this.#labels.text('next'), page + 1, more)

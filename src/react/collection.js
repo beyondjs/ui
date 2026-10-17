@@ -11,7 +11,7 @@ const { useRef, useState } = React;
  * changes (for example from the address on back and forward) and `onState` reports the person's
  * changes. `link(row)` makes rows open their detail; `onOpen(row, event)` takes over the navigation.
  */
-export function Collection({ label, columns, source, link = null, onOpen = null, search = true, filters = [], state = null, onState = null, limit = 20, empty = null, explain = null, labels }) {
+export function Collection({ label, columns, source, link = null, onOpen = null, search = true, filters = [], state = null, onState = null, limit = 20, empty = null, explain = null, labels, presentation = 'table' }) {
 	const cells = useRef([]);
 	const [portals, setPortals] = useState([]);
 	const latest = useLatest({ source, onOpen, onState, explain, columns, link });
@@ -19,6 +19,7 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 		() =>
 			new List({
 				label,
+				presentation,
 				search,
 				filters,
 				limit,
@@ -33,7 +34,7 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 				columns: columns.map((column, index) => ({ ...column, render: undefined, value: row => cell(row, index) })),
 				onrender: () => setPortals(cells.current.splice(0))
 			}),
-		[label, search, JSON.stringify(filters), limit, labels, Boolean(link), Boolean(onOpen), columns.length]
+		[label, presentation, search, JSON.stringify(filters), limit, labels, Boolean(link), Boolean(onOpen), columns.length]
 	);
 	// Each drawn cell asks the latest column definition for its content.
 	function cell(row, index) {

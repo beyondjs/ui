@@ -13,7 +13,7 @@ const find = selector => rules.filter(rule => rule.selector.split(',').map(part 
 
 test('no capitals by style: nothing is transformed to upper case (D20)', () => {
 	assert.doesNotMatch(sheet, /text-transform:\s*(uppercase|capitalize)/);
-	for (const selector of ['.bui-badge', '.bui-table thead th', '.bui-table tbody td::before', '.bui-navmenu-heading', '.bui-consequence dt']) {
+	for (const selector of ['.bui-badge', '.bui-table thead th', '.bui-table:not(.bui-data) tbody td::before', '.bui-navmenu-heading', '.bui-consequence dt']) {
 		assert.ok(find(selector).length, selector);
 		for (const rule of find(selector)) assert.doesNotMatch(rule.body, /letter-spacing:\s*0\.0[3-9]|letter-spacing:\s*0\.[1-9]/, selector);
 	}
@@ -27,7 +27,7 @@ test('text below body size never uses Rubik 300 (D09)', () => {
 });
 
 test('labels are told apart by weight 500, not by case', () => {
-	for (const selector of ['.bui-badge', '.bui-table thead th', '.bui-table tbody td::before', '.bui-navmenu-heading']) {
+	for (const selector of ['.bui-badge', '.bui-table thead th', '.bui-table:not(.bui-data) tbody td::before', '.bui-navmenu-heading']) {
 		assert.ok(find(selector).some(rule => /font-weight:\s*var\(--weight-medium\)/.test(rule.body)), selector);
 	}
 });

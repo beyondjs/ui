@@ -69,6 +69,8 @@ test('search and filters reset the page; no matches offers to clear them', async
 	assert.deepEqual(states.at(-1), { query: '', filters: { state: 'released' }, page: 1 });
 	const input = list.element.querySelector('input[type="search"]');
 	assert.equal(list.element.querySelector(`label[for="${input.id}"]`).textContent, 'Search Requests');
+	assert.ok(list.element.querySelector(`label[for="${input.id}"]`).classList.contains('bui-hidden'), 'a compact field: its label for assistive technology, its placeholder naming it (0.15.0, DQ-12)');
+	assert.equal(input.placeholder, 'Search Requests');
 	input.value = 'nothing like this';
 	input.dispatchEvent(new Event('input'));
 	await page.until(() => /No matches for “nothing like this”/.test(list.element.textContent));
