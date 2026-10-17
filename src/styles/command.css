@@ -75,3 +75,28 @@
 	font-size: var(--text-label);
 	opacity: 0.75;
 }
+/* A command the person may correct before allowing, and a note sent with a decision (0.16.0, CNV-10). */
+.bui-command-edit {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 2lh;
+	border: 1px solid var(--color-border-control);
+	resize: vertical;
+}
+.bui-command-note {
+	display: grid;
+	gap: var(--space-2);
+}
+.bui-command-note[hidden] {
+	display: none;
+}
+.bui-command-note-field {
+	box-sizing: border-box;
+	width: 100%;
+	resize: vertical;
+}
+.bui-command-note-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+}

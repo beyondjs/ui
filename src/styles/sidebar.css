@@ -251,3 +251,14 @@ a.bui-sidebar-item:hover {
 		opacity: 0;
 	}
 }
+/* One bar on a phone (0.16.0, DQ-19): merged with the family bar, the sidebar draws no product row; the
+   bar's menu button opens the drawer, shown only while the sidebar is one. */
+.bui-sidebar[data-merged] .bui-sidebar-row {
+	display: none;
+}
+.bui-family[data-merged]:not([data-drawer]) .bui-header-toggle {
+	display: none;
+}
+.bui-shell:has(.bui-sidebar[data-mode='drawer'][data-merged]) .bui-page[data-template='thread'] {
+	--bui-page-chrome: var(--layout-family);
+}

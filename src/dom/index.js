@@ -85,3 +85,6 @@ export { Checklist } from './checklist/checklist.js';
 export { EmptyState } from './checklist/empty.js';
 export { CommandCard } from './command/card.js';
 export { DataTable } from './table/table.js';
+export { CommandPalette } from './palette/palette.js';
+export { ChoiceCards } from './choice/cards.js';
+export { Primaries } from './core/primaries.js';

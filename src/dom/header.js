@@ -91,6 +91,19 @@ export class Header extends Component {
 		this.#onchange?.(this.#expanded);
 	}
 
+	/**
+	 * Gives the toggle an external region to open (0.16.0: a sidebar merged with the bar on a phone),
+	 * `{ controls, expanded, onchange }`, or null for the header's own navigation again.
+	 */
+	set toggle(value) {
+		this.#controls = value?.controls ?? this.#controls;
+		this.#expanded = Boolean(value?.expanded);
+		this.#onchange = value?.onchange ?? null;
+		this.#toggle.setAttribute('aria-controls', this.#controls);
+		this.#element.classList.toggle('bui-header-external', Boolean(value));
+		this.#draw();
+	}
+
 	/** Replaces the context: breadcrumb entries or a node. */
 	set context(value) {
 		fill(this.#context, this.#trail(value));

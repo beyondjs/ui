@@ -1,0 +1,85 @@
+/* A choice among options compared side by side (ChoiceCards, 0.16.0, DQ-15): native radios drawn as
+   cards, the chosen one on the selection's surface with the accent's edge; it applies at once. */
+.bui-cards {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+.bui-cards-legend {
+	margin-bottom: var(--space-2);
+	padding: 0;
+	font-size: var(--text-small);
+	font-weight: var(--weight-medium);
+}
+.bui-cards-description {
+	margin: 0 0 var(--space-2);
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+}
+.bui-cards-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
+	gap: var(--space-2);
+}
+.bui-card-choice {
+	position: relative;
+	display: grid;
+	align-content: start;
+	gap: var(--space-1);
+	padding: var(--space-3);
+	border: 1px solid var(--color-border-control);
+	border-radius: var(--radius-base);
+	background: var(--color-surface);
+	color: var(--color-text);
+	font-size: var(--text-small);
+	cursor: pointer;
+}
+.bui-card-choice:hover {
+	background: var(--color-surface-sunken);
+}
+.bui-card-choice[data-checked] {
+	border-color: var(--color-accent);
+	background: var(--color-surface-selected);
+	box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+.bui-card-choice[data-disabled] {
+	color: var(--color-text-muted);
+	cursor: not-allowed;
+}
+.bui-card-choice:has(.bui-card-radio:focus-visible) {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+}
+/* The radio stays in the tab order and the arrows' path; the card is its mark. */
+.bui-card-radio {
+	position: absolute;
+	inset: var(--space-3) var(--space-3) auto auto;
+	margin: 0;
+	accent-color: var(--color-action);
+}
+.bui-card-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--space-1) var(--space-2);
+	padding-inline-end: var(--space-6);
+}
+.bui-card-title {
+	font-size: var(--text-body);
+	font-weight: var(--weight-semibold);
+}
+.bui-card-body {
+	display: grid;
+	gap: var(--space-1);
+}
+.bui-card-detail,
+.bui-card-reason {
+	color: var(--color-text-muted);
+}
+.bui-card-facts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-1) var(--space-3);
+	font-variant-numeric: tabular-nums;
+}

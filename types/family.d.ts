@@ -203,6 +203,10 @@ export class FamilyBar extends Component {
 	/** The copy in English and Spanish (0.7.2). */
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: FamilyBarOptions);
+	/** The bar an element draws (0.16.0). */
+	static of(element: Element | null): FamilyBar | null;
+	/** A region of the product's own the menu button opens (0.16.0, a merged sidebar), or null. */
+	set toggle(value: { controls: string; expanded?: boolean; onchange?: (expanded: boolean) => void } | null);
 	readonly state: 'loading' | 'unavailable' | 'none' | 'ready';
 	descriptor: FamilyDescriptor | FamilyUnavailable | FamilyNone | null;
 	set fallback(value: FamilyFallback | null);

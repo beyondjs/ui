@@ -2,6 +2,7 @@ import { Component } from '../core/component.js';
 import { el, fill } from '../core/element.js';
 import { PagePanel } from './panel.js';
 import { PageDock } from './dock.js';
+import { Primaries } from '../core/primaries.js';
 
 const templates = Object.freeze(['overview', 'list', 'detail', 'settings', 'task', 'tool', 'thread']);
 const widths = Object.freeze(['fluid', 'standard', 'form', 'reading', 'thread']);
@@ -53,6 +54,7 @@ export class Page extends Component {
 	#aside;
 	#panel = null;
 	#dock = null;
+	#primaries = null;
 
 	/**
 	 * @param {object} [options]
@@ -86,6 +88,8 @@ export class Page extends Component {
 		this.main = children;
 		this.dock = dock;
 		this.aside = aside;
+		// One primary action per region, warned in a development build (0.16.0, DQ-09)
+		if (Primaries.enabled) this.#primaries = new Primaries({ root: this.#element });
 	}
 
 	/** The panel kept in view (`PagePanel`), when the page was made with `panel`; null otherwise. */
@@ -149,6 +153,7 @@ export class Page extends Component {
 	}
 
 	destroy() {
+		this.#primaries?.destroy();
 		this.#panel?.destroy();
 		this.#dock?.destroy();
 		super.destroy();

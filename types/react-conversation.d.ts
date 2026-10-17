@@ -22,6 +22,8 @@ export interface ComposerProps {
 	/** Sends; a rejection gives the text back. Read from the latest props. */
 	onSubmit: (message: ComposerMessage) => Promise<unknown> | unknown;
 	placeholder?: string | null;
+	/** The step a message needs first (0.16.0, DQ-03); `onSelect` is read from the latest props. */
+	step?: { label: string; onSelect: (input: { text: string }) => unknown } | null;
 	/** The state line above the box: text, React content, or `{ text, action }` with the action React content or `{ label, onSelect }` (0.11.0). */
 	status?: ReactNode | { text: ReactNode; action?: ReactNode | { label: string; onSelect?: (() => unknown) | null } | null };
 	/** The turn's choices at the toolbar's start, React content (0.11.0). */

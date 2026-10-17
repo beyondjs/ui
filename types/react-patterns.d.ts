@@ -7,6 +7,7 @@ export type { StatusState, StatusTone, ChecklistState, ChecklistStep } from './p
 export { Floating } from './dom.js';
 export type { FloatingAnchor, FloatingOptions, FloatingRefusal } from './dom.js';
 export * from './react-table.js';
+export * from './react-command.js';
 
 type Copies = { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 
@@ -38,5 +39,5 @@ export namespace Checklist { const labels: Copies; }
 export function EmptyState(props: { kind?: 'empty' | 'match' | 'context'; title: string; text?: string | null; action?: { label: string; href?: string | null; onSelect?: ((event: Event) => void) | null } | null; onClear?: (() => void) | null; checklist?: { title?: string | null; steps: Array<{ key: string; title: string; detail?: string | null; state?: ChecklistState; reason?: string | null; action?: { label: string; href?: string | null } | null }> } | null; glyph?: string | null; labels?: Copy }): ReactElement;
 export namespace EmptyState { const labels: Copies; }
 
-export function CommandCard(props: { title: string; command: string; detail?: string | null; scope?: { label: string; checked?: boolean } | null; state?: 'pending' | 'allowed' | 'denied'; onAllow: (answer: { scope: boolean }) => unknown; onDeny: (answer: { scope: boolean }) => unknown; /** Takes focus when true */ focus?: boolean; labels?: Copy }): ReactElement;
+export function CommandCard(props: { title: string; command: string; detail?: string | null; scope?: { label: string; checked?: boolean } | null; state?: 'pending' | 'allowed' | 'denied'; onAllow?: (answer: { scope: boolean }) => unknown; onDeny?: (answer: { scope: boolean }) => unknown; /** 0.16.0 */ decisions?: import('./patterns.js').CommandDecision[] | null; onDecide?: ((answer: import('./patterns.js').CommandAnswer) => unknown) | null; editable?: boolean; /** Takes focus when true */ focus?: boolean; labels?: Copy }): ReactElement;
 export namespace CommandCard { const labels: Copies; }

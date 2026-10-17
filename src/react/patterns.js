@@ -44,10 +44,11 @@ export function EmptyState({ kind = 'empty', title, text = null, action = null, 
 	return h('div', { ref: host, className: 'bui-host' });
 }
 
-/** A request waiting for the person's answer; `onAllow` and `onDeny` may return a promise. */
-export function CommandCard({ title, command, detail = null, scope = null, state = 'pending', onAllow, onDeny, focus = false, labels }) {
-	const latest = useLatest({ onAllow, onDeny });
-	const [host, card] = useInstance(() => new Card({ title, command, detail, scope, state, labels, allow: answer => latest.current.onAllow?.(answer), deny: answer => latest.current.onDeny?.(answer) }), [title, command, detail, scope?.label, labels]);
+/** A request waiting for the person's answer; `onAllow` and `onDeny` (or, with `decisions`, `onDecide`, 0.16.0) may return a promise. */
+export function CommandCard({ title, command, detail = null, scope = null, state = 'pending', onAllow = null, onDeny = null, decisions = null, onDecide = null, editable = false, focus = false, labels }) {
+	const latest = useLatest({ onAllow, onDeny, onDecide });
+	const decide = onDecide ? answer => latest.current.onDecide?.(answer) : null;
+	const [host, card] = useInstance(() => new Card({ title, command, detail, scope, state, labels, decisions, editable, ondecide: decide, allow: answer => latest.current.onAllow?.(answer), deny: answer => latest.current.onDeny?.(answer) }), [title, command, detail, scope?.label, labels, JSON.stringify(decisions), editable, Boolean(onDecide)]);
 	useSync(card, current => (current.state = state), [state]);
 	useSync(card, current => focus && current.focus(), [focus]);
 	return h('div', { ref: host, className: 'bui-host' });

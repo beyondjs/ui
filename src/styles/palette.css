@@ -1,0 +1,123 @@
+/* The command palette (CommandPalette, 0.16.0, DQ-21): a modal dialog with no title bar, one large field,
+   grouped results with their shortcuts at the end, near the top of the window. */
+.bui-palette {
+	box-sizing: border-box;
+	width: min(40rem, calc(100vw - 2 * var(--space-4)));
+	max-height: min(32rem, calc(100dvh - 6rem));
+	margin: 12vh auto auto;
+	padding: 0;
+	overflow: hidden;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-base);
+	background: var(--color-surface);
+	color: var(--color-text);
+	box-shadow: var(--elevation-dialog);
+}
+.bui-palette[open] {
+	display: flex;
+	flex-direction: column;
+	animation: bui-enter var(--motion-quick) var(--motion-ease);
+}
+.bui-palette::backdrop {
+	background: var(--overlay-scrim);
+}
+.bui-palette-search {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	padding: var(--space-3) var(--space-4);
+	border-bottom: 1px solid var(--color-border);
+	color: var(--color-text-muted);
+}
+.bui-palette-field {
+	flex: 1;
+	min-width: 0;
+	min-height: var(--bui-target);
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--color-text);
+	font: inherit;
+	font-size: var(--text-title-3);
+	outline: none;
+}
+.bui-palette-list {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	padding: var(--space-1) var(--space-2) var(--space-2);
+}
+.bui-palette-group + .bui-palette-group {
+	margin-top: var(--space-2);
+}
+.bui-palette-heading,
+.bui-palette-state {
+	margin: 0;
+	padding: var(--space-2) var(--space-2) var(--space-1);
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+}
+.bui-palette-state {
+	padding-top: 0;
+	font-weight: var(--weight-regular);
+}
+.bui-palette-option {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	min-height: var(--bui-target);
+	padding: var(--space-1) var(--space-2);
+	border-radius: var(--radius-control);
+	font-size: var(--text-small);
+	cursor: pointer;
+}
+.bui-palette-option[aria-selected='true'] {
+	background: var(--color-surface-selected);
+	box-shadow: inset 2px 0 0 var(--color-accent);
+}
+.bui-palette-glyph {
+	display: inline-flex;
+	flex: none;
+	width: 16px;
+	color: var(--color-text-muted);
+}
+.bui-palette-glyph > .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-palette-words {
+	display: flex;
+	flex: 1;
+	align-items: baseline;
+	gap: var(--space-2);
+	min-width: 0;
+}
+.bui-palette-label {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.bui-palette-detail {
+	min-width: 0;
+	overflow: hidden;
+	color: var(--color-text-muted);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.bui-palette-keys {
+	flex: none;
+	color: var(--color-text-muted);
+	font-family: var(--font-mono);
+	font-size: var(--text-label);
+}
+.bui-palette-status {
+	margin: 0;
+	padding: var(--space-2) var(--space-4);
+	border-top: 1px solid var(--color-border);
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+}
+.bui-palette-status:empty {
+	display: none;
+}

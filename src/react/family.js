@@ -112,13 +112,15 @@ function relay(notice, latest) {
  * `action` and `search` (its `source` and `all` read from the latest props too), and `shortcut` makes
  * ⌘K / Ctrl+K open the search.
  */
-export function Sidebar({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onNavigate = null, labels, shortcut = false }) {
+export function Sidebar({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onNavigate = null, labels, shortcut = false, merge = false }) {
 	const latest = useLatest({ onNavigate, search, groups });
 	const objects = () => objected(groups, latest);
 	const [host, sidebar] = useInstance(() => new Sections({ product, groups: objects(), context, cut, section, action, search: finding(search, () => latest.current.search), labels, shortcut, onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null }), [product, cut, labels, Boolean(onNavigate), Boolean(shortcut)]);
 	useSync(sidebar, current => (current.groups = objects()), [JSON.stringify(groups)]);
 	useSync(sidebar, current => (current.context = context), [JSON.stringify(context)]);
 	useSync(sidebar, current => (current.section = section), [section]);
+	// One bar on a phone (0.16.0, DQ-19): the page's family bar opens this sidebar's drawer
+	useSync(sidebar, current => merge && current.merge(Bar.of(document.querySelector('.bui-family'))), [merge]);
 	useSync(sidebar, current => (current.action = action), [JSON.stringify(action)]);
 	useSync(sidebar, current => (current.search = finding(search, () => latest.current.search)), [Boolean(search), search?.label, search?.placeholder ?? null, search?.bound, search?.delay, Boolean(search?.all)]);
 	return h('div', { ref: host, className: 'bui-host bui-sidebar-host' });

@@ -127,6 +127,8 @@ export interface ComposerOptions extends ComposerEdges {
 	/** Sends; a rejection gives the text back to the field. */
 	onsubmit: (message: ComposerMessage) => Promise<unknown>;
 	placeholder?: string | null;
+	/** The step a message needs first (0.16.0, DQ-03): the primary action names it and performs it. */
+	step?: import('./command.js').ComposerStepOption | null;
 	/** The state line above the box: one sentence, only when it changes what sending does, with its action (0.11.0). */
 	status?: Content | ComposerStatusLine | null;
 	/** The turn's choices at the toolbar's start, before the tools (0.11.0). */
@@ -196,6 +198,8 @@ export class Composer extends Component {
 	readonly toolbar: ComposerToolbar;
 	/** What Options says beside its glyph while folded (0.11.2). */
 	set summary(text: string | null);
+	/** The step a message needs first, or null (0.16.0). */
+	set step(value: import('./command.js').ComposerStepOption | null);
 	/** The work surface where a drop attaches too; needs `attach` (0.11.2). */
 	set zone(element: Element | null);
 	/** Opens the platform's file chooser, as Attach does (0.11.0). */

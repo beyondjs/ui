@@ -127,6 +127,10 @@ export class Sidebar extends Component {
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: SidebarOptions);
 	readonly mode: 'permanent' | 'drawer';
+	/** FamilyBar's `toggle` for this drawer (0.16.0). */
+	readonly toggle: { controls: string; expanded: boolean; onchange: (expanded: boolean) => void };
+	/** One bar on a phone (0.16.0, DQ-19): the bar's menu button opens the drawer and the product row goes. */
+	merge(bar: import('./family.js').FamilyBar): void;
 	/** Whether the drawer is open. */
 	readonly expanded: boolean;
 	/** Patched by keys in both forms (0.10.0): focus stays where it is. */

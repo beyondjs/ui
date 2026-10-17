@@ -32,6 +32,13 @@ import { Manage } from './manage.js';
  * bar then shows the organization only, never "Choose a project".
  */
 export class FamilyBar extends Component {
+	static #bars = new WeakMap();
+
+	/** The bar drawn by an element (0.16.0), for a part that is made apart from it (a React sidebar merging with it). */
+	static of(element) {
+		return element ? (FamilyBar.#bars.get(element) ?? null) : null;
+	}
+
 	/** The copy in English and Spanish (0.7.2): `new FamilyBar({ …, labels: FamilyBar.labels.es })`. */
 	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ ...spanish }) });
 
@@ -91,6 +98,7 @@ export class FamilyBar extends Component {
 		this.#start = bar.querySelector('.bui-header-start');
 		this.#start.classList.add('bui-family-brand');
 		bar.addEventListener('click', event => this.#navigate(event));
+		FamilyBar.#bars.set(bar, this);
 		this.#watch();
 		this.#draw();
 	}
@@ -138,6 +146,11 @@ export class FamilyBar extends Component {
 
 	get expanded() {
 		return this.#header.expanded;
+	}
+
+	/** Gives the bar's menu button a region of the product's own to open (0.16.0, a merged sidebar), or null. */
+	set toggle(value) {
+		this.#header.toggle = value;
 	}
 
 	/** Opens or closes the product's own region named by `toggle`. */

@@ -4,6 +4,7 @@ import { Labels } from '../core/labels.js';
 import { ComposerKeys } from './keys.js';
 import { ComposerField } from './field.js';
 import { ComposerActions } from './actions.js';
+import { ComposerStep } from './step.js';
 import { ComposerStatus } from './status.js';
 import { ComposerContext } from './context.js';
 import { ComposerSend } from './send.js';
@@ -49,9 +50,10 @@ export class Composer extends Component {
 	#busy = false;
 	#tray = el('div', { class: 'bui-composer-tray', hidden: true });
 	#expand;
+	#step = new ComposerStep();
 
 	/** @param {import('./options.js').ComposerOptions} options what the composer shows and how it sends */
-	constructor({ label, onsubmit, placeholder = null, status = null, tools = [], extras = [], actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value = '', min = 1, max = 12, name = null, onchange = null, explain = undefined, labels = {}, settings = [], attach = null, attachments = [], onsuggest = null, suggest = null, locale = undefined, compact = true, summary = null, tray = [], commands = null, recall = null, dictation = null }) {
+	constructor({ label, onsubmit, placeholder = null, status = null, tools = [], extras = [], actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value = '', min = 1, max = 12, name = null, onchange = null, explain = undefined, labels = {}, settings = [], attach = null, attachments = [], onsuggest = null, suggest = null, locale = undefined, compact = true, summary = null, tray = [], commands = null, recall = null, dictation = null, step = null }) {
 		super();
 		if (typeof onsubmit !== 'function') throw new TypeError('A composer sends through onsubmit');
 		this.#labels = new Labels(copy.en, labels);
@@ -75,8 +77,7 @@ export class Composer extends Component {
 		control.addEventListener('input', () => (this.#say(null), this.#onchange?.(control.value)));
 		// The touch screen may change (a keyboard attached): the hint is read again when the field takes focus
 		control.addEventListener('focus', () => this.#instruct());
-		// Through the setters, in this order
-		Object.assign(this, { status, settings, attachments, tools, extras, actions, stop, summary, tray });
+		Object.assign(this, { status, settings, attachments, tools, extras, actions, stop, summary, tray, step });
 		this.#disabled = disabled || null;
 		this.#busy = Boolean(busy);
 		this.#draw();
@@ -186,6 +187,12 @@ export class Composer extends Component {
 		this.#instruct();
 	}
 
+	/** The step a message needs first, `{ label, run }` ("Choose a machine and send"), or null (0.16.0, DQ-03). */
+	set step(value) {
+		this.#actions.step = this.#step.use(value);
+		this.#instruct();
+	}
+
 	/** `{ label, run, busy? }` while work runs (Interrupt), or null. */
 	set stop(value) {
 		this.#actions.stop = value;
@@ -246,8 +253,9 @@ export class Composer extends Component {
 		super.destroy();
 	}
 
-	#send(action, pressed) {
-		if (this.#sender.sending || this.#busy || this.#disabled || this.destroyed) return Promise.resolve(false);
+	#send(action, pressed, stepped = false) {
+		if (this.#sender.sending || this.#busy || this.#disabled || this.destroyed || this.#step.running) return Promise.resolve(false);
+		if (this.#step.active && !stepped) return this.#step.pass({ text: this.#field.value, draw: () => this.#draw(), send: () => this.#send(action, pressed, true) });
 		// What Options showed folds again once the message is sent (a refused one keeps it shown)
 		return this.#sender.send(action, pressed).then(sent => (sent && (this.#toolbar.fold.toggle(false), this.#expand.close()), sent));
 	}
@@ -267,7 +275,7 @@ export class Composer extends Component {
 	}
 
 	#draw() {
-		const busy = this.#busy || this.#sender.sending;
+		const busy = this.#busy || this.#sender.sending || this.#step.running;
 		this.#actions.draw({ disabled: this.#disabled, busy });
 		this.#element.toggleAttribute('data-busy', busy);
 		this.#element.toggleAttribute('data-disabled', Boolean(this.#disabled));

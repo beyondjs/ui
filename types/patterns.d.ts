@@ -90,12 +90,32 @@ export class EmptyState extends Component {
 	readonly checklist: Checklist | null;
 }
 
+/** A decision a `CommandCard` offers (0.16.0): "Allow once", "Allow for this conversation", "Deny with a note". */
+export interface CommandDecision {
+	value: string;
+	label: string;
+	kind: 'allow' | 'deny';
+	keys?: 'Enter' | 'Escape' | null;
+	/** Asks for a note first ("Tell it what to do instead"). */
+	note?: boolean | { label?: string; placeholder?: string };
+	/** What the card says once it is decided (its label by default). */
+	said?: string;
+}
+export interface CommandAnswer {
+	value: string;
+	kind: 'allow' | 'deny';
+	note: string | null;
+	/** The command as corrected (`editable`), else null. */
+	command: string | null;
+	scope: boolean;
+}
+
 /** A request waiting for the person's answer, with Enter and Escape while focused (DQ-13). */
 export class CommandCard extends Component {
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	/** Lines shown before Show all (8). */
 	static lines: number;
-	constructor(options: { title: string | Node; command: string; detail?: string | Node | null; scope?: { label: string; checked?: boolean } | null; allow: (answer: { scope: boolean }) => unknown; deny: (answer: { scope: boolean }) => unknown; state?: 'pending' | 'allowed' | 'denied'; labels?: Copy });
+	constructor(options: { title: string | Node; command: string; detail?: string | Node | null; scope?: { label: string; checked?: boolean } | null; allow?: ((answer: { scope: boolean; note?: string; command?: string }) => unknown) | null; deny?: ((answer: { scope: boolean; note?: string; command?: string }) => unknown) | null; state?: 'pending' | 'allowed' | 'denied'; labels?: Copy; /** Scoped decisions (0.16.0, CNV-10) */ decisions?: CommandDecision[] | null; ondecide?: ((answer: CommandAnswer) => unknown) | null; /** The command may be corrected before allowing (0.16.0) */ editable?: boolean });
 	state: 'pending' | 'allowed' | 'denied';
 	focus(): void;
 	/** Answers as the person would; whether the answer was taken. */

@@ -27,6 +27,7 @@ export class ComposerActions {
 	#label = '';
 	#others = [];
 	#disabled = null;
+	#step = null;
 
 	/**
 	 * @param {object} options
@@ -57,9 +58,16 @@ export class ComposerActions {
 		return this.#reason.id;
 	}
 
-	/** The primary action's id and label. */
+	/** The primary action's id and label (the step's while a step is needed, 0.16.0). */
 	get primary() {
-		return { id: this.#primary, label: this.#label };
+		return { id: this.#primary, label: this.#step?.label ?? this.#label };
+	}
+
+	/** The step a message needs first (0.16.0, DQ-03): the primary button names it and performs it; null restores it. */
+	set step(step) {
+		this.#step = step ?? null;
+		this.#send.label = this.#step?.label ?? this.#label;
+		this.#send.element.toggleAttribute('data-step', Boolean(this.#step));
 	}
 
 	/** `[{ id, label, primary? }]`: the first marked primary (else the first) is the button, the others the split menu. */
@@ -69,7 +77,7 @@ export class ComposerActions {
 		const primary = actions.find(action => action.primary) ?? actions[0];
 		this.#primary = String(primary.id ?? 'send');
 		this.#label = primary.label;
-		this.#send.label = primary.label;
+		this.#send.label = this.#step?.label ?? primary.label;
 		this.#others = actions.filter(action => action !== primary).map(action => ({ id: String(action.id ?? action.label), label: action.label }));
 		if (this.#others.length && !this.#menu) {
 			this.#menu = new ActionMenu({ label: null, name: this.#labels.text('more'), glyph: 'chevron', items: [], align: 'end' });

@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Page as Region } from '../dom/page/page.js';
 import { PagePanel } from '../dom/page/panel.js';
+import { Primaries } from '../dom/core/primaries.js';
 import { PageDock } from '../dom/page/dock.js';
 import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
@@ -56,6 +57,12 @@ export function Page({ template = 'detail', width = null, arrival = null, header
 	const docking = template === 'thread';
 	const holder = useRef(null);
 	const end = useRef(null);
+	// One primary action per region, warned in a development build (0.16.0, DQ-09)
+	useLayoutEffect(() => {
+		if (!Primaries.enabled || !frame.current) return undefined;
+		const watched = new Primaries({ root: frame.current });
+		return () => watched.destroy();
+	}, []);
 	useLayoutEffect(() => {
 		if (!docking) return undefined;
 		const watched = new PageDock({ element: holder.current, end: end.current });

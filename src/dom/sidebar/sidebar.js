@@ -5,6 +5,7 @@ import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { SidebarSections } from './sections.js';
 import { Drawer } from './drawer.js';
+import { SidebarMerge } from './merge.js';
 import { SidebarFolds } from './folds.js';
 import { SidebarShortcut } from './shortcut.js';
 import { Hint } from '../core/hint.js';
@@ -78,6 +79,7 @@ export class Sidebar extends Component {
 	#row;
 	#button;
 	#drawer;
+	#merge = new SidebarMerge();
 	#sections;
 	#labels;
 	#cut;
@@ -118,7 +120,7 @@ export class Sidebar extends Component {
 		this.#panel = el('div', { class: 'bui-sidebar-panel' }, [this.#sections.panel]);
 		this.#button = el('button', { type: 'button', class: 'bui-sidebar-button', 'aria-haspopup': 'dialog', 'aria-expanded': 'false', 'aria-controls': id, onclick: () => this.open() });
 		this.#row = el('div', { class: 'bui-sidebar-row' }, [this.#button]);
-		this.#drawer = new Drawer({ id, title: product, name, close: this.#labels.text('close'), onclose: () => this.#button.setAttribute('aria-expanded', 'false') });
+		this.#drawer = new Drawer({ id, title: product, name, close: this.#labels.text('close'), onclose: () => (this.#button.setAttribute('aria-expanded', 'false'), this.#merge.closed()) });
 		this.#element = el('div', { class: 'bui-sidebar' }, [this.#panel, this.#row, this.#drawer.element]);
 		this.#element.addEventListener('click', event => this.#navigate(event));
 		this.#hint = new Hint(this.#panel);
@@ -205,8 +207,19 @@ export class Sidebar extends Component {
 	/** Opens the drawer (below the cut only). */
 	open() {
 		if (this.mode !== 'drawer' || this.#drawer.shown) return;
-		this.#drawer.open(this.#button);
+		this.#drawer.open(this.#merge.trigger ?? this.#button);
 		this.#button.setAttribute('aria-expanded', String(this.#drawer.shown));
+	}
+
+	/** FamilyBar's `toggle` for this drawer (0.16.0, DQ-19): pass it to the bar, then `merge(bar)`. */
+	get toggle() {
+		return this.#merge.toggle(this.#drawer.element.id, open => (open ? this.open() : this.close()));
+	}
+
+	/** One bar on a phone (0.16.0, DQ-19): the bar's menu button opens the drawer and the product row goes. */
+	merge(bar) {
+		this.#merge.attach(bar, this.#element, this.toggle);
+		this.#merge.mode(this.mode);
 	}
 
 	/** Closes the drawer and returns focus to the row's button. */
@@ -260,6 +273,7 @@ export class Sidebar extends Component {
 		const mode = wide ? 'permanent' : 'drawer';
 		if (this.#element.dataset.mode === mode) return;
 		this.#element.dataset.mode = mode;
+		this.#merge.mode(mode);
 		this.#panel.hidden = !wide;
 		this.#row.hidden = wide;
 		if (!wide || !this.#drawer.shown) return;

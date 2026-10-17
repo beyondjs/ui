@@ -135,6 +135,8 @@ export class Header extends Component {
 	set context(value: Crumb[] | Node | null);
 	set nav(value: Crumb[] | Node | null);
 	set end(slots: { notifications?: Node | null; account?: Node | null });
+	/** An external region the toggle opens (0.16.0), or null. */
+	set toggle(value: { controls: string; expanded?: boolean; onchange?: (expanded: boolean) => void } | null);
 }
 
 export interface NotificationEntryOptions {
