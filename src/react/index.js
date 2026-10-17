@@ -40,3 +40,6 @@ export { useInstance } from './hooks.js';
 export { Diff } from './diff.js';
 export { Highlighter } from '../dom/code/highlighter.js';
 export { ActionLine } from './actions.js';
+export { ListRow, Checklist, EmptyState, CopyValue, CommandCard } from './patterns.js';
+export { DataTable } from './table.js';
+export { Floating } from '../dom/core/floating.js';

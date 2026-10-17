@@ -285,3 +285,6 @@ export * from './resource.js';
 export * from './shared.js';
 export * from './diff.js';
 export * from './edges.js';
+export * from './floating.js';
+export * from './patterns.js';
+export * from './table.js';

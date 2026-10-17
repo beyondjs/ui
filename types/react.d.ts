@@ -298,3 +298,5 @@ export { consequence } from './dom.js';
 export * from './react-conversation.js';
 export * from './react-resource.js';
 export * from './react-shared.js';
+export * from './react-patterns.js';
+export * from './react-table.js';
