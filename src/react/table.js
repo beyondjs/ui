@@ -36,11 +36,13 @@ export function DataTable({ label, columns, rows = [], rowKey = null, search = t
 			}),
 		[label, String(search), size, labels, Boolean(link), Boolean(onOpen), Boolean(onRetry), Boolean(group), columns.map(column => column.key).join('|')]
 	);
-	// Each drawn cell asks the latest column definition for its React content.
+	// Each drawn cell is a holder; its React content is rendered with every render of the table (0.16.2),
+	// so a cell whose content changes while its row does not is drawn again, keyed by its row and column.
 	function cell(row, index) {
 		const holder = document.createElement('span');
 		holder.className = 'bui-cell';
-		cells.current.push({ holder, content: latest.current.columns[index].render(row) });
+		const key = latest.current.rowKey?.(row) ?? row?.id ?? cells.current.length;
+		cells.current.push({ holder, row, index, key: `${key}:${latest.current.columns[index]?.key ?? index}` });
 		return holder;
 	}
 	useSync(table, current => (current.rows = rows), [rows]);
@@ -51,7 +53,7 @@ export function DataTable({ label, columns, rows = [], rowKey = null, search = t
 		if (status === 'loading' || status?.failed !== undefined) current.status = status;
 		else if (current.status !== 'ready') current.rows = rows;
 	}, [JSON.stringify(status)]);
-	return h('div', { ref: host, className: 'bui-host' }, portals.map((portal, index) => ReactDOM.createPortal(portal.content, portal.holder, `cell-${index}`)));
+	return h('div', { ref: host, className: 'bui-host' }, portals.map(portal => ReactDOM.createPortal(columns[portal.index]?.render?.(portal.row) ?? null, portal.holder, portal.key)));
 }
 
 // The copy in English and Spanish, as on the DOM class.

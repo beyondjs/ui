@@ -20,6 +20,7 @@
 	container: bui-row / inline-size;
 	position: relative;
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	gap: var(--space-3);
 	min-height: var(--bui-target);
@@ -59,7 +60,8 @@
 }
 .bui-row-main {
 	display: grid;
-	flex: 1 1 auto;
+	/* Name and end share a line while both fit; a narrow row puts the end under the name (0.16.2) */
+	flex: 1 1 12rem;
 	min-width: 0;
 }
 .bui-row-title {
@@ -113,7 +115,9 @@ span.bui-row-title {
 }
 .bui-row-end {
 	display: flex;
-	flex: none;
+	flex: 0 1 auto;
+	flex-wrap: wrap;
+	min-width: 0;
 	align-items: center;
 	gap: var(--space-2) var(--space-3);
 	color: var(--color-text-muted);
@@ -144,7 +148,7 @@ span.bui-row-title {
 }
 @container bui-row (max-width: 30rem) {
 	.bui-row-end {
-		flex-wrap: wrap;
+		flex: 1 1 100%;
 		justify-content: flex-start;
 	}
 	.bui-row-fact {

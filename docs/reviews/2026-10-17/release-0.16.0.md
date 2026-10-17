@@ -73,3 +73,23 @@ A full 290-plus-check run per engine was not repeated for this release.
   `projects[i].state: 'archived'` rows in the project menu. New label `archived` in `FamilyBar.labels`.
 - Adoption: the Desktop (Beyond Home) passes `product: 'home'` or keeps `desktop`; products re-vendoring get the
   name and the mark with no change. Tests: `audit-family.test.mjs`; the family bar checks in three engines.
+
+## Addendum 0.16.2
+
+What the products' adoptions of 0.16.1 found, corrected:
+
+1. **Organizations in a merged bar without projects.** `Location.sections()` returned nothing for
+   `projects: false`, so a merged bar on a touch screen under 380 px (which folds the location into the
+   product menu) lost the organization menu, and Accounts could not merge. It now carries the organizations.
+2. **A narrow `ListRow`.** Its end never shrank (`flex: none`) and kept name and end on one line. The row
+   wraps (`flex-wrap: wrap`, the name's basis 12rem), the end shrinks (`flex: 0 1 auto; min-width: 0`) and
+   wraps, and under 30rem it takes its own line under the name.
+3. **A narrow `DataTable`'s empty cells.** An empty value (`''`, null, an empty node; never a React cell's
+   holder) marks its cell `data-empty`, which the narrow layout leaves out; the " · " separators go before
+   each shown cell after another shown one, so no separator stands around an empty cell or at the end.
+4. **React `DataTable` cells.** A cell's React content is rendered with every render of the table, keyed by
+   its row (`rowKey`, else `id`) and column, so a cell whose content changes while its row does not is drawn
+   again (it was the content captured when the DOM drew the row).
+
+Tests: `tests/adoption.test.mjs`. Browser: the family bar, one bar on a phone, `patterns` (ListRow and
+DataTable at 390 px), navigation and sidebar checks in Chrome, Firefox and WebKit.

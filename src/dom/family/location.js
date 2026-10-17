@@ -71,7 +71,10 @@ export class Location extends Component {
 
 	/** New copies of the location menu's sections (organizations, then projects), for another menu to carry. */
 	sections() {
-		return this.#chooser() ? this.#sections() : [];
+		if (this.#chooser()) return this.#sections();
+		// A product without projects still carries its organizations (0.16.2: a merged bar on a narrow touch screen folds the location into the product menu)
+		if (this.#options.projects === false && this.#organizations.current) return [this.#organizations.section()].filter(section => section.items.length);
+		return [];
 	}
 
 	/** The organization in view (`{ id?, name, role? }`), or null. */

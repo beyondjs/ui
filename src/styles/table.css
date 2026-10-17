@@ -101,11 +101,15 @@
 		color: var(--color-text-muted);
 		font-size: var(--text-small);
 	}
-	.bui-data td:not(:last-child)::after {
-		content: ' ·';
+	/* The others in one line joined by " · ", an empty cell leaving no separator (0.16.2) */
+	.bui-data td[data-empty] {
+		display: none;
 	}
 	.bui-data td::before {
 		content: none;
+	}
+	.bui-data td:not([data-empty]) ~ td:not([data-empty])::before {
+		content: '· ';
 	}
 	.bui-data-group {
 		border-bottom: 0;
