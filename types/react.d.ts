@@ -248,7 +248,6 @@ export namespace Unavailable { const labels: Copies; }
 export namespace useToaster { const labels: Copies; }
 export namespace Freshness { const labels: Copies; }
 export namespace TechnicalDetails { const labels: Copies; }
-
 export interface NotificationEntryHandle {
 	refresh(): void;
 	/** Opens the panel. */
@@ -299,4 +298,3 @@ export * from './react-conversation.js';
 export * from './react-resource.js';
 export * from './react-shared.js';
 export * from './react-patterns.js';
-export * from './react-table.js';

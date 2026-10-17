@@ -27,7 +27,7 @@ export namespace Facts { const labels: Copies; }
 export function Meter(props: MeterValues & { label: string; clock?: Clock; locale?: string; labels?: Copy }): ReactElement;
 export namespace Meter { const labels: Copies; }
 /** A compact choice (0.11.0): ChoiceMenu's props and `state`, its own state in words. */
-export function ChoiceChip(props: { label: string; options: Array<ChoiceMenuOption | null | false>; value?: string | null; placeholder?: string | null; actions?: Array<ReactChoiceAction | null | false>; disabled?: boolean; align?: 'start' | 'end'; placement?: 'auto' | 'below' | 'above'; search?: boolean | 'auto' | number; statement?: boolean; name?: string | null; onChange?: ((value: string) => void) | null; labels?: Copy; state?: [string, FactsTone] | null }): ReactElement;
+export function ChoiceChip(props: { label: string; options: Array<ChoiceMenuOption | null | false>; value?: string | null; placeholder?: string | null; actions?: Array<ReactChoiceAction | null | false>; disabled?: boolean; align?: 'start' | 'end'; placement?: 'auto' | 'below' | 'above'; search?: boolean | 'auto' | number; statement?: boolean; name?: string | null; onChange?: ((value: string) => void) | null; labels?: Copy; state?: [string, FactsTone] | null; /** The slot's icon (0.15.0) */ glyph?: string | null }): ReactElement;
 export namespace ChoiceChip { const labels: Copies; }
 
 // Only the declarations marked `export` are public.

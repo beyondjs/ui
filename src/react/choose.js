@@ -38,9 +38,10 @@ export function ChoiceChip(props) {
 }
 
 /** The React form of a `ChoiceMenu` or a `ChoiceChip`, driven by its DOM class. */
-function useChoice(Class, { label, options, value = null, placeholder = null, actions = [], disabled = false, align = 'start', placement = 'auto', search = 'auto', statement = true, name = null, onChange = null, labels, state = null }) {
+function useChoice(Class, { label, options, value = null, placeholder = null, actions = [], disabled = false, align = 'start', placement = 'auto', search = 'auto', statement = true, name = null, onChange = null, labels, state = null, glyph = null }) {
 	const latest = useLatest({ onChange, actions });
-	const [host, menu] = useInstance(() => new Class({ label, options: [], placeholder, align, placement, search, statement, name, labels, onchange: chosen => latest.current.onChange?.(chosen) }), [label, placeholder, align, placement, String(search), statement, name, labels]);
+	const chip = Class === Chip ? { glyph } : {};
+	const [host, menu] = useInstance(() => new Class({ label, options: [], placeholder, align, placement, search, statement, name, labels, ...chip, onchange: chosen => latest.current.onChange?.(chosen) }), [label, placeholder, align, placement, String(search), statement, name, labels, glyph]);
 	useSync(menu, current => Class === Chip && (current.state = state), [JSON.stringify(state)]);
 	useSync(menu, current => {
 		current.actions = relay(actions, latest, 'actions');

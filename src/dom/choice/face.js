@@ -12,7 +12,8 @@ export class ChoiceFace {
 	/**
 	 * Draws the button for the option `chosen` (or the placeholder when none is chosen). A chip (0.11.0)
 	 * shows its state's word whenever there is one, the dot only beside it, and takes its own `state`
-	 * over the chosen option's.
+	 * over the chosen option's. With nothing chosen and no placeholder of the product's, a chip's value
+	 * is its slot's name ("Machine"), so an empty tray never reads "Choose · Choose" (0.15.0).
 	 */
 	static draw(button, label, chosen, placeholder, face = null) {
 		const own = face?.state ?? null;
@@ -20,14 +21,18 @@ export class ChoiceFace {
 		const attention = tone === 'danger' || tone === 'warning';
 		button.dataset.tone = tone ?? '';
 		button.classList.toggle('bui-choice-empty', !chosen);
-		const value = el('span', { class: 'bui-choice-value' }, [content(chosen ? chosen.label : placeholder)]);
-		const name = el('span', { class: 'bui-choice-label', text: label });
+		const slot = Boolean(face?.slot && !chosen);
+		const value = el('span', { class: 'bui-choice-value' }, [content(chosen ? chosen.label : slot ? label : placeholder)]);
+		const name = slot ? null : el('span', { class: 'bui-choice-label', text: label });
 		if (face) {
+			// A chip with nothing chosen says its slot's name in the value's place, with its glyph (0.15.0, DQ-02)
+			const lead = face.glyph ? glyph(face.glyph) : null;
+			button.toggleAttribute('data-slot', slot);
 			// A chip: its muted label, the value, then the state's word with its dot beside it, never a dot alone
 			const word = state ? el('span', { class: `bui-status bui-status-${tone ?? 'neutral'} bui-chip-state`, 'data-tone': tone ?? 'neutral' }, [el('span', { class: 'bui-status-dot', 'aria-hidden': 'true' }), state]) : null;
 			// The whole face in words, for the tooltip of a composer that shortens it to its value (0.11.2)
-			button.setAttribute('data-bui-tip', [`${label}: ${value.textContent}`, state].filter(Boolean).join(' · '));
-			return button.replaceChildren(...[name, value, word, glyph('chevron')].filter(Boolean));
+			button.setAttribute('data-bui-tip', [slot ? label : `${label}: ${value.textContent}`, state].filter(Boolean).join(' · '));
+			return button.replaceChildren(...[lead, name, value, word, glyph('chevron')].filter(Boolean));
 		}
 		button.replaceChildren(
 			...[

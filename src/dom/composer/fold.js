@@ -21,6 +21,10 @@ import { Hint } from '../core/hint.js';
  * Since 0.11.2 a `summary` (the model that will run, "Opus 5.5") shows beside the glyph, so a folded
  * composer still says what sending uses; the control's name then says both ("Options · Opus 5.5").
  *
+ * Since 0.15.0 a chip asked to open while it is folded (a product's `/model` command calling
+ * `chip.open()`) is not a silent no-op (DQ-01): the chip's `bui-refused` shows what Options holds and the
+ * chip opens.
+ *
  * The control exists only while there is something to fold (Attach or at least one setting); a
  * product passes `compact: false` to keep the wrapped toolbar of 0.11.0.
  */
@@ -53,6 +57,7 @@ export class ComposerFold {
 		this.#button = el('button', { type: 'button', class: 'bui-icon-button bui-composer-more', 'aria-label': this.#name, 'aria-expanded': 'false', 'data-bui-hint': true, onclick: () => this.toggle() }, [glyph('more'), this.#summary]);
 		this.#hint = new Hint(this.#button);
 		bar.addEventListener('keydown', this.#escape);
+		root.addEventListener('bui-refused', this.#unfold);
 		this.#controls(parts);
 	}
 
@@ -109,8 +114,17 @@ export class ComposerFold {
 
 	destroy() {
 		this.#bar.removeEventListener('keydown', this.#escape);
+		this.#root.removeEventListener('bui-refused', this.#unfold);
 		this.#hint.destroy();
 	}
+
+	/** A folded control asked to open: show what Options holds, then let it open. */
+	#unfold = event => {
+		if (this.open || !this.available || !this.#parts.some(part => part.contains(event.target))) return;
+		event.preventDefault();
+		this.toggle(true);
+		event.detail?.retry?.();
+	};
 
 	/** Escape on Options or on what it shows folds it again, unless an open menu took the key. */
 	#escape = event => {

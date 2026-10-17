@@ -65,7 +65,8 @@ export class ActionMenu extends Component {
 	constructor(options: { label?: Content | null; name?: string | null; items: Array<MenuItem | null | false>; align?: 'start' | 'end'; glyph?: string | null; placement?: 'auto' | 'below' | 'above' });
 	readonly expanded: boolean;
 	set items(items: Array<MenuItem | null | false>);
-	open(index?: number): void;
+	/** Whether it opened (0.15.0): false when its button is not drawn. */
+	open(index?: number): boolean;
 	close(refocus?: boolean): void;
 }
 
@@ -78,7 +79,7 @@ export interface DisclosureOptions {
 	role?: string | null;
 	onchange?: ((open: boolean) => void) | null;
 	class?: string;
-	/** Where a floating panel opens (0.11.2): above when there is no room below (`auto`, default), or always on one side. */
+	/** The side a floating panel prefers (0.11.2; since 0.15.0 it flips when that side has no room and the other has more). */
 	placement?: 'auto' | 'above' | 'below';
 }
 export class Disclosure extends Component {
@@ -87,7 +88,8 @@ export class Disclosure extends Component {
 	readonly panel: HTMLElement;
 	readonly expanded: boolean;
 	toggle(): void;
-	open(): void;
+	/** Whether it opened (0.15.0): false when a floating panel's button is not drawn. */
+	open(): boolean;
 	close(refocus?: boolean): void;
 }
 

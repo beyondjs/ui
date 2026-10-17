@@ -4,6 +4,7 @@ import { Ids } from './core/ids.js';
 import { Interaction } from './core/interaction.js';
 import { Hint } from './core/hint.js';
 import { Leaving } from './core/leaving.js';
+import { Floating } from './core/floating.js';
 
 /**
  * A button that shows and hides a panel: the disclosure pattern.
@@ -22,10 +23,13 @@ import { Leaving } from './core/leaving.js';
  * picture keeps the panel's classes so it looks the same, so it never outlives a reopening: opening
  * again or destroying removes it, and an open panel has no copy beside it.
  *
- * A floating panel opens above its button when the viewport has no room for it below and more room
- * above (0.11.2, `placement: 'auto'`), as menus do; `placement: 'above'` always opens it above, for a
- * button whose page docks something under it (an answer's details over a docked composer), so it never
- * opens under what is docked or extends the page.
+ * A floating panel (one the stylesheet positions over the page) is placed by `Floating` since 0.15.0:
+ * in the top layer, on its preferred side (`placement: 'auto'` and `'below'` prefer below, `'above'` above,
+ * for a button whose page docks something under it) and flipped when that side has no room and the other
+ * has more, shifted and capped to the room, never under the family bar, and placed again on scroll and
+ * resize. A panel inside a header (the family bar's menus, a bell in a host's own bar) keeps the header's
+ * own geometry, and a panel in the page's flow (help) is not moved. A button that is not drawn opens
+ * nothing: `open()` returns false.
  */
 export class Disclosure extends Component {
 	#element;
@@ -36,7 +40,7 @@ export class Disclosure extends Component {
 	#releases = [];
 	#hint = null;
 	#picture = null;
-	#placement;
+	#floating;
 
 	/**
 	 * @param {object} options
@@ -50,7 +54,6 @@ export class Disclosure extends Component {
 	 */
 	constructor({ label, name = null, children = [], align = 'start', variant = 'plain', role = null, onchange = null, hint = false, placement = 'auto', class: extra = '' }) {
 		super();
-		this.#placement = ['auto', 'above', 'below'].includes(placement) ? placement : 'auto';
 		this.#onchange = onchange;
 		const id = Ids.next('bui-panel');
 		this.#button = el(
@@ -70,6 +73,8 @@ export class Disclosure extends Component {
 			this.#button,
 			this.#panel
 		]);
+		this.#floating = new Floating(this.#panel, { anchor: this.#button, placement, align, above: 'bui-disclosure-above' });
+		this.#floating.retry = () => this.open();
 		if (hint) this.hint = true;
 	}
 
@@ -82,6 +87,7 @@ export class Disclosure extends Component {
 	destroy() {
 		this.#hint?.destroy();
 		this.#picture?.remove();
+		this.#floating.destroy();
 		super.destroy();
 	}
 
@@ -106,12 +112,14 @@ export class Disclosure extends Component {
 		else this.open();
 	}
 
+	/** Opens the panel; false when it did not open (destroyed, or a floating panel whose button is not drawn). */
 	open() {
-		if (this.#open || this.destroyed) return;
-		this.#open = true;
+		if (this.#open) return true;
+		if (this.destroyed) return false;
 		this.#picture?.remove();
 		this.#panel.hidden = false;
-		this.#place();
+		if (this.#floats() && !this.#floating.show()) return this.#open || ((this.#panel.hidden = true), false);
+		this.#open = true;
 		this.#button.setAttribute('aria-expanded', 'true');
 		const document = this.#element.ownerDocument;
 		this.#releases = [
@@ -124,6 +132,7 @@ export class Disclosure extends Component {
 			})
 		];
 		this.#onchange?.(true);
+		return true;
 	}
 
 	/**
@@ -139,6 +148,7 @@ export class Disclosure extends Component {
 		if (!this.#open) return;
 		this.#open = false;
 		this.#leave();
+		this.#floating.hide();
 		this.#panel.hidden = true;
 		this.#button.setAttribute('aria-expanded', 'false');
 		for (const release of this.#releases) release();
@@ -156,17 +166,12 @@ export class Disclosure extends Component {
 		this.#picture = Leaving.play(this.#panel, { host: this.#element, swap: ['bui-disclosure-panel', 'bui-disclosure-leaving'] });
 	}
 
-	/** A floating panel goes above its button when there is no room below and more room above. */
-	#place() {
-		this.#panel.classList.remove('bui-disclosure-above');
+	/** Whether the panel floats over the page and is not a header's (which places its panels itself). */
+	#floats() {
 		const view = this.#element.ownerDocument.defaultView;
-		if (!view || !this.#element.isConnected || view.getComputedStyle?.(this.#panel).position !== 'absolute' || this.#placement === 'below') return;
-		if (this.#placement === 'above') return void this.#panel.classList.add('bui-disclosure-above');
-		const box = this.#button.getBoundingClientRect();
-		const height = this.#panel.getBoundingClientRect().height;
-		const below = view.innerHeight - box.bottom - 8;
-		const above = box.top - 8;
-		this.#panel.classList.toggle('bui-disclosure-above', height > below && above > below);
+		if (!view || !this.#element.isConnected || this.#element.closest('.bui-header')) return false;
+		const position = view.getComputedStyle?.(this.#panel).position;
+		return position === 'absolute' || position === 'fixed';
 	}
 
 	#escape(event) {

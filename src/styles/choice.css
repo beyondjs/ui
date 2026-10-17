@@ -68,8 +68,9 @@
 	margin-left: auto;
 	color: var(--color-text-muted);
 }
+/* As wide as its button at least (`Floating` sets the anchor's width; 100% in the page's flow before 0.15.0). */
 .bui-choice-list {
-	min-width: max(100%, 16rem);
+	min-width: max(var(--bui-anchor-width, 100%), 16rem);
 }
 .bui-choice-item {
 	gap: 2px;

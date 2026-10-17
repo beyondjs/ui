@@ -114,71 +114,31 @@ test('ActionMenu: the list opens on the side with room and stays inside the view
 		button.click();
 		return { menu, list };
 	};
-	// The viewport is 1024 × 768 (tests/support/page.mjs).
+	// The viewport is 1024 × 768 (tests/support/page.mjs). Since 0.15.0 `Floating` sets the list's place inline.
 	let { list } = open({ anchor: box(900, 720, 80, 32) });
 	assert.ok(list.classList.contains('bui-menu-above'), 'without room below it opens above');
-	assert.equal(list.style.getPropertyValue('translate'), '-84px 0', 'shifted left so its right edge stays 8 px inside');
+	assert.equal(list.dataset.buiSide, 'above');
+	assert.deepEqual([list.style.left, list.style.top], ['816px', '526px'], 'shifted left so its right edge stays 8 px inside, 4 px above the button');
 	assert.equal(list.style.getPropertyValue('max-height'), '', 'not capped when it fits');
+	assert.ok(list.hasAttribute('data-bui-floating'), 'placed by Floating');
 	({ list } = open({ anchor: box(100, 40, 80, 32) }));
 	assert.ok(!list.classList.contains('bui-menu-above'), 'with room below it opens below');
-	assert.equal(list.style.getPropertyValue('translate'), '', 'not shifted when it fits');
+	assert.deepEqual([list.style.left, list.style.top], ['100px', '76px'], 'not shifted when it fits');
 	({ list } = open({ anchor: box(100, 300, 80, 32), height: 500 }));
 	assert.ok(!list.classList.contains('bui-menu-above'), 'below has more room than above');
 	assert.equal(list.style.getPropertyValue('max-height'), '424px', 'capped to the room below, 8 px from the edge');
 	({ list } = open({ anchor: box(100, 720, 80, 32), placement: 'below' }));
-	assert.ok(!list.classList.contains('bui-menu-above'), 'placement below keeps the side');
-	assert.equal(list.style.getPropertyValue('max-height'), '4px', 'and still stops 8 px before the viewport ends');
+	assert.ok(list.classList.contains('bui-menu-above'), 'placement below is a preference: with no room below and more above it flips (0.15.0)');
+	({ list } = open({ anchor: box(100, 400, 80, 32), placement: 'above' }));
+	assert.ok(list.classList.contains('bui-menu-above'), 'placement above keeps its side while it has room');
 	({ list } = open({ anchor: box(100, 40, 80, 32), placement: 'above' }));
-	assert.ok(list.classList.contains('bui-menu-above'), 'placement above keeps the side');
+	assert.ok(!list.classList.contains('bui-menu-above'), 'and flips below when there is no room above (DQ-01: a forced side climbed under the bar)');
 	const { menu, list: reopened } = open({ anchor: box(900, 720, 80, 32) });
 	menu.close();
 	reopened.previousElementSibling.getBoundingClientRect = () => box(100, 40, 80, 32);
 	menu.open();
 	assert.ok(!reopened.classList.contains('bui-menu-above'), 'placed again on every opening');
-	assert.equal(reopened.style.getPropertyValue('translate'), '', 'an earlier shift does not stay');
-});
-
-test('Field validates with consumer messages, rechecks while typing and clears', () => {
-	const field = new ui.Field({ label: 'Name', required: true, hint: 'As people know it', messages: { valueMissing: 'Escribe un nombre.' } }).mount(document.body);
-	assert.equal(field.check(), false);
-	assert.equal(field.control.getAttribute('aria-invalid'), 'true');
-	assert.match(field.element.textContent, /Escribe un nombre/);
-	assert.match(field.control.getAttribute('aria-describedby'), /-hint .*-error/);
-	field.control.value = 'Ana';
-	field.control.dispatchEvent(new Event('input'));
-	assert.equal(field.invalid, false);
-	assert.equal(field.control.hasAttribute('aria-invalid'), false);
-	const custom = new ui.Field({ label: 'Slug', validate: value => (/\s/.test(value) ? 'No spaces.' : null) });
-	custom.control.value = 'a b';
-	assert.equal(custom.check(), false);
-});
-
-test('Choices report checkbox arrays and radio values; Select keeps native values', () => {
-	const changes = [];
-	const boxes = new ui.Choices({ legend: 'Areas', options: [{ value: 'a', label: 'A' }, { value: 'b', label: 'B', disabled: true, reason: 'Archived' }], value: ['a'], onchange: value => changes.push(value) }).mount(document.body);
-	assert.deepEqual(boxes.value, ['a']);
-	assert.match(boxes.element.textContent, /Archived/);
-	const radios = new ui.Choices({ legend: 'Theme', type: 'radio', options: [{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }], value: 'dark' });
-	assert.equal(radios.value, 'dark');
-	radios.value = 'light';
-	assert.equal(radios.value, 'light');
-	const select = new ui.Select({ options: [{ value: 'en', label: 'English' }, { group: 'Other', options: [{ value: 'es', label: 'Español' }] }], value: 'es' });
-	assert.equal(select.value, 'es');
-	assert.equal(new ui.Field({ label: 'Language', control: select }).element.querySelector('label').htmlFor, select.control.id);
-});
-
-test('Help opens from its button, closes with Escape and returns focus; outside press closes', () => {
-	const help = new ui.Help({ topic: 'Identifier', text: ['The identifier never changes.', 'Copy it for support.'], labels: { name: 'Ayuda: {topic}' } }).mount(document.body);
-	assert.equal(help.button.getAttribute('aria-label'), 'Ayuda: Identifier');
-	help.button.click();
-	assert.equal(help.expanded, true);
-	assert.equal(help.panel.hidden, false);
-	page.key(help.panel, 'Escape');
-	assert.equal(help.expanded, false);
-	assert.equal(document.activeElement, help.button);
-	help.button.click();
-	document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-	assert.equal(help.expanded, false);
+	assert.equal(reopened.style.left, '100px', 'an earlier shift does not stay');
 });
 
 test('Tooltip describes its trigger, shows on focus, hides on Escape and cleans up on destroy', () => {

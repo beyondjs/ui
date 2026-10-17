@@ -78,7 +78,8 @@ export class Meter extends Component {
 
 /** A compact choice on `ChoiceMenu` (0.11.0): a muted label, its value and a state in words; the same menu. */
 export class ChoiceChip extends ChoiceMenu {
-	constructor(options: ChoiceMenuOptions & { state?: [string, FactsTone] | null });
+	/** `glyph` (0.15.0): the slot's icon; with nothing chosen and no placeholder the chip says its slot's name. */
+	constructor(options: ChoiceMenuOptions & { state?: [string, FactsTone] | null; glyph?: string | null });
 	/** Its own state, over the chosen option's; null for that one's. */
 	state: [string, FactsTone] | null;
 }

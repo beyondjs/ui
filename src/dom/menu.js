@@ -3,7 +3,7 @@ import { el, content } from './core/element.js';
 import { Glyph } from './core/icons.js';
 import { Hint } from './core/hint.js';
 import { Ids } from './core/ids.js';
-import { Placement } from './core/placement.js';
+import { Floating } from './core/floating.js';
 import { Leaving } from './core/leaving.js';
 
 /**
@@ -14,11 +14,13 @@ import { Leaving } from './core/leaving.js';
  * on, and a press outside closes. A disabled item stays reachable so its reason can be read, but it
  * does nothing. Choosing an item closes the menu, returns focus and runs the item.
  *
- * The list stays inside the viewport. With `placement: 'auto'` (the default) it opens below the
- * button, or above it when there is no room below and more room above; `'below'` and `'above'` fix
- * the side. Whatever the side, it is shifted sideways when an edge of the viewport would cut it, and
- * no taller than the room on its side (it then scrolls). Moving focus into it, within it and back to
- * the button never scrolls the page or a scroll container around the menu.
+ * The list is placed by `Floating` (0.15.0): in the top layer, so no scroller clips it, on its
+ * preferred side (`placement: 'auto'` and `'below'` prefer below, `'above'` above) and flipped when that
+ * side has no room and the other has more, shifted to stay inside the room, capped to it (it then
+ * scrolls), never under the family bar, and placed again while the page scrolls or resizes. A button
+ * that is not drawn opens nothing: `open()` returns false and the button dispatches `bui-refused`.
+ * Moving focus into it, within it and back to the button never scrolls the page or a scroll container
+ * around the menu.
  *
  * Items: `{ label, run?, href?, disabled?, reason?, tone? }`; `tone: 'danger'` marks destructive ones.
  *
@@ -33,7 +35,7 @@ export class ActionMenu extends Component {
 	#items = [];
 	#open = false;
 	#release = null;
-	#placement;
+	#floating;
 	#picture = null;
 
 	/**
@@ -43,11 +45,10 @@ export class ActionMenu extends Component {
 	 * @param {Array<object|null|false>} options.items the actions
 	 * @param {'start'|'end'} [options.align] which edge of the button the list aligns to
 	 * @param {string|null} [options.glyph] the button's icon
-	 * @param {'auto'|'below'|'above'} [options.placement] which side of the button the list opens on
+	 * @param {'auto'|'below'|'above'} [options.placement] the side of the button the list prefers (it flips without room, 0.15.0)
 	 */
 	constructor({ label, name = null, items, align = 'end', glyph = 'more', placement = 'auto' }) {
 		super();
-		this.#placement = new Placement(placement);
 		const id = Ids.next('bui-menu');
 		this.#button = el(
 			'button',
@@ -68,6 +69,7 @@ export class ActionMenu extends Component {
 		this.#list = el('ul', { id, class: `bui-menu bui-align-${align}`, role: 'menu', hidden: true, onkeydown: event => this.#keys(event) });
 		this.items = items;
 		this.#element = el('div', { class: 'bui-menu-holder' }, [this.#button, this.#list]);
+		this.#floating = new Floating(this.#list, { anchor: this.#button, placement, align, above: 'bui-menu-above' });
 		this.#hint = glyph && !label ? new Hint(this.#element) : null;
 	}
 
@@ -78,6 +80,7 @@ export class ActionMenu extends Component {
 	destroy() {
 		this.#hint?.destroy();
 		this.#picture?.remove();
+		this.#floating.destroy();
 		super.destroy();
 	}
 
@@ -91,21 +94,27 @@ export class ActionMenu extends Component {
 		this.#list.replaceChildren(...this.#items.map(entry => entry.holder));
 	}
 
-	/** Opens the menu and focuses the item at `index` (negative counts from the end). */
+	/**
+	 * Opens the menu and focuses the item at `index` (negative counts from the end); false when its
+	 * button is not drawn (0.15.0).
+	 */
 	open(index = 0) {
-		if (this.destroyed) return;
+		if (this.destroyed) return false;
 		if (!this.#open) {
-			this.#open = true;
 			this.#picture?.remove();
 			this.#list.hidden = false;
+			this.#floating.retry = () => this.open(index);
+			// A refusal another part answered (Options unfolded) may have opened it meanwhile
+			if (!this.#floating.show()) return this.#open || ((this.#list.hidden = true), false);
+			this.#open = true;
 			this.#button.setAttribute('aria-expanded', 'true');
-			this.#placement.place(this.#list, this.#button);
 			this.#release = this.listen(this.#element.ownerDocument, 'pointerdown', event => {
 				if (!this.#element.contains(event.target)) this.close(false);
 			});
 		}
 		const targets = this.#items.map(entry => entry.node);
 		targets.at(index < 0 ? targets.length + index : index)?.focus({ preventScroll: true });
+		return true;
 	}
 
 	close(refocus = false) {
@@ -113,6 +122,7 @@ export class ActionMenu extends Component {
 		this.#open = false;
 		this.#picture?.remove();
 		this.#picture = Leaving.play(this.#list);
+		this.#floating.hide();
 		this.#list.hidden = true;
 		this.#button.setAttribute('aria-expanded', 'false');
 		this.#release?.();

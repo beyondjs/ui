@@ -1,6 +1,6 @@
 import { el, fill, content } from '../core/element.js';
 import { Ids } from '../core/ids.js';
-import { Placement } from '../core/placement.js';
+import { Floating } from '../core/floating.js';
 import { Announcer } from '../operations/announcer.js';
 import { MentionToken } from './token.js';
 import { SuggestAsk } from './ask.js';
@@ -21,6 +21,11 @@ import { CaretPoint } from './caret.js';
  * with a line that says so ("50 of 120 · keep typing to narrow"), kept in view at the list's end, which
  * describes the list and is said once with the answer ("50 of 120 suggestions · keep typing to narrow").
  *
+ * Since 0.15.0 (DQ-01, OWN-21) the list hangs from the line being typed, not from the composer's box: its
+ * anchor is the trigger's character (`CaretPoint`), placed by `Floating` below that line or above it
+ * without room, in the top layer, never under the family bar, and placed again while the page scrolls or
+ * the phone's keyboard opens. Without a caret point (a field not drawn) it falls back to the box.
+ *
  * Since 0.14.0 a composer's commands use it too (`start`: the trigger only at the field's start, "/"):
  * an item with `run` is not inserted; its token leaves the field and `run({ value })` is the product's,
  * never sent to anyone by the composer.
@@ -37,7 +42,7 @@ export class ComposerSuggest {
 	#numbers;
 	#trigger;
 	#oninsert;
-	#placement = new Placement('auto');
+	#floating;
 	#caret;
 	#token = null;
 	#closed = null;
@@ -74,6 +79,7 @@ export class ComposerSuggest {
 		field.setAttribute('aria-controls', this.#list.id);
 		field.setAttribute('aria-haspopup', 'listbox');
 		this.#caret = new CaretPoint(field);
+		this.#floating = new Floating(this.#panel, { anchor: this.#point(), placement: 'below', align: 'start', quiet: true });
 		this.#on('input', event => (event.isComposing ? null : this.#read()));
 		this.#on('compositionstart', () => ((this.#composing = true), this.close()));
 		this.#on('compositionend', () => ((this.#composing = false), this.#read()));
@@ -122,6 +128,7 @@ export class ComposerSuggest {
 
 	close() {
 		this.#ask.cancel();
+		this.#floating.hide();
 		this.#panel.hidden = true;
 		this.#items = [];
 		this.#active = -1;
@@ -174,20 +181,28 @@ export class ComposerSuggest {
 		this.#panel.hidden = false;
 		this.#field.setAttribute('aria-controls', this.#list.id);
 		this.#move(this.#active);
-		this.#align();
-		this.#placement.place(this.#panel, this.#anchor);
+		if (!this.#floating.show()) this.close();
 	}
 
-	/** Moves the list along the box to the trigger being typed, never past the box's end. */
-	#align() {
-		this.#panel.style.removeProperty('left');
-		const point = this.#token ? this.#caret.at(this.#token.start) : null;
-		if (!point) return;
-		const box = this.#anchor.getBoundingClientRect();
-		const field = this.#field.getBoundingClientRect();
-		const room = box.width - this.#panel.getBoundingClientRect().width;
-		const left = Math.max(0, Math.min(field.left - box.left + point.left, room));
-		if (left > 0) this.#panel.style.left = `${Math.round(left)}px`;
+	/**
+	 * A virtual anchor at the trigger's character: one line high at the caret's line, or the composer's
+	 * box when the field cannot say where its characters are.
+	 */
+	#point() {
+		const field = this.#field;
+		return {
+			contextElement: field,
+			getBoundingClientRect: () => {
+				const point = this.#token ? this.#caret.at(this.#token.start) : null;
+				if (!point) return this.#anchor.getBoundingClientRect();
+				const box = field.getBoundingClientRect();
+				const style = field.ownerDocument.defaultView.getComputedStyle(field);
+				const line = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.5 || 20;
+				const left = box.left + point.left;
+				const top = box.top + point.top;
+				return { left, top, right: left, bottom: top + line, width: 0, height: line, x: left, y: top };
+			}
+		};
 	}
 
 	/** A cut list's last line and what is said with it, or null for a whole list. */

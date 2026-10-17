@@ -106,4 +106,19 @@ export class ChoiceFinder {
 		const order = entries.map((entry, position) => entries[(start + position) % entries.length]);
 		return order.find(entry => ChoiceFinder.fold(entry.text).startsWith(typed)) ?? null;
 	}
+
+	/**
+	 * A printable key in the open list: typed into the search field of a long list (`onfilter` then
+	 * filters, and the field takes focus), else the type-ahead entry among the `shown` ones, or null.
+	 */
+	typed(event, shown, index, onfilter) {
+		if (this.field && event.key.length === 1 && event.key.trim()) {
+			event.preventDefault();
+			this.field.value += event.key;
+			onfilter();
+			this.field.focus({ preventScroll: true });
+			return null;
+		}
+		return this.ahead(event.key, Date.now(), shown, index);
+	}
 }

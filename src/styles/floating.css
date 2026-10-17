@@ -1,0 +1,24 @@
+/* A floating surface placed by `Floating` (0.15.0): menus, choice lists, suggestions, in-page popover
+   panels, tooltips and hints. In the top layer where the browser has the popover API, `fixed` above the
+   page otherwise; its place is set inline from its anchor, so these rules come last. An anchor scrolled
+   out of the room hides it until it comes back. */
+[data-bui-floating] {
+	position: fixed;
+	inset: auto;
+	z-index: 60;
+	margin: 0;
+}
+[data-bui-floating][data-bui-away] {
+	visibility: hidden;
+}
+/* The browser frames a popover; a tooltip has no frame of its own. */
+.bui-tooltip[data-bui-floating] {
+	border: 0;
+}
+/* Key hints ("⌘K", "/ for commands") are not offered where there is no keyboard to press them on. */
+@media (hover: none) and (pointer: coarse) {
+	.bui-keys,
+	[data-bui-keys] {
+		display: none;
+	}
+}

@@ -53,7 +53,8 @@ export class ChoiceMenu extends Component {
 	set disabled(disabled: boolean);
 	set options(options: Array<ChoiceMenuOption | null | false>);
 	set actions(actions: Array<ChoiceMenuAction | null | false>);
-	open(): void;
+	/** Whether it opened (0.15.0): false when disabled, stated or its button is not drawn. */
+	open(): boolean;
 	close(refocus?: boolean): void;
 }
 

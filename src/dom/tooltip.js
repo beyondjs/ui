@@ -1,20 +1,23 @@
 import { Component } from './core/component.js';
 import { el, content } from './core/element.js';
 import { Ids } from './core/ids.js';
+import { Floating } from './core/floating.js';
 
 /**
  * A short supplementary description of a control, shown on hover, keyboard focus and a touch press.
  *
  * It describes the trigger (`aria-describedby`), stays while the pointer moves onto it, and Escape
  * hides it. It never carries the only copy of essential information: use `Help` for that, which
- * opens from a button on any device. Tooltips are positioned in the viewport so they never widen
- * the page on narrow screens.
+ * opens from a button on any device. It is placed by `Floating` (0.15.0): below its trigger, or above
+ * without room, inside the viewport so it never widens the page, in the top layer and never under the
+ * family bar.
  */
 export class Tooltip extends Component {
 	#element;
 	#trigger;
 	#hide = null;
 	#when;
+	#floating;
 
 	/**
 	 * @param {Element} trigger the described control, owned by the consumer
@@ -33,6 +36,7 @@ export class Tooltip extends Component {
 		const described = trigger.getAttribute('aria-describedby');
 		if (describe) trigger.setAttribute('aria-describedby', [described, id].filter(Boolean).join(' '));
 		trigger.ownerDocument.body.append(this.#element);
+		this.#floating = new Floating(this.#element, { anchor: trigger, placement: 'below', align: 'center', gap: 8, quiet: true });
 		const soon = () => (this.#hide = this.later(() => this.hide(), delay));
 		this.listen(trigger, 'pointerenter', event => event.pointerType !== 'touch' && this.show());
 		this.listen(trigger, 'pointerleave', event => event.pointerType !== 'touch' && soon());
@@ -64,11 +68,12 @@ export class Tooltip extends Component {
 		this.#hide?.();
 		if (this.#when && !this.#when()) return this.hide();
 		this.#element.hidden = false;
-		this.#place();
+		if (!this.#floating.show()) this.#element.hidden = true;
 	}
 
 	hide() {
 		this.#hide?.();
+		this.#floating.hide();
 		this.#element.hidden = true;
 	}
 
@@ -76,17 +81,7 @@ export class Tooltip extends Component {
 		const ids = (this.#trigger.getAttribute('aria-describedby') ?? '').split(' ').filter(id => id && id !== this.#element.id);
 		if (ids.length) this.#trigger.setAttribute('aria-describedby', ids.join(' '));
 		else this.#trigger.removeAttribute('aria-describedby');
+		this.#floating.destroy();
 		super.destroy();
-	}
-
-	#place() {
-		const view = this.#trigger.ownerDocument.defaultView;
-		const box = this.#trigger.getBoundingClientRect();
-		const own = this.#element.getBoundingClientRect();
-		const margin = 8;
-		const left = Math.min(Math.max(margin, box.left + box.width / 2 - own.width / 2), view.innerWidth - own.width - margin);
-		const below = box.bottom + margin + own.height <= view.innerHeight;
-		this.#element.style.left = `${Math.max(margin, left)}px`;
-		this.#element.style.top = `${below ? box.bottom + margin : box.top - own.height - margin}px`;
 	}
 }

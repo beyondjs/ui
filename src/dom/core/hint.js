@@ -1,6 +1,7 @@
 import { Component } from './component.js';
 import { el } from './element.js';
 import { Interaction } from './interaction.js';
+import { Floating } from './floating.js';
 
 /**
  * The visible name of a component's icon-only controls (decision D11): a glyph on the closed list
@@ -21,6 +22,9 @@ import { Interaction } from './interaction.js';
  * Since 0.11.2 a control whose visible words are shortened (a composer's chip that shows only its
  * value) carries its whole text in `data-bui-tip`; the hint shows that text instead of the name, and
  * only while `when(target)` answers true (the words are shortened now).
+ *
+ * Since 0.15.0 it is placed by `Floating` (the top layer, never under the family bar), and a hint shown
+ * by a touch press leaves out the shortcut: a key a touch screen has no keyboard for is not offered.
  */
 export class Hint extends Component {
 	#root;
@@ -29,6 +33,8 @@ export class Hint extends Component {
 	#cancel = null;
 	#escape = null;
 	#when;
+	#floating = new Floating(this.#element, { anchor: this.#element, placement: 'below', align: 'center', gap: 8, quiet: true });
+	#touch = false;
 
 	/**
 	 * @param {Element} root the component's element
@@ -67,7 +73,9 @@ export class Hint extends Component {
 		this.listen(root, 'pointerdown', event => {
 			const target = find(event);
 			if (!target || event.pointerType !== 'touch') return;
+			this.#touch = true;
 			this.show(target);
+			this.#touch = false;
 			this.#cancel = this.later(() => this.hide(), 1500);
 		});
 	}
@@ -88,13 +96,14 @@ export class Hint extends Component {
 		const name = tip ? ((this.#when?.(target) ?? false) ? tip : null) : target.getAttribute('aria-label');
 		// An open menu or panel already says what the control does; the hint would cover it.
 		if (!name || !target.isConnected || target.getAttribute('aria-expanded') === 'true') return this.hide();
-		const shortcut = target.getAttribute('data-bui-shortcut');
+		const shortcut = this.#touch ? null : target.getAttribute('data-bui-shortcut');
 		const host = this.#root.closest('dialog') ?? target.ownerDocument.body;
 		if (this.#element.parentNode !== host) host.append(this.#element);
 		this.#element.textContent = shortcut ? `${name} · ${shortcut}` : name;
 		this.#element.hidden = false;
 		this.#target = target;
-		this.#place(target);
+		this.#floating.anchor = target;
+		if (!this.#floating.show()) return this.hide();
 		this.#escape ??= this.listen(target.ownerDocument, 'keydown', event => event.key === 'Escape' && this.hide());
 	}
 
@@ -102,6 +111,7 @@ export class Hint extends Component {
 		this.#cancel?.();
 		this.#cancel = null;
 		this.#target = null;
+		this.#floating.hide();
 		this.#element.hidden = true;
 		this.#escape?.();
 		this.#escape = null;
@@ -121,17 +131,6 @@ export class Hint extends Component {
 	#soon(target) {
 		this.#cancel?.();
 		this.#cancel = this.later(() => this.show(target), 300);
-	}
-
-	#place(target) {
-		const view = target.ownerDocument.defaultView;
-		const box = target.getBoundingClientRect();
-		const own = this.#element.getBoundingClientRect();
-		const margin = 8;
-		const left = Math.min(Math.max(margin, box.left + box.width / 2 - own.width / 2), view.innerWidth - own.width - margin);
-		const below = box.bottom + margin + own.height <= view.innerHeight;
-		this.#element.style.left = `${Math.max(margin, left)}px`;
-		this.#element.style.top = `${below ? box.bottom + margin : box.top - own.height - margin}px`;
 	}
 
 	/**

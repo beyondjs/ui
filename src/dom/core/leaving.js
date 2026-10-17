@@ -80,6 +80,14 @@ export class Leaving {
 			host.append(this.#veil);
 		}
 		host.append(picture);
+		// A surface in the top layer (0.15.0, `Floating`) leaves from there, where it was drawn.
+		if (picture.hasAttribute('popover') && typeof picture.showPopover === 'function') {
+			try {
+				picture.showPopover();
+			} catch {
+				// Not allowed here: it leaves from the page.
+			}
+		}
 		this.#picture = picture;
 		picture.addEventListener('animationend', event => event.target === picture && this.remove());
 		this.#timer = setTimeout(() => this.remove(), Leaving.bound);

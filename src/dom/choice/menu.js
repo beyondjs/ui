@@ -2,7 +2,7 @@ import { Component } from '../core/component.js';
 import { el } from '../core/element.js';
 import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
-import { Placement } from '../core/placement.js';
+import { Floating } from '../core/floating.js';
 import { Leaving } from '../core/leaving.js';
 import { single } from '../core/statement.js';
 import { ChoiceEntry } from './entry.js';
@@ -11,22 +11,18 @@ import { ChoiceFinder } from './finder.js';
 import { labels as copy } from './labels.js';
 
 /**
- * One choice among a few things that have a state: an environment that is running or failed, a tool
- * that is ready or needs a sign-in. Between `Select` (plain values) and `Picker` (large collections
- * to search), it shows what a native select cannot: each option's state and a line of detail, the
- * choice's state on the button itself, and actions such as "New environment…" after the options.
+ * One choice among a few things that have a state (an environment that is running or failed, a tool
+ * that needs a sign-in): between `Select` (plain values) and `Picker` (large collections), it shows each
+ * option's state and a line of detail, the choice's state on its button, and actions after the options.
  *
- * The button names what is chosen ("Environment: lab"), with its state beside it when the state asks
- * for attention, and never cuts its words. It opens the ARIA menu pattern with the options as
- * `menuitemradio` (the chosen one checked) and the actions as `menuitem` after a separator. Arrow
- * keys, Home and End move, Enter or Space chooses, Escape closes and returns focus to the button, Tab
- * closes and moves on, a press outside closes, and printable keys move to the next option that starts
- * with them. A list longer than `ChoiceMenu.threshold` (or with `search: true`) opens with a search
- * field that filters by the beginning of the text or of any segment (0.7.0). A disabled option stays
- * reachable so its reason can be read, and is never chosen. Choosing calls `onchange` with the value.
- *
- * One option that can be chosen and no action is a statement, not a choice (D56, 0.7.0): the label and
- * the option are shown as text, and the value is that option's (`statement: false` keeps the menu).
+ * The button names what is chosen ("Environment: lab"), never cut. It opens the ARIA menu pattern:
+ * options as `menuitemradio` (the chosen one checked), actions as `menuitem` after a separator; arrows,
+ * Home and End move, Enter or Space chooses, Escape closes and returns focus, Tab closes and moves on, a
+ * press outside closes, printable keys move to the next option starting with them. Past
+ * `ChoiceMenu.threshold` options (or `search: true`) it opens with a search field (0.7.0). A disabled
+ * option stays reachable with its reason and is never chosen. One option that can be chosen and no
+ * action is a statement, not a choice (D56; `statement: false` keeps the menu). The list is placed by
+ * `Floating` (0.15.0).
  *
  * Options: `{ value, label, detail?, status?: [text, tone], disabled?, reason?, search? }`. Actions:
  * `{ label, run, disabled?, reason? }`.
@@ -51,7 +47,7 @@ export class ChoiceMenu extends Component {
 	#value = null;
 	#settings;
 	#onchange;
-	#placement;
+	#floating;
 	#open = false;
 	#release = null;
 	#picture = null;
@@ -74,13 +70,15 @@ export class ChoiceMenu extends Component {
 		this.#label = label;
 		this.#labels = new Labels(copy.en, placeholder ? { ...labels, placeholder } : labels);
 		this.#settings = { search, statement, name, face };
+		if (face) face.slot = !(placeholder ?? labels.placeholder);
 		this.#onchange = onchange;
-		this.#placement = new Placement(placement);
 		const id = Ids.next('bui-choice');
 		this.#button = el('button', { type: 'button', class: 'bui-choice-button', 'aria-haspopup': 'menu', 'aria-expanded': 'false', 'aria-controls': id, disabled, onclick: () => (this.#open ? this.close(true) : this.open()), onkeydown: event => this.#opener(event) });
 		this.#list = el('ul', { id, class: 'bui-choice-items', role: 'menu', 'aria-label': label });
 		this.#panel = el('div', { class: `bui-menu bui-choice-list bui-align-${align}`, hidden: true, onkeydown: event => this.#keys(event) }, [this.#list]);
 		this.#element = el('div', { class: `bui-menu-holder bui-choice${face ? ' bui-chip' : ''}` });
+		this.#floating = new Floating(this.#panel, { anchor: this.#button, placement, align, above: 'bui-menu-above' });
+		this.#floating.retry = () => this.open();
 		this.#value = value;
 		this.#actions = actions.filter(Boolean);
 		this.options = options;
@@ -136,22 +134,30 @@ export class ChoiceMenu extends Component {
 		return this.#options.find(option => option.value === this.#value) ?? null;
 	}
 
-	/** Opens the list on the chosen option, or the first one; a long list on its search field */
+	/**
+	 * Opens the list on the chosen option (a long list on its search field); false when disabled, stated
+	 * or its button is not drawn (0.15.0: `bui-refused`, which a composer's Options answers).
+	 */
 	open() {
-		if (this.destroyed || this.#button.disabled || this.stated) return;
+		if (this.destroyed || this.#button.disabled || this.stated) return false;
 		if (!this.#open) {
-			this.#open = true;
 			this.#picture?.remove();
 			this.#panel.hidden = false;
+			// A refusal another part answered (Options unfolded) may have opened it meanwhile
+			if (!this.#floating.show()) return this.#open || ((this.#panel.hidden = true), false);
+			this.#open = true;
 			this.#button.setAttribute('aria-expanded', 'true');
-			this.#placement.place(this.#panel, this.#button);
 			this.#release = this.listen(this.#element.ownerDocument, 'pointerdown', event => {
 				if (!this.#element.contains(event.target)) this.close(false);
 			});
 		}
-		if (this.#finder.field) return this.#finder.field.focus({ preventScroll: true });
+		if (this.#finder.field) {
+			this.#finder.field.focus({ preventScroll: true });
+			return true;
+		}
 		const chosen = this.#entries.findIndex(entry => entry.option && entry.option.value === this.#value);
 		this.#entries[Math.max(chosen, 0)]?.node.focus({ preventScroll: true });
+		return true;
 	}
 
 	close(refocus = false) {
@@ -159,6 +165,7 @@ export class ChoiceMenu extends Component {
 		this.#open = false;
 		// It leaves as it came (0.14.0, D95): hidden at once, an inert picture eases out
 		this.#picture = Leaving.play(this.#panel);
+		this.#floating.hide();
 		this.#panel.hidden = true;
 		this.#button.setAttribute('aria-expanded', 'false');
 		this.#release?.();
@@ -169,6 +176,7 @@ export class ChoiceMenu extends Component {
 
 	destroy() {
 		this.#picture?.remove();
+		this.#floating.destroy();
 		super.destroy();
 	}
 
@@ -276,14 +284,7 @@ export class ChoiceMenu extends Component {
 
 	/** A printable key: into the search field of a long list, else to the next entry that starts with it. */
 	#ahead(event, index) {
-		if (this.#finder.field && event.key.length === 1 && event.key.trim()) {
-			event.preventDefault();
-			this.#finder.field.value += event.key;
-			this.#filter();
-			return this.#finder.field.focus({ preventScroll: true });
-		}
-		const shown = this.#entries.filter(entry => entry.shown);
-		const entry = this.#finder.ahead(event.key, Date.now(), shown, index);
+		const entry = this.#finder.typed(event, this.#entries.filter(item => item.shown), index, () => this.#filter());
 		if (!entry) return;
 		event.preventDefault();
 		entry.node.focus({ preventScroll: true });
