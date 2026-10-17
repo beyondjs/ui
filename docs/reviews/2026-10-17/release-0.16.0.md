@@ -54,3 +54,11 @@ A product that enables `CommandPalette`'s `shortcut` turns off the `Sidebar`'s o
   the arrows; the composer's step then the send; scoped decisions with a note; one bar at 390 px with the
   drawer opened by the bar's button and focus back, no button beside a permanent sidebar; the primaries
   warning. Results by engine are in the addendum.
+
+## Addendum: acceptance runs (2026-10-17, local)
+
+On the code of commit 197b1bb (the later commits change only documentation and the version), packed
+tarball, three consumers, the affected checks by name in each engine: the three new `commanding` checks,
+the composer (`composer`, `suggestions`, `attachments`), `sidebar`, `family bar`, `CommandCard`, `floating`,
+`keyboard` and `thread` checks: 125 checks in each of Chrome, Firefox 155 and WebKit 26.6, all passing.
+A full 290-plus-check run per engine was not repeated for this release.
