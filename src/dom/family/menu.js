@@ -24,6 +24,7 @@ export class NavigationMenu extends Component {
 	static #reachable = '.bui-navmenu-field, .bui-navmenu-notice a, .bui-navmenu-notice button, .bui-navmenu-item';
 
 	#disclosure;
+	#quiet = false;
 
 	/**
 	 * @param {object} options
@@ -47,7 +48,7 @@ export class NavigationMenu extends Component {
 			class: `bui-navmenu ${extra}`.trim(),
 			children: sections.filter(Boolean).map(section => this.#section(section)),
 			onchange: open => {
-				if (open) this.#arrive();
+				if (open && !this.#quiet) this.#arrive();
 				onchange?.(open);
 			}
 		});
@@ -95,8 +96,17 @@ export class NavigationMenu extends Component {
 		return this.#disclosure.expanded;
 	}
 
-	open() {
-		this.#disclosure.open();
+	/**
+	 * Opens the menu; `arrive: false` (0.17.1) leaves focus where it is, for a menu held open across the
+	 * bar's redraw. Returns whether it is open.
+	 */
+	open({ arrive = true } = {}) {
+		this.#quiet = !arrive;
+		try {
+			return this.#disclosure.open();
+		} finally {
+			this.#quiet = false;
+		}
 	}
 
 	close(refocus = false) {
@@ -123,11 +133,15 @@ export class NavigationMenu extends Component {
 		]);
 	}
 
-	/** The entries arrow keys move between: the search field, links, buttons and unavailable entries that are shown. */
-	#entries() {
-		const view = this.element.ownerDocument.defaultView;
+	/** The entries arrow keys move between in `panel`: the search field, links, buttons and unavailable entries that are shown. */
+	static entries(panel) {
+		const view = panel.ownerDocument.defaultView;
 		const shown = node => view.getComputedStyle(node).display !== 'none' && !node.closest('[hidden]');
-		return [...this.panel.querySelectorAll(NavigationMenu.#reachable)].filter(node => shown(node) && shown(node.parentElement) && shown(node.closest('.bui-navmenu-section')));
+		return [...panel.querySelectorAll(NavigationMenu.#reachable)].filter(node => shown(node) && shown(node.parentElement) && shown(node.closest('.bui-navmenu-section')));
+	}
+
+	#entries() {
+		return NavigationMenu.entries(this.panel);
 	}
 
 	#keys(event) {

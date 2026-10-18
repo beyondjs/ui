@@ -1,0 +1,18 @@
+/* The 0.17.1 fixture: a fact's value that breaks long words anywhere, as a resource page's facts do. Tokens only. */
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+}
+.hold-page {
+	display: grid;
+	gap: var(--space-6);
+	padding: var(--space-4);
+}
+.hold-fact {
+	display: flex;
+	width: 180px;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}

@@ -1,0 +1,8 @@
+/* The fictional application's own type, on the faces its fonts.css declares (0.17.1). */
+body {
+	font-family: Inter, sans-serif;
+}
+h1 {
+	font-family: Rubik, sans-serif;
+	font-weight: 400;
+}

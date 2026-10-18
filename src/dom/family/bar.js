@@ -9,6 +9,8 @@ import { ProductSwitcher } from './switcher.js';
 import { Location } from './location.js';
 import { AccountMenu } from './account.js';
 import { Manage } from './manage.js';
+import { HeldMenu } from './held.js';
+import { Same } from '../core/same.js';
 
 /**
  * The family bar: the one bar every signed-in Beyond product renders (decisions D01 and D04).
@@ -30,6 +32,10 @@ import { Manage } from './manage.js';
  * project's state in the descriptor (`projects[i].here.state`) and may add one `notice` line to the
  * project menu. A product that has no projects (Accounts) passes `projects: false` (0.15.0, DQ-19): the
  * bar then shows the organization only, never "Choose a project".
+ *
+ * Since 0.17.1 a new descriptor, fallback, notice, `brand` or `account` keeps the menu the person has open (D95): the same
+ * menu stays open in place with its new contents, focus on the same entry (`HeldMenu`); and the same data
+ * set again draws nothing new.
  */
 export class FamilyBar extends Component {
 	static #bars = new WeakMap();
@@ -55,6 +61,8 @@ export class FamilyBar extends Component {
 	#parts = [];
 	#late = false;
 	#wait = null;
+	#given = new Same();
+	#drawn = new Same();
 
 	/**
 	 * @param {object} options
@@ -82,6 +90,7 @@ export class FamilyBar extends Component {
 		this.#labels = new Labels(defaults, labels);
 		this.#names = { ...names, ...products };
 		this.#descriptor = descriptor;
+		this.#given.keep(descriptor);
 		this.#fallback = fallback ?? {};
 		this.#thread = el('div', { class: 'bui-family-thread' });
 		this.#end = el('div', { class: 'bui-family-end' });
@@ -121,8 +130,13 @@ export class FamilyBar extends Component {
 		return this.#descriptor;
 	}
 
-	/** Replaces the descriptor and redraws; focus on a part of the bar stays on that part. */
+	/**
+	 * Replaces the descriptor and redraws; focus on a part of the bar stays on that part, and an open menu
+	 * stays open (0.17.1). The same descriptor again changes nothing; null again (loading again) starts a
+	 * new loading bound, drawing nothing new while it is still loading.
+	 */
 	set descriptor(value) {
+		if (this.#given.keep(value ?? null) && value) return;
 		this.#descriptor = value ?? null;
 		this.#watch();
 		this.#draw();
@@ -131,6 +145,27 @@ export class FamilyBar extends Component {
 	/** Replaces the names shown while the descriptor is loading or unavailable. */
 	set fallback(value) {
 		this.#fallback = value ?? {};
+		this.#draw();
+	}
+
+	/**
+	 * Replaces the wordmark and the product's own home address (0.17.1) and redraws, keeping an open menu;
+	 * the same values draw nothing new.
+	 */
+	set brand(value) {
+		if (!value) return;
+		this.#options.brand = value;
+		const mark = this.#start.querySelector('.bui-lockup-mark');
+		if (mark && value.src && mark.getAttribute('src') !== value.src) mark.setAttribute('src', value.src);
+		this.#draw();
+	}
+
+	/**
+	 * Replaces the account menu's options (`label`, `signout`, `items`, `preferences`, 0.17.1) and redraws,
+	 * keeping an open menu; the same values draw nothing new.
+	 */
+	set account(value) {
+		this.#options.account = value ?? {};
 		this.#draw();
 	}
 
@@ -184,6 +219,10 @@ export class FamilyBar extends Component {
 	}
 
 	#draw() {
+		// The same data draws nothing new (0.17.1)
+		const drawn = { state: this.state, descriptor: this.#descriptor, fallback: this.#fallback, notice: this.#notice, brand: this.#options.brand, account: this.#options.account };
+		if (this.#drawn.keep(drawn)) return;
+		const held = HeldMenu.of(this.element);
 		const focused = this.#focused();
 		for (const part of this.#parts) part.destroy();
 		const state = this.state;
@@ -207,6 +246,7 @@ export class FamilyBar extends Component {
 		this.#end.replaceChildren(...[docs, notifications, menu.element].filter(Boolean));
 		this.element.dataset.state = state;
 		this.#restore(focused);
+		held?.restore([switcher.menu, ...location.menus, menu.menu]);
 	}
 
 	/** The part of the bar holding focus, so a redraw can return focus to its replacement. */

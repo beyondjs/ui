@@ -186,3 +186,19 @@ a.bui-copy-value-text:hover {
 	flex: none;
 	white-space: pre;
 }
+/* Copy keeps its word whole and its size (0.17.1): inside a box that breaks long words anywhere (a fact's
+   value) it would otherwise shrink to one letter per line. The value is what gets cut. */
+.bui-copy-value > .bui-copy-button {
+	flex: none;
+	white-space: nowrap;
+}
+.bui-copy-value > .bui-copy-button .bui-button {
+	white-space: nowrap;
+	overflow-wrap: normal;
+}
+/* React's host of a CopyValue is the row's flex item: it may shrink, so the value is cut instead of
+   pushing the row past a phone's width. */
+.bui-host:has(> .bui-copy-value) {
+	min-width: 0;
+	max-width: 100%;
+}

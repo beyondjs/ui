@@ -7,4 +7,6 @@ root.append(pending);
 const response = await fetch('/state');
 const title = document.createElement('h1');
 title.textContent = response.ok ? 'Your projects' : 'The service is unavailable';
-root.replaceChildren(title);
+const line = document.createElement('p');
+line.textContent = response.ok ? 'Two projects' : 'Try again in a moment';
+root.replaceChildren(title, line);

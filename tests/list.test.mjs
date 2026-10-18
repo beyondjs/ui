@@ -121,3 +121,13 @@ test('React ListRow and CopyValue drive the same classes and read callbacks from
 	assert.equal(host.querySelector('.bui-copy-value-text').textContent, 'req_1');
 	await React.act(() => root.unmount());
 });
+
+test('CopyValue’s Copy never shrinks or wraps; React’s host may shrink so the value is cut (0.17.1)', () => {
+	const sheet = readFileSync(new URL('../dist/styles.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+	const rule = selector => [...sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, names]) => names.split(',').map(name => name.trim()).includes(selector)).map(([, , body]) => body).join('\n');
+	assert.match(rule('.bui-copy-value > .bui-copy-button'), /flex:\s*none/);
+	assert.match(rule('.bui-copy-value > .bui-copy-button'), /white-space:\s*nowrap/);
+	assert.match(rule('.bui-copy-value > .bui-copy-button .bui-button'), /white-space:\s*nowrap/);
+	assert.match(rule('.bui-copy-value > .bui-copy-button .bui-button'), /overflow-wrap:\s*normal/);
+	assert.match(rule('.bui-host:has(> .bui-copy-value)'), /min-width:\s*0/);
+});

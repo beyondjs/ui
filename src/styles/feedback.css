@@ -242,6 +242,17 @@
 	gap: var(--space-2);
 	margin-top: var(--space-2);
 }
+/* An outage's line while it tries again by itself (Again, 0.17.1, D132): quiet, its time in tabular figures. */
+.bui-again {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	font-variant-numeric: tabular-nums;
+}
+.bui-again[hidden] {
+	display: none;
+}
 @media (max-width: 480px) {
 	.bui-unavailable {
 		gap: var(--space-3);

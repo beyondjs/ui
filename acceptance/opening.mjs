@@ -25,6 +25,15 @@ class OpeningAcceptance {
 				return response.end(readFileSync(new URL('./fixtures/opening/ready.js', import.meta.url)));
 			}
 			if (name === 'state') return response.end('{}');
+			// The application's own faces, as its `@beyond-js/ui/fonts.css` declares them (0.17.1)
+			if (name.startsWith('fonts/')) {
+				response.setHeader('Content-Type', name.endsWith('.css') ? 'text/css' : 'font/woff2');
+				return response.end(readFileSync(new URL(`../${name}`, import.meta.url)));
+			}
+			if (name === 'app.css') {
+				response.setHeader('Content-Type', 'text/css');
+				return response.end(readFileSync(new URL('./fixtures/opening/app.css', import.meta.url)));
+			}
 			response.setHeader('Content-Type', 'text/html');
 			response.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; require-trusted-types-for 'script'; trusted-types 'none'");
 			response.end(this.#document.render(readFileSync(new URL('./fixtures/opening/index.html', import.meta.url), 'utf8')));
@@ -78,6 +87,16 @@ class OpeningAcceptance {
 			await page.locator('#bui-opening').waitFor({ state: 'detached' });
 			await page.getByRole('heading', { name: failure ? 'The service is unavailable' : 'Your projects' }).waitFor();
 			if (!module) assert.equal(await page.locator('h1').evaluate(node => node === document.activeElement), true);
+			// One set of faces once the application is ready: the opening's handed over to the application's
+			await page.clock.runFor(1000);
+			await page.waitForFunction(() => ![...document.querySelector('link[data-bui-opening]').sheet.cssRules].some(rule => rule.constructor.name === 'CSSFontFaceRule'));
+			const faces = await page.evaluate(async () => {
+				await document.fonts.ready;
+				const named = [...document.fonts].filter(face => /Inter|Rubik/.test(face.family));
+				return { count: named.length, inter: document.fonts.check('400 16px Inter'), rubik: document.fonts.check('400 16px Rubik'), unloaded: named.filter(face => /U\+0+-0*FF/i.test(face.unicodeRange) && face.weight === '400' && face.status !== 'loaded').map(face => face.family) };
+			});
+			assert.equal(faces.count, 12, `one set of faces: ${JSON.stringify(faces)}`);
+			assert.equal(faces.inter, true, `Inter 400 reads as loaded: ${JSON.stringify(faces)}`);
 			assert.ok(page.url().endsWith('/?project=kept#context'));
 			assert.equal(await page.locator('body').evaluate(body => body.getAnimations({ subtree: true }).length), 0);
 			this.#count++;

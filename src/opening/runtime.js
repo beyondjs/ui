@@ -1,4 +1,5 @@
 import { Preferences } from '../dom/preferences/preferences.js';
+import { OpeningFonts } from './fonts.js';
 
 /** Owns only the document's first opening, before an application has a useful screen. */
 class OpeningRuntime {
@@ -40,6 +41,8 @@ class OpeningRuntime {
 		// A person who reached recovery keeps a keyboard destination when the page arrives late.
 		const focused = this.#element.contains(document.activeElement);
 		this.#element.remove();
+		// One set of faces from now on: the application's own, once the ones in use have loaded (0.17.1)
+		new OpeningFonts(document.querySelector('link[data-bui-opening]')?.sheet ?? null).release().catch(() => false);
 		if (focused) {
 			const destination = root.querySelector('h1, main, button, a[href]') ?? root;
 			if (!destination.hasAttribute('tabindex')) destination.setAttribute('tabindex', '-1');

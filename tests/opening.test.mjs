@@ -50,3 +50,28 @@ test('Vite includes only explicitly selected application documents and emits eve
 	assert.ok(emitted.some(file => file.fileName.endsWith('.svg')));
 	assert.ok(emitted.some(file => file.fileName.endsWith('.woff2')));
 });
+
+test('the opening hands its faces over to the application’s own, once the ones in use load, and keeps them otherwise (0.17.1)', async () => {
+	const { OpeningFonts } = await import('../src/opening/fonts.js');
+	assert.match(new OpeningDocument({ product: 'Example', key: 'fixture', logo }).render(source), /<link rel="stylesheet" href="\/opening-[a-f0-9]+\.css" data-bui-opening>/);
+	class CSSFontFaceRule {
+		constructor(family) { this.style = { getPropertyValue: () => `"${family}"` }; }
+	}
+	const sheet = () => ({ cssRules: [{ type: 1 }, new CSSFontFaceRule('Inter'), new CSSFontFaceRule('Rubik'), { type: 1 }], deleteRule(index) { this.cssRules.splice(index, 1); } });
+	const face = (family, status, fails = false) => ({ family, weight: '400', style: 'normal', unicodeRange: 'U+0-FF', status, loads: 0, load() { this.loads += 1; return fails ? Promise.reject(new Error('404')) : Promise.resolve(this); } });
+	const twice = () => [face('Inter', 'loaded'), face('Rubik', 'unloaded'), face('Inter', 'unloaded'), face('Rubik', 'unloaded')];
+	let shown = sheet(), faces = twice();
+	assert.equal(await new OpeningFonts(shown, faces).release(), true);
+	assert.deepEqual(shown.cssRules.map(rule => rule.type ?? 'face'), [1, 1], 'the opening’s faces are removed, its other rules kept');
+	assert.deepEqual(faces.map(item => item.loads), [1, 0, 1, 0], 'only the faces in use are loaded under both declarations first');
+	shown = sheet();
+	assert.equal(await new OpeningFonts(shown, [face('Inter', 'loaded'), face('Rubik', 'unloaded')]).release(), false, 'no faces of the application’s own: the opening’s stay');
+	assert.equal(shown.cssRules.length, 4);
+	shown = sheet(), faces = twice();
+	faces[2] = face('Inter', 'unloaded', true);
+	assert.equal(await new OpeningFonts(shown, faces).release(), false, 'a face that cannot load: the opening’s stay');
+	assert.equal(shown.cssRules.length, 4);
+	assert.equal(await new OpeningFonts(null, faces).release(), false);
+	const guarded = { get cssRules() { throw new Error('SecurityError'); } };
+	assert.equal(await new OpeningFonts(guarded, faces).release(), false, 'an unreadable sheet changes nothing');
+});

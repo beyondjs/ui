@@ -214,6 +214,10 @@ export class FamilyBar extends Component {
 	set fallback(value: FamilyFallback | null);
 	/** `notice` replaces the project menu's notice (0.4.0). */
 	notice: FamilyNotice | null;
+	/** Replaces the wordmark and home address in place, keeping an open menu (0.17.1). */
+	set brand(value: FamilyBarOptions['brand']);
+	/** Replaces the account menu's options in place, keeping an open menu (0.17.1). */
+	set account(value: NonNullable<FamilyBarOptions['account']>);
 	expanded: boolean;
 }
 
@@ -248,8 +252,12 @@ export interface UnavailableOptions {
 	level?: 2 | 3 | 4 | 5 | 6;
 	/** Technical details shown closed under it (0.15.0, D43). */
 	details?: FailureDetails | null;
-	/** `owner`: "Who can change this: " */
-	labels?: { owner?: string };
+	/** An outage's read, or `Again`'s options: it tries again by itself and says when it last tried (0.17.1, D132); ignored for every other kind. */
+	again?: (() => Promise<unknown>) | import('./again.js').AgainOptions | null;
+	/** The language of the line's time of day (0.17.1). */
+	locale?: string;
+	/** `owner`: "Who can change this: "; `retry`, `tried`, `trying` (0.17.1) */
+	labels?: { owner?: string; retry?: string; tried?: string; trying?: string };
 }
 /** "Not available here", explained in place. */
 export class Unavailable extends Component {
@@ -258,6 +266,8 @@ export class Unavailable extends Component {
 	constructor(options: UnavailableOptions);
 	/** The technical details shown, or null (0.15.0). */
 	readonly details: import('./dom.js').TechnicalDetails | null;
+	/** What tries an outage again, or null (0.17.1). */
+	readonly again: import('./again.js').Again | null;
 	static level(value: unknown): 2 | 3 | 4 | 5 | 6;
 }
 

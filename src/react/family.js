@@ -4,11 +4,12 @@ import { FamilyBar as Bar } from '../dom/family/bar.js';
 import { ProductNav as Row } from '../dom/nav.js';
 import { Unavailable as Missing, glyphs } from '../dom/unavailable.js';
 import { Sidebar as Sections } from '../dom/sidebar/sidebar.js';
-import { Mark, Badge } from './simple.js';
+import { Mark, Badge, Button } from './simple.js';
 import { TechnicalDetails } from './operations.js';
+import { useAgain, AgainLine } from './again.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 
-const { useId, useState } = React;
+const { useId, useMemo, useState } = React;
 
 /**
  * The family bar, driven by the DOM `FamilyBar` class. `descriptor` is a prop (null while loading,
@@ -20,31 +21,42 @@ const { useId, useState } = React;
  * or an inline function) never draws the bar again.
  * `onNavigate(item, event)` takes over plain clicks on the bar's same-origin links. `notice` is
  * applied when its text, address or action label change, and its `action.onSelect` is called with
- * the latest props. A change of `product`, `brand`, `products`, `labels` (memoize it), `advisory`,
- * `transient`, the account entries or `toggle` creates a new bar.
+ * the latest props. Since 0.17.1 `brand`, `account.label`, the sign-out's form, the account entries and
+ * `account.preferences` are applied to the bar in place, keeping an open menu, and equal values change
+ * nothing; a change of `product`, `products`, `labels` (memoize it), `advisory`, `transient`, `projects`,
+ * `bound` or `toggle` creates a new bar.
  */
 export function FamilyBar({ product, brand, descriptor = null, fallback = null, products = {}, notifications = null, account = {}, toggle = null, onNavigate = null, advisory = ['NOT_ADMITTED'], notice = null, transient = [], labels, projects = true, bound = 15000 }) {
 	const [slot] = useState(() => document.createElement('div'));
 	const latest = useLatest({ account, toggle, onNavigate, notice });
 	const items = (account.items ?? []).filter(Boolean);
 	const signout = account.signout ?? null;
+	const leave = typeof signout === 'function' ? 'function' : (signout?.href ?? (signout ? `leave:${signout.bound ?? ''}` : null));
+	const listed = JSON.stringify(items.map(item => [item.label, item.href ?? null]));
+	// Applied to the bar in place (0.17.1): a new address or label keeps an open menu, the same values change nothing
+	const home = useMemo(() => ({ src: brand.src, href: brand.href }), [brand.src, brand.href]);
+	const options = useMemo(
+		() => ({
+			label: account.label ?? null,
+			signout: leaving(signout, latest),
+			items: items.map((item, index) => ({ label: item.label, href: item.href ?? null, run: item.href ? null : () => latest.current.account.items?.filter(Boolean)[index]?.onSelect?.() })),
+			preferences: preferring(account.preferences, latest)
+		}),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[account.label, leave, listed, account.preferences?.preferences, JSON.stringify(account.preferences?.locales ?? null)]
+	);
 	const [host, bar] = useInstance(() => {
 		slot.className = 'bui-slot';
 		return new Bar({
 			product,
-			brand,
+			brand: home,
 			descriptor,
 			fallback: fallback ?? {},
 			products,
 			advisory,
 			labels,
 			notifications: slot,
-			account: {
-				label: account.label ?? null,
-				signout: leaving(signout, latest),
-				items: items.map((item, index) => ({ label: item.label, href: item.href ?? null, run: item.href ? null : () => latest.current.account.items?.filter(Boolean)[index]?.onSelect?.() })),
-				preferences: preferring(account.preferences, latest)
-			},
+			account: options,
 			onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null,
 			toggle: toggle ? { controls: toggle.controls, expanded: toggle.expanded, onchange: expanded => latest.current.toggle?.onChange?.(expanded) } : null,
 			notice: relay(notice, latest),
@@ -52,7 +64,9 @@ export function FamilyBar({ product, brand, descriptor = null, fallback = null, 
 			projects,
 			bound
 		});
-	}, [projects, bound, product, brand.src, brand.href, JSON.stringify(products), JSON.stringify(advisory), JSON.stringify(transient), labels, account.label, typeof signout === 'function' ? 'function' : (signout?.href ?? (signout ? `leave:${signout.bound ?? ''}` : null)), JSON.stringify(items.map(item => [item.label, item.href ?? null])), account.preferences?.preferences, JSON.stringify(account.preferences?.locales ?? null), Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
+	}, [projects, bound, product, JSON.stringify(products), JSON.stringify(advisory), JSON.stringify(transient), labels, Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
+	useSync(bar, current => (current.brand = home), [home]);
+	useSync(bar, current => (current.account = options), [options]);
 	useSync(bar, current => (current.notice = relay(notice, latest)), [notice?.text, notice?.href, notice?.action?.label, notice?.action?.href]);
 	useSync(bar, current => (current.descriptor = descriptor), [JSON.stringify(descriptor)]);
 	useSync(bar, current => (current.fallback = fallback ?? {}), [JSON.stringify(fallback)]);
@@ -151,11 +165,16 @@ export function ProductNav({ items, label = null, sticky = false, onNavigate = n
 
 /**
  * "Not available here", rendered by React with the markup of the DOM `Unavailable`: `action` and
- * `secondary` are React content.
+ * `secondary` are React content. Since 0.17.1 an outage (`kind: 'outage'`) given its read as `again`
+ * tries again by itself (`useAgain`), says when it last tried and offers "Try again" when no `action` is
+ * passed; `again` is read from the latest props and ignored for every other kind.
  */
-export function Unavailable({ title, reason, owner = null, action = null, secondary = null, kind = 'access', code = null, level = 2, labels = {}, details = null }) {
+export function Unavailable({ title, reason, owner = null, action = null, secondary = null, kind = 'access', code = null, level = 2, labels = {}, details = null, again = null, locale = undefined }) {
 	const id = `bui-unavailable-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 	const type = glyphs[kind] ? kind : 'access';
+	const outage = type === 'outage' && typeof again === 'function';
+	const moments = useAgain(outage, () => again?.());
+	if (outage) action ??= h(Button, { label: labels.retry ?? Missing.labels.en.retry, onClick: () => void moments.now() });
 	return h(
 		'section',
 		{ className: `bui-unavailable bui-unavailable-${type}`, 'data-unavailable': type, 'aria-labelledby': id },
@@ -167,6 +186,7 @@ export function Unavailable({ title, reason, owner = null, action = null, second
 			h('p', { className: 'bui-unavailable-reason' }, reason),
 			owner ? h('p', { className: 'bui-unavailable-owner' }, h('span', { className: 'bui-unavailable-label' }, labels.owner ?? Missing.labels.en.owner), owner) : null,
 			code ? h('p', { className: 'bui-unavailable-code' }, h(Badge, { label: code, tone: 'neutral' })) : null,
+			outage ? h(AgainLine, { moments, locale, labels }) : null,
 			action || secondary ? h('div', { className: 'bui-unavailable-actions' }, action, secondary) : null,
 			details ? h(TechnicalDetails, details) : null
 		)

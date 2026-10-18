@@ -53,7 +53,7 @@ export class OpeningDocument {
 		const escape = OpeningDocument.#escape;
 		const words = key => `<span lang="en">${escape(OpeningDocument.labels.en[key])}</span><span lang="es">${escape(OpeningDocument.labels.es[key])}</span>`;
 		const settings = encodeURIComponent(JSON.stringify(this.#specs));
-		const head = `<link rel="stylesheet" href="${this.#url('css')}"><script defer src="${this.#url('js')}" data-opening="${settings}"></script>`;
+		const head = `<link rel="stylesheet" href="${this.#url('css')}" data-bui-opening><script defer src="${this.#url('js')}" data-opening="${settings}"></script>`;
 		const body = `<div id="bui-opening" class="bui-opening"><div class="bui-opening-panel">
 <div class="bui-opening-brand"><img src="${this.#url('svg')}" alt="Beyond" width="120" height="30"><span class="bui-opening-name">${escape(this.#specs.product)}</span></div>
 <div class="bui-opening-signal"><span class="bui-opening-mark" aria-hidden="true"></span><p class="bui-opening-status" role="status" data-opening-status><span class="bui-opening-wait">${words('opening')}</span><span class="bui-opening-slow">${words('slow')}</span></p></div>
