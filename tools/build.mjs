@@ -1,3 +1,4 @@
+import { buildSync } from 'esbuild';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { tokens, TokenSheet } from '../src/foundations/index.js';
@@ -13,7 +14,7 @@ import { tokens, TokenSheet } from '../src/foundations/index.js';
  * runs this through `prepack`, and the tests run it first, so a stale copy is never packed.
  */
 class Build {
-	static order = ['base', 'icons', 'controls', 'choice', 'cards', 'forms', 'picker', 'choose', 'overlays', 'palette', 'session', 'sheet', 'feedback', 'status', 'collection', 'table', 'list', 'checklist', 'command', 'header', 'notify', 'navigation', 'family', 'family-narrow', 'sidebar', 'sidebar-entries', 'page', 'panel', 'compact', 'thread', 'facts', 'arrival', 'notices', 'operations', 'details', 'rows', 'composer', 'editor', 'dictation', 'attachments', 'activity', 'rail', 'diff', 'diff-lines', 'code', 'quiet', 'prose', 'motion', 'links', 'floating'];
+	static order = ['base', 'icons', 'controls', 'choice', 'cards', 'forms', 'picker', 'choose', 'overlays', 'palette', 'session', 'sheet', 'feedback', 'signal', 'status', 'collection', 'table', 'list', 'checklist', 'command', 'header', 'notify', 'navigation', 'family', 'family-narrow', 'sidebar', 'sidebar-entries', 'page', 'panel', 'compact', 'thread', 'facts', 'arrival', 'notices', 'operations', 'details', 'rows', 'composer', 'editor', 'dictation', 'attachments', 'activity', 'rail', 'diff', 'diff-lines', 'code', 'quiet', 'prose', 'motion', 'links', 'floating'];
 
 	#root = new URL('../', import.meta.url);
 
@@ -23,6 +24,7 @@ class Build {
 		writeFileSync(`${directory}tokens.css`, `${new TokenSheet(tokens).css}\n`);
 		writeFileSync(`${directory}tokens.json`, `${JSON.stringify(tokens, null, '\t')}\n`);
 		writeFileSync(`${directory}styles.css`, this.styles);
+		buildSync({ entryPoints: [fileURLToPath(new URL('src/opening/runtime.js', this.#root))], bundle: true, format: 'iife', target: 'es2022', outfile: `${directory}opening.js` });
 		console.log(`Built tokens ${tokens.version} (${tokens.status}) and ${Build.order.length} component stylesheets into dist/`);
 	}
 

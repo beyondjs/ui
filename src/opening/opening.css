@@ -1,0 +1,39 @@
+/* The first document paint: one quiet, precise identity and an honest state, without fake progress. */
+.bui-opening {
+	position: fixed;
+	inset: 0;
+	z-index: 2147483646;
+	display: grid;
+	place-items: center;
+	align-items: safe center;
+	overflow: auto;
+	box-sizing: border-box;
+	padding: var(--space-6);
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font: var(--weight-regular) var(--text-body)/var(--leading-body) var(--font-sans);
+}
+.bui-opening * { box-sizing: border-box; }
+.bui-opening-panel { width: min(100%, 26rem); display: grid; gap: var(--space-6); }
+.bui-opening-brand { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); }
+.bui-opening-brand img { display: block; width: 120px; height: 30px; object-fit: contain; }
+.bui-opening-name { font: var(--weight-regular) var(--text-title-2)/var(--leading-title-2) var(--font-brand); }
+.bui-opening-signal { display: grid; grid-template-columns: 16px minmax(0, 1fr); align-items: center; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--color-border-strong); }
+.bui-opening p { margin: 0; overflow-wrap: anywhere; }
+.bui-opening-status { color: var(--color-text-muted); }
+.bui-opening-slow { display: none; }
+.bui-opening[data-state='slow'] .bui-opening-wait { display: none; }
+.bui-opening[data-state='slow'] .bui-opening-slow { display: inline; }
+.bui-opening-recovery { display: grid; gap: var(--space-4); }
+.bui-opening-recovery[hidden] { display: none; }
+.bui-opening-note, .bui-opening-help { color: var(--color-text-muted); font-size: var(--text-small); }
+.bui-opening button { justify-self: start; padding: var(--space-2) var(--space-4); min-height: 44px; border: 1px solid var(--color-border-control); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text); font: inherit; cursor: pointer; }
+.bui-opening button:focus-visible, .bui-opening summary:focus-visible { outline: 2px solid var(--color-action); outline-offset: 3px; }
+.bui-opening summary { cursor: pointer; min-height: 44px; display: list-item; align-content: center; }
+.bui-opening [lang='es'] { display: none; }
+:root:lang(es) .bui-opening [lang='en'] { display: none; }
+:root:lang(es) .bui-opening [lang='es'] { display: inline; }
+.bui-opening-noscript { display: none; }
+/* Neither the state mark nor the surface moves, including under reduced motion. */
+
+.bui-opening:has(noscript p) .bui-opening-signal { display: none; }

@@ -138,6 +138,10 @@ await confirm({
 const hint = new Hint(toolbar); // <button class="bui-icon-button" aria-label="Copy link" data-bui-hint>…more glyph…</button>
 ```
 
+## Opening a product
+
+The build-time public module `@beyond-js/ui/opening` supplies `OpeningDocument` for static servers and `OpeningPlugin` for Vite. The [opening guide](opening.md) defines application entry selection, readiness, recovery and continuity with DOM and React loading lines. It creates no session or request policy.
+
 ## Collections and feedback
 
 **DataTable** (DOM and React `DataTable`; since 0.15.0, DQ-12). A table of rows the product holds: a compact search whose placeholder names it (the label kept for assistive technology), headers that sort (`sort: true` or a comparison; `aria-sort`; one column at a time, ascending then descending, stable, numbers as numbers), groups with their count (`group: { by, label? }`), and pages of `size` rows (50) with "1–50 of 312", none when everything fits. The table never reads the address: every change the person makes calls `onchange({ query, sort, direction, page })` so the product writes it, and setting `state` (back, forward) draws it without calling it. States: `status = 'loading'` (skeleton rows in the table's shape, its loading line for assistive technology), `{ failed: reason }` (the reason or "This list could not be loaded." with Try again, `onretry`), and rows. No row at all hides the search, the headers and the pager and shows the empty state (`empty`: a node or `{ title, text, action }`); a search with no match says "Nothing matches “…”." with "Clear the search". The primary column (`primary`, else the first) names and opens the row (`link(row)`, `onopen` for plain clicks; a button without `link`), the whole row its target; `mono` and `align: 'end'` columns. On a region under 36rem each row is two short lines (the primary cell, then the others joined by " · "). React: `render(row)` may return React content; `rows`, `state` and `status` are applied when they change. `DataTable.labels.en` / `.es`.

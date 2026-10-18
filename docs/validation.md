@@ -96,3 +96,7 @@ UI is not compiled by Packages or Engine, so `beyond test` and the utilities val
 ## Documentation changes
 
 Validate local links and anchors, English and portability, the thin `CLAUDE.md` bridge, the shared coding and documentation standard copies, and `git diff --check`, including untracked files.
+
+## Opening document
+
+The [opening guide](opening.md#verification) names the public adapter checks and `npm run acceptance:opening` in Chrome, Firefox and WebKit. Its static fixture is independent of the application module, including a module that holds DOMContentLoaded. These checks do not establish product integration.

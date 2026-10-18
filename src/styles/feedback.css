@@ -158,7 +158,7 @@
 	height: 12px;
 	border-radius: var(--radius-control);
 	background: var(--color-surface-sunken);
-	animation: bui-pulse 1.4s ease-in-out infinite;
+	/* Placeholders preserve the content’s shape without moving what the person reads. */
 }
 .bui-skeleton-line:nth-child(3n + 1) {
 	width: 90%;

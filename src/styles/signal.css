@@ -1,0 +1,20 @@
+/* One quiet waiting mark for the document and named in-page loading lines. */
+.bui-loading > .bui-spinner,
+.bui-opening-mark {
+	position: relative;
+	flex: none;
+	box-sizing: border-box;
+	width: 12px;
+	height: 12px;
+	border: 1px solid var(--color-text-muted);
+	border-radius: var(--radius-round);
+	animation: none;
+}
+.bui-loading > .bui-spinner::after,
+.bui-opening-mark::after {
+	content: '';
+	position: absolute;
+	inset: 3px;
+	border-radius: inherit;
+	background: var(--color-text-muted);
+}
