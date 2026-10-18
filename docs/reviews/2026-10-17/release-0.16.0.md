@@ -83,7 +83,8 @@ What the products' adoptions of 0.16.1 found, corrected:
    product menu) lost the organization menu, and Accounts could not merge. It now carries the organizations.
 2. **A narrow `ListRow`.** Its end never shrank (`flex: none`) and kept name and end on one line. The row
    wraps (`flex-wrap: wrap`, the name's basis 12rem), the end shrinks (`flex: 0 1 auto; min-width: 0`) and
-   wraps, and under 30rem it takes its own line under the name.
+   wraps, and under 30rem it takes its own line under the name, with a small row gap (4 px) so the wrapped
+   row stays under about 96 px at 390 px.
 3. **A narrow `DataTable`'s empty cells.** An empty value (`''`, null, an empty node; never a React cell's
    holder) marks its cell `data-empty`, which the narrow layout leaves out; the " · " separators go before
    each shown cell after another shown one, so no separator stands around an empty cell or at the end.
@@ -91,5 +92,7 @@ What the products' adoptions of 0.16.1 found, corrected:
    its row (`rowKey`, else `id`) and column, so a cell whose content changes while its row does not is drawn
    again (it was the content captured when the DOM drew the row).
 
-Tests: `tests/adoption.test.mjs`. Browser: the family bar, one bar on a phone, `patterns` (ListRow and
-DataTable at 390 px), navigation and sidebar checks in Chrome, Firefox and WebKit.
+Tests: `tests/adoption.test.mjs` (`npm test` 636 pass). Browser, in Chrome, Firefox 155 and WebKit 26.6: the
+family bar (23), one bar on a phone (2), `patterns` (2: ListRow and DataTable at 390 px; it first measured a
+wrapped row at 101.6 px, which the smaller row gap corrected), navigation (7) and sidebar (16) checks, all
+passing.

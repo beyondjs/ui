@@ -22,7 +22,8 @@
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: var(--space-3);
+	/* A wrapped end sits close under the name: a small row gap, the usual column gap */
+	gap: var(--space-1) var(--space-3);
 	min-height: var(--bui-target);
 	padding: var(--space-2) var(--space-3);
 	border-radius: var(--radius-control);
