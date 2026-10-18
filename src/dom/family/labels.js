@@ -5,14 +5,17 @@
  * here is copy a product passes in its own language; the package ships the English and Spanish sets
  * (`FamilyBar.labels.en` / `.es`), whose role names are Beyond Accounts' own (0.7.3).
  * `area` and `role` are functions of `{ product }` and `{ role }` so a language maps every value.
+ * The area lines use the family's words (D141, 0.17.2): snapshot, never capture; machine for what Conduict
+ * operates; Beyond Home for the Desktop.
  */
 const areas = {
 	projects: 'Projects of this organization',
 	workspace: 'Development environments',
 	delegate: 'Delegated projects',
 	cdn: 'Applications',
-	snapshots: 'Captures',
-	conduict: 'Environments and conversations',
+	snapshots: 'Snapshots of selected packages',
+	conduict: 'Machines and their conversations',
+	packages: 'Packages, previews and snapshots',
 	accounts: 'Members and invitations',
 	home: 'Your projects, recent work and what needs you',
 	desktop: 'Your projects, recent work and what needs you'
@@ -80,8 +83,9 @@ const translated = {
 		workspace: 'Entornos de desarrollo',
 		delegate: 'Proyectos delegados',
 		cdn: 'Aplicaciones',
-		snapshots: 'Capturas',
-		conduict: 'Entornos y conversaciones',
+		snapshots: 'Instantáneas de los paquetes elegidos',
+		conduict: 'Máquinas y sus conversaciones',
+		packages: 'Paquetes, vistas previas e instantáneas',
 		accounts: 'Miembros e invitaciones',
 		home: 'Tus proyectos, el trabajo reciente y lo que te necesita',
 		desktop: 'Tus proyectos, el trabajo reciente y lo que te necesita'

@@ -62,7 +62,7 @@ export const es = {
 		entries: 'Este proyecto en cada producto',
 		overview: 'Resumen del proyecto',
 		entry: 'Este proyecto en {product}',
-		area: ({ product }) => ({ projects: 'Proyectos de esta organización', workspace: 'Entornos de desarrollo', delegate: 'Proyectos delegados', cdn: 'Aplicaciones', snapshots: 'Capturas', conduict: 'Entornos y conversaciones', accounts: 'Miembros e invitaciones' })[product] ?? '',
+		area: ({ product }) => ({ projects: 'Proyectos de esta organización', workspace: 'Entornos de desarrollo', delegate: 'Proyectos delegados', cdn: 'Aplicaciones', snapshots: 'Instantáneas de los paquetes elegidos', conduict: 'Máquinas y sus conversaciones', packages: 'Paquetes, vistas previas e instantáneas', accounts: 'Miembros e invitaciones' })[product] ?? '',
 		back: 'Tus organizaciones y proyectos',
 		UNCONFIGURED: 'No se ofrece aquí',
 		NOT_ADMITTED: 'Aún no está abierto para ti',

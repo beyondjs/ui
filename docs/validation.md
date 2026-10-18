@@ -94,6 +94,10 @@ A pass is package evidence only. It is not adoption by a product, not a product 
 
 UI is not compiled by Packages or Engine, so `beyond test` and the utilities validation do not apply. It owns no service, port or selector profile; root and suite launch checks are inapplicable.
 
+## 0.17.2 words
+
+`vocabulary.test.mjs` holds the family bar's English and Spanish copy, its area and role lines included, to D141's words (no capture, no environment for a machine, no Desktop), an area line for every product `productNames` lists except Docs, and the switcher's short form of Projects' leads for Snapshots, Conduict, Packages and Beyond Home. The browser acceptance's React fixture carries the same Spanish area lines.
+
 ## 0.17.1 corrections
 
 `held.test.mjs` holds the family bar's open menu across a new descriptor, notice, `brand` and `account` (focus on the same entry, on the panel or left where it was, the search applied again, a menu no longer drawn not opened, React's bar kept instead of made again) and `Same`'s comparison; `again.test.mjs` holds `Again`'s schedule on injected timers, a refusal as an answer, one try at a time against Try again, `online` and the page shown again, a hidden page, `AgainLine` in English and Spanish, `Unavailable`'s outage that recovers and a refusal never tried, and React `useAgain`; `list.test.mjs` holds Copy's rules; `opening.test.mjs` holds `OpeningFonts`' hand-over and its refusals. `npm run types` compiles `fixtures/types/hold.ts` and `hold.tsx`. The browser acceptance's `checks/holding.mjs` runs on the `hold.html` pages (DOM and both Reacts): an open menu kept in place across new data with no entry and its exit on Escape, Copy on one line in a narrow fact, and an outage recovering with no reload; `npm run acceptance:opening` counts twelve faces with Inter 400 loaded.
