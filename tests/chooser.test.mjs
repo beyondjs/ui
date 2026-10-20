@@ -138,7 +138,7 @@ test('SecretField: Connect first, the paste folded as the last resort, and a sto
 	assert.equal(connected, 1);
 	const fold = field.element.querySelector('details');
 	assert.equal(fold.querySelector('summary').textContent, 'Paste the access token instead');
-	assert.match(fold.textContent, /Only when connecting isn’t possible/);
+	assert.match(fold.textContent, /Use only when connecting is unavailable/);
 	assert.equal(field.control.disabled, true);
 	assert.equal(field.value, null);
 	assert.deepEqual([...new FormData(form).keys()], [], 'a closed fold submits nothing');

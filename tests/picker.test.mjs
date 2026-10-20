@@ -133,7 +133,7 @@ test('no matches, empty source, failure with retry', async () => {
 	assert.ok(options(picker.element).length > 0);
 	const empty = new Picker({ label: 'Nothing', source: async () => ({ items: [] }), delay: 0 }).mount(document.body);
 	await settle(empty);
-	assert.equal(status(empty), 'There is nothing to choose from yet.');
+	assert.equal(status(empty), 'No options yet.');
 });
 
 test('a late answer of an older query never replaces a newer one', async () => {

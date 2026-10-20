@@ -14,7 +14,7 @@ import { tokens, TokenSheet } from '../src/foundations/index.js';
  * runs this through `prepack`, and the tests run it first, so a stale copy is never packed.
  */
 class Build {
-	static order = ['base', 'icons', 'controls', 'choice', 'cards', 'forms', 'picker', 'choose', 'overlays', 'palette', 'session', 'sheet', 'feedback', 'signal', 'status', 'collection', 'table', 'list', 'checklist', 'command', 'header', 'notify', 'navigation', 'family', 'family-narrow', 'sidebar', 'sidebar-entries', 'page', 'panel', 'compact', 'thread', 'facts', 'arrival', 'notices', 'operations', 'details', 'rows', 'composer', 'editor', 'dictation', 'attachments', 'activity', 'rail', 'diff', 'diff-lines', 'code', 'quiet', 'prose', 'motion', 'links', 'floating'];
+	static order = ['base', 'icons', 'controls', 'choice', 'cards', 'forms', 'picker', 'choose', 'overlays', 'palette', 'session', 'sheet', 'feedback', 'signal', 'status', 'collection', 'table', 'list', 'checklist', 'command', 'header', 'notify', 'navigation', 'family', 'family-narrow', 'family-menu', 'sidebar', 'sidebar-entries', 'sidebar-rail', 'page', 'panel', 'compact', 'thread', 'facts', 'arrival', 'notices', 'operations', 'details', 'rows', 'composer', 'editor', 'dictation', 'attachments', 'activity', 'rail', 'diff', 'diff-lines', 'code', 'quiet', 'prose', 'motion', 'links', 'floating'];
 
 	#root = new URL('../', import.meta.url);
 

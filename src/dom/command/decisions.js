@@ -7,7 +7,7 @@ import { Ids } from '../core/ids.js';
  * conversation" and "Deny with a note". A decision is `{ value, label, kind: 'allow'|'deny', keys?:
  * 'Enter'|'Escape', note?: boolean|{ label?, placeholder? } }`: the first allow takes Enter and the first
  * deny without a note takes Escape unless `keys` says otherwise. A decision with a note first shows its
- * field ("Tell it what to do instead"), whose Enter sends the decision with the note and whose Escape
+ * field ("Describe an alternative"), whose Enter sends the decision with the note and whose Escape
  * goes back to the answers.
  */
 export class CommandDecisions {

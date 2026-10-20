@@ -94,6 +94,10 @@ A pass is package evidence only. It is not adoption by a product, not a product 
 
 UI is not compiled by Packages or Engine, so `beyond test` and the utilities validation do not apply. It owns no service, port or selector profile; root and suite launch checks are inapplicable.
 
+## 0.18.0 navigation
+
+`sidebar-rail.test.mjs` covers rail order, contextual toggle/collapse, setter behavior, focus after updates and object removal, readable navigation callbacks, mobile content and default restoration. `react-sidebar-rail.test.mjs` checks StrictMode and latest handlers. Typed fixtures `navigation.ts` and `navigation.tsx` exercise the public APIs. Installed checks in `navigation-rail.mjs` run through `npm run acceptance -- 'rail navigation'`, with DOM and React consumers in Chrome, Firefox and WebKit. The [navigation guide](navigation.md) describes the opt-in boundary.
+
 ## 0.17.2 words
 
 `vocabulary.test.mjs` holds the family bar's English and Spanish copy, its area and role lines included, to D141's words (no capture, no environment for a machine, no Desktop), an area line for every product `productNames` lists except Docs, and the switcher's short form of Projects' leads for Snapshots, Conduict, Packages and Beyond Home. The browser acceptance's React fixture carries the same Spanish area lines.
@@ -109,3 +113,11 @@ Validate local links and anchors, English and portability, the thin `CLAUDE.md` 
 ## Opening document
 
 The [opening guide](opening.md#verification) names the public adapter checks and `npm run acceptance:opening` in Chrome, Firefox and WebKit. Its static fixture is independent of the application module, including a module that holds DOMContentLoaded. These checks do not establish product integration.
+
+## UI 0.18.1: shared hierarchy and contextual destinations
+
+Run `npm run acceptance -- "shared hierarchy"` for dropdown and Unavailable typography in both themes and at desktop and phone widths. Run `npm run acceptance -- "rail navigation"` for contextual headers, Floating tooltips and route links. Repeat with `BEYOND_UI_BROWSER=firefox` and `BEYOND_UI_BROWSER=webkit`. Existing header geometry remains covered by `npm run acceptance -- "bar end"`. See [the release evidence](reviews/2026-10-20/release-0.18.1.md) and [the navigation guide](navigation.md).
+
+## UI 0.18.2: complete semantic writing review
+
+[The writing review](reviews/2026-10-20/interface-writing.md) records all shared catalogs and inline text reviewed, changes made and deliberate retention. [The writing guide](writing.md) states the maintained component responsibilities. Public bilingual catalog parity and uncertainty/recovery checks are part of `npm test`; existing installed notification, confirmation, approval and resource-picker checks validate affected journeys.

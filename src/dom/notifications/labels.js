@@ -1,5 +1,8 @@
+import { AgainLine } from '../again/line.js';
+
 /** English defaults of the notification entry and inbox; consumers replace any entry through `labels`. */
 export const defaults = {
+	...AgainLine.labels.en,
 	title: 'Notifications',
 	button: ({ count, more }) => (count === null || count === undefined ? 'Notifications' : count === 0 ? 'Notifications, none unread' : more ? `Notifications, ${count} or more unread` : `Notifications, ${count} unread`),
 	badge: ({ count, more }) => (more ? `${count}+` : count > 99 ? '99+' : String(count)),
@@ -8,14 +11,14 @@ export const defaults = {
 	caught: 'You are all caught up.',
 	failure: 'Notifications could not be loaded.',
 	retry: 'Try again',
-	unavailable: 'Notifications are unavailable right now. Everything else works.',
-	cause: 'Notifications are unavailable right now because {reason}. Everything else works.',
-	not_configured: 'this installation is not connected to Beyond Projects',
+	unavailable: 'Notifications are unavailable.',
+	cause: 'Notifications are unavailable: {reason}.',
+	not_configured: 'notifications are not connected to Beyond Projects',
 	not_platform_session: 'your session is not a Beyond Accounts session',
 	session_rejected: 'Beyond Projects could not confirm your access to them yet',
 	projects_unavailable: 'Beyond Projects did not answer',
 	accounts_unavailable: 'Beyond Accounts did not answer',
-	partial: ({ products }) => `Some products could not be reached (${products}). Their notifications are hidden until they answer.`,
+	partial: ({ products }) => `No response from ${products}. Their notifications appear when the connection returns.`,
 	all: 'View all notifications',
 	everything: 'Mark all as read',
 	mark: 'Mark as read',
@@ -38,6 +41,7 @@ export const defaults = {
 
 /** The notification entry's and inbox's copy in Spanish (0.7.2; `NotificationEntry.labels.es`). */
 export const spanish = {
+	...AgainLine.labels.es,
 	title: 'Notificaciones',
 	button: ({ count, more }) => (count === null || count === undefined ? 'Notificaciones' : count === 0 ? 'Notificaciones, ninguna sin leer' : more ? `Notificaciones, ${count} o más sin leer` : `Notificaciones, ${count} sin leer`),
 	badge: defaults.badge,
@@ -46,14 +50,14 @@ export const spanish = {
 	caught: 'Estás al día.',
 	failure: 'No se pudieron cargar las notificaciones.',
 	retry: 'Reintentar',
-	unavailable: 'Las notificaciones no están disponibles ahora. Todo lo demás funciona.',
-	cause: 'Las notificaciones no están disponibles ahora porque {reason}. Todo lo demás funciona.',
-	not_configured: 'esta instalación no está conectada a Beyond Projects',
+	unavailable: 'Las notificaciones no están disponibles.',
+	cause: 'Las notificaciones no están disponibles: {reason}.',
+	not_configured: 'las notificaciones no están conectadas a Beyond Projects',
 	not_platform_session: 'tu sesión no es una sesión de Beyond Accounts',
 	session_rejected: 'Beyond Projects aún no pudo confirmar tu acceso a ellas',
 	projects_unavailable: 'Beyond Projects no respondió',
 	accounts_unavailable: 'Beyond Accounts no respondió',
-	partial: ({ products }) => `Algunos productos no respondieron (${products}). Sus notificaciones no se muestran hasta que respondan.`,
+	partial: ({ products }) => `${products} no respondieron. Sus notificaciones aparecerán cuando vuelva la conexión.`,
 	all: 'Ver todas las notificaciones',
 	everything: 'Marcar todas como leídas',
 	mark: 'Marcar como leída',

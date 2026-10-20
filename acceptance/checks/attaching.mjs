@@ -9,7 +9,7 @@ import { open } from './thread.mjs';
  * once per state; and suggestions with real keys, above the docked box, with their bounded states.
  */
 const words = {
-	en: { start: 'Start', model: 'Model', reason: "This engine's route can't enforce it", drop: 'Drop files to attach', uploading: 'shot.png uploading', attached: 'shot.png attached', failed: 'Larger than 10 MB', retry: 'Retry', late: 'Unavailable · didn’t answer in time', unread: 'Unavailable · couldn’t be read', looking: 'Looking…' },
+	en: { start: 'Start', model: 'Model', reason: "This engine's route can't enforce it", drop: 'Drop files to attach', uploading: 'shot.png uploading', attached: 'shot.png attached', failed: 'Larger than 10 MB', retry: 'Retry', late: 'Unavailable · didn’t answer in time', unread: 'Unavailable · couldn’t be read', looking: 'Searching…' },
 	es: { start: 'Iniciar', model: 'Modelo', reason: 'La ruta de este motor no puede imponerlo', drop: 'Suelta los archivos para adjuntarlos', uploading: 'shot.png subiéndose', attached: 'shot.png adjuntado', failed: 'Más de 10 MB', retry: 'Reintentar', late: 'No disponible · no respondió a tiempo', unread: 'No disponible · no se pudo leer', looking: 'Buscando…' }
 };
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');

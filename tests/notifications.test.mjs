@@ -19,9 +19,10 @@ async function opened(entry) {
 	await page.until(() => entry.panel.querySelector('.bui-notify-body').getAttribute('aria-busy') === 'false');
 }
 
-test('the count shows when known and hides while unknown, failed or unavailable', async () => {
+test('the count shows when known and hides while unknown, failed or unavailable', async t => {
 	const notices = new Notices();
 	const entry = new NotificationEntry({ adapter: notices.adapter, href: '/notifications' }).mount(document.body);
+	t.after(() => entry.destroy());
 	assert.equal(badge(entry).hidden, true, 'hidden before the summary answers');
 	assert.equal(bell(entry).getAttribute('aria-label'), 'Notifications');
 	await page.until(() => entry.count === 3);
@@ -39,7 +40,7 @@ test('the count shows when known and hides while unknown, failed or unavailable'
 	assert.equal(entry.element.dataset.state, 'unavailable');
 	assert.equal(badge(entry).hidden, true);
 	await opened(entry);
-	assert.match(entry.panel.textContent, /Notifications are unavailable right now/);
+	assert.match(entry.panel.textContent, /Notifications are unavailable/);
 });
 
 test('the panel lists recent items with product and time, and forgets them when closed', async () => {
@@ -106,7 +107,7 @@ test('the panel states failure with retry, and partial results name the unreacha
 	notices.missing = ['cdn'];
 	entry.panel.querySelector('.bui-callout button').click();
 	await page.until(() => entry.panel.querySelector('.bui-notice'));
-	assert.match(entry.panel.textContent, /Some products could not be reached \(cdn\)/);
+	assert.match(entry.panel.textContent, /No response from cdn/);
 	assert.equal(titles(entry.panel).some(title => title.includes('Release 1.4.0')), false);
 });
 
@@ -153,7 +154,7 @@ test('the inbox marks all read for its product filter and survives an unavailabl
 	assert.equal(notices.items.find(item => item.id === 'n4').read, null, 'another product stays unread');
 	notices.absent = true;
 	await inbox.load();
-	assert.match(inbox.element.textContent, /unavailable right now/);
+	assert.match(inbox.element.textContent, /unavailable/);
 	inbox.destroy();
 	assert.equal(inbox.element.isConnected, false);
 });

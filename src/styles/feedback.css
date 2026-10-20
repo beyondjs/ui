@@ -190,7 +190,7 @@
 /* "Not available here" (Unavailable): explained in place, in tones that never read as a failure. */
 .bui-unavailable {
 	display: flex;
-	gap: var(--space-4);
+	gap: var(--space-3);
 	max-width: 44rem;
 	padding: var(--space-6);
 	border: 1px solid var(--color-border);
@@ -198,34 +198,35 @@
 	background: var(--color-surface);
 	color: var(--color-text);
 }
-/* The disc is centred on the title's first line. */
+/* A compact status mark sits beside the first heading line; the body aligns below the words. */
 .bui-unavailable-icon {
 	display: grid;
 	place-items: center;
 	flex: none;
-	width: 44px;
-	height: 44px;
-	margin-top: calc((var(--text-title-2) * var(--leading-title-2) - 44px) / 2);
-	border-radius: var(--radius-round);
-	background: var(--color-warning-surface);
+	width: var(--space-6);
+	height: var(--space-6);
+	margin-top: calc((var(--text-title-2) * var(--leading-title-2) - var(--space-6)) / 2);
 	color: var(--color-warning);
 }
 .bui-unavailable-capability .bui-unavailable-icon {
-	background: var(--color-info-surface);
 	color: var(--color-info);
 }
 .bui-unavailable-association .bui-unavailable-icon {
-	background: var(--color-surface-sunken);
 	color: var(--color-text-muted);
 }
+.bui-unavailable-icon > .bui-icon { width: 20px; height: 20px; }
 .bui-unavailable-body {
 	display: grid;
 	align-content: start;
 	gap: var(--space-2);
 	min-width: 0;
+	font-size: var(--text-body);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-body);
 }
 .bui-unavailable-title {
 	margin: 0;
+	color: var(--color-text);
 	font-size: var(--text-title-2);
 	font-weight: var(--weight-medium);
 	line-height: var(--leading-title-2);

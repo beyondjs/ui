@@ -35,7 +35,7 @@ function type(field, text, options = {}) {
 }
 const key = (field, name, options = {}) => page.key(field, name, options);
 
-test('after the trigger the field asks, says Looking…, then lists options as a listbox it controls, the first active', async () => {
+test('after the trigger the field asks, says Searching…, then lists options as a listbox it controls, the first active', async () => {
 	const { composer, asked, field, list, panel } = make();
 	assert.equal(field.getAttribute('aria-autocomplete'), 'list');
 	assert.equal(field.getAttribute('aria-controls'), list.id);
@@ -151,7 +151,7 @@ test('every ask ends: a silent source is aborted at its bound and said unavailab
 	const silent = make(() => new Promise(() => {}), { suggest: { bound: 40 } });
 	type(silent.field, '@src');
 	await page.until(() => silent.composer.suggestions.state === 'looking');
-	assert.equal(silent.panel.querySelector('.bui-composer-suggest-line').textContent, 'Looking…');
+	assert.equal(silent.panel.querySelector('.bui-composer-suggest-line').textContent, 'Searching…');
 	await page.until(() => silent.composer.suggestions.state === 'unavailable');
 	assert.equal(silent.asked[0].signal.aborted, true, 'the ask is aborted at its bound');
 	assert.equal(silent.panel.querySelector('.bui-composer-suggest-line').textContent, 'Unavailable · didn’t answer in time');

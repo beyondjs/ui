@@ -7,6 +7,26 @@ const panel = page => page.locator('.bui-notify .bui-disclosure-panel');
 /** The notification entry and inbox with the fixture adapter in each of its modes. */
 export const checks = [
 	{
+		name: 'notification outages warn, show the last attempt and recover automatically',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			const { page } = await browser.open(consumer, { query: '?notices=unavailable' });
+			await page.clock.install();
+			await page.reload();
+			await page.locator('#inbox .bui-callout-warning').waitFor();
+			await bell(page).click();
+			await panel(page).locator('.bui-callout-warning .bui-again').waitFor();
+			expect(await panel(page).getByRole('button', { name: words[consumer.language].retry }).count() === 1, 'manual recovery remains available');
+			await page.evaluate(() => window.fixture.notices.recover());
+			await page.clock.runFor(5000);
+			await page.locator('#inbox .bui-notice').first().waitFor();
+			await panel(page).locator('.bui-notice').first().waitFor();
+			expect(await page.locator('.bui-callout-warning').count() === 0, 'recovery removes the warning');
+			await page.keyboard.press('Escape');
+			expect(await panel(page).locator('.bui-notice').count() === 0, 'private text is cleared on close');
+		}
+	},
+	{
 		name: 'entry: unread count and name, panel lists and marks read, Escape returns focus and the panel forgets its items',
 		consumers: ['dom', 'react19', 'react18'],
 		async run(browser, consumer) {

@@ -1,0 +1,6 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font-sans); color: var(--color-text); background: var(--color-canvas); }
+#root { min-height: 100dvh; }
+.navigation-page { min-width: 0; flex: 1; padding: var(--space-8); }
+.navigation-page h1 { margin: 0; font-size: var(--text-title-1); font-weight: var(--weight-semibold); }
+.navigation-page p { font-size: var(--text-body); }

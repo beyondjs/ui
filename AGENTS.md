@@ -16,6 +16,10 @@ This is the canonical instruction source for this independent repository. Read [
 - Every component that carries copy ships it in English and Spanish as `X.labels.en` / `.es` (builders: `loading.labels`, `consequence.labels`; `availability` entries: `labels`); a new component or string adds both, and `tests/spanish.test.mjs` checks every set has every key.
 - Distribution is a vendored tarball (`npm run pack:consumers -- <consumer>`); do not publish to a registry without explicit authorization. A change to the package that consumers need is a new version, re-vendored deliberately.
 
+## Product writing
+
+Use task or object headings, specific action verbs and one term per concept. Keep one idea per sentence; aim for 15 words without hiding permissions, costs, privacy or recovery. Remove filler and repeated introductions. Distinguish dynamic values from explanatory copy and offer contextual help only when useful. Review the complete journey in English and Spanish. The family reference owns the full guidance in Beyond Suite's `branding/docs/writing.md` (D156); this paragraph remains sufficient in a standalone checkout.
+
 ## Family reference synchronization
 
 Every assignment changing user-visible functionality, authorization/admission (including refusal meaning), navigation, visible states or recovery must assess and update the affected family representation, journeys, evidence and documentation in the same assignment. The suite's canonical policy is `docs/family/reference-synchronization.md` in the Beyond Suite repository; this is a portable locator, not a required sibling dependency. Finish with **synchronized**, **no reference impact** with a reason, or **synchronization blocked** with affected identifiers, blocker, owner/decision and remaining work. Record the evidence date/type, product revision and uncommitted state, reference/token versions and proposal approval state. If the suite is unavailable, retain the report here and return it to its owner; do not claim synchronization. Simulation does not prove product acceptance, and implementation does not approve a proposal.

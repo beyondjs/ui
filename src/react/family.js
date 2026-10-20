@@ -126,11 +126,13 @@ function relay(notice, latest) {
  * `action` and `search` (its `source` and `all` read from the latest props too), and `shortcut` makes
  * ⌘K / Ctrl+K open the search.
  */
-export function Sidebar({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onNavigate = null, labels, shortcut = false, merge = false }) {
-	const latest = useLatest({ onNavigate, search, groups });
+export function Sidebar({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onNavigate = null, labels, shortcut = false, merge = false, rail = null }) {
+	const latest = useLatest({ onNavigate, search, groups, rail });
 	const objects = () => objected(groups, latest);
-	const [host, sidebar] = useInstance(() => new Sections({ product, groups: objects(), context, cut, section, action, search: finding(search, () => latest.current.search), labels, shortcut, onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null }), [product, cut, labels, Boolean(onNavigate), Boolean(shortcut)]);
+	const railing = () => rail ? { ...rail, onchange: open => latest.current.rail?.onChange?.(open) } : null;
+	const [host, sidebar] = useInstance(() => new Sections({ product, groups: objects(), context, cut, section, action, search: finding(search, () => latest.current.search), labels, shortcut, rail: railing(), onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null }), [product, cut, labels, Boolean(onNavigate), Boolean(shortcut)]);
 	useSync(sidebar, current => (current.groups = objects()), [JSON.stringify(groups)]);
+	useSync(sidebar, current => (current.rail = railing()), [Boolean(rail), rail?.panel, rail?.open, JSON.stringify(rail?.order)]);
 	useSync(sidebar, current => (current.context = context), [JSON.stringify(context)]);
 	useSync(sidebar, current => (current.section = section), [section]);
 	// One bar on a phone (0.16.0, DQ-19): the page's family bar opens this sidebar's drawer

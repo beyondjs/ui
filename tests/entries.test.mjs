@@ -131,7 +131,7 @@ test('search: no match, a failure and a source past its bound say so with Try ag
 	mode = 'fail';
 	type('zebras');
 	await page.until(() => !nav.querySelector('.bui-sidebar-retry').hidden);
-	assert.equal(nav.querySelector('.bui-sidebar-line').textContent, 'The search didn’t answer, so results can’t be listed now.');
+	assert.equal(nav.querySelector('.bui-sidebar-line').textContent, 'Search did not respond. Try again.');
 	mode = 'silent';
 	nav.querySelector('.bui-sidebar-retry').click();
 	assert.equal(nav.querySelector('.bui-sidebar-line').textContent, 'Searching…');

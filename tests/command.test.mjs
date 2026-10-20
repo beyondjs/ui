@@ -60,7 +60,7 @@ test('a failed answer is said in place and the answers stay; a long command fold
 	const card = new ui.CommandCard({ title: 'Ejecutar', command: Array.from({ length: 12 }, (_, index) => `line ${index}`).join('\n'), allow: async () => { if (fail) throw new Error('down'); }, deny: () => {}, labels: ui.CommandCard.labels.es }).mount(document.body);
 	assert.equal(await card.answer('allow'), false);
 	assert.equal(card.state, 'pending');
-	assert.equal(card.element.querySelector('.bui-command-line').textContent, 'Tu respuesta no llegó. Vuelve a intentarlo.');
+	assert.equal(card.element.querySelector('.bui-command-line').textContent, 'No se pudo confirmar tu respuesta. Vuelve a intentarlo.');
 	fail = false;
 	assert.equal(await card.answer('allow'), true);
 	assert.equal(card.element.querySelector('.bui-command-line').textContent, 'Permitido');

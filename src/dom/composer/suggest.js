@@ -12,7 +12,7 @@ import { CaretPoint } from './caret.js';
  * and says it with the attributes a text box takes (`aria-controls`, `aria-autocomplete="list"`,
  * `aria-haspopup="listbox"`, `aria-activedescendant`; since 0.11.2 no `aria-expanded`, which a text box
  * does not take). The list opens at the trigger being typed (0.11.2), each option on one line: its label,
- * then its detail, cut at the line's end. "Looking…", "No match" and "Unavailable · {reason}" are said apart; a polite region
+ * then its detail, cut at the line's end. "Searching…", "No match" and "Unavailable · {reason}" are said apart; a polite region
  * says each answer once. Up and Down move, Enter or Tab inserts, Escape closes (and the same token stays
  * closed); the token is replaced by the item's value and a space. Nothing is asked while an input method
  * composes, and Enter is taken only while an option is active in an open list.

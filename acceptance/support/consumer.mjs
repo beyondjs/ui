@@ -49,12 +49,13 @@ export class Consumer {
 	async prepare(tarball) {
 		this.#directory = mkdtempSync(join(tmpdir(), `ui acceptance ${this.#name}-`));
 		cpSync(fixtures, join(this.#directory, 'fixtures'), { recursive: true });
+		cpSync(new URL('../../tests/fixtures/sidebar-rail.mjs', import.meta.url), join(this.#directory, 'fixtures', 'data', 'sidebar-rail.mjs'));
 		const dependencies = { '@beyond-js/ui': `file:${tarball}` };
 		if (this.#react) Object.assign(dependencies, { react: this.#react, 'react-dom': this.#react });
 		writeFileSync(join(this.#directory, 'package.json'), JSON.stringify({ name: `ui-consumer-${this.#name}`, private: true, type: 'module', dependencies }, null, '\t'));
 		execFileSync('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error'], { cwd: this.#directory, stdio: 'pipe' });
 		// The React fixture's pages: the full consumer, one under an external store, the family bar, the icons with preferences, the long operations, the page system, "Choose, never type", the conversation (0.10.0), the thread (0.11.0), the diff (0.11.2), the round of 0.14.0, the audit of 0.15.0 and the patterns of 0.16.0.
-		const entries = (this.#page === 'react' ? ['main.jsx', 'store.jsx', 'family.jsx', 'icons.jsx', 'operations.jsx', 'layout.jsx', 'choosing.jsx', 'conversation.jsx', 'thread.jsx', 'diff.jsx', 'round.jsx', 'audit.jsx', 'wave.jsx', 'hold.jsx'] : ['main.js', 'family.js', 'icons.js', 'operations.js', 'layout.js', 'choosing.js', 'session.js', 'landed.js', 'conversation.js', 'thread.js', 'diff.js', 'round.js', 'audit.js', 'wave.js', 'hold.js']).map(file => join(this.#directory, 'fixtures', this.#page, file));
+		const entries = (this.#page === 'react' ? ['main.jsx', 'store.jsx', 'family.jsx', 'icons.jsx', 'operations.jsx', 'layout.jsx', 'choosing.jsx', 'conversation.jsx', 'thread.jsx', 'diff.jsx', 'round.jsx', 'audit.jsx', 'wave.jsx', 'hold.jsx', 'navigation.jsx'] : ['main.js', 'family.js', 'icons.js', 'operations.js', 'layout.js', 'choosing.js', 'session.js', 'landed.js', 'conversation.js', 'thread.js', 'diff.js', 'round.js', 'audit.js', 'wave.js', 'hold.js', 'navigation.js']).map(file => join(this.#directory, 'fixtures', this.#page, file));
 		await build({ entryPoints: entries, bundle: true, format: 'esm', outdir: join(this.#directory, 'fixtures', this.#page, 'out'), jsx: 'automatic', loader: { '.woff2': 'file' }, define: { 'process.env.NODE_ENV': '"development"' }, logLevel: 'error', absWorkingDir: this.#directory });
 		this.#server = await new Server(this.#directory).start();
 		return this;

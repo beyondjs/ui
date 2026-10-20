@@ -8,8 +8,8 @@ import { survey } from '../../tests/support/names.mjs';
  * below; and the page at 320 to 1440 px in both themes with its icon-only controls named.
  */
 const words = {
-	en: { needs: 'Needs you', recent: 'Recent', long: 'Upgrade the build to the latest toolchain and explain every warning it prints along the way', count: '1 result', none: 'Nothing matches “zzz”.', unavailable: 'The search didn’t answer, so results can’t be listed now.', retry: 'Try again', details: 'Details', action: 'New conversation', searching: 'Searching…' },
-	es: { needs: 'Te espera', recent: 'Recientes', long: 'Upgrade the build to the latest toolchain and explain every warning it prints along the way', count: '1 resultado', none: 'Nada coincide con «zzz».', unavailable: 'La búsqueda no respondió, así que ahora no se pueden mostrar resultados.', retry: 'Reintentar', details: 'Detalles', action: 'Nueva conversación', searching: 'Buscando…' }
+	en: { needs: 'Needs you', recent: 'Recent', long: 'Upgrade the build to the latest toolchain and explain every warning it prints along the way', count: '1 result', none: 'Nothing matches “zzz”.', unavailable: 'Search did not respond. Try again.', retry: 'Try again', details: 'Details', action: 'New conversation', searching: 'Searching…' },
+	es: { needs: 'Te espera', recent: 'Recientes', long: 'Upgrade the build to the latest toolchain and explain every warning it prints along the way', count: '1 resultado', none: 'Nada coincide con «zzz».', unavailable: 'La búsqueda no respondió. Reintenta.', retry: 'Reintentar', details: 'Detalles', action: 'Nueva conversación', searching: 'Buscando…' }
 };
 const unlabeled = ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user'];
 

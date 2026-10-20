@@ -10,6 +10,7 @@ export type IconName =
 	| 'home'
 	| 'menu'
 	| 'more'
+	| 'settings'
 	| 'check'
 	| 'close'
 	| 'plus'

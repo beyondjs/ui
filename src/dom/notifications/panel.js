@@ -94,8 +94,8 @@ export class Panel {
 	}
 
 	/** Notifications are unavailable (for example without Beyond Projects): say so and offer "Try again". */
-	unavailable(message) {
-		this.show([callout({ tone: 'info', title: content(message), actions: [this.#again()] })]);
+	unavailable(message, { outage = false, line = null } = {}) {
+		this.show([callout({ tone: outage ? 'warning' : 'info', title: content(message), body: line, actions: [this.#again()] })]);
 	}
 
 	/** Announces a short outcome, such as an item that is no longer available. */

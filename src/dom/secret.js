@@ -7,7 +7,7 @@ import { status } from './feedback.js';
 const words = {
 	en: {
 		paste: 'Paste the {credential} instead',
-		last: 'Only when connecting isn’t possible: a pasted {credential} stays as it is until someone replaces it.',
+		last: 'Use only when connecting is unavailable. This {credential} stays unchanged until someone replaces it.',
 		field: 'The {credential}',
 		stored: 'Stored',
 		replace: 'Replace',
@@ -15,7 +15,7 @@ const words = {
 	},
 	es: {
 		paste: 'Pegar el {credential} en su lugar',
-		last: 'Solo si no es posible conectar: el {credential} pegado queda como está hasta que alguien lo reemplace.',
+		last: 'Úsalo solo si no puedes conectar. Este {credential} no cambia hasta que alguien lo reemplace.',
 		field: 'El {credential}',
 		stored: 'Guardado',
 		replace: 'Reemplazar',

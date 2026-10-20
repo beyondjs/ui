@@ -112,7 +112,7 @@ test('"Can\'t find it?" shows in the results, no match, an empty source, a failu
 	assert.ok(shown(), 'with the gate');
 	const empty = new Picker({ label: 'Repositories', source: async () => ({ items: [] }), delay: 0, footer: footer() }).mount(document.body);
 	await settle(empty);
-	assert.equal(status(empty), 'There is nothing to choose from yet.');
+	assert.equal(status(empty), 'No options yet.');
 	assert.equal(escape(empty).hidden, false);
 	const plain = new Picker({ label: 'People', source: async () => ({ items: [] }), delay: 0 }).mount(document.body);
 	assert.equal(escape(plain).hidden, true, 'nothing to show without the product\'s actions');
@@ -147,8 +147,8 @@ test('a source that does not answer within the bound is unavailable, never "noth
 	const repositories = new Repositories();
 	repositories.stall = true;
 	const picker = new Picker({ label: 'Repositories', source: repositories.source, delay: 0, bound: 30, accounts: { items: accounts } }).mount(document.body);
-	await page.until(() => /didn’t answer in time/.test(status(picker)));
-	assert.equal(status(picker), 'The choices didn’t answer in time, so they can’t be listed now.');
+	await page.until(() => /did not respond in time/.test(status(picker)));
+	assert.equal(status(picker), 'The choices did not respond in time. Try again.');
 	const retry = picker.element.querySelector('.bui-picker-foot .bui-button-secondary');
 	assert.equal(retry.hidden, false);
 	repositories.stall = false;

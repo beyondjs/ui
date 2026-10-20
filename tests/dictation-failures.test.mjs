@@ -16,7 +16,7 @@ afterEach(() => dictations.release());
 
 test('a microphone the browser will not give: denied, missing or busy, each with Try again and Dismiss', async () => {
 	const cases = [
-		['NotAllowedError', 'denied', 'Can’t use the microphone. Allow it for this site in your browser’s settings, then try again.'],
+		['NotAllowedError', 'denied', 'Microphone access is blocked. Allow this site in your browser settings, then try again.'],
 		['SecurityError', 'denied', null],
 		['NotFoundError', 'missing', 'No microphone was found.'],
 		['OverconstrainedError', 'missing', null],

@@ -25,14 +25,14 @@ test('the inbox says why notifications are unavailable when the relay names a kn
 	notices.reason = 'projects_unavailable';
 	const inbox = new ui.NotificationInbox({ adapter: notices.adapter, products }).mount(document.body);
 	await page.until(() => /unavailable/.test(inbox.element.textContent));
-	assert.match(inbox.element.textContent, /Notifications are unavailable right now because Beyond Projects did not answer\. Everything else works\./);
+	assert.match(inbox.element.textContent, /Notifications are unavailable: Beyond Projects did not answer\./);
 	notices.reason = 'session_rejected';
 	await inbox.load();
-	assert.match(inbox.element.textContent, /because Beyond Projects could not confirm your access to them yet\./);
+	assert.match(inbox.element.textContent, /: Beyond Projects could not confirm your access to them yet\./);
 	assert.doesNotMatch(inbox.element.textContent, /session/i, 'only the session dialog speaks of the session');
 	notices.reason = 'Conduict did not answer.';
 	await inbox.load();
-	assert.match(inbox.element.textContent, /Notifications are unavailable right now\. Everything else works\./, 'a reason that is not a code is not shown');
+	assert.match(inbox.element.textContent, /Notifications are unavailable\./, 'a reason that is not a code is not shown');
 	notices.reason = null;
 	notices.absent = false;
 	await inbox.load();
@@ -47,12 +47,12 @@ test('the entry\'s panel says the reason in Spanish, and every code has a senten
 	const entry = new ui.NotificationEntry({ adapter: notices.adapter, labels: ui.NotificationEntry.labels.es }).mount(document.body);
 	entry.button.click();
 	await page.until(() => /disponibles/.test(entry.panel.textContent));
-	assert.match(entry.panel.textContent, /Las notificaciones no están disponibles ahora porque esta instalación no está conectada a Beyond Projects\. Todo lo demás funciona\./);
+	assert.match(entry.panel.textContent, /Las notificaciones no están disponibles: las notificaciones no están conectadas a Beyond Projects\./);
 	entry.destroy();
 	for (const code of ['not_configured', 'not_platform_session', 'session_rejected', 'projects_unavailable', 'accounts_unavailable']) {
 		for (const set of [ui.NotificationEntry.labels.en, ui.NotificationEntry.labels.es, ui.NotificationInbox.labels.es]) assert.equal(typeof set[code], 'string', code);
 	}
-	assert.equal(ui.NotificationEntry.labels.en.unavailable, 'Notifications are unavailable right now. Everything else works.', 'the plain sentence is unchanged');
+	assert.equal(ui.NotificationEntry.labels.en.unavailable, 'Notifications are unavailable.', 'the generic state makes no claim about other features');
 });
 
 test('Tabs name what they belong to; a given label still wins and the default is unchanged', () => {

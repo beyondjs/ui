@@ -65,7 +65,7 @@ test('CopyMessage: the text whole, one copy action, and a refused or silent clip
 		throw new Error('NotAllowedError');
 	};
 	assert.equal(await message.copy(), false);
-	assert.match(message.element.querySelector('.bui-copy-result').textContent, /didn’t let Beyond copy it/);
+	assert.match(message.element.querySelector('.bui-copy-result').textContent, /Copying is unavailable in this browser/);
 	assert.match(String(window.getSelection()), /approve the Beyond app/);
 	const bound = ui.CopyMessage.bound;
 	ui.CopyMessage.bound = 20;
@@ -130,7 +130,7 @@ test('ProviderWindow: a blocked window offers this tab, messages count only from
 	popups.opened[0].closed = true;
 	window.dispatchEvent(new window.MessageEvent('message', { origin: 'https://projects.example.test', data: { type: 'beyond-provider' } }));
 	await page.until(() => provider.state === 'unknown');
-	assert.match(provider.element.textContent, /It isn’t known yet whether you finished on GitHub.*Check again/);
+	assert.match(provider.element.textContent, /The GitHub check did not respond.*Completion is still unknown.*Check again/);
 	answer = { state: 'waiting', request: 'req_1' };
 	let waited = null;
 	const handed = new ui.ProviderWindow({ provider: 'GitHub', href: '/start', same: false, read: async () => answer, onend: outcome => (waited = outcome), labels: ui.ProviderWindow.labels.es }).mount(document.body);

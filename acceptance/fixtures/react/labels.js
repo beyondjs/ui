@@ -9,7 +9,7 @@ export const es = {
 		caught: 'Estás al día.',
 		failure: 'No se pudieron cargar las notificaciones.',
 		retry: 'Reintentar',
-		unavailable: 'Las notificaciones no están disponibles ahora. Tu trabajo no se ve afectado.',
+		unavailable: 'Las notificaciones no están disponibles ahora.',
 		partial: ({ products }) => `Algunos productos no respondieron (${products}).`,
 		all: 'Ver todas las notificaciones',
 		everything: 'Marcar todas como leídas',

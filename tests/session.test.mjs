@@ -136,7 +136,7 @@ test('an unavailable Accounts is not a sign-out: it says so and tries again', as
 	await page.until(() => dialog()?.open, 2000);
 	assert.equal(session.kind, 'unavailable');
 	assert.equal(dialog().querySelector('.bui-dialog-title').textContent, 'Beyond Accounts is not answering');
-	assert.match(dialog().textContent, /This page tries again by itself/);
+	assert.match(dialog().textContent, /This page retries automatically/);
 	assert.ok(button('Try again'));
 	assert.equal(dialog().querySelector('.bui-dialog-head .bui-icon-button'), null, 'it cannot be closed either');
 	page.key(dialog(), 'Escape');

@@ -27,14 +27,14 @@ test('partial results name unreachable products by their display names, falling 
 	notices.missing = ['cdn'];
 	const named = new NotificationEntry({ adapter: notices.adapter, products }).mount(document.body);
 	await opened(named);
-	assert.match(partial(named.panel), /Some products could not be reached \(CDN\)/);
-	assert.doesNotMatch(partial(named.panel), /\(cdn\)/);
+	assert.match(partial(named.panel), /No response from CDN/);
+	assert.doesNotMatch(partial(named.panel), /No response from cdn/);
 	const unnamed = new NotificationEntry({ adapter: notices.adapter, products: { delegate: 'Delegate' } }).mount(document.body);
 	await opened(unnamed);
-	assert.match(partial(unnamed.panel), /\(cdn\)/, 'an id without a display name is shown as it is');
+	assert.match(partial(unnamed.panel), /No response from cdn/, 'an id without a display name is shown as it is');
 	const inbox = new NotificationInbox({ adapter: notices.adapter, products, state: { state: 'all' } }).mount(document.body);
 	await page.until(() => inbox.element.querySelector('.bui-notice'));
-	assert.match(partial(inbox.element), /\(CDN\)/);
+	assert.match(partial(inbox.element), /CDN/);
 });
 
 test('sources with state unavailable are the partial signal in lists; available sources are not', async () => {
@@ -46,10 +46,10 @@ test('sources with state unavailable are the partial signal in lists; available 
 	entry.close();
 	notices.missing = ['cdn', 'projects'];
 	await opened(entry);
-	assert.match(partial(entry.panel), /\(CDN, Projects\)/);
+	assert.match(partial(entry.panel), /CDN, Projects/);
 	const inbox = new NotificationInbox({ adapter: notices.adapter, products, state: { state: 'all' } }).mount(document.body);
 	await page.until(() => inbox.element.querySelector('.bui-notice'));
-	assert.match(partial(inbox.element), /\(CDN, Projects\)/);
+	assert.match(partial(inbox.element), /CDN, Projects/);
 });
 
 test('a bounded summary shows N+ for any N; an unbounded one keeps 99+ past 99', async () => {

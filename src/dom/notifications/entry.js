@@ -8,6 +8,7 @@ import { loading } from '../feedback.js';
 import { Cause, defaults, copies } from './labels.js';
 import { Age } from '../time/age.js';
 import { Feed } from './feed.js';
+import { Recovery } from './recovery.js';
 import { NoticeList } from './list.js';
 import { Actions } from './actions.js';
 import { Panel } from './panel.js';
@@ -56,6 +57,7 @@ export class NotificationEntry extends Disclosure {
 	#labels;
 	#badge;
 	#feed;
+	#recovery;
 	#list;
 	#panel;
 	#limit;
@@ -86,6 +88,11 @@ export class NotificationEntry extends Disclosure {
 		this.#badge = badge;
 		this.#limit = limit;
 		this.#feed = new Feed(adapter);
+		this.#recovery = new Recovery({ locale, labels, run: async () => {
+			await this.#load();
+			await this.refresh();
+			return !Recovery.outage(this.#feed);
+		} });
 		const go = onopen ?? (destination => this.element.ownerDocument.defaultView.location.assign(destination));
 		const actions = new Actions({ adapter, feed: this.#feed, onopen: (destination, item) => { this.close(false); go(destination, item); }, changed: () => this.#changed(), say: key => this.#panel.say(words.text(key)) });
 		this.#list = new NoticeList({ labels: words, age: new Age({ locale }), products, actions, grouped: true, days: true });
@@ -142,6 +149,7 @@ export class NotificationEntry extends Disclosure {
 	}
 
 	destroy() {
+		this.#recovery.destroy();
 		this.#feed.clear();
 		super.destroy();
 	}
@@ -163,6 +171,7 @@ export class NotificationEntry extends Disclosure {
 			// Private text never outlives the open panel, and an answer still on its way is discarded.
 			this.#wait(false);
 			this.#feed.clear();
+			this.#recovery.stop();
 			this.#panel.busy = false;
 			this.#panel.show([]);
 		}
@@ -190,6 +199,7 @@ export class NotificationEntry extends Disclosure {
 	#draw() {
 		const feed = this.#feed;
 		const words = this.#labels;
+		this.#recovery.update(feed);
 		const busy = feed.state === 'loading';
 		this.#panel.busy = busy;
 		if (busy) {
@@ -197,7 +207,7 @@ export class NotificationEntry extends Disclosure {
 			return;
 		}
 		this.#wait(false);
-		if (feed.state === 'unavailable') return this.#panel.unavailable(Cause.text(words, feed.reason));
+		if (feed.state === 'unavailable') return this.#panel.unavailable(Cause.text(words, feed.reason), { outage: Recovery.outage(feed), line: Recovery.outage(feed) ? this.#recovery.element : null });
 		if (feed.state === 'failed') return this.#panel.failed(words.text('failure'));
 		const partial = this.#list.partial(feed.missing);
 		if (!feed.items.length) return this.#panel.show([partial, el('p', { class: 'bui-notify-empty', text: words.text('empty') })]);

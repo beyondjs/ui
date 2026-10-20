@@ -4,7 +4,7 @@ import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { CommandDecisions } from './decisions.js';
 
-const defaults = { allow: 'Allow', deny: 'Deny', more: 'Show all', less: 'Show less', allowed: 'Allowed', denied: 'Denied', working: 'Sending your answer…', failed: 'Your answer did not reach it. Try again.', note: 'Tell it what to do instead', send: 'Send', back: 'Back', command: 'Command' };
+const defaults = { allow: 'Allow', deny: 'Deny', more: 'Show all', less: 'Show less', allowed: 'Allowed', denied: 'Denied', working: 'Sending your answer…', failed: 'Your answer could not be confirmed. Try again.', note: 'Describe an alternative', send: 'Send', back: 'Back', command: 'Command' };
 
 /**
  * A request that waits for the person's answer (0.15.0, DQ-13): an agent asks to run a command, write a
@@ -23,7 +23,7 @@ const defaults = { allow: 'Allow', deny: 'Deny', more: 'Show all', less: 'Show l
  */
 export class CommandCard extends Component {
 	/** The copy in English and Spanish. */
-	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ allow: 'Permitir', deny: 'Rechazar', more: 'Ver todo', less: 'Ver menos', allowed: 'Permitido', denied: 'Rechazado', working: 'Enviando tu respuesta…', failed: 'Tu respuesta no llegó. Vuelve a intentarlo.', note: 'Dile qué hacer en su lugar', send: 'Enviar', back: 'Volver', command: 'Comando' }) });
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ allow: 'Permitir', deny: 'Rechazar', more: 'Ver todo', less: 'Ver menos', allowed: 'Permitido', denied: 'Rechazado', working: 'Enviando tu respuesta…', failed: 'No se pudo confirmar tu respuesta. Vuelve a intentarlo.', note: 'Describe una alternativa', send: 'Enviar', back: 'Volver', command: 'Comando' }) });
 	/** Lines of a command shown before Show all. */
 	static lines = 8;
 

@@ -39,8 +39,8 @@ test('FamilyBar product menu: products only, in order with availability, reasons
 	const bar = make({ descriptor: inside });
 	const items = entries(bar, 'product');
 	assert.deepEqual(texts(items), ['Workspace', 'Delegate', 'CDN', 'Snapshots'], 'Projects is the project overview, not a product here');
-	assert.equal(menu(bar, 'product').querySelector('.bui-navmenu-heading').textContent, 'This project in each product');
-	assert.deepEqual(items.map(item => item.querySelector('.bui-navmenu-meta').textContent), ['This project in Workspace', 'This project in Delegate', 'This project in CDN', 'This project in Snapshots']);
+	assert.equal(menu(bar, 'product').querySelector('.bui-navmenu-heading').textContent, 'Products');
+	assert.ok(items.every(item => !item.querySelector('.bui-navmenu-meta')), 'the project already appears in the bar');
 	const [workspace, delegate, cdn, snapshots] = items;
 	assert.equal(workspace.tagName, 'A', 'an advisory reason with an address stays a link');
 	// A reason is the row's quiet state at its end, as in the project menu (0.13.0)
@@ -56,6 +56,7 @@ test('FamilyBar product menu: products only, in order with availability, reasons
 	assert.equal(snapshots.tagName, 'SPAN', 'a reason that is not advisory is not a link even with an address');
 	assert.equal(reason(snapshots), 'Project archived');
 	assert.equal(delegate.getAttribute('aria-current'), 'page');
+	assert.equal(delegate.querySelector(':scope > .bui-icon').dataset.icon, 'check');
 	assert.equal(items.filter(item => item.hasAttribute('aria-current')).length, 1);
 	bar.destroy();
 	const strict = make({ descriptor: inside, advisory: [] });

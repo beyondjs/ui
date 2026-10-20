@@ -48,7 +48,7 @@ test('unavailable offers "Try again", not "View all", and recovers', async () =>
 	const entry = new NotificationEntry({ adapter: notices.adapter, href: '/notifications' }).mount(document.body);
 	entry.button.click();
 	await settled(entry);
-	assert.match(body(entry).textContent, /Notifications are unavailable right now\. Everything else works\./);
+	assert.match(body(entry).textContent, /Notifications are unavailable\./);
 	assert.equal(all(entry).hidden, true);
 	const again = [...body(entry).querySelectorAll('button')].find(node => node.textContent === 'Try again');
 	assert.ok(again, 'Try again is offered');

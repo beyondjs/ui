@@ -11,7 +11,7 @@ export const words = Object.freeze({
 		again: 'Try the window again',
 		closed: 'The {provider} window closed before you finished. Nothing was connected.',
 		checking: 'Checking what happened on {provider}…',
-		unknown: 'It isn’t known yet whether you finished on {provider}: the check didn’t answer.',
+		unknown: 'The {provider} check did not respond. Completion is still unknown.',
 		check: 'Check again'
 	}),
 	es: Object.freeze({
@@ -25,7 +25,7 @@ export const words = Object.freeze({
 		again: 'Probar la ventana otra vez',
 		closed: 'La ventana de {provider} se cerró antes de terminar. No se conectó nada.',
 		checking: 'Comprobando qué pasó en {provider}…',
-		unknown: 'Todavía no se sabe si terminaste en {provider}: la comprobación no respondió.',
+		unknown: 'La comprobación de {provider} no respondió. El resultado sigue sin confirmarse.',
 		check: 'Comprobar de nuevo'
 	})
 });

@@ -1,0 +1,24 @@
+/* Product choices keep context in the bar, with one aligned label and a current-choice mark. */
+.bui-family-product .bui-navmenu-panel { box-sizing: border-box; }
+/* Main menu titles match the notification title and profile identity; group labels stay quiet. */
+.bui-family-product .bui-navmenu-section:first-child > .bui-navmenu-heading {
+	padding: 0 var(--space-2) var(--space-2);
+	color: var(--color-text);
+	font-size: var(--text-body);
+	font-weight: var(--weight-medium);
+	line-height: var(--leading-small);
+}
+.bui-family-account .bui-navmenu-section:first-child > .bui-navmenu-heading {
+	padding: 0 var(--space-2) var(--space-2);
+}
+.bui-family-person { padding-block: 0; }
+.bui-family-account .bui-navmenu-section + .bui-navmenu-section { padding-top: var(--space-2); }
+.bui-family-account .bui-navmenu-item { padding-block: var(--space-2); }
+.bui-family-product .bui-navmenu-item { padding: var(--space-2); box-sizing: border-box; }
+.bui-family-product .bui-navmenu-item[aria-current] { box-shadow: none; }
+.bui-family-product .bui-navmenu-item > .bui-icon { width: 16px; height: 16px; margin-inline-start: auto; }
+@media (min-width: 720px) {
+	.bui-family { column-gap: var(--space-2); }
+	.bui-family-product { gap: var(--space-2); }
+	.bui-family .bui-family-thread { gap: var(--space-2); }
+}

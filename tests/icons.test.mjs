@@ -58,7 +58,7 @@ test('the components keep their own unsized glyphs', () => {
 });
 
 test('the closed list of glyphs shown without a visible label is part of the catalog', () => {
-	assert.deepEqual([...ui.unlabeled], ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user']);
+	assert.deepEqual([...ui.unlabeled], ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user', 'home', 'chat', 'code', 'box', 'globe', 'grid', 'settings']);
 	assert.ok(ui.unlabeled.every(name => ui.icons.includes(name)));
 });
 

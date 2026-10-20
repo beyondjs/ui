@@ -35,7 +35,7 @@ export const composer = freeze({
 		sending: '{name} uploading',
 		removed: '{name} removed',
 		suggestions: 'Suggestions',
-		looking: 'Looking…',
+		looking: 'Searching…',
 		nomatch: 'No match',
 		unavailable: 'Unavailable · {reason}',
 		late: 'didn’t answer in time',

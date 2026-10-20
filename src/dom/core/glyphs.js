@@ -19,6 +19,7 @@ export const paths = Object.freeze({
 	home: ['M4 11l8-7 8 7', 'M6 9.5V20h12V9.5'],
 	menu: ['M4 7h16', 'M4 12h16', 'M4 17h16'],
 	more: ['M6 12h.01', 'M12 12h.01', 'M18 12h.01'],
+	settings: ['M4 6h2', 'M10 6h10', 'M4 12h10', 'M18 12h2', 'M4 18h4', 'M12 18h8', 'M8 4a2 2 0 1 1 0 4 2 2 0 0 1 0-4z', 'M16 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4z', 'M10 16a2 2 0 1 1 0 4 2 2 0 0 1 0-4z'],
 
 	// Actions
 	check: 'M5 12.5l4.5 4.5L19 7.5',
@@ -87,4 +88,4 @@ export const paths = Object.freeze({
  * question mark that opens essential help beside a field) and `user` (the account avatar before a
  * name is known) were added at the 0.3.0 integration under the same rule, for the owner to confirm.
  */
-export const unlabeled = Object.freeze(['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user']);
+export const unlabeled = Object.freeze(['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user', 'home', 'chat', 'code', 'box', 'globe', 'grid', 'settings']);

@@ -41,7 +41,7 @@ test('deny with a note asks for it first: Enter sends the note, Escape goes back
 	const field = card.element.querySelector('.bui-command-note-field');
 	assert.equal(document.activeElement, field);
 	assert.equal(field.placeholder, 'What should it do instead?');
-	assert.equal(card.element.querySelector('.bui-command-note label').textContent, 'Dile qué hacer en su lugar');
+	assert.equal(card.element.querySelector('.bui-command-note label').textContent, 'Describe una alternativa');
 	page.key(field, 'Escape');
 	assert.equal(card.element.querySelector('.bui-command-note').hidden, true, 'back to the answers');
 	assert.equal(answers.length, 0);

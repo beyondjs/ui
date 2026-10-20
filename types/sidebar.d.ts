@@ -5,6 +5,8 @@ import type { IconName } from './icons.js';
 
 /** One link of a product's sidebar. */
 export interface SidebarItem {
+	/** The rail's named glyph (0.18.0); ignored by the standard labeled sidebar. */
+	glyph?: IconName;
 	label: Content;
 	href?: string | null;
 	current?: boolean;
@@ -65,6 +67,12 @@ export interface SidebarEntries {
 export interface SidebarObject {
 	kind: 'object';
 	key?: string;
+	/** The named rail toggle's glyph (0.18.0; chat by default). */
+	glyph?: IconName;
+	/** A rail destination instead of a toggle (0.18.1); the product owns route and panel state. */
+	href?: string | null;
+	/** Whether the rail destination is the current page (0.18.1). */
+	current?: boolean;
 	/** What the objects are ("Conversations"). */
 	heading: Content;
 	/** The primary action ("New"); `row: true` also ends the product row with it below the cut (SB-07). */
@@ -104,6 +112,8 @@ export interface SidebarSearchOptions {
 	all?: ((query: string) => string | null) | null;
 }
 export interface SidebarOptions {
+	/** Desktop rail over these same groups; null preserves the standard sidebar (0.18.0). */
+	rail?: SidebarRailOptions | null;
 	/** The product's display name: the drawer's heading and its name, "{product} sections". */
 	product: string;
 	groups?: Array<SidebarGroup | SidebarEntries | SidebarObject>;
@@ -121,6 +131,17 @@ export interface SidebarOptions {
 	/** ⌘K / Ctrl+K opens the search (0.14.0): an option a product enables; off by default. */
 	shortcut?: boolean;
 }
+
+export interface SidebarRailOptions {
+	/** The key of the contextual object group; no panel without a matching group. */
+	panel?: string | null;
+	/** The contextual panel's initial/current state; true by default. */
+	open?: boolean;
+	/** Section item keys and the object group key, in rail order; drawer order stays unchanged. */
+	order?: string[];
+	/** Called only for a person's toggle/collapse, never for a setter or resize. */
+	onchange?: ((open: boolean) => void) | null;
+}
 /** A product's own sections (0.4.0): permanent above the cut, a product row and a modal drawer below it. */
 export class Sidebar extends Component {
 	/** The copy in English and Spanish (0.7.2). */
@@ -133,6 +154,8 @@ export class Sidebar extends Component {
 	merge(bar: import('./family.js').FamilyBar): void;
 	/** Whether the drawer is open. */
 	readonly expanded: boolean;
+	/** Replace rail configuration without rebuilding navigation (0.18.0). */
+	rail: SidebarRailOptions | null;
 	/** Patched by keys in both forms (0.10.0): focus stays where it is. */
 	set groups(value: Array<SidebarGroup | SidebarEntries | SidebarObject>);
 	set context(value: SidebarOptions['context']);

@@ -21,7 +21,7 @@ export const words = Object.freeze({
 		suspended_body: 'Signing in again does not change this.',
 		accounts: 'Open Beyond Accounts',
 		unavailable: 'Beyond Accounts is not answering',
-		unavailable_body: 'Your session could not be renewed yet. This page tries again by itself, and what you were doing stays here.',
+		unavailable_body: 'Your session could not be renewed. This page retries automatically. Your work stays here.',
 		retry: 'Try again',
 		retrying: 'Trying again…',
 		unsent: 'Not sent while you were signed out. Try it again.'
@@ -44,7 +44,7 @@ export const words = Object.freeze({
 		suspended_body: 'Volver a iniciar sesión no lo cambia.',
 		accounts: 'Abrir Beyond Accounts',
 		unavailable: 'Beyond Accounts no responde',
-		unavailable_body: 'Aún no se pudo renovar tu sesión. Esta página lo vuelve a intentar sola, y lo que estabas haciendo sigue aquí.',
+		unavailable_body: 'No se pudo renovar tu sesión. Esta página reintenta automáticamente. Tu trabajo sigue aquí.',
 		retry: 'Intentar de nuevo',
 		retrying: 'Intentando de nuevo…',
 		unsent: 'No se envió mientras no tenías sesión. Vuelve a intentarlo.'

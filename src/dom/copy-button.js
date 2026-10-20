@@ -6,8 +6,8 @@ import { Clipboard } from './core/clipboard.js';
 import { Button } from './button.js';
 
 const words = {
-	en: { copy: 'Copy', copied: 'Copied', refused: 'Not copied', said: 'Copied', why: 'Your browser didn’t let Beyond copy it.', selected: 'Your browser didn’t let Beyond copy it. The text is selected: copy it with your keyboard.' },
-	es: { copy: 'Copiar', copied: 'Copiado', refused: 'No copiado', said: 'Copiado', why: 'Tu navegador no dejó que Beyond lo copie.', selected: 'Tu navegador no dejó que Beyond lo copie. El texto está seleccionado: cópialo con el teclado.' }
+	en: { copy: 'Copy', copied: 'Copied', refused: 'Not copied', said: 'Copied', why: 'Copying is unavailable in this browser.', selected: 'Copying is unavailable in this browser. The text is selected: copy it with your keyboard.' },
+	es: { copy: 'Copiar', copied: 'Copiado', refused: 'No copiado', said: 'Copiado', why: 'No se puede copiar desde este navegador.', selected: 'No se puede copiar desde este navegador. El texto está seleccionado: cópialo con el teclado.' }
 };
 
 /**

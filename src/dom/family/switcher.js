@@ -1,6 +1,7 @@
 import { Component } from '../core/component.js';
 import { el } from '../core/element.js';
 import { NavigationMenu, entry } from './menu.js';
+import { glyph } from '../core/icons.js';
 
 /**
  * The product switcher of the family bar (decision D04): the product name, drawn as the family
@@ -45,7 +46,7 @@ export class ProductSwitcher extends Component {
 			name: labels.text('product', { name }),
 			part: 'product',
 			class: 'bui-family-product',
-			sections: [{ heading: labels.text(descriptor?.project ? 'entries' : 'products'), items }, ...carried.map(section => ({ ...section, class: `${section.class ?? ''} bui-family-carried`.trim() }))]
+			sections: [{ heading: labels.text('products'), items }, ...carried.map(section => ({ ...section, class: `${section.class ?? ''} bui-family-carried`.trim() }))]
 		});
 	}
 
@@ -65,13 +66,14 @@ export class ProductSwitcher extends Component {
 	#item(item) {
 		const { product, names, descriptor, places, labels } = this.#options;
 		const name = names[item.product] ?? item.product;
-		const meta = descriptor.project ? labels.text('entry', { product: name }) : labels.text('area', { product: item.product });
+		const meta = descriptor.project ? null : labels.text('area', { product: item.product });
 		const off = item.available === false;
 		return entry({
 			label: name,
 			meta: meta || null,
 			href: places.open(item) ? item.url : null,
 			current: item.product === product ? 'page' : null,
+			note: item.product === product ? glyph('check') : null,
 			state: off ? this.#reason(item.reason) : null,
 			class: off && item.reason === 'NOT_ADMITTED' ? 'bui-navmenu-advisory' : ''
 		});
@@ -80,7 +82,7 @@ export class ProductSwitcher extends Component {
 	/** The current product at its own home, when the descriptor does not list it (or there is no descriptor yet). */
 	#here() {
 		const { product, names, places } = this.#options;
-		return entry({ label: names[product] ?? product, href: places.own, current: 'page', class: 'bui-family-here' });
+		return entry({ label: names[product] ?? product, href: places.own, current: 'page', note: glyph('check'), class: 'bui-family-here' });
 	}
 
 	#reason(code) {

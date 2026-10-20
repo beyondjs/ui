@@ -22,6 +22,10 @@ export class SidebarSections {
 	#search = null;
 	#searches = new Map();
 	#groups = [];
+	#mapped = [];
+	#selected = null;
+	#context = null;
+	#action = null;
 
 	/**
 	 * @param {object} options
@@ -62,8 +66,22 @@ export class SidebarSections {
 		});
 		for (const [key, search] of this.#searches) if (kept.get(key) !== search) search.destroy();
 		this.#searches = kept;
-		this.#panel.groups = groups;
+		this.#mapped = groups;
+		this.#panel.groups = this.#visible;
 		this.#drawer.groups = groups;
+	}
+
+	/** Null keeps the standard sidebar; a key selects one contextual object for the rail. */
+	set panel(key) {
+		this.#selected = key;
+		this.#panel.groups = this.#visible;
+		this.#panel.context = key === null ? this.#context : null;
+		this.#panel.action = key === null ? this.#action : null;
+		this.#panel.search = key === null ? this.#search : null;
+	}
+
+	get #visible() {
+		return this.#selected === null ? this.#mapped : this.#mapped.filter(group => group?.kind === 'object' && String(group.key ?? group.heading ?? '') === this.#selected);
 	}
 
 	/** The objects' searches, in order (0.14.0). */
@@ -72,19 +90,21 @@ export class SidebarSections {
 	}
 
 	set context(value) {
-		this.#panel.context = value ?? null;
+		this.#context = value ?? null;
+		this.#panel.context = this.#selected === null ? this.#context : null;
 		this.#drawer.context = value ?? null;
 	}
 
 	set action(value) {
-		this.#panel.action = value ?? null;
+		this.#action = value ?? null;
+		this.#panel.action = this.#selected === null ? this.#action : null;
 		this.#drawer.action = value ?? null;
 	}
 
 	/** `{ label, source, bound?, delay?, all?, placeholder? }`, or null; a new config keeps the query. */
 	set search(config) {
 		this.#search = SidebarSections.#keep(this.#search, config);
-		this.#panel.search = this.#search;
+		this.#panel.search = this.#selected === null ? this.#search : null;
 		this.#drawer.search = this.#search;
 	}
 
@@ -109,7 +129,7 @@ export class SidebarSections {
 
 	/** The label of the current item, or null. */
 	get current() {
-		return this.#panel.current;
+		return this.#drawer.current;
 	}
 
 	destroy() {

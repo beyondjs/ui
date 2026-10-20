@@ -8,6 +8,7 @@ import { callout, loading } from '../feedback.js';
 import { Cause, defaults, copies } from './labels.js';
 import { Age } from '../time/age.js';
 import { Feed } from './feed.js';
+import { Recovery } from './recovery.js';
 import { NoticeList } from './list.js';
 import { Actions } from './actions.js';
 
@@ -27,6 +28,7 @@ export class NotificationInbox extends Component {
 	#adapter;
 	#labels;
 	#feed;
+	#recovery;
 	#list;
 	#body;
 	#status;
@@ -54,6 +56,10 @@ export class NotificationInbox extends Component {
 		this.#labels = new Labels(defaults, labels);
 		this.#state = { state: state.state === 'all' ? 'all' : 'unread', product: state.product ?? '' };
 		this.#feed = new Feed(adapter);
+		this.#recovery = new Recovery({ locale, labels, run: async () => {
+			await this.load();
+			return !Recovery.outage(this.#feed);
+		} });
 		const go = onopen ?? (destination => this.#element.ownerDocument.defaultView.location.assign(destination));
 		const actions = new Actions({ adapter, feed: this.#feed, onopen: go, changed: () => this.#draw(), say: key => this.#say(this.#labels.text(key)) });
 		this.#list = new NoticeList({ labels: this.#labels, age: new Age({ locale }), products, actions, grouped: true, days: true });
@@ -109,6 +115,7 @@ export class NotificationInbox extends Component {
 	}
 
 	destroy() {
+		this.#recovery.destroy();
 		this.#feed.clear();
 		this.#product.destroy();
 		super.destroy();
@@ -147,6 +154,7 @@ export class NotificationInbox extends Component {
 	#draw() {
 		const feed = this.#feed;
 		const words = this.#labels;
+		this.#recovery.update(feed);
 		this.#buttons.forEach((button, index) => button.setAttribute('aria-pressed', String(['unread', 'all'][index] === this.#state.state)));
 		this.#body.setAttribute('aria-busy', String(feed.state === 'loading' || feed.state === 'more'));
 		this.#more.hidden = !(feed.state === 'ready' && feed.more) && feed.state !== 'more';
@@ -154,7 +162,7 @@ export class NotificationInbox extends Component {
 		this.#everything.hidden = !(feed.state === 'ready' && feed.items.some(item => !item.read));
 		if (feed.state === 'more') return;
 		if (feed.state === 'loading') return fill(this.#body, [loading(words.text('loading'))]);
-		if (feed.state === 'unavailable') return fill(this.#body, [callout({ tone: 'info', title: Cause.text(words, feed.reason) })]);
+		if (feed.state === 'unavailable') return fill(this.#body, [callout({ tone: Recovery.outage(feed) ? 'warning' : 'info', title: Cause.text(words, feed.reason), body: Recovery.outage(feed) ? this.#recovery.element : null, actions: [el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', text: words.text('retry'), onclick: () => this.#retry() })] })]);
 		if (feed.state === 'failed') {
 			const retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', onclick: () => this.#retry() }, [glyph('refresh'), el('span', { text: words.text('retry') })]);
 			return fill(this.#body, [callout({ tone: 'danger', title: words.text('failure'), actions: [retry] })]);
