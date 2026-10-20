@@ -58,6 +58,9 @@ test('Steps: a finished step says how long it took; the step in progress its tim
 	// Every state is in words: visible for progress, hidden for done and waiting.
 	assert.match(rows(steps)[0], /Machine · Done/);
 	assert.match(rows(steps)[1], /In progress/);
+	// One mark per step: the state's word beside the name carries no status mark of its own
+	assert.equal(list.querySelector('[data-state="progress"] .bui-step-state').textContent, 'In progress');
+	assert.equal(list.querySelectorAll('.bui-status, .bui-status-dot').length, 0);
 	assert.match(rows(steps)[2], /Connection to Conduict · Waiting/);
 	assert.equal(steps.element.querySelector('[aria-live="polite"]').textContent, '', 'nothing is announced when drawn');
 	steps.destroy();
@@ -102,7 +105,7 @@ test('Steps: a changed state is announced; a blocked step says its reason with t
 	assert.equal(steps.announced, 'Startup: Done. Connection to Conduict: Blocked');
 	const row = steps.element.querySelectorAll('.bui-step')[2];
 	assert.equal(row.dataset.state, 'stalled');
-	assert.match(row.querySelector('.bui-status').textContent, /Blocked/);
+	assert.equal(row.querySelector('.bui-step-state').textContent, 'Blocked');
 	assert.equal(row.querySelector('.bui-step-reason').textContent, 'Conduict cannot reach the machine: its address is not admitted.');
 	const details = row.querySelector('details.bui-details');
 	assert.ok(details && !details.open, 'technical details are folded');

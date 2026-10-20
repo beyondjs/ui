@@ -4,7 +4,7 @@ import type { Component, MenuItem } from './dom.js';
 
 /** A state of the closed set; each has its tone, which is its shape and its hue. */
 export type StatusState = 'ready' | 'busy' | 'waking' | 'asleep' | 'attention' | 'failed' | 'unknown' | 'success' | 'running' | 'idle' | 'pending' | 'stopped' | 'done';
-/** A filled circle, an open ring, a diamond, a square, a hollow circle or a dashed circle. */
+/** A filled circle, a half-filled circle, a diamond, a square, a hollow circle or a dashed circle. */
 export type StatusTone = 'success' | 'progress' | 'attention' | 'failure' | 'idle' | 'unknown';
 
 /** A state in words with a mark whose shape says it as well as its hue (decision C2, DQ-04). */

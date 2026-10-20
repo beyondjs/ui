@@ -121,3 +121,7 @@ Run `npm run acceptance -- "shared hierarchy"` for dropdown and Unavailable typo
 ## UI 0.18.2: complete semantic writing review
 
 [The writing review](reviews/2026-10-20/interface-writing.md) records all shared catalogs and inline text reviewed, changes made and deliberate retention. [The writing guide](writing.md) states the maintained component responsibilities. Public bilingual catalog parity and uncertainty/recovery checks are part of `npm test`; existing installed notification, confirmation, approval and resource-picker checks validate affected journeys.
+
+## UI 0.18.4: one progress mark that reads as a mark
+
+`tests/status.test.mjs` holds the half-filled circle of `progress` in the built stylesheet, and `tests/operations.test.mjs` holds a step's state as words beside its name (`bui-step-state`) with no status mark inside `Steps`. Run `npm run acceptance -- "awaited card"`, and repeat with `BEYOND_UI_BROWSER=firefox` and `BEYOND_UI_BROWSER=webkit`, for the steps inside the awaited card. See [the release evidence](reviews/2026-10-20/release-0.18.4.md).

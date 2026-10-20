@@ -23,7 +23,7 @@ test('every state has a tone, each tone its own shape, and the family words in E
 	assert.ok(Object.isFrozen(ui.Status.labels.en) && Object.isFrozen(ui.Status.states));
 	const shapes = {
 		success: /background:\s*var\(--color-success\)/,
-		progress: /border-inline-end-color:\s*transparent/,
+		progress: /linear-gradient\(to right, var\(--color-info\) 50%, transparent 50%\)/,
 		attention: /rotate\(45deg\)/,
 		failure: /border-radius:\s*2px/,
 		idle: /1\.5px solid/,

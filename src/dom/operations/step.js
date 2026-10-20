@@ -1,6 +1,6 @@
 import { el, content } from '../core/element.js';
 import { glyph } from '../core/icons.js';
-import { hidden, status } from '../feedback.js';
+import { hidden } from '../feedback.js';
 import { TimeWords } from '../time/words.js';
 import { TechnicalDetails } from './details.js';
 import { Timing } from './timing.js';
@@ -13,7 +13,8 @@ import { Timing } from './timing.js';
  */
 export class StepView {
 	static #states = ['done', 'progress', 'stalled', 'failed', 'waiting'];
-	static #tones = { progress: 'progress', stalled: 'warning', failed: 'danger' };
+	/** The states whose word is shown beside the name; the others are said only to assistive technology */
+	static #shown = ['progress', 'stalled', 'failed'];
 	static #marks = { done: 'check', stalled: 'alert', failed: 'close' };
 
 	#step;
@@ -46,7 +47,8 @@ export class StepView {
 			el('div', { class: 'bui-step-body' }, [
 				el('span', { class: 'bui-step-head' }, [
 					el('span', { class: 'bui-step-label' }, [content(step.label)]),
-					StepView.#tones[state] ? status(word, StepView.#tones[state]) : hidden(` · ${word}`)
+					// The mark already gives the state its shape: the head says it in words, with no second mark
+					StepView.#shown.includes(state) ? el('span', { class: 'bui-step-state', text: word }) : hidden(` · ${word}`)
 				]),
 				this.#time,
 				this.#phase,

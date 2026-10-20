@@ -5,8 +5,8 @@ export const words = Object.freeze({
 });
 
 /**
- * Each state's tone, which is its shape and its hue together: `success` a filled circle, `progress` an
- * open ring, `attention` a diamond, `failure` a square, `idle` a hollow circle, `unknown` a dashed
+ * Each state's tone, which is its shape and its hue together: `success` a filled circle, `progress` a
+ * half-filled circle, `attention` a diamond, `failure` a square, `idle` a hollow circle, `unknown` a dashed
  * circle. The earlier tones of `status()` keep their names: `warning` is drawn as attention, `danger` as
  * failure, `neutral` and `info` as a filled circle in their hue.
  */

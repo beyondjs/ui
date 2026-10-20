@@ -67,6 +67,18 @@
 	font-weight: var(--weight-medium);
 	overflow-wrap: anywhere;
 }
+/* The state in words beside the name: the mark on the left already gives it its shape (0.18.4) */
+.bui-step-state {
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+}
+.bui-step-stalled .bui-step-state {
+	color: var(--color-warning);
+}
+.bui-step-failed .bui-step-state {
+	color: var(--color-danger);
+}
 .bui-step-waiting .bui-step-label {
 	color: var(--color-text-muted);
 	font-weight: var(--weight-regular);
