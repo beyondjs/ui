@@ -18,7 +18,7 @@
 .bui-checklist-title {
 	margin: 0;
 	font-size: var(--text-title-3);
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 }
 .bui-checklist-progress {
 	margin: 0;

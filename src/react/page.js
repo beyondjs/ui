@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Page as Region } from '../dom/page/page.js';
 import { PagePanel } from '../dom/page/panel.js';
 import { Primaries } from '../dom/core/primaries.js';
+import { Hierarchy } from '../dom/core/hierarchy.js';
 import { PageDock } from '../dom/page/dock.js';
 import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
@@ -61,6 +62,12 @@ export function Page({ template = 'detail', width = null, arrival = null, header
 	useLayoutEffect(() => {
 		if (!Primaries.enabled || !frame.current) return undefined;
 		const watched = new Primaries({ root: frame.current });
+		return () => watched.destroy();
+	}, []);
+	// A heading outranks what it names, warned in a development build (0.19.0, D158)
+	useLayoutEffect(() => {
+		if (!Hierarchy.enabled || !frame.current) return undefined;
+		const watched = new Hierarchy({ root: frame.current });
 		return () => watched.destroy();
 	}, []);
 	useLayoutEffect(() => {

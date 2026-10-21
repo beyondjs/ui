@@ -125,3 +125,7 @@ Run `npm run acceptance -- "shared hierarchy"` for dropdown and Unavailable typo
 ## UI 0.18.4: one progress mark that reads as a mark
 
 `tests/status.test.mjs` holds the half-filled circle of `progress` in the built stylesheet, and `tests/operations.test.mjs` holds a step's state as words beside its name (`bui-step-state`) with no status mark inside `Steps`. Run `npm run acceptance -- "awaited card"`, and repeat with `BEYOND_UI_BROWSER=firefox` and `BEYOND_UI_BROWSER=webkit`, for the steps inside the awaited card. See [the release evidence](reviews/2026-10-20/release-0.18.4.md).
+
+## UI 0.19.0: a heading outranks what it names
+
+`tests/hierarchy.test.mjs` holds D158 in the built stylesheet and the sources: every title the components draw is semibold, a side sheet's title is title-2 and a `Section` at level 3 title-3, the label headings keep the label role, every heading element a component draws is either a semibold title or marked `data-bui-label`, and `Hierarchy` names a heading lighter than semibold or outranked in its region, once, and nothing else. Run `npm run acceptance -- "shared hierarchy"` for the measured steps of a side sheet drawn as a machine's panel and of a dialog, in both themes at 1440 and 390 px, and for the development build's warning: none for the shared parts, one per heading for a composition that breaks the rule. Repeat with `BEYOND_UI_BROWSER=firefox` and `BEYOND_UI_BROWSER=webkit`. See [the release evidence](reviews/2026-10-21/release-0.19.0.md).

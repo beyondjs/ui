@@ -102,7 +102,9 @@ export const checks = [
 				let { page, context } = await open(browser, consumer, { scheme });
 				const shapes = await page.evaluate(() => [...document.querySelectorAll('#statuses .bui-status-dot')].map(node => {
 					const style = getComputedStyle(node);
-					return [style.borderTopStyle, style.borderRadius, style.transform !== 'none', style.backgroundColor === 'rgba(0, 0, 0, 0)' ? 'hollow' : 'filled', style.borderRightColor === 'rgba(0, 0, 0, 0)'].join('|');
+					// Work in progress is a half-filled circle since 0.18.4: a ring with half its background drawn as a gradient
+					const fill = style.backgroundColor !== 'rgba(0, 0, 0, 0)' ? 'filled' : style.backgroundImage !== 'none' ? 'half' : 'hollow';
+					return [style.borderTopStyle, style.borderRadius, style.transform !== 'none', fill, style.borderRightColor === 'rgba(0, 0, 0, 0)'].join('|');
 				}));
 				expect(new Set(shapes).size === shapes.length, `${scheme}: one shape per tone: ${JSON.stringify(shapes)}`);
 				const label = await page.evaluate(() => {

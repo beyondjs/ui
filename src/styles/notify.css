@@ -82,7 +82,7 @@
 .bui-notify-title {
 	margin: 0;
 	font-size: var(--text-body);
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 	line-height: var(--leading-small);
 }
 .bui-notify-everything {

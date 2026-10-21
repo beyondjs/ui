@@ -46,4 +46,5 @@ export { ListRow, Checklist, EmptyState, CopyValue, CommandCard } from './patter
 export { DataTable } from './table.js';
 export { CommandPalette, ChoiceCards } from './command.js';
 export { Primaries } from '../dom/core/primaries.js';
+export { Hierarchy } from '../dom/core/hierarchy.js';
 export { Floating } from '../dom/core/floating.js';

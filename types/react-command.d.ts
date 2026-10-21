@@ -3,7 +3,8 @@ import type { ReactElement, ForwardRefExoticComponent, RefAttributes } from 'rea
 import type { Copy } from './notifications.js';
 import type { PaletteItem, PaletteSource, ChoiceCard } from './command.js';
 export type { PaletteItem, PaletteSource, ChoiceCard } from './command.js';
-export { Primaries } from './command.js';
+export { Primaries, Hierarchy } from './command.js';
+export type { HierarchyPaint } from './command.js';
 
 export interface CommandPaletteHandle {
 	open(query?: string): void;

@@ -21,7 +21,7 @@
 .bui-facts-title {
 	margin: 0;
 	font-size: var(--text-body);
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 	line-height: var(--leading-body);
 }
 .bui-facts-summary {
@@ -181,7 +181,8 @@
 	inset-inline-start: 0;
 	width: calc(var(--bui-meter, 0) * 100%);
 	border-radius: inherit;
-	background: var(--color-action);
+	/* A use is a fact, not an action: the info hue, so coral stays the region's primary action (C2, D158) */
+	background: var(--color-info);
 	transition: width var(--motion-standard) var(--motion-ease);
 }
 .bui-meter[data-level='warning'] .bui-meter-fill {

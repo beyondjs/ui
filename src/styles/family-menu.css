@@ -5,8 +5,10 @@
 	padding: 0 var(--space-2) var(--space-2);
 	color: var(--color-text);
 	font-size: var(--text-body);
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 	line-height: var(--leading-small);
+	/* A title, not a label: no label tracking (D158) */
+	letter-spacing: normal;
 }
 .bui-family-account .bui-navmenu-section:first-child > .bui-navmenu-heading {
 	padding: 0 var(--space-2) var(--space-2);

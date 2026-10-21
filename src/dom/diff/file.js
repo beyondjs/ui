@@ -52,7 +52,7 @@ export class DiffFileView {
 		this.#copy = new CopyButton({ text: entry.path, label: this.#words.text('path'), name: this.#words.text('name', { path: entry.path }), labels: this.#words.copy });
 		const level = [2, 3, 4].includes(options.level) ? options.level : 3;
 		this.#element = el('section', { class: 'bui-diff-file', 'aria-labelledby': `${id}-path`, dataset: { status: entry.status, path: entry.path } }, [
-			el('div', { class: 'bui-diff-head' }, [el(`h${level}`, { class: 'bui-diff-heading' }, [this.#toggle]), this.#copy.element]),
+			el('div', { class: 'bui-diff-head' }, [el(`h${level}`, { class: 'bui-diff-heading', 'data-bui-label': true }, [this.#toggle]), this.#copy.element]),
 			this.#body
 		]);
 	}

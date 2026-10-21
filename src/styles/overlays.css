@@ -39,7 +39,7 @@
 	padding-top: var(--space-1);
 	font-size: var(--text-title-3);
 	line-height: var(--leading-title-3);
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 	overflow-wrap: anywhere;
 }
 .bui-dialog-description {
@@ -165,7 +165,7 @@
 	margin: 0;
 }
 .bui-toast-title {
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 }
 .bui-toast-detail {
 	font-size: var(--text-small);

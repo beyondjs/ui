@@ -188,14 +188,22 @@ export const checks = [
 			const label = (found, what) => {
 				expect(found.length > 0, `${what}: present`);
 				for (const item of found) {
-					expect(item.transform === 'none' && (item.shown === null || item.shown === item.written), `${what} as written: ${JSON.stringify(item)}`);
+					// Capitals by style are the difference read; a label laid out in parts (an organization · its role) breaks lines in innerText only
+					const flat = text => text.replace(/\s+/g, ' ').trim();
+					expect(item.transform === 'none' && (item.shown === null || flat(item.shown) === flat(item.written)), `${what} as written: ${JSON.stringify(item)}`);
 					expect(item.size === '12px' && item.weight === '500' && (item.tracking === 'normal' || parseFloat(item.tracking) <= 0.25), `${what} at 12px, 500, tracking at most 0.02em: ${JSON.stringify(item)}`);
 				}
 			};
 			const family = await browser.open(consumer, { file: 'family.html', query: '?family=inside' });
 			label(await read(family.page, '.bui-badge'), 'tags');
 			await family.page.locator('.bui-family-product .bui-navmenu-button').click();
-			label(await read(family.page, '.bui-navmenu-panel:not([hidden]) .bui-navmenu-heading'), 'menu headings');
+			// The Products menu's first heading is its title since 0.18.1, semibold since 0.19.0 (D158), as written;
+			// a menu's group labels are read in the profile menu, whose groups follow the person's identity
+			const title = await read(family.page, '.bui-navmenu-panel:not([hidden]) .bui-navmenu-section:first-child > .bui-navmenu-heading');
+			expect(title.length === 1 && title[0].transform === 'none' && title[0].shown === title[0].written && title[0].weight === '600' && title[0].tracking === 'normal', `the Products title, as written and semibold: ${JSON.stringify(title)}`);
+			await family.page.keyboard.press('Escape');
+			await family.page.locator('.bui-family-account > button').click();
+			label(await read(family.page, '.bui-navmenu-panel:not([hidden]) .bui-navmenu-section:not(:first-child) > .bui-navmenu-heading'), 'menu headings');
 			await family.context.close();
 			const { page } = await browser.open(consumer);
 			await page.waitForFunction(() => document.querySelectorAll('#listing tbody tr').length > 0);

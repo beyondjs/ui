@@ -57,7 +57,7 @@
 	min-width: 0;
 	margin: 0;
 	font-size: var(--text-title-2);
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 	line-height: var(--leading-title-2);
 	overflow-wrap: anywhere;
 }

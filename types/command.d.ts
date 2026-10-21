@@ -1,4 +1,4 @@
-/** Types of 0.16.0's `CommandPalette`, `ChoiceCards` and `Primaries`, re-exported by `@beyond-js/ui/dom`. */
+/** Types of 0.16.0's `CommandPalette`, `ChoiceCards` and `Primaries`, and 0.19.0's `Hierarchy`, re-exported by `@beyond-js/ui/dom`. */
 import type { Copy } from './notifications.js';
 import type { Component } from './dom.js';
 
@@ -68,6 +68,24 @@ export class Primaries {
 	static enabled: boolean;
 	constructor(options: { root: Element; warn?: ((message: string, region: Element) => void) | null });
 	check(): Array<{ region: Element; count: number }>;
+	destroy(): void;
+}
+
+/** What a check reads of an element's text: its size in pixels, its weight and whether it is shown. */
+export interface HierarchyPaint {
+	size: number;
+	weight: number;
+	shown: boolean;
+}
+
+/** A heading outranks what it names (0.19.0, D158), warned while a product is developed. */
+export class Hierarchy {
+	static headings: string;
+	static regions: string;
+	static weight: number;
+	static enabled: boolean;
+	constructor(options: { root: Element; warn?: ((message: string, heading: Element) => void) | null; measure?: ((node: Element) => HierarchyPaint) | null; wait?: number });
+	check(): Array<{ heading: Element; reason: 'weight' | 'outranked'; by: { node: Element; text: string; size: number; weight: number } | null }>;
 	destroy(): void;
 }
 

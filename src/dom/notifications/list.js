@@ -54,7 +54,7 @@ export class NoticeList {
 		const recent = groups.filter(([latest]) => new Date(latest.occurred).toDateString() === today);
 		const earlier = groups.filter(group => !recent.includes(group));
 		if (!recent.length || !earlier.length) return list(groups);
-		const heading = key => el('h3', { class: 'bui-notice-day', text: this.#labels.text(key) });
+		const heading = key => el('h3', { class: 'bui-notice-day', 'data-bui-label': true, text: this.#labels.text(key) });
 		return el('div', { class: 'bui-notice-days' }, [heading('today'), list(recent), heading('earlier'), list(earlier)]);
 	}
 

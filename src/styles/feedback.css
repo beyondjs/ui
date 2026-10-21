@@ -131,7 +131,7 @@
 	overflow-wrap: anywhere;
 }
 .bui-callout-title {
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 }
 .bui-callout-actions {
 	display: flex;
@@ -180,7 +180,7 @@
 }
 .bui-empty-title {
 	margin: 0;
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 }
 .bui-empty-body {
 	margin: 0;
@@ -228,7 +228,7 @@
 	margin: 0;
 	color: var(--color-text);
 	font-size: var(--text-title-2);
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 	line-height: var(--leading-title-2);
 }
 .bui-unavailable-body > p {

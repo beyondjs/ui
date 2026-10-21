@@ -233,7 +233,7 @@ a.bui-sidebar-item:hover {
 .bui-drawer-title {
 	margin: 0;
 	font-size: var(--text-body);
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 }
 .bui-drawer-body {
 	flex: 1;

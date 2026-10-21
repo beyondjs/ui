@@ -3,6 +3,7 @@ import { el, fill } from '../core/element.js';
 import { PagePanel } from './panel.js';
 import { PageDock } from './dock.js';
 import { Primaries } from '../core/primaries.js';
+import { Hierarchy } from '../core/hierarchy.js';
 
 const templates = Object.freeze(['overview', 'list', 'detail', 'settings', 'task', 'tool', 'thread']);
 const widths = Object.freeze(['fluid', 'standard', 'form', 'reading', 'thread']);
@@ -55,6 +56,7 @@ export class Page extends Component {
 	#panel = null;
 	#dock = null;
 	#primaries = null;
+	#hierarchy = null;
 
 	/**
 	 * @param {object} [options]
@@ -90,6 +92,8 @@ export class Page extends Component {
 		this.aside = aside;
 		// One primary action per region, warned in a development build (0.16.0, DQ-09)
 		if (Primaries.enabled) this.#primaries = new Primaries({ root: this.#element });
+		// A heading outranks what it names, warned in a development build (0.19.0, D158)
+		if (Hierarchy.enabled) this.#hierarchy = new Hierarchy({ root: this.#element });
 	}
 
 	/** The panel kept in view (`PagePanel`), when the page was made with `panel`; null otherwise. */
@@ -154,6 +158,7 @@ export class Page extends Component {
 
 	destroy() {
 		this.#primaries?.destroy();
+		this.#hierarchy?.destroy();
 		this.#panel?.destroy();
 		this.#dock?.destroy();
 		super.destroy();

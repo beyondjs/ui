@@ -30,6 +30,8 @@ test('coral is kept for the primary action, the selection and focus (C2): links 
 	assert.ok(find('.bui-button-primary:disabled').some(rule => /var\(--color-disabled\)/.test(rule.body) && /var\(--color-on-disabled\)/.test(rule.body)));
 	assert.ok(find('.bui-family-avatar').some(rule => !/--color-family-marker/.test(rule.body)), 'a person is not an action');
 	assert.ok(find('.bui-sidebar-item[aria-current=\'page\']').some(rule => /--color-surface-selected/.test(rule.body)), 'the selection');
+	assert.ok(find('.bui-meter-fill').some(rule => /background:\s*var\(--color-info\)/.test(rule.body)), 'a use is a fact, not an action (0.19.0)');
+	for (const rule of find('.bui-meter-fill')) assert.doesNotMatch(rule.body, /--color-action/, 'a meter never competes with the primary action');
 });
 
 test('text below body size never uses Rubik 300 (D09)', () => {

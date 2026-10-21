@@ -39,9 +39,9 @@ Unit and typed-consumer fixtures cover both DOM and React APIs. The installed-pa
 
 ## Typography and recovery
 
-The Products title, notification title and account identity use the body title role at medium weight. Menu rows use the small regular role; section labels use the muted label role. The profile email, membership role, unread notification mark and availability reasons retain their meaning. Shared inset spacing aligns titles and rows without repeating the context.
+The Products title, notification title and account identity use the body title role, semibold since 0.19.0 like every title (D158). Menu rows use the small regular role; section labels use the muted label role. The profile email, membership role, unread notification mark and availability reasons retain their meaning. Shared inset spacing aligns titles and rows without repeating the context.
 
-`Unavailable` uses a compact status icon beside its heading. Its reason, responsible person and actions align below the heading. The heading uses the second title role; the body uses the regular body role. Both retain the text contrast, while the owner label and technical details stay quieter. The heading level remains the caller's semantic choice. Consumers must scope their own heading styles rather than override shared heading classes through broad descendant selectors.
+`Unavailable` uses a compact status icon beside its heading. Its reason, responsible person and actions align below the heading. The heading uses the second title role, semibold; the body uses the regular body role. Both retain the text contrast, while the owner label and technical details stay quieter. The heading level remains the caller's semantic choice. Consumers must scope their own heading styles rather than override shared heading classes through broad descendant selectors.
 
 The installed `shared hierarchy` checks verify these roles and geometry in both themes at 1440, 390 and 320 px. Rail checks also verify Floating tooltips on hover and keyboard focus, English and Spanish contextual headings, and destination links.
 

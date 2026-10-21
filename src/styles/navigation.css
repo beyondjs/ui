@@ -46,7 +46,7 @@
 .bui-family-name {
 	color: var(--color-text);
 	font-size: var(--text-body);
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 	line-height: var(--leading-small);
 	overflow-wrap: anywhere;
 }

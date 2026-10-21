@@ -180,11 +180,17 @@
 	align-items: center;
 	gap: var(--space-2) var(--space-4);
 }
+/* A heading outranks what it names (D158): semibold, and its size follows its level, so a section
+   inside a panel or a side sheet (level 3) is one step below the title it sits under. */
 .bui-section-title {
 	margin: 0;
 	font-size: var(--text-title-2);
-	font-weight: var(--weight-medium);
+	font-weight: var(--weight-semibold);
 	line-height: var(--leading-title-2);
+}
+h3.bui-section-title {
+	font-size: var(--text-title-3);
+	line-height: var(--leading-title-3);
 }
 .bui-section-actions {
 	display: flex;

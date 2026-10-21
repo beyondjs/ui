@@ -1,0 +1,13 @@
+/* The hierarchy page's own parts (0.19.0, D158): a note as a product writes it, and, for `?wrong` only,
+   a region heading drawn as a label on purpose, so the development build's warning has something to name. */
+.fixture-note {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+}
+.fixture-eyebrow {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+}

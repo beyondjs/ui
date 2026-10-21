@@ -6,6 +6,7 @@ import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 import { Focus } from './core/focus.js';
 import { Interaction } from './core/interaction.js';
+import { Hierarchy } from './core/hierarchy.js';
 
 const defaults = { close: 'Close' };
 
@@ -42,6 +43,7 @@ export class Dialog extends Component {
 	#opener = null;
 	#adopted = false;
 	#settle = null;
+	#hierarchy = null;
 	#closing = false;
 	#hint;
 
@@ -149,6 +151,8 @@ export class Dialog extends Component {
 		}
 		this.#settle = Promise.withResolvers ? Promise.withResolvers() : Dialog.#resolvers();
 		this.#element.showModal();
+		// Its headings outrank what they name, warned in a development build (0.19.0, D158)
+		if (Hierarchy.enabled) this.#hierarchy ??= new Hierarchy({ root: this.#element });
 		new Focus(this.#element).first(this.#closer);
 		return this.#settle.promise;
 	}
@@ -210,6 +214,8 @@ export class Dialog extends Component {
 	}
 
 	#finish(value) {
+		this.#hierarchy?.destroy();
+		this.#hierarchy = null;
 		const opener = this.#opener;
 		this.#opener = null;
 		if (this.#adopted) {

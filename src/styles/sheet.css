@@ -49,12 +49,14 @@
 	gap: var(--space-3);
 	padding: var(--space-4) var(--space-4) 0 var(--space-5);
 }
+/* The sheet's title takes the panel's role (title-2, semibold, D158): a sheet holds sections, whose
+   headings are one step below it (`Section` at level 3), and the body text one step below those. */
 .bui-sheet-title {
 	margin: 0;
 	padding-top: var(--space-1);
-	font-size: var(--text-title-3);
-	line-height: var(--leading-title-3);
-	font-weight: var(--weight-medium);
+	font-size: var(--text-title-2);
+	line-height: var(--leading-title-2);
+	font-weight: var(--weight-semibold);
 	overflow-wrap: anywhere;
 }
 .bui-sheet-title:focus {

@@ -7,6 +7,7 @@ import { Labels } from './core/labels.js';
 import { Focus } from './core/focus.js';
 import { Interaction } from './core/interaction.js';
 import { Leaving } from './core/leaving.js';
+import { Hierarchy } from './core/hierarchy.js';
 
 const widths = Object.freeze(['form', 'standard']);
 
@@ -50,6 +51,7 @@ export class SideSheet extends Component {
 	#overflow = null;
 	#closing = false;
 	#picture = null;
+	#hierarchy = null;
 
 	/**
 	 * @param {object} options
@@ -158,6 +160,8 @@ export class SideSheet extends Component {
 		this.#settle = SideSheet.#resolvers();
 		this.#picture?.remove();
 		this.#element.showModal();
+		// Its headings outrank what they name, warned in a development build (0.19.0, D158)
+		if (Hierarchy.enabled) this.#hierarchy ??= new Hierarchy({ root: this.#element });
 		this.#overflow = document.documentElement.style.overflow;
 		document.documentElement.style.overflow = 'hidden';
 		this.focus();
@@ -245,6 +249,8 @@ export class SideSheet extends Component {
 		const settle = this.#settle;
 		if (!settle) return;
 		this.#settle = null;
+		this.#hierarchy?.destroy();
+		this.#hierarchy = null;
 		const document = this.#element.ownerDocument;
 		document.documentElement.style.overflow = this.#overflow ?? '';
 		this.#overflow = null;
