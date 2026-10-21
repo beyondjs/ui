@@ -4,7 +4,7 @@
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { FamilyBar, Sidebar, ProductNav, Page, PageHeader, Tabs, Section, Arrival, Button, Preferences, status, el } from '@beyond-js/ui';
+import { FamilyBar, Sidebar, ProductNav, Page, PageHeader, Tabs, Section, Arrival, Button, ListRow, Preferences, status, el } from '@beyond-js/ui';
 import { chosen, fallback, product } from '../data/family.js';
 import { shape, words, groups } from '../data/layout.js';
 
@@ -15,9 +15,15 @@ const shell = root.appendChild(el('div', { class: shape.nav === 'sidebar' ? 'bui
 const nav = shape.nav === 'sidebar' ? new Sidebar({ product: 'Conduict', groups, context: { label: 'Project', name: 'Storefront' } }).mount(shell) : new ProductNav({ items: groups[0].items }).mount(shell);
 const main = shell.appendChild(el('main', { id: 'main' }));
 const tabs = new Tabs({ items: ['Overview', 'Conversations', 'Repositories', 'AI engines', 'Access', 'Runtime'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 })) });
-const header = new PageHeader({ title: words.title, crumbs: [{ label: 'Environments', href: '#/environments' }], status: status('Ready', 'success'), facts: words.facts, actions: [new Button({ label: 'Start a conversation', variant: 'primary' }), new Button({ label: 'Stop the environment' }), new Button({ label: 'More actions' })], tabs });
+const header = new PageHeader({ title: words.title, crumbs: [{ label: 'Environments', href: '#/environments' }], kind: words.kind, status: status('Ready', 'success'), facts: words.facts, actions: [new Button({ label: 'Start a conversation', variant: 'primary' }), new Button({ label: 'Stop the environment' }), new Button({ label: 'More actions' })], tabs });
 const arrival = shape.arrival ? new Arrival({ product: 'Conduict', href: '#/back', ondismiss: () => {} }) : null;
-const repositories = new Section({ title: 'Repositories', description: words.description, actions: [new Button({ label: 'Add a repository' })], children: [el('ul', {}, words.rows.map(row => el('li', { text: row })))] });
+// The last row holds a list of its own, as a repository's copies are listed under it: it never reaches past the page
+const rows = words.rows.map((row, index) =>
+	index < words.rows.length - 1
+		? new ListRow({ title: row, href: `#/${row}`, meta: [words.branch], tag: 'li' }).element
+		: el('li', {}, [new ListRow({ title: row, href: `#/${row}`, meta: [words.branch], tag: 'div' }).element, el('ul', { class: 'bui-rows' }, words.nested.map(name => new ListRow({ title: name, href: `#/${name}`, tag: 'li' }).element))])
+);
+const repositories = new Section({ title: 'Repositories', description: words.description, actions: [new Button({ label: 'Add a repository' })], children: [el('ul', { class: 'bui-rows' }, rows)] });
 // A wide table that scrolls inside its own box, as a collection does: it must never widen the page
 const table = el('div', {}, [el('div', { class: 'layout-scroll' }, [el('table', {}, [el('tr', {}, words.columns.map(text => el('td', { text })))])])]);
 const access = new Section({ title: 'Access', children: [el('p', { class: 'bui-reading', text: words.description }), table] });

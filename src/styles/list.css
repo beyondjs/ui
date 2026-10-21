@@ -1,20 +1,33 @@
 /* One object in a list (ListRow, 0.15.0, DQ-12): a dense row, its name in the text color with a muted
    line under it, its end's facts and quiet actions, the whole row opening the object. Narrow rows (under
    30rem, measured on the row) stay two or three short lines. A copyable value (CopyValue) is mono. */
+/* A list's rows keep their words on the content edge (0.19.1, the alignment audit's P5): the list hangs
+   its rows' inline padding into the gutter, so a hovered or current row's surface reaches past its words
+   while each divider stays on the edge. */
 .bui-rows {
 	display: grid;
-	margin: 0;
+	margin: 0 calc(-1 * var(--space-3));
 	padding: 0;
 	list-style: none;
 }
+/* A list inside a row is indented by its row: it never hangs again, or it would reach past the page */
+.bui-rows .bui-rows {
+	margin-inline: 0;
+}
 .bui-rows .bui-row {
-	border-top: 1px solid var(--color-border);
 	border-radius: 0;
 }
+.bui-rows .bui-row::before {
+	position: absolute;
+	inset: 0 var(--space-3) auto;
+	border-top: 1px solid var(--color-border);
+	content: '';
+	pointer-events: none;
+}
 /* A React row is hosted in an element of its own (`display: contents`). */
-.bui-rows > .bui-row:first-child,
-.bui-rows > :first-child > .bui-row {
-	border-top: 0;
+.bui-rows > .bui-row:first-child::before,
+.bui-rows > :first-child > .bui-row::before {
+	content: none;
 }
 .bui-row {
 	container: bui-row / inline-size;

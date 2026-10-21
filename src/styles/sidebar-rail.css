@@ -41,6 +41,23 @@
 	background: var(--color-surface-sunken);
 	border-color: var(--color-border-strong);
 }
+/* The product's one object in use at the rail's end (0.19.1, D161): its glyph, with its state's mark on
+   the glyph's corner, told by shape as well as hue (`Status`). */
+.bui-sidebar-rail-foot {
+	margin-top: auto;
+}
+.bui-sidebar-rail-state {
+	position: absolute;
+	right: 3px;
+	bottom: 3px;
+	display: inline-flex;
+	padding: 2px;
+	border-radius: var(--radius-round);
+	background: var(--color-sidebar);
+}
+.bui-sidebar-rail-state .bui-status-dot {
+	margin-top: 0;
+}
 .bui-sidebar-rail-meta {
 	position: absolute;
 	top: 0;

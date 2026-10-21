@@ -141,6 +141,19 @@ export interface SidebarRailOptions {
 	order?: string[];
 	/** Called only for a person's toggle/collapse, never for a setter or resize. */
 	onchange?: ((open: boolean) => void) | null;
+	/** The product's one object in use, kept in view at the rail's end (0.19.1, D161); none takes no room. */
+	foot?: SidebarRailFoot | null;
+}
+/** The rail's foot (0.19.1): what the person works on, at a glance, with its details one press away. */
+export interface SidebarRailFoot {
+	/** Its name ("Recovered machine"): the control's accessible name and hint, with the state's words after it. */
+	label: string | Node;
+	/** A glyph of the catalog (`box` by default). */
+	glyph?: string;
+	/** Its state, drawn as `Status`'s mark on the glyph's corner and said in words in the name. */
+	status?: { state: string; label?: string | Node | null } | null;
+	/** Opens the product's own panel about it (a dialog); the control is given for focus to return to. */
+	onclick?: ((control: HTMLButtonElement) => void) | null;
 }
 /** A product's own sections (0.4.0): permanent above the cut, a product row and a modal drawer below it. */
 export class Sidebar extends Component {

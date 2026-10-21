@@ -133,3 +133,36 @@ test('a contextual object can navigate to its own route instead of toggling a gl
 	assert.ok(document.activeElement === link, 'collapse returns focus to the destination link');
 	sidebar.destroy();
 });
+
+test('the rail\'s foot keeps the product\'s object in use at its end, its state by shape and in words, opening its panel (0.19.1, D161)', () => {
+	const pressed = [];
+	const foot = { label: 'Recovered machine', glyph: 'box', status: { state: 'waking', label: 'Waking up' }, onclick: control => pressed.push(control) };
+	const sidebar = make({ rail: { ...rail, foot } });
+	const navigation = sidebar.element.querySelector('.bui-sidebar-rail');
+	const control = navigation.lastElementChild;
+	assert.ok(control.classList.contains('bui-sidebar-rail-foot'), 'the foot is the rail\'s last control');
+	assert.equal(control.tagName, 'BUTTON');
+	assert.equal(control.getAttribute('aria-label'), 'Recovered machine · Waking up', 'its name says the object and its state in words');
+	assert.equal(control.getAttribute('aria-haspopup'), 'dialog');
+	assert.ok(control.hasAttribute('data-bui-hint'), 'its name is its hint');
+	assert.equal(control.querySelector('svg').dataset.icon, 'box');
+	const mark = control.querySelector('.bui-sidebar-rail-state');
+	assert.ok(mark.classList.contains('bui-status-progress'), 'waking is drawn as work in progress (a half-filled circle)');
+	assert.equal(mark.getAttribute('aria-hidden'), 'true', 'the words carry the meaning; the mark only repeats it');
+	control.click();
+	assert.deepEqual(pressed, [control], 'a press hands the control to the product, for focus to return to');
+	control.focus();
+	sidebar.rail = { ...rail, foot: { ...foot, status: { state: 'ready', label: 'Ready' } } };
+	assert.ok(navigation.lastElementChild === control, 'a change of state patches the same control');
+	assert.ok(document.activeElement === control, 'and keeps focus on it');
+	assert.equal(control.getAttribute('aria-label'), 'Recovered machine · Ready');
+	assert.ok(control.querySelector('.bui-sidebar-rail-state').classList.contains('bui-status-success'));
+	sidebar.groups = [{ ...groups[0], items: groups[0].items.map(item => (item.key === 'machines' ? { ...item, meta: 3 } : item)) }, groups[1]];
+	assert.ok(navigation.lastElementChild === control, 'the sections\' updates keep the foot last');
+	sidebar.rail = { ...rail, foot: { label: 'Recovered machine' } };
+	assert.equal(control.querySelector('.bui-sidebar-rail-state'), null, 'without a state no mark is drawn');
+	assert.equal(control.getAttribute('aria-label'), 'Recovered machine');
+	sidebar.rail = { ...rail, foot: null };
+	assert.equal(navigation.querySelector('.bui-sidebar-rail-foot'), null, 'none takes no room');
+	sidebar.destroy();
+});

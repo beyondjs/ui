@@ -116,9 +116,11 @@ export interface PageCrumb {
 export interface PageHeaderOptions {
 	/** What is in view: the resource's name, never the organization when a project is in view. */
 	title: string | Node;
-	/** The levels above; none, or a single section root, shows no breadcrumb. */
+	/** The levels above, where the object lives; none, or a single section root, shows no breadcrumb. */
 	crumbs?: Array<PageCrumb | null | false>;
-	/** One status (`status()`). */
+	/** The object's kind or variant beside the H1: words drawn as a quiet tag, or one control that chooses among its siblings (0.19.1, D160). */
+	kind?: string | Node | { element: Node } | null;
+	/** One status (`status()`): the H1 object's own state, never another object's. */
 	status?: Node | null;
 	/** One muted line of facts. */
 	facts?: string | Node | Array<string | Node> | null;
@@ -140,6 +142,8 @@ export class PageHeader extends Component {
 	readonly heading: HTMLHeadingElement;
 	title: string | Node;
 	crumbs: Array<PageCrumb | null | false>;
+	/** The object's kind or variant beside the H1 (0.19.1). */
+	kind: string | Node | { element: Node } | null;
 	status: Node | null;
 	facts: string | Node | Array<string | Node> | null;
 	actions: Array<Node | { element: Node } | null>;

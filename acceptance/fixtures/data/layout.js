@@ -15,7 +15,10 @@ export const words = {
 	facts: 'Compute Engine · us-east4 · created 3 Oct',
 	description:
 		'Every repository this environment holds is cloned once and shared by its conversations, each on a branch of its own, so two conversations never edit the same files. A copy keeps its manual changes; nothing here pushes anywhere, and a removed repository keeps its worktrees until you delete them yourself.',
+	kind: 'Standard',
+	branch: 'main',
 	rows: ['acme/web', 'acme/docs', 'acme/api'],
+	nested: ['acme/api · main', 'acme/api · feature/cart'],
 	columns: ['Repository', 'Branch', 'Head', 'Changes', 'Last turn', 'Cloned from', 'Access', 'Worktrees', 'Drift'].map(name => `${name} of the working copy`),
 	facts2: ['Profile: standard', 'Disk: 100 GB', 'Cost: about $0.21 per hour']
 };

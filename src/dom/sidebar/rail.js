@@ -3,8 +3,14 @@ import { el } from '../core/element.js';
 import { glyph } from '../core/icons.js';
 import { Hint } from '../core/hint.js';
 import { KeyedList } from '../core/keyed.js';
+import { Status } from '../status/status.js';
 
-/** An opt-in desktop rail over the sidebar's own sections and one contextual object group. */
+/**
+ * An opt-in desktop rail over the sidebar's own sections and one contextual object group. Its `foot`
+ * (0.19.1, D161) keeps the product's one object in use in view at the rail's end, as code editors keep
+ * their remote machine: its glyph with its state's mark (`Status`: shape as well as hue), its name and
+ * state as the control's name and hint, and a press that opens the product's own panel about it.
+ */
 export class SidebarRail extends Component {
 	#element;
 	#collapse;
@@ -16,6 +22,7 @@ export class SidebarRail extends Component {
 	#panel;
 	#onchange;
 	#hint;
+	#foot = null;
 
 	constructor({ name, panel, labels, onchange }) {
 		super();
@@ -99,7 +106,8 @@ export class SidebarRail extends Component {
 			kept.set(item.key, node);
 			return node;
 		});
-		this.#order.order(nodes);
+		const foot = this.#footing();
+		this.#order.order(foot ? [...nodes, foot] : nodes);
 		this.#entries = kept;
 		this.#collapse.setAttribute('aria-label', this.#labels.text('hide', { name: SidebarRail.#text(group?.heading) }));
 	}
@@ -127,6 +135,26 @@ export class SidebarRail extends Component {
 			if (item.current) node.setAttribute('aria-current', 'page');
 			else node.removeAttribute('aria-current');
 		}
+	}
+
+	/** The foot's control, patched in place so a change of state keeps focus and its hint; null without a foot. */
+	#footing() {
+		const foot = this.#options?.foot;
+		if (!foot?.label) return null;
+		this.#foot ??= el('button', { type: 'button', class: 'bui-sidebar-rail-item bui-sidebar-rail-foot', 'data-bui-hint': '', 'aria-haspopup': 'dialog', onclick: () => this.#options?.foot?.onclick?.(this.#foot) });
+		const name = SidebarRail.#text(foot.label);
+		const state = foot.status?.state ?? null;
+		const said = foot.status ? SidebarRail.#text(foot.status.label ?? Status.labels.en[state] ?? '') : '';
+		const mark = foot.glyph ?? 'box';
+		const tone = state ? Status.tone(state) : '';
+		if (this.#foot.dataset.glyph !== mark || this.#foot.dataset.tone !== tone) {
+			this.#foot.replaceChildren(glyph(mark), ...(tone ? [el('span', { class: `bui-status bui-status-${tone} bui-sidebar-rail-state`, 'aria-hidden': 'true' }, [el('span', { class: 'bui-status-dot' })])] : []));
+			this.#foot.dataset.glyph = mark;
+			this.#foot.dataset.tone = tone;
+		}
+		this.#foot.dataset.state = state ?? '';
+		this.#foot.setAttribute('aria-label', said ? `${name} · ${said}` : name);
+		return this.#foot;
 	}
 
 	static #text(value) { return value?.textContent ?? String(value ?? ''); }

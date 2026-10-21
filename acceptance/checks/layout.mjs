@@ -67,6 +67,49 @@ const measure = page =>
 
 const gutter = region => (region < 640 ? 16 : region < 1024 ? 24 : 32);
 
+/**
+ * Every left edge of the page's column against the H1's (0.19.1, the alignment audit's P5): the first
+ * glyph of the crumbs, the facts, the first tab, a section's title and a list row's title, the tab row's
+ * line and a row's divider; with the kind's place beside the H1 and how far the title line's actions sit
+ * from the title's start.
+ */
+const edges = page =>
+	page.evaluate(() => {
+		const round = value => Math.round(value * 10) / 10;
+		const ink = node => {
+			if (!node) return null;
+			const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, { acceptNode: text => (text.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
+			const text = walker.nextNode();
+			if (!text) return null;
+			const range = document.createRange();
+			const start = text.textContent.search(/\S/);
+			range.setStart(text, start);
+			range.setEnd(text, start + 1);
+			return round(range.getBoundingClientRect().left);
+		};
+		const heading = document.querySelector('.bui-page-heading');
+		const title = heading.getBoundingClientRect();
+		const row = document.querySelectorAll('.bui-rows .bui-row')[1];
+		const divider = row ? round(row.getBoundingClientRect().left + parseFloat(getComputedStyle(row, '::before').left)) : null;
+		const kind = document.querySelector('.bui-page-kind:not([hidden])');
+		const box = kind?.getBoundingClientRect();
+		const actions = document.querySelector('.bui-page-actions');
+		return {
+			start: ink(heading),
+			parts: {
+				crumbs: ink(document.querySelector('.bui-crumbs a')),
+				facts: ink(document.querySelector('.bui-page-facts')),
+				tab: ink(document.querySelector('.bui-page-tabs .bui-productnav-list a')),
+				line: round(document.querySelector('.bui-page-tabs .bui-productnav').getBoundingClientRect().left),
+				section: ink(document.querySelector('.bui-section-title')),
+				row: ink(document.querySelector('.bui-rows .bui-row-title')),
+				divider
+			},
+			kind: box ? { left: box.left, middle: (box.top + box.bottom) / 2, title: { right: title.right, middle: (title.top + title.bottom) / 2 } } : null,
+			reach: actions ? actions.getBoundingClientRect().right - title.left : null
+		};
+	});
+
 export const checks = [
 	{
 		name: 'page: content starts one gutter from the navigation at 320 to 2560 px, never centered; lines stay readable; no sideways scroll; both themes',
@@ -90,6 +133,24 @@ export const checks = [
 					if (found.region < 640) expect(wrapped, `${at}: under 640 px the actions follow the title`);
 					await context.close();
 				}
+			}
+		}
+	},
+	{
+		name: 'page: every left edge of the column is the H1\'s (crumbs, facts, first tab and its line, section and row titles, dividers); the kind sits beside the H1; a resource page keeps its actions within reach (0.19.1)',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			for (const width of [390, 1024, 1440, 1920]) {
+				const { page, context } = await open(browser, consumer, { width });
+				const found = await edges(page);
+				for (const [part, left] of Object.entries(found.parts)) expect(left !== null && Math.abs(left - found.start) <= 1, `${width}px: the ${part} starts at ${left}, the H1 at ${found.start}`);
+				expect(found.kind, `${width}px: the kind is drawn`);
+				if (width >= 640) {
+					expect(found.kind.left >= found.kind.title.right, `${width}px: the kind sits after the H1 on its line: ${JSON.stringify(found.kind)}`);
+					expect(Math.abs(found.kind.middle - found.kind.title.middle) <= 2, `${width}px: the kind is centred on the H1's line: ${JSON.stringify(found.kind)}`);
+				}
+				if (width >= 1440) expect(found.reach <= 64 * 16 + 1, `${width}px: a resource page's actions end ${found.reach}px from its title's start, at most a form column and its panel (64rem)`);
+				await context.close();
 			}
 		}
 	},

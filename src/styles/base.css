@@ -96,8 +96,13 @@
 		transition: none !important;
 		scroll-behavior: auto !important;
 	}
+	/* Still, a spinner is work in progress: a half-filled circle (D129, 0.19.1), never an open ring,
+	   which is the shape of what rests */
 	.bui-spinner {
 		border-right-color: currentColor;
-		opacity: 0.6;
+		background: linear-gradient(to right, currentColor 50%, transparent 50%);
+	}
+	.bui-spinner:dir(rtl) {
+		background: linear-gradient(to left, currentColor 50%, transparent 50%);
 	}
 }

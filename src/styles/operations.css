@@ -189,6 +189,13 @@
 	background-size: 200% 100%;
 	animation: bui-travel 1.6s linear infinite;
 }
+/* Still, an unknown share is a dashed track along the whole bar (0.19.1): a band held in one place
+   would read as a share already done. */
+@media (prefers-reduced-motion: reduce) {
+	.bui-awaited-bar:indeterminate {
+		background: repeating-linear-gradient(to right, var(--color-info) 0 var(--space-2), var(--color-surface-sunken) var(--space-2) var(--space-4));
+	}
+}
 .bui-awaited-bar:indeterminate::-webkit-progress-bar {
 	background: transparent;
 }

@@ -129,10 +129,10 @@ function relay(notice, latest) {
 export function Sidebar({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onNavigate = null, labels, shortcut = false, merge = false, rail = null }) {
 	const latest = useLatest({ onNavigate, search, groups, rail });
 	const objects = () => objected(groups, latest);
-	const railing = () => rail ? { ...rail, onchange: open => latest.current.rail?.onChange?.(open) } : null;
+	const railing = () => (rail ? { ...rail, foot: footing(rail.foot, latest), onchange: open => latest.current.rail?.onChange?.(open) } : null);
 	const [host, sidebar] = useInstance(() => new Sections({ product, groups: objects(), context, cut, section, action, search: finding(search, () => latest.current.search), labels, shortcut, rail: railing(), onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null }), [product, cut, labels, Boolean(onNavigate), Boolean(shortcut)]);
 	useSync(sidebar, current => (current.groups = objects()), [JSON.stringify(groups)]);
-	useSync(sidebar, current => (current.rail = railing()), [Boolean(rail), rail?.panel, rail?.open, JSON.stringify(rail?.order)]);
+	useSync(sidebar, current => (current.rail = railing()), [Boolean(rail), rail?.panel, rail?.open, JSON.stringify(rail?.order), JSON.stringify(rail?.foot ? { label: String(rail.foot.label ?? ''), glyph: rail.foot.glyph ?? null, status: rail.foot.status ?? null } : null)]);
 	useSync(sidebar, current => (current.context = context), [JSON.stringify(context)]);
 	useSync(sidebar, current => (current.section = section), [section]);
 	// One bar on a phone (0.16.0, DQ-19): the page's family bar opens this sidebar's drawer
@@ -140,6 +140,13 @@ export function Sidebar({ product, groups = [], context = null, cut = 1024, sect
 	useSync(sidebar, current => (current.action = action), [JSON.stringify(action)]);
 	useSync(sidebar, current => (current.search = finding(search, () => latest.current.search)), [Boolean(search), search?.label, search?.placeholder ?? null, search?.bound, search?.delay, Boolean(search?.all)]);
 	return h('div', { ref: host, className: 'bui-host bui-sidebar-host' });
+}
+
+/** The rail's foot with its press read from the latest props (0.19.1): React's `onClick`, the DOM's `onclick`. */
+function footing(foot, latest) {
+	if (!foot?.label) return null;
+	const { onClick, ...rest } = foot;
+	return { ...rest, onclick: control => latest.current.rail?.foot?.onClick?.(control) };
 }
 
 /** The DOM search for a `search` prop: its `source` and `all` are read from `now()`, the latest props, when asked. */

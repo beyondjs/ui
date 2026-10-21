@@ -33,12 +33,12 @@ test('Page, PageHeader and Section render the DOM classes\' markup', async () =>
 		h(ui.Page, {
 			template: 'detail',
 			width: 'standard',
-			header: h(ui.PageHeader, { title: 'web', crumbs: [{ label: 'Environments', href: '/environments' }], status: h(ui.Status, { label: 'Ready', tone: 'success' }), facts: 'Compute Engine', actions: h(ui.Button, { label: 'Start', variant: 'primary' }) }),
+			header: h(ui.PageHeader, { title: 'web', crumbs: [{ label: 'Environments', href: '/environments' }], kind: 'Standard', status: h(ui.Status, { label: 'Ready', tone: 'success' }), facts: 'Compute Engine', actions: h(ui.Button, { label: 'Start', variant: 'primary' }) }),
 			aside: h('p', null, 'Facts'),
 			label: 'About web'
 		}, h(ui.Section, { title: 'Repositories', description: 'Copies on this machine.' }, h('p', null, 'acme/web')))
 	);
-	const header = new dom.PageHeader({ title: 'web', crumbs: [{ label: 'Environments', href: '/environments' }], status: dom.status('Ready', 'success'), facts: 'Compute Engine', actions: [new dom.Button({ label: 'Start', variant: 'primary' })] });
+	const header = new dom.PageHeader({ title: 'web', crumbs: [{ label: 'Environments', href: '/environments' }], kind: 'Standard', status: dom.status('Ready', 'success'), facts: 'Compute Engine', actions: [new dom.Button({ label: 'Start', variant: 'primary' })] });
 	const section = new dom.Section({ title: 'Repositories', description: 'Copies on this machine.', children: [dom.el('p', { text: 'acme/web' })] });
 	const expected = new dom.Page({ template: 'detail', width: 'standard', header, children: [section.element], aside: [dom.el('p', { text: 'Facts' })], label: 'About web' });
 	// The DOM header keeps its empty parts hidden; React leaves them out.

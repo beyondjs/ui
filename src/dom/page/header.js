@@ -8,9 +8,12 @@ import { PageCompact } from './compact.js';
 const defaults = { crumbs: 'Breadcrumb' };
 
 /**
- * A page's one header (LR-05): a breadcrumb only from the second level down, the H1 naming what is in
- * view, one status right after it (D42), one muted facts line, the actions at the end of the title's
- * line (one primary, the rest under an `ActionMenu`) and the page's tabs below.
+ * A page's one header (LR-05, D160): a breadcrumb only from the second level down that says where the
+ * object in view lives, the H1 naming it as its list names it, its kind or variant beside it (`kind`:
+ * "Checkout", or one control that chooses among its siblings), one status right after it (D42) that is
+ * the H1 object's own, one muted facts line of that object's properties, the actions at the end of the
+ * title's line (one primary, the rest under an `ActionMenu`) and the page's tabs below. Another
+ * object's state (the machine a copy runs on) is never the header's status or one of its facts.
  *
  * The H1 takes focus after a navigation (`focus()`; it has `tabindex="-1"`). Under a 640 px region the
  * status and the actions move under the title. Preferences, product switching, organization or
@@ -30,6 +33,7 @@ export class PageHeader extends Component {
 
 	#element;
 	#heading;
+	#kind;
 	#status;
 	#facts;
 	#actions;
@@ -45,6 +49,7 @@ export class PageHeader extends Component {
 	 * @param {object} options
 	 * @param {string|Node} options.title what is in view: the resource's name, never the organization when a project is in view
 	 * @param {Array<{label: string, href?: string|null}>} [options.crumbs] the levels above, the last one being the current page's parent
+	 * @param {string|Node|{element: Node}|null} [options.kind] the object's kind or variant beside the H1: words, or one control (0.19.1)
 	 * @param {Node|null} [options.status] one status (`status()` of this package)
 	 * @param {string|Node|Array<string|Node>|null} [options.facts] one muted line of facts
 	 * @param {Node[]} [options.actions] the title line's actions: one primary button, then an `ActionMenu`
@@ -52,22 +57,24 @@ export class PageHeader extends Component {
 	 * @param {{crumbs?: string}} [options.labels]
 	 * @param {boolean|{actions?: Array<Node|{element: Node}>}|null} [options.compact] the compact line on scroll (0.11.0)
 	 */
-	constructor({ title, crumbs = [], status = null, facts = null, actions = [], tabs = null, labels = {}, compact = null }) {
+	constructor({ title, crumbs = [], kind = null, status = null, facts = null, actions = [], tabs = null, labels = {}, compact = null }) {
 		super();
 		this.#labels = new Labels(defaults, labels);
 		const id = Ids.next('bui-page-title');
 		this.#heading = el('h1', { class: 'bui-page-heading', id, tabindex: '-1' });
+		this.#kind = el('span', { class: 'bui-page-kind' });
 		this.#status = el('span', { class: 'bui-page-status' });
 		this.#actions = el('div', { class: 'bui-page-actions' });
 		this.#facts = el('p', { class: 'bui-page-facts' });
 		this.#crumbs = el('nav', { class: 'bui-crumbs', 'aria-label': this.#labels.text('crumbs') });
 		this.#tabs = el('div', { class: 'bui-page-tabs' });
-		const line = el('div', { class: 'bui-page-title' }, [this.#heading, this.#status, this.#actions]);
+		const line = el('div', { class: 'bui-page-title' }, [this.#heading, this.#kind, this.#status, this.#actions]);
 		// No name on the header: inside <main> it has the generic role, which takes none (ARIA 1.2), and the H1 already names the page
 		this.#element = el('header', { class: 'bui-page-header' }, [this.#crumbs, line, this.#facts, this.#tabs]);
 		if (compact) this.#compact(line, compact);
 		this.title = title;
 		this.crumbs = crumbs;
+		this.kind = kind;
 		this.status = status;
 		this.facts = facts;
 		this.actions = actions;
@@ -104,6 +111,16 @@ export class PageHeader extends Component {
 		const items = levels.map(level => el('li', {}, [level.href ? el('a', { href: level.href, text: level.label }) : el('span', { text: level.label })]));
 		fill(this.#crumbs, items.length ? [el('ol', {}, items)] : []);
 		this.#crumbs.hidden = !items.length;
+	}
+
+	/**
+	 * The object's kind or variant beside the H1 (0.19.1, D160): words drawn as a quiet tag ("Checkout",
+	 * "Worktree"), or one control that chooses among the object's siblings. None takes no room.
+	 */
+	set kind(kind) {
+		const node = typeof kind === 'string' ? (kind ? el('span', { class: 'bui-page-tag', text: kind }) : null) : (kind?.element ?? kind ?? null);
+		fill(this.#kind, [node]);
+		this.#kind.hidden = !node;
 	}
 
 	set status(status) {

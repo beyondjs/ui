@@ -53,7 +53,7 @@ test('PageHeader: crumbs only with levels above, the H1, one status, facts, the 
 	assert.equal(element.hasAttribute('aria-labelledby'), false, 'the header takes no name: the H1 names the page (ARIA 1.2, a generic header inside <main>)');
 	assert.deepEqual([...element.querySelectorAll('.bui-crumbs a')].map(link => [link.textContent, link.getAttribute('href')]), [['Environments', '/environments']]);
 	const line = element.querySelector('.bui-page-title');
-	assert.deepEqual([...line.children].map(child => child.className), ['bui-page-heading', 'bui-page-status', 'bui-page-actions'], 'the status follows the H1 and the actions end the line');
+	assert.deepEqual([...line.children].map(child => child.className), ['bui-page-heading', 'bui-page-kind', 'bui-page-status', 'bui-page-actions'], 'the kind and the status follow the H1 and the actions end the line');
 	assert.equal(line.querySelector('h1').textContent, 'web');
 	assert.equal(element.querySelector('.bui-page-facts').textContent, 'Compute Engine · us-east4');
 	assert.ok(element.querySelector('.bui-page-tabs nav.bui-tabs.bui-productnav'), 'the tabs are drawn like ProductNav');
@@ -65,9 +65,33 @@ test('PageHeader: crumbs only with levels above, the H1, one status, facts, the 
 	header.facts = null;
 	header.actions = [];
 	header.tabs = null;
-	assert.deepEqual(['.bui-crumbs', '.bui-page-status', '.bui-page-facts', '.bui-page-actions', '.bui-page-tabs'].map(selector => element.querySelector(selector).hidden), [true, true, true, true, true], 'empty parts take no room');
+	assert.deepEqual(['.bui-crumbs', '.bui-page-kind', '.bui-page-status', '.bui-page-facts', '.bui-page-actions', '.bui-page-tabs'].map(selector => element.querySelector(selector).hidden), [true, true, true, true, true, true], 'empty parts take no room');
 	header.title = 'web (renamed)';
 	assert.equal(header.heading.textContent, 'web (renamed)');
+	header.destroy();
+});
+
+test('PageHeader: the object\'s kind beside the H1, as words or one control; none takes no room (0.19.1, D160)', () => {
+	const header = new ui.PageHeader({ title: 'willy · main', crumbs: [{ label: 'Live', href: '#/live' }, { label: 'Recovered machine', href: '#/live?machine=env_1' }], kind: 'Checkout', status: ui.status('Stopped', 'idle') }).mount(document.body);
+	const line = header.element.querySelector('.bui-page-title');
+	const kind = line.querySelector('.bui-page-kind');
+	assert.equal(kind.hidden, false);
+	assert.equal(kind.previousElementSibling, header.heading, 'the kind sits right after the H1');
+	assert.equal(kind.nextElementSibling.className, 'bui-page-status', 'and before the one status');
+	assert.equal(kind.querySelector('.bui-page-tag').textContent, 'Checkout');
+	assert.equal(header.heading.textContent, 'willy · main', 'the kind is not part of the H1\'s name');
+	assert.deepEqual([...header.element.querySelectorAll('.bui-crumbs li')].map(item => item.textContent), ['Live', 'Recovered machine'], 'the crumbs say where the object lives');
+	const chooser = new ui.Button({ label: 'Worktree' });
+	header.kind = chooser;
+	assert.equal(kind.firstElementChild, chooser.element, 'a component is placed by its element');
+	const control = ui.el('button', { type: 'button', text: 'Checkout' });
+	header.kind = control;
+	assert.equal(kind.firstElementChild, control, 'a node is placed as given');
+	header.kind = '';
+	assert.equal(kind.hidden, true, 'empty words take no room');
+	header.kind = null;
+	assert.equal(kind.hidden, true);
+	assert.equal(kind.childNodes.length, 0);
 	header.destroy();
 });
 

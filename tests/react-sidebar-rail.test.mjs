@@ -39,3 +39,16 @@ test('React rail survives StrictMode and reads the latest callback and controlle
 	root = null;
 	assert.equal(host.children.length, 0);
 });
+
+test('React rail foot reads the latest press and patches its state in place (0.19.1)', async () => {
+	const calls = [];
+	const render = (name, state) => React.createElement(ui.Sidebar, { product: 'Conduict', groups, rail: { ...rail, foot: { label: 'Recovered machine', status: { state, label: state === 'ready' ? 'Ready' : 'Waking up' }, onClick: () => calls.push(name) } } });
+	await act(() => root.render(render('first', 'waking')));
+	const control = host.querySelector('.bui-sidebar-rail-foot');
+	assert.equal(control.getAttribute('aria-label'), 'Recovered machine · Waking up');
+	await act(() => root.render(render('second', 'ready')));
+	assert.ok(host.querySelector('.bui-sidebar-rail-foot') === control, 'a prop update keeps the control');
+	assert.equal(control.getAttribute('aria-label'), 'Recovered machine · Ready');
+	await act(() => control.click());
+	assert.deepEqual(calls, ['second'], 'the latest handler is used');
+});

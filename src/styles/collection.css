@@ -53,6 +53,15 @@
 	text-align: left;
 	vertical-align: middle;
 }
+/* A table's first and last columns keep their words on the content's edges (0.19.1, P5), as its lines do. */
+.bui-table th:first-child,
+.bui-table td:first-child {
+	padding-inline-start: 0;
+}
+.bui-table th:last-child,
+.bui-table td:last-child {
+	padding-inline-end: 0;
+}
 .bui-table thead th {
 	color: var(--color-text-muted);
 	font-size: var(--text-label);

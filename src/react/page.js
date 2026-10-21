@@ -108,12 +108,13 @@ function assign(ref, value) {
 }
 
 /**
- * The page's one header: `crumbs` (`{ label, href? }`, the levels above), the H1 `title`, one
- * `status`, a `facts` line, the title line's `actions` and the `tabs`. `headingRef` reaches the H1
+ * The page's one header: `crumbs` (`{ label, href? }`, the levels above, where the object lives), the
+ * H1 `title`, its `kind` beside it (words or one control, 0.19.1), one `status`, a `facts` line, the
+ * title line's `actions` and the `tabs`. `headingRef` reaches the H1
  * for focus after a navigation. `compact` (`true` or `{ actions }`, 0.11.0) adds the sticky line that
  * shows the title and the status once the title has scrolled out, placed right before the header.
  */
-export function PageHeader({ title, crumbs = [], status = null, facts = null, actions = null, tabs = null, headingRef = null, labels = {}, compact = null }) {
+export function PageHeader({ title, crumbs = [], kind = null, status = null, facts = null, actions = null, tabs = null, headingRef = null, labels = {}, compact = null }) {
 	const id = `bui-page-title-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 	const levels = (crumbs ?? []).filter(Boolean);
 	const bar = useRef(null);
@@ -142,7 +143,7 @@ export function PageHeader({ title, crumbs = [], status = null, facts = null, ac
 		levels.length
 			? h('nav', { className: 'bui-crumbs', 'aria-label': labels.crumbs ?? 'Breadcrumb' }, h('ol', null, levels.map((level, index) => h('li', { key: index }, level.href ? h('a', { href: level.href }, level.label) : h('span', null, level.label)))))
 			: null,
-		h('div', { ref: line, className: 'bui-page-title' }, h('h1', { id, className: 'bui-page-heading', tabIndex: -1, ref: headingRef }, title), status ? h('span', { className: 'bui-page-status' }, status) : null, actions ? h('div', { className: 'bui-page-actions' }, actions) : null),
+		h('div', { ref: line, className: 'bui-page-title' }, h('h1', { id, className: 'bui-page-heading', tabIndex: -1, ref: headingRef }, title), kind ? h('span', { className: 'bui-page-kind' }, typeof kind === 'string' ? h('span', { className: 'bui-page-tag' }, kind) : kind) : null, status ? h('span', { className: 'bui-page-status' }, status) : null, actions ? h('div', { className: 'bui-page-actions' }, actions) : null),
 		facts ? h('p', { className: 'bui-page-facts' }, facts) : null,
 		tabs ? h('div', { className: 'bui-page-tabs' }, tabs) : null
 	);

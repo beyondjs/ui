@@ -5,7 +5,7 @@ import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { FamilyBar, Sidebar, ProductNav, Page, PageHeader, Tabs, Section, Arrival as Line, Button, Status, Preferences } from '@beyond-js/ui/react';
+import { FamilyBar, Sidebar, ProductNav, Page, PageHeader, Tabs, Section, Arrival as Line, Button, ListRow, Status, Preferences } from '@beyond-js/ui/react';
 import { Arrival as Words } from '@beyond-js/ui';
 import { chosen, fallback, product } from '../data/family.js';
 import { shape, words, groups } from '../data/layout.js';
@@ -15,7 +15,7 @@ const preferences = new Preferences({ key: 'beyond-layout', fallback: { appearan
 window.fixture = { preferences, ready: false };
 
 function View() {
-	const header = <PageHeader title={words.title} crumbs={[{ label: 'Entornos', href: '#/environments' }]} status={<Status label="Listo" tone="success" />} facts={words.facts} actions={<><Button label="Empezar una conversación" variant="primary" /><Button label="Detener el entorno" /><Button label="Más acciones" /></>} tabs={<Tabs items={['Resumen', 'Conversaciones', 'Repositorios', 'Motores de IA', 'Acceso', 'Ejecución'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 }))} />} />;
+	const header = <PageHeader title={words.title} crumbs={[{ label: 'Entornos', href: '#/environments' }]} kind="Estándar" status={<Status label="Listo" tone="success" />} facts={words.facts} actions={<><Button label="Empezar una conversación" variant="primary" /><Button label="Detener el entorno" /><Button label="Más acciones" /></>} tabs={<Tabs items={['Resumen', 'Conversaciones', 'Repositorios', 'Motores de IA', 'Acceso', 'Ejecución'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 }))} />} />;
 	const aside = shape.aside ? (
 		<>
 			<h2>Acerca de</h2>
@@ -30,7 +30,18 @@ function View() {
 				<main id="main">
 					<Page template={shape.template} width={shape.width} arrival={shape.arrival ? <Line product="Conduict" href="#/back" onDismiss={() => {}} labels={Words.labels.es} /> : null} header={header} aside={aside} label="Acerca de este entorno">
 						<Section title="Repositorios" description={words.description} actions={<Button label="Añadir un repositorio" />}>
-							<ul>{words.rows.map(row => <li key={row}>{row}</li>)}</ul>
+							<ul className="bui-rows">
+								{words.rows.map((row, index) =>
+									index < words.rows.length - 1 ? (
+										<ListRow key={row} title={row} href={`#/${row}`} meta={[words.branch]} />
+									) : (
+										<li key={row}>
+											<ListRow tag="div" title={row} href={`#/${row}`} meta={[words.branch]} />
+											<ul className="bui-rows">{words.nested.map(name => <ListRow key={name} title={name} href={`#/${name}`} />)}</ul>
+										</li>
+									)
+								)}
+							</ul>
 						</Section>
 						<Section title="Acceso">
 							<p className="bui-reading">{words.description}</p>
