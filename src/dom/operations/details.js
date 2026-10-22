@@ -31,6 +31,7 @@ export class TechnicalDetails extends Component {
 	#content;
 	#result;
 	#button;
+	#revision = 0;
 	#values = { text: '', request: null, time: null };
 
 	/**
@@ -80,6 +81,7 @@ export class TechnicalDetails extends Component {
 
 	/** Replaces any of `text`, `request` and `time`. */
 	update(values = {}) {
+		this.#revision++;
 		this.#values = { ...this.#values, ...values };
 		const { text, request } = this.#values;
 		const moment = TimeWords.moment(this.#values.time);
@@ -99,8 +101,9 @@ export class TechnicalDetails extends Component {
 	 * saying so in place and selecting the text.
 	 */
 	async copy() {
+		const revision = this.#revision;
 		const copied = await Clipboard.write(this.#element.ownerDocument, this.report, TechnicalDetails.bound);
-		if (this.destroyed) return copied;
+		if (this.destroyed || revision !== this.#revision) return copied;
 		this.#result.textContent = this.#labels.text(copied ? 'copied' : 'refused');
 		this.#result.classList.toggle('bui-details-refused', !copied);
 		if (!copied) Clipboard.select(this.#content);

@@ -1,0 +1,42 @@
+/* One search/filter composition in a collection or beside the page's existing actions. */
+.bui-list-tools,
+.bui-list-search,
+.bui-list-filter-tools,
+.bui-list-restrictions {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	min-width: 0;
+	max-width: 100%;
+}
+.bui-list-tools[hidden],
+.bui-list-tools [hidden] { display: none; }
+.bui-list-search-editor {
+	flex: 1 1 12rem;
+	min-width: 0;
+	max-width: 100%;
+}
+.bui-list-search-editor input {
+	width: 100%;
+	min-width: 0;
+}
+.bui-list-query,
+.bui-list-restriction {
+	max-width: 100%;
+	white-space: normal;
+	overflow-wrap: anywhere;
+	text-align: start;
+}
+.bui-list-restriction > span { min-width: 0; }
+.bui-list-restriction > svg { flex: 0 0 auto; }
+.bui-list-filters .bui-disclosure-panel,
+.bui-list-filters .bui-disclosure-leaving {
+	padding: var(--space-3);
+}
+.bui-list-filters .bui-disclosure-panel:not([hidden]) {
+	display: grid;
+	gap: var(--space-3);
+}
+.bui-list-filters .bui-select,
+.bui-list-filters .bui-select-control { max-width: 100%; }

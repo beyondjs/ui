@@ -5,6 +5,7 @@ import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { ActionMenu } from '../menu.js';
 import { Button } from '../button.js';
+import { ActionLine } from '../actions/line.js';
 import { Status } from '../status/status.js';
 
 const defaults = { more: 'More actions for {title}', select: 'Choose {title}' };
@@ -17,7 +18,7 @@ const defaults = { more: 'More actions for {title}', select: 'Choose {title}' };
  * the menu and the check stay above that target. The name is drawn in the text color, never the accent.
  *
  * On a narrow row (a container query on the row itself, under 30rem) the end's facts move under the
- * meta and the actions wrap after them: the row stays two or three short lines, never a card of labels
+ * meta and the actions wrap after them: facts stay visible and long values wrap, never a card of labels
  * and values. With `select` the row is a choice in a picker: a checkbox before the name, its state given
  * by the product. `update()` patches the row in place: the name keeps focus, the menu keeps its instance.
  */
@@ -31,7 +32,7 @@ export class ListRow extends Component {
 	#name = null;
 	#meta = el('p', { class: 'bui-row-meta' });
 	#end = el('div', { class: 'bui-row-end' });
-	#actions = el('div', { class: 'bui-row-actions' });
+	#actions = new ActionLine();
 	#check = null;
 	#menu = null;
 	#buttons = [];
@@ -56,6 +57,7 @@ export class ListRow extends Component {
 	constructor(options) {
 		super();
 		this.#labels = new Labels(defaults, options.labels ?? {});
+		this.#actions.element.querySelector('.bui-action-line-actions').classList.add('bui-row-actions');
 		this.#element = el(options.tag === 'div' ? 'div' : 'li', { class: 'bui-row' }, [this.#lead, this.#main, this.#end]);
 		this.update(options);
 	}
@@ -87,6 +89,7 @@ export class ListRow extends Component {
 
 	destroy() {
 		this.#menu?.destroy();
+		this.#actions.destroy();
 		for (const button of this.#buttons) button.destroy();
 		super.destroy();
 	}
@@ -135,8 +138,15 @@ export class ListRow extends Component {
 
 	#tail({ status, facts, actions, menu, title }) {
 		for (const button of this.#buttons) button.destroy();
-		this.#buttons = actions.filter(Boolean).map(({ label, run, glyph: mark = null, name = null }) => new Button({ label, glyph: mark, name, variant: 'quiet', small: true, onclick: event => run?.(event) }));
-		fill(this.#actions, this.#buttons.map(button => button.element));
+		this.#buttons = actions.map((action, index) => {
+			if (!action) return null;
+			const { label, run, glyph: mark = null, name = null } = action;
+			const button = new Button({ label, glyph: mark, name, variant: 'quiet', small: true, onclick: event => run?.(event) });
+			// Aligned lists keep an absent action's column without inventing a disabled control.
+			button.element.style.setProperty('--bui-action-column', String(index + 1));
+			return button;
+		}).filter(Boolean);
+		this.#actions.actions = this.#buttons;
 		const items = menu.filter(Boolean);
 		if (items.length && !this.#menu) this.#menu = new ActionMenu({ label: null, name: this.#text('more', title), items, align: 'end' });
 		else if (items.length) this.#menu.items = items;
@@ -146,7 +156,7 @@ export class ListRow extends Component {
 		}
 		this.#menu?.element.querySelector('.bui-menu-button')?.setAttribute('aria-label', this.#text('more', title));
 		const shown = [...facts.filter(fact => fact !== null && fact !== undefined && fact !== false && fact !== '').map(fact => el('span', { class: 'bui-row-fact' }, [content(fact)])), status ? (status.state ? ListRow.#status(status, false) : status) : null].filter(Boolean);
-		fill(this.#end, [...shown, this.#buttons.length ? this.#actions : null, this.#menu?.element ?? null].filter(Boolean));
+		fill(this.#end, [...shown, this.#buttons.length ? this.#actions.element : null, this.#menu?.element ?? null].filter(Boolean));
 		this.#end.hidden = !this.#end.childElementCount;
 	}
 

@@ -106,7 +106,18 @@ const edges = page =>
 				divider
 			},
 			kind: box ? { left: box.left, middle: (box.top + box.bottom) / 2, title: { right: title.right, middle: (title.top + title.bottom) / 2 } } : null,
-			reach: actions ? actions.getBoundingClientRect().right - title.left : null
+			header: (() => {
+				const header = document.querySelector('.bui-page-header');
+				const frame = header.parentElement;
+				const style = getComputedStyle(frame);
+				return { width: header.getBoundingClientRect().width, available: frame.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) };
+			})(),
+			actions: actions ? (() => {
+				const bounds = actions.getBoundingClientRect();
+				const siblings = [...actions.parentElement.children].filter(node => node !== actions && node.getClientRects().length);
+				const prior = siblings.at(-1).getBoundingClientRect();
+				return { left: bounds.left, top: bounds.top, prior: prior.right, bottom: prior.bottom, gap: parseFloat(getComputedStyle(actions.parentElement).columnGap) };
+			})() : null
 		};
 	});
 
@@ -149,7 +160,10 @@ export const checks = [
 					expect(found.kind.left >= found.kind.title.right, `${width}px: the kind sits after the H1 on its line: ${JSON.stringify(found.kind)}`);
 					expect(Math.abs(found.kind.middle - found.kind.title.middle) <= 2, `${width}px: the kind is centred on the H1's line: ${JSON.stringify(found.kind)}`);
 				}
-				if (width >= 1440) expect(found.reach <= 64 * 16 + 1, `${width}px: a resource page's actions end ${found.reach}px from its title's start, at most a form column and its panel (64rem)`);
+				expect(Math.abs(found.header.width - found.header.available) <= 1, `${width}px: the header fills its Page region`);
+				if (found.actions.top < found.actions.bottom - 1) expect(Math.abs(found.actions.left - found.actions.prior - found.actions.gap) <= 2, `${width}px: object actions follow the title group by one gap`);
+				else expect(Math.abs(found.actions.left - found.start) <= 1, `${width}px: wrapped object actions start on the heading edge`);
+				expect(!(await overflow(page)), `${width}px: the header does not overflow`);
 				await context.close();
 			}
 		}

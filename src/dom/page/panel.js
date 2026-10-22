@@ -225,10 +225,13 @@ export class PagePanel extends Component {
 		if (mode === 'beside' && open) {
 			// The person was looking at it: it stays in view, beside now
 			this.#shown = true;
+			this.#sheet.open().then(() => {
+				if (inside && !this.destroyed && this.#mode === 'beside') new Focus(this.#element).targets[0]?.focus({ preventScroll: true });
+			});
 			this.#sheet.close(null);
 		}
 		this.#paint();
-		if (inside && mode === 'beside') (new Focus(this.#element).targets[0] ?? null)?.focus({ preventScroll: true });
+		if (inside && !this.#sheet.shown && mode === 'beside') (new Focus(this.#element).targets[0] ?? null)?.focus({ preventScroll: true });
 		else if (inside) [...this.#controls.keys()][0]?.focus({ preventScroll: true });
 	}
 

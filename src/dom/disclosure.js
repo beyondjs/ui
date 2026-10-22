@@ -10,7 +10,7 @@ import { Floating } from './core/floating.js';
  * A button that shows and hides a panel: the disclosure pattern.
  *
  * It traps nothing: Tab moves on normally. Escape and the button close the panel and return focus to
- * the button; a press outside closes it without moving focus. Escape also closes it when focus rests
+ * the button; a press outside closes it without moving focus unless `outside: false` keeps a page section open. Escape also closes it when focus rests
  * on the page's body, as it does in Safari after a click on a button, and focus then goes to the
  * button. Closing it from code returns focus to the button when focus was inside the panel, so it is
  * never left on a hidden element. The panel works the same with a mouse,
@@ -41,6 +41,7 @@ export class Disclosure extends Component {
 	#hint = null;
 	#picture = null;
 	#floating;
+	#outside;
 
 	/**
 	 * @param {object} options
@@ -49,12 +50,14 @@ export class Disclosure extends Component {
 	 * @param {Node[]} [options.children] panel content
 	 * @param {'start'|'end'} [options.align] which edge of the button the panel aligns to
 	 * @param {(open: boolean) => void} [options.onchange]
+	 * @param {boolean} [options.outside=true] close on an outside press; false keeps an in-flow section stable
 	 * @param {boolean} [options.hint] the button shows a glyph alone: its name appears as a tooltip (D11)
 	 * @param {'auto'|'above'|'below'} [options.placement] where a floating panel opens (0.11.2): above when there is no room below (`auto`), or always on one side
 	 */
-	constructor({ label, name = null, children = [], align = 'start', variant = 'plain', role = null, onchange = null, hint = false, placement = 'auto', class: extra = '' }) {
+	constructor({ label, name = null, children = [], align = 'start', variant = 'plain', role = null, onchange = null, hint = false, placement = 'auto', outside = true, class: extra = '' }) {
 		super();
 		this.#onchange = onchange;
+		this.#outside = outside;
 		const id = Ids.next('bui-panel');
 		this.#button = el(
 			'button',
@@ -124,7 +127,7 @@ export class Disclosure extends Component {
 		const document = this.#element.ownerDocument;
 		this.#releases = [
 			this.listen(document, 'pointerdown', event => {
-				if (!this.#element.contains(event.target)) this.#shut(false);
+				if (this.#outside && !this.#element.contains(event.target)) this.#shut(false);
 			}),
 			// Escape that reaches the document from nowhere in particular (the body) still closes the panel.
 			this.listen(document, 'keydown', event => {

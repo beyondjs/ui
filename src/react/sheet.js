@@ -9,11 +9,11 @@ const { useLayoutEffect, useRef, useState } = React;
  * A side sheet driven by the DOM `SideSheet` class: React renders `children` into its body, `actions`
  * into its footer and `error` (a failure such as "Beyond Projects didn't answer" with Try again) at its
  * top. `open` opens and closes it; `onClose(value)` reports only the person dismissing it (Escape, the
- * close button) or a `close(value)` from inside, never a close through `open`, a replacement or an
+ * close button or backdrop) or a `close(value)` from inside, never a close through `open`, a replacement or an
  * unmount, as the React `Dialog`. `busy` keeps it open while the hosted task works. `restore` is the
  * element focus returns to when it closes.
  */
-export function SideSheet({ open, title, label = null, description = null, width = 'form', busy = false, error = null, restore = null, labels, onClose, actions = null, children }) {
+export function SideSheet({ open, title, label = null, description = null, width = 'form', backdrop = true, guard = null, busy = false, error = null, restore = null, labels, onClose, actions = null, children }) {
 	const [state, setState] = useState(null);
 	const [slot] = useState(() => document.createElement('div'));
 	const held = useRef(null);
@@ -21,9 +21,10 @@ export function SideSheet({ open, title, label = null, description = null, width
 	// The sheet the error region was last filled for, and whether it held one: refilled only when that changes
 	const shown = useRef({ sheet: null, error: false });
 	const closing = useLatest(onClose);
+	const guarding = useLatest(guard);
 	const sheet = living(state);
 	useLayoutEffect(() => {
-		const made = new Sheet({ title, label, description, width, labels: { close: labels?.close } });
+		const made = new Sheet({ title, label, description, width, backdrop, guard: reason => guarding.current ? guarding.current(reason) : true, labels: { close: labels?.close } });
 		held.current = made;
 		setState(made);
 		return () => {
@@ -34,7 +35,7 @@ export function SideSheet({ open, title, label = null, description = null, width
 		// The title and busy are updated in place; these options shape the element itself. The close
 		// label is a string, so labels passed inline never rebuild (and close) the sheet (0.7.4)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [label, description, width, labels?.close]);
+	}, [label, description, width, backdrop, labels?.close]);
 	useLayoutEffect(() => {
 		if (!sheet || sheet !== held.current) return;
 		sheet.title = title;
@@ -48,7 +49,10 @@ export function SideSheet({ open, title, label = null, description = null, width
 	});
 	useLayoutEffect(() => {
 		if (!sheet || sheet !== held.current) return;
-		if (open && !sheet.shown) {
+		if (open && sheet.shown) {
+			if (round.current) round.current.quiet = false;
+			sheet.open();
+		} else if (open) {
 			const current = { quiet: false };
 			round.current = current;
 			sheet.open({ restore }).then(value => {

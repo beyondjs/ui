@@ -26,6 +26,7 @@ export const paths = Object.freeze({
 	close: ['M6 6l12 12', 'M18 6L6 18'],
 	plus: ['M12 5v14', 'M5 12h14'],
 	minus: 'M5 12h14',
+	filter: ['M4 6h16', 'M7 12h10', 'M10 18h4'],
 	search: ['M10.5 4a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13z', 'M15.5 15.5L20 20'],
 	refresh: ['M19 7v4h-4', 'M18.4 11A7 7 0 1 0 17 16.5'],
 	play: 'M8 5.5v13l10-6.5z',

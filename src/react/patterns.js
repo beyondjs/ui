@@ -1,4 +1,6 @@
+import { Fragment } from 'react';
 import { ListRow as Row } from '../dom/list/row.js';
+import { RowContent } from './row-content.js';
 import { CopyValue as Value } from '../dom/list/value.js';
 import { Checklist as Steps } from '../dom/checklist/checklist.js';
 import { EmptyState as Empty } from '../dom/checklist/empty.js';
@@ -7,7 +9,7 @@ import { h, useInstance, useLatest, useSync } from './hooks.js';
 
 /**
  * The React forms of 0.15.0's patterns, driven by their DOM classes so behavior has one implementation:
- * `ListRow`, `CopyValue`, `Checklist`, `EmptyState` and `CommandCard`. Words are strings; callbacks are
+ * `ListRow`, `CopyValue`, `Checklist`, `EmptyState` and `CommandCard`. List rows accept React content; callbacks are
  * read from the latest props; the rest is applied when its content changes.
  */
 
@@ -15,9 +17,10 @@ import { h, useInstance, useLatest, useSync } from './hooks.js';
 export function ListRow(props) {
 	const latest = useLatest(props);
 	const tag = props.tag === 'div' ? 'div' : 'li';
-	const [host, row] = useInstance(() => new Row(relay(latest.current, latest, 'div')), [props.labels]);
-	useSync(row, current => current.update(relay(latest.current, latest, 'div')), [shape(props)]);
-	return h(tag, { ref: host, className: 'bui-host', style: { display: 'contents' } });
+	const [host, row] = useInstance(() => new RowContent(latest.current, latest), [props.labels]);
+	const plan = row?.prepare(props);
+	useSync(row, current => current.update(plan), [plan?.key]);
+	return h(Fragment, null, h(tag, { ref: host, className: 'bui-host', style: { display: 'contents' } }), ...(plan?.portals ?? []));
 }
 
 /** A copyable value: mono, cut and shown whole on hover and focus, then Copy. */
@@ -52,24 +55,6 @@ export function CommandCard({ title, command, detail = null, scope = null, state
 	useSync(card, current => (current.state = state), [state]);
 	useSync(card, current => focus && current.focus(), [focus]);
 	return h('div', { ref: host, className: 'bui-host' });
-}
-
-/** A row's options with its callbacks read from the latest props. */
-function relay(props, latest, tag) {
-	const { run, actions: given = [], menu = [], select = null } = props;
-	return {
-		...props,
-		tag,
-		run: run ? event => latest.current.run?.(event) : null,
-		actions: given.filter(Boolean).map((action, index) => ({ ...action, run: event => latest.current.actions?.filter(Boolean)[index]?.onSelect?.(event) })),
-		menu: menu.filter(Boolean).map((item, index) => ({ ...item, run: item.href ? null : event => latest.current.menu?.filter(Boolean)[index]?.onSelect?.(event) })),
-		select: select ? { ...select, onchange: checked => latest.current.select?.onChange?.(checked) } : null
-	};
-}
-
-/** What changes a row: its values, not its callbacks. */
-function shape({ title, href, meta, lead, status, facts, actions = [], menu = [], select, current }) {
-	return JSON.stringify([title, href, meta, lead, status, facts, actions.filter(Boolean).map(action => [action.label, action.glyph]), menu.filter(Boolean).map(item => [item.label, item.href, item.disabled, item.reason, item.tone]), select ? [select.checked, select.disabled, select.name, select.value] : null, current]);
 }
 
 /** Steps with each action's `onSelect` read from the latest props. */

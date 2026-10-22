@@ -4,8 +4,8 @@ import { Page as Window } from './support/page.mjs';
 
 /**
  * 0.14.0's quiet parts and exits: `ActionLine` (D102) in the DOM and in React, `Facts`' value column and
- * numbers (D99), and the exits of menus and side sheets (D95): hidden at once, an inert picture easing out,
- * none under reduced motion, never a copy beside a reopened one. Their motion is measured in the browser.
+ * numbers (D99), and exits (D95): menus use an inert picture; side sheets retain their native modal until exit ends.
+ * Reduced motion leaves no picture or delayed sheet, never a copy beside a reopened one. Their motion is measured in the browser.
  */
 const page = new Window();
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -103,27 +103,18 @@ test('a closed menu is hidden at once and its picture eases out, inert and namel
 	}
 });
 
-test('a side sheet closes at once and slides out as a picture over a fading veil; none under reduced motion', async () => {
+test('a side sheet without motion closes with its result and leaves no picture or veil', async () => {
 	const sheet = new dom.SideSheet({ title: 'Add repositories', children: [Object.assign(document.createElement('p'), { textContent: 'Body' })] });
 	const done = sheet.open();
 	sheet.close('chosen');
 	assert.equal(await done, 'chosen');
 	assert.equal(sheet.shown, false);
-	const picture = document.body.querySelector('div.bui-sheet.bui-leaving');
-	assert.ok(picture, 'the picture of the sheet');
-	assert.equal(picture.getAttribute('aria-hidden'), 'true');
-	assert.equal(picture.textContent.includes('Body'), true);
-	assert.ok(picture.previousElementSibling.classList.contains('bui-sheet-veil'));
-	sheet.open();
-	assert.equal(document.body.querySelector('.bui-leaving'), null, 'reopening removes it');
-	const media = page.window.matchMedia;
-	page.window.matchMedia = query => ({ matches: query.includes('reduce'), addEventListener() {}, removeEventListener() {} });
-	try {
-		sheet.close();
-		assert.equal(document.body.querySelector('.bui-leaving'), null, 'no picture under reduced motion');
-	} finally {
-		page.window.matchMedia = media;
-	}
+	assert.equal(document.querySelector('.bui-leaving, .bui-sheet-veil'), null);
+	const reopened = sheet.open();
+	assert.equal(sheet.shown, true);
+	sheet.close();
+	assert.equal(await reopened, null);
+	assert.equal(document.querySelector('.bui-leaving, .bui-sheet-veil'), null);
 	sheet.destroy();
 });
 
@@ -131,7 +122,7 @@ test('a host that removes animations by its own preference gets no still picture
 	const computed = page.window.getComputedStyle;
 	// What a host's stylesheet computes for a picture; happy-dom reports no animation, so it is given here
 	let motion = { animationName: 'none', animationDuration: '0s' };
-	page.window.getComputedStyle = node => (node.classList?.contains('bui-leaving') ? { position: 'absolute', ...motion } : { ...computed(node), position: 'absolute' });
+	page.window.getComputedStyle = node => (node.classList?.contains('bui-leaving') || node.dataset?.motion === 'out' ? { position: 'absolute', ...motion } : { ...computed(node), position: 'absolute' });
 	try {
 		const menu = new dom.ActionMenu({ label: 'More', items: [{ label: 'Rename', run: () => {} }] }).mount(document.body);
 		const sheet = new dom.SideSheet({ title: 'Add repositories', children: [Object.assign(document.createElement('p'), { textContent: 'Body' })] });
@@ -140,7 +131,8 @@ test('a host that removes animations by its own preference gets no still picture
 			menu.close(true);
 			sheet.open();
 			sheet.close();
-			return [document.querySelectorAll('.bui-leaving').length, document.querySelectorAll('.bui-sheet-veil').length];
+			assert.equal(document.querySelectorAll('.bui-sheet-veil').length, 0, 'native backdrop has no duplicated veil');
+			return [document.querySelectorAll('.bui-leaving').length, Number(sheet.shown)];
 		};
 		assert.deepEqual(close(), [0, 0], 'an animation named none: removed at once, veil and all');
 		motion = { animationName: 'bui-leave', animationDuration: '0s' };
@@ -149,12 +141,14 @@ test('a host that removes animations by its own preference gets no still picture
 		assert.deepEqual(close(), [0, 0], 'every listed duration zero');
 		// A recovery: once the host allows motion again, the pictures ease out as before
 		motion = { animationName: 'bui-leave', animationDuration: '120ms' };
-		assert.deepEqual(close(), [2, 1], 'a moving picture stays until its animation ends');
+		assert.deepEqual(close(), [1, 1], 'the menu picture and native sheet stay until their animations end');
 		for (const picture of document.querySelectorAll('.bui-leaving')) picture.dispatchEvent(new page.window.Event('animationend'));
-		assert.equal(document.querySelectorAll('.bui-leaving, .bui-sheet-veil').length, 0, 'and removes itself, veil and all');
+		sheet.element.dispatchEvent(new page.window.Event('animationend'));
+		assert.equal(sheet.shown, false);
+		assert.equal(document.querySelectorAll('.bui-leaving, .bui-sheet-veil').length, 0, 'both exits clean up');
 		// An engine that reports nothing is not taken as still: the bound ends that picture
 		motion = { animationName: '', animationDuration: '' };
-		assert.deepEqual(close(), [2, 1], 'an unreported animation keeps the picture to its bound');
+		assert.deepEqual(close(), [1, 0], 'the legacy menu bounds an unreported animation; the native sheet closes without an animation');
 		menu.destroy();
 		sheet.destroy();
 		assert.equal(document.querySelectorAll('.bui-leaving, .bui-sheet-veil').length, 0);
@@ -166,7 +160,7 @@ test('a host that removes animations by its own preference gets no still picture
 test('an action line quiets every kind of action it holds, a disclosure (an answer\'s Details) included (0.14.2)', async () => {
 	const { readFileSync } = await import('node:fs');
 	const sheet = readFileSync(new URL('../src/styles/quiet.css', import.meta.url), 'utf8');
-	const rules = sheet.match(/\.bui-action-line-actions :is\([^)]*\)/g) ?? [];
+	const rules = sheet.match(/\.bui-action-line-actions :is\(\.bui-button[^)]*\)/g) ?? [];
 	assert.ok(rules.length >= 2, 'the quiet rule and its hover rule');
 	for (const rule of rules) assert.match(rule, /\.bui-disclosure-button/, `${rule} leaves a disclosure bordered`);
 });

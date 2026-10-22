@@ -138,3 +138,11 @@ test('Hierarchy checks again after a change, waits for the page to settle, and i
 	assert.equal(ui.Hierarchy.enabled, false, 'off outside a development build');
 	assert.equal(ui.Hierarchy.weight, 600);
 });
+
+
+test('subgroups exclude preceding parent titles and peer content; ARIA headings and container exemptions stay checked', () => {
+	const host = region(readFileSync(join(root, 'tests/fixtures/hierarchy-groups.html'), 'utf8'));
+	const hierarchy = new ui.Hierarchy({ root: host, warn: () => null, measure: painted });
+	assert.deepEqual(hierarchy.check().map(item => [item.heading.id, item.reason]), [['role', 'weight'], ['blanket', 'weight']]);
+	hierarchy.destroy();
+});

@@ -71,6 +71,8 @@ export class ActionMenu extends Component {
 }
 
 export interface DisclosureOptions {
+	/** Close on an outside press (default true); false keeps an in-flow section open. */
+	outside?: boolean;
 	label: Content | Content[];
 	name?: string | null;
 	children?: Node[];
@@ -182,13 +184,16 @@ export class Dialog extends Component {
 	readonly element: HTMLDialogElement;
 	readonly body: HTMLElement;
 	readonly footer: HTMLElement;
+	/** True until the native modal closes at the end of its bounded exit. */
 	readonly shown: boolean;
 	busy: boolean;
 	set title(value: Content);
 	set actions(nodes: Node[]);
 	fill(children: unknown): this;
 	append(children: unknown): this;
+	/** Resolves after the exit and focus return; reopening cancels a pending exit. */
 	open<T = unknown>(): Promise<T | null>;
+	/** Whether the close was accepted; false while busy or already leaving. */
 	close(value?: unknown): boolean;
 	dismiss(): boolean;
 }

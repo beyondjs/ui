@@ -1,5 +1,8 @@
+import { words } from './tools-labels.js';
+
 /** The collection's copy: `defaults` in English; `Collection.labels` holds English and Spanish. */
 export const defaults = {
+	...words.en,
 	search: 'Search {label}',
 	placeholder: 'Search',
 	all: 'All',
@@ -20,6 +23,7 @@ export const defaults = {
 };
 
 export const spanish = {
+	...words.es,
 	search: 'Buscar en {label}',
 	placeholder: 'Buscar',
 	all: 'Todos',

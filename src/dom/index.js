@@ -44,6 +44,8 @@ export { FamilyBar } from './family/bar.js';
 export { names as productNames } from './family/labels.js';
 export { ProductNav } from './nav.js';
 export { Unavailable } from './unavailable.js';
+export { RetryAction } from './again/action.js';
+export { Recovery } from './again/recovery.js';
 export { Again } from './again/again.js';
 export { AgainLine } from './again/line.js';
 export { availability } from './availability.js';

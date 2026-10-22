@@ -1,5 +1,7 @@
 # Validation
 
+For default drawer dismissal, run `node acceptance/run.mjs 'sheet: default'` in each supported engine. `tests/sheet.test.mjs`, `tests/sheet-motion.test.mjs` and `tests/react-sheet-motion.test.mjs` check guards, gesture reset and exit/reopen settlement; the installed browser checks cover mouse/touch, DOM/React, focus, drags and busy guards. The prepared `node acceptance/run.mjs 'sheet motion:'` checks rendered native frames and reversal; it is pending the package coordinator’s serialized validation turn. See [0.19.2 evidence](reviews/2026-10-22/release-0.19.2.md).
+
 Run the checks that match a change. Every command runs from the repository root after `npm install` (Node.js 22.21.1 or later).
 
 | Level | Command | Runner and DOM | What a pass proves |
@@ -129,3 +131,11 @@ Run `npm run acceptance -- "shared hierarchy"` for dropdown and Unavailable typo
 ## UI 0.19.0: a heading outranks what it names
 
 `tests/hierarchy.test.mjs` holds D158 in the built stylesheet and the sources: every title the components draw is semibold, a side sheet's title is title-2 and a `Section` at level 3 title-3, the label headings keep the label role, every heading element a component draws is either a semibold title or marked `data-bui-label`, and `Hierarchy` names a heading lighter than semibold or outranked in its region, once, and nothing else. Run `npm run acceptance -- "shared hierarchy"` for the measured steps of a side sheet drawn as a machine's panel and of a dialog, in both themes at 1440 and 390 px, and for the development build's warning: none for the shared parts, one per heading for a composition that breaks the rule. Repeat with `BEYOND_UI_BROWSER=firefox` and `BEYOND_UI_BROWSER=webkit`. See [the release evidence](reviews/2026-10-21/release-0.19.0.md).
+
+## Dialog motion
+
+`tests/dialog-motion.test.mjs` checks the delayed close, duplicate requests, interrupted exit, immediate destruction, focus and the fallback bound. `npm run acceptance -- "dialog motion"` measures entry and exit in installed DOM, React 18 and React 19 consumers, including short-lived prompts and reduced motion. Repeat with `BEYOND_UI_BROWSER=firefox` and `BEYOND_UI_BROWSER=webkit`. Existing `dialog:` and `busy confirmation:` checks retain keyboard and failure/retry coverage.
+
+## UI 0.20.0 integration
+
+The [release record](reviews/2026-10-22/release-0.20.0.md) separates archive adoption, unit checks and browser results. `quiet.test.mjs` checks native sheet cleanup and zero-duration host preferences; `sheet-motion.test.mjs` owns retained-modal completion and interruption. SideSheet delegates its keyboard cycling to the existing Focus collaborator. Run installed acceptance across all three engines for native dialog/sheet motion, dismissal guards, Sidebar context, recovery details and header geometry. Shared source tests do not certify product adoption.

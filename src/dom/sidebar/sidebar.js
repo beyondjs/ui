@@ -12,14 +12,14 @@ import { Hint } from '../core/hint.js';
 import { words } from './labels.js';
 import { SidebarRail } from './rail.js';
 import { SidebarStart } from './start.js';
+import { SidebarContext } from './context.js';
 
 /**
  * A product's own sections, the same in every product that has them (Delegate, Conduict, CDN's
  * administration, Workspace).
  *
- * At or above `cut` (1024 px, the family's one cut, D49; a product passes another width only with a
- * recorded measurement showing its content cannot fit at 1024 px) it is
- * a permanent sidebar, integrated in the page: flush under the family bar, full height and sticky,
+ * From `cut` (1024 px, D49; a departure requires a recorded fit measurement), it is a permanent
+ * sidebar: flush under the family bar, full height and sticky,
  * with a border on its inner edge, a discretely different surface and a clear current item. It has no
  * toggle in the bar. Below the cut it becomes a product row under the bar, about 44 px and sticky,
  * whose button names the section in view ("≡ Requests") and opens the same sections in a modal
@@ -66,6 +66,7 @@ export class Sidebar extends Component {
 	#hint;
 	#start;
 	#rail;
+	#context;
 
 	/**
 	 * @param {object} options
@@ -101,6 +102,7 @@ export class Sidebar extends Component {
 		this.#start = new SidebarStart(this.#row);
 		this.#drawer = new Drawer({ id, title: product, name, close: this.#labels.text('close'), onclose: () => (this.#button.setAttribute('aria-expanded', 'false'), this.#merge.closed()) });
 		this.#element = el('div', { class: 'bui-sidebar' }, [this.#panel, this.#row, this.#drawer.element]);
+		this.#context = new SidebarContext(this.#element, this.#panel, (work, delay) => this.later(work, delay));
 		this.#element.addEventListener('click', event => this.#navigate(event));
 		this.#hint = new Hint(this.#panel);
 		this.#drawer.fill(this.#sections.drawer);
@@ -223,6 +225,7 @@ export class Sidebar extends Component {
 	}
 
 	destroy() {
+		this.#context.destroy();
 		this.#start.destroy();
 		this.#rail.destroy();
 		this.#shortcut.destroy();
@@ -273,10 +276,8 @@ export class Sidebar extends Component {
 		if (enabled && this.#rail.element.parentNode !== this.#element) this.#element.prepend(this.#rail.element);
 		if (!enabled) this.#rail.element.remove();
 		if (enabled && !shown && this.#panel.contains(this.#element.ownerDocument.activeElement)) this.#rail.return();
-		this.#element.toggleAttribute('data-rail', enabled);
-		this.#element.toggleAttribute('data-panel', shown);
 		this.#sections.panel = enabled ? this.#rail.options.panel ?? '' : null;
-		this.#panel.hidden = !wide || (enabled && !shown);
+		this.#context.show({ wide, enabled, shown });
 		this.#rail.element.hidden = !wide || !enabled;
 		const head = enabled ? this.#panel.querySelector('.bui-sidebar-object-head') : null;
 		if (head && this.#rail.collapse.parentNode !== head) head.append(this.#rail.collapse);

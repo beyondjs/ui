@@ -1,5 +1,5 @@
+import { RetryAction } from '../again/action.js';
 import { el, fill, content } from '../core/element.js';
-import { glyph } from '../core/icons.js';
 import { callout } from '../feedback.js';
 
 /**
@@ -105,7 +105,7 @@ export class Panel {
 	}
 
 	#again() {
-		return el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', onclick: () => this.#retry() }, [glyph('refresh'), el('span', { text: this.#labels.text('retry') })]);
+		return new RetryAction({ labels: { retry: this.#labels.text('retry') }, run: () => this.#retry() }).element;
 	}
 
 	/** Marks the body while rows are hidden below its lower edge, so it fades there. */

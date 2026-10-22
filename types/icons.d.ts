@@ -16,6 +16,7 @@ export type IconName =
 	| 'plus'
 	| 'minus'
 	| 'search'
+	| 'filter'
 	| 'refresh'
 	| 'play'
 	| 'stop'

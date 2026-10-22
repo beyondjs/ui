@@ -1,6 +1,12 @@
 /** Types of 0.15.0's `DataTable`, re-exported by `@beyond-js/ui/dom`. */
 import type { Copy } from './notifications.js';
 import type { Component } from './dom.js';
+import type { CollectionFilter, CollectionTools, CollectionToolsMode } from './collection-tools.js';
+
+export interface DataTableFilter<Row = any> extends CollectionFilter {
+	/** True when this row matches the selected value; empty selections do not filter. */
+	match: (row: Row, value: string) => boolean;
+}
 
 export interface DataTableColumn<Row = any> {
 	key: string;
@@ -15,6 +21,8 @@ export interface DataTableColumn<Row = any> {
 	align?: 'start' | 'end';
 	/** The cell that names and opens the row (the first column without it). */
 	primary?: boolean;
+	/** Content already names its meaning: omit the repeated narrow visual label. */
+	summary?: boolean;
 }
 
 export interface DataTableState {
@@ -22,6 +30,8 @@ export interface DataTableState {
 	sort: string | null;
 	direction: 'ascending' | 'descending';
 	page: number;
+	/** Present when filter definitions or input filter state are supplied. */
+	filters?: Record<string, string>;
 }
 
 export interface DataTableOptions<Row = any> {
@@ -30,6 +40,8 @@ export interface DataTableOptions<Row = any> {
 	rows?: Row[];
 	key?: (row: Row) => string;
 	search?: boolean | { match?: (row: Row, query: string) => boolean };
+	filters?: Array<DataTableFilter<Row>>;
+	tools?: CollectionToolsMode;
 	group?: { by: (row: Row) => string; label?: (key: string, rows: Row[]) => string } | null;
 	state?: Partial<DataTableState>;
 	/** The person changed the state: write it to the address. Setting `state` back does not call it. */
@@ -50,6 +62,7 @@ export interface DataTableOptions<Row = any> {
 export class DataTable<Row = any> extends Component {
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: DataTableOptions<Row>);
+	readonly tools: CollectionTools;
 	get state(): DataTableState;
 	set state(state: Partial<DataTableState>);
 	rows: Row[];

@@ -1,7 +1,7 @@
 import { Component } from '../core/component.js';
-import { el, fill, content } from '../core/element.js';
+import { el, fill } from '../core/element.js';
 import { glyph } from '../core/icons.js';
-import { Ids } from '../core/ids.js';
+import { CollectionTools } from '../collection/tools.js';
 import { Labels } from '../core/labels.js';
 import { callout, skeleton } from '../feedback.js';
 import { EmptyState } from '../checklist/empty.js';
@@ -18,7 +18,7 @@ import { words } from './labels.js';
  *
  * It tells its states apart: `status` `loading` (skeleton rows in the table's shape, the loading line
  * for assistive technology), `failed` (the product's reason with Try again, `onretry`), and with rows
- * `ready`. With no row at all the controls are hidden and the empty state is shown (the product's node,
+ * `ready`. With no row at all the tools remain reachable and the empty state is shown (the product's node,
  * or `{ title, text, action }`); a search that matches nothing says so with "Clear the search". What
  * fits on one page shows no range and no pager. On a narrow region (a container query on the table's
  * own width) each row is two short lines: the primary cell, then the others in one muted line.
@@ -39,11 +39,10 @@ export class DataTable extends Component {
 	#state;
 	#status = 'ready';
 	#reason = null;
-	#input = null;
+	#tools;
 	#body = el('div', { class: 'bui-data-body' });
 	#pager;
 	#said = el('p', { class: 'bui-hidden', role: 'status' });
-	#pending = null;
 
 	/**
 	 * @param {object} options
@@ -52,8 +51,10 @@ export class DataTable extends Component {
 	 * @param {Array<object>} [options.rows]
 	 * @param {(row: object) => string} [options.key] each row's stable key (`row.id`)
 	 * @param {boolean|{match?: (row: object, query: string) => boolean}} [options.search]
+	 * @param {Array<{name: string, label: string, all?: string, options: object[], match: (row: object, value: string) => boolean}>} [options.filters] supported finite restrictions
+	 * @param {'compact'|'expanded'|'external'} [options.tools] shared tools placement; expanded keeps search open
 	 * @param {{by: (row: object) => string, label?: (key: string, rows: object[]) => string}|null} [options.group]
-	 * @param {{query?: string, sort?: string|null, direction?: 'ascending'|'descending', page?: number}} [options.state]
+	 * @param {{query?: string, filters?: object, sort?: string|null, direction?: 'ascending'|'descending', page?: number}} [options.state]
 	 * @param {(state: object) => void} [options.onchange] the person changed the state (write it to the address)
 	 * @param {number} [options.size] rows a page (50)
 	 * @param {((row: object) => string)|null} [options.link] a row's address
@@ -69,12 +70,11 @@ export class DataTable extends Component {
 		this.#labels = new Labels(words.en, labels);
 		this.#query = new DataQuery({ columns, group, match: typeof search === 'object' ? (search.match ?? null) : null, size });
 		this.#view = new DataTableView({ label, columns, key: options.key, link: options.link ?? null, onopen: options.onopen ?? null, labels: this.#labels, onsort: column => this.#sort(column) });
-		this.#state = DataTable.#clean(state);
-		const id = Ids.next('bui-data');
-		if (search) this.#input = el('input', { id: `${id}-search`, type: 'search', class: 'bui-input', autocomplete: 'off', value: this.#state.query, placeholder: this.#labels.text('search', { label }), oninput: () => this.#typed() });
-		const tools = this.#input ? el('div', { class: 'bui-data-tools' }, [el('label', { for: this.#input.id, class: 'bui-hidden', text: this.#labels.text('search', { label }) }), el('span', { class: 'bui-picker-search' }, [glyph('search'), this.#input])]) : null;
+		this.#state = DataTable.#clean(state, Boolean(options.filters?.length));
+		this.#tools = new CollectionTools({ label, search, filters: options.filters ?? [], state: this.#state, labels, compact: options.tools !== 'expanded', delay: options.delay ?? 200, onchange: state => this.#change({ query: state.query, ...(options.filters?.length ? { filters: state.filters } : {}), page: 1 }) });
+		this.#tools.element.classList.add('bui-data-tools');
 		this.#pager = el('nav', { class: 'bui-pager', 'aria-label': this.#labels.text('pages', { label }) });
-		this.#element = el('section', { class: 'bui-data-table', 'aria-label': typeof label === 'string' ? label : null }, [tools, this.#said, this.#body, this.#pager]);
+		this.#element = el('section', { class: 'bui-data-table', 'aria-label': typeof label === 'string' ? label : null }, [options.tools === 'external' ? null : this.#tools.element, this.#said, this.#body, this.#pager]);
 		this.rows = rows;
 	}
 
@@ -82,15 +82,18 @@ export class DataTable extends Component {
 		return this.#element;
 	}
 
+	/** Shared tools, available for placement beside page actions in external mode. */
+	get tools() { return this.#tools; }
+
 	/** The query, sort, direction and page in view. */
 	get state() {
-		return { ...this.#state };
+		return { ...this.#state, ...(this.#state.filters ? { filters: { ...this.#state.filters } } : {}) };
 	}
 
 	/** Restores a state (from the address on back or forward) without reporting it. */
 	set state(state) {
-		this.#state = DataTable.#clean(state);
-		if (this.#input) this.#input.value = this.#state.query;
+		this.#state = DataTable.#clean(state, Boolean(this.#options.filters?.length));
+		this.#tools.state = this.#state;
 		this.#draw();
 	}
 
@@ -117,16 +120,14 @@ export class DataTable extends Component {
 	}
 
 	destroy() {
-		this.#pending?.();
+		this.#tools.destroy();
 		super.destroy();
 	}
 
 	#draw() {
 		const label = this.#options.label;
-		const tools = this.#element.querySelector('.bui-data-tools');
 		this.#element.dataset.status = this.#status;
 		if (this.#status === 'loading') {
-			if (tools) tools.hidden = true;
 			fill(this.#pager, []);
 			this.#said.textContent = this.#labels.text('loading', { label });
 			return fill(this.#body, [skeleton({ rows: 5, kind: 'table' })]);
@@ -137,18 +138,18 @@ export class DataTable extends Component {
 			this.#said.textContent = this.#reason ?? this.#labels.text('failure');
 			return fill(this.#body, [callout({ tone: 'danger', title: this.#reason ?? this.#labels.text('failure'), actions: [retry].filter(Boolean) })]);
 		}
-		// No row at all: no controls, only the empty state
-		if (tools) tools.hidden = !this.#rows.length;
-		if (!this.#rows.length) {
+		// Tools remain reachable through loading and empty results, including restored restrictions.
+		if (!this.#rows.length && !this.#filtered()) {
 			fill(this.#pager, []);
 			this.#said.textContent = '';
 			return fill(this.#body, [this.#empty()]);
 		}
-		const answer = this.#query.run(this.#rows, this.#state);
+		const rows = this.#rows.filter(row => (this.#options.filters ?? []).every(filter => !this.#state.filters?.[filter.name] || filter.match(row, this.#state.filters[filter.name])));
+		const answer = this.#query.run(rows, this.#state);
 		this.#state.page = answer.page;
 		if (!answer.total) {
 			fill(this.#pager, []);
-			const none = new EmptyState({ kind: 'match', title: this.#labels.text('matches', { query: this.#state.query }), clear: () => this.#clear(), labels: { clear: this.#labels.text('clear') } });
+			const none = new EmptyState({ kind: 'match', title: this.#labels.text('matches', { query: this.#state.query }), clear: () => this.#clear(), labels: { clear: this.#labels.text(this.#options.filters?.length ? 'clearFilters' : 'clear') } });
 			this.#said.textContent = none.element.querySelector('.bui-empty-title').textContent;
 			return fill(this.#body, [none.element]);
 		}
@@ -182,15 +183,15 @@ export class DataTable extends Component {
 		this.#body.querySelectorAll('thead th')[index]?.querySelector('button')?.focus({ preventScroll: true });
 	}
 
-	#typed() {
-		this.#pending?.();
-		this.#pending = this.later(() => this.#change({ query: this.#input.value.trim(), page: 1 }), this.#options.delay ?? 200);
+	#filtered() {
+		return Boolean(this.#state.query) || Object.values(this.#state.filters ?? {}).some(Boolean);
 	}
 
 	#clear() {
-		if (this.#input) this.#input.value = '';
-		this.#change({ query: '', page: 1 });
-		this.#input?.focus();
+		const part = { query: '', ...(this.#state.filters ? { filters: {} } : {}), page: 1 };
+		this.#tools.state = part;
+		this.#change(part);
+		this.#tools.focus();
 	}
 
 	#change(part, paged = false) {
@@ -200,7 +201,7 @@ export class DataTable extends Component {
 		if (paged) this.#body.querySelector('tbody .bui-row-link, tbody th')?.focus?.({ preventScroll: true });
 	}
 
-	static #clean(state = {}) {
-		return { query: String(state?.query ?? ''), sort: state?.sort ?? null, direction: state?.direction === 'descending' ? 'descending' : 'ascending', page: Math.max(1, Number(state?.page) || 1) };
+	static #clean(state = {}, filters = false) {
+		return { ...(filters || state?.filters ? { filters: { ...(state?.filters ?? {}) } } : {}), query: String(state?.query ?? ''), sort: state?.sort ?? null, direction: state?.direction === 'descending' ? 'descending' : 'ascending', page: Math.max(1, Number(state?.page) || 1) };
 	}
 }

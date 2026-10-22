@@ -2,7 +2,7 @@ import { test, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { Page } from './support/page.mjs';
 
-/** `DataTable` (0.15.0, DQ-12): search, sort, groups and pages over the product's rows, its state reported for the address and restored silently, its states told apart, its controls hidden when there is nothing. */
+/** `DataTable` (0.15.0, DQ-12): search, sort, groups and pages over the product's rows, its state reported for the address and restored silently, its states told apart, its tools reachable when there is nothing. */
 const page = new Page();
 const ui = await import('@beyond-js/ui/dom');
 after(() => page.close());
@@ -86,10 +86,10 @@ test('groups with their count; pages past the size with a range; a page past the
 	table.destroy();
 });
 
-test('no data: no search, no headers, no pager, only the empty state; loading and failure are said; Spanish', () => {
+test('no data: tools stay reachable, no headers or pager; loading and failure are said; Spanish', () => {
 	const retries = [];
 	const table = make({ rows: [], empty: { title: 'No machine yet', action: { label: 'Create a machine', run: () => {} } }, onretry: () => retries.push(1), labels: ui.DataTable.labels.es });
-	assert.equal(table.element.querySelector('.bui-data-tools').hidden, true);
+	assert.equal(table.element.querySelector('.bui-data-tools').hidden, false);
 	assert.equal(table.element.querySelector('table'), null);
 	assert.equal(table.element.querySelector('.bui-empty').dataset.kind, 'empty');
 	assert.equal(table.element.querySelector('.bui-empty .bui-button-primary').textContent, 'Create a machine');

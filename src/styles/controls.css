@@ -26,7 +26,7 @@
 	background: var(--color-action);
 	color: var(--color-on-action);
 }
-.bui-button-primary:hover {
+.bui-button-primary:not(:disabled, [aria-disabled='true']):hover {
 	background: var(--color-action-hover);
 }
 .bui-button-secondary {
@@ -34,22 +34,26 @@
 	color: var(--color-text);
 	border-color: var(--color-border-control);
 }
-.bui-button-secondary:hover {
+.bui-button-secondary:not(:disabled, [aria-disabled='true']):hover {
 	border-color: var(--color-text);
 }
 .bui-button-quiet {
 	background: transparent;
 	color: var(--color-link);
 }
-.bui-button-quiet:hover {
+.bui-button-quiet:not(:disabled, [aria-disabled='true']):hover {
+	background: var(--overlay-lift);
+}
+.bui-button:is(.bui-button-secondary, .bui-button-quiet):not(:disabled, [aria-disabled='true']):active {
 	background: var(--color-surface-sunken);
+	border-color: var(--color-text);
 }
 .bui-button-danger {
 	background: var(--color-surface);
 	color: var(--color-danger);
 	border-color: var(--color-danger);
 }
-.bui-button-danger:hover {
+.bui-button-danger:not(:disabled, [aria-disabled='true']):hover {
 	background: var(--color-danger-surface);
 }
 .bui-button:disabled,
@@ -82,8 +86,8 @@
 	color: inherit;
 	cursor: pointer;
 }
-.bui-icon-button:hover {
-	background: var(--color-surface-sunken);
+.bui-icon-button:not(:disabled, [aria-disabled='true']):hover {
+	background: var(--overlay-lift);
 }
 .bui-icon-button[aria-disabled='true'] {
 	opacity: 0.5;

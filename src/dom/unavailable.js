@@ -5,7 +5,7 @@ import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 import { badge } from './feedback.js';
 import { TechnicalDetails } from './operations/details.js';
-import { Button } from './button.js';
+import { RetryAction } from './again/action.js';
 import { Again } from './again/again.js';
 import { AgainLine } from './again/line.js';
 
@@ -44,6 +44,8 @@ export class Unavailable extends Component {
 	#details = null;
 	#again = null;
 	#line = null;
+	#action = null;
+	#release = null;
 
 	/**
 	 * @param {object} options
@@ -68,7 +70,11 @@ export class Unavailable extends Component {
 		if (type === 'outage' && again) {
 			this.#again = new Again(typeof again === 'function' ? { run: again } : again);
 			this.#line = new AgainLine({ again: this.#again, locale, labels, now: typeof again === 'function' ? undefined : again.now });
-			action ??= new Button({ label: text.text('retry'), onclick: () => void this.#again.now() }).element;
+			if (!action) {
+				this.#action = new RetryAction({ labels: { retry: text.text('retry') }, run: () => this.#again.now() });
+				action = this.#action.element;
+				this.#release = this.#again.listen(state => { this.#action.busy = state.trying; });
+			}
 		}
 		this.#element = el('section', { class: `bui-unavailable bui-unavailable-${type}`, 'data-unavailable': type, 'aria-labelledby': id }, [
 			el('span', { class: 'bui-unavailable-icon' }, [glyph(glyphs[type])]),
@@ -100,6 +106,8 @@ export class Unavailable extends Component {
 	}
 
 	destroy() {
+		this.#release?.();
+		this.#action?.destroy();
 		this.#again?.stop();
 		this.#line?.destroy();
 		this.#details?.destroy();

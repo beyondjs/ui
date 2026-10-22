@@ -68,6 +68,28 @@ test('Dialog opens from its prop, renders React children, reports Escape and cle
 	assert.equal(document.querySelector('dialog'), null);
 });
 
+test('Dialog controlled reopen cancels its exit and still reports the next dismissal', async () => {
+	const style = document.createElement('style');
+	style.textContent = '.bui-dialog[data-motion="out"] { animation-name: leaving; animation-duration: 0.12s; }';
+	document.head.append(style);
+	const closes = [];
+	const view = open => h(ui.Dialog, { open, title: 'Rename', onClose: value => closes.push(value) }, h('input'));
+	await render(view(true));
+	const dialog = document.querySelector('dialog');
+	await render(view(false));
+	assert.equal(dialog.inert, true);
+	await render(view(true));
+	assert.equal(dialog.inert, false);
+	assert.equal(dialog.open, true);
+	await act(async () => {
+		page.key(dialog, 'Escape');
+		dialog.dispatchEvent(new Event('animationend'));
+	});
+	assert.deepEqual(closes, [null]);
+	assert.equal(dialog.open, false);
+	style.remove();
+});
+
 test('Picker is driven by the DOM class, exposes its choice and leaves nothing on unmount', async () => {
 	const ref = React.createRef();
 	const changes = [];

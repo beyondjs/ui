@@ -2,6 +2,54 @@ import { expect, overflow } from '../support/browser.mjs';
 
 export const checks = [
 	{
+		name: 'rail motion: symmetric context entry and exit, interrupted close, stable updates and reduced motion',
+		consumers: ['dom', 'react19', 'react18'],
+		async run(browser, consumer) {
+			for (const reducedMotion of ['no-preference', 'reduce']) {
+				const { page } = await browser.open(consumer, { file: 'navigation.html', viewport: { width: 1440, height: 900 }, reducedMotion });
+				const panel = page.locator('.bui-sidebar-panel');
+				const toggle = page.locator('.bui-sidebar-rail button[aria-expanded]');
+				const close = await panel.evaluate(node => {
+					node.querySelector('.bui-sidebar-collapse').click();
+					return { mark: node.dataset.motion, inert: node.inert, hidden: node.hidden, space: node.parentElement.hasAttribute('data-panel'), animation: getComputedStyle(node).animationName };
+				});
+				if (reducedMotion === 'reduce') expect(close.hidden && close.animation === 'none', 'reduced motion closes immediately');
+				else {
+					expect(close.mark === 'out' && close.inert && !close.hidden && close.space, 'exit keeps its space and disables interaction');
+					expect(close.animation === 'bui-sidebar-context-out', 'shared exit animation');
+				}
+				await panel.waitFor({ state: 'hidden' });
+				const entered = await toggle.evaluate(node => {
+					node.click();
+					const panel = document.querySelector('.bui-sidebar-panel');
+					return { mark: panel.dataset.motion, hidden: panel.hidden, animation: getComputedStyle(panel).animationName };
+				});
+				expect(!entered.hidden, 'opening is visible');
+				expect(entered.animation === (reducedMotion === 'reduce' ? 'none' : 'bui-sidebar-context-in'), 'entry follows motion preference');
+				// Motion clears its animation marker on completion; WebKit may reject the detached animation's finished promise.
+				await page.locator('.bui-sidebar-panel:not([data-motion])').waitFor({ state: 'visible' });
+				await page.evaluate(() => window.fixture.update());
+				expect(await panel.getAttribute('data-motion') === null, 'live update starts no motion');
+				const reversed = await toggle.evaluate(node => {
+					node.click();
+					const panel = document.querySelector('.bui-sidebar-panel');
+					const leaving = panel.dataset.motion;
+					node.click();
+					return { leaving, entering: panel.dataset.motion, hidden: panel.hidden, inert: panel.inert };
+				});
+				expect(!reversed.hidden && !reversed.inert, 'reopening restores interaction immediately');
+				if (reducedMotion !== 'reduce') expect(reversed.leaving === 'out' && reversed.entering === 'in', 'reopening reverses exit into entry');
+				await page.locator('.bui-sidebar-panel:not([data-motion])').waitFor({ state: 'visible' });
+				expect(await panel.evaluate(node => !node.hidden && !node.inert), 'reopening cancels a pending exit');
+				await toggle.evaluate(node => node.click());
+				await page.setViewportSize({ width: 390, height: 844 });
+				await page.waitForFunction(() => document.querySelector('.bui-sidebar').dataset.mode === 'drawer');
+				expect(await panel.getAttribute('data-motion') === null, 'crossing the cut cancels desktop motion');
+				expect(!(await overflow(page)), 'no horizontal overflow after interruption');
+			}
+		}
+	},
+	{
 		name: 'rail navigation: desktop context toggles by keyboard, updates in place and preserves labels in both themes',
 		consumers: ['dom', 'react19', 'react18'],
 		async run(browser, consumer) {

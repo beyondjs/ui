@@ -21,6 +21,9 @@
 
 /* Technical details: the source's words, the request and the time, copyable. */
 .bui-details {
+	min-width: 0;
+	width: 100%;
+	max-width: var(--layout-form);
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
 }
@@ -60,6 +63,7 @@ details[open] > .bui-summary > .bui-icon {
 	border-radius: var(--radius-control);
 }
 .bui-details-body {
+	min-width: 0;
 	display: grid;
 	gap: var(--space-2);
 	margin-top: var(--space-1);
@@ -74,6 +78,9 @@ details[open] > .bui-summary > .bui-icon {
 	min-width: 0;
 }
 .bui-details-text {
+	min-width: 0;
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-body);
 	margin: 0;
 	max-height: 16rem;
 	overflow: auto;

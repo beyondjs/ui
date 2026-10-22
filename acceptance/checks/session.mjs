@@ -50,7 +50,8 @@ export const checks = [
 			await popup.locator('#signin').click();
 			await popup.waitForEvent('close', { timeout: 10_000 });
 			await page.waitForFunction(() => window.fixture.log.includes('write:true'), null, { timeout: 10_000 });
-			expect(!(await shown(page)), 'the dialog closed');
+			await page.waitForFunction(() => !document.querySelector('dialog.bui-session')?.open, null, { timeout: 2_000 });
+			expect(!(await shown(page)), 'the dialog closed after its bounded exit');
 			expect(await page.evaluate(() => Boolean(document.querySelector('.bui-family-account'))), 'the account menu is back');
 		}
 	},
@@ -100,7 +101,8 @@ export const checks = [
 				await popup.locator('#signin').click();
 				await popup.waitForEvent('close', { timeout: 10_000 });
 				await page.waitForFunction(() => window.fixture.log.includes('write:true') && window.fixture.log.includes('read:true'), null, { timeout: 10_000 });
-				expect(!(await shown(page)), `${width}: the dialog closed once signed in`);
+				await page.waitForFunction(() => !document.querySelector('dialog.bui-session')?.open, null, { timeout: 2_000 });
+				expect(!(await shown(page)), `${width}: the dialog closed after signing in and its bounded exit`);
 			}
 		}
 	}

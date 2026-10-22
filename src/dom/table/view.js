@@ -62,7 +62,7 @@ export class DataTableView {
 		const classes = [column.align === 'end' ? 'bui-numeric' : null, column.mono ? 'bui-mono' : null].filter(Boolean).join(' ') || null;
 		// A React cell's holder (`bui-cell`) is filled after the drawing: never taken for empty
 		const empty = value === null || value === undefined || value === '' || (typeof value === 'object' && typeof value.nodeType === 'number' && !value.classList?.contains('bui-cell') && !value.textContent && !value.childElementCount && value.localName !== 'img');
-		return el(primary ? 'th' : 'td', { class: classes, scope: primary ? 'row' : null, 'data-label': typeof column.label === 'string' ? column.label : null, 'data-empty': !primary && empty ? '' : null }, [inner]);
+		return el(primary ? 'th' : 'td', { class: classes, scope: primary ? 'row' : null, 'data-label': typeof column.label === 'string' ? column.label : column.label?.textContent || null, 'data-summary': !primary && column.summary ? '' : null, 'data-empty': !primary && empty ? '' : null }, [inner]);
 	}
 
 	static #open(event, row, onopen, link) {

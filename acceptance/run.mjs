@@ -1,11 +1,12 @@
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { Consumer } from './support/consumer.mjs';
 import { Browser } from './support/browser.mjs';
+import { checks as disclosure } from './checks/disclosure-flow.mjs';
 import { checks as keyboard } from './checks/keyboard.mjs';
 import { checks as picker } from './checks/picker.mjs';
 import { checks as notifications } from './checks/notifications.mjs';
@@ -38,6 +39,10 @@ import { checks as auditing } from './checks/auditing.mjs';
 import { checks as commanding } from './checks/commanding.mjs';
 import { checks as holding } from './checks/holding.mjs';
 import { checks as navigating } from './checks/navigation-rail.mjs';
+import { checks as dismissal } from './checks/dismissal.mjs';
+import { checks as sheets } from './checks/sheet-motion.mjs';
+import { checks as dialogs } from './checks/dialog-motion.mjs';
+import { checks as recovery } from './checks/recovery-details.mjs';
 import { checks as hierarchy } from './checks/hierarchy.mjs';
 
 /**
@@ -48,7 +53,7 @@ import { checks as hierarchy } from './checks/hierarchy.mjs';
 class Acceptance {
 	#root = fileURLToPath(new URL('..', import.meta.url));
 	#consumers = [new Consumer('dom', 'dom'), new Consumer('react19', 'react', '19.3.0'), new Consumer('react18', 'react', '18.3.1')];
-	#checks = [...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...choosing, ...icons, ...prose, ...session, ...composing, ...panels, ...thread, ...attaching, ...folding, ...fitting, ...diffing, ...railing, ...ending, ...anchoring, ...moving, ...seeking, ...editing, ...auditing, ...commanding, ...holding, ...navigating, ...hierarchy];
+	#checks = [...disclosure, ...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...choosing, ...icons, ...prose, ...session, ...composing, ...panels, ...thread, ...attaching, ...folding, ...fitting, ...diffing, ...railing, ...ending, ...anchoring, ...moving, ...seeking, ...editing, ...auditing, ...commanding, ...holding, ...navigating, ...hierarchy, ...dismissal, ...sheets, ...dialogs, ...recovery];
 	#filter = process.argv[2] ?? '';
 
 	async run() {
@@ -56,8 +61,9 @@ class Acceptance {
 		const browser = new Browser();
 		const results = [];
 		try {
-			const name = execFileSync('npm', ['pack', '--pack-destination', work, '--loglevel=error'], { cwd: this.#root, encoding: 'utf8' }).trim().split('\n').at(-1);
-			const tarball = join(work, name);
+			const supplied = process.env.BEYOND_UI_TARBALL;
+			const name = supplied ?? execFileSync('npm', ['pack', '--pack-destination', work, '--loglevel=error'], { cwd: this.#root, encoding: 'utf8' }).trim().split('\n').at(-1);
+			const tarball = supplied ? resolve(this.#root, supplied) : join(work, name);
 			const integrity = `sha512-${createHash('sha512').update(readFileSync(tarball)).digest('base64')}`;
 			console.log(`Packed ${name} (${integrity})`);
 			await Promise.all(this.#consumers.map(consumer => consumer.prepare(tarball)));
@@ -82,9 +88,12 @@ class Acceptance {
 
 	async #one(browser, check, consumer) {
 		const opened = [];
+		let timer;
 		const tracked = { engine: browser.engine, open: async (...args) => { const view = await browser.open(...args); opened.push(view); return view; } };
 		try {
-			await check.run(tracked, consumer);
+			await Promise.race([check.run(tracked, consumer), new Promise((_, reject) => {
+				timer = setTimeout(() => reject(new Error('Check exceeded 120 seconds')), 120_000);
+			})]);
 			const errors = opened.flatMap(view => view.errors);
 			if (errors.length) throw new Error(`page errors: ${errors.join(' | ')}`);
 			console.log(`ok   ${consumer.name.padEnd(8)} ${check.name}`);
@@ -93,6 +102,7 @@ class Acceptance {
 			console.log(`FAIL ${consumer.name.padEnd(8)} ${check.name}\n     ${process.env.DEBUG ? error.message : error.message.split('\n')[0]}`);
 			return { passed: false };
 		} finally {
+			clearTimeout(timer);
 			await Promise.all(opened.map(view => view.context.close().catch(() => {})));
 		}
 	}

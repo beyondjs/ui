@@ -25,6 +25,26 @@
 }
 .bui-dialog::backdrop {
 	background: var(--overlay-scrim);
+	animation: bui-dialog-veil-in var(--motion-standard) var(--motion-ease);
+}
+/* Keep the native top layer until the exit ends, including in Firefox and WebKit. */
+.bui-dialog[open][data-motion='out'] {
+	animation: bui-leave var(--motion-exit) var(--motion-ease-exit) forwards;
+}
+.bui-dialog[data-motion='out']::backdrop {
+	animation: bui-dialog-veil-out var(--motion-exit) var(--motion-ease-exit) forwards;
+}
+@keyframes bui-dialog-veil-in {
+	from { opacity: 0; }
+}
+@keyframes bui-dialog-veil-out {
+	to { opacity: 0; }
+}
+/* Installed hosts may keep reduced motion as a device preference. */
+:root[data-motion='reduced'] .bui-dialog,
+:root[data-motion='reduced'] .bui-dialog::backdrop {
+	animation: none !important;
+	transition: none !important;
 }
 .bui-dialog-head {
 	display: flex;

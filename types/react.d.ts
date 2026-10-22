@@ -2,6 +2,7 @@
 import type { ReactNode, ReactElement, Ref, RefAttributes, ForwardRefExoticComponent, FormHTMLAttributes, ButtonHTMLAttributes, SelectHTMLAttributes, MouseEvent as ReactMouseEvent, RefObject } from 'react';
 import type { Copy, NotificationAdapter, Notice } from './notifications.js';
 import type { Tone, MenuItem, ChoiceOption, SelectOption, PromptOptions, QuestionOptions, Crumb, CollectionState, InboxState, PickerChoice, PickerSource, Component, ChoiceMenuOption, PickerAccount, PickerRecognized, PickerFound, GitRef, PickedProject, StatusRowState, ProviderState } from './dom.js';
+import type { CollectionToolsMode } from './collection-tools.js';
 export type { ChoiceMenuOption, PickerAccount, PickerItem, PickerMark, PickerRecognized, PickerFound, GitRef, PickedProject, StatusRowState, ProviderState, DraftKey } from './dom.js';
 export type { Copy, NotificationAdapter, Notice, NoticePage, NoticeRequest, NoticeSource, NoticeSummary } from './notifications.js';
 export { confirm, prompt, alert, availability, productNames } from './dom.js';
@@ -81,7 +82,7 @@ export namespace StatusRow { const labels: Copies; }
 /** A provider's window followed until the server says how it ended (0.7.0). */
 export const ProviderWindow: ForwardRefExoticComponent<{ provider: string; href: string; read: () => Promise<{ state: string; [key: string]: unknown }>; origin?: string | null; onEnd?: ((outcome: 'done' | 'waiting', answer: { state: string; [key: string]: unknown }) => void) | null; same?: boolean | 'auto'; expected?: Expected; bound?: number; interval?: number; follow?: number; channel?: string | null; clock?: Clock; locale?: string; labels?: Copy } & RefAttributes<{ open(): void; check(): Promise<void> | undefined; cancel(): void; readonly state: ProviderState }>> & { labels: Copies };
 /** A side sheet (0.7.0): `open`, `onClose`, `busy`, `error` (React content at its top), `actions`, `restore`. */
-export function SideSheet(props: { open: boolean; title: string; label?: string | null; description?: string | null; width?: 'form' | 'standard'; busy?: boolean; error?: ReactNode; restore?: HTMLElement | null; labels?: { close?: string }; onClose?: (value: unknown) => void; actions?: ReactNode; children?: ReactNode }): ReactElement | null;
+export function SideSheet(props: { open: boolean; title: string; label?: string | null; description?: string | null; width?: 'form' | 'standard'; backdrop?: boolean; guard?: (reason: 'backdrop' | 'escape' | 'close') => boolean; busy?: boolean; error?: ReactNode; restore?: HTMLElement | null; labels?: { close?: string }; onClose?: (value: unknown) => void; actions?: ReactNode; children?: ReactNode }): ReactElement | null;
 export namespace SideSheet { const labels: Copies; }
 /** List and detail (0.7.0): the detail beside the list on a wide region, its own page on a narrow one. */
 export function ListDetail(props: { list: ReactNode; detail?: ReactNode; label?: string | null; back?: { label: ReactNode; href: string; onNavigate?: ((event: ReactMouseEvent<HTMLAnchorElement>) => void) | null } | null }): ReactElement;
@@ -162,6 +163,9 @@ export interface CollectionProps<Row> {
 	onOpen?: ((row: Row, event: MouseEvent) => void) | null;
 	search?: boolean;
 	filters?: Array<{ name: string; label: string; all?: string; options: SelectOption[] }>;
+	tools?: CollectionToolsMode;
+	/** With tools='external', a dedicated empty DOM container for this collection's toolbar. */
+	toolsTarget?: HTMLElement | null;
 	state?: Partial<CollectionState> | null;
 	onState?: ((state: CollectionState) => void) | null;
 	limit?: number;
@@ -198,7 +202,7 @@ export function AgainLine(props: { moments: Pick<import('./again.js').AgainMomen
 export namespace AgainLine { const labels: Copies; }
 export { Again } from './again.js';
 export type { AgainMoments, AgainOptions } from './again.js';
-export function Disclosure(props: { label: string; name?: string | null; align?: 'start' | 'end'; /** Where the floating panel opens (0.11.2) */ placement?: 'auto' | 'above' | 'below'; onChange?: (open: boolean) => void; children?: ReactNode }): ReactElement;
+export function Disclosure(props: { outside?: boolean; label: string; name?: string | null; align?: 'start' | 'end'; /** Where the floating panel opens (0.11.2) */ placement?: 'auto' | 'above' | 'below'; onChange?: (open: boolean) => void; children?: ReactNode }): ReactElement;
 export function ActionMenu(props: { label?: string | null; name?: string | null; items: Array<(Omit<MenuItem, 'run'> & { onSelect?: (event: MouseEvent) => void }) | null | false>; align?: 'start' | 'end'; glyph?: string | null; placement?: 'auto' | 'below' | 'above' }): ReactElement;
 export function Help(props: { topic: string; text?: string | string[]; labels?: Copy; children?: ReactNode }): ReactElement;
 export function Tooltip(props: { text: string; describe?: boolean; children: ReactElement }): ReactElement;
@@ -289,3 +293,7 @@ export * from './react-shared.js';
 export * from './react-patterns.js';
 export * from './react-family.js';
 import type { FamilyBarProps } from './react-family.js';
+
+/** Labelled secondary refresh action; `busy` tracks the owning read. */
+export function RetryAction(props: { onClick?: ButtonProps['onClick']; labels?: Copy; busy?: boolean; small?: boolean; name?: string | null }): ReactElement;
+export namespace RetryAction { const labels: Copies; }

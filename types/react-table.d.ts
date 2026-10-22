@@ -1,16 +1,21 @@
 /** Types of the React `DataTable` (0.15.0), re-exported by `@beyond-js/ui/react`. */
 import type { ReactElement, ReactNode } from 'react';
 import type { Copy } from './notifications.js';
-import type { DataTableState } from './table.js';
-export type { DataTableColumn, DataTableState } from './table.js';
+import type { DataTableFilter, DataTableState } from './table.js';
+import type { CollectionToolsMode } from './collection-tools.js';
+export type { DataTableColumn, DataTableFilter, DataTableState } from './table.js';
 
 /** A table of rows the product holds, driven by the DOM `DataTable`; `render` may return React content. */
 export function DataTable<Row = any>(props: {
 	label: string;
-	columns: Array<{ key: string; label: string; value?: (row: Row) => string | number | null | undefined; render?: (row: Row) => ReactNode; sort?: boolean | ((a: Row, b: Row) => number); mono?: boolean; align?: 'start' | 'end'; primary?: boolean }>;
+	columns: Array<{ key: string; label: string; value?: (row: Row) => string | number | null | undefined; render?: (row: Row) => ReactNode; sort?: boolean | ((a: Row, b: Row) => number); mono?: boolean; align?: 'start' | 'end'; primary?: boolean; summary?: boolean }>;
 	rows?: Row[];
 	rowKey?: ((row: Row) => string) | null;
 	search?: boolean;
+	filters?: Array<DataTableFilter<Row>>;
+	tools?: CollectionToolsMode;
+	/** With tools='external', a dedicated empty DOM container for this table's toolbar. */
+	toolsTarget?: HTMLElement | null;
 	group?: { by: (row: Row) => string; label?: (key: string, rows: Row[]) => string } | null;
 	state?: Partial<DataTableState> | null;
 	onChange?: ((state: DataTableState) => void) | null;

@@ -15,7 +15,7 @@ const picker = () => new Picker({ label: 'Repositories', source: source(log), de
 const opener = new Button({ label: 'Add repositories', variant: 'primary', onclick: () => sheet.open() }).mount(section('sheeting'));
 const work = new Button({ label: 'Add 1 repository', variant: 'primary', onclick: () => (sheet.busy = !sheet.busy) });
 const inner = picker();
-const sheet = new SideSheet({ title: 'Add repositories to Storefront', description: 'They’re added to Storefront in Beyond Projects, and Conduict clones them on My first VM.', children: [inner.element], actions: [work.element, new Button({ label: 'Cancel', onclick: () => sheet.close() }).element], onclose: value => log.push(`sheet:${value}`) });
+const sheet = new SideSheet({ backdrop: new URLSearchParams(location.search).has('protected') ? false : undefined, title: 'Add repositories to Storefront', description: 'They’re added to Storefront in Beyond Projects, and Conduict clones them on My first VM.', children: [inner.element], actions: [work.element, new Button({ label: 'Cancel', onclick: () => sheet.close() }).element], onclose: value => log.push(`sheet:${value}`) });
 inner.control.setAttribute('data-autofocus', '');
 picker().mount(section('picking'));
 new RefChooser({ label: 'Base branch', refs: branches, value: 'main', onchange: value => log.push(`ref:${value}`) }).mount(section('refs'));
@@ -38,4 +38,4 @@ new Choices({ legend: 'AI engine', type: 'radio', name: 'engine', options: [{ va
 new AwaitedLine({ title: 'Cloning acme/web', since: Date.now() - 40_000, expected: { median: 60_000, p90: 120_000 } }).mount(following);
 new Button({ label: 'Delete My first VM', variant: 'danger', onclick: () => confirm({ title: 'Delete My first VM?', accept: 'Delete environment', tone: 'danger', consequence: { affected: ['2 running conversations stop'], lost: 'The machine and its copies', costing: 'The disk snapshot, until you delete it', recovery: 'Deletion cannot be undone.' } }).then(answer => log.push(`confirm:${answer}`)) }).mount(section('consequence'));
 if (shape.sheet) sheet.open();
-window.fixture = { log, stall: false, sheet, opener: opener.element, ready: true };
+window.fixture = { log, stall: false, sheet, open: value => value ? sheet.open() : sheet.close(), opener: opener.element, ready: true };

@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Collection as List } from '../dom/collection/collection.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
+import { useTools } from './collection-tools.js';
 
 const { useRef, useState } = React;
 
@@ -11,7 +12,7 @@ const { useRef, useState } = React;
  * changes (for example from the address on back and forward) and `onState` reports the person's
  * changes. `link(row)` makes rows open their detail; `onOpen(row, event)` takes over the navigation.
  */
-export function Collection({ label, columns, source, link = null, onOpen = null, search = true, filters = [], state = null, onState = null, limit = 20, empty = null, explain = null, labels, presentation = 'table' }) {
+export function Collection({ label, columns, source, link = null, onOpen = null, search = true, filters = [], tools = 'compact', toolsTarget = null, state = null, onState = null, limit = 20, empty = null, explain = null, labels, presentation = 'table' }) {
 	const cells = useRef([]);
 	const [portals, setPortals] = useState([]);
 	const latest = useLatest({ source, onOpen, onState, explain, columns, link });
@@ -22,6 +23,7 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 				presentation,
 				search,
 				filters,
+				tools,
 				limit,
 				empty,
 				labels,
@@ -34,8 +36,9 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 				columns: columns.map((column, index) => ({ ...column, render: undefined, value: row => cell(row, index) })),
 				onrender: () => setPortals(cells.current.splice(0))
 			}),
-		[label, presentation, search, JSON.stringify(filters), limit, labels, Boolean(link), Boolean(onOpen), columns.length]
+		[label, presentation, search, JSON.stringify(filters), tools, limit, labels, Boolean(link), Boolean(onOpen), columns.length]
 	);
+	useTools(list, toolsTarget, tools);
 	// Each drawn cell asks the latest column definition for its content.
 	function cell(row, index) {
 		const column = latest.current.columns[index];

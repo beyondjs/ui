@@ -127,13 +127,13 @@ export class SidebarRail extends Component {
 		}
 		node.dataset.label = name;
 		node.setAttribute('aria-label', meta ? `${name} · ${meta}` : name);
+		if (item.current) node.setAttribute('aria-current', 'page');
+		else node.removeAttribute('aria-current');
 		if (item.object && !item.href) {
 			node.setAttribute('aria-controls', this.#panel);
 			node.setAttribute('aria-expanded', String(this.shown));
 		} else {
 			if (item.href) node.setAttribute('href', item.href);
-			if (item.current) node.setAttribute('aria-current', 'page');
-			else node.removeAttribute('aria-current');
 		}
 	}
 

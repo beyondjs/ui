@@ -40,14 +40,14 @@ export const checks = [
 		}
 	},
 	{
-		name: 'choose: side sheet: at the inline end, the window\'s height, 40rem wide from 1024 px and whole below; focus kept inside and returned; busy and a press outside never close it; both themes',
+		name: 'choose: side sheet: at the inline end, the window\'s height, 40rem wide from 1024 px and whole below; focus kept inside and returned; busy and an explicit backdrop opt-out stay open; both themes',
 		consumers: ['dom', 'react19', 'react18'],
 		async run(browser, consumer) {
 			const words = copy(consumer);
 			const surfaces = {};
 			for (const [width, scheme] of [[1440, 'light'], [1023, 'dark'], [390, 'light'], [320, 'dark']]) {
 				const at = `${width}px ${scheme}`;
-				const { page, context } = await open(browser, consumer, { width, scheme });
+				const { page, context } = await open(browser, consumer, { width, scheme, query: '?protected=1' });
 				const opener = page.locator('#sheeting > .bui-button, #sheeting > button').first();
 				await opener.click();
 				await page.waitForFunction(() => document.querySelector('.bui-sheet')?.open);

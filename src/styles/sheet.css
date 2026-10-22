@@ -33,6 +33,20 @@
 }
 .bui-sheet::backdrop {
 	background: var(--overlay-scrim);
+	animation: bui-sheet-veil-in var(--motion-standard) var(--motion-ease);
+}
+/* Keep the same native modal and backdrop through exit; consumer teardown runs afterwards. */
+.bui-sheet[open][data-motion='out'] {
+	animation: bui-sheet-native-out var(--motion-exit) var(--motion-ease-exit) forwards;
+}
+.bui-sheet:dir(rtl)[open][data-motion='out'] {
+	animation-name: bui-sheet-native-out-rtl;
+}
+.bui-sheet[data-motion='out']::backdrop {
+	animation: bui-sheet-veil-out var(--motion-exit) var(--motion-ease-exit) forwards;
+}
+@keyframes bui-sheet-veil-in {
+	from { opacity: var(--bui-sheet-veil-from, 0); }
 }
 @media (max-width: 1023.98px) {
 	.bui-sheet,
@@ -109,11 +123,24 @@
 }
 @keyframes bui-sheet-in {
 	from {
-		transform: translateX(100%);
+		transform: var(--bui-sheet-from, translateX(100%));
 	}
 }
 @keyframes bui-sheet-in-rtl {
 	from {
-		transform: translateX(-100%);
+		transform: var(--bui-sheet-from, translateX(-100%));
 	}
+}
+
+@keyframes bui-sheet-native-out {
+	from { transform: var(--bui-sheet-exit-from, none); }
+	to { transform: translateX(100%); }
+}
+@keyframes bui-sheet-native-out-rtl {
+	from { transform: var(--bui-sheet-exit-from, none); }
+	to { transform: translateX(-100%); }
+}
+@keyframes bui-sheet-veil-out {
+	from { opacity: var(--bui-sheet-veil-exit-from, 1); }
+	to { opacity: 0; }
 }

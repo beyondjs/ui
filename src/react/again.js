@@ -1,6 +1,8 @@
 import React from 'react';
 import { Again } from '../dom/again/again.js';
 import { AgainLine as Line } from '../dom/again/line.js';
+import { Button, useBusy } from './simple.js';
+import { RetryAction as Action } from '../dom/again/action.js';
 import { h, useLatest } from './hooks.js';
 
 const { useEffect, useMemo, useState } = React;
@@ -35,3 +37,10 @@ export function AgainLine({ moments, locale = undefined, labels = {} }) {
 }
 
 AgainLine.labels = Line.labels;
+
+/** The same recovery action as the DOM component, with the refresh glyph and secondary style. */
+export function RetryAction({ onClick, labels = {}, busy = false, small = true, name = null }) {
+	const [working, run] = useBusy();
+	return h(Button, { label: labels.retry ?? Action.labels.en.retry, glyph: 'refresh', variant: 'secondary', small, name, labels, busy: busy || working, onClick: event => void run(() => onClick?.(event)).catch(() => {}) });
+}
+RetryAction.labels = Action.labels;

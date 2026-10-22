@@ -20,6 +20,7 @@ const began = Date.now() - 40_000;
 function Choosing() {
 	const [open, setOpen] = useState(shape.sheet);
 	const [busy, setBusy] = useState(false);
+	window.fixture.open = setOpen;
 	const { confirm } = useConfirm(useConfirm.labels.es);
 	const picker = autofocus => <Picker label="Repositorios" source={find} delay={50} bound={2000} labels={labels} accounts={named} recognize={recognize} onRecognize={found => found && log.push(`recognized:${found.label}:${found.outcome}`)} onChange={items => log.push(`picked:${items.map(item => item.id).join(',')}`)} footer={<button type="button" className="bui-link-button" data-autofocus={autofocus ? '' : undefined} onClick={() => log.push('escape')}>Elegir en GitHub qué repositorios puede ver Beyond</button>} />;
 	const detail = shape.detail ? <div><h2>acme/web</h2><p>Listo · actualizado desde GitHub al empezar la última conversación.</p></div> : null;
@@ -27,7 +28,7 @@ function Choosing() {
 		<>
 			<section id="sheeting">
 				<Button label="Añadir repositorios" variant="primary" onClick={() => setOpen(true)} />
-				<SideSheet open={open} title="Añadir repositorios a Storefront" description="Se añaden a Storefront en Beyond Projects y Conduict los clona en My first VM." busy={busy} labels={SideSheet.labels.es} onClose={value => (log.push(`sheet:${value}`), setOpen(false))} actions={<><Button label="Añadir 1 repositorio" variant="primary" onClick={() => setBusy(value => !value)} /><Button label="Cancelar" onClick={() => setOpen(false)} /></>}>
+				<SideSheet backdrop={new URLSearchParams(location.search).has('protected') ? false : undefined} open={open} title="Añadir repositorios a Storefront" description="Se añaden a Storefront en Beyond Projects y Conduict los clona en My first VM." busy={busy} labels={SideSheet.labels.es} onClose={value => (log.push(`sheet:${value}`), setOpen(false))} actions={<><Button label="Añadir 1 repositorio" variant="primary" onClick={() => setBusy(value => !value)} /><Button label="Cancelar" onClick={() => setOpen(false)} /></>}>
 					{picker(false)}
 				</SideSheet>
 			</section>

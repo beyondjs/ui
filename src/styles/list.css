@@ -1,6 +1,6 @@
 /* One object in a list (ListRow, 0.15.0, DQ-12): a dense row, its name in the text color with a muted
    line under it, its end's facts and quiet actions, the whole row opening the object. Narrow rows (under
-   30rem, measured on the row) stay two or three short lines. A copyable value (CopyValue) is mono. */
+   30rem, measured on the row) keep their facts below the name, wrapping as needed. A copyable value (CopyValue) is mono. */
 /* A list's rows keep their words on the content edge (0.19.1, the alignment audit's P5): the list hangs
    its rows' inline padding into the gutter, so a hovered or current row's surface reaches past its words
    while each divider stays on the edge. */
@@ -20,7 +20,7 @@
 .bui-rows .bui-row::before {
 	position: absolute;
 	inset: 0 var(--space-3) auto;
-	border-top: 1px solid var(--color-border);
+	border-top: 1px solid var(--color-border-strong);
 	content: '';
 	pointer-events: none;
 }
@@ -45,7 +45,10 @@
 	font-weight: var(--weight-regular);
 	line-height: var(--leading-small);
 }
-.bui-row[data-open]:hover {
+.bui-row[data-open]:not([data-current]):hover {
+	background: var(--overlay-lift);
+}
+.bui-row[data-open]:has(.bui-row-title:active) {
 	background: var(--color-surface-sunken);
 }
 .bui-row[data-current] {
@@ -144,8 +147,7 @@ span.bui-row-title {
 .bui-row-check,
 .bui-row-actions,
 .bui-row-end .bui-menu-holder,
-.bui-row-end a,
-.bui-row-end button {
+.bui-row :is(.bui-row-lead, .bui-row-meta, .bui-row-end) :is(a, button, input, select, textarea, summary, label, [tabindex], .bui-tooltip-anchor) {
 	position: relative;
 	z-index: 1;
 }
@@ -156,9 +158,68 @@ span.bui-row-title {
 	margin: 0;
 	accent-color: var(--color-action);
 }
-.bui-row-actions {
-	display: flex;
-	gap: var(--space-1);
+.bui-row-actions.bui-action-line-actions {
+	margin-inline-start: 0;
+}
+/* A row's actions must remain visible over the row's own hover. Selection belongs to the row. */
+.bui-row-end :is(.bui-button, .bui-icon-button):not(:disabled, [aria-disabled='true']):is(:hover, :focus-visible, [aria-expanded='true']) {
+	background: var(--color-surface);
+	border-color: var(--color-border-control);
+	color: var(--color-text);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+.bui-row-end :is(.bui-button, .bui-icon-button):not(:disabled, [aria-disabled='true']):active {
+	background: var(--color-surface-sunken);
+}
+/* Two recurring actions share content-sized columns across rows. The caller keeps absent actions as
+   null in the same slot. Use only with lead/name/actions/menu rows, without end facts or a checkbox. */
+.bui-rows-aligned {
+	container: bui-list / inline-size;
+	grid-template-columns: max-content minmax(0, 1fr) repeat(3, max-content);
+	column-gap: var(--space-3);
+}
+.bui-rows-aligned > :not(.bui-row),
+.bui-rows-aligned > .bui-row,
+.bui-rows-aligned > * > .bui-row {
+	display: grid;
+	grid-template-columns: subgrid;
+	grid-column: 1 / -1;
+}
+.bui-rows-aligned .bui-row { container-type: normal; }
+.bui-rows-aligned .bui-row-lead { grid-column: 1; }
+.bui-rows-aligned .bui-row-main { grid-column: 2; }
+.bui-rows-aligned .bui-row-end {
+	display: grid;
+	grid-template-columns: subgrid;
+	grid-column: 3 / -1;
+}
+.bui-rows-aligned .bui-row-end > .bui-action-line,
+.bui-rows-aligned .bui-row-actions { display: contents; }
+.bui-rows-aligned .bui-row-actions .bui-button {
+	grid-column: var(--bui-action-column);
+	grid-row: 1;
+	justify-content: flex-start;
+}
+.bui-rows-aligned .bui-row-end > .bui-menu-holder { grid-column: 3; grid-row: 1; }
+.bui-rows-aligned > * > :not(.bui-row) { grid-column: 1 / -1; }
+@container bui-list (max-width: 48rem) {
+	.bui-rows-aligned .bui-row { display: flex; }
+	.bui-rows-aligned .bui-row-end {
+		display: flex;
+		flex: 1 1 100%;
+		justify-content: flex-start;
+	}
+	.bui-rows-aligned .bui-row-end > .bui-action-line { display: flex; flex: 1; }
+	.bui-rows-aligned .bui-row-actions {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		flex: 1;
+	}
+}
+@container bui-list (max-width: 24rem) {
+	.bui-rows-aligned .bui-row-actions { grid-template-columns: minmax(0, 1fr); }
+	.bui-rows-aligned .bui-row-actions .bui-button { grid-column: 1; grid-row: auto; }
 }
 @container bui-row (max-width: 30rem) {
 	.bui-row-end {
@@ -166,7 +227,10 @@ span.bui-row-title {
 		justify-content: flex-start;
 	}
 	.bui-row-fact {
-		display: none;
+		min-width: 0;
+		max-width: 100%;
+		white-space: normal;
+		overflow-wrap: anywhere;
 	}
 }
 

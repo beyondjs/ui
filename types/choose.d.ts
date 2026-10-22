@@ -124,6 +124,10 @@ export class Draft {
 }
 
 export interface SideSheetOptions {
+	/** Outside gestures dismiss by default; false is an explicit exception. */
+	backdrop?: boolean;
+	/** Return true to dismiss; otherwise preserve the sheet and explain or confirm unsaved work. */
+	guard?: (reason: 'backdrop' | 'escape' | 'close') => boolean;
 	title: Content;
 	label?: string | null;
 	description?: Content | null;
@@ -152,7 +156,7 @@ export class SideSheet extends Component {
 	open<T = unknown>(options?: { restore?: HTMLElement | null }): Promise<T | null>;
 	focus(): void;
 	close(value?: unknown): boolean;
-	dismiss(): boolean;
+	dismiss(reason?: 'backdrop' | 'escape' | 'close'): boolean;
 }
 
 export type ProviderState = 'idle' | 'open' | 'blocked' | 'checking' | 'closed' | 'unknown' | 'done' | 'away';

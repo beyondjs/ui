@@ -1,6 +1,6 @@
 /* A table of rows the product holds (DataTable, 0.15.0, DQ-12): a compact search with its placeholder,
    headers that sort, group headings with their count, rows that open with the whole row, and on a narrow
-   region two short lines a row instead of a card of labels and values. It reuses the collection's table. */
+   region a name followed by labeled inline values instead of a card per field. It reuses the collection's table. */
 .bui-data-table {
 	container: bui-data / inline-size;
 	display: grid;
@@ -68,7 +68,7 @@
 .bui-data .bui-mono {
 	font-family: var(--font-mono);
 }
-/* A narrow region: each row is its primary cell, then the others in one muted line. */
+/* A narrow region: the name, then labeled values wrapping together in one muted line. */
 @container bui-data (max-width: 36rem) {
 	.bui-data thead {
 		position: absolute;
@@ -100,16 +100,26 @@
 		border: 0;
 		color: var(--color-text-muted);
 		font-size: var(--text-small);
+		min-width: 0;
+		max-width: 100%;
+		overflow-wrap: anywhere;
+		text-align: start;
 	}
-	/* The others in one line joined by " · ", an empty cell leaving no separator (0.16.2) */
+	/* Empty cells leave no label or separator. Self-describing summaries omit the repeated label. */
 	.bui-data td[data-empty] {
 		display: none;
 	}
 	.bui-data td::before {
 		content: none;
 	}
+	.bui-data td[data-label]:not([data-label=''], [data-summary])::before {
+		content: attr(data-label) ': ';
+	}
 	.bui-data td:not([data-empty]) ~ td:not([data-empty])::before {
 		content: '· ';
+	}
+	.bui-data td:not([data-empty]) ~ td[data-label]:not([data-empty], [data-label=''], [data-summary])::before {
+		content: '· ' attr(data-label) ': ';
 	}
 	.bui-data-group {
 		border-bottom: 0;

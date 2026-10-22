@@ -36,7 +36,7 @@ function svg(glyph) {
  * shows a spinner and says it is working: `labels.busy` (default `{label}…`) replaces a text label.
  */
 export function Button({ label, children, variant = 'secondary', glyph = null, href = null, onClick = null, disabled = false, busy = false, type = 'button', small = false, name, labels = {}, ...rest }) {
-	const className = `bui-button bui-button-${variant}${small ? ' bui-button-small' : ''}`;
+	const className = `bui-button bui-button-${variant}${small ? ' bui-button-small' : ''}${rest.className ? ` ${rest.className}` : ''}`;
 	const text = label ?? children;
 	const shown = busy && typeof text === 'string' ? (labels.busy ?? '{label}…').replace('{label}', text) : text;
 	const inner = [busy ? h('span', { key: 'mark', className: 'bui-spinner', 'aria-hidden': 'true' }) : glyph ? h(Mark, { key: 'mark', name: glyph }) : null, h('span', { key: 'text' }, shown)];
@@ -71,9 +71,13 @@ export function useBusy() {
 	const [busy, setBusy] = useState(false);
 	const running = useRef(false);
 	const alive = useRef(true);
-	useEffect(() => () => void (alive.current = false), []);
+	useEffect(() => {
+		// StrictMode replays setup after cleanup while preserving this hook's state.
+		alive.current = true;
+		return () => void (alive.current = false);
+	}, []);
 	const run = useCallback(async work => {
-		if (running.current) return undefined;
+		if (!alive.current || running.current) return undefined;
 		running.current = true;
 		setBusy(true);
 		try {

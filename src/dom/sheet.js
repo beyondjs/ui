@@ -1,3 +1,4 @@
+import { Backdrop } from './core/backdrop.js';
 import { Component } from './core/component.js';
 import { el, fill, content } from './core/element.js';
 import { glyph } from './core/icons.js';
@@ -6,7 +7,7 @@ import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 import { Focus } from './core/focus.js';
 import { Interaction } from './core/interaction.js';
-import { Leaving } from './core/leaving.js';
+import { Motion } from './core/motion.js';
 import { Hierarchy } from './core/hierarchy.js';
 
 const widths = Object.freeze(['form', 'standard']);
@@ -21,11 +22,15 @@ const widths = Object.freeze(['form', 'standard']);
  * title; Tab and Shift+Tab stay inside; closing returns focus to `restore` (given to `open`), else to
  * the element that opened it, else to the constructor's `restore`, never to the page's body.
  *
- * A task sheet never closes on a press outside. Escape and the close button close it, except while
+ * A pointer gesture starting and ending outside dismisses by default; inside presses and drags
+ * from inside do not. `backdrop: false` is an explicit exception, not a form default. `guard(reason)`
+ * must return true to permit dismissal; otherwise it preserves the sheet while the consumer explains
+ * or confirms unsaved work. A confirmed discard or successful task calls `close(value)` directly.
+ * Escape and the close button close it, except while
  * `busy` (the hosted task is working): then nothing closes it. `error(node)` shows a failure at its
  * top, such as "Beyond Projects didn't answer" with Try again, without closing it or losing what the
  * person did. It slides in with `--motion-standard` and, since 0.14.0 (D95), slides back out with
- * `--motion-exit` (an inert picture, `Leaving`, while the sheet itself is closed at once); it appears
+ * `--motion-exit` with its native backdrop, keeping the modal until its exit finishes; it appears
  * and goes at once under reduced motion.
  * `open()` resolves with the value given to `close(value)`; a dismissal gives null.
  */
@@ -35,6 +40,8 @@ export class SideSheet extends Component {
 	static widths = widths;
 
 	#element;
+	#backdrop = null;
+	#guard;
 	#heading;
 	#body;
 	#problem;
@@ -50,7 +57,8 @@ export class SideSheet extends Component {
 	#settle = null;
 	#overflow = null;
 	#closing = false;
-	#picture = null;
+	#motion;
+	#value = null;
 	#hierarchy = null;
 
 	/**
@@ -61,14 +69,17 @@ export class SideSheet extends Component {
 	 * @param {Node[]} [options.children] the body
 	 * @param {Node[]} [options.actions] the footer's actions, which stay in view
 	 * @param {'form'|'standard'} [options.width]
+	 * @param {boolean} [options.backdrop] Outside gestures dismiss (default true); false is an explicit exception
+	 * @param {(reason: 'backdrop'|'escape'|'close') => boolean} [options.guard] Return true to dismiss; otherwise preserve the sheet and explain or confirm the unsaved work
 	 * @param {Element} [options.restore] focus target after closing when nothing better is known
 	 * @param {(value: unknown) => void} [options.onclose]
 	 */
-	constructor({ title, label = null, description = null, children = [], actions = [], width = 'form', restore = null, onclose = null, labels = {} }) {
+	constructor({ title, label = null, description = null, children = [], actions = [], width = 'form', backdrop = true, guard = null, restore = null, onclose = null, labels = {} }) {
 		super();
 		if (!widths.includes(width)) throw new TypeError(`A side sheet's width is one of ${widths.join(', ')}`);
 		const text = new Labels(SideSheet.labels.en, labels);
 		this.#restore = restore;
+		this.#guard = guard;
 		this.#onclose = onclose;
 		const id = Ids.next('bui-sheet');
 		this.#heading = el('h2', { id: `${id}-title`, class: 'bui-sheet-title', tabindex: '-1' }, [content(title)]);
@@ -86,10 +97,12 @@ export class SideSheet extends Component {
 		this.#element.addEventListener('keydown', event => this.#keys(event));
 		this.#element.addEventListener('cancel', event => {
 			event.preventDefault();
-			this.dismiss();
+			this.dismiss('escape');
 		});
 		this.#element.addEventListener('close', () => this.#closed());
 		this.#hint = new Hint(this.#element);
+		this.#motion = new Motion(this.#element, (work, delay) => this.later(work, delay));
+		if (backdrop) this.#backdrop = new Backdrop(this.#element, () => this.dismiss('backdrop'));
 	}
 
 	get element() {
@@ -149,7 +162,15 @@ export class SideSheet extends Component {
 	/** Opens the sheet. Resolves with the value it closes with; `restore` receives focus afterwards. */
 	open({ restore = null } = {}) {
 		if (this.destroyed) return Promise.resolve(null);
-		if (this.#element.open) return this.#settle.promise;
+		if (this.#element.open) {
+			if (this.#motion.leaving) {
+				this.#paint('entry');
+				this.#motion.stop();
+				this.#value = null;
+				this.focus();
+			}
+			return this.#settle.promise;
+		}
 		const document = this.#element.ownerDocument;
 		this.#opener = Interaction.origin(document);
 		this.#given = restore;
@@ -158,7 +179,10 @@ export class SideSheet extends Component {
 			this.#adopted = true;
 		}
 		this.#settle = SideSheet.#resolvers();
-		this.#picture?.remove();
+		this.#motion.stop();
+		this.#element.style.removeProperty('--bui-sheet-from');
+		this.#element.style.removeProperty('--bui-sheet-veil-from');
+		this.#backdrop?.reset();
 		this.#element.showModal();
 		// Its headings outrank what they name, warned in a development build (0.19.0, D158)
 		if (Hierarchy.enabled) this.#hierarchy ??= new Hierarchy({ root: this.#element });
@@ -174,27 +198,42 @@ export class SideSheet extends Component {
 		chosen.focus({ preventScroll: true });
 	}
 
-	/** Closes with a value, unless busy. Returns whether it closed. */
+	/** Requests a close unless busy or already leaving; the opening settles after the bounded exit. */
 	close(value = null) {
-		if (!this.#element.open || this.#busy) return false;
-		this.#closing = true;
-		this.#picture = Leaving.play(this.#element, { host: this.#element.ownerDocument.body, tag: 'div', floating: false, veil: 'bui-sheet-veil' });
-		this.#element.close();
-		this.#closing = false;
-		this.#finish(value);
+		if (!this.#element.open || this.#busy || this.#motion.leaving) return false;
+		this.#value = value;
+		this.#paint('exit');
+		this.#motion.leave(() => this.#end(value));
 		return true;
 	}
 
-	/** A dismissal (Escape, the close button): closes with null unless busy. */
-	dismiss() {
+	/** Continue from the painted frame when a person reverses an entry or an exit. */
+	#paint(direction) {
+		const view = this.#element.ownerDocument.defaultView;
+		const suffix = direction === 'entry' ? 'from' : 'exit-from';
+		this.#element.style.setProperty(`--bui-sheet-${suffix}`, view.getComputedStyle(this.#element).transform || 'none');
+		this.#element.style.setProperty(`--bui-sheet-veil-${suffix}`, view.getComputedStyle(this.#element, '::backdrop').opacity || '1');
+	}
+
+	#end(value) {
+		this.#closing = true;
+		this.#element.close();
+		this.#finish(value);
+	}
+
+	/** Requests dismissal, honoring busy state and the consumer's synchronous preservation guard. */
+	dismiss(reason = 'close') {
+		if (this.#busy || this.#motion.leaving || !this.#element.open) return false;
+		if (this.#guard && this.#guard(reason) !== true) return false;
 		return this.close(null);
 	}
 
 	destroy() {
 		this.#busy = false;
-		if (this.#element.open) this.close(null);
-		this.#picture?.remove();
+		this.#motion.stop();
+		if (this.#element.open) this.#end(this.#value);
 		this.#hint.destroy();
+		this.#backdrop?.destroy();
 		super.destroy();
 	}
 
@@ -202,42 +241,18 @@ export class SideSheet extends Component {
 		if (event.key === 'Escape') {
 			event.preventDefault();
 			event.stopPropagation();
-			this.dismiss();
-		} else if (event.key === 'Tab') this.#cycle(event);
+			this.dismiss('escape');
+		} else if (event.key === 'Tab') new Focus(this.#element).cycle(event);
 	}
 
-	/** Keeps Tab inside, moving focus itself so WebKit's Tab, which skips links by default, never leaves for the page behind. */
-	#cycle(event) {
-		const targets = new Focus(this.#element).targets;
-		event.preventDefault();
-		if (!targets.length) return;
-		const document = this.#element.ownerDocument;
-		const step = event.shiftKey ? -1 : 1;
-		let index = this.#place(targets, document.activeElement, step);
-		// A target that does not take focus (not rendered, or refused by the engine) is passed over (0.7.4)
-		for (let tried = 0; tried < targets.length; tried++) {
-			index = (index + step + targets.length) % targets.length;
-			targets[index].focus({ preventScroll: true });
-			if (document.activeElement === targets[index]) return;
-		}
-	}
-
-	/**
-	 * Where Tab starts from: the active target, or for an element inside that is not one (a menu's
-	 * option) the place just before the next target after it in document order (0.7.4).
-	 */
-	#place(targets, active, step) {
-		const index = targets.indexOf(active);
-		if (index >= 0) return index;
-		if (!active || !this.#element.contains(active)) return step > 0 ? -1 : 0;
-		const after = targets.findIndex(node => active.compareDocumentPosition(node) & 4);
-		const next = after < 0 ? targets.length : after;
-		return step > 0 ? next - 1 : next;
-	}
 
 	// Closed by something other than this class, such as a form with `method="dialog"`.
 	#closed() {
-		if (this.#closing || !this.#settle) return;
+		if (this.#closing) {
+			this.#closing = false;
+			return;
+		}
+		if (!this.#settle || this.#element.open) return;
 		if (this.#busy && !this.destroyed) {
 			this.#element.showModal();
 			return;
@@ -249,6 +264,9 @@ export class SideSheet extends Component {
 		const settle = this.#settle;
 		if (!settle) return;
 		this.#settle = null;
+		this.#motion.stop();
+		this.#value = null;
+		this.#backdrop?.reset();
 		this.#hierarchy?.destroy();
 		this.#hierarchy = null;
 		const document = this.#element.ownerDocument;

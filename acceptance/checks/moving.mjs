@@ -92,8 +92,9 @@ export const checks = [
 			await narrow.page.waitForTimeout(250);
 			await narrow.page.keyboard.press('Escape');
 			const sheet = await moving(narrow.page);
-			expect(sheet.some(entry => entry.includes('bui-sheet') && entry.includes('bui-sheet-out')), `the sheet slides out: ${sheet}`);
-			await narrow.page.waitForFunction(() => !document.querySelector('.bui-leaving'));
+			expect(sheet.some(entry => entry.includes('bui-sheet') && entry.includes('bui-sheet-native-out')), `the sheet slides out: ${sheet}`);
+			await narrow.page.waitForFunction(() => !document.querySelector('dialog.bui-sheet[open]'), null, { timeout: 2_000 });
+			expect(await narrow.page.locator('.bui-sheet-veil, div.bui-sheet').count() === 0, 'the native sheet creates no exit copy or duplicated veil');
 			const pulses = await page.evaluate(() => [...document.styleSheets].flatMap(sheet => { try { return [...sheet.cssRules]; } catch { return []; } }).filter(rule => /bui-pulse/.test(rule.cssText) && !/@keyframes/.test(rule.cssText) && !/skeleton/.test(rule.selectorText)).map(rule => rule.style.animationIterationCount));
 			expect(pulses.length && pulses.every(count => count === '4'), `live dots pulse four times (~5 s; a loading skeleton keeps pulsing): ${pulses}`);
 		}

@@ -1,6 +1,8 @@
 /** Types of the larger DOM components, re-exported by `@beyond-js/ui/dom`. */
 import type { Component, Disclosure, Content, Copy, SelectOption, Tone } from './dom.js';
 import type { NotificationAdapter, Notice } from './notifications.js';
+import type { CollectionFilter, CollectionTools, CollectionToolsConstructor, CollectionToolsMode } from './collection-tools.js';
+export type { CollectionFilter, CollectionTools, CollectionToolsConstructor, CollectionToolsMode, CollectionToolsOptions, CollectionToolsState } from './collection-tools.js';
 
 /** A mark on a result with its reason, such as "Also in Website" or "Archived on GitHub" (0.7.0). */
 export interface PickerMark { label: string; tone?: Tone; reason?: string | null }
@@ -87,7 +89,9 @@ export interface CollectionOptions<Row> {
 	onopen?: ((row: Row, event: MouseEvent) => void) | null;
 	key?: (row: Row) => string;
 	search?: boolean;
-	filters?: Array<{ name: string; label: Content; all?: string; options: SelectOption[] }>;
+	filters?: CollectionFilter[];
+	/** Compact by default; external leaves placement of `tools.element` to the caller. */
+	tools?: CollectionToolsMode;
 	state?: Partial<CollectionState>;
 	onstate?: ((state: CollectionState) => void) | null;
 	onrender?: (() => void) | null;
@@ -100,10 +104,12 @@ export interface CollectionOptions<Row> {
 	labels?: Copy;
 }
 export class Collection<Row = Record<string, unknown>> extends Component {
+	static readonly Tools: CollectionToolsConstructor;
 	/** The copy in English and Spanish (0.7.0). */
 	static readonly labels: { readonly en: Copy; readonly es: Copy };
 	static local<Row>(rows: Row[], match?: (row: Row, query: string, filters: Record<string, string>) => boolean): CollectionOptions<Row>['source'];
 	constructor(options: CollectionOptions<Row>);
+	readonly tools: CollectionTools;
 	state: CollectionState;
 	load(): Promise<void>;
 }

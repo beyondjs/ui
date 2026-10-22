@@ -101,4 +101,18 @@
 .bui-sidebar[data-mode='permanent'][data-rail] .bui-sidebar-object-action { grid-column: 1; grid-row: 2; }
 .bui-sidebar[data-mode='permanent'][data-rail] .bui-sidebar-seek { grid-column: 2; grid-row: 2; }
 .bui-sidebar[data-mode='permanent'][data-rail] .bui-sidebar-object-head > .bui-sidebar-search { grid-column: 1 / -1; }
-.bui-sidebar-rail-item[aria-expanded='true'] { background: var(--color-sidebar-hover); }
+
+/* Context enters from the navigation edge and leaves there before the layout releases its space.
+   Motion owns cancellation, inertness and the exit bound; the shared reduced-motion rule disables it. */
+.bui-sidebar[data-mode='permanent'][data-rail] > .bui-sidebar-panel[data-motion='in'] {
+	animation: bui-sidebar-context-in var(--motion-standard) var(--motion-ease);
+}
+.bui-sidebar[data-mode='permanent'][data-rail] > .bui-sidebar-panel[data-motion='out'] {
+	animation: bui-sidebar-context-out var(--motion-exit) var(--motion-ease-exit) forwards;
+}
+@keyframes bui-sidebar-context-in {
+	from { opacity: 0; transform: translateX(calc(-1 * var(--space-6))); }
+}
+@keyframes bui-sidebar-context-out {
+	to { opacity: 0; transform: translateX(calc(-1 * var(--space-6))); }
+}

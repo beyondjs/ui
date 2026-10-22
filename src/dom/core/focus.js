@@ -60,4 +60,33 @@ export class Focus {
 			first.focus();
 		}
 	}
+	/** Keeps Tab inside, moving focus itself so WebKit's Tab, which skips links by default, never leaves for the page behind. */
+	cycle(event) {
+		const targets = this.targets;
+		event.preventDefault();
+		if (!targets.length) return;
+		const document = this.#container.ownerDocument;
+		const step = event.shiftKey ? -1 : 1;
+		let index = this.#place(targets, document.activeElement, step);
+		// A target that does not take focus (not rendered, or refused by the engine) is passed over (0.7.4)
+		for (let tried = 0; tried < targets.length; tried++) {
+			index = (index + step + targets.length) % targets.length;
+			targets[index].focus({ preventScroll: true });
+			if (document.activeElement === targets[index]) return;
+		}
+	}
+
+	/**
+	 * Where Tab starts from: the active target, or for an element inside that is not one (a menu's
+	 * option) the place just before the next target after it in document order (0.7.4).
+	 */
+	#place(targets, active, step) {
+		const index = targets.indexOf(active);
+		if (index >= 0) return index;
+		if (!active || !this.#container.contains(active)) return step > 0 ? -1 : 0;
+		const after = targets.findIndex(node => active.compareDocumentPosition(node) & 4);
+		const next = after < 0 ? targets.length : after;
+		return step > 0 ? next - 1 : next;
+	}
+
 }

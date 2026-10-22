@@ -1,9 +1,8 @@
 import { Component } from '../core/component.js';
 import { el, fill, content } from '../core/element.js';
 import { glyph } from '../core/icons.js';
-import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
-import { Select } from '../select.js';
+import { CollectionTools } from './tools.js';
 import { callout, skeleton } from '../feedback.js';
 import { Loader, local } from './loader.js';
 import { Table } from './table.js';
@@ -29,6 +28,7 @@ import { defaults, spanish } from './labels.js';
  */
 export class Collection extends Component {
 	static local = local;
+	static Tools = CollectionTools;
 	/** The copy in English and Spanish. */
 	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze(spanish) });
 
@@ -37,11 +37,9 @@ export class Collection extends Component {
 	#options;
 	#loader;
 	#state;
-	#input;
-	#filters = [];
+	#tools;
 	#region;
 	#pager;
-	#pending = null;
 	#status;
 	#paged = false;
 	#columns;
@@ -54,6 +52,7 @@ export class Collection extends Component {
 	 * @param {(request: {query: string, filters: object, page: number, limit: number, signal: AbortSignal}) => Promise<{rows: object[], total?: number, more?: boolean}>} options.source
 	 * @param {(row: object) => string} [options.link] the address of a row's detail
 	 * @param {{query?: string, filters?: object, page?: number}} [options.state] initial state, usually from the address
+	 * @param {'compact'|'expanded'|'external'} [options.tools] shared tools placement; expanded keeps search open
 	 * @param {(state: {query: string, filters: object, page: number}) => void} [options.onstate]
 	 * @param {{title: string, body?: string, action?: Node}} [options.empty] the empty collection
 	 * @param {() => void} [options.onrender] runs after each redraw of the rows (the React adapter fills cells then)
@@ -65,20 +64,14 @@ export class Collection extends Component {
 		this.#labels = new Labels(defaults, labels);
 		this.#loader = new Loader(source);
 		this.#state = { query: state.query ?? '', filters: { ...(state.filters ?? {}) }, page: Math.max(1, Number(state.page) || 1) };
-		const id = Ids.next('bui-collection');
-		this.#input = search
-			? el('input', { id: `${id}-search`, type: 'search', class: 'bui-input', value: this.#state.query, autocomplete: 'off', placeholder: typeof label === 'string' ? this.#labels.text('search', { label }) : this.#labels.text('placeholder'), oninput: () => this.#typed() })
-			: null;
-		const tools = [
-			this.#input ? el('div', { class: 'bui-collection-search' }, [el('label', { for: this.#input.id, class: 'bui-hidden' }, [this.#labels.text('search', { label })]), el('span', { class: 'bui-picker-search' }, [glyph('search'), this.#input])]) : null,
-			...filters.map(filter => this.#filter(filter, id))
-		];
+		this.#tools = new CollectionTools({ label, search, filters, state: this.#state, labels, compact: options.tools !== 'expanded', delay: options.delay ?? 250, onchange: state => this.#change(state) });
+		this.#tools.element.classList.add('bui-collection-tools');
 		this.#region = el('div', { class: 'bui-collection-body', tabindex: '-1', 'aria-busy': 'false' });
 		this.#status = el('p', { class: 'bui-hidden', role: 'status' });
 		this.#pager = el('nav', { class: 'bui-pager', 'aria-label': this.#labels.text('pages', { label }) });
 		this.#columns = new ColumnFit({ columns: options.columns, labels: this.#labels });
 		this.#element = el('section', { class: 'bui-collection', 'aria-label': typeof label === 'string' ? label : null }, [
-			tools.some(Boolean) ? el('div', { class: 'bui-collection-tools' }, tools) : null,
+			options.tools === 'external' ? null : this.#tools.element,
 			this.#status,
 			this.#region,
 			this.#columns.element,
@@ -91,6 +84,9 @@ export class Collection extends Component {
 		return this.#element;
 	}
 
+	/** The same tools can be placed beside page actions with tools: external. */
+	get tools() { return this.#tools; }
+
 	/** The query, filters and page in view. */
 	get state() {
 		return { query: this.#state.query, filters: { ...this.#state.filters }, page: this.#state.page };
@@ -99,8 +95,7 @@ export class Collection extends Component {
 	/** Changes the state (for example from the address on back or forward) and loads it. */
 	set state(state) {
 		this.#state = { query: state.query ?? '', filters: { ...(state.filters ?? {}) }, page: Math.max(1, Number(state.page) || 1) };
-		if (this.#input) this.#input.value = this.#state.query;
-		for (const filter of this.#filters) filter.select.value = this.#state.filters[filter.name] ?? '';
+		this.#tools.state = this.#state;
 		this.load();
 	}
 
@@ -134,29 +129,13 @@ export class Collection extends Component {
 		this.#loader.cancel();
 		this.#rows?.destroy?.();
 		this.#columns.release();
-		for (const filter of this.#filters) filter.select.destroy();
+		this.#tools.destroy();
 		super.destroy();
 	}
 
 	#table(rows) {
 		const { label, columns, link = null, onopen = null, key, presentation = 'table' } = this.#options;
 		return presentation === 'list' ? new CollectionRows({ label, columns, rows, link, onopen, key }) : new Table({ label, columns, rows, link, onopen, key });
-	}
-
-	#filter(filter, id) {
-		const select = new Select({
-			id: `${id}-${filter.name}`,
-			options: [{ value: '', label: filter.all ?? this.#labels.text('all') }, ...filter.options],
-			value: this.#state.filters[filter.name] ?? '',
-			onchange: value => this.#change({ filters: { ...this.#state.filters, [filter.name]: value } })
-		});
-		this.#filters.push({ name: filter.name, select });
-		return el('div', { class: 'bui-collection-filter' }, [el('label', { for: `${id}-${filter.name}`, class: 'bui-field-label' }, [content(filter.label)]), select.element]);
-	}
-
-	#typed() {
-		this.#pending?.();
-		this.#pending = this.later(() => this.#change({ query: this.#input.value.trim() }), this.#options.delay ?? 250);
 	}
 
 	#change(part) {
@@ -173,7 +152,7 @@ export class Collection extends Component {
 	#clear() {
 		this.state = { query: '', filters: {}, page: 1 };
 		this.#options.onstate?.(this.state);
-		(this.#input ?? this.#region).focus();
+		this.#tools.focus();
 	}
 
 	#filtered() {

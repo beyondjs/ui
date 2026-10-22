@@ -2,7 +2,7 @@ import { test, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { Page } from './support/page.mjs';
 
-/** SideSheet (0.7.0, LR-07): focus in and back, Tab kept inside, Escape and Close unless busy, never a press outside, a failure in place. */
+/** SideSheet (0.7.0, LR-07): focus in and back, Tab kept inside, Escape and Close unless busy, default outside dismissal with explicit preservation guards, a failure in place. */
 const page = new Page();
 const ui = await import('@beyond-js/ui/dom');
 after(() => page.close());
@@ -56,10 +56,10 @@ test('focus goes to [data-autofocus]; Tab and Shift+Tab stay inside; restore giv
 	assert.ok(document.activeElement === elsewhere, 'the restore given to open receives focus');
 });
 
-test('a press outside never closes it; while busy neither Escape, Close nor close() does', async () => {
+test('an explicit backdrop opt-out stays open; while busy neither Escape, Close nor close() does', async () => {
 	const button = opener();
 	const closes = [];
-	const sheet = new ui.SideSheet({ title: 'Add repositories', onclose: value => closes.push(value) });
+	const sheet = new ui.SideSheet({ title: 'Add repositories', backdrop: false, onclose: value => closes.push(value) });
 	sheet.open();
 	sheet.element.dispatchEvent(new window.MouseEvent('click', { bubbles: true, clientX: 1, clientY: 1 }));
 	document.body.dispatchEvent(new window.PointerEvent('pointerdown', { bubbles: true }));
@@ -115,4 +115,55 @@ test('the standard width, an accessible name of its own, a closed sheet refusing
 	assert.equal(await first, null);
 	assert.equal(await sheet.open(), null, 'a destroyed sheet never opens');
 	assert.throws(() => new ui.SideSheet({ title: 'x', width: 'reading' }), /form, standard/);
+});
+
+
+test('default backdrop: complete outside gesture only, busy guard, focus return and reset on reopen', async () => {
+	const button = opener('Machine details');
+	const sheet = new ui.SideSheet({ title: 'Machine' });
+	sheet.element.getBoundingClientRect = () => ({ left: 100, right: 300, top: 0, bottom: 500 });
+	const press = (x, kind = 'pointerdown', target = sheet.element) => target.dispatchEvent(new window.MouseEvent(kind, { bubbles: true, button: 0, clientX: x, clientY: 100 }));
+	const done = sheet.open();
+	press(150); press(150, 'click');
+	assert.equal(sheet.shown, true, 'padding is inside');
+	press(150); press(50, 'click');
+	assert.equal(sheet.shown, true, 'drag from inside stays');
+	press(50); press(150, 'click');
+	assert.equal(sheet.shown, true, 'release inside stays');
+	press(50); sheet.element.dispatchEvent(new window.Event('pointercancel')); press(50, 'click');
+	assert.equal(sheet.shown, true, 'cancelled gesture stays');
+	sheet.busy = true;
+	press(50); press(50, 'click');
+	assert.equal(sheet.shown, true, 'busy stays');
+	sheet.busy = false;
+	press(50); press(50, 'click');
+	assert.equal(await done, null);
+	assert.equal(document.activeElement, button);
+	sheet.open();
+	press(50, 'click');
+	assert.equal(sheet.shown, true, 'reopening forgets earlier gesture');
+	sheet.destroy();
+});
+
+
+test('dirty-work guard sees every dismissal reason, busy cannot bypass it, and confirmed close is explicit', async () => {
+	let dirty = true;
+	const reasons = [];
+	const sheet = new ui.SideSheet({ title: 'Add repositories', guard: reason => { reasons.push(reason); return !dirty; } });
+	const done = sheet.open();
+	for (const reason of ['backdrop', 'escape', 'close']) assert.equal(sheet.dismiss(reason), false);
+	assert.deepEqual(reasons, ['backdrop', 'escape', 'close']);
+	assert.equal(sheet.shown, true);
+	sheet.busy = true;
+	assert.equal(sheet.dismiss('close'), false);
+	assert.equal(reasons.length, 3);
+	sheet.busy = false;
+	dirty = false;
+	assert.equal(sheet.dismiss('backdrop'), true);
+	assert.equal(await done, null);
+	dirty = true;
+	const confirmed = sheet.open();
+	assert.equal(sheet.close('discarded'), true);
+	assert.equal(await confirmed, 'discarded');
+	sheet.destroy();
 });

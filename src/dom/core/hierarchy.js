@@ -14,7 +14,7 @@
  */
 export class Hierarchy {
 	/** The elements that name a region. */
-	static headings = 'h1, h2, h3, h4, h5, h6';
+	static headings = 'h1, h2, h3, h4, h5, h6, [role="heading"]';
 	/** The regions a heading names when no `aria-labelledby` points at it. */
 	static regions = 'main, section, article, aside, dialog, [role="dialog"], [role="region"], [data-bui-region]';
 	/** The weight every heading takes (`--weight-semibold`). */
@@ -65,7 +65,8 @@ export class Hierarchy {
 	static #paint(node) {
 		const view = node.ownerDocument.defaultView;
 		const paint = view.getComputedStyle(node);
-		return { size: parseFloat(paint.fontSize) || 0, weight: Number(paint.fontWeight) || 400, shown: paint.visibility !== 'hidden' && node.getClientRects().length > 0 };
+		const box = node.getBoundingClientRect();
+		return { size: parseFloat(paint.fontSize) || 0, weight: Number(paint.fontWeight) || 400, shown: paint.visibility !== 'hidden' && node.getClientRects().length > 0 && !(box.width <= 1 && box.height <= 1) };
 	}
 
 	/** The headings that fail, each reported once: `[{ heading, reason: 'weight' | 'outranked', by }]`. */
@@ -73,7 +74,7 @@ export class Hierarchy {
 		const found = [];
 		const headings = [...(this.#root.matches?.(Hierarchy.headings) ? [this.#root] : []), ...this.#root.querySelectorAll(Hierarchy.headings)];
 		for (const heading of headings) {
-			if (heading.closest('[data-bui-label]') || heading.closest('[hidden]')) continue;
+			if (heading.hasAttribute('data-bui-label') || heading.closest('[hidden]')) continue;
 			const face = Hierarchy.#face(heading);
 			if (!face) continue;
 			const own = this.#measure(face);
@@ -110,13 +111,21 @@ export class Hierarchy {
 		const walker = region.ownerDocument.createTreeWalker(region, 1);
 		let read = 0;
 		for (let node = walker.nextNode(); node && read < Hierarchy.#most; node = walker.nextNode()) {
-			if (heading.contains(node) || !Hierarchy.#text(node)) continue;
+			if (heading.contains(node) || !(heading.compareDocumentPosition(node) & 4)) continue;
+			// A subgroup ends at its next peer or ancestor heading; its parent title precedes it.
+			if (node.matches(Hierarchy.headings) && Hierarchy.#level(node) <= Hierarchy.#level(heading)) break;
+			if (!Hierarchy.#text(node)) continue;
 			read += 1;
 			const paint = this.#measure(node);
 			if (!paint.shown) continue;
 			if (paint.size > own.size + 0.5 || (Math.abs(paint.size - own.size) <= 0.5 && paint.weight > own.weight)) return { node, text: Hierarchy.#text(node), size: paint.size, weight: paint.weight };
 		}
 		return null;
+	}
+
+	/** The semantic level of native and ARIA headings. */
+	static #level(node) {
+		return Number(node.getAttribute('aria-level') ?? node.tagName.slice(1)) || 2;
 	}
 
 	/** What draws a heading's words: the heading, or the first element inside it that holds text itself */

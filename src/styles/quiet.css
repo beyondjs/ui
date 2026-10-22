@@ -30,9 +30,19 @@
 	font-weight: var(--weight-regular);
 	text-decoration: none;
 }
-.bui-action-line-actions :is(.bui-button, a, .bui-link-button, .bui-disclosure-button):is(:hover, :focus-visible, [aria-expanded='true']) {
-	background: var(--color-surface-sunken);
+.bui-action-line-actions :is(.bui-button, a, .bui-link-button, .bui-disclosure-button):not(:disabled, [aria-disabled='true']):is(:hover, :focus-visible, [aria-expanded='true']) {
+	background: var(--overlay-lift);
 	color: var(--color-text);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+.bui-action-line-actions :is(.bui-button, a, .bui-link-button, .bui-disclosure-button):not(:disabled, [aria-disabled='true']):active {
+	background: var(--color-surface-sunken);
+}
+.bui-action-line-actions :is(:disabled, [aria-disabled='true']) {
+	background: transparent;
+	color: var(--color-text-muted);
+	text-decoration: none;
 }
 .bui-action-line-actions a {
 	display: inline-flex;

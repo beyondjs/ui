@@ -44,7 +44,10 @@ export function Dialog({ open, title, description = null, busy = false, escape =
 	});
 	useLayoutEffect(() => {
 		if (!modal || modal !== held.current) return;
-		if (open && !modal.shown) {
+		if (open && modal.shown) {
+			if (round.current) round.current.quiet = false;
+			modal.open(); // A controlled reopen cancels an exit without making another round.
+		} else if (open) {
 			// Each opening is one round; a round closed through `open` or by destruction reports nothing.
 			const current = { quiet: false };
 			round.current = current;

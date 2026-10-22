@@ -154,6 +154,8 @@ export const checks = [
 			await page.locator('dialog.bui-sheet[open]').waitFor();
 			await page.setViewportSize({ width: 1440, height: 900 });
 			await page.waitForFunction(() => document.querySelector('.bui-page').dataset.panel === 'beside');
+			await page.waitForFunction(() => !document.querySelector('dialog.bui-sheet[open]'), null, { timeout: 2_000 });
+			expect(await page.locator('.bui-page-panel').evaluate(node => node.contains(document.activeElement)), 'focus follows the content after the native sheet exit');
 			expect(!(await page.locator('dialog.bui-sheet[open]').count()) && (await page.locator('.bui-page-panel').isVisible()), 'crossing the cut closes the sheet and shows the panel beside');
 		}
 	},

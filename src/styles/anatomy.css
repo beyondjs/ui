@@ -18,10 +18,16 @@
 	line-height: var(--leading-label);
 	white-space: nowrap;
 }
-/* A resource's page keeps its actions within reach of its title (0.19.1, D160): the title's line spans
-   at most a form column and its side panel (LR-03), however wide the region; tabs and facts keep theirs. */
-.bui-page[data-template='detail'] .bui-page-title {
-	max-width: calc(var(--layout-form) + var(--layout-aside) + var(--space-8));
+/* Headers use the Page region. Structured facts wrap there; prose opts into bui-reading.
+   Object actions stay beside their title group without imposing a width cap on the header. */
+.bui-page .bui-page-frame > .bui-page-header {
+	max-width: none;
+}
+.bui-page[data-template='detail'] .bui-page-actions {
+	margin-inline-start: 0;
+}
+.bui-page-facts {
+	overflow-wrap: anywhere;
 }
 
 /* A page's tabs start on the content edge (0.19.1, the alignment audit's P5): the first label lines up

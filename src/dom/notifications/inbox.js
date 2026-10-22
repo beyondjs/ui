@@ -1,3 +1,4 @@
+import { RetryAction } from '../again/action.js';
 import { Component } from '../core/component.js';
 import { el, fill } from '../core/element.js';
 import { glyph } from '../core/icons.js';
@@ -162,9 +163,9 @@ export class NotificationInbox extends Component {
 		this.#everything.hidden = !(feed.state === 'ready' && feed.items.some(item => !item.read));
 		if (feed.state === 'more') return;
 		if (feed.state === 'loading') return fill(this.#body, [loading(words.text('loading'))]);
-		if (feed.state === 'unavailable') return fill(this.#body, [callout({ tone: Recovery.outage(feed) ? 'warning' : 'info', title: Cause.text(words, feed.reason), body: Recovery.outage(feed) ? this.#recovery.element : null, actions: [el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', text: words.text('retry'), onclick: () => this.#retry() })] })]);
+		if (feed.state === 'unavailable') return fill(this.#body, [callout({ tone: Recovery.outage(feed) ? 'warning' : 'info', title: Cause.text(words, feed.reason), body: Recovery.outage(feed) ? this.#recovery.element : null, actions: [new RetryAction({ labels: { retry: words.text('retry') }, run: () => this.#retry() }).element] })]);
 		if (feed.state === 'failed') {
-			const retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary bui-button-small', onclick: () => this.#retry() }, [glyph('refresh'), el('span', { text: words.text('retry') })]);
+			const retry = new RetryAction({ labels: { retry: words.text('retry') }, run: () => this.#retry() }).element;
 			return fill(this.#body, [callout({ tone: 'danger', title: words.text('failure'), actions: [retry] })]);
 		}
 		// Items marked read stay listed until the next load, so "Mark as unread" can undo at once.

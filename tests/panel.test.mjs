@@ -146,3 +146,24 @@ test('control returns its release, and destroying the page releases the panel', 
 	toggle.click();
 	assert.equal(document.querySelector('dialog.bui-sheet'), null);
 });
+
+
+test('crossing the cut transfers focus only after the native sheet finishes its exit', async () => {
+	const style = document.createElement('style');
+	style.textContent = '.bui-sheet[data-motion="out"] { animation-name: leaving; animation-duration: 0.12s; }';
+	document.head.append(style);
+	resize(800);
+	const { view, panel, facts } = scene();
+	try {
+		panel.open();
+		facts.querySelector('a').focus();
+		const sheet = document.querySelector('dialog.bui-sheet[open]');
+		resize(1280);
+		assert.ok(sheet.open && sheet.contains(facts), 'content stays inside its modal through exit');
+		sheet.dispatchEvent(new Event('animationend'));
+		await Promise.resolve();
+		const aside = view.element.querySelector('.bui-page-panel');
+		assert.ok(!sheet.open && aside.contains(facts));
+		assert.ok(aside.contains(document.activeElement), 'focus follows content after exit');
+	} finally { view.destroy(); style.remove(); }
+});

@@ -6,6 +6,7 @@ import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 import { Focus } from './core/focus.js';
 import { Interaction } from './core/interaction.js';
+import { Motion } from './core/motion.js';
 import { Hierarchy } from './core/hierarchy.js';
 
 const defaults = { close: 'Close' };
@@ -23,7 +24,9 @@ const defaults = { close: 'Close' };
  * Dismissal policy: Escape and the close button dismiss unless `escape` is false; a press on the
  * backdrop dismisses only with `backdrop: true`. While `busy` nothing dismisses it — not Escape, the
  * close button, the backdrop nor a repeated close request — so an operation whose integrity matters
- * can finish. `open()` returns a promise of the value given to `close(value)`; a dismissal gives null.
+ * can finish. A close keeps the native modal and backdrop through its bounded exit, with its
+ * contents inert. Focus returns and the opening resolves after the exit; reduced motion closes at
+ * once. Opening again cancels an exit; destruction finishes it immediately. `open()` returns a promise of the value given to `close(value)`; a dismissal gives null.
  */
 export class Dialog extends Component {
 	/** The copy in English and Spanish (0.7.1). */
@@ -46,6 +49,8 @@ export class Dialog extends Component {
 	#hierarchy = null;
 	#closing = false;
 	#hint;
+	#motion;
+	#value = null;
 
 	/**
 	 * @param {object} options
@@ -88,6 +93,7 @@ export class Dialog extends Component {
 		this.#element.addEventListener('close', () => this.#closed());
 		this.#element.addEventListener('click', event => this.#press(event));
 		this.#hint = new Hint(this.#element);
+		this.#motion = new Motion(this.#element, (work, delay) => this.later(work, delay));
 		this.#policy();
 	}
 
@@ -142,7 +148,14 @@ export class Dialog extends Component {
 	/** Opens the dialog modally. Resolves with the value it closes with. */
 	open() {
 		if (this.destroyed) return Promise.resolve(null);
-		if (this.#element.open) return this.#settle.promise;
+		if (this.#element.open) {
+			if (this.#motion.leaving) {
+				this.#motion.stop();
+				this.#value = null;
+				new Focus(this.#element).first(this.#closer);
+			}
+			return this.#settle.promise;
+		}
 		const document = this.#element.ownerDocument;
 		this.#opener = Interaction.origin(document);
 		if (!this.#element.isConnected) {
@@ -157,12 +170,11 @@ export class Dialog extends Component {
 		return this.#settle.promise;
 	}
 
-	/** Closes with a value, unless busy. Returns whether it closed. */
+	/** Requests a close unless busy or already leaving. Resolves the opening after the bounded exit. */
 	close(value = null) {
-		if (!this.#element.open || this.#busy) return false;
-		this.#closing = true;
-		this.#element.close();
-		this.#finish(value);
+		if (!this.#element.open || this.#busy || this.#motion.leaving) return false;
+		this.#value = value;
+		this.#motion.leave(() => this.#end(value));
 		return true;
 	}
 
@@ -174,9 +186,16 @@ export class Dialog extends Component {
 
 	destroy() {
 		this.#busy = false;
-		if (this.#element.open) this.close(null);
+		this.#motion.stop();
+		if (this.#element.open) this.#end(this.#value);
 		this.#hint.destroy();
 		super.destroy();
+	}
+
+	#end(value) {
+		this.#closing = true;
+		this.#element.close();
+		this.#finish(value);
 	}
 
 	#policy() {
@@ -214,6 +233,11 @@ export class Dialog extends Component {
 	}
 
 	#finish(value) {
+		if (!this.#settle) return;
+		this.#motion.stop();
+		const settle = this.#settle;
+		this.#settle = null;
+		this.#value = null;
 		this.#hierarchy?.destroy();
 		this.#hierarchy = null;
 		const opener = this.#opener;
@@ -225,7 +249,7 @@ export class Dialog extends Component {
 		const target = opener?.isConnected ? opener : this.#restore?.isConnected ? this.#restore : null;
 		if (target && target !== target.ownerDocument.body) target.focus?.();
 		this.#onclose?.(value);
-		this.#settle?.resolve(value);
+		settle.resolve(value);
 	}
 
 	static #resolvers() {

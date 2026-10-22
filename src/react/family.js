@@ -6,7 +6,7 @@ import { Unavailable as Missing, glyphs } from '../dom/unavailable.js';
 import { Sidebar as Sections } from '../dom/sidebar/sidebar.js';
 import { Mark, Badge, Button } from './simple.js';
 import { TechnicalDetails } from './operations.js';
-import { useAgain, AgainLine } from './again.js';
+import { useAgain, AgainLine, RetryAction } from './again.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 
 const { useId, useMemo, useState } = React;
@@ -183,7 +183,7 @@ export function Unavailable({ title, reason, owner = null, action = null, second
 	const type = glyphs[kind] ? kind : 'access';
 	const outage = type === 'outage' && typeof again === 'function';
 	const moments = useAgain(outage, () => again?.());
-	if (outage) action ??= h(Button, { label: labels.retry ?? Missing.labels.en.retry, onClick: () => void moments.now() });
+	if (outage) action ??= h(RetryAction, { labels: { retry: labels.retry ?? Missing.labels.en.retry }, busy: moments.trying, onClick: () => void moments.now() });
 	return h(
 		'section',
 		{ className: `bui-unavailable bui-unavailable-${type}`, 'data-unavailable': type, 'aria-labelledby': id },

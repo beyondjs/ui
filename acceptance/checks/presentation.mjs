@@ -133,9 +133,23 @@ export const checks = [
 			await list.getByRole('button', { name: copy.next }).click();
 			await page.waitForFunction(() => /Request 6/.test(document.querySelector('#listing tbody').textContent));
 			expect(await page.evaluate(() => document.activeElement.classList.contains('bui-collection-body')), 'focus moves to the new rows');
-			await list.locator('input[type="search"]').fill('zzz');
+			const search = list.locator('.bui-list-search > button[aria-expanded]');
+			await search.click();
+			const field = list.locator('input[type="search"]');
+			await field.fill('zzz');
+			await field.press('Escape');
+			expect(await list.locator('.bui-list-query').isVisible(), 'closing search keeps the applied query visible');
+			expect(await field.inputValue() === 'zzz', 'Escape never clears the query');
 			await list.getByRole('button', { name: copy.clear }).click();
 			await page.waitForFunction(() => document.querySelectorAll('#listing tbody tr').length === 5);
+			const filters = list.locator('.bui-list-filters .bui-disclosure-button');
+			await filters.click();
+			await list.locator('.bui-collection-filter select').selectOption({ index: 1 });
+			await filters.click();
+			expect(await list.locator('.bui-list-restriction').isVisible(), 'closed filters keep the restriction visible');
+			await list.locator('.bui-list-restriction').click();
+			await page.waitForFunction(() => document.querySelectorAll('#listing tbody tr').length === 5);
+			expect(await filters.evaluate(node => node === document.activeElement), 'removing a filter returns focus to Filters');
 			await list.locator('a.bui-row-link').first().click();
 			await page.waitForFunction(() => location.hash === '#/requests/r1');
 		}

@@ -1,5 +1,6 @@
 import { test, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { Page } from './support/page.mjs';
 import { groups, rail } from './fixtures/sidebar-rail.mjs';
 
@@ -165,4 +166,63 @@ test('the rail\'s foot keeps the product\'s object in use at its end, its state 
 	sidebar.rail = { ...rail, foot: null };
 	assert.equal(navigation.querySelector('.bui-sidebar-rail-foot'), null, 'none takes no room');
 	sidebar.destroy();
+});
+
+
+test('the current contextual route stays selected when its panel closes and reopens', () => {
+	const current = [{ ...groups[0], items: groups[0].items.map(item => ({ ...item, current: false })) }, { ...groups[1], current: true }];
+	const sidebar = make({ groups: current });
+	const navigation = sidebar.element.querySelector('.bui-sidebar-rail');
+	const control = toggle(sidebar);
+	const address = page.window.location.href;
+	assert.equal(control.getAttribute('aria-current'), 'page');
+	control.click();
+	assert.equal(control.getAttribute('aria-expanded'), 'false');
+	assert.equal(control.getAttribute('aria-current'), 'page');
+	assert.equal(navigation.querySelectorAll('[aria-current="page"]').length, 1);
+	assert.equal(document.activeElement, control);
+	control.click();
+	assert.equal(control.getAttribute('aria-expanded'), 'true');
+	assert.equal(control.getAttribute('aria-current'), 'page');
+	assert.equal(page.window.location.href, address);
+	sidebar.destroy();
+});
+
+test('route changes update selection independently from an expanded contextual panel', () => {
+	const current = name => [{ ...groups[0], items: groups[0].items.map(item => ({ ...item, current: item.key === name })) }, { ...groups[1], current: name === 'conversations' }];
+	const sidebar = make({ groups: current('home') });
+	const navigation = sidebar.element.querySelector('.bui-sidebar-rail');
+	const home = navigation.querySelector('[data-label="Home"]');
+	const control = toggle(sidebar);
+	assert.equal(home.getAttribute('aria-current'), 'page');
+	assert.equal(control.getAttribute('aria-expanded'), 'true');
+	assert.equal(control.getAttribute('aria-current'), null);
+	sidebar.groups = current('conversations');
+	assert.equal(home.getAttribute('aria-current'), null);
+	assert.equal(control.getAttribute('aria-current'), 'page');
+	sidebar.groups = current('home');
+	assert.equal(home.getAttribute('aria-current'), 'page');
+	assert.equal(control.getAttribute('aria-current'), null);
+	assert.equal(navigation.querySelectorAll('[aria-current="page"]').length, 1);
+	sidebar.destroy();
+});
+
+
+test('a current link and contextual toggle share the selected colors and border', () => {
+	const style = document.createElement('style');
+	style.textContent = ':root { --color-text: #eeeeee; --color-surface-sunken: #222222; --color-border-strong: #777777; --color-sidebar-hover: #333333; }' + readFileSync(new URL('../src/styles/sidebar-rail.css', import.meta.url), 'utf8');
+	document.head.append(style);
+	const current = name => [{ ...groups[0], items: groups[0].items.map(item => ({ ...item, current: item.key === name })) }, { ...groups[1], current: name === 'conversations' }];
+	const sidebar = make({ groups: current('home') });
+	const navigation = sidebar.element.querySelector('.bui-sidebar-rail');
+	const paint = node => { const value = getComputedStyle(node); return [value.backgroundColor, value.borderColor, value.color]; };
+	const home = paint(navigation.querySelector('[data-label="Home"]'));
+	const control = toggle(sidebar);
+	assert.notDeepEqual(paint(control), home, 'expansion is not route selection');
+	sidebar.groups = current('conversations');
+	assert.deepEqual(paint(control), home, 'links and buttons use one selected treatment');
+	control.click();
+	assert.deepEqual(paint(control), home, 'closing keeps that selected treatment');
+	sidebar.destroy();
+	style.remove();
 });

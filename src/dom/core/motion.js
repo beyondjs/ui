@@ -93,7 +93,10 @@ export class Motion {
 	#moving() {
 		const view = this.#element.ownerDocument.defaultView;
 		if (!this.#element.isConnected || this.#element.hidden || !view?.getComputedStyle) return false;
-		const name = view.getComputedStyle(this.#element).animationName;
-		return Boolean(name) && name !== 'none';
+		const style = view.getComputedStyle(this.#element);
+		const names = (style.animationName ?? '').split(',').map(name => name.trim());
+		const durations = (style.animationDuration ?? '').split(',').map(value => value.trim());
+		return names.some((name, index) => name && name !== 'none' &&
+			(!durations[index % durations.length] || parseFloat(durations[index % durations.length]) > 0));
 	}
 }

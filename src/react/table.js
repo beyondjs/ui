@@ -2,8 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { DataTable as Table } from '../dom/table/table.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
+import { useTools } from './collection-tools.js';
 
-const { useRef, useState } = React;
+const { useEffect, useRef, useState } = React;
+const none = Object.freeze([]);
 
 /**
  * A table of rows the product holds (0.15.0), driven by the DOM `DataTable`. A column may give
@@ -11,15 +13,18 @@ const { useRef, useState } = React;
  * `status` are applied when they change; `onChange` reports the person's changes (write them to the
  * address); `onOpen` and `onRetry` are read from the latest props.
  */
-export function DataTable({ label, columns, rows = [], rowKey = null, search = true, group = null, state = null, onChange = null, size = 50, link = null, onOpen = null, empty = null, status = 'ready', onRetry = null, labels }) {
+export function DataTable({ label, columns, rows = none, rowKey = null, search = true, filters = [], tools = 'compact', toolsTarget = null, group = null, state = null, onChange = null, size = 50, link = null, onOpen = null, empty = null, status = 'ready', onRetry = null, labels }) {
 	const cells = useRef([]);
+	const applied = useRef(null);
 	const [portals, setPortals] = useState([]);
-	const latest = useLatest({ columns, onChange, onOpen, onRetry, link, group, rowKey });
+	const latest = useLatest({ columns, onChange, onOpen, onRetry, link, group, rowKey, filters });
 	const [host, table] = useInstance(
 		() =>
 			new Table({
 				label,
 				search,
+				filters: filters.map(filter => ({ ...filter, match: (row, value) => latest.current.filters.find(item => item.name === filter.name)?.match(row, value) ?? false })),
+				tools,
 				size,
 				labels,
 				empty,
@@ -34,8 +39,9 @@ export function DataTable({ label, columns, rows = [], rowKey = null, search = t
 				columns: columns.map((column, index) => ({ ...column, value: column.value ? row => latest.current.columns[index].value(row) : undefined, render: column.render ? row => cell(row, index) : undefined, sort: typeof column.sort === 'function' ? (a, b) => latest.current.columns[index].sort(a, b) : column.sort })),
 				onrender: () => setPortals(cells.current.splice(0))
 			}),
-		[label, String(search), size, labels, Boolean(link), Boolean(onOpen), Boolean(onRetry), Boolean(group), columns.map(column => column.key).join('|')]
+		[label, String(search), JSON.stringify(filters), tools, size, labels, Boolean(link), Boolean(onOpen), Boolean(onRetry), Boolean(group), columns.map(column => column.key).join('|')]
 	);
+	useTools(table, toolsTarget, tools);
 	// Each drawn cell is a holder; its React content is rendered with every render of the table (0.16.2),
 	// so a cell whose content changes while its row does not is drawn again, keyed by its row and column.
 	function cell(row, index) {
@@ -45,7 +51,17 @@ export function DataTable({ label, columns, rows = [], rowKey = null, search = t
 		cells.current.push({ holder, row, index, key: `${key}:${latest.current.columns[index]?.key ?? index}` });
 		return holder;
 	}
-	useSync(table, current => (current.rows = rows), [rows]);
+	// A predicate may change while rows and address state stay the same. Compare against the last
+	// application, not the filters array: callers may build that array inline on every render.
+	useEffect(() => {
+		if (!table || table.destroyed) return;
+		const matches = filters.map(filter => filter.match);
+		const previous = applied.current;
+		if (previous?.table === table && previous.rows === rows && previous.matches.length === matches.length && matches.every((match, index) => match === previous.matches[index])) return;
+		applied.current = { table, rows, matches };
+		table.rows = rows;
+		if (status === 'loading' || status?.failed !== undefined) table.status = status;
+	});
 	useSync(table, current => {
 		if (state && JSON.stringify(state) !== JSON.stringify(current.state)) current.state = state;
 	}, [JSON.stringify(state)]);

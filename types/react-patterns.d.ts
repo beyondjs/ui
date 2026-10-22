@@ -1,5 +1,5 @@
 /** Types of the React forms of 0.15.0's patterns and DataTable, re-exported by `@beyond-js/ui/react`. */
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import type { Copy } from './notifications.js';
 import type { MenuItem } from './dom.js';
 import type { StatusState, ChecklistState } from './patterns.js';
@@ -9,17 +9,21 @@ export type { FloatingAnchor, FloatingOptions, FloatingRefusal } from './dom.js'
 export * from './react-table.js';
 export * from './react-command.js';
 
+/** Phrasing content for a row slot; native nodes remain supported for DOM consumers. */
+type RowContent = ReactNode | Node;
+type RowState = { state: StatusState | (string & {}); label?: RowContent };
+
 type Copies = { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 
 /** One object in a list, driven by the DOM `ListRow`; callbacks are read from the latest props. */
 export function ListRow(props: {
-	title: string;
+	title: string | Node;
 	href?: string | null;
 	run?: ((event: Event) => void) | null;
-	meta?: string | Array<string | null | undefined> | null;
-	lead?: { state: StatusState | (string & {}); label?: string | null } | string | null;
-	status?: { state: StatusState | (string & {}); label?: string | null } | null;
-	facts?: Array<string | null | false>;
+	meta?: RowContent | Array<RowContent>;
+	lead?: RowState | RowContent;
+	status?: RowState | RowContent;
+	facts?: Array<RowContent>;
 	actions?: Array<{ label: string; onSelect?: ((event: Event) => void) | null; glyph?: string | null; name?: string | null } | null | false>;
 	menu?: Array<(Omit<MenuItem, 'run'> & { onSelect?: ((event: Event) => void) | null }) | null | false>;
 	select?: { checked?: boolean; disabled?: boolean; name?: string | null; value?: string | null; onChange?: ((checked: boolean) => void) | null } | null;

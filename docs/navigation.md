@@ -25,7 +25,9 @@ The rail presents the existing section items. `glyph` selects a named icon from 
 
 The default cut remains 1024 px. Below it, the full navigation uses the existing modal drawer, with all sections, object actions, search and context. `sidebar.merge(bar)` and React's `merge` keep one hamburger in the family bar. Desktop collapse does not hide the drawer's contents. Crossing the cut closes an open drawer and moves focus to the desktop navigation.
 
-Collapsing returns focus to the object toggle or destination link. If that object disappears while its panel holds focus, focus returns to an existing current or first rail destination. Data updates patch rail controls by key. A keyboard search opens its contextual panel first. No motion is added to data updates or the layout.
+Every rail entry marks its current route with `aria-current="page"`, whether it is a destination link or the current section's contextual toggle. The same selected background and border apply to both. `aria-expanded` only describes panel visibility; opening a panel does not select a route, and closing it does not remove route selection. Hover has its existing neutral background; keyboard focus retains its separate focus ring.
+
+Collapsing returns focus to the object toggle or destination link. If that object disappears while its panel holds focus, focus returns to an existing current or first rail destination. Data updates patch rail controls by key. A keyboard search opens its contextual panel first. The contextual panel enters from the navigation edge and exits toward it using the shared `Motion` lifecycle and motion tokens. Its space stays until the exit ends; its content is inert during exit, and focus returns to the rail immediately. Reopening cancels an exit. Crossing the mobile cut cancels desktop motion. Reduced motion changes visibility immediately. Data updates start no animation.
 
 Keep information needed independently of the contextual panel, such as a machine's state or spending estimate, in an always-visible work region. An optional conversation panel is not an appropriate sole location for that information.
 
