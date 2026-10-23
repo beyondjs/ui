@@ -56,6 +56,11 @@ export class Collection extends Component {
 	 * @param {(state: {query: string, filters: object, page: number}) => void} [options.onstate]
 	 * @param {{title: string, body?: string, action?: Node}} [options.empty] the empty collection
 	 * @param {() => void} [options.onrender] runs after each redraw of the rows (the React adapter fills cells then)
+	 * @param {(row: object) => object} [options.row] the list presentation's own `ListRow` options for a row (0.20.5)
+	 * @param {(row: object) => {key: string, label: string}} [options.group] groups consecutive rows under a label (0.20.5, `Recency`)
+	 * @param {boolean|string|Node|((list: {count: number}) => string|Node)} [options.end] the list's end line on its
+	 * last page (0.20.5): true (default) says the family's words, a text, node or function of how many rows the
+	 * list holds the product's, false none
 	 */
 	constructor(options) {
 		super();
@@ -66,6 +71,10 @@ export class Collection extends Component {
 		this.#state = { query: state.query ?? '', filters: { ...(state.filters ?? {}) }, page: Math.max(1, Number(state.page) || 1) };
 		this.#tools = new CollectionTools({ label, search, filters, state: this.#state, labels, compact: options.tools !== 'expanded', delay: options.delay ?? 250, onchange: state => this.#change(state) });
 		this.#tools.element.classList.add('bui-collection-tools');
+		// Down from the search reaches the first row (the list rule L7), wherever the tools are placed
+		this.#tools.element.addEventListener('keydown', event => {
+			if (event.key === 'ArrowDown' && event.target.matches?.('input') && this.#rows?.first?.()) event.preventDefault();
+		});
 		this.#region = el('div', { class: 'bui-collection-body', tabindex: '-1', 'aria-busy': 'false' });
 		this.#status = el('p', { class: 'bui-hidden', role: 'status' });
 		this.#pager = el('nav', { class: 'bui-pager', 'aria-label': this.#labels.text('pages', { label }) });
@@ -115,10 +124,11 @@ export class Collection extends Component {
 		this.#rows?.destroy?.();
 		this.#rows = rows.length ? this.#table(rows) : null;
 		const table = this.#rows?.element ?? null;
-		fill(this.#region, [table ?? this.#nothing()]);
+		const further = more ?? (pages !== null ? this.#state.page < pages : false);
+		fill(this.#region, [table ?? this.#nothing(), table && !further ? this.#end((this.#state.page - 1) * limit + rows.length) : null]);
 		this.#columns.attach(table?.localName === 'table' ? table : null, this.#region);
 		this.#options.onrender?.();
-		const summary = this.#paging({ rows, total, more: more ?? (pages !== null ? this.#state.page < pages : false), pages, limit });
+		const summary = this.#paging({ rows, total, more: further, pages, limit });
 		this.#status.textContent = rows.length ? summary : this.#region.textContent;
 		// After a page change focus moves to the new rows, so the pager button that was pressed can disable itself.
 		if (this.#paged) this.#region.focus();
@@ -134,8 +144,19 @@ export class Collection extends Component {
 	}
 
 	#table(rows) {
-		const { label, columns, link = null, onopen = null, key, presentation = 'table' } = this.#options;
-		return presentation === 'list' ? new CollectionRows({ label, columns, rows, link, onopen, key }) : new Table({ label, columns, rows, link, onopen, key });
+		const { label, columns, link = null, onopen = null, key, presentation = 'table', row = null, group = null } = this.#options;
+		return presentation === 'list' ? new CollectionRows({ label, columns, rows, link, onopen, key, row, group, query: this.#state.query }) : new Table({ label, columns, rows, link, onopen, key });
+	}
+
+	/**
+	 * A list's end line on its last page (0.20.5, the list rule L5): it says the list is whole, so a short
+	 * list never reads as one still loading, and where a pointer moves it, the keys that go through it
+	 */
+	#end(count) {
+		const { end = true, presentation = 'table' } = this.#options;
+		if (presentation !== 'list' || end === false) return null;
+		const said = end === true ? this.#labels.text('end') : typeof end === 'function' ? end({ count }) : end;
+		return el('p', { class: 'bui-rows-end' }, [el('span', {}, [content(said)]), el('span', { class: 'bui-keys bui-rows-keys', text: this.#labels.text('keys') })]);
 	}
 
 	#change(part) {

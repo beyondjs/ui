@@ -1,0 +1,58 @@
+/* The family's list rules (0.20.5, D162). A row's lead sits on its name's line, so marks read down one
+   column at the names' height (L2). */
+.bui-row-lead {
+	align-self: flex-start;
+	align-items: center;
+	height: calc(var(--text-body) * var(--leading-body));
+}
+.bui-row-lead .bui-status-dot {
+	margin-top: 0;
+}
+/* A row's menu shows on the row a pointer rests on, the row the focus is in and while it is open; a
+   touch screen always shows it (L6) */
+@media (hover: hover) and (pointer: fine) {
+	.bui-row:not(:hover, :focus-within) > .bui-row-end > .bui-menu-holder:not(:has([aria-expanded='true'])) {
+		opacity: 0;
+	}
+}
+/* A row whose end is only its menu keeps it beside its name at every width (L6) */
+.bui-row:has(> .bui-row-end > .bui-menu-holder:only-child) {
+	flex-wrap: nowrap;
+}
+.bui-row-end:has(> .bui-menu-holder:only-child) {
+	flex: none;
+}
+/* Groups of rows under their labels, each label opening its list (L4) */
+.bui-rows-groups {
+	display: grid;
+}
+.bui-rows-label {
+	margin: 0;
+	padding: var(--space-6) 0 var(--space-2);
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	font-weight: var(--weight-medium);
+	line-height: var(--leading-label);
+}
+.bui-rows-group:first-child > .bui-rows-label {
+	padding-top: var(--space-1);
+}
+/* A list's end line: the list is whole (L5). A line on the content edge closes the last row; the keys follow
+   its words, never stranded at the far edge. */
+.bui-rows-end {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-1) var(--space-4);
+	margin: 0;
+	padding-top: var(--space-3);
+	border-top: 1px solid var(--color-border-strong);
+	color: var(--color-text-muted);
+	font-size: var(--text-label);
+	line-height: var(--leading-label);
+}
+/* The words a search matched, in the names (L8) */
+.bui-match {
+	border-radius: 2px;
+	background: var(--color-info-surface);
+	color: inherit;
+}

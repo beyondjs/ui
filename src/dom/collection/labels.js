@@ -19,7 +19,9 @@ export const defaults = {
 	previous: 'Previous',
 	next: 'Next',
 	columns: ({ count }) => (count === 1 ? 'Show 1 more column' : `Show ${count} more columns`),
-	fewer: 'Show fewer columns'
+	fewer: 'Show fewer columns',
+	end: 'Nothing more',
+	keys: '↑ ↓ to move · Enter to open'
 };
 
 export const spanish = {
@@ -40,5 +42,7 @@ export const spanish = {
 	previous: 'Anterior',
 	next: 'Siguiente',
 	columns: ({ count }) => (count === 1 ? 'Mostrar 1 columna más' : `Mostrar ${count} columnas más`),
-	fewer: 'Mostrar menos columnas'
+	fewer: 'Mostrar menos columnas',
+	end: 'No hay más',
+	keys: '↑ ↓ para moverte · Enter para abrir'
 };

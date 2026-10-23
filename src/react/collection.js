@@ -12,15 +12,19 @@ const { useRef, useState } = React;
  * changes (for example from the address on back and forward) and `onState` reports the person's
  * changes. `link(row)` makes rows open their detail; `onOpen(row, event)` takes over the navigation.
  */
-export function Collection({ label, columns, source, link = null, onOpen = null, search = true, filters = [], tools = 'compact', toolsTarget = null, state = null, onState = null, limit = 20, empty = null, explain = null, labels, presentation = 'table' }) {
+export function Collection({ label, columns, source, link = null, onOpen = null, search = true, filters = [], tools = 'compact', toolsTarget = null, state = null, onState = null, limit = 20, empty = null, explain = null, labels, presentation = 'table', row = null, group = null, end = true }) {
 	const cells = useRef([]);
 	const [portals, setPortals] = useState([]);
-	const latest = useLatest({ source, onOpen, onState, explain, columns, link });
+	const latest = useLatest({ source, onOpen, onState, explain, columns, link, row, group });
 	const [host, list] = useInstance(
 		() =>
 			new List({
 				label,
 				presentation,
+				// The list's own row options and groups (0.20.5) read the latest props
+				row: row ? item => latest.current.row?.(item) ?? {} : null,
+				group: group ? item => latest.current.group(item) : null,
+				end,
 				search,
 				filters,
 				tools,
@@ -36,7 +40,7 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 				columns: columns.map((column, index) => ({ ...column, render: undefined, value: row => cell(row, index) })),
 				onrender: () => setPortals(cells.current.splice(0))
 			}),
-		[label, presentation, search, JSON.stringify(filters), tools, limit, labels, Boolean(link), Boolean(onOpen), columns.length]
+		[label, presentation, search, JSON.stringify(filters), tools, limit, labels, Boolean(link), Boolean(onOpen), columns.length, Boolean(row), Boolean(group), typeof end === 'string' ? end : Boolean(end)]
 	);
 	useTools(list, toolsTarget, tools);
 	// Each drawn cell asks the latest column definition for its content.

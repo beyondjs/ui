@@ -1,10 +1,11 @@
 // The 0.15.0 audit page of the plain DOM consumer: Floating's menus against the sticky bar, in a box that
 // scrolls and at a composer's caret; a chip folded behind Options; Status, ListRow, DataTable, Tabs, a
-// sidebar count and a CommandCard. window.fixture exposes them to the checks.
+// sidebar count and a CommandCard; since 0.20.5 a grouped list with its rows' marks, menus and end line
+// (D162). window.fixture exposes them to the checks.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { FamilyBar, Sidebar, ActionMenu, ChoiceChip, Composer, Status, ListRow, DataTable, Tabs, CommandCard, el } from '@beyond-js/ui';
+import { FamilyBar, Sidebar, ActionMenu, ChoiceChip, Composer, Status, ListRow, DataTable, Tabs, CommandCard, Collection, Recency, el } from '@beyond-js/ui';
 import { chosen, fallback, product } from '../data/family.js';
 import { machines, options, tones, command } from '../data/audit.js';
 
@@ -25,6 +26,10 @@ main.append(statuses);
 const list = el('ul', { class: 'bui-rows', id: 'rows' }, machines.map(machine => new ListRow({ title: machine.name, href: `#/machines/${machine.id}`, meta: [machine.size, `${machine.conversations} conversations`], lead: { state: machine.state }, status: { state: machine.state }, facts: ['3 d'], actions: [{ label: 'Wake', run: () => log.push(`wake:${machine.id}`) }], menu: [{ label: 'Delete…', tone: 'danger' }] }).element));
 main.append(list);
 const table = new DataTable({ label: 'Machines', columns: [{ key: 'name', label: 'Name', sort: true }, { key: 'size', label: 'Size' }, { key: 'conversations', label: 'Conversations', align: 'end', sort: true }, { key: 'id', label: 'Identifier', mono: true }], rows: machines, onchange: state => log.push(`table:${JSON.stringify(state)}`) }).mount(main);
+const hour = 3600000;
+const recent = machines.map((machine, index) => ({ ...machine, at: Date.now() - [1, 30, 200][index % 3] * hour })).sort((a, b) => b.at - a.at);
+const grouped = new Collection({ label: 'Recent machines', presentation: 'list', columns: [{ key: 'name', label: 'Name', primary: true }], source: Collection.local(recent), link: row => `#/machines/${row.id}`, row: row => ({ lead: { state: row.state }, meta: [row.size, '3 d'], menu: [{ label: 'Rename' }] }), group: new Recency().group(row => row.at), tools: 'external' }).mount(main);
+grouped.element.id = 'grouped';
 const tabs = new Tabs({ items: ['Overview', 'Conversations', 'Repositories', 'AI engines', 'Access', 'Runtime', 'Costs', 'Settings'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 })) }).mount(main);
 const card = new CommandCard({ title: 'Claude Code asks to run a command', command, scope: { label: 'Always allow commands like this' }, allow: () => log.push('allow'), deny: () => log.push('deny') }).mount(main);
 
@@ -36,7 +41,7 @@ window.fixture = {
 	menu,
 	card,
 	destroy() {
-		for (const component of [card, tabs, table, menu, composer, effort, model, sidebar, bar]) component.destroy();
+		for (const component of [card, tabs, grouped, table, menu, composer, effort, model, sidebar, bar]) component.destroy();
 	},
 	ready: true
 };

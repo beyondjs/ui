@@ -171,6 +171,46 @@ export const checks = [
 		}
 	},
 	{
+		name: 'a grouped list: each label on the content edge, each mark on its name\'s line, a menu shown only where the pointer rests or the focus is, and an end line on the edge (0.20.5, D162)',
+		consumers: ['dom'],
+		async run(browser, consumer) {
+			for (const scheme of ['light', 'dark']) {
+				for (const width of [1440, 390]) {
+					const at = `${scheme} ${width} px`;
+					const { page, context } = await open(browser, consumer, { width, scheme });
+					await page.waitForSelector('#grouped .bui-rows-end');
+					const found = await page.evaluate(() => {
+						const list = document.querySelector('#grouped');
+						const box = node => node.getBoundingClientRect();
+						const label = list.querySelector('.bui-rows-label');
+						const row = list.querySelector('.bui-row');
+						const end = list.querySelector('.bui-rows-end');
+						const title = box(row.querySelector('.bui-row-title'));
+						const dot = box(row.querySelector('.bui-status-dot'));
+						const holder = row.querySelector('.bui-row-end > .bui-menu-holder');
+						return {
+							edge: Math.round(box(row).left + 12),
+							label: Math.round(box(label).left),
+							end: Math.round(box(end).left),
+							groups: list.querySelectorAll('.bui-rows-group').length,
+							mark: Math.abs((dot.top + dot.bottom) / 2 - (title.top + title.height / 2)),
+							hidden: getComputedStyle(holder).opacity,
+							beside: Math.abs(box(holder).top - box(row).top) < box(row).height / 2
+						};
+					});
+					expect(found.groups === 3, `${at}: three groups by recency: ${JSON.stringify(found)}`);
+					expect(Math.abs(found.label - found.edge) <= 1 && Math.abs(found.end - found.edge) <= 1, `${at}: the label and the end line start on the content edge: ${JSON.stringify(found)}`);
+					expect(found.mark <= 2, `${at}: the mark sits on its name's line: ${JSON.stringify(found)}`);
+					expect(found.hidden === '0', `${at}: a menu waits for the pointer or the focus: ${JSON.stringify(found)}`);
+					expect(found.beside, `${at}: the menu stays beside the name: ${JSON.stringify(found)}`);
+					await page.locator('#grouped .bui-row').first().hover();
+					expect((await page.locator('#grouped .bui-row').first().locator('.bui-row-end > .bui-menu-holder').evaluate(node => getComputedStyle(node).opacity)) === '1', `${at}: the menu shows on the row the pointer rests on`);
+					await context.close();
+				}
+			}
+		}
+	},
+	{
 		name: 'CommandCard: focused on arrival, Enter allows once and the outcome replaces the answers',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {

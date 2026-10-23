@@ -17,3 +17,4 @@ export function ActionLine(props: { facts?: Array<import('react').ReactNode>; la
 
 // The React Diff (0.11.2)
 export * from './react-diff.js';
+export { Recency, Matches } from './parts.js';

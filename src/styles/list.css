@@ -226,6 +226,13 @@ span.bui-row-title {
 		flex: 1 1 100%;
 		justify-content: flex-start;
 	}
+	.bui-row-end:has(> .bui-menu-holder:only-child) {
+		flex: none;
+	}
+	/* A narrow row's quiet line wraps rather than cutting its last facts (L10) */
+	.bui-row-meta {
+		white-space: normal;
+	}
 	.bui-row-fact {
 		min-width: 0;
 		max-width: 100%;

@@ -173,6 +173,7 @@ export interface CollectionProps<Row> {
 	explain?: ((error: unknown) => string) | null;
 	labels?: Copy;
 	/** `list` (0.15.0): rows as `ListRow`s */ presentation?: 'table' | 'list';
+	/** 0.20.5 (D162): the list's own `ListRow` options for a row, its groups and its end line */ row?: ((row: Row) => Partial<import('./patterns.js').ListRowOptions>) | null; group?: ((row: Row) => { key: string; label: string }) | null; end?: boolean | string;
 }
 export function Collection<Row = Record<string, unknown>>(props: CollectionProps<Row>): ReactElement;
 

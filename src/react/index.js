@@ -24,6 +24,8 @@ export { useAgain, AgainLine, RetryAction } from './again.js';
 export { Again } from '../dom/again/again.js';
 export { Clock } from '../dom/time/clock.js';
 export { Age } from '../dom/time/age.js';
+export { Recency } from '../dom/collection/recency.js';
+export { Matches } from '../dom/list/matches.js';
 export { confirm, prompt, alert } from '../dom/questions.js';
 export { availability } from '../dom/availability.js';
 export { names as productNames } from '../dom/family/labels.js';
