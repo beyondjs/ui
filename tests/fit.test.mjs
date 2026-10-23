@@ -46,18 +46,21 @@ class Flow {
 		const fold = root.dataset.fit === 'fold' && !root.hasAttribute('data-options');
 		if (node.closest('[hidden]')) return false;
 		if (node.matches('.bui-composer-more')) return root.dataset.fit === 'fold';
-		if (fold && node.closest('.bui-composer-attach, .bui-composer-settings')) return false;
+		// The + is one target wide and never folds (0.26.0): only the settings do
+		if (fold && node.closest('.bui-composer-settings')) return false;
 		return true;
 	}
 
 	/** An item's width at the composer's level. */
 	size(node) {
-		const short = Boolean(this.#composer.element.dataset.fit);
-		if (node.matches('.bui-composer-more')) return 32;
-		if (node.matches('.bui-composer-attach')) return 80;
+		const root = this.#composer.element;
+		const short = Boolean(root.dataset.fit);
+		// Options with the model beside its glyph, unless the stylesheet leaves the value out
+		if (node.matches('.bui-composer-more')) return node.hasAttribute('data-summary') && !root.matches('[data-options], [data-bare]') ? 120 : 32;
+		if (node.matches('.bui-composer-attach')) return 32;
 		if (node.matches('.bui-chip')) return short ? 100 : 230;
 		if (node.matches('.bui-composer-send')) return 70;
-		if (node.matches('.bui-composer-stop')) return 110;
+		if (node.matches('.bui-composer-stop')) return 32;
 		return 0;
 	}
 
@@ -94,7 +97,7 @@ test('a wide toolbar keeps every word; a narrower one shortens the chips to thei
 	assert.equal(composer.element.hasAttribute('data-fit'), false);
 	layout.width = 400;
 	composer.toolbar.measure();
-	assert.equal(composer.toolbar.level, 'short', 'two shortened chips, Attach and Send fit in 400');
+	assert.equal(composer.toolbar.level, 'short', 'two shortened chips, the + and Send fit in 400');
 	assert.equal(composer.element.dataset.fit, 'short');
 	layout.width = 250;
 	composer.toolbar.measure();
@@ -106,15 +109,32 @@ test('a wide toolbar keeps every word; a narrower one shortens the chips to thei
 	composer.destroy();
 });
 
-test('the actions keep their words: a running turn\'s Interrupt counts, and the fit folds only what it may', () => {
+test('the actions are never shortened: a running turn\'s Interrupt counts, and the fit folds only what it may', () => {
 	const composer = compose({ stop: { label: 'Interrupt', run: () => undefined } });
 	layout = new Flow(composer, 500);
 	composer.toolbar.measure();
-	assert.equal(composer.toolbar.level, 'short', '80 + 100 + 100 + 110 + 70 and the gaps fit in 500');
+	assert.equal(composer.toolbar.level, 'short', '32 + 100 + 100 + 32 + 70 and the gaps fit in 500');
 	composer.stop = null;
 	layout.width = 300;
 	composer.toolbar.measure();
 	assert.equal(composer.toolbar.level, 'fold');
+	composer.destroy();
+});
+
+test('when even the folded row does not fit, Options leaves out the model beside its glyph, its name still saying it (0.26.0)', () => {
+	const composer = compose({ summary: 'Opus 5.5' });
+	layout = new Flow(composer, 250);
+	composer.toolbar.measure();
+	assert.equal(composer.toolbar.level, 'fold');
+	assert.equal(composer.element.hasAttribute('data-bare'), false, '120 + 32 + 70 and the gaps fit in 250');
+	layout.width = 200;
+	composer.toolbar.measure();
+	assert.equal(composer.toolbar.level, 'fold');
+	assert.ok(composer.element.hasAttribute('data-bare'), 'the glyph alone keeps one row');
+	assert.equal(composer.fold.button.getAttribute('aria-label'), 'Options · Opus 5.5');
+	layout.width = 1000;
+	composer.toolbar.measure();
+	assert.deepEqual([composer.toolbar.level, composer.element.hasAttribute('data-bare')], ['full', false], 'wider again, it says it');
 	composer.destroy();
 });
 
@@ -155,7 +175,7 @@ test('while Options is open or focused the level stays; it is decided again when
 	composer.destroy();
 });
 
-test("a shortened chip's tooltip says its whole face; at full level it says nothing", () => {
+test("a chip shows its value alone at every level (0.26.0): its tooltip says its whole face", () => {
 	const composer = compose();
 	layout = new Flow(composer, 1000);
 	composer.toolbar.measure();
@@ -163,7 +183,7 @@ test("a shortened chip's tooltip says its whole face; at full level it says noth
 	assert.equal(button.getAttribute('data-bui-tip'), 'Model: GPT-6.1 Sol · Medium');
 	page.key(document.body, 'Tab');
 	button.focus();
-	assert.equal(document.querySelector('.bui-hint:not([hidden])'), null, 'the words are all shown');
+	assert.equal(document.querySelector('.bui-hint:not([hidden])')?.textContent ?? null, 'Model: GPT-6.1 Sol · Medium', 'its label is only in its name and tooltip');
 	button.blur();
 	layout.width = 400;
 	composer.toolbar.measure();

@@ -2,8 +2,8 @@ import { expect, overflow } from '../support/browser.mjs';
 import { open } from './thread.mjs';
 
 /**
- * The composer of 0.11.0 in a real engine, on the `thread.html` pages: the state line above the box
- * with its action; the settings chips by keyboard and at 44 px on a touch screen; attachments picked
+ * The composer of 0.11.0 in a real engine, on the `thread.html` pages: the state line with its action,
+ * the box's first band since 0.26.0 (D165); the settings chips by keyboard and at 44 px on a touch screen; attachments picked
  * through the platform's chooser, dropped and pasted (synthetic drag and clipboard events carrying a
  * real DataTransfer: no person drags and no system clipboard is read), removed by keyboard and said
  * once per state; and suggestions with real keys, above the docked box, with their bounded states.
@@ -18,7 +18,7 @@ const logged = (page, text) => page.waitForFunction(entry => window.fixture.log.
 
 export const checks = [
 	{
-		name: 'composer state line above the box with its action at its end; settings chips at the toolbar\'s start, wrapping at 320 px with compact: false (the 0.11.0 toolbar); both themes',
+		name: "composer state line as the box's first band, its words where the field's start and its action at its end; settings chips at the toolbar's start, wrapping at 320 px with compact: false (the 0.11.0 toolbar); both themes",
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const copy = words[consumer.language];
@@ -33,9 +33,14 @@ export const checks = [
 						const action = line.querySelector('.bui-composer-status-action');
 						const chips = [...root.querySelectorAll('.bui-composer-settings .bui-chip')].map(box);
 						const pad = parseFloat(getComputedStyle(line).paddingInlineEnd) || 0;
-						return { pad, line: box(line), box: box(root.querySelector('.bui-composer-box')), action: box(action), chips, root: box(root), start: box(root.querySelector('.bui-composer-start')), end: box(root.querySelector('.bui-composer-end')) };
+						const field = root.querySelector('.bui-composer-field');
+						const words = box(line.querySelector('.bui-composer-status')).left + parseFloat(getComputedStyle(line.querySelector('.bui-composer-status')).paddingInlineStart || '0');
+						const text = box(field).left + parseFloat(getComputedStyle(field).paddingInlineStart);
+						return { pad, words, text, line: box(line), box: box(root.querySelector('.bui-composer-box')), action: box(action), chips, root: box(root), start: box(root.querySelector('.bui-composer-start')), end: box(root.querySelector('.bui-composer-end')) };
 					}, dock);
-					expect(found.line.bottom <= found.box.top + 0.5, `${at}: the line above the box: ${found.line.bottom} > ${found.box.top}`);
+					expect(found.line.top >= found.box.top - 0.5 && found.line.top <= found.box.top + 1.5 && found.line.bottom < found.box.bottom, `${at}: the line is the box's first band: ${found.line.top} for ${found.box.top}`);
+					expect(Math.abs(found.line.left - found.box.left) <= 1.5 && Math.abs(found.line.right - found.box.right) <= 1.5, `${at}: the band shares the box's edges`);
+					expect(Math.abs(found.words - found.text) <= 1, `${at}: its words start where the field's do: ${found.words} for ${found.text}`);
 					expect(Math.abs(found.action.right - (found.line.right - found.pad)) <= 1, `${at}: its action at its end: ${found.action.right} for ${found.line.right - found.pad}`);
 					expect(found.chips.length === 2 && found.chips.every(chip => chip.left >= found.root.left - 0.5 && chip.right <= found.root.right + 0.5), `${at}: the chips inside the composer`);
 					if (width <= 390) expect(found.start.bottom <= found.end.top + 1, `${at}: the start takes a row of its own`);

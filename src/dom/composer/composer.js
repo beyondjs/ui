@@ -10,26 +10,23 @@ import { ComposerContext } from './context.js';
 import { ComposerSend } from './send.js';
 import { ComposerToolbar } from './toolbar.js';
 import { ComposerExpand } from './expand.js';
+import { ComposerMarks } from './marks.js';
+import { ComposerBox } from './box.js';
 import { composer as copy } from './labels.js';
 
 /**
- * A message box, the same wherever a person writes to an agent or a person (the components guide,
- * "Conversations", states every option): an optional state line above the box; a field of one line that
- * grows with its text and then scrolls (named by `label`, with no visible label, and a `placeholder` that
- * says what sending will do); a toolbar with Attach, the turn's `settings` and the product's `tools` at
- * its start (kept on one row by `ComposerToolbar`), then `extras`, the reason sending is unavailable, the
- * `stop` action and the primary action with the other `actions` in a split menu.
+ * A message box, the same wherever a person writes to an agent or a person; the components guide
+ * ("Conversations") states every option. One rounded box: an optional state line as its first band, a
+ * field that grows with its text and then scrolls (named by `label`, a `placeholder` saying what sending
+ * does), and a toolbar whose controls share one geometry since 0.26.0 (D165): the **+**, the `settings`
+ * by their value and the `tools`, then `extras`, the reason sending is unavailable, Dictate, `stop` and
+ * Send (glyphs alone, their words their name and tooltip; the other `actions` in Send's split menu).
  *
- * Keys follow `submit` (`ComposerKeys`). Sending is one path for the keys, the button and the menu: the
- * text (trimmed) leaves the field at once and `onsubmit({ text, action, attachments? })` runs, one send at
- * a time and none while `busy` or `disabled`; a rejection gives the text back with `explain(error)`.
- *
- * Since 0.14.0 (D100) the same composer serves a new and a started conversation: a `tray` of compact
- * chips sits on the box's lower edge while the product needs it (the context to choose before the first
- * send) and leaves by `tray = null`; focus draws the box's own border in the focus color; `commands` list
- * after a "/" at the field's start; `recall` brings a message back on ArrowUp in an empty field; the field
- * stops near a third of the window (`--bui-composer-cap`) and **Expand** opens a taller editor; and
- * `dictation` offers **Dictate**: voice to editable text, never sent by itself.
+ * Sending is one path for the keys (`submit`, `ComposerKeys`), the button and the menu: the trimmed text
+ * leaves the field at once and `onsubmit({ text, action, attachments? })` runs, one send at a time and
+ * none while `busy` or `disabled`; a rejection gives the text back with `explain(error)`. Since 0.14.0
+ * (D100) a new and a started conversation share it (a `tray` of chips, focus as the box's border, `commands`
+ * after "/", `recall`, **Expand**, `dictation`); its states and marks are `ComposerMarks`'.
  */
 export class Composer extends Component {
 	/** The copy in English and Spanish. */
@@ -46,14 +43,13 @@ export class Composer extends Component {
 	#actions;
 	#labels;
 	#onchange;
-	#disabled = null;
-	#busy = false;
-	#tray = el('div', { class: 'bui-composer-tray', hidden: true });
+	#box = new ComposerBox();
 	#expand;
 	#step = new ComposerStep();
+	#marks;
 
 	/** @param {import('./options.js').ComposerOptions} options what the composer shows and how it sends */
-	constructor({ label, onsubmit, placeholder = null, status = null, tools = [], extras = [], actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value = '', min = 1, max = 12, name = null, onchange = null, explain = undefined, labels = {}, settings = [], attach = null, attachments = [], onsuggest = null, suggest = null, locale = undefined, compact = true, summary = null, tray = [], commands = null, recall = null, dictation = null, step = null }) {
+	constructor({ label, onsubmit, placeholder = null, status = null, tools = [], extras = [], actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value = '', min = 1, max = 12, name = null, onchange = null, explain = undefined, labels = {}, settings = [], attach = null, attachments = [], onsuggest = null, suggest = null, locale = undefined, compact = true, summary = null, tray = [], commands = null, recall = null, dictation = null, step = null, add = [], live = false }) {
 		super();
 		if (typeof onsubmit !== 'function') throw new TypeError('A composer sends through onsubmit');
 		this.#labels = new Labels(copy.en, labels);
@@ -63,24 +59,23 @@ export class Composer extends Component {
 		const host = { alive: () => !this.destroyed, files: () => this.#context.files, primary: () => this.#actions.primary.id, draw: () => this.#draw(), root: () => this.#element };
 		this.#sender = new ComposerSend({ field: this.#field, labels: this.#labels, onsubmit, onchange, explain, host });
 		this.#actions = new ComposerActions({ labels: this.#labels, run: action => this.#send(action, true), refocus: () => this.focus() });
-		const box = el('div', { class: 'bui-composer-box' });
-		this.#element = el('div', { class: 'bui-composer', 'data-submit': submit }, [this.#status.element, box, this.#keys.guide]);
+		const box = this.#box.element;
+		this.#element = el('div', { class: 'bui-composer', 'data-submit': submit }, [box, this.#keys.guide]);
+		this.#marks = new ComposerMarks(this.#element, () => !this.#field.value.trim() && !this.#context?.files.ready);
 		const control = this.#field.control;
 		this.#context = new ComposerContext({ root: this.#element, box, field: control, labels: this.#labels, locale, attach, onsuggest, suggest, commands, recall, dictation, refocus: () => this.focus(), oninsert: (text, caret) => this.#write(text, caret) });
 		this.#toolbar = new ComposerToolbar({ root: this.#element, controls: this.#context.controls, actions: this.#actions.element, labels: this.#labels, compact });
 		this.#expand = new ComposerExpand({ root: this.#element, box, field: control, labels: this.#labels });
 		const voice = this.#context.dictation;
 		if (voice) this.#actions.voice = voice.button;
-		box.prepend(this.#context.files.element, this.#expand.element, this.#field.element, ...[this.#sender.element, voice?.element, this.#toolbar.element, this.#tray].filter(Boolean));
+		this.#box.hold([this.#status.element, this.#context.files.element, this.#expand.element, this.#field.element, this.#sender.element, voice?.element, this.#toolbar.element]);
 		this.#element.append(this.#context.files.announcer, this.#expand.dialog);
 		this.#keys.watch(control, { take: event => this.#context.keys(event), send: () => this.#send(null, false) });
-		control.addEventListener('input', () => (this.#say(null), this.#onchange?.(control.value)));
+		control.addEventListener('input', () => (this.#say(null), this.#marks.empty(), this.#onchange?.(control.value)));
 		// The touch screen may change (a keyboard attached): the hint is read again when the field takes focus
 		control.addEventListener('focus', () => this.#instruct());
-		Object.assign(this, { status, settings, attachments, tools, extras, actions, stop, summary, tray, step });
-		this.#disabled = disabled || null;
-		this.#busy = Boolean(busy);
-		this.#draw();
+		// The busy and disabled setters draw the composer
+		Object.assign(this, { status, settings, attachments, tools, extras, actions, stop, summary, tray, step, add, live, disabled, busy });
 	}
 
 	get element() {
@@ -99,13 +94,14 @@ export class Composer extends Component {
 	/** Replaces the text (a prefilled message, a restored draft) without calling `onchange`. */
 	set value(text) {
 		this.#field.value = text;
+		this.#marks.empty();
 	}
 
 	set placeholder(text) {
 		this.#field.placeholder = text;
 	}
 
-	/** The state line above the box: text, a node, `{ text, action }` (0.11.0), or null for none. */
+	/** The state line, the box's first band: text, a node, `{ text, action }` (0.11.0), or null for none. */
 	set status(value) {
 		this.#status.value = value;
 		this.#describe();
@@ -113,7 +109,7 @@ export class Composer extends Component {
 
 	/** The turn's choices at the toolbar's start, before the tools (0.11.0). */
 	set settings(nodes) {
-		this.#toolbar.settings = Composer.#nodes(nodes);
+		this.#toolbar.settings = ComposerBox.nodes(nodes);
 	}
 
 	/** What sending uses ("Opus 5.5"), said beside Options while the settings are folded, or null (0.11.2). */
@@ -139,6 +135,17 @@ export class Composer extends Component {
 	/** The chips: `[{ key, name, size?, type?, state, progress?, reason?, thumbnail?, file? }]` (0.11.0). */
 	set attachments(items) {
 		this.#context.files.items = items;
+		this.#marks.empty();
+	}
+
+	/** The **+** menu's entries after Attach files, `[{ label, run, keys? }]`; none: the + attaches at once (0.26.0). */
+	set add(entries) {
+		this.#context.add.entries = entries;
+	}
+
+	/** Whether the product's work runs now (the engine answering), shown on the box's edge (0.26.0). */
+	set live(value) {
+		this.#marks.live = value;
 	}
 
 	/** The suggestions (`ComposerSuggest`: `open`, `state`, `close()`), or null without `onsuggest`. */
@@ -153,9 +160,7 @@ export class Composer extends Component {
 
 	/** The context tray on the box's lower edge (0.14.0): compact chips, or null or an empty list to take it away. */
 	set tray(nodes) {
-		const list = Composer.#nodes(nodes);
-		fill(this.#tray, list);
-		this.#tray.hidden = !list.length;
+		this.#box.tray = nodes;
 	}
 
 	/** Dictation (`ComposerDictation`: `state`, `start()`, `stop()`, `cancel()`), or null without `dictation` (0.14.0). */
@@ -174,11 +179,11 @@ export class Composer extends Component {
 	}
 
 	set tools(nodes) {
-		this.#toolbar.tools = Composer.#nodes(nodes);
+		this.#toolbar.tools = ComposerBox.nodes(nodes);
 	}
 
 	set extras(nodes) {
-		fill(this.#actions.extras, Composer.#nodes(nodes));
+		fill(this.#actions.extras, ComposerBox.nodes(nodes));
 	}
 
 	/** `[{ id, label, primary? }]`: the primary button and the split menu's other ways to send. */
@@ -199,22 +204,22 @@ export class Composer extends Component {
 	}
 
 	get disabled() {
-		return this.#disabled;
+		return this.#marks.disabled;
 	}
 
 	/** `{ reason }` while sending is unavailable, or null. */
 	set disabled(value) {
-		this.#disabled = value || null;
+		this.#marks.disabled = value || null;
 		this.#draw();
 	}
 
 	/** The product's own work: nothing is sent while busy. */
 	get busy() {
-		return this.#busy;
+		return this.#marks.busy;
 	}
 
 	set busy(value) {
-		this.#busy = Boolean(value);
+		this.#marks.busy = Boolean(value);
 		this.#draw();
 	}
 
@@ -254,7 +259,7 @@ export class Composer extends Component {
 	}
 
 	#send(action, pressed, stepped = false) {
-		if (this.#sender.sending || this.#busy || this.#disabled || this.destroyed || this.#step.running) return Promise.resolve(false);
+		if (this.#sender.sending || this.#marks.busy || this.#marks.disabled || this.destroyed || this.#step.running) return Promise.resolve(false);
 		if (this.#step.active && !stepped) return this.#step.pass({ text: this.#field.value, draw: () => this.#draw(), send: () => this.#send(action, pressed, true) });
 		// What Options showed folds again once the message is sent (a refused one keeps it shown)
 		return this.#sender.send(action, pressed).then(sent => (sent && (this.#toolbar.fold.toggle(false), this.#expand.close()), sent));
@@ -262,9 +267,8 @@ export class Composer extends Component {
 
 	/** Writes a suggestion's text with the caret after it, as typing would, and says the change. */
 	#write(text, caret) {
-		const control = this.#field.control;
-		this.#field.value = text;
-		control.setSelectionRange?.(caret, caret);
+		this.value = text;
+		this.#field.control.setSelectionRange?.(caret, caret);
 		this.#expand.measure();
 		this.#say(null);
 		this.#onchange?.(text);
@@ -275,10 +279,9 @@ export class Composer extends Component {
 	}
 
 	#draw() {
-		const busy = this.#busy || this.#sender.sending || this.#step.running;
-		this.#actions.draw({ disabled: this.#disabled, busy });
-		this.#element.toggleAttribute('data-busy', busy);
-		this.#element.toggleAttribute('data-disabled', Boolean(this.#disabled));
+		const busy = this.#marks.busy || this.#sender.sending || this.#step.running;
+		this.#actions.draw({ disabled: this.#marks.disabled, busy });
+		this.#marks.draw(busy);
 		this.#describe();
 	}
 
@@ -290,11 +293,8 @@ export class Composer extends Component {
 	/** The field is described by the state line, the keys, the reason sending is unavailable and a failure. */
 	#describe() {
 		if (!this.#actions) return;
-		const ids = [this.#status.id, this.#keys.guide.id, this.#disabled?.reason ? this.#actions.reason : null, this.#sender.id];
+		const ids = [this.#status.id, this.#keys.guide.id, this.#marks.disabled?.reason ? this.#actions.reason : null, this.#sender.id];
 		this.#field.control.setAttribute('aria-describedby', ids.filter(Boolean).join(' '));
 	}
 
-	static #nodes(nodes) {
-		return [].concat(nodes ?? []).filter(Boolean).map(node => node.element ?? node);
-	}
 }

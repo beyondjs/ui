@@ -6,17 +6,17 @@ import { Hint } from '../core/hint.js';
 /**
  * A composer's **Options** (0.11.1): when the toolbar cannot keep one row even with its chips shortened
  * to their value (`ComposerFit`, measured since 0.11.2; below 30rem of composer in 0.11.1), the turn's
- * settings and Attach fold behind one control, the `more` glyph named "Options" with the family tooltip
+ * settings fold behind one control, the `more` glyph named "Options" with the family tooltip
  * (D11's closed list), so the toolbar keeps one row and the dock does not grow. When the toolbar fits,
  * the control is not shown and nothing is folded.
  *
- * It is a disclosure, not a menu: its contents are controls of their own (chips with their own menus,
- * Attach), so the button says `aria-expanded` and controls them, and pressing it shows them in the
+ * It is a disclosure, not a menu: its contents are controls of their own (chips with their own menus),
+ * so the button says `aria-expanded` and controls them, and pressing it shows them in the
  * toolbar's start, beside Options from the first row (wrapping as they need), the actions taking the
  * next row.
  * Focus stays on the button; Tab moves into what it showed. Escape on any of them (not taken by an open
- * menu) folds them and returns focus to Options, and so does sending a message. A paste or a drop
- * still attaches while Attach is folded, and `Composer.attach()` still opens the chooser.
+ * menu) folds them and returns focus to Options, and so does sending a message. Since 0.26.0 (D165) the
+ * composer's **+** is one target wide and never folds: only the settings do (Attach folded before).
  *
  * Since 0.11.2 a `summary` (the model that will run, "Opus 5.5") shows beside the glyph, so a folded
  * composer still says what sending uses; the control's name then says both ("Options · Opus 5.5").
@@ -25,7 +25,7 @@ import { Hint } from '../core/hint.js';
  * `chip.open()`) is not a silent no-op (DQ-01): the chip's `bui-refused` shows what Options holds and the
  * chip opens.
  *
- * The control exists only while there is something to fold (Attach or at least one setting); a
+ * The control exists only while there is something to fold (at least one setting); a
  * product passes `compact: false` to keep the wrapped toolbar of 0.11.0.
  */
 export class ComposerFold {
@@ -45,7 +45,7 @@ export class ComposerFold {
 	 * @param {HTMLElement} options.bar the toolbar, where the control goes first, before its start
 	 * @param {import('../core/labels.js').Labels} options.labels the composer's copy (`options`)
 	 * @param {boolean} options.enabled whether the composer folds at all (`compact`)
-	 * @param {Array<HTMLElement|null|undefined>} options.parts what it folds: Attach (when there is one) and the settings' holder
+	 * @param {Array<HTMLElement|null|undefined>} options.parts what it folds: the settings' holder
 	 * @param {((open: boolean) => void)|null} [options.onchange] it showed or folded what it holds
 	 */
 	constructor({ root, bar, labels, enabled, parts, onchange = null }) {

@@ -1,5 +1,6 @@
 import { test, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { Page } from './support/page.mjs';
 
 /** ChoiceChip (0.11.0): a compact choice on ChoiceMenu with its value and a state in words, its own state, the menu's keyboard and statements. */
@@ -42,6 +43,26 @@ test("the chip's own state stands over the chosen option's, and changing it call
 	chip.state = null;
 	assert.equal(chip.control.querySelector('.bui-chip-state').textContent, 'Ready', "back to the option's");
 	assert.deepEqual(chosen, []);
+	chip.destroy();
+});
+
+test("a calm option's state is said in the chip's name and tooltip only, its menu still showing it; the chip's own state is never calm", () => {
+	const machines = [{ value: 'web', label: 'Development Machine', status: ['Busy · 1 running', 'progress'], calm: true }, { value: 'lab', label: 'lab', status: ['Asleep', 'neutral'] }];
+	const chip = new ui.ChoiceChip({ label: 'Machine', options: machines, value: 'web' }).mount(document.body);
+	const state = chip.control.querySelector('.bui-chip-state');
+	assert.ok(state.hasAttribute('data-calm'), 'hidden from sight by the family style');
+	assert.match(chip.control.textContent, /Busy · 1 running/, 'still in the name');
+	assert.equal(chip.control.getAttribute('data-bui-tip'), 'Machine: Development Machine · Busy · 1 running');
+	assert.match(readFileSync(new URL('../src/styles/choice.css', import.meta.url), 'utf8'), /\.bui-chip \.bui-chip-state\[data-calm\]\s*\{[^}]*clip:\s*rect\(0 0 0 0\)/);
+	page.key(chip.control, 'ArrowDown');
+	const shown = chip.element.querySelector('[role="menuitemradio"] .bui-status');
+	assert.equal(shown.hasAttribute('data-calm'), false, 'the menu says it as every state');
+	page.key(document.activeElement, 'Escape');
+	chip.value = 'lab';
+	assert.equal(chip.control.querySelector('.bui-chip-state').hasAttribute('data-calm'), false);
+	chip.value = 'web';
+	chip.state = ['Waking up', 'progress'];
+	assert.equal(chip.control.querySelector('.bui-chip-state').hasAttribute('data-calm'), false, "the chip's own state is said");
 	chip.destroy();
 });
 

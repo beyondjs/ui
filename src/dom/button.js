@@ -2,6 +2,7 @@ import { Component } from './core/component.js';
 import { el, fill, content } from './core/element.js';
 import { glyph } from './core/icons.js';
 import { Labels } from './core/labels.js';
+import { Hint } from './core/hint.js';
 
 const defaults = { busy: '{label}…' };
 
@@ -11,6 +12,11 @@ const defaults = { busy: '{label}…' };
  * Variants: `primary`, `secondary`, `quiet` and `danger`. While busy the button keeps focus and its
  * place but ignores presses (`aria-disabled`), shows a spinner and says it is working, so a double
  * press can never send an action twice; `run()` wraps an asynchronous action in that state.
+ *
+ * Since 0.26.0 (D165) a button may be `bare`: its glyph alone is drawn, its label stays its accessible
+ * name (visually hidden, and its `aria-label`) and the family tooltip shows it on hover and focus. Only a
+ * glyph of the closed list (`unlabeled`, D11) stands alone this way; `bare` can change while it lives,
+ * as a composer's Send does when a step needs its words.
  */
 export class Button extends Component {
 	#element;
@@ -19,6 +25,9 @@ export class Button extends Component {
 	#labels;
 	#busy = false;
 	#disabled;
+	#bare = false;
+	#name;
+	#hint = null;
 
 	/**
 	 * @param {object} options
@@ -28,6 +37,7 @@ export class Button extends Component {
 	 * @param {string} [options.href] renders a link styled as a button
 	 * @param {(event: Event) => void} [options.onclick]
 	 * @param {string} [options.name] accessible name when it differs from the label
+	 * @param {boolean} [options.bare] the glyph alone, its label the name and the tooltip (0.26.0, D165)
 	 */
 	constructor({
 		label,
@@ -41,12 +51,14 @@ export class Button extends Component {
 		small = false,
 		name = null,
 		describedby = null,
+		bare = false,
 		labels = {}
 	}) {
 		super();
 		this.#label = label;
 		this.#glyph = glyph;
 		this.#disabled = disabled;
+		this.#name = name;
 		this.#labels = new Labels(defaults, labels);
 		const props = {
 			class: `bui-button bui-button-${variant}${small ? ' bui-button-small' : ''}`,
@@ -58,6 +70,7 @@ export class Button extends Component {
 				? el('a', { ...props, href })
 				: el('button', { ...props, type, disabled, onclick: event => this.#press(event, onclick) });
 		if (href && !disabled && onclick) this.#element.addEventListener('click', onclick);
+		this.#bare = Boolean(bare && glyph);
 		this.busy = busy;
 	}
 
@@ -91,6 +104,39 @@ export class Button extends Component {
 		this.#render();
 	}
 
+	/** The accessible name when it differs from the words (a bare button's name and tooltip), or null for its words. */
+	set name(value) {
+		this.#name = value || null;
+		if (this.#bare) return this.#render();
+		if (this.#name) this.#element.setAttribute('aria-label', this.#name);
+		else this.#element.removeAttribute('aria-label');
+	}
+
+	get bare() {
+		return this.#bare;
+	}
+
+	/** Draws the glyph alone (true) or with its words (false); a button without a glyph keeps its words. */
+	set bare(value) {
+		const bare = Boolean(value && this.#glyph);
+		if (bare === this.#bare) return;
+		this.#bare = bare;
+		this.#render();
+	}
+
+	/** Replaces the glyph (a copy's check for a moment), drawn while the button is not busy. */
+	set glyph(name) {
+		this.#glyph = name ?? null;
+		if (!this.#glyph) this.#bare = false;
+		this.#render();
+	}
+
+	destroy() {
+		this.#hint?.destroy();
+		this.#hint = null;
+		super.destroy();
+	}
+
 	/** Runs an asynchronous action while busy; presses during it are ignored. Rethrows its failure. */
 	async run(work) {
 		if (this.#busy) return undefined;
@@ -115,7 +161,29 @@ export class Button extends Component {
 		const text = this.#busy && typeof this.#label === 'string' ? this.#labels.text('busy', { label: this.#label }) : this.#label;
 		fill(this.#element, [
 			this.#busy ? el('span', { class: 'bui-spinner', 'aria-hidden': 'true' }) : this.#glyph ? glyph(this.#glyph) : null,
-			el('span', {}, [content(text)])
+			el('span', { class: this.#bare ? 'bui-hidden' : null }, [content(text)])
 		]);
+		this.#face(text);
+	}
+
+	/**
+	 * A bare button's name and tooltip follow its words; once its words are drawn again its name is the
+	 * label's own (or `name`). A button that never was bare is left as it is, whatever a product set on it.
+	 */
+	#face(text) {
+		const element = this.#element;
+		if (!this.#bare && !this.#hint) return;
+		element.classList.toggle('bui-button-bare', this.#bare);
+		element.toggleAttribute('data-bui-hint', this.#bare);
+		if (this.#bare) {
+			const words = typeof text === 'string' ? text : (text?.textContent ?? '');
+			element.setAttribute('aria-label', this.#name ?? words);
+			this.#hint ??= new Hint(element);
+			return;
+		}
+		if (this.#name) element.setAttribute('aria-label', this.#name);
+		else element.removeAttribute('aria-label');
+		this.#hint.destroy();
+		this.#hint = null;
 	}
 }

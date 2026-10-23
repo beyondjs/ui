@@ -2,7 +2,7 @@
 import type { Component, Content, Copy } from './dom.js';
 import type { IconName } from './icons.js';
 import type { Clock, Moment } from './operations.js';
-import type { ComposerEdges, ComposerDictation, ComposerEditor } from './edges.js';
+import type { ComposerEdges, ComposerDictation, ComposerEditor, ComposerEntry } from './edges.js';
 
 type Copies = { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 type Part = Node | { element: Node };
@@ -12,6 +12,8 @@ export interface ComposerAction {
 	id: string;
 	label: string;
 	primary?: boolean;
+	/** The primary draws its words, not its glyph alone (0.26.0): an action that is not a send. */
+	words?: boolean;
 }
 /** The stop action while work runs (Interrupt): busy while `run` works or while `busy` says so. */
 export interface ComposerStop {
@@ -129,11 +131,11 @@ export interface ComposerOptions extends ComposerEdges {
 	placeholder?: string | null;
 	/** The step a message needs first (0.16.0, DQ-03): the primary action names it and performs it. */
 	step?: import('./command.js').ComposerStepOption | null;
-	/** The state line above the box: one sentence, only when it changes what sending does, with its action (0.11.0). */
+	/** The state line, the box's first band since 0.26.0: one sentence, only when it changes what sending does, with its action (0.11.0). */
 	status?: Content | ComposerStatusLine | null;
 	/** The turn's choices at the toolbar's start, before the tools (0.11.0). */
 	settings?: Part[];
-	/** Files from paste, drop and Attach (0.11.0). */
+	/** Files from paste, drop and the + (Attach files) (0.11.0; the + since 0.26.0). */
 	attach?: ComposerAttach | null;
 	/** The chips (0.11.0). */
 	attachments?: ComposerAttachment[];
@@ -142,11 +144,7 @@ export interface ComposerOptions extends ComposerEdges {
 	suggest?: ComposerSuggestSettings | null;
 	/** The language of sizes, percents and counts. */
 	locale?: string;
-	/**
-	 * Keep the toolbar on one row (default true): measured since 0.11.2, the chips first say their value
-	 * only (the label and a calm state in their name and tooltip), and last the settings and Attach fold
-	 * behind Options. `false` keeps 0.11.0's wrapped toolbar.
-	 */
+	/** Keep the toolbar on one row (default true, measured since 0.11.2): the chips shortened, last the settings folded behind Options; `false` keeps 0.11.0's toolbar. */
 	compact?: boolean;
 	/** What sending uses ("Opus 5.5"), said beside Options while the settings are folded (0.11.2). */
 	summary?: string | null;
@@ -202,8 +200,11 @@ export class Composer extends Component {
 	set step(value: import('./command.js').ComposerStepOption | null);
 	/** The work surface where a drop attaches too; needs `attach` (0.11.2). */
 	set zone(element: Element | null);
-	/** Opens the platform's file chooser, as Attach does (0.11.0). */
+	/** Opens the platform's file chooser, as the + (Attach files) does (0.11.0). */
 	attach(): void;
+	/** The + menu's entries after Attach files, and whether the product's work runs now (0.26.0). */
+	set add(entries: ComposerEntry[]);
+	set live(value: boolean);
 	set tools(nodes: Part[]);
 	set extras(nodes: Part[]);
 	set actions(list: ComposerAction[] | null);

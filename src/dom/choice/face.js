@@ -12,8 +12,10 @@ export class ChoiceFace {
 	/**
 	 * Draws the button for the option `chosen` (or the placeholder when none is chosen). A chip (0.11.0)
 	 * shows its state's word whenever there is one, the dot only beside it, and takes its own `state`
-	 * over the chosen option's. With nothing chosen and no placeholder of the product's, a chip's value
-	 * is its slot's name ("Machine"), so an empty tray never reads "Choose · Choose" (0.15.0).
+	 * over the chosen option's; a `calm` option's state (0.26.0: a machine busy with other work, which
+	 * changes nothing for this choice) is said only in the chip's name and tooltip, its menu still showing
+	 * it. With nothing chosen and no placeholder of the product's, a chip's value is its slot's name
+	 * ("Machine"), so an empty tray never reads "Choose · Choose" (0.15.0).
 	 */
 	static draw(button, label, chosen, placeholder, face = null) {
 		const own = face?.state ?? null;
@@ -29,7 +31,7 @@ export class ChoiceFace {
 			const lead = face.glyph ? glyph(face.glyph) : null;
 			button.toggleAttribute('data-slot', slot);
 			// A chip: its muted label, the value, then the state's word with its dot beside it, never a dot alone
-			const word = state ? el('span', { class: `bui-status bui-status-${tone ?? 'neutral'} bui-chip-state`, 'data-tone': tone ?? 'neutral' }, [el('span', { class: 'bui-status-dot', 'aria-hidden': 'true' }), state]) : null;
+			const word = state ? el('span', { class: `bui-status bui-status-${tone ?? 'neutral'} bui-chip-state`, 'data-tone': tone ?? 'neutral', 'data-calm': !own && chosen?.calm ? '' : null }, [el('span', { class: 'bui-status-dot', 'aria-hidden': 'true' }), state]) : null;
 			// The whole face in words, for the tooltip of a composer that shortens it to its value (0.11.2)
 			button.setAttribute('data-bui-tip', [slot ? label : `${label}: ${value.textContent}`, state].filter(Boolean).join(' · '));
 			return button.replaceChildren(...[lead, name, value, word, glyph('chevron')].filter(Boolean));

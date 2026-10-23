@@ -53,7 +53,8 @@ export class CopyButton extends Component {
 	static bound: number;
 	/** Milliseconds the result stays said on the button (2000). */
 	static hold: number;
-	constructor(options: { text: string | (() => string); label?: string | null; name?: string | null; select?: (() => Node | null) | null; variant?: 'primary' | 'secondary' | 'quiet'; small?: boolean; onresult?: ((copied: boolean) => void) | null; labels?: Copy });
+	/** `bare` (0.26.0): the glyph alone (`copy`, or `glyph` such as `link`), its words its name and tooltip; a copy shows the `check` for a moment. */
+	constructor(options: { text: string | (() => string); label?: string | null; name?: string | null; select?: (() => Node | null) | null; variant?: 'primary' | 'secondary' | 'quiet'; small?: boolean; onresult?: ((copied: boolean) => void) | null; labels?: Copy; bare?: boolean; glyph?: string });
 	readonly button: HTMLButtonElement;
 	/** `'copied'` or `'refused'` while the button says it, else null. */
 	readonly result: 'copied' | 'refused' | null;

@@ -1,0 +1,181 @@
+/* The composer's controls (0.26.0, D165): one geometry for the toolbar of every composer. A glyph alone
+   (+, Dictate, Interrupt, Options) is a round target with a quiet edge; a chip (a setting, the tray's
+   context) is a pill of the same height and edge showing its value; Send is the one filled control. The
+   box's live edge says the product's work runs. Tokens only. */
+/* One geometry for every control of the box (0.26.0, D165): a glyph alone is a round target with a quiet
+   edge, the same height as the chips beside it, its hover a lift inside that same circle. */
+.bui-composer :is(.bui-button-bare, .bui-composer-plus, .bui-composer-more) {
+	flex: none;
+	box-sizing: border-box;
+	width: var(--bui-target);
+	min-width: var(--bui-target);
+	height: var(--bui-target);
+	min-height: var(--bui-target);
+	padding: 0;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-round);
+	background: transparent;
+	color: var(--color-text);
+}
+.bui-composer :is(.bui-button-bare, .bui-composer-plus, .bui-composer-more):not(:disabled, [aria-disabled='true']):hover,
+.bui-composer :is(.bui-composer-plus, .bui-composer-more)[aria-expanded='true'] {
+	border-color: var(--color-border-strong);
+	background: var(--overlay-lift);
+}
+.bui-composer :is(.bui-button-bare, .bui-composer-plus, .bui-composer-more) .bui-icon {
+	width: 18px;
+	height: 18px;
+}
+/* Every chip of the box (the settings and the tray): a pill one target tall with the same quiet edge, its
+   value alone, its label and a ready state in its name and its tooltip; any other state keeps its word
+   ("Asleep", "Not connected"), and the measured fit shortens it further (`short`). */
+.bui-composer .bui-chip .bui-choice-button {
+	gap: var(--space-1);
+	min-height: var(--bui-target);
+	padding: 0 var(--space-2) 0 var(--space-3);
+	border-radius: var(--radius-round);
+	background: transparent;
+	font-size: var(--text-small);
+}
+.bui-composer .bui-chip .bui-choice-button:not([data-tone='danger'], [data-tone='warning']) {
+	border-color: var(--color-border);
+}
+.bui-composer .bui-chip .bui-choice-button:not(:disabled):hover,
+.bui-composer .bui-chip .bui-choice-button[aria-expanded='true'] {
+	border-color: var(--color-border-strong);
+	background: var(--overlay-lift);
+}
+.bui-composer .bui-chip .bui-choice-label,
+.bui-composer .bui-chip .bui-chip-state[data-tone='success'] {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+.bui-composer .bui-chip .bui-choice-value {
+	font-weight: var(--weight-regular);
+}
+.bui-composer .bui-chip .bui-choice-button > .bui-icon {
+	width: 16px;
+	height: 16px;
+	color: var(--color-text-muted);
+}
+.bui-composer .bui-chip .bui-choice-button > .bui-icon:last-child {
+	width: 14px;
+	height: 14px;
+}
+.bui-composer .bui-chip.bui-choice-statement .bui-statement {
+	min-height: var(--bui-target);
+	padding: 0 var(--space-3);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-round);
+}
+/* Send (0.26.0): one filled round target with its glyph, the box's one primary; its words show only when
+   they must be read first (a step, an action that is not a send), as a pill ending with the glyph. With
+   nothing to send it reads quiet (the family's disabled surface), and a press still says why. The other
+   ways to send are its chevron, joined to it by a hairline. */
+.bui-composer-send {
+	display: inline-flex;
+	align-items: stretch;
+	gap: 1px;
+}
+.bui-composer .bui-composer-go {
+	border: 0;
+	background: var(--color-action);
+	color: var(--color-on-action);
+}
+.bui-composer .bui-composer-go:not(:disabled, [aria-disabled='true']):hover {
+	border-color: transparent;
+	background: var(--color-action-hover);
+}
+.bui-composer .bui-composer-go[data-words] {
+	flex-direction: row-reverse;
+	gap: var(--space-2);
+	min-height: var(--bui-target);
+	padding: 0 var(--space-3) 0 var(--space-4);
+	border-radius: var(--radius-round);
+}
+.bui-composer .bui-composer-go[data-words] .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-composer[data-empty] .bui-composer-go:not([data-words], [data-busy]),
+.bui-composer[data-empty] .bui-composer-send:has(> .bui-composer-go:not([data-words], [data-busy])) .bui-menu-button {
+	background: var(--color-disabled);
+	color: var(--color-on-disabled);
+}
+.bui-composer-send > .bui-button:not(:last-child) {
+	border-start-end-radius: 0;
+	border-end-end-radius: 0;
+}
+.bui-composer-send .bui-menu-holder {
+	display: inline-flex;
+}
+.bui-composer-send .bui-menu-button {
+	width: var(--bui-target);
+	min-width: 0;
+	min-height: var(--bui-target);
+	padding: 0;
+	border: 0;
+	border-radius: 0 var(--radius-round) var(--radius-round) 0;
+	background: var(--color-action);
+	color: var(--color-on-action);
+}
+.bui-composer-send .bui-menu-button:hover {
+	background: var(--color-action-hover);
+}
+.bui-composer-send .bui-menu-button .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-composer .bui-composer-stop .bui-icon {
+	width: 14px;
+	height: 14px;
+}
+/* Under the state band the field needs less room above it, the band already parting it from the box's
+   edge; on a phone the band's sentence sits closer to its edges, so a dock with a two-line band stays
+   within a quarter of a 320 × 640 screen (0.26.0). */
+.bui-composer-line:not([hidden]) ~ .bui-composer-input > .bui-composer-field {
+	min-height: calc(var(--bui-composer-min, 1) * 1lh + var(--space-2) + var(--space-1));
+	padding-block-start: var(--space-2);
+}
+@container bui-composer (max-width: 30rem) {
+	.bui-composer-status {
+		padding-block: 2px;
+	}
+}
+/* The product's work runs (0.26.0, `live`): a still line along the box's top edge, inside its corners, in
+   the hue of work in progress (never the coral of the primary, C2), with a light that runs along it twice
+   and then holds, as a live status dot pulses about five seconds (D95). A state, never content that
+   moves; nothing runs under reduced motion. */
+.bui-composer[data-live] .bui-composer-box::before {
+	content: '';
+	position: absolute;
+	z-index: 1;
+	inset-block-start: -1px;
+	inset-inline: var(--bui-composer-radius);
+	height: 2px;
+	border-radius: var(--radius-round);
+	background:
+		linear-gradient(90deg, transparent, var(--color-info), transparent) no-repeat -70% 0 / 40% 100%,
+		color-mix(in srgb, var(--color-info) 45%, transparent);
+	animation: bui-composer-live 2400ms ease-in-out 2;
+	pointer-events: none;
+}
+@keyframes bui-composer-live {
+	from {
+		background-position: -70% 0, 0 0;
+	}
+	to {
+		background-position: 170% 0, 0 0;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.bui-composer[data-live] .bui-composer-box::before {
+		animation: none;
+	}
+}
+

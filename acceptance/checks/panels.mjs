@@ -1,5 +1,6 @@
 import { expect, overflow } from '../support/browser.mjs';
 import { survey } from '../../tests/support/names.mjs';
+import { unlabeled } from '../support/unlabeled.mjs';
 
 /**
  * The Sidebar's entries and search and the Page's panel kept in view (0.10.0) in a real engine, on the
@@ -11,7 +12,6 @@ const words = {
 	en: { needs: 'Needs you', recent: 'Recent', long: 'Upgrade the build to the latest toolchain and explain every warning it prints along the way', count: '1 result', none: 'Nothing matches “zzz”.', unavailable: 'Search did not respond. Try again.', retry: 'Try again', details: 'Details', action: 'New conversation', searching: 'Searching…' },
 	es: { needs: 'Te espera', recent: 'Recientes', long: 'Upgrade the build to the latest toolchain and explain every warning it prints along the way', count: '1 resultado', none: 'Nada coincide con «zzz».', unavailable: 'La búsqueda no respondió. Reintenta.', retry: 'Reintentar', details: 'Detalles', action: 'Nueva conversación', searching: 'Buscando…' }
 };
-const unlabeled = ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user'];
 
 async function open(browser, consumer, { width = 1440, height = 900, query = '', ...options } = {}) {
 	const view = await browser.open(consumer, { file: 'conversation.html', query, viewport: { width, height }, ...options });

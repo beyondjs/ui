@@ -58,7 +58,7 @@ test('the components keep their own unsized glyphs', () => {
 });
 
 test('the closed list of glyphs shown without a visible label is part of the catalog', () => {
-	assert.deepEqual([...ui.unlabeled], ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user', 'home', 'chat', 'code', 'box', 'globe', 'grid', 'settings']);
+	assert.deepEqual([...ui.unlabeled], ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user', 'home', 'chat', 'code', 'box', 'globe', 'grid', 'settings', 'plus', 'up', 'stop', 'microphone', 'copy', 'link', 'undo', 'check'], "D165 (0.26.0) adds the composer's and an answer's glyph-only controls");
 	assert.ok(ui.unlabeled.every(name => ui.icons.includes(name)));
 });
 

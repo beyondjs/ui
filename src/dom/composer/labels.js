@@ -4,8 +4,9 @@
  * is empty or was not sent; since 0.11.0 its attachments (Attach, the drop target, the chips' states and
  * what is announced) and its suggestions (their states and what is announced); since 0.11.1 the narrow
  * toolbar's Options and a truncated list's last line; since 0.11.2 a file the product refused; since
- * 0.14.0 the commands' list and the taller editor's Expand and Collapse. Public as
- * `Composer.labels`.
+ * 0.14.0 the commands' list and the taller editor's Expand and Collapse; since 0.26.0 (D165) the "+"
+ * control's names: **Attach files** when it only attaches, **Add** when it opens the product's menu.
+ * Public as `Composer.labels`.
  */
 const freeze = sets => Object.freeze({ en: Object.freeze(sets.en), es: Object.freeze(sets.es) });
 
@@ -19,7 +20,8 @@ export const composer = freeze({
 		touch: 'Enter adds a line. Use {action} to send.',
 		empty: 'Write a message first.',
 		failed: 'Not sent. Your message is still here.',
-		attach: 'Attach',
+		attach: 'Attach files',
+		add: 'Add',
 		drop: 'Drop files to attach',
 		files: 'Attachments',
 		bytes: '{count} B',
@@ -57,7 +59,8 @@ export const composer = freeze({
 		touch: 'Intro añade una línea. Usa «{action}» para enviar.',
 		empty: 'Escribe un mensaje primero.',
 		failed: 'No se envió. Tu mensaje sigue aquí.',
-		attach: 'Adjuntar',
+		attach: 'Adjuntar archivos',
+		add: 'Añadir',
 		drop: 'Suelta los archivos para adjuntarlos',
 		files: 'Adjuntos',
 		bytes: '{count} B',

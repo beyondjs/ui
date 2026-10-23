@@ -1,10 +1,10 @@
 import { expect } from '../support/browser.mjs';
 import { words } from '../support/words.mjs';
 import { survey } from '../../tests/support/names.mjs';
+import { unlabeled } from '../support/unlabeled.mjs';
 
 // The closed list of glyphs shown without a visible label (D11): the owner's ten, with `help` and
 // `user` added at the 0.3.0 integration for the owner to confirm.
-const unlabeled = ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user'];
 
 /** Fails any icon-only control of the page without an accessible name, a tooltip or a glyph of the list. */
 async function named(page, at) {

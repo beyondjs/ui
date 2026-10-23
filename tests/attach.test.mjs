@@ -2,7 +2,11 @@ import { test, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { Page } from './support/page.mjs';
 
-/** Composer (0.11.0): the state line above the box with its action, the settings slot, and attachments from paste, drop and Attach as removable chips said once per state. */
+/**
+ * Composer (0.11.0): the state line with its action (since 0.26.0 the box's first band), the settings slot,
+ * and attachments from paste, drop and the + as removable chips said once per state; since 0.26.0 the +
+ * opens the file chooser at once, or a menu of the product's entries after Attach files.
+ */
 const page = new Page();
 const ui = await import('@beyond-js/ui/dom');
 after(() => page.close());
@@ -32,13 +36,13 @@ function make(options = {}) {
 	return { composer, log, sent, field: composer.field, root: composer.element };
 }
 
-test('the state line is a line of its own above the box, describes the field and has its action at its end', () => {
+test("the state line is the box's first band (0.26.0), describes the field and has its action at its end", () => {
 	let started = 0;
 	const composer = new ui.Composer({ label: 'Message', onsubmit: () => Promise.resolve(), status: { text: 'My first VM is stopped · about $0.20 an hour', action: { label: 'Start', run: () => started++ } } }).mount(document.body);
 	const line = composer.element.querySelector('.bui-composer-line');
 	const box = composer.element.querySelector('.bui-composer-box');
-	assert.ok(line.nextElementSibling === box, 'above the box');
-	assert.ok(!box.contains(line), 'never inside the field\'s box');
+	assert.ok(box.firstElementChild === line, "the box's first band, sharing its edges");
+	assert.ok(line.compareDocumentPosition(composer.field) & Node.DOCUMENT_POSITION_FOLLOWING, 'before the field');
 	const sentence = line.querySelector('.bui-composer-status');
 	assert.equal(sentence.textContent, 'My first VM is stopped · about $0.20 an hour');
 	assert.ok(composer.field.getAttribute('aria-describedby').split(' ').includes(sentence.id));
@@ -60,13 +64,14 @@ test('the state line is a line of its own above the box, describes the field and
 	composer.destroy();
 });
 
-test('settings sit at the toolbar\'s start, before the tools; without attach there is no Attach and a paste is left alone', () => {
+test("settings sit at the toolbar's start after the +, before the tools; with nothing to add the + is not drawn and a paste is left alone", () => {
 	const model = new ui.ChoiceChip({ label: 'Model', options: [{ value: 'a', label: 'Opus 5.5' }, { value: 'b', label: 'Sonnet 5' }], value: 'a' });
 	const tool = document.createElement('button');
 	const composer = new ui.Composer({ label: 'Message', onsubmit: () => Promise.resolve(), settings: [model], tools: [tool] }).mount(document.body);
 	const start = composer.element.querySelector('.bui-composer-start');
-	assert.deepEqual([...start.children].map(node => node.className), ['bui-composer-settings', 'bui-composer-tools']);
+	assert.deepEqual([...start.children].map(node => node.className), ['bui-composer-add', 'bui-composer-settings', 'bui-composer-tools']);
 	assert.ok(start.querySelector('.bui-composer-settings').contains(model.element));
+	assert.equal(start.querySelector('.bui-composer-add').hidden, true, 'no file to take, no entry: no +');
 	assert.equal(composer.element.querySelector('.bui-composer-attach'), null);
 	const paste = carrying('paste', 'clipboardData', clipboard([file('a.png')]));
 	composer.field.dispatchEvent(paste);
@@ -77,11 +82,15 @@ test('settings sit at the toolbar\'s start, before the tools; without attach the
 	model.destroy();
 });
 
-test('Attach is its glyph beside its word and opens the file input; picked, pasted and dropped files reach onfiles with how they came', () => {
+test('the + attaches at once, its glyph alone named Attach files with its tooltip; picked, pasted and dropped files reach onfiles with how they came', () => {
 	const { composer, log, field, root } = make();
 	const attach = root.querySelector('.bui-composer-attach');
-	assert.equal(attach.textContent.trim(), 'Attach');
-	assert.equal(attach.querySelector('svg').dataset.icon, 'attach', 'the paper clip beside the word (D11)');
+	assert.ok(root.querySelector('.bui-composer-start').firstElementChild.contains(attach), "the toolbar's first control");
+	assert.equal(attach.getAttribute('aria-label'), 'Attach files');
+	assert.equal(attach.querySelector('svg').dataset.icon, 'plus', 'the + alone (D165, the closed list of D11)');
+	assert.ok(attach.hasAttribute('data-bui-hint'), 'its name is its tooltip');
+	assert.ok(attach.querySelector('.bui-hidden'), 'its words are its name, not drawn');
+	assert.equal(attach.getAttribute('aria-haspopup'), null, 'nothing but files to add: it opens the chooser at once');
 	const input = root.querySelector('input[type="file"]');
 	assert.equal(input.getAttribute('accept'), 'image/*,text/plain');
 	assert.ok(input.hasAttribute('multiple'));
@@ -192,10 +201,42 @@ test('a message with a ready attachment may have no text, and carries the attach
 	assert.throws(() => new ui.Composer({ label: 'Message', onsubmit: () => Promise.resolve(), attach: {} }), TypeError);
 });
 
+test('the + with the product\'s entries is a menu: Attach files first, then each entry with its key; without files, the entries alone', () => {
+	const ran = [];
+	const { composer, root } = make({ add: [{ label: 'Mention a file', keys: '@', run: () => ran.push('mention') }, { label: 'Commands', keys: '/', run: () => ran.push('commands') }] });
+	const button = root.querySelector('.bui-composer-plus');
+	assert.equal(button.getAttribute('aria-haspopup'), 'menu');
+	assert.equal(button.getAttribute('aria-label'), 'Add');
+	assert.ok(button.hasAttribute('data-bui-hint'));
+	assert.equal(button.querySelector('svg').dataset.icon, 'plus');
+	button.click();
+	const items = [...root.querySelectorAll('.bui-composer-add [role="menuitem"]')];
+	assert.deepEqual(items.map(item => item.textContent), ['Attach files', 'Mention a file@', 'Commands/']);
+	assert.deepEqual([...root.querySelectorAll('.bui-composer-keys')].map(key => [key.tagName, key.getAttribute('aria-hidden')]), [['KBD', 'true'], ['KBD', 'true']]);
+	const input = root.querySelector('input[type="file"]');
+	let opened = 0;
+	input.click = () => opened++;
+	items[0].click();
+	assert.equal(opened, 1, 'Attach files opens the chooser');
+	button.click();
+	root.querySelectorAll('.bui-composer-add [role="menuitem"]')[1].click();
+	assert.deepEqual(ran, ['mention']);
+	button.focus();
+	composer.add = [];
+	const attach = root.querySelector('.bui-composer-attach');
+	assert.ok(attach && attach.getAttribute('aria-haspopup') === null, 'no entry: Attach files at once again');
+	assert.ok(document.activeElement === attach, 'focus stays on the +');
+	composer.destroy();
+	const bare = new ui.Composer({ label: 'Message', onsubmit: () => Promise.resolve(), add: [{ label: 'Commands', run: () => ran.push('only') }] }).mount(document.body);
+	bare.element.querySelector('.bui-composer-plus').click();
+	assert.deepEqual([...bare.element.querySelectorAll('[role="menuitem"]')].map(item => item.textContent), ['Commands'], 'no Attach files without attach');
+	bare.destroy();
+});
+
 test('Spanish copy for attachments', () => {
 	const { composer, root } = make({ labels: ui.Composer.labels.es, locale: 'es' });
 	composer.attachments = [{ key: 'a', name: 'a.png', size: 1_500_000, state: 'failed', reason: 'Demasiado grande' }];
-	assert.equal(root.querySelector('.bui-composer-attach').textContent.trim(), 'Adjuntar');
+	assert.equal(root.querySelector('.bui-composer-attach').getAttribute('aria-label'), 'Adjuntar archivos');
 	assert.match(root.querySelector('.bui-composer-file-meta').textContent, /^1,5 MB · Falló · Demasiado grande$/);
 	assert.equal(root.querySelector('.bui-composer-file-remove').getAttribute('aria-label'), 'Quitar a.png');
 	assert.equal(root.querySelector('.bui-announcer').textContent, 'a.png falló: Demasiado grande');

@@ -6,10 +6,10 @@
  * @property {string} label the field's accessible name ("Message to Claude Code"), never drawn
  * @property {(message: {text: string, action: string, attachments: object[]}) => Promise<unknown>} onsubmit sends; a rejection gives the text back
  * @property {string|null} [placeholder] what sending will do ("Message Claude Code…")
- * @property {string|Node|null} [status] the state line
+ * @property {string|Node|null} [status] the state line, the box's first band since 0.26.0
  * @property {Array<Node|{element: Node}>} [tools] the toolbar's start
  * @property {Array<Node|{element: Node}>} [extras] the toolbar's end, before the actions
- * @property {Array<{id: string, label: string, primary?: boolean}>|null} [actions] the ways to send ("Send" by default)
+ * @property {Array<{id: string, label: string, primary?: boolean, words?: boolean}>|null} [actions] the ways to send ("Send" by default); the primary is its glyph alone unless `words` (0.26.0)
  * @property {{label: string, run: () => unknown, busy?: boolean}|null} [stop] the stop action while work runs
  * @property {{reason?: string|null}|null} [disabled] sending is unavailable, and why
  * @property {boolean} [busy] the product's own work: nothing is sent meanwhile
@@ -32,5 +32,7 @@
  * @property {Array<{value: string, label?: string, detail?: string, run?: Function}>|((query: string, signal: AbortSignal) => unknown)|null} [commands] after "/" at the start (0.14.0)
  * @property {(() => string|null|Promise<string|null>)|null} [recall] ArrowUp in an empty field brings this text back (0.14.0)
  * @property {{transcribe: Function, cap?: number, bound?: number, minimum?: number, explain?: Function}|null} [dictation] offers Dictate (0.14.0)
+ * @property {Array<{label: string, run: Function, keys?: string}>} [add] the **+** menu's entries after Attach files (0.26.0)
+ * @property {boolean} [live] the product's work runs now: the box's edge shows it (0.26.0)
  */
 export {};

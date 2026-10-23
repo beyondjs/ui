@@ -31,28 +31,6 @@ export class Labels {
 
 export function el(tag: string, props?: Record<string, unknown>, children?: unknown): HTMLElement;
 
-export interface ButtonOptions {
-	label: Content;
-	variant?: 'primary' | 'secondary' | 'quiet' | 'danger';
-	glyph?: string | null;
-	href?: string | null;
-	onclick?: ((event: MouseEvent) => void) | null;
-	disabled?: boolean;
-	busy?: boolean;
-	type?: 'button' | 'submit' | 'reset';
-	small?: boolean;
-	name?: string | null;
-	describedby?: string | null;
-	labels?: Copy;
-}
-export class Button extends Component {
-	constructor(options: ButtonOptions);
-	busy: boolean;
-	disabled: boolean;
-	set label(value: Content);
-	run<T>(work: () => Promise<T>): Promise<T | undefined>;
-}
-
 export interface MenuItem {
 	label: Content;
 	run?: ((event: MouseEvent) => void) | null;
@@ -297,4 +275,5 @@ export * from './edges.js';
 export * from './floating.js';
 export * from './patterns.js';
 export * from './table.js';
+export * from './button.js';
 export * from './command.js';

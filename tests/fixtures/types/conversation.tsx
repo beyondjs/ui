@@ -24,3 +24,6 @@ export function Conversation({ draft }: { draft: string }) {
 }
 // @ts-expect-error a row's title is text in React
 export const wrong = <ActivityRow title={<b>x</b>} />;
+
+// Since 0.26.0 (D165): the + entries read from the latest props and the live state
+export const Live = () => <Composer label="Message" onSubmit={async () => undefined} add={[{ label: 'Mention a file', keys: '@', onSelect: () => undefined }]} live />;

@@ -9,6 +9,8 @@ export interface ChoiceMenuOption {
 	label: Content;
 	detail?: Content | null;
 	status?: [string, 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'progress'] | null;
+	/** A chip says this option's state only in its name and tooltip while it is chosen; its menu still shows it (0.26.0) */
+	calm?: boolean;
 	disabled?: boolean;
 	reason?: string | null;
 	/** What a search or type-ahead matches when the label is not plain text (0.7.0) */

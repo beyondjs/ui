@@ -19,6 +19,10 @@ const words = {
  *
  * The text is read when the button is pressed (`text` may be a function), so a link or a path that
  * changes needs no update. While the clipboard answers, the button is busy and ignores presses.
+ *
+ * Since 0.26.0 (D165) it may be `bare`: the `copy` glyph alone (or `glyph`, such as `link`), its words its
+ * name and tooltip; a copy is the `check` for a moment, a refusal keeps its glyph in the danger tone,
+ * each with its words in its name and in the polite region.
  */
 export class CopyButton extends Component {
 	/** The copy in English and Spanish. */
@@ -38,6 +42,8 @@ export class CopyButton extends Component {
 	#select;
 	#cancel = null;
 	#result = null;
+	#bare;
+	#glyph;
 
 	/**
 	 * @param {object} options
@@ -48,16 +54,20 @@ export class CopyButton extends Component {
 	 * @param {'primary'|'secondary'|'quiet'} [options.variant] the button's variant (quiet by default)
 	 * @param {boolean} [options.small] the small button (true by default)
 	 * @param {(copied: boolean) => void} [options.onresult] the copy's outcome
+	 * @param {boolean} [options.bare] the glyph alone, its words its name and tooltip (0.26.0)
+	 * @param {string} [options.glyph] the bare button's glyph (`copy`; `link` for a link)
 	 */
-	constructor({ text, label = null, name = null, select = null, variant = 'quiet', small = true, onresult = null, labels = {} }) {
+	constructor({ text, label = null, name = null, select = null, variant = 'quiet', small = true, onresult = null, labels = {}, bare = false, glyph: drawn = 'copy' }) {
 		super();
 		this.#labels = new Labels(words.en, labels);
 		this.#text = text;
 		this.#label = label ?? this.#labels.text('copy');
 		this.#name = name;
 		this.#select = select;
-		this.#button = new Button({ label: this.#label, name, variant, small, glyph: null, onclick: () => this.#button.run(() => this.copy().then(copied => onresult?.(copied))) });
-		this.#element = el('span', { class: 'bui-copy-button' }, [this.#button.element, this.#region]);
+		this.#bare = Boolean(bare);
+		this.#glyph = drawn;
+		this.#button = new Button({ label: this.#label, name, variant, small, glyph: this.#bare ? drawn : null, bare: this.#bare, onclick: () => this.#button.run(() => this.copy().then(copied => onresult?.(copied))) });
+		this.#element = el('span', { class: `bui-copy-button${this.#bare ? ' bui-copy-bare' : ''}` }, [this.#button.element, this.#region]);
 	}
 
 	get element() {
@@ -104,8 +114,12 @@ export class CopyButton extends Component {
 		this.#result = result;
 		this.#element.dataset.result = result;
 		const words = this.#labels.text(result === 'copied' ? 'copied' : 'refused');
-		this.#button.label = el('span', { class: 'bui-copy-button-said' }, [result === 'copied' ? glyph('check') : null, words]);
-		if (this.#name) this.#button.element.setAttribute('aria-label', words);
+		if (this.#bare) {
+			// The glyph says it for a moment, the words stay its name and tooltip
+			this.#button.glyph = result === 'copied' ? 'check' : this.#glyph;
+			this.#button.label = words;
+		} else this.#button.label = el('span', { class: 'bui-copy-button-said' }, [result === 'copied' ? glyph('check') : null, words]);
+		if (this.#name) this.#button.name = words;
 		this.#cancel = this.later(() => this.#reset(), CopyButton.hold);
 	}
 
@@ -113,7 +127,8 @@ export class CopyButton extends Component {
 		this.#cancel = null;
 		this.#result = null;
 		delete this.#element.dataset.result;
+		if (this.#bare) this.#button.glyph = this.#glyph;
 		this.#button.label = this.#label;
-		if (this.#name) this.#button.element.setAttribute('aria-label', this.#name);
+		if (this.#name) this.#button.name = this.#name;
 	}
 }

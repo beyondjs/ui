@@ -4,12 +4,13 @@ import { ComposerFold } from './fold.js';
 import { ComposerFit } from './fit.js';
 
 /**
- * A composer's toolbar (0.11.2): its start (Attach, the turn's settings, the product's tools) and its
+ * A composer's toolbar (0.11.2): its start (the **+**, the turn's settings, the product's tools) and its
  * end (the actions), kept on one row by `ComposerFit` and, as the last resort, by Options
  * (`ComposerFold`). Since 0.11.1 a composer folded its settings and Attach behind Options under 30rem;
  * since 0.11.2 it folds only when the toolbar cannot keep one row even with its chips shortened to
  * their value, measured, never by a fixed width. The settings' chips show their whole words in the
- * family tooltip while the fit shortens them.
+ * family tooltip while the fit shortens them. Since 0.26.0 (D165) every control is one target tall and
+ * the **+** is one target wide, so it stays in place and only the settings fold.
  */
 export class ComposerToolbar {
 	#element;
@@ -18,24 +19,23 @@ export class ComposerToolbar {
 	#fold;
 	#fit;
 	#hint;
-	#attach;
 
 	/**
 	 * @param {object} options
 	 * @param {HTMLElement} options.root the composer
-	 * @param {HTMLElement[]} options.controls Attach and its file input, when the composer takes files
+	 * @param {HTMLElement[]} options.controls the **+** and its file input, when the composer takes files
 	 * @param {HTMLElement} options.actions the toolbar's end
 	 * @param {import('../core/labels.js').Labels} options.labels the composer's copy
 	 * @param {boolean} options.compact whether the toolbar adapts to keep one row (`compact`, default true)
 	 */
 	constructor({ root, controls, actions, labels, compact }) {
-		this.#attach = controls.length > 0;
 		const start = el('div', { class: 'bui-composer-start' }, [...controls, this.#settings, this.#tools]);
 		this.#element = el('div', { class: 'bui-composer-bar' }, [start, actions]);
-		this.#fold = new ComposerFold({ root, bar: this.#element, labels, enabled: compact !== false, parts: [controls[0], this.#settings], onchange: open => open || this.#fit.measure() });
+		this.#fold = new ComposerFold({ root, bar: this.#element, labels, enabled: compact !== false, parts: [this.#settings], onchange: open => open || this.#fit.measure() });
 		this.#fit = new ComposerFit({ root, bar: this.#element, fold: this.#fold, enabled: compact !== false });
-		this.#hint = new Hint(this.#settings, { when: () => root.hasAttribute('data-fit') });
-		this.#fold.available = this.#attach;
+		// A chip shows its value alone (0.26.0): its whole words ("Model: Opus 5.5 · High") are its tooltip
+		this.#hint = new Hint(this.#settings, { when: () => true });
+		this.#fold.available = false;
 	}
 
 	get element() {
@@ -60,7 +60,7 @@ export class ComposerToolbar {
 	/** The turn's choices at the start, before the tools. */
 	set settings(nodes) {
 		fill(this.#settings, nodes);
-		this.#fold.available = nodes.length > 0 || this.#attach;
+		this.#fold.available = nodes.length > 0;
 	}
 
 	set tools(nodes) {

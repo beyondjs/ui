@@ -1,8 +1,12 @@
 /* The message box (Composer, 0.10.0): an optional state line, a field of one line that grows to twelve,
-   and a toolbar with the product's tools at its start and the actions at its end. Since 0.11.0 the state
-   line is a line of its own above the box, and the toolbar's start holds Attach, the turn's settings and
-   the tools. Tokens only. */
+   and a toolbar with the product's tools at its start and the actions at its end. Since 0.11.0 the
+   toolbar's start holds Attach, the turn's settings and the tools. Since 0.26.0 (D165) the box is one
+   rounded surface: the state line is its first band, and every control of its toolbar is one target tall,
+   round when it is a glyph alone (+, Dictate, Interrupt, Send) and a pill when it has words (a chip, a
+   step), each with a quiet edge of its own; only Send is filled. Tokens only. */
 .bui-composer {
+	--bui-composer-radius: calc(var(--radius-base) * 2.5);
+	--bui-composer-inset: var(--space-3);
 	container: bui-composer / inline-size;
 	position: relative;
 	display: grid;
@@ -15,21 +19,26 @@
 	display: grid;
 	min-width: 0;
 	border: 1px solid var(--color-border-control);
-	border-radius: var(--radius-base);
+	border-radius: var(--bui-composer-radius);
 	background: var(--color-surface);
 }
 /* The field draws no ring of its own: the box's own border shows focus (editor.css, 0.14.0). */
 .bui-composer-field:focus-visible {
 	outline: none;
 }
-/* The state line above the box, with its action at its end; it is not the field's content. */
+/* The state line, the box's first band (0.26.0), with its action at its end; it is not the field's content.
+   It shares the box's edges: its words start where the field's do. */
 .bui-composer-line {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 0 var(--space-2);
 	min-width: 0;
-	padding-inline: var(--space-1);
+	padding: var(--space-1) var(--space-2) var(--space-1) var(--bui-composer-inset);
+	border-bottom: 1px solid var(--color-border);
+	border-start-start-radius: calc(var(--bui-composer-radius) - 1px);
+	border-start-end-radius: calc(var(--bui-composer-radius) - 1px);
+	background: var(--overlay-lift);
 }
 .bui-composer-line[hidden] {
 	display: none;
@@ -46,6 +55,7 @@
 	flex: 1 1 16rem;
 	min-width: 0;
 	margin: 0;
+	padding-block: var(--space-1);
 	color: var(--color-text-muted);
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
@@ -63,9 +73,9 @@
 	min-height: calc(var(--bui-composer-min, 1) * 1lh + var(--space-3) + var(--space-1));
 	max-height: min(calc(var(--bui-composer-max, 12) * 1lh + var(--space-3) + var(--space-1)), var(--bui-composer-cap, 33dvh));
 	margin: 0;
-	padding: var(--space-3) var(--space-3) var(--space-1);
+	padding: var(--space-3) var(--bui-composer-inset) var(--space-1);
 	border: 0;
-	border-radius: var(--radius-base) var(--radius-base) 0 0;
+	border-radius: var(--bui-composer-radius) var(--bui-composer-radius) 0 0;
 	background: transparent;
 	color: inherit;
 	font: inherit;
@@ -89,7 +99,7 @@
 .bui-composer-placeholder {
 	position: absolute;
 	inset-block-start: var(--space-3);
-	inset-inline: var(--space-3);
+	inset-inline: var(--bui-composer-inset);
 	overflow: hidden;
 	color: var(--color-text-muted);
 	font-size: var(--text-body);
@@ -107,7 +117,7 @@
 	align-items: flex-start;
 	gap: var(--space-2);
 	margin: 0;
-	padding: var(--space-1) var(--space-3) 0;
+	padding: var(--space-1) var(--bui-composer-inset) 0;
 	color: var(--color-danger);
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
@@ -123,7 +133,7 @@
 	align-items: center;
 	gap: var(--space-2);
 	min-width: 0;
-	padding: var(--space-2);
+	padding: var(--space-1) var(--space-2) var(--space-2);
 }
 .bui-composer-start,
 .bui-composer-settings,
@@ -144,9 +154,28 @@
 .bui-composer-extras:empty {
 	display: none;
 }
-.bui-composer-attach .bui-icon {
-	width: 16px;
-	height: 16px;
+/* The + holds one control (the button or the menu's button) and is one target wide. */
+.bui-composer-add {
+	display: inline-flex;
+	flex: none;
+}
+.bui-composer-add[hidden] {
+	display: none;
+}
+.bui-composer-entry {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-4);
+	width: 100%;
+}
+.bui-composer-keys {
+	padding: 0 var(--space-1);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	color: var(--color-text-muted);
+	font-family: var(--font-mono);
+	font-size: var(--text-label);
 }
 /* A product's React content keeps the toolbar's flow */
 .bui-composer-slot {
@@ -169,52 +198,21 @@
 	font-weight: var(--weight-regular);
 	overflow-wrap: anywhere;
 }
-/* The primary action and the menu of the other ways to send, joined by a hairline of the box. */
-.bui-composer-send {
-	display: inline-flex;
-	align-items: stretch;
-	gap: 1px;
-}
-.bui-composer-send > .bui-button:not(:last-child) {
-	border-start-end-radius: 0;
-	border-end-end-radius: 0;
-}
-.bui-composer-send .bui-menu-holder {
-	display: inline-flex;
-}
-.bui-composer-send .bui-menu-button {
-	min-height: var(--bui-control);
-	border-color: transparent;
-	border-start-start-radius: 0;
-	border-end-start-radius: 0;
-	background: var(--color-action);
-	color: var(--color-on-action);
-}
-.bui-composer-send .bui-menu-button:hover {
-	background: var(--color-action-hover);
-}
-.bui-composer-stop .bui-icon {
-	width: 14px;
-	height: 14px;
-}
-/* Options (0.11.1): shown only when the toolbar folds, at the toolbar's control size, so it lines up with
-   Attach and Send; since 0.11.2 it may say what sending uses beside its glyph. */
-.bui-composer-more {
+/* Options (0.11.1): shown only when the toolbar folds, one round target like the +, so it lines up with
+   the others; since 0.11.2 it may say what sending uses beside its glyph, as a pill. */
+.bui-composer .bui-composer-more {
 	display: none;
-	flex: none;
-	width: var(--bui-control);
-	height: var(--bui-control);
 	color: var(--color-text-muted);
 }
-.bui-composer-more:hover,
-.bui-composer-more[aria-expanded='true'] {
+.bui-composer .bui-composer-more:hover,
+.bui-composer .bui-composer-more[aria-expanded='true'] {
 	color: var(--color-text);
 }
-.bui-composer-more[data-summary] {
+.bui-composer .bui-composer-more[data-summary] {
 	width: auto;
 	max-width: 12rem;
 	gap: var(--space-1);
-	padding-inline: var(--space-2);
+	padding-inline: var(--space-2) var(--space-3);
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
 }
@@ -227,6 +225,15 @@
 }
 .bui-composer-summary:empty {
 	display: none;
+}
+/* Open, Options shows the chips themselves: its summary would say them twice (0.26.0), so it is one target
+   again; and so it is when even the folded row does not fit (`data-bare`), its name still saying the value */
+.bui-composer:is([data-options], [data-bare]) .bui-composer-summary {
+	display: none;
+}
+.bui-composer:is([data-options], [data-bare]) .bui-composer-more[data-summary] {
+	width: var(--bui-target);
+	padding-inline: 0;
 }
 /* The width the fit watches: a line across the composer, with no height of its own. */
 .bui-composer-gauge {
@@ -273,9 +280,8 @@
 	align-self: flex-start;
 }
 .bui-composer[data-fit='fold'][data-options] .bui-composer-start {
-	flex-basis: calc(100% - var(--bui-control) - var(--space-2));
+	flex-basis: calc(100% - var(--bui-target) - var(--space-2));
 }
-.bui-composer[data-fit='fold']:not([data-options]) .bui-composer-attach,
 .bui-composer[data-fit='fold']:not([data-options]) .bui-composer-settings {
 	display: none;
 }

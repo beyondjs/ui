@@ -4,7 +4,9 @@
  * set and Workspace's client set (redrawn to this stroke, duplicates removed), the Desktop's window
  * controls and CDN's step markers; 0.10.0 adds `file` and `terminal` for activity rows, and 0.11.0
  * `attach` (a paper clip) for a composer's Attach, always beside its word; 0.14.0 adds `microphone` for a
- * composer's Dictate, always beside its word. New glyphs may be drawn on the Lucide grid (ISC licence).
+ * composer's Dictate, always beside its word; 0.26.0 (D165) adds `up` (a composer's Send), `copy`, `link`
+ * and `undo` (an answer's Copy, Copy link and Restore). New glyphs may be drawn on the Lucide grid (ISC
+ * licence).
  *
  * This file is data only: `Glyph` (`icons.js`) builds elements from it. A name says what the glyph
  * shows or means in plain English; a product that used another name maps it (see the catalog guide).
@@ -32,6 +34,10 @@ export const paths = Object.freeze({
 	play: 'M8 5.5v13l10-6.5z',
 	stop: 'M7 7h10v10H7z',
 	send: 'M4 12l16-8-6 16-3-7z',
+	up: ['M12 19V5', 'M6 11l6-6 6 6'],
+	copy: ['M10 8h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z', 'M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3'],
+	link: ['M10 13.5a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2', 'M14 10.5a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2'],
+	undo: ['M9 14L4 9l5-5', 'M4 9h10.5a5.5 5.5 0 0 1 0 11H11'],
 	merge: ['M6 4v16', 'M18 4v6a4 4 0 0 1-4 4H6', 'M6 8l-3 3', 'M6 8l3 3'],
 
 	// Window controls (with `close`)
@@ -88,5 +94,9 @@ export const paths = Object.freeze({
  * one. Every other icon comes with a visible label. The owner's list is the first ten; `help` (the
  * question mark that opens essential help beside a field) and `user` (the account avatar before a
  * name is known) were added at the 0.3.0 integration under the same rule, for the owner to confirm.
+ * Since 0.26.0 (D165, the owner's direction of 2026-10-23 for the composer and an answer's line) a
+ * composer's `plus` (Add), `up` (Send), `stop` (Interrupt) and `microphone` (Dictate), and an answer's
+ * `copy`, `link` and `undo` stand alone too, each with its name as its tooltip, and `check` as a bare
+ * copy's result for a moment ("Copied").
  */
-export const unlabeled = Object.freeze(['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user', 'home', 'chat', 'code', 'box', 'globe', 'grid', 'settings']);
+export const unlabeled = Object.freeze(['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user', 'home', 'chat', 'code', 'box', 'globe', 'grid', 'settings', 'plus', 'up', 'stop', 'microphone', 'copy', 'link', 'undo', 'check']);

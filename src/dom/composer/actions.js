@@ -5,10 +5,16 @@ import { ActionMenu } from '../menu.js';
 
 /**
  * The end of a composer's toolbar: the product's extras, the reason sending is unavailable (said
- * beside the action, D44), the stop action while work runs (a labelled button with the `stop` glyph,
- * busy while its `run` works or while the product says so) and the primary action, followed, when
- * there are other ways to send, by a split menu of them: the chevron alone, named "More ways to send"
- * with its tooltip (D11). An unavailable action stays reachable and reads its reason.
+ * beside the action, D44), the stop action while work runs (busy while its `run` works or while the
+ * product says so) and the primary action, followed, when there are other ways to send, by a split menu
+ * of them: the chevron alone, named "More ways to send" with its tooltip (D11). An unavailable action
+ * stays reachable and reads its reason.
+ *
+ * Since 0.26.0 (D165) Send is one round target with the `up` glyph alone, its words ("Send", "Wake up and
+ * send", "Queue") its name and its tooltip, and the stop action the `stop` glyph alone, named by its
+ * label ("Interrupt"). Send says its words only when they are what the person must read before sending:
+ * a step a message needs (`step`, "Choose a machine and send") or an action that is not a send
+ * (`words: true`, "Check whether it started").
  */
 export class ComposerActions {
 	#element;
@@ -25,6 +31,7 @@ export class ComposerActions {
 	#refocus;
 	#primary = null;
 	#label = '';
+	#words = false;
 	#others = [];
 	#disabled = null;
 	#step = null;
@@ -39,7 +46,8 @@ export class ComposerActions {
 		this.#labels = labels;
 		this.#run = run;
 		this.#refocus = refocus;
-		this.#send = new Button({ label: labels.text('send'), variant: 'primary', labels: { busy: labels.text('busy') }, onclick: () => this.#run(this.#primary) });
+		this.#send = new Button({ label: labels.text('send'), variant: 'primary', glyph: 'up', bare: true, labels: { busy: labels.text('busy') }, onclick: () => this.#run(this.#primary) });
+		this.#send.element.classList.add('bui-composer-go');
 		this.#split = el('div', { class: 'bui-composer-send' }, [this.#send.element]);
 		this.#element = el('div', { class: 'bui-composer-end' }, [this.#extras, this.#reason, this.#split]);
 	}
@@ -68,16 +76,29 @@ export class ComposerActions {
 		this.#step = step ?? null;
 		this.#send.label = this.#step?.label ?? this.#label;
 		this.#send.element.toggleAttribute('data-step', Boolean(this.#step));
+		this.#face();
 	}
 
-	/** `[{ id, label, primary? }]`: the first marked primary (else the first) is the button, the others the split menu. */
+	/** Send's glyph alone, or its words when they are what the person must read first (a step, `words`). */
+	#face() {
+		const words = Boolean(this.#step) || this.#words;
+		this.#send.bare = !words;
+		this.#send.element.toggleAttribute('data-words', words);
+	}
+
+	/**
+	 * `[{ id, label, primary?, words? }]`: the first marked primary (else the first) is the button, the
+	 * others the split menu; `words` draws the primary's words instead of its glyph (0.26.0).
+	 */
 	set actions(list) {
 		const actions = (Array.isArray(list) ? list : []).filter(action => action && action.label);
 		if (!actions.length) actions.push({ id: 'send', label: this.#labels.text('send') });
 		const primary = actions.find(action => action.primary) ?? actions[0];
 		this.#primary = String(primary.id ?? 'send');
 		this.#label = primary.label;
+		this.#words = primary.words === true;
 		this.#send.label = this.#step?.label ?? primary.label;
+		this.#face();
 		this.#others = actions.filter(action => action !== primary).map(action => ({ id: String(action.id ?? action.label), label: action.label }));
 		if (this.#others.length && !this.#menu) {
 			this.#menu = new ActionMenu({ label: null, name: this.#labels.text('more'), glyph: 'chevron', items: [], align: 'end' });
@@ -106,7 +127,7 @@ export class ComposerActions {
 		}
 		this.#stop = value;
 		if (!this.#stopper) {
-			this.#stopper = new Button({ label: value.label, glyph: 'stop', labels: { busy: this.#labels.text('busy') }, onclick: () => this.#halt() });
+			this.#stopper = new Button({ label: value.label, glyph: 'stop', bare: true, labels: { busy: this.#labels.text('busy') }, onclick: () => this.#halt() });
 			this.#stopper.element.classList.add('bui-composer-stop');
 			this.#element.insertBefore(this.#stopper.element, this.#split);
 		} else this.#stopper.label = value.label;

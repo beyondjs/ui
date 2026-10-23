@@ -11,8 +11,10 @@ const levels = Object.freeze(['full', 'short', 'fold']);
  * 2. `short`: the settings' chips say their value only — the label and a calm state go to the chip's
  *    accessible name and to the family tooltip, a state that asks for attention keeps its word, and a
  *    long value is cut with an ellipsis while the tooltip and the open menu say it whole (D44);
- * 3. `fold`: the settings and Attach fold behind Options (`ComposerFold`), as a narrow composer did in
- *    0.11.1. Only when there is something to fold.
+ * 3. `fold`: the settings fold behind Options (`ComposerFold`), as a narrow composer did in 0.11.1. Only
+ *    when there is something to fold. When the row still does not fit (a phone's step in words, a
+ *    product's extras beside Send), Options leaves out the value beside its glyph (`data-bare`, 0.26.0),
+ *    which its name and tooltip still say.
  *
  * The actions keep their words at every level. The level is the root's `data-fit` (absent for `full`).
  * It is measured when the composer's width changes (a zero-height gauge across the composer, so a
@@ -86,11 +88,13 @@ export class ComposerFit {
 		// Options open or focused: its contents or itself would be hidden by a trial, so the level stays
 		const focused = this.#root.ownerDocument.activeElement;
 		if (this.#fold.open || (focused && focused === this.#fold.button)) return;
+		delete this.#root.dataset.bare;
 		for (const level of levels) {
 			if (level === 'fold' && !this.#fold.available) break;
 			this.#set(level);
-			if (level === 'fold' || this.#fits()) return;
+			if (this.#fits()) return;
 		}
+		if (this.level === 'fold') this.#root.toggleAttribute('data-bare', true);
 	}
 
 	destroy() {

@@ -37,6 +37,16 @@ export interface ComposerEdges {
 	recall?: (() => string | null | Promise<string | null>) | null;
 	/** Offers Dictate where the browser can record (WebM with Opus, WebM, then MP4; never Ogg). */
 	dictation?: DictationOptions | null;
+	/** The **+** menu's entries after Attach files (0.26.0, D165); none: the + attaches at once. */
+	add?: ComposerEntry[];
+	/** The product's work runs now (the engine answering): the box's edge shows it (0.26.0). */
+	live?: boolean;
+}
+/** One entry of the composer's **+** menu after Attach files (0.26.0): its words, what it does, and the key that does the same in the field ("@", "/"). */
+export interface ComposerEntry {
+	label: string;
+	run: () => unknown;
+	keys?: string | null;
 }
 export type DictationState = 'idle' | 'asking' | 'recording' | 'transcribing' | 'failed';
 export type DictationFailure = 'denied' | 'missing' | 'busy' | 'interrupted' | 'short' | 'none' | 'unavailable' | 'limit' | 'silent';

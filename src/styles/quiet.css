@@ -48,6 +48,16 @@
 	display: inline-flex;
 	align-items: center;
 }
+/* A glyph alone in the line (0.26.0, D165): one round target, its glyph where the line's words start. */
+.bui-action-line-actions .bui-button-bare {
+	width: var(--bui-target);
+	padding: 0;
+	border-radius: var(--radius-round);
+}
+.bui-action-line-actions .bui-button-bare .bui-icon {
+	width: 16px;
+	height: 16px;
+}
 .bui-action-line-facts {
 	margin: 0;
 	color: var(--color-text-muted);

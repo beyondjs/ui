@@ -3,7 +3,11 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Page } from './support/page.mjs';
 
-/** A narrow composer's Options (0.11.1): one named control that folds the settings and Attach, a disclosure with its tooltip, folded again by Escape and by a send; `compact: false` keeps 0.11.0. */
+/**
+ * A narrow composer's Options (0.11.1): one named control that folds the settings (and Attach before
+ * 0.26.0, whose + is one target wide and stays), a disclosure with its tooltip, folded again by Escape and
+ * by a send; `compact: false` keeps 0.11.0.
+ */
 const page = new Page();
 const ui = await import('@beyond-js/ui/dom');
 after(() => page.close());
@@ -15,7 +19,7 @@ const attach = { onfiles: () => undefined };
 /** The control is shown by the stylesheet's container query, which happy-dom does not apply: a test says it. */
 const shown = (button, value = true) => (button.getClientRects = () => (value ? [{ width: 32, height: 32 }] : []));
 
-test('with settings or Attach, Options comes first in the toolbar: the more glyph, named, a disclosure that controls both, with the family tooltip', () => {
+test('with settings, Options comes first in the toolbar: the more glyph, named, a disclosure that controls them, with the family tooltip; the + stays', () => {
 	const model = chip();
 	const composer = new ui.Composer({ label: 'Message', onsubmit: () => Promise.resolve(), settings: [model], attach }).mount(document.body);
 	const bar = composer.element.querySelector('.bui-composer-bar');
@@ -28,7 +32,7 @@ test('with settings or Attach, Options comes first in the toolbar: the more glyp
 	assert.equal(button.getAttribute('aria-expanded'), 'false');
 	assert.equal(button.getAttribute('role'), null, 'a disclosure button, not a menu');
 	const controlled = button.getAttribute('aria-controls').split(' ').map(id => document.getElementById(id));
-	assert.deepEqual(controlled.map(node => node.className.split(' ').find(name => name.startsWith('bui-composer-'))), ['bui-composer-attach', 'bui-composer-settings']);
+	assert.deepEqual(controlled.map(node => node.className.split(' ').find(name => name.startsWith('bui-composer-'))), ['bui-composer-settings'], 'the + never folds (0.26.0)');
 	assert.ok(button.hasAttribute('data-bui-hint') && button.hasAttribute('data-bui-hints'), 'the family tooltip');
 	assert.ok(composer.element.hasAttribute('data-compact'));
 	assert.equal(composer.fold.open, false);
@@ -114,11 +118,13 @@ test('Options exists only while there is something to fold, and never with compa
 	model.destroy();
 });
 
-test('Spanish names it «Opciones»; a paste still attaches while Attach is folded; destroy releases its tooltip', () => {
+test('Spanish names it «Opciones»; a paste attaches whatever is folded; destroy releases its tooltip', () => {
 	const files = [];
-	const composer = new ui.Composer({ label: 'Mensaje', onsubmit: () => Promise.resolve(), labels: ui.Composer.labels.es, attach: { onfiles: list => files.push(...list) } }).mount(document.body);
+	const model = chip();
+	const composer = new ui.Composer({ label: 'Mensaje', onsubmit: () => Promise.resolve(), labels: ui.Composer.labels.es, settings: [model], attach: { onfiles: list => files.push(...list) } }).mount(document.body);
 	const button = composer.fold.button;
 	assert.equal(button.getAttribute('aria-label'), 'Opciones');
+	assert.equal(composer.element.querySelector('.bui-composer-attach').getAttribute('aria-label'), 'Adjuntar archivos');
 	const data = { files: [new File(['x'], 'a.png', { type: 'image/png' })], types: ['Files'], getData: () => '' };
 	const paste = new Event('paste', { bubbles: true, cancelable: true });
 	Object.defineProperty(paste, 'clipboardData', { value: data });
@@ -126,14 +132,16 @@ test('Spanish names it «Opciones»; a paste still attaches while Attach is fold
 	assert.equal(files.length, 1);
 	button.focus();
 	composer.destroy();
+	model.destroy();
 	assert.equal(document.querySelectorAll('.bui-hint').length, 0);
 });
 
 test('the stylesheet folds only at the measured fold level, shortens the chips at the short level and keeps compact: false as 0.11.0 below 30rem (0.11.2)', () => {
 	assert.match(sheet, /\.bui-composer-more\s*\{[^}]*display:\s*none/);
 	assert.match(sheet, /\.bui-composer\[data-fit='fold'\] \.bui-composer-more\s*\{[^}]*display:\s*inline-grid/);
-	assert.match(sheet, /\.bui-composer\[data-fit='fold'\]:not\(\[data-options\]\) \.bui-composer-attach,\s*\.bui-composer\[data-fit='fold'\]:not\(\[data-options\]\) \.bui-composer-settings\s*\{[^}]*display:\s*none/);
-	assert.match(sheet, /\.bui-composer\[data-fit='fold'\]\[data-options\] \.bui-composer-start\s*\{[^}]*flex-basis:\s*calc\(100% - var\(--bui-control\) - var\(--space-2\)\)/);
+	assert.match(sheet, /\.bui-composer\[data-fit='fold'\]:not\(\[data-options\]\) \.bui-composer-settings\s*\{[^}]*display:\s*none/);
+	assert.doesNotMatch(sheet, /data-fit='fold'\]:not\(\[data-options\]\) \.bui-composer-attach/, 'the + never folds (0.26.0)');
+	assert.match(sheet, /\.bui-composer\[data-fit='fold'\]\[data-options\] \.bui-composer-start\s*\{[^}]*flex-basis:\s*calc\(100% - var\(--bui-target\) - var\(--space-2\)\)/);
 	assert.match(sheet, /\.bui-composer\[data-fit\] \.bui-composer-settings \.bui-choice-label,[^{]*\{[^}]*clip:\s*rect\(0 0 0 0\)/, 'a shortened chip keeps its label in its name');
 	assert.match(sheet, /\.bui-chip-state:not\(\[data-tone='warning'\], \[data-tone='danger'\]\)/, 'a state that asks for attention keeps its word');
 	assert.match(sheet, /\.bui-composer\[data-compact\] \.bui-composer-settings \.bui-choice-button\s*\{[^}]*flex-wrap:\s*nowrap/, 'a chip never wraps inside itself');

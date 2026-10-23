@@ -1,5 +1,6 @@
 import { ComposerFiles } from './files.js';
 import { ComposerIntake } from './intake.js';
+import { ComposerAdd } from './add.js';
 import { ComposerSuggest } from './suggest.js';
 import { ComposerRecall } from './recall.js';
 import { ComposerDictation } from './dictation/dictation.js';
@@ -8,12 +9,14 @@ import { ComposerDictation } from './dictation/dictation.js';
  * What a composer's message carries beside its text (0.11.0): attachments (`attach`: paste, drop and
  * Attach, with the chips the product sets) and suggestions after a trigger character (`onsuggest`);
  * since 0.14.0 the product's commands after a "/" at the field's start (`commands`), its last queued
- * message on ArrowUp in an empty field (`recall`) and dictation (`dictation`). Each part exists only
- * when the product asks for it; without them the composer is as it was.
+ * message on ArrowUp in an empty field (`recall`) and dictation (`dictation`); since 0.26.0 the **+**
+ * that attaches or opens the product's entries (`ComposerAdd`, D165). Each part exists only when the
+ * product asks for it; without them the composer is as it was.
  */
 export class ComposerContext {
 	#files;
 	#intake = null;
+	#add;
 	#suggest = null;
 	#commands = null;
 	#recall = null;
@@ -38,6 +41,7 @@ export class ComposerContext {
 	constructor({ root, box, field, labels, locale, attach, onsuggest, suggest, commands = null, recall = null, dictation = null, refocus, oninsert }) {
 		this.#files = new ComposerFiles({ labels, locale, refocus, callbacks: { onremove: item => attach?.onremove?.(item), onretry: attach?.onretry ? item => attach.onretry(item) : null } });
 		if (attach) this.#intake = new ComposerIntake({ root, box, field, labels, attach });
+		this.#add = new ComposerAdd({ labels, pick: this.#intake ? () => this.#intake.pick() : null, attach: attach?.label ?? null });
 		if (onsuggest) {
 			if (typeof onsuggest !== 'function') throw new TypeError("A composer's suggestions come from onsuggest(query, signal)");
 			this.#suggest = new ComposerSuggest({ field, anchor: box, labels, source: onsuggest, settings: suggest, oninsert, locale });
@@ -56,9 +60,14 @@ export class ComposerContext {
 		return this.#files;
 	}
 
-	/** Attach and its file input, for the toolbar's start; none without `attach`. */
+	/** The **+** and its file input, for the toolbar's start (the + is not drawn with nothing to add). */
 	get controls() {
-		return this.#intake?.elements ?? [];
+		return [this.#add.element, this.#intake?.input].filter(Boolean);
+	}
+
+	/** The **+** (`ComposerAdd`), whose `entries` the product sets (0.26.0). */
+	get add() {
+		return this.#add;
 	}
 
 	/** The suggestions, or null. */
@@ -91,6 +100,7 @@ export class ComposerContext {
 		this.#commands?.destroy();
 		this.#suggest?.destroy();
 		this.#intake?.destroy();
+		this.#add.destroy();
 		this.#files.destroy();
 	}
 

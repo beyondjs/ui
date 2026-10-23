@@ -37,6 +37,10 @@
 .bui-page[data-template='thread'] .bui-page-compact-line {
 	padding-inline-end: max(var(--layout-gutter), calc(100% - var(--layout-gutter) - var(--layout-thread)));
 }
+/* A centred thread's compact line keeps its words over the centred column (0.26.0). */
+.bui-page[data-template='thread'][data-lane='center'] .bui-page-compact-line {
+	padding-inline: max(var(--layout-gutter), calc((100% - var(--layout-thread)) / 2));
+}
 
 /* A centred thread (0.15.0, decision C2 amending D52 for this template; DQ-14): the thread's column and its
    header sit in the middle of the region, or of what a panel kept in view leaves of it. */
@@ -55,7 +59,8 @@
 }
 
 /* The dock: at the column's end, sticky at the window's bottom, over the canvas so what passes beneath is
-   hidden; a hairline above it only while content passes beneath (`data-stuck`, from its end mark). */
+   hidden; while content passes beneath (`data-stuck`, from its end mark) it fades into the canvas above the
+   dock (since 0.26.0, D165; a hairline before), so nothing is cut by a line. */
 .bui-page-dock {
 	position: sticky;
 	bottom: 0;
@@ -70,10 +75,10 @@
 .bui-page-dock::before {
 	content: '';
 	position: absolute;
-	inset-block-start: 0;
+	inset-block-end: 100%;
 	inset-inline: 0;
-	height: 1px;
-	background: var(--color-border);
+	height: var(--space-6);
+	background: linear-gradient(to bottom, transparent, var(--color-canvas));
 	opacity: 0;
 	transition: opacity var(--motion-quick) var(--motion-ease);
 	pointer-events: none;

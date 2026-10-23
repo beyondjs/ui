@@ -24,6 +24,10 @@ export interface ComposerProps {
 	placeholder?: string | null;
 	/** The step a message needs first (0.16.0, DQ-03); `onSelect` is read from the latest props. */
 	step?: { label: string; onSelect: (input: { text: string }) => unknown } | null;
+	/** The + menu's entries after Attach files (0.26.0, D165); each `onSelect` is read from the latest props. */
+	add?: Array<{ label: string; onSelect: () => unknown; keys?: string | null }> | null;
+	/** The product's work runs now (the engine answering): the box's edge shows it (0.26.0). */
+	live?: boolean;
 	/** The state line above the box: text, React content, or `{ text, action }` with the action React content or `{ label, onSelect }` (0.11.0). */
 	status?: ReactNode | { text: ReactNode; action?: ReactNode | { label: string; onSelect?: (() => unknown) | null } | null };
 	/** The turn's choices at the toolbar's start, React content (0.11.0). */

@@ -94,7 +94,9 @@
 	display: grid;
 	gap: var(--space-1);
 }
-.bui-choice {
+/* A radio or a checkbox with its label. A `ChoiceMenu`'s holder shares the class name and is not one: it
+   keeps its own box (0.26.0), so no chip carries a column gap after its button. */
+.bui-choice:not(.bui-menu-holder) {
 	display: grid;
 	grid-template-columns: auto 1fr;
 	align-items: center;

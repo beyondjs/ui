@@ -131,6 +131,16 @@
 .bui-chip .bui-choice-button[data-tone='danger'] .bui-chip-state {
 	color: var(--color-danger);
 }
+/* A calm option's state is said in the chip's name and tooltip only (0.26.0); its menu still shows it */
+.bui-chip .bui-chip-state[data-calm] {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
 .bui-chip.bui-choice-statement .bui-statement {
 	min-height: var(--bui-target);
 	align-items: center;

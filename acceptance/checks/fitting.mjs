@@ -65,13 +65,15 @@ export const checks = [
 		}
 	},
 	{
-		name: "composer: a shortened chip's tooltip says its whole face on hover and on keyboard focus; folded, Options says what sending uses",
+		name: "composer: a chip's tooltip says its whole face on hover and on keyboard focus, its label never drawn (0.26.0); folded, Options says what sending uses",
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const copy = words[consumer.language];
+			// Since 0.26.0 (D165) a chip in a composer shows its value at every level: its label is its name and its
+			// tooltip whether or not the fit shortens it, so the chips need only be shown (at 1280 px, the panel a sheet)
 			const { page } = await open(browser, consumer, { width: 1280, height: 900, query: '?dock=codex' });
 			const level = await page.evaluate(selector => document.querySelector(selector).dataset.fit ?? 'full', dock);
-			expect(level === 'short', `a running Codex turn at 1280 px shortens its chips: ${level}`);
+			expect(level !== 'fold', `a running Codex turn at 1280 px shows its chips: ${level}`);
 			const chip = page.locator(`${dock} .bui-composer-settings .bui-choice-button`).first();
 			const label = await chip.locator('.bui-choice-label').evaluate(node => ({ width: node.getBoundingClientRect().width, text: node.textContent }));
 			expect(label.width <= 1 && label.text, `the label leaves the face, not the name: ${JSON.stringify(label)}`);

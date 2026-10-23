@@ -1,5 +1,6 @@
 import { expect, overflow } from '../support/browser.mjs';
 import { survey } from '../../tests/support/names.mjs';
+import { unlabeled } from '../support/unlabeled.mjs';
 
 /**
  * The thread page of 0.11.0 in a real engine, on the `thread.html` pages: the thread tier with a panel
@@ -12,7 +13,6 @@ const words = {
 	en: { details: 'Details', hide: 'Hide Details', title: 'Fix the checkout redirect after a failed payment', near: 'Near the limit', recent: 'Recent' },
 	es: { details: 'Detalles', hide: 'Ocultar Detalles', title: 'Corregir la redirección del pago tras un pago fallido', near: 'Cerca del límite', recent: 'Recientes' }
 };
-const unlabeled = ['close', 'menu', 'more', 'search', 'bell', 'chevron', 'pin', 'minimize', 'maximize', 'restore', 'help', 'user'];
 const rem = 16;
 const sizes = { aside: 22 * rem, max: 40 * rem, wide: 48 * rem, thread: 52 * rem, form: 40 * rem, gap: 2 * rem };
 

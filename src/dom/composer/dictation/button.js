@@ -2,8 +2,8 @@ import { Interaction } from '../../core/interaction.js';
 import { Button } from '../../button.js';
 
 /**
- * **Dictate**: a quiet button with the `microphone` glyph beside its visible word (the microphone is not
- * on the closed list of icon-only glyphs, D11), hidden where dictation is not available. While a
+ * **Dictate**: since 0.26.0 (D165) the `microphone` glyph alone in one round target, its word its name and
+ * its tooltip (the microphone joined D11's closed list), hidden where dictation is not available. While a
  * dictation is under way it waits: it stays reachable, ignores presses (`aria-disabled`) and is
  * described by the line's words, which say what is happening and offer the ways on.
  */
@@ -13,12 +13,12 @@ export class DictationButton {
 
 	/**
 	 * @param {object} options
-	 * @param {string} options.label the visible word ("Dictate")
+	 * @param {string} options.label its word ("Dictate"), its name and tooltip
 	 * @param {boolean} options.available whether dictation is offered
 	 * @param {() => void} options.onpress starts a dictation
 	 */
 	constructor({ label, available, onpress }) {
-		this.#button = new Button({ label, glyph: 'microphone', variant: 'quiet', onclick: () => !this.#waiting && onpress() });
+		this.#button = new Button({ label, glyph: 'microphone', variant: 'quiet', bare: true, onclick: () => !this.#waiting && onpress() });
 		this.#button.element.classList.add('bui-dictation-button');
 		this.#button.element.hidden = !available;
 	}
