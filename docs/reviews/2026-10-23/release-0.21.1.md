@@ -50,3 +50,18 @@ Firefox and WebKit were not run. Nothing here is product acceptance: Conduict's 
 ## Family synchronization
 
 The rules' formulation, the audit of every product's lists and each product's adoption pending belong to the Beyond Suite's `branding/docs/list-patterns.md` and its reviews. This package implements their shared part only.
+
+## Independent review and its fixes
+
+An independent source review of this release and of Conduict's adoption found eleven issues, all fixed before release:
+- **Labels:** a product that passes its own `labels` to `Collection` must add `end` and `keys`, or those words fall back to English (`Labels` reads the English defaults). Conduict adds them, and Your work passes `end: false`.
+- **Collection table on a phone:** its stacked rows keep their hang into both gutters. A new check, "a collection's table whose rows stack on a phone…", passes 2/2.
+- **Lead:** only a row with a quiet line puts its lead on the name's line; a row of one line keeps it centered.
+- **Focus:** a row's name that holds the focus keeps it when the list is drawn again.
+- **Down from the search:** it waits while an input method composes and while an answer that replaces the rows is on its way.
+- **End line:** a list whose rows open nothing shows no keys.
+- **Narrow DataTable:** a group's heading has one line above it.
+- **Hidden columns:** the last shown cell keeps the right inset when a column of lower priority is hidden.
+- **React:** `end` takes a function of the count and reads the latest props.
+
+`tests/list-rules.test.mjs` adds two tests for the focus, the keys and the search's Down.

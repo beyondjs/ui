@@ -69,8 +69,9 @@
 .bui-table td:first-child {
 	--bui-divider-start: var(--space-3);
 }
-.bui-table th:last-child,
-.bui-table td:last-child {
+/* The last shown cell, also when a column of lower priority is hidden (FAM-40) */
+.bui-table th:nth-last-child(1 of :not([data-bui-hidden])),
+.bui-table td:nth-last-child(1 of :not([data-bui-hidden])) {
 	--bui-divider-end: var(--space-3);
 }
 .bui-table thead th,
@@ -160,6 +161,10 @@
 	.bui-table:not(.bui-data) td {
 		display: block;
 		width: 100%;
+	}
+	/* The table keeps its hang into both gutters when its rows stack */
+	.bui-table:not(.bui-data) {
+		width: calc(100% + 2 * var(--space-3));
 	}
 	.bui-table:not(.bui-data) tbody tr {
 		padding: var(--space-2) var(--space-3);

@@ -129,3 +129,30 @@ test('Matches marks each word ignoring case and taking it literally', () => {
 	assert.deepEqual(said(ui.Matches.mark('a+b (c)', '+b (')), ['a', '[+b]', ' ', '[(]', 'c)']);
 	assert.deepEqual(ui.Matches.mark('Plain', ' '), ['Plain']);
 });
+
+test('a row\'s name that holds the focus keeps it when the list is drawn again', async () => {
+	const list = make();
+	await page.until(() => list.element.querySelector('.bui-row'));
+	list.element.querySelectorAll('.bui-row-title')[2].focus();
+	await list.load();
+	assert.equal(document.activeElement, list.element.querySelectorAll('.bui-row-title')[2], 'the same conversation\'s name, in the new rows');
+	assert.equal(document.activeElement.textContent, 'hola');
+	list.destroy();
+});
+
+test('a list whose rows open nothing says no keys; Down from the search waits for an input method and for a pending answer', async () => {
+	const plain = make({ link: null });
+	await page.until(() => plain.element.querySelector('.bui-rows-end'));
+	assert.equal(plain.element.querySelector('.bui-rows-end .bui-keys'), null);
+	plain.destroy();
+	const list = make();
+	await page.until(() => list.element.querySelector('.bui-row'));
+	const search = list.tools.element.querySelector('input');
+	search.focus();
+	search.dispatchEvent(new page.window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true, isComposing: true }));
+	assert.equal(document.activeElement, search, 'an input method keeps its Down');
+	list.element.querySelector('.bui-collection-body').setAttribute('aria-busy', 'true');
+	search.dispatchEvent(new page.window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+	assert.equal(document.activeElement, search, 'rows about to be replaced take no focus');
+	list.destroy();
+});

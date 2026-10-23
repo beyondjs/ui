@@ -1,11 +1,12 @@
-/* The family's list rules (0.21.1, D162). A row's lead sits on its name's line, so marks read down one
-   column at the names' height (L2). */
-.bui-row-lead {
+/* The family's list rules (0.21.1, D162). A row with a quiet line under its name puts its lead on the
+   name's line, so marks read down one column at the names' height (L2); a row of one line keeps it
+   centered with the name */
+.bui-row:has(> .bui-row-main > .bui-row-meta:not([hidden])) > .bui-row-lead {
 	align-self: flex-start;
 	align-items: center;
 	height: calc(var(--text-body) * var(--leading-body));
 }
-.bui-row-lead .bui-status-dot {
+.bui-row:has(> .bui-row-main > .bui-row-meta:not([hidden])) > .bui-row-lead .bui-status-dot {
 	margin-top: 0;
 }
 /* A row's menu shows on the row a pointer rests on, the row the focus is in and while it is open; a

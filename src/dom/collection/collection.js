@@ -73,7 +73,9 @@ export class Collection extends Component {
 		this.#tools.element.classList.add('bui-collection-tools');
 		// Down from the search reaches the first row (the list rule L7), wherever the tools are placed
 		this.#tools.element.addEventListener('keydown', event => {
-			if (event.key === 'ArrowDown' && event.target.matches?.('input') && this.#rows?.first?.()) event.preventDefault();
+			// Not while a language's input method chooses, nor while an answer that replaces the rows is on its way
+			if (event.key !== 'ArrowDown' || event.isComposing || !event.target.matches?.('input') || this.#region.getAttribute('aria-busy') === 'true') return;
+			if (this.#rows?.first?.()) event.preventDefault();
 		});
 		this.#region = el('div', { class: 'bui-collection-body', tabindex: '-1', 'aria-busy': 'false' });
 		this.#status = el('p', { class: 'bui-hidden', role: 'status' });
@@ -121,11 +123,14 @@ export class Collection extends Component {
 		const { rows = [], total = null, more = null } = result.answer ?? {};
 		const pages = total !== null ? Math.max(1, Math.ceil(total / limit)) : null;
 		if (!rows.length && this.#state.page > 1 && (pages === null || this.#state.page > pages)) return this.#go(pages ?? this.#state.page - 1);
+		// A row's name that holds the focus keeps it across the redraw, as the arrow keys leave it there
+		const focused = this.#region.contains(document.activeElement) ? document.activeElement.closest('[data-key]')?.dataset.key ?? null : null;
 		this.#rows?.destroy?.();
 		this.#rows = rows.length ? this.#table(rows) : null;
 		const table = this.#rows?.element ?? null;
 		const further = more ?? (pages !== null ? this.#state.page < pages : false);
 		fill(this.#region, [table ?? this.#nothing(), table && !further ? this.#end((this.#state.page - 1) * limit + rows.length) : null]);
+		if (focused !== null) [...this.#region.querySelectorAll('[data-key]')].find(row => row.dataset.key === focused)?.querySelector('.bui-row-title, .bui-row-link')?.focus({ preventScroll: true });
 		this.#columns.attach(table?.localName === 'table' ? table : null, this.#region);
 		this.#options.onrender?.();
 		const summary = this.#paging({ rows, total, more: further, pages, limit });
@@ -156,7 +161,9 @@ export class Collection extends Component {
 		const { end = true, presentation = 'table' } = this.#options;
 		if (presentation !== 'list' || end === false) return null;
 		const said = end === true ? this.#labels.text('end') : typeof end === 'function' ? end({ count }) : end;
-		return el('p', { class: 'bui-rows-end' }, [el('span', {}, [content(said)]), el('span', { class: 'bui-keys bui-rows-keys', text: this.#labels.text('keys') })]);
+		// The keys open only rows that open: a list of names without a destination says no keys
+		const keys = this.#options.link ? el('span', { class: 'bui-keys bui-rows-keys', text: this.#labels.text('keys') }) : null;
+		return el('p', { class: 'bui-rows-end' }, [el('span', {}, [content(said)]), keys]);
 	}
 
 	#change(part) {

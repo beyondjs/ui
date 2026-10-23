@@ -95,6 +95,10 @@
 		background-position: center top;
 		background-size: calc(100% - 2 * var(--space-3)) 1px;
 	}
+	/* A group's heading keeps one line above it, its row's */
+	.bui-data .bui-data-group th {
+		background: none;
+	}
 	.bui-data th[scope='row'] {
 		flex-basis: 100%;
 		height: auto;

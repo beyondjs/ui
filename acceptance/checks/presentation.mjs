@@ -79,6 +79,21 @@ export const checks = [
 		}
 	},
 	{
+		name: 'a collection\'s table whose rows stack on a phone keeps its hang into both gutters (0.21.1, D162)',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			const { page } = await browser.open(consumer, { viewport: { width: 390, height: 800 } });
+			await page.waitForFunction(() => document.querySelectorAll('#listing tbody tr').length > 0);
+			const found = await page.evaluate(() => {
+				const body = document.querySelector('#listing .bui-collection-body').getBoundingClientRect();
+				const table = document.querySelector('#listing .bui-table').getBoundingClientRect();
+				return { body: [Math.round(body.left), Math.round(body.right)], table: [Math.round(table.left), Math.round(table.right)] };
+			});
+			expect(Math.abs(found.body[0] - found.table[0]) <= 1 && Math.abs(found.body[1] - found.table[1]) <= 1, `the stacked table spans its body, gutters included: ${JSON.stringify(found)}`);
+			expect(!(await overflow(page)), 'no sideways scroll');
+		}
+	},
+	{
 		name: '200% zoom: no horizontal scroll and the dialog fits the viewport',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
