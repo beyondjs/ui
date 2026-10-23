@@ -43,4 +43,6 @@ Types: `types/button.d.ts` (new), `ComposerEntry`, `add`, `live`, `ChoiceMenuOpt
 
 ## Artifact
 
-<!-- Filled once packed from the release commit. -->
+- Archive: `dist-pack/beyond-ui-0.26.0.tgz`, packed from the release commit.
+- SHA-256: `8cecfb6ee40ec6d973b04ade116b3618e6b863a327d5984bb76931ef924e2194`.
+- Integrity: `sha512-bD6ot7A+UqiukKgNpNJP5YhnYOhBWwew/Upq2/B39TOK86SDEQ3rz3LSKy7pSi0nRTBGEDTkwfwfZksiMFJo5A==`, the same as the archive the browser acceptance packed.
