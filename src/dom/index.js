@@ -77,6 +77,7 @@ export { ActivityRow } from './activity/row.js';
 export { ActivityGroup } from './activity/group.js';
 export { ActivityExchange } from './activity/exchange.js';
 export { Rail, RailItem, RailMoment } from './activity/rail.js';
+export { Lanes } from './lanes/lanes.js';
 export { Facts } from './facts/facts.js';
 export { Meter } from './facts/meter.js';
 export { Diff } from './diff/diff.js';

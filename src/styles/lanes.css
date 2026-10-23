@@ -1,0 +1,241 @@
+/* Lanes (0.22.0): concurrent work as lanes on one time axis. The list is one grid and every lane a
+   subgrid row of it, so the columns align across lanes by their content with nothing measured in script:
+   the mark and the title (indented by depth under a tree connector), the kind, the live line, the time and
+   the facts in tabular figures, and the trace. Its kind, facts and trace columns exist only when a lane
+   has them (`data-kind`, `data-facts`, `data-trace` on the block). A lane is one line from 40rem of the
+   block's width and two below it, by a container query; no change of words or times changes its height.
+   The marks are `Status`'s shapes and hues and never pulse (LOAD-01); bars move only with the data, at
+   each tick, so nothing animates, reduced motion or not. Tokens only. */
+.bui-lanes {
+	container: bui-lanes / inline-size;
+	--bui-lanes-gap: var(--space-3);
+	--bui-lanes-pad: var(--space-3);
+	--bui-lanes-indent: 1.25rem;
+	--bui-lanes-mark: 18px;
+	--bui-lanes-span: 60000;
+	--bui-lanes-guide: linear-gradient(var(--color-border-strong), var(--color-border-strong));
+	min-width: 0;
+}
+.bui-lanes[data-kind] {
+	--bui-lanes-kind: [kind] fit-content(8rem);
+}
+.bui-lanes[data-facts] {
+	--bui-lanes-facts: [facts] minmax(3rem, max-content);
+}
+.bui-lanes[data-trace] {
+	--bui-lanes-trace: [trace] minmax(5rem, 4fr);
+}
+/* The rows hang their padding into the gutter, so the marks keep the content's edge (P5) */
+.bui-lanes-list {
+	display: grid;
+	grid-template-columns: [head] minmax(0, 6fr) var(--bui-lanes-kind,) [now] minmax(0, 6fr) [time] minmax(5rem, max-content) var(--bui-lanes-facts,) var(--bui-lanes-trace,);
+	column-gap: var(--bui-lanes-gap);
+	margin-inline: calc(-1 * var(--bui-lanes-pad));
+}
+.bui-lane {
+	--bui-lane-line: 50%;
+	--bui-lane-reach: calc(50% + 0.5px);
+	position: relative;
+	display: grid;
+	grid-column: 1 / -1;
+	grid-template-columns: subgrid;
+	grid-template-rows: minmax(1lh, auto);
+	align-items: center;
+	justify-self: stretch;
+	box-sizing: border-box;
+	min-width: 0;
+	min-height: var(--bui-target);
+	margin: 0;
+	padding: var(--space-1) var(--bui-lanes-pad);
+	border: 0;
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: var(--color-text);
+	font: inherit;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+	text-align: start;
+	cursor: pointer;
+}
+.bui-lane:not([aria-current='true']):hover {
+	background: var(--overlay-lift);
+}
+.bui-lane:active {
+	background: var(--color-surface-sunken);
+}
+/* The lane whose detail is open: the selection's surface and its coral edge (C2) */
+.bui-lane[aria-current='true'] {
+	background: var(--color-surface-selected);
+	box-shadow: inset 2px 0 0 var(--color-accent);
+}
+.bui-lane[aria-current='true']:dir(rtl) {
+	box-shadow: inset -2px 0 0 var(--color-accent);
+}
+.bui-lane:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: -2px;
+}
+.bui-lane-head,
+.bui-lane-kind,
+.bui-lane-now,
+.bui-lane-time,
+.bui-lane-facts {
+	grid-row: 1;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.bui-lane-head {
+	grid-column: head;
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+	padding-inline-start: calc(var(--bui-lane-depth, 0) * var(--bui-lanes-indent));
+}
+.bui-lane-mark {
+	flex: none;
+	justify-content: center;
+	width: var(--bui-lanes-mark);
+}
+/* Still: the shape says the state, the time says it lives (LOAD-01, D95) */
+.bui-lane .bui-lane-mark .bui-status-dot {
+	animation: none;
+}
+.bui-lane-title {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	font-weight: var(--weight-medium);
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.bui-lane-kind {
+	grid-column: kind;
+	color: var(--color-text-muted);
+}
+.bui-lane-now {
+	grid-column: now;
+	color: var(--color-text-muted);
+}
+.bui-lane-time {
+	grid-column: time;
+	font-variant-numeric: tabular-nums;
+	text-align: end;
+}
+.bui-lane-facts {
+	grid-column: facts;
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--space-3);
+	font-variant-numeric: tabular-nums;
+}
+/* The trace: a track the width of the axis and the lane's bar on it, placed by custom properties in
+   milliseconds (`--bui-lane-from`, `--bui-lane-to` against the block's `--bui-lanes-span`) */
+.bui-lane-trace {
+	grid-row: 1;
+	grid-column: trace;
+	position: relative;
+	height: 1lh;
+}
+.bui-lane-trace::before,
+.bui-lane-bar {
+	position: absolute;
+	top: calc(50% - 2px);
+	height: 4px;
+	border-radius: 2px;
+}
+.bui-lane-trace::before {
+	content: '';
+	inset-inline: 0;
+	background: var(--color-surface-sunken);
+}
+.bui-lane-bar {
+	inset-inline-start: min(calc(100% - 4px), calc(var(--bui-lane-from, 0) / var(--bui-lanes-span) * 100%));
+	width: max(4px, calc((var(--bui-lane-to, 0) - var(--bui-lane-from, 0)) / var(--bui-lanes-span) * 100%));
+	max-width: 100%;
+	background: var(--color-text-muted);
+}
+.bui-lane[data-tone='progress'] .bui-lane-bar {
+	background: var(--color-info);
+}
+.bui-lane[data-tone='attention'] .bui-lane-bar {
+	background: var(--color-warning);
+}
+.bui-lane[data-tone='success'] .bui-lane-bar {
+	background: var(--color-success);
+}
+.bui-lane[data-tone='failure'] .bui-lane-bar {
+	background: var(--color-danger);
+}
+.bui-lane[data-tone='unknown'] .bui-lane-bar {
+	background: var(--color-border-strong);
+}
+/* The tree connector: ├ or └ from the parent's mark to the lane's own, and │ where a shallower level
+   continues past the lane to a later sibling. Decoration only, under the lane's words. */
+.bui-lane[data-branch]::before,
+.bui-lane[data-through]::after {
+	content: '';
+	position: absolute;
+	inset-block: 0;
+	pointer-events: none;
+}
+.bui-lane[data-branch]::before {
+	inset-inline-start: calc(var(--bui-lanes-pad) + (var(--bui-lane-depth, 1) - 1) * var(--bui-lanes-indent) + var(--bui-lanes-mark) / 2);
+	width: calc(var(--bui-lanes-indent) - var(--bui-lanes-mark) / 2 - 2px);
+	background:
+		var(--bui-lanes-guide) no-repeat left 0 top 0 / 1px var(--bui-lane-reach),
+		var(--bui-lanes-guide) no-repeat left 0 top var(--bui-lane-line) / 100% 1px;
+}
+.bui-lane[data-branch='middle']::before {
+	--bui-lane-reach: 100%;
+}
+.bui-lane[data-through]::after {
+	inset-inline-start: calc(var(--bui-lanes-pad) + var(--bui-lanes-mark) / 2);
+	width: calc(var(--bui-lanes-indent) + 1px);
+}
+.bui-lane[data-through='1']::after {
+	background: var(--bui-lanes-guide) no-repeat left 0 top 0 / 1px 100%;
+}
+.bui-lane[data-through='2']::after {
+	background: var(--bui-lanes-guide) no-repeat right 0 top 0 / 1px 100%;
+}
+.bui-lane[data-through='1 2']::after {
+	background:
+		var(--bui-lanes-guide) no-repeat left 0 top 0 / 1px 100%,
+		var(--bui-lanes-guide) no-repeat right 0 top 0 / 1px 100%;
+}
+.bui-lane[data-branch]:dir(rtl)::before {
+	background:
+		var(--bui-lanes-guide) no-repeat right 0 top 0 / 1px var(--bui-lane-reach),
+		var(--bui-lanes-guide) no-repeat right 0 top var(--bui-lane-line) / 100% 1px;
+}
+.bui-lane[data-through='1']:dir(rtl)::after {
+	background: var(--bui-lanes-guide) no-repeat right 0 top 0 / 1px 100%;
+}
+.bui-lane[data-through='2']:dir(rtl)::after {
+	background: var(--bui-lanes-guide) no-repeat left 0 top 0 / 1px 100%;
+}
+/* Narrow: two lines a lane, the title and the time, then the live line under the title and the facts */
+@container bui-lanes (width < 40rem) {
+	.bui-lanes-list {
+		grid-template-columns: [head now] minmax(0, 1fr) [time facts] minmax(5rem, max-content);
+	}
+	.bui-lane {
+		--bui-lane-line: calc(var(--space-1) + 0.5lh - 0.5px);
+		--bui-lane-reach: calc(var(--space-1) + 0.5lh + 0.5px);
+		grid-template-rows: repeat(2, minmax(1lh, auto));
+	}
+	.bui-lane-kind,
+	.bui-lane-trace {
+		display: none;
+	}
+	.bui-lane-now,
+	.bui-lane-facts {
+		grid-row: 2;
+	}
+	.bui-lane-now {
+		padding-inline-start: calc(var(--bui-lane-depth, 0) * var(--bui-lanes-indent) + var(--bui-lanes-mark) + var(--space-2));
+	}
+}
