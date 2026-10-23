@@ -65,3 +65,7 @@ An independent source review of this release and of Conduict's adoption found el
 - **React:** `end` takes a function of the count and reads the latest props.
 
 `tests/list-rules.test.mjs` adds two tests for the focus, the keys and the search's Down.
+
+## Final run
+
+On the release's last code commit (6065424, the review's fixes), the full installed acceptance in Chrome passed 347 of 348. The one failure was the notification panel's timing check ("panel: an empty inbox offers no 'View all'…", DOM): the panel was busy before the indicator's delay. That check passed 3 of 3 alone, and it touches nothing of the list rules.
