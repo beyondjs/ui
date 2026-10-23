@@ -192,6 +192,7 @@ export const checks = [
 							edge: Math.round(box(row).left + 12),
 							label: Math.round(box(label).left),
 							end: Math.round(box(end).left),
+							spans: Math.abs(box(end).right - box(row).right + 12) <= 1,
 							groups: list.querySelectorAll('.bui-rows-group').length,
 							mark: Math.abs((dot.top + dot.bottom) / 2 - (title.top + title.height / 2)),
 							hidden: getComputedStyle(holder).opacity,
@@ -200,6 +201,7 @@ export const checks = [
 					});
 					expect(found.groups === 3, `${at}: three groups by recency: ${JSON.stringify(found)}`);
 					expect(Math.abs(found.label - found.edge) <= 1 && Math.abs(found.end - found.edge) <= 1, `${at}: the label and the end line start on the content edge: ${JSON.stringify(found)}`);
+					expect(found.spans, `${at}: the end line spans the list, never a paragraph's measure: ${JSON.stringify(found)}`);
 					expect(found.mark <= 2, `${at}: the mark sits on its name's line: ${JSON.stringify(found)}`);
 					expect(found.hidden === '0', `${at}: a menu waits for the pointer or the focus: ${JSON.stringify(found)}`);
 					expect(found.beside, `${at}: the menu stays beside the name: ${JSON.stringify(found)}`);

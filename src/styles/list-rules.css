@@ -50,6 +50,11 @@
 	font-size: var(--text-label);
 	line-height: var(--leading-label);
 }
+/* A line of the list, not a paragraph of prose: it spans the list even where a product caps its pages'
+   paragraphs at the reading measure (a selector of two classes outranks a product's class and element) */
+.bui-collection-body > .bui-rows-end {
+	max-width: none;
+}
 /* The words a search matched, in the names (L8) */
 .bui-match {
 	border-radius: 2px;

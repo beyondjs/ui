@@ -25,3 +25,9 @@ body {
 	height: 300px;
 	padding: var(--space-2);
 }
+
+/* As a product caps its pages' paragraphs at the reading measure (Conduict's `.conduict-body p`), so the
+   list's end line is checked against such a rule (0.21.1, D162) */
+.audit-page p {
+	max-width: 20rem;
+}
