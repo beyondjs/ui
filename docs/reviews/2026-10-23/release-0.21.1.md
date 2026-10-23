@@ -30,11 +30,11 @@ A consumer that vendors 0.21.1 checks its lists and tables in the browser before
 
 ## Archive
 
-Conduict's working tree vendors this change's archive under its provisional number: `beyond-ui-0.20.5.tgz`, SHA-256 `966ea84cfd00f752b44f2aba8119b09da61dc5449c088ad5b5c3c4be51245feb`, byte-identical to the one packed in this worktree. Its All conversations uses `row`, `group` and `end`. No other consumer has vendored it. The 0.21.1 archive is packed after the rebase on 0.21.0; its digest is not recorded here.
+`dist-pack/beyond-ui-0.21.1.tgz`, packed after the rebase on 0.21.0: SHA-256 `901e721d756fd6d6d5e894f4e97b7994d65deaf4ae44d48922ecdb21eb450339`, integrity `sha512-JCsW+zMhbeNftdTZ/g4edhLQjsiSUWhayFYA8pvIJTcQqx3E/xC0lKh7pj2LfOVUmayKw6sYTWVC5mAXB+0E9w==`. Conduict vendors it, and its All conversations uses `row`, `group` and `end`. No other consumer has vendored it. Before the rebase, the same changes were packed under a provisional 0.20.5 for Conduict's working tree only; that archive is not released.
 
 ## Executed checks
 
-Executed locally on 2026-10-23 in Chrome 155, on the working tree before the rebase on 0.21.0:
+Executed locally on 2026-10-23 in Chrome 155. The full run used the working tree before the rebase on 0.21.0. After the rebase, on 0.21.1: `npm test` passes 759 of 759 (0.21.0's tests included), `npm run types` passes, and the three list checks pass ("a grouped list" 1/1, "share one geometry" 2/2, "collection narrower than its table" 2/2). Before the rebase:
 
 - `npm test`: 754 pass, 0 fail. The new `tests/list-rules.test.mjs` adds 6 tests: a row's own options, groups and their labels, the end line, marked matches, the arrow keys with Down from the search, and `Recency` and `Matches` alone.
 - `npm run types` passes.
@@ -43,7 +43,7 @@ Executed locally on 2026-10-23 in Chrome 155, on the working tree before the reb
   - "a grouped list: …" (DOM).
 
   Each runs in both themes at 1440 and 390 px.
-- The two failures were "collection narrower than its table" (DOM and React 19). The collection body's new gutter hang crossed the container's edge by the hang itself. The check (`acceptance/checks/presentation.mjs`) now allows the body its declared hang and nothing more. The session that changed it reports 2/2 passing afterwards; that rerun's log is not part of this record.
+- The two failures were "collection narrower than its table" (DOM and React 19). The collection body's new gutter hang crossed the container's edge by the hang itself. The check (`acceptance/checks/presentation.mjs`) now allows the body its declared hang and nothing more. It passes 2/2 on 0.21.1.
 
 Firefox and WebKit were not run. Nothing here is product acceptance: Conduict's adoption is recorded in its own repository.
 
