@@ -170,3 +170,20 @@ test('useRecovery shares one notice with a Collection, which says “Not availab
 		assert.ok(host.querySelector('.bui-collection tbody tr, .bui-collection .bui-rows li'));
 	} finally { await React.act(async () => root.unmount()); host.remove(); }
 });
+
+test('React Recovery runs a callback several reads share once per attempt, and its empty host takes no room (0.24.1)', async () => {
+	const { Recovery } = await import('@beyond-js/ui/react');
+	const { readFileSync } = await import('node:fs');
+	const host = document.createElement('div'); document.body.append(host);
+	const root = createRoot(host);
+	let calls = 0;
+	const shared = async () => { calls++; };
+	const reads = [{ key: 'machines', title: 'Machines', run: shared }, { key: 'work', title: 'Your conversations', run: shared }];
+	try {
+		await React.act(async () => root.render(React.createElement(Recovery, { title: 'Beyond Accounts did not answer', reads, again: { events: null, page: null } })));
+		await React.act(async () => { host.querySelector('.bui-recovery-actions button').click(); await new Promise(resolve => setTimeout(resolve, 0)); });
+		assert.equal(calls, 1, 'one read for both, as the DOM notice does');
+	} finally { await React.act(async () => root.unmount()); host.remove(); }
+	const sheet = readFileSync(new URL('../src/styles/recovery.css', import.meta.url), 'utf8');
+	assert.match(sheet, /\.bui-host:has\(> \.bui-recovery\[hidden\]\) \{\s*display: none;/);
+});

@@ -19,6 +19,10 @@
 .bui-recovery[hidden] {
 	display: none;
 }
+/* React's host of a notice with nothing to say takes no room in a grid or a flex row (0.24.1) */
+.bui-host:has(> .bui-recovery[hidden]) {
+	display: none;
+}
 .bui-recovery-mark {
 	grid-area: mark;
 	display: inline-flex;

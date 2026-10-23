@@ -85,6 +85,8 @@ export function Recovery({ notice = null, title, reads = [], whole = false, labe
 	const host = useRef(null);
 	const latest = useLatest(reads);
 	const synced = useRef(new Set());
+	// One call per attempt for reads that share a callback, as the DOM notice promises: keyed by the callback
+	const attempt = useRef(new Map());
 	useLayoutEffect(() => {
 		if (!current || !host.current) return undefined;
 		host.current.append(current.element);
@@ -100,7 +102,15 @@ export function Recovery({ notice = null, title, reads = [], whole = false, labe
 			for (const key of synced.current) if (!keys.has(key)) it.delete(key);
 			for (const read of reads) {
 				const run = async () => {
-					await latest.current.find(item => item.key === read.key)?.run?.();
+					const callback = latest.current.find(item => item.key === read.key)?.run;
+					if (typeof callback !== 'function') return false;
+					let pending = attempt.current.get(callback);
+					if (!pending) {
+						pending = Promise.resolve().then(callback);
+						attempt.current.set(callback, pending);
+						pending.then(() => attempt.current.delete(callback), () => attempt.current.delete(callback));
+					}
+					await pending;
 					return false;
 				};
 				it.set(read.key, { title: read.title, details: read.details ?? null, automatic: read.automatic ?? true, run });
