@@ -3,9 +3,16 @@
  * settles, under a bar with the family lockup the opening hands its identity over to.
  */
 const root = document.getElementById('root');
-const pending = document.createElement('p');
-pending.dataset.buiOpeningWait = 'session';
-pending.textContent = 'Confirmando tu sesión…';
+// `?unnamed`: a region that names no step and adds a note while it waits, as a product's own veil can
+const unnamed = new URLSearchParams(location.search).has('unnamed');
+const pending = document.createElement(unnamed ? 'section' : 'p');
+pending.dataset.buiOpeningWait = unnamed ? '' : 'session';
+if (unnamed) {
+	const line = document.createElement('p');
+	line.textContent = 'Leyendo tus proyectos… Un momento.';
+	pending.append(line);
+	setTimeout(() => pending.append(Object.assign(document.createElement('p'), { textContent: 'Está tardando más de lo habitual.' })), 50);
+} else pending.textContent = 'Confirmando tu sesión…';
 root.append(pending);
 const response = await fetch('/state');
 const bar = document.createElement('header');

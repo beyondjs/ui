@@ -36,6 +36,10 @@ test('the opening says nothing it cannot back: no help without a cause, a fallba
 	const css = readFileSync(new URL('../src/opening/opening.css', import.meta.url), 'utf8');
 	assert.match(css, /\.bui-opening-fallback \{[^}]*visibility: hidden; animation: bui-opening-fallback 0s linear 15s forwards;/);
 	assert.match(css, /prefers-reduced-motion: reduce[\s\S]*\.bui-opening-trace::after \{ display: none; \}/, 'nothing travels under reduced motion');
+	// 0.21.2: motion is declared only for a person who did not ask for less, so no more specific rule brings it back
+	const motion = css.match(/@media \(prefers-reduced-motion: no-preference\) \{[\s\S]*?\n\}/)[0];
+	assert.match(motion, /bui-opening-travel[\s\S]*bui-opening-pulse[\s\S]*bui-opening-in/);
+	assert.doesNotMatch(css.replace(motion, ''), /animation: bui-opening-(travel|pulse|in)\b/, 'no animation outside the no-preference block');
 	assert.doesNotMatch(css, /text-transform/);
 });
 

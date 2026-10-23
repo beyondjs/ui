@@ -93,9 +93,10 @@ export class OpeningWords {
 		return text || this.text('opening');
 	}
 
-	/** A duration as a person reads it: "0.4 s", "12 s", "1 min 5 s" (decimals in the document's language) */
+	/** A duration as a person reads it: "< 0.1 s", "0.4 s", "12 s", "1 min 5 s" (decimals in the document's language) */
 	time(ms) {
 		const seconds = Math.max(0, ms) / 1000;
+		if (seconds < 0.1) return `< ${new Intl.NumberFormat(this.language, { minimumFractionDigits: 1 }).format(0.1)} s`;
 		if (seconds >= 60) return `${Math.floor(seconds / 60)} min ${Math.floor(seconds % 60)} s`;
 		const digits = seconds < 10 ? 1 : 0;
 		return `${new Intl.NumberFormat(this.language, { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(digits ? seconds : Math.floor(seconds))} s`;

@@ -29,10 +29,11 @@ test('the words: every key in both languages, the family’s steps, a product’
 	assert.equal(said.step('mine', 'Waking your machine...'), 'Waking your machine');
 	assert.equal(said.step('', ''), 'Opening Conduict');
 	assert.equal(said.text('longer', { step: 'Confirming your session' }), 'Confirming your session is taking longer than usual');
-	assert.deepEqual([380, 4249, 12000, 65000].map(ms => said.time(ms)), ['0.4 s', '4.2 s', '12 s', '1 min 5 s']);
+	assert.deepEqual([30, 380, 4249, 12000, 65000].map(ms => said.time(ms)), ['< 0.1 s', '0.4 s', '4.2 s', '12 s', '1 min 5 s'], 'never “0.0 s”');
 	document.documentElement.lang = 'es-ES';
 	assert.equal(said.step('signin'), 'Iniciando tu sesión con Beyond Accounts');
 	assert.equal(said.time(4249), '4,2 s', 'decimals in the document’s language');
+	assert.equal(said.time(20), '< 0,1 s');
 	assert.equal(said.text('late'), 'Conduict aún no se ha abierto');
 	document.documentElement.lang = 'en';
 });

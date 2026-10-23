@@ -51,6 +51,9 @@ class OpeningRuntime {
 	#start() {
 		this.#element = document.getElementById('bui-opening');
 		if (!this.#element) return this.#release();
+		// A document drawn by another version of the package (a development server whose package changed
+		// under it) lacks this version's parts: it only ends on readiness, and nothing throws (0.21.2)
+		if (!this.#element.querySelector('[data-opening-steps]') || !this.#element.querySelector('[data-opening-recovery] [data-opening-heading]')) return this.#plain();
 		// The controller runs: the static line for an opening without it is no longer needed
 		this.#element.querySelector('[data-opening-fallback]')?.remove();
 		this.#element.dataset.state = 'opening';
@@ -81,9 +84,20 @@ class OpeningRuntime {
 		const pending = root.querySelector(this.#specs.pending ?? '[data-bui-opening-wait]');
 		if (!pending) return void this.#end(root);
 		const id = pending.getAttribute('data-bui-opening-wait') ?? '';
-		if (!this.#steps.begin(id, steps.includes(id) ? '' : pending.textContent)) return;
+		if (!this.#steps.begin(id, steps.includes(id) ? '' : this.#line(pending))) return;
 		this.#slow = false;
 		if (!this.#recovery.state) this.#say(this.#steps.label);
+	}
+
+	/**
+	 * A step the product does not name, in its own words: its status line, else its first line of text, to
+	 * the end of the first sentence; what a region adds later below that line starts no new step (0.21.2)
+	 */
+	#line(pending) {
+		const status = pending.matches('[role="status"]') ? pending : pending.querySelector('[role="status"]');
+		const leaf = [...(status ?? pending).querySelectorAll('*')].find(node => !node.children.length && node.textContent.trim());
+		const text = (leaf ?? status ?? pending).textContent.replace(/\s+/g, ' ').trim();
+		return text.split(/(?<=[.…!?])\s/)[0];
 	}
 
 	/** The one announced line: never the ticking time, and the same words are not said twice */
@@ -177,6 +191,21 @@ class OpeningRuntime {
 		this.#element.remove();
 		// One set of faces from now on: the application's own, once the ones in use have loaded (0.17.1)
 		new OpeningFonts(document.querySelector('link[data-bui-opening]')?.sheet ?? null).release().catch(() => false);
+	}
+
+	/** Ends a document of another version on readiness, removing it at once */
+	#plain() {
+		removeEventListener('error', this.#fault, true);
+		removeEventListener('unhandledrejection', this.#fault);
+		const observer = new MutationObserver(() => end());
+		const end = () => {
+			const root = document.querySelector(this.#specs.root);
+			if (!root?.children.length || root.querySelector(this.#specs.pending ?? '[data-bui-opening-wait]')) return;
+			observer.disconnect();
+			this.#element.remove();
+		};
+		observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'data-state', 'data-bui-opening-wait'] });
+		end();
 	}
 
 	#release() {

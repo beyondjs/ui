@@ -42,7 +42,7 @@
 
 /* The trace: work without a known end, as the family's indeterminate band (Awaited), in the colour of work in progress. */
 .bui-opening-trace { position: relative; height: 1px; background: var(--color-border-strong); clip-path: inset(-12px 0); }
-.bui-opening-trace::after { content: ''; position: absolute; top: -0.5px; left: 0; width: 34%; height: 2px; border-radius: var(--radius-round); background: linear-gradient(90deg, transparent, var(--color-info) 62%, color-mix(in srgb, var(--color-info) 40%, var(--color-text)) 88%, transparent); filter: drop-shadow(0 0 5px var(--color-info)); animation: bui-opening-travel 1.8s cubic-bezier(0.45, 0, 0.25, 1) infinite; }
+.bui-opening-trace::after { content: ''; position: absolute; top: -0.5px; left: 0; width: 34%; height: 2px; border-radius: var(--radius-round); background: linear-gradient(90deg, transparent, var(--color-info) 62%, color-mix(in srgb, var(--color-info) 40%, var(--color-text)) 88%, transparent); filter: drop-shadow(0 0 5px var(--color-info)); }
 .bui-opening:is([data-state='failed'], [data-state='offline']) .bui-opening-trace::after { display: none; }
 @keyframes bui-opening-travel { from { transform: translateX(-100%); } to { transform: translateX(265%); } }
 
@@ -50,7 +50,7 @@
 .bui-opening-status { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 
 /* The steps, each with the family's mark for its state (D129) and its time in tabular figures. */
-.bui-opening-steps { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; font-size: var(--text-small); line-height: var(--leading-small); animation: bui-opening-in var(--motion-standard) var(--motion-ease); }
+.bui-opening-steps { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; font-size: var(--text-small); line-height: var(--leading-small); }
 .bui-opening-steps[hidden] { display: none; }
 .bui-opening-step { display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-3); color: var(--color-text-muted); }
 .bui-opening-step:not([data-state='done']) { color: var(--color-text); }
@@ -59,7 +59,7 @@
 .bui-opening-step[data-late] .bui-opening-time { color: var(--color-text); }
 .bui-opening-dot { width: 9px; height: 9px; border-radius: var(--radius-round); }
 .bui-opening-step[data-state='done'] .bui-opening-dot { background: var(--color-success); }
-.bui-opening-step[data-state='active'] .bui-opening-dot { border: 1.5px solid var(--color-info); background: linear-gradient(to right, var(--color-info) 50%, transparent 50%); animation: bui-opening-pulse 1.2s ease-in-out 4; }
+.bui-opening-step[data-state='active'] .bui-opening-dot { border: 1.5px solid var(--color-info); background: linear-gradient(to right, var(--color-info) 50%, transparent 50%); }
 .bui-opening-step[data-state='late'] .bui-opening-dot { border-radius: 1px; background: var(--color-warning); transform: rotate(45deg) scale(0.85); }
 .bui-opening-step[data-state='failed'] .bui-opening-dot { border-radius: 2px; background: var(--color-danger); }
 @keyframes bui-opening-pulse { 50% { opacity: 0.4; } }
@@ -93,11 +93,17 @@
 @media (max-width: 30rem) {
 	.bui-opening { --bui-opening-height: 26px; }
 }
-/* Nothing moves under reduced motion: the trace is a still, dashed band, as the family's indeterminate one. */
+/* Motion exists only for a person who did not ask for less (0.21.2): the trace's light, the running step's few
+   pulses and the steps' arrival are declared here alone, so no rule of a product's can bring them back. */
+@media (prefers-reduced-motion: no-preference) {
+	.bui-opening-trace::after { animation: bui-opening-travel 1.8s cubic-bezier(0.45, 0, 0.25, 1) infinite; }
+	.bui-opening-step[data-state='active'] .bui-opening-dot { animation: bui-opening-pulse 1.2s ease-in-out 4; }
+	.bui-opening-steps { animation: bui-opening-in var(--motion-standard) var(--motion-ease); }
+}
+/* Under reduced motion the trace is a still, dashed band, as the family's indeterminate one. */
 @media (prefers-reduced-motion: reduce) {
 	.bui-opening-trace { background: repeating-linear-gradient(to right, var(--color-info) 0 var(--space-2), transparent var(--space-2) var(--space-4)); }
 	.bui-opening-trace::after { display: none; }
-	.bui-opening-steps, .bui-opening-step .bui-opening-dot { animation: none; }
 }
 @media (forced-colors: active) {
 	.bui-opening-trace, .bui-opening-dot { forced-color-adjust: none; background: CanvasText; }

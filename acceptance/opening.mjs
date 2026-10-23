@@ -27,6 +27,8 @@ class OpeningAcceptance {
 			for (const theme of ['light', 'dark']) for (const width of [320, 390, 1440]) await this.#late({ theme, width });
 			await this.#failed();
 			await this.#error();
+			await this.#unnamed();
+			await this.#earlier();
 			await this.#unavailable();
 			await this.#disabled();
 			await this.#usual();
@@ -51,11 +53,13 @@ class OpeningAcceptance {
 		// The application's own faces, as its `@beyond-js/ui/fonts.css` declares them (0.17.1)
 		if (name.startsWith('fonts/')) return send(types[name.split('.').pop()] ?? 'text/css', readFileSync(new URL(`../${name}`, import.meta.url)));
 		response.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; require-trusted-types-for 'script'; trusted-types 'none'");
-		send('text/html', this.#document.render(readFileSync(new URL('./fixtures/opening/index.html', import.meta.url), 'utf8')));
+		const html = this.#document.render(readFileSync(new URL('./fixtures/opening/index.html', import.meta.url), 'utf8'));
+		// `/earlier`: the markup before 0.21.0 with this version's controller and stylesheet
+		send('text/html', name === 'earlier' ? html.replace(/<div id="bui-opening"[\s\S]*?<\/noscript>\n<\/div><\/div>/, readFileSync(new URL('./fixtures/opening/earlier.html', import.meta.url), 'utf8').trim()) : html);
 	}
 
 	/** A page whose `/state` read (or module) waits for `release()`; `fail` answers 503, `abort` aborts it */
-	async #open({ theme = 'light', width = 390, motion = 'reduce', clock = true, javascript = true, hold = '**/state', abort = false, fail = false, prepare = null } = {}) {
+	async #open({ theme = 'light', width = 390, motion = 'reduce', clock = true, javascript = true, hold = '**/state', abort = false, fail = false, prepare = null, path = '/?project=kept#context' } = {}) {
 		const context = await this.#browser.newContext({ viewport: { width, height: 800 }, colorScheme: theme, reducedMotion: motion, locale: 'es-ES', javaScriptEnabled: javascript });
 		await prepare?.(context);
 		const page = await context.newPage();
@@ -63,7 +67,7 @@ class OpeningAcceptance {
 		let release;
 		const gate = new Promise(resolve => (release = resolve));
 		await page.route(hold, async route => { await gate; if (abort) await route.abort(); else await route.fulfill({ status: fail ? 503 : 200, body: '{}' }); });
-		await page.goto(`${this.#url}/?project=kept#context`, { waitUntil: hold.endsWith('ready.js') ? 'commit' : 'domcontentloaded' });
+		await page.goto(`${this.#url}${path}`, { waitUntil: hold.endsWith('ready.js') ? 'commit' : 'domcontentloaded' });
 		return { context, page, release };
 	}
 
@@ -77,9 +81,11 @@ class OpeningAcceptance {
 			const status = page.locator('[data-opening-status]');
 			await page.waitForFunction(() => document.querySelector('[data-opening-status]').textContent === 'Confirmando tu sesión');
 			const identity = await page.locator('.bui-opening-lockup').boundingBox();
-			assert.equal(await page.locator('.bui-opening-steps').isHidden(), true, 'a quick opening says no steps');
+			// A quick opening says no steps; an engine that took longer than the reveal to get here already says them
+			if (await page.evaluate(() => performance.now() < 700)) assert.equal(await page.locator('.bui-opening-steps').isHidden(), true, 'a quick opening says no steps');
 			await page.clock.fastForward(900);
 			assert.deepEqual(await this.#steps(page), ['done Cargando Projects', 'active Confirmando tu sesión']);
+			assert.deepEqual(await page.locator('#bui-opening').evaluate(node => node.getAnimations({ subtree: true }).filter(motion => motion.playState === 'running' && motion.effect.getComputedTiming().duration > 1).map(motion => motion.animationName)), [], 'nothing moves under reduced motion, the running step’s mark included');
 			assert.match(await page.locator('.bui-opening-step >> nth=1 >> .bui-opening-time').textContent(), /^\d+,\d s$/, 'its time, in the language’s decimals');
 			assert.equal(await page.locator('#bui-opening').evaluate(element => element.scrollWidth <= innerWidth), true);
 			assert.equal(await page.locator('.bui-opening-veil').evaluate(element => getComputedStyle(element).backgroundColor), theme === 'dark' ? 'rgb(16, 22, 37)' : 'rgb(255, 255, 255)');
@@ -146,6 +152,35 @@ class OpeningAcceptance {
 			release();
 			await page.locator('#bui-opening').waitFor({ state: 'detached' });
 			await page.getByRole('heading', { name: 'Your projects' }).waitFor();
+			this.#count++;
+		} finally { await context.close(); }
+	}
+
+	/** A step the product does not name is said in one short line, and a note added below it starts no new step */
+	async #unnamed() {
+		const { context, page, release } = await this.#open({ path: '/?unnamed' });
+		try {
+			await page.clock.fastForward(900);
+			assert.deepEqual(await this.#steps(page), ['done Cargando Projects', 'active Leyendo tus proyectos']);
+			await page.clock.fastForward(500);
+			assert.deepEqual(await this.#steps(page), ['done Cargando Projects', 'active Leyendo tus proyectos'], 'the note below the line starts no step');
+			release();
+			await page.locator('#bui-opening').waitFor({ state: 'detached' });
+			this.#count++;
+		} finally { await context.close(); }
+	}
+
+	/** A document drawn by an earlier version, with this version's controller, ends on readiness without an error */
+	async #earlier() {
+		const { context, page, release } = await this.#open({ clock: false, path: '/earlier?project=kept#context' });
+		const errors = [];
+		page.on('pageerror', error => errors.push(error.message));
+		try {
+			await page.waitForTimeout(1000);
+			release();
+			await page.locator('#bui-opening').waitFor({ state: 'detached' });
+			await page.getByRole('heading', { name: 'Your projects' }).waitFor();
+			assert.deepEqual(errors, [], 'nothing throws');
 			this.#count++;
 		} finally { await context.close(); }
 	}
