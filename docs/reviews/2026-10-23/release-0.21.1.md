@@ -30,7 +30,7 @@ A consumer that vendors 0.21.1 checks its lists and tables in the browser before
 
 ## Archive
 
-`dist-pack/beyond-ui-0.21.1.tgz`, packed after the rebase on 0.21.0: SHA-256 `818fb87a3231449812e1fd9d1f27d182404a4a94efee3f405694507b6cd2389d`, integrity `sha512-Fl73MY1YHxiwle2amiTIo0uverkhy54SI3QWijToQVzl6laQcJMmyIb7L5YVv+8fSXQw21LN5AcBp9Vf7AHT2g==`. Conduict vendors it, and its All conversations uses `row`, `group` and `end`. No other consumer has vendored it. Before the rebase, the same changes were packed under a provisional 0.20.5 for Conduict's working tree only; that archive is not released.
+`dist-pack/beyond-ui-0.21.1.tgz`, packed after the rebase on 0.21.0 and the review's fixes: SHA-256 `613bc5c98311c1ea1ad7dd35c47f327a9fe27368bf4b124b0595bcd33504dc36`, integrity `sha512-a/hjSoxtKs0/ddQn9S4x1qSteKf8pqKJN6RGed97WP+r2LAX6G4itOByMecuPhcsr3HJDtO83DcFSoOJeCOpYg==`. Conduict vendors it, and its All conversations uses `row`, `group` and `end`. No other consumer has vendored it. Before the rebase, the same changes were packed under a provisional 0.20.5 for Conduict's working tree only; that archive is not released.
 
 ## Executed checks
 
