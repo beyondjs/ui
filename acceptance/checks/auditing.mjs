@@ -125,6 +125,52 @@ export const checks = [
 		}
 	},
 	{
+		name: 'ListRow and DataTable rows share one geometry: the same hang, content edge, divider and hover (0.20.5, D159)',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			for (const scheme of ['light', 'dark']) {
+				for (const width of [1440, 390]) {
+					const at = `${scheme} ${width} px`;
+					const { page, context } = await open(browser, consumer, { width, scheme });
+					const found = await page.evaluate(() => {
+						const round = value => Math.round(value * 10) / 10;
+						const ink = node => {
+							const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, { acceptNode: text => (text.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
+							const text = walker.nextNode();
+							const range = document.createRange();
+							const start = text.textContent.search(/\S/);
+							range.setStart(text, start);
+							range.setEnd(text, start + 1);
+							return round(range.getBoundingClientRect().left);
+						};
+						const list = document.querySelector('#rows').getBoundingClientRect();
+						const row = document.querySelectorAll('#rows .bui-row')[1];
+						const before = getComputedStyle(row, '::before');
+						const body = document.querySelector('.bui-data-body');
+						const lines = [...document.querySelectorAll('.bui-data tbody tr')];
+						const tr = lines[1];
+						const cell = tr.firstElementChild;
+						const style = getComputedStyle(cell);
+						const narrow = getComputedStyle(tr).display === 'flex';
+						const line = getComputedStyle(narrow ? tr : cell);
+						return {
+							edge: round(body.getBoundingClientRect().left + parseFloat(getComputedStyle(body).paddingLeft)),
+							list: { left: round(list.left), divider: round(row.getBoundingClientRect().left + parseFloat(before.left)), color: before.borderTopColor },
+							table: { left: round(tr.getBoundingClientRect().left), ink: ink(cell), divider: narrow ? round(tr.getBoundingClientRect().left + parseFloat(/calc\(100% - ([\d.]+)px\)/.exec(line.backgroundSize)?.[1] ?? NaN) / 2) : round(cell.getBoundingClientRect().left + parseFloat(style.backgroundPositionX)), color: line.backgroundImage, first: getComputedStyle(lines[0].firstElementChild).backgroundSize }
+						};
+					});
+					const edge = found.list.divider;
+					expect(Math.abs(found.table.left - found.list.left) <= 1, `${at}: a table row hangs as a list row does: ${JSON.stringify(found)}`);
+					expect(Math.abs(found.table.ink - edge) <= 1 && Math.abs(found.edge - edge) <= 1, `${at}: a table's first cell starts on the list's content edge: ${JSON.stringify(found)}`);
+					expect(Math.abs(found.table.divider - edge) <= 1, `${at}: a table's divider starts where a list's does: ${JSON.stringify(found)}`);
+					expect(found.table.color.includes(found.list.color), `${at}: dividers share one color: ${JSON.stringify(found)}`);
+					expect(found.table.first === '0px 0px' || found.table.first === 'auto', `${at}: no line above the first row: ${JSON.stringify(found)}`);
+					await context.close();
+				}
+			}
+		}
+	},
+	{
 		name: 'CommandCard: focused on arrival, Enter allows once and the outcome replaces the answers',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {

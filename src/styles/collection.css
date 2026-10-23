@@ -28,7 +28,12 @@
 .bui-collection-body:focus {
 	outline: none;
 }
+/* A collection's body hangs into the gutter as a list does (D159, P5): its rows' and its table's surfaces
+   reach past their words while the words, dividers, skeletons and messages stay on the content edge, and
+   scrolling clips none of it. */
 .bui-collection-body {
+	margin-inline: calc(-1 * var(--space-3));
+	padding-inline: var(--space-3);
 	overflow-x: auto;
 }
 .bui-collection-body:focus-visible {
@@ -39,28 +44,42 @@
 	opacity: 0.6;
 }
 
+/* A table hangs into the gutter as a list's rows do (0.20.5, D159, P5): its first and last cells keep their
+   padding, so their words stay on the content edge while a hovered row's surface reaches past them. */
 .bui-table {
-	width: 100%;
+	width: calc(100% + 2 * var(--space-3));
+	margin-inline: calc(-1 * var(--space-3));
 	border-collapse: collapse;
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
 }
 .bui-table th,
 .bui-table td {
+	--bui-divider-start: 0px;
+	--bui-divider-end: 0px;
 	height: var(--bui-row);
 	padding: var(--space-2) var(--space-3);
-	border-bottom: 1px solid var(--color-border);
+	background: linear-gradient(var(--color-border-strong), var(--color-border-strong)) no-repeat;
+	background-size: 0 0;
 	text-align: left;
 	vertical-align: middle;
 }
-/* A table's first and last columns keep their words on the content's edges (0.19.1, P5), as its lines do. */
+/* A list's dividers: under the header and between rows, in the list's color, on the content edge. */
 .bui-table th:first-child,
 .bui-table td:first-child {
-	padding-inline-start: 0;
+	--bui-divider-start: var(--space-3);
 }
 .bui-table th:last-child,
 .bui-table td:last-child {
-	padding-inline-end: 0;
+	--bui-divider-end: var(--space-3);
+}
+.bui-table thead th,
+.bui-table tbody tr:not(:first-child) > * {
+	background-size: calc(100% - var(--bui-divider-start) - var(--bui-divider-end)) 1px;
+	background-position: var(--bui-divider-start) top;
+}
+.bui-table thead th {
+	background-position: var(--bui-divider-start) bottom;
 }
 .bui-table thead th {
 	color: var(--color-text-muted);
@@ -79,8 +98,11 @@
 .bui-table-links tbody tr {
 	position: relative;
 }
-.bui-table-links tbody tr:hover {
-	background: var(--color-surface-sunken);
+.bui-table-links tbody tr:not(.bui-data-group):hover {
+	background-color: var(--overlay-lift);
+}
+.bui-table-links tbody tr:has(.bui-row-link:active) {
+	background-color: var(--color-surface-sunken);
 }
 .bui-row-link {
 	color: var(--color-link);
@@ -140,14 +162,19 @@
 		width: 100%;
 	}
 	.bui-table:not(.bui-data) tbody tr {
-		padding: var(--space-2) 0;
-		border-bottom: 1px solid var(--color-border);
+		padding: var(--space-2) var(--space-3);
+	}
+	.bui-table:not(.bui-data) tbody tr:not(:first-child) {
+		background-image: linear-gradient(var(--color-border-strong), var(--color-border-strong));
+		background-repeat: no-repeat;
+		background-position: center top;
+		background-size: calc(100% - 2 * var(--space-3)) 1px;
 	}
 	.bui-table:not(.bui-data) tbody th,
 	.bui-table:not(.bui-data) tbody td {
 		height: auto;
 		padding: var(--space-1) 0;
-		border: 0;
+		background: none;
 	}
 	.bui-table:not(.bui-data) tbody td::before {
 		content: attr(data-label);
