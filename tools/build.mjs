@@ -24,8 +24,13 @@ class Build {
 		writeFileSync(`${directory}tokens.css`, `${new TokenSheet(tokens).css}\n`);
 		writeFileSync(`${directory}tokens.json`, `${JSON.stringify(tokens, null, '\t')}\n`);
 		writeFileSync(`${directory}styles.css`, this.styles);
-		buildSync({ entryPoints: [fileURLToPath(new URL('src/opening/runtime.js', this.#root))], bundle: true, minify: true, format: 'iife', target: 'es2022', outfile: `${directory}opening.js` });
+		// The opening's controller knows its version, to tell a document another version drew (0.25.0)
+		buildSync({ entryPoints: [fileURLToPath(new URL('src/opening/runtime.js', this.#root))], bundle: true, minify: true, format: 'iife', target: 'es2022', define: { __BEYOND_UI__: JSON.stringify(this.version) }, outfile: `${directory}opening.js` });
 		console.log(`Built tokens ${tokens.version} (${tokens.status}) and ${Build.order.length} component stylesheets into dist/`);
+	}
+
+	get version() {
+		return JSON.parse(readFileSync(new URL('package.json', this.#root), 'utf8')).version;
 	}
 
 	get styles() {

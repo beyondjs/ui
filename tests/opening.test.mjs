@@ -14,24 +14,24 @@ test('the opening is in the document, escaped, localized and independent of the 
 	assert.ok(opening.files.size > 0, 'a consumer cannot clear the document’s asset state');
 	assert.match(html, /<span class="bui-opening-name">&lt;Example&gt;<\/span>/);
 	assert.match(html, /<span lang="es">Abriendo &lt;Example&gt;<\/span>/, 'the one announced line names the product in both languages');
-	assert.match(html, /Enable JavaScript/);
+	assert.match(html, /Turn on JavaScript in your browser to open &lt;Example&gt;\./);
+	assert.match(html, new RegExp(`id="bui-opening" class="bui-opening" data-state="opening" data-version="${OpeningDocument.version.replaceAll('.', '\\.')}"`), 'the document says which version drew it (0.25.0)');
 	assert.match(html, /<script defer src="\/opening-[a-f0-9]+\.js"/);
 	assert.ok(html.indexOf('data-opening=') < html.indexOf('type="module"'));
 	assert.ok(html.indexOf('id="bui-opening"') < html.indexOf('id="root"'));
 	const css = [...opening.files].find(([name]) => name.endsWith('.css'))[1];
 	assert.match(css, /:not\(\[data-state='leaving'\]\)\) > :not\(#bui-opening\)[^{]*\{ visibility: hidden; \}/, 'the product stays hidden until the hand-over starts');
+	assert.match(css, /:not\(vite-error-overlay\) \{ visibility: hidden; \}/, 'a development server’s error overlay is never hidden (0.25.0)');
 	const tokens = readFileSync(new URL('../dist/tokens.css', import.meta.url), 'utf8');
 	const own = readFileSync(new URL('../src/opening/opening.css', import.meta.url), 'utf8');
 	for (const [, name] of own.matchAll(/var\((--[^),]+)/g)) assert.ok(tokens.includes(`${name}:`) || own.includes(`${name}:`), `${name} is a canonical token or the opening's own property`);
 });
 
-test('the opening says nothing it cannot back: no help without a cause, a fallback only for a controller that never ran (0.21.0)', () => {
+test('the opening says nothing it cannot back: no help without a cause, a fallback only for a controller that never ran (0.21.0, 0.25.0)', () => {
 	const html = new OpeningDocument({ product: 'Conduict', key: 'fixture', logo }).render(source);
 	assert.doesNotMatch(html, /Trouble opening|No se abre|Use your browser to reload/, 'no standing help that says nothing');
-	assert.match(html, /data-opening-fallback><span lang="en">Conduict hasn’t opened\. Reload this page to try again\.<\/span>/);
-	assert.match(html, /<ol class="bui-opening-steps" data-opening-steps aria-hidden="true" hidden><\/ol>/, 'the steps are drawn by the controller, hidden from assistive technology');
-	assert.match(html, /data-opening-recovery hidden>/, 'recovery waits for a cause');
-	assert.match(html, /<span lang="en">Technical details<\/span>/);
+	assert.match(html, /data-opening-fallback><span lang="en">Couldn’t open Conduict\. Reload this page to try again\.<\/span>/);
+	assert.doesNotMatch(html, /data-opening-steps|data-opening-recovery/, 'the controller draws the steps and the recovery, so a document only paints the identity, the trace and one line (0.25.0)');
 	assert.equal((html.match(/role="status"/g) ?? []).length, 1, 'one announced line');
 	const css = readFileSync(new URL('../src/opening/opening.css', import.meta.url), 'utf8');
 	assert.match(css, /\.bui-opening-fallback \{[^}]*visibility: hidden; animation: bui-opening-fallback 0s linear 15s forwards;/);
@@ -43,10 +43,10 @@ test('the opening says nothing it cannot back: no help without a cause, a fallba
 	assert.doesNotMatch(css, /text-transform/);
 });
 
-test('Vite includes only explicitly selected application documents and emits every referenced asset', () => {
+test('Vite includes only explicitly selected application documents and emits every referenced asset', async () => {
 	const plugin = new OpeningPlugin({ product: 'Example', key: 'fixture', logo: '../acceptance/fixtures/brand/wordmark.svg', pages: ['/index.html', '/desktop/index.html'] }).plugin;
 	const root = new URL('../src', import.meta.url).pathname.replace(/\/$/, '');
-	plugin.configResolved({ root, base: '/' });
+	await plugin.configResolved({ root, base: '/', command: 'build' });
 	for (const path of ['/session/index.html', '/landed.html']) assert.equal(plugin.transformIndexHtml.handler(source, { filename: root + path }), source);
 	for (const path of ['/index.html', '/desktop/index.html']) {
 		const rendered = plugin.transformIndexHtml.handler(source, { filename: root + path });
@@ -55,6 +55,7 @@ test('Vite includes only explicitly selected application documents and emits eve
 		assert.equal(rendered.tags[0].attrs.defer, true);
 		assert.doesNotMatch(rendered.tags[0].attrs['data-opening'], /["'<>]/, 'bootstrap settings are safe across Vite attribute serializers');
 		assert.equal(JSON.parse(decodeURIComponent(rendered.tags[0].attrs['data-opening'])).product, 'Example');
+		assert.equal(JSON.parse(decodeURIComponent(rendered.tags[0].attrs['data-opening'])).development, undefined, 'a build is never a development server');
 	}
 	let middleware;
 	const connect = () => { throw new Error('Vite must never call Connect as a post hook'); };
@@ -67,6 +68,10 @@ test('Vite includes only explicitly selected application documents and emits eve
 	assert.ok(emitted.some(file => file.fileName.endsWith('.js')));
 	assert.ok(emitted.some(file => file.fileName.endsWith('.svg')));
 	assert.ok(emitted.some(file => file.fileName.endsWith('.woff2')));
+	// A development server's failures show their technical details open (0.25.0)
+	await plugin.configResolved({ root, base: '/', command: 'serve' });
+	const served = plugin.transformIndexHtml.handler(source, { filename: `${root}/index.html` });
+	assert.equal(JSON.parse(decodeURIComponent(served.tags[0].attrs['data-opening'])).development, true);
 });
 
 test('the opening hands its faces over to the application’s own, once the ones in use load, and keeps them otherwise (0.17.1)', async () => {

@@ -1,6 +1,6 @@
 /* The first document paint (0.21.0): the product's identity and a live trace; past a quick opening, its
-   steps with their times; when it cannot simply wait, what happened and the way on. One left edge for
-   every part, the product hidden behind it until it hands over. Tokens only. */
+   steps with their times; when it cannot simply wait, what is true and the way on, if one can work (0.25.0).
+   One left edge for every part, the product hidden behind it until it hands over. Tokens only. */
 .bui-opening {
 	--bui-opening-height: 32px;
 	position: fixed;
@@ -43,6 +43,8 @@
 /* The trace: work without a known end, as the family's indeterminate band (Awaited), in the colour of work in progress. */
 .bui-opening-trace { position: relative; height: 1px; background: var(--color-border-strong); clip-path: inset(-12px 0); }
 .bui-opening-trace::after { content: ''; position: absolute; top: -0.5px; left: 0; width: 34%; height: 2px; border-radius: var(--radius-round); background: linear-gradient(90deg, transparent, var(--color-info) 62%, color-mix(in srgb, var(--color-info) 40%, var(--color-text)) 88%, transparent); filter: drop-shadow(0 0 5px var(--color-info)); }
+/* When nothing runs any more (failed, offline) nothing says it does: the trace is a plain divider, in any motion setting (0.25.0). */
+.bui-opening:is([data-state='failed'], [data-state='offline']) .bui-opening-trace { background: var(--color-border-strong); }
 .bui-opening:is([data-state='failed'], [data-state='offline']) .bui-opening-trace::after { display: none; }
 @keyframes bui-opening-travel { from { transform: translateX(-100%); } to { transform: translateX(265%); } }
 
@@ -51,7 +53,6 @@
 
 /* The steps, each with the family's mark for its state (D129) and its time in tabular figures. */
 .bui-opening-steps { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; font-size: var(--text-small); line-height: var(--leading-small); }
-.bui-opening-steps[hidden] { display: none; }
 .bui-opening-step { display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-3); color: var(--color-text-muted); }
 .bui-opening-step:not([data-state='done']) { color: var(--color-text); }
 .bui-opening-label { min-width: 0; overflow-wrap: anywhere; }
@@ -67,7 +68,6 @@
 
 /* When it cannot simply wait: what happened, the way on and the details to copy. */
 .bui-opening-recovery { display: grid; gap: var(--space-3); justify-items: start; padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
-.bui-opening-recovery[hidden] { display: none; }
 .bui-opening-heading { font-size: var(--text-title-3); line-height: var(--leading-title-3); font-weight: var(--weight-semibold); }
 .bui-opening-note { color: var(--color-text-muted); font-size: var(--text-small); }
 .bui-opening button { display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--space-4); border: 1px solid var(--color-border-control); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: var(--text-small); font-weight: var(--weight-medium); cursor: pointer; }
@@ -79,6 +79,8 @@
 .bui-opening-details[open] { display: grid; gap: var(--space-2); justify-items: start; }
 .bui-opening-text { width: 100%; margin: 0; padding: var(--space-3); border-radius: var(--radius-control); background: var(--color-surface-sunken); color: var(--color-text); font: var(--text-label)/var(--leading-small) var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; user-select: all; }
 .bui-opening-said:empty { display: none; }
+/* What a state does not offer is not drawn at all; after the parts' own display so it always wins (0.25.0). */
+.bui-opening [hidden] { display: none; }
 
 /* Shown by the stylesheet alone, after 15 s, only when the controller never ran to remove it. */
 .bui-opening-fallback { color: var(--color-text-muted); font-size: var(--text-small); visibility: hidden; animation: bui-opening-fallback 0s linear 15s forwards; }

@@ -4,11 +4,13 @@ import { readFileSync, mkdirSync } from 'node:fs';
 import { once } from 'node:events';
 import { chromium, firefox, webkit } from 'playwright-core';
 import { OpeningDocument } from '@beyond-js/ui/opening';
+import { OpeningFailures } from './opening-failures.mjs';
 
 /**
- * Checks the opening under strict CSP, against a fictional delayed application (0.21.0): the identity
- * that never moves, the steps said with their times, recovery for a late, failed or offline opening,
- * the measured usual, a page restored from the cache and the hand-over into the product's bar.
+ * Checks the opening under strict CSP, against a fictional delayed application (0.21.0, 0.25.0): the
+ * identity that never moves, the steps said with their times, a late opening, the measured usual, a page
+ * restored from the cache and the hand-over into the product's bar; `OpeningFailures` holds what it says
+ * and offers when it cannot simply wait.
  */
 class OpeningAcceptance {
 	#document = new OpeningDocument({ product: 'Projects', key: 'opening-fixture', device: true, logo: new URL('./fixtures/brand/wordmark.svg', import.meta.url) });
@@ -25,16 +27,16 @@ class OpeningAcceptance {
 			this.#url = `http://127.0.0.1:${this.#server.address().port}`;
 			this.#browser = await ({ chrome: () => chromium.launch({ channel: 'chrome' }), firefox: () => firefox.launch(), webkit: () => webkit.launch() })[this.#engine]();
 			for (const theme of ['light', 'dark']) for (const width of [320, 390, 1440]) await this.#late({ theme, width });
-			await this.#failed();
-			await this.#error();
 			await this.#unnamed();
-			await this.#earlier();
 			await this.#unavailable();
 			await this.#disabled();
 			await this.#usual();
-			await this.#offline();
 			await this.#restored();
 			await this.#handover();
+			for (const check of new OpeningFailures({ open: options => this.#open(options), steps: page => this.#steps(page) }).checks) {
+				await check();
+				this.#count++;
+			}
 			console.log(`${this.#engine}: ${this.#count} opening checks passed`);
 		} finally {
 			await this.#browser?.close(); this.#server.closeAllConnections();
@@ -47,7 +49,7 @@ class OpeningAcceptance {
 		const send = (type, body) => { response.setHeader('Content-Type', type); response.end(body); };
 		const types = { js: 'text/javascript', css: 'text/css', svg: 'image/svg+xml', woff2: 'font/woff2', txt: 'text/plain' };
 		if (this.#document.files.has(name)) return send(types[name.split('.').pop()], this.#document.files.get(name));
-		if (name === 'ready.js' || name === 'app.css') return send(types[name.split('.').pop()], readFileSync(new URL(`./fixtures/opening/${name}`, import.meta.url)));
+		if (/^[a-z]+\.js$/.test(name) || name === 'app.css') return send(types[name.split('.').pop()], readFileSync(new URL(`./fixtures/opening/${name}`, import.meta.url)));
 		if (name === 'wordmark.svg') return send(types.svg, readFileSync(new URL('./fixtures/brand/wordmark.svg', import.meta.url)));
 		if (name === 'state') return send('application/json', '{}');
 		// The application's own faces, as its `@beyond-js/ui/fonts.css` declares them (0.17.1)
@@ -58,12 +60,16 @@ class OpeningAcceptance {
 		send('text/html', name === 'earlier' ? html.replace(/<div id="bui-opening"[\s\S]*?<\/noscript>\n<\/div><\/div>/, readFileSync(new URL('./fixtures/opening/earlier.html', import.meta.url), 'utf8').trim()) : html);
 	}
 
-	/** A page whose `/state` read (or module) waits for `release()`; `fail` answers 503, `abort` aborts it */
-	async #open({ theme = 'light', width = 390, motion = 'reduce', clock = true, javascript = true, hold = '**/state', abort = false, fail = false, prepare = null, path = '/?project=kept#context' } = {}) {
+	/**
+	 * A page whose `/state` read (or module) waits for `release()`; `fail` answers 503, `abort` aborts it,
+	 * and `entry` serves another fixture module as the application's entry
+	 */
+	async #open({ theme = 'light', width = 390, motion = 'reduce', clock = true, javascript = true, hold = '**/state', abort = false, fail = false, prepare = null, entry = null, path = '/?project=kept#context' } = {}) {
 		const context = await this.#browser.newContext({ viewport: { width, height: 800 }, colorScheme: theme, reducedMotion: motion, locale: 'es-ES', javaScriptEnabled: javascript });
 		await prepare?.(context);
 		const page = await context.newPage();
 		if (clock && javascript) await page.clock.install();
+		if (entry) await page.route('**/ready.js', route => route.fulfill({ contentType: 'text/javascript', body: readFileSync(new URL(`./fixtures/opening/${entry}`, import.meta.url)) }));
 		let release;
 		const gate = new Promise(resolve => (release = resolve));
 		await page.route(hold, async route => { await gate; if (abort) await route.abort(); else await route.fulfill({ status: fail ? 503 : 200, body: '{}' }); });
@@ -92,13 +98,13 @@ class OpeningAcceptance {
 			await page.clock.fastForward(11300);
 			const button = page.getByRole('button', { name: 'Volver a cargar', exact: true });
 			await button.waitFor(); await button.focus();
-			assert.equal(await page.getByText('Projects aún no se ha abierto', { exact: true }).isVisible(), true);
-			assert.equal(await status.textContent(), 'Projects aún no se ha abierto. Sigue intentándolo. Vuelve a cargar si no termina.');
+			assert.equal(await page.getByText('Está tardando más de lo esperado', { exact: true }).isVisible(), true);
+			assert.equal(await status.textContent(), 'Está tardando más de lo esperado. Puedes seguir esperando o volver a cargar.');
 			assert.deepEqual(await this.#steps(page), ['done Cargando Projects', 'late Confirmando tu sesión']);
 			assert.deepEqual(await page.locator('.bui-opening-lockup').boundingBox(), identity, 'the identity never moves while steps and recovery appear');
 			await page.locator('.bui-opening-details summary').click();
 			const details = await page.locator('[data-opening-text]').textContent();
-			assert.match(details, /^Paso: Confirmando tu sesión\nPasos: Cargando Projects \(interface\) [^·]+ · Confirmando tu sesión \(session\) [^\n]+\nDirección: http:\/\/127\.0\.0\.1:\d+\/\?project=kept#context\nHora: \d{4}-/);
+			assert.match(details, /^Paso: Confirmando tu sesión\nPasos: Cargando Projects \(interface\) [^·]+ · Confirmando tu sesión \(session\) [^\n]+\nVersión: @beyond-js\/ui \d+\.\d+\.\d+\nDirección: http:\/\/127\.0\.0\.1:\d+\/\?project=kept#context\nHora: \d{4}-/);
 			if (width === 390) {
 				mkdirSync('.artifacts/opening', { recursive: true });
 				await page.screenshot({ path: `.artifacts/opening/${this.#engine}-${theme}.png` });
@@ -125,37 +131,6 @@ class OpeningAcceptance {
 		} finally { await context.close(); }
 	}
 
-	async #failed() {
-		const { context, page, release } = await this.#open({ hold: '**/ready.js', abort: true });
-		try {
-			release();
-			await page.getByText('Projects no se pudo cargar', { exact: true }).waitFor();
-			assert.deepEqual(await this.#steps(page), ['failed Cargando Projects']);
-			assert.match(await page.locator('[data-opening-text]').textContent(), /Error: http:\/\/127\.0\.0\.1:\d+\/ready\.js/, 'the details name what could not load');
-			await page.unroute('**/ready.js');
-			await Promise.all([page.waitForEvent('framenavigated'), page.getByRole('button', { name: 'Volver a cargar', exact: true }).click()]);
-			await page.getByRole('heading', { name: 'Your projects' }).waitFor();
-			this.#count++;
-		} finally { await context.close(); }
-	}
-
-	/** An uncaught failure while opening is said as one, and the product can still finish */
-	async #error() {
-		const { context, page, release } = await this.#open();
-		try {
-			await page.waitForFunction(() => document.querySelector('[data-opening-status]').textContent === 'Confirmando tu sesión');
-			await page.evaluate(() => dispatchEvent(new ErrorEvent('error', { message: 'Startup failed', filename: 'http://127.0.0.1/ready.js', lineno: 3 })));
-			await page.getByText('Algo falló al abrir. Vuelve a cargar para intentarlo de nuevo.', { exact: true }).waitFor();
-			assert.equal(await page.getByText('Projects aún no se ha abierto', { exact: true }).isVisible(), true);
-			assert.match(await page.locator('[data-opening-text]').textContent(), /Error: Startup failed · http:\/\/127\.0\.0\.1\/ready\.js:3/);
-			assert.deepEqual(await this.#steps(page), ['done Cargando Projects', 'late Confirmando tu sesión']);
-			release();
-			await page.locator('#bui-opening').waitFor({ state: 'detached' });
-			await page.getByRole('heading', { name: 'Your projects' }).waitFor();
-			this.#count++;
-		} finally { await context.close(); }
-	}
-
 	/** A step the product does not name is said in one short line, and a note added below it starts no new step */
 	async #unnamed() {
 		const { context, page, release } = await this.#open({ path: '/?unnamed' });
@@ -166,21 +141,6 @@ class OpeningAcceptance {
 			assert.deepEqual(await this.#steps(page), ['done Cargando Projects', 'active Leyendo tus proyectos'], 'the note below the line starts no step');
 			release();
 			await page.locator('#bui-opening').waitFor({ state: 'detached' });
-			this.#count++;
-		} finally { await context.close(); }
-	}
-
-	/** A document drawn by an earlier version, with this version's controller, ends on readiness without an error */
-	async #earlier() {
-		const { context, page, release } = await this.#open({ clock: false, path: '/earlier?project=kept#context' });
-		const errors = [];
-		page.on('pageerror', error => errors.push(error.message));
-		try {
-			await page.waitForTimeout(1000);
-			release();
-			await page.locator('#bui-opening').waitFor({ state: 'detached' });
-			await page.getByRole('heading', { name: 'Your projects' }).waitFor();
-			assert.deepEqual(errors, [], 'nothing throws');
 			this.#count++;
 		} finally { await context.close(); }
 	}
@@ -198,7 +158,7 @@ class OpeningAcceptance {
 	async #disabled() {
 		const { context, page } = await this.#open({ javascript: false });
 		try {
-			await page.getByText('Enable JavaScript in your browser to open this product.', { exact: true }).waitFor();
+			await page.getByText('Turn on JavaScript in your browser to open Projects.', { exact: true }).waitFor();
 			assert.equal(await page.getByRole('status').count(), 0, 'nothing announces a wait that cannot happen');
 			assert.equal(await page.locator('.bui-opening-trace').isHidden(), true);
 			this.#count++;
@@ -218,29 +178,6 @@ class OpeningAcceptance {
 			const kept = JSON.parse(await page.evaluate(() => localStorage.getItem('opening-fixture.opening')));
 			assert.equal(kept.session.length, 6, 'this opening joined the measured ones');
 			assert.equal(kept.interface.length, 6);
-			this.#count++;
-		} finally { await context.close(); }
-	}
-
-	/** Without a connection the opening says so, and code that could not load loads again by itself */
-	async #offline() {
-		const { context, page, release } = await this.#open({ clock: false, hold: '**/ready.js', abort: true });
-		try {
-			// The controller is running once the line for an opening without it is gone
-			await page.waitForFunction(() => document.getElementById('bui-opening') && !document.querySelector('[data-opening-fallback]'));
-			await context.setOffline(true);
-			await page.evaluate(() => dispatchEvent(new Event('offline')));
-			await page.getByText('Estás sin conexión', { exact: true }).waitFor();
-			assert.equal(await page.getByText('Projects continúa cuando vuelvas a conectarte.', { exact: true }).isVisible(), true);
-			release();
-			await page.waitForFunction(() => document.querySelector('[data-opening-recovery]').dataset.state === 'offline' && document.querySelector('.bui-opening-step[data-state="failed"]'));
-			await page.unroute('**/ready.js');
-			const reloaded = page.waitForEvent('framenavigated');
-			await context.setOffline(false);
-			// Engines that emulate the connection fire `online` themselves; the others are told here
-			await page.evaluate(() => dispatchEvent(new Event('online'))).catch(() => null);
-			await reloaded;
-			await page.getByRole('heading', { name: 'Your projects' }).waitFor();
 			this.#count++;
 		} finally { await context.close(); }
 	}

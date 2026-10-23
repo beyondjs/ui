@@ -1,28 +1,36 @@
 import { Preferences } from '../dom/preferences/preferences.js';
 import { OpeningExit } from './exit.js';
+import { OpeningFault } from './fault.js';
 import { OpeningFonts } from './fonts.js';
+import { OpeningFrame } from './frame.js';
 import { OpeningRecovery } from './recovery.js';
+import { OpeningRetry } from './retry.js';
 import { OpeningSteps } from './steps.js';
 import { OpeningUsual } from './usual.js';
 import { OpeningWords, steps } from './words.js';
 
 /**
- * Owns only the document's first opening, before an application has a useful screen (0.21.0).
+ * Owns only the document's first opening, before an application has a useful screen (0.21.0, 0.25.0).
  *
  * A quick opening shows the product's identity and a live trace, nothing to read. Past `reveal` it says
  * its steps as they happen, each with its time: the document's own (`interface`), then each step the
  * product names on its waiting element (`data-bui-opening-wait`). It says once when a step takes longer
- * than it usually does on this device, says a failure or a lost connection as such, with Reload and
- * Technical details, and loads again by itself when code that could not load can be reached again. When
- * the product's root holds a useful screen with no waiting element, it hands over: the identity settles
- * into the family bar and the rest fades, with the product usable from the first frame. A page restored
- * from the back-forward cache before it opened is opened again.
+ * than it usually does on this device. When it cannot simply wait it says only what is true: still
+ * running past `bound` (or after a failure the product may outlive, with no progress within `stall`),
+ * unable to open (its code could not load or threw before drawing anything: every sign of progress
+ * stops), or offline (it opens by itself on reconnecting). Code that could not load reloads by itself
+ * once first. When the product's root holds a useful screen with no waiting element, it hands over: the
+ * identity settles into the family bar and the rest fades, with the product usable from the first frame.
+ * A page restored from the back-forward cache before it opened is opened again, and a development
+ * server's error overlay is never covered.
  */
 class OpeningRuntime {
 	/** Milliseconds from the navigation's start before the steps are said: a quick opening says none */
 	static reveal = 800;
 	/** Milliseconds from the navigation's start before an unfinished opening offers Reload (engineering default) */
 	static bound = 12000;
+	/** Milliseconds a failure the product may outlive is given to show progress (engineering default) */
+	static stall = 4000;
 
 	#specs;
 	#element;
@@ -34,8 +42,12 @@ class OpeningRuntime {
 	#observer;
 	#language;
 	#timers = [];
+	#stall = 0;
+	#started = false;
 	#ended = false;
 	#broken = false;
+	#failed = false;
+	#reloading = false;
 	#slow = false;
 
 	constructor(script) {
@@ -45,23 +57,26 @@ class OpeningRuntime {
 		// Installed before module evaluation, including failures that precede DOMContentLoaded.
 		addEventListener('error', this.#fault, true);
 		addEventListener('unhandledrejection', this.#fault);
+		// The document's modules have run: a throw is no longer the product's start
+		addEventListener('DOMContentLoaded', () => (this.#started = true), { once: true });
 		this.#start();
 	}
 
 	#start() {
 		this.#element = document.getElementById('bui-opening');
 		if (!this.#element) return this.#release();
-		// A document drawn by another version of the package (a development server whose package changed
-		// under it) lacks this version's parts: it only ends on readiness, and nothing throws (0.21.2)
-		if (!this.#element.querySelector('[data-opening-steps]') || !this.#element.querySelector('[data-opening-recovery] [data-opening-heading]')) return this.#plain();
+		this.#words = new OpeningWords(this.#specs.product);
+		const frame = new OpeningFrame(this.#element, this.#words);
+		const { stage, status, list } = frame.draw();
 		// The controller runs: the static line for an opening without it is no longer needed
 		this.#element.querySelector('[data-opening-fallback]')?.remove();
 		this.#element.dataset.state = 'opening';
-		this.#status = this.#element.querySelector('[data-opening-status]');
-		this.#words = new OpeningWords(this.#specs.product);
+		this.#status = status;
 		this.#usual = new OpeningUsual(this.#specs.key);
-		this.#steps = new OpeningSteps({ list: this.#element.querySelector('[data-opening-steps]'), words: this.#words, usual: this.#usual });
-		this.#recovery = new OpeningRecovery({ element: this.#element.querySelector('[data-opening-recovery]'), words: this.#words });
+		this.#steps = new OpeningSteps({ list, words: this.#words, usual: this.#usual });
+		this.#recovery = new OpeningRecovery({ parent: stage, words: this.#words, development: Boolean(this.#specs.development) || frame.outdated });
+		this.#recovery.keep({ version: `@beyond-js/ui ${OpeningFrame.version}` });
+		if (frame.outdated) this.#outdated(frame);
 		this.#steps.begin('interface', '', 0);
 		this.#observer = new MutationObserver(() => this.#check());
 		this.#observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['hidden', 'data-state', 'data-bui-opening-wait'] });
@@ -76,9 +91,22 @@ class OpeningRuntime {
 		this.#check();
 	}
 
+	/**
+	 * A document drawn by another version of the package: its development server has not restarted since
+	 * the package changed under it. The page is drawn again in this version's form, and anything that
+	 * goes wrong says that cause, the one established here.
+	 */
+	#outdated(frame) {
+		this.#recovery.cause = 'outdated';
+		this.#recovery.keep({ page: frame.drawn ? `@beyond-js/ui ${frame.drawn}` : this.#words.text('earlier') });
+		console.warn(`[@beyond-js/ui] This page was drawn by ${frame.drawn ? `@beyond-js/ui ${frame.drawn}` : 'an earlier @beyond-js/ui'}, and its opening is ${OpeningFrame.version}: restart the development server to serve what is installed.`);
+	}
+
 	/** Follows the product: its root drawn, the step its waiting element names, or a useful screen */
 	#check() {
 		if (this.#ended) return;
+		// A development server's error overlay says what failed in full: the opening steps aside for it
+		if (document.querySelector('body > vite-error-overlay')) return void this.#yield();
 		const root = document.querySelector(this.#specs.root);
 		if (!root || !root.children.length) return;
 		const pending = root.querySelector(this.#specs.pending ?? '[data-bui-opening-wait]');
@@ -86,6 +114,8 @@ class OpeningRuntime {
 		const id = pending.getAttribute('data-bui-opening-wait') ?? '';
 		if (!this.#steps.begin(id, steps.includes(id) ? '' : this.#line(pending))) return;
 		this.#slow = false;
+		// Progress: a failure the product outlived is no longer waited on
+		clearTimeout(this.#stall);
 		if (!this.#recovery.state) this.#say(this.#steps.label);
 	}
 
@@ -124,28 +154,41 @@ class OpeningRuntime {
 		this.#show('late');
 	}
 
-	/** Shows a state that cannot simply wait, with what the details need to say */
-	#show(state, error = undefined) {
+	/** Shows a state that cannot simply wait; a failure stops the running step's time where it failed */
+	#show(state) {
 		this.#steps.show();
-		// A failed step's time stops where it failed; a late or offline one keeps counting
+		const step = this.#steps.label;
 		if (state === 'failed') this.#steps.end();
 		this.#steps.mark(state === 'failed' || this.#broken ? 'failed' : 'late');
 		this.#element.dataset.state = state;
-		this.#say(this.#recovery.show(state, { step: this.#steps.label, steps: this.#steps.text, ...(error ? { error } : {}) }));
+		this.#say(this.#recovery.show(state, { ...(step ? { step } : {}), steps: this.#steps.text }));
 	}
 
-	/** A script that could not load, or an uncaught failure before a useful screen */
+	/** An uncaught failure before a useful screen, said by what it means for the opening (`OpeningFault`) */
 	#fault = event => {
-		if (this.#ended || !this.#element) return;
-		// Missing images, fonts and optional resources must not turn an opening into a failure.
-		if (event.type === 'error' && event.target !== window && event.target?.tagName !== 'SCRIPT') return;
-		const script = event.type === 'error' && event.target?.tagName === 'SCRIPT';
-		const error = script ? String(event.target.src) : event.type === 'unhandledrejection' ? String(event.reason?.message ?? event.reason) : [event.message, event.filename && `${event.filename}:${event.lineno}`].filter(Boolean).join(' · ');
-		const failed = script || /dynamically imported module|importing a module script failed/i.test(error);
-		this.#broken ||= failed;
-		this.#show(failed ? 'failed' : 'error', error);
-		if (navigator.onLine === false) this.#offline();
+		if (this.#ended || this.#reloading || !this.#element || !OpeningFault.counts(event)) return;
+		const root = document.querySelector(this.#specs.root);
+		const fault = new OpeningFault(event, { drawn: Boolean(root?.children.length), started: this.#started, words: this.#words });
+		this.#recovery.keep({ error: fault.text });
+		if (!fault.final) return void this.#hold();
+		// Code that could not load is loaded again once, by itself, before anything is said
+		if (fault.kind === 'load' && navigator.onLine !== false && new OpeningRetry(this.#specs.key).run()) return void (this.#reloading = true);
+		this.#broken ||= fault.kind === 'load';
+		this.#failed = true;
+		clearTimeout(this.#stall);
+		this.#show(navigator.onLine === false ? 'offline' : 'failed');
 	};
+
+	/** A failure the product may outlive: said only when nothing moves within `stall`, by what is on screen */
+	#hold() {
+		clearTimeout(this.#stall);
+		this.#stall = setTimeout(() => {
+			if (this.#ended || this.#recovery.state) return;
+			const drawn = document.querySelector(this.#specs.root)?.children.length;
+			this.#failed = !drawn;
+			this.#show(drawn ? 'late' : 'failed');
+		}, OpeningRuntime.stall);
+	}
 
 	#offline = () => {
 		if (!this.#ended) this.#show('offline');
@@ -155,6 +198,7 @@ class OpeningRuntime {
 	#online = () => {
 		if (this.#ended || this.#recovery.state !== 'offline') return;
 		if (this.#broken) return location.reload();
+		if (this.#failed) return this.#show('failed');
 		this.#recovery.hide();
 		this.#steps.mark('active');
 		this.#element.dataset.state = 'opening';
@@ -170,7 +214,8 @@ class OpeningRuntime {
 	/** The document's language changed (the account's, on arrival): every line is said in it */
 	#speak() {
 		this.#steps.speak();
-		this.#say(this.#recovery.state ? this.#recovery.show(this.#recovery.state) : this.#steps.label);
+		const sentence = this.#recovery.speak();
+		this.#say(this.#recovery.state ? sentence : this.#steps.label);
 	}
 
 	async #end(root) {
@@ -193,23 +238,16 @@ class OpeningRuntime {
 		new OpeningFonts(document.querySelector('link[data-bui-opening]')?.sheet ?? null).release().catch(() => false);
 	}
 
-	/** Ends a document of another version on readiness, removing it at once */
-	#plain() {
-		removeEventListener('error', this.#fault, true);
-		removeEventListener('unhandledrejection', this.#fault);
-		const observer = new MutationObserver(() => end());
-		const end = () => {
-			const root = document.querySelector(this.#specs.root);
-			if (!root?.children.length || root.querySelector(this.#specs.pending ?? '[data-bui-opening-wait]')) return;
-			observer.disconnect();
-			this.#element.remove();
-		};
-		observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'data-state', 'data-bui-opening-wait'] });
-		end();
+	/** Steps aside at once for a development server's error overlay */
+	#yield() {
+		this.#ended = true;
+		this.#release();
+		this.#element.remove();
 	}
 
 	#release() {
 		for (const timer of this.#timers) clearTimeout(timer);
+		clearTimeout(this.#stall);
 		this.#observer?.disconnect();
 		this.#language?.disconnect();
 		removeEventListener('error', this.#fault, true);

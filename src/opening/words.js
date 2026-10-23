@@ -1,7 +1,8 @@
 /**
- * The opening's words in the family's two languages (0.21.0): its own lines and the steps a product
- * names on its waiting element (`data-bui-opening-wait="session"`). `{product}` is the product's name
- * and `{time}` a duration; both are values, never translated.
+ * The opening's words in the family's two languages (0.21.0, said again from the person's side in
+ * 0.25.0): its own lines and the steps a product names on its waiting element
+ * (`data-bui-opening-wait="session"`). `{product}` is the product's name, `{time}` a duration and
+ * `{version}` a version of the package; all three are values, never translated.
  */
 export const words = Object.freeze({
 	en: Object.freeze({
@@ -9,28 +10,31 @@ export const words = Object.freeze({
 		interface: 'Loading {product}',
 		session: 'Confirming your session',
 		signin: 'Signing you in with Beyond Accounts',
-		projects: 'Connecting Beyond Projects',
+		projects: 'Connecting to Beyond Projects',
 		usual: 'usually {time}',
 		longer: '{step} is taking longer than usual',
-		late: '{product} hasn’t opened yet',
-		keeps: 'It keeps trying. Reload if it doesn’t finish.',
-		stopped: 'Something failed while it opened. Reload to try again.',
-		failed: '{product} couldn’t load',
-		again: 'Reload to try again.',
+		late: 'Taking longer than expected',
+		wait: 'You can keep waiting or reload.',
+		failed: 'Couldn’t open {product}',
 		offline: 'You’re offline',
-		reconnect: '{product} continues when you reconnect.',
+		reconnect: '{product} opens as soon as you’re back online.',
+		outdated: 'Its development server is out of date. Restart it, then reload.',
 		reload: 'Reload',
 		details: 'Technical details',
 		copy: 'Copy details',
 		copied: 'Copied',
-		refused: 'Could not copy. The details are selected: copy them with your keyboard.',
+		refused: 'Couldn’t copy. The details are selected: copy them with your keyboard.',
 		step: 'Step',
 		steps: 'Steps',
 		error: 'Error',
+		unloaded: 'Could not load {address}',
+		version: 'Version',
+		page: 'Page',
+		earlier: 'an earlier version',
 		address: 'Address',
 		time: 'Time',
-		fallback: '{product} hasn’t opened. Reload this page to try again.',
-		disabled: 'Enable JavaScript in your browser to open this product.'
+		fallback: 'Couldn’t open {product}. Reload this page to try again.',
+		disabled: 'Turn on JavaScript in your browser to open {product}.'
 	}),
 	es: Object.freeze({
 		opening: 'Abriendo {product}',
@@ -40,13 +44,12 @@ export const words = Object.freeze({
 		projects: 'Conectando con Beyond Projects',
 		usual: 'normalmente {time}',
 		longer: '{step} está tardando más de lo normal',
-		late: '{product} aún no se ha abierto',
-		keeps: 'Sigue intentándolo. Vuelve a cargar si no termina.',
-		stopped: 'Algo falló al abrir. Vuelve a cargar para intentarlo de nuevo.',
-		failed: '{product} no se pudo cargar',
-		again: 'Vuelve a cargar para intentarlo de nuevo.',
+		late: 'Está tardando más de lo esperado',
+		wait: 'Puedes seguir esperando o volver a cargar.',
+		failed: 'No se pudo abrir {product}',
 		offline: 'Estás sin conexión',
-		reconnect: '{product} continúa cuando vuelvas a conectarte.',
+		reconnect: '{product} se abre en cuanto vuelvas a tener conexión.',
+		outdated: 'Su servidor de desarrollo está desactualizado. Reinícialo y vuelve a cargar.',
 		reload: 'Volver a cargar',
 		details: 'Detalles técnicos',
 		copy: 'Copiar detalles',
@@ -55,10 +58,14 @@ export const words = Object.freeze({
 		step: 'Paso',
 		steps: 'Pasos',
 		error: 'Error',
+		unloaded: 'No se pudo cargar {address}',
+		version: 'Versión',
+		page: 'Página',
+		earlier: 'una versión anterior',
 		address: 'Dirección',
 		time: 'Hora',
-		fallback: '{product} no se ha abierto. Vuelve a cargar esta página para intentarlo de nuevo.',
-		disabled: 'Activa JavaScript en tu navegador para abrir este producto.'
+		fallback: 'No se pudo abrir {product}. Vuelve a cargar esta página para intentarlo de nuevo.',
+		disabled: 'Activa JavaScript en tu navegador para abrir {product}.'
 	})
 });
 
@@ -74,6 +81,11 @@ export class OpeningWords {
 
 	constructor(product) {
 		this.#product = product;
+	}
+
+	/** The product's name, a value never translated */
+	get product() {
+		return this.#product;
 	}
 
 	get language() {

@@ -34,13 +34,32 @@ test('the words: every key in both languages, the family’s steps, a product’
 	assert.equal(said.step('signin'), 'Iniciando tu sesión con Beyond Accounts');
 	assert.equal(said.time(4249), '4,2 s', 'decimals in the document’s language');
 	assert.equal(said.time(20), '< 0,1 s');
-	assert.equal(said.text('late'), 'Conduict aún no se ha abierto');
+	assert.equal(said.text('late'), 'Está tardando más de lo esperado');
+	assert.equal(said.text('failed'), 'No se pudo abrir Conduict');
 	document.documentElement.lang = 'en';
+	assert.equal(said.step('projects'), 'Connecting to Beyond Projects');
+	assert.equal(said.text('reconnect'), 'Conduict opens as soon as you’re back online.');
+	assert.equal(said.product, 'Conduict');
+});
+
+test('the words say only what the opening backs, from the person’s side (0.25.0)', () => {
+	for (const language of ['en', 'es']) {
+		const lines = Object.entries(words[language]);
+		// A note never restates the button beside it; only the line shown without a controller, which has no button, says to reload
+		for (const [key, line] of lines) if (key !== 'fallback') assert.doesNotMatch(line, /Reload to try again|Vuelve a cargar para intentarlo/, `${language}.${key}`);
+		// The opening retries nothing of the product's: no line promises that it keeps trying
+		for (const [key, line] of lines) assert.doesNotMatch(line, /keeps trying|sigue intentándolo/i, `${language}.${key}`);
+		// "Usual" is measured on the device (D50); the engineering bound says "expected"
+		assert.match(words[language].late, /expected|esperado/);
+		assert.match(words[language].longer, /usual|normal/);
+	}
+	for (const key of Object.keys(words.en)) assert.deepEqual(words.en[key].match(/\{\w+\}/g), words.es[key].match(/\{\w+\}/g), `${key} carries the same values in both languages`);
 });
 
 test('loading.step says a step as the opening does, and anything else as the default loading line', () => {
 	assert.equal(loading.step({ step: 'session' }), 'Confirming your session…');
 	assert.equal(loading.step({ step: 'projects', language: 'es' }), 'Conectando con Beyond Projects…');
+	assert.equal(loading.step({ step: 'projects' }), 'Connecting to Beyond Projects…');
 	assert.equal(loading.step({ step: 'unknown', language: 'es' }), 'Cargando…');
 	assert.deepEqual([...loading.steps], [...steps]);
 	const line = loading(loading.step({ step: 'signin' }));
