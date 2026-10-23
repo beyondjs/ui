@@ -14,7 +14,7 @@ Automatic reads use `Again`: one running attempt, backoff, online and visibility
 
 Each region whose read did not answer says so where its content would be, with no cause and no action of its own:
 
-- `EmptyState` with `kind: 'outage'`: "Not available right now" («No disponible en este momento») with the outage's mark, as one quiet line with no box (since 0.24.1; `frame: true` asks for one). It takes no action and no `clear`: who did not answer and Try again are the notice's. A failed read is unavailable, never empty.
+- `EmptyState` with `kind: 'outage'`: "Not available right now" («No disponible en este momento») with the outage's mark, as one quiet line with no box (since 0.24.1, and in React since 0.25.1; `frame: true` asks for one). It takes no action and no `clear`: who did not answer and Try again are the notice's. A failed read is unavailable, never empty.
 - `Section`'s `unavailable` (option, method and React prop) keeps the heading and actions and puts that state in the body.
 - Content kept from an earlier read stays, with `LastUpdate` above it: "Last updated 12:04" («Última actualización: 12:04»), the day with the time on another day, or "May be out of date" («Puede no estar al día») when the time is not known, which is never invented. `Section`'s `updated` draws it.
 - A `Collection` joins the notice with `recovery` (the notice), `outage(error)` (which failures are that cause's outage) and `details(error)` (their evidence): the list says "Not available right now" in place, the notice reads it again, and it leaves the notice when it answers or goes away. Any other failure keeps the collection's own answer.

@@ -187,3 +187,20 @@ test('React Recovery runs a callback several reads share once per attempt, and i
 	const sheet = readFileSync(new URL('../src/styles/recovery.css', import.meta.url), 'utf8');
 	assert.match(sheet, /\.bui-host:has\(> \.bui-recovery\[hidden\]\) \{\s*display: none;/);
 });
+
+test('React EmptyState and Section draw an outage’s place as one quiet line unless a box is asked for (0.25.1)', async () => {
+	const { EmptyState, Section } = await import('@beyond-js/ui/react');
+	const host = document.createElement('div'); document.body.append(host);
+	const root = createRoot(host);
+	const place = selector => host.querySelector(selector);
+	try {
+		await React.act(async () => root.render(React.createElement(EmptyState, { kind: 'outage' })));
+		assert.ok(place('.bui-empty-outage').classList.contains('bui-empty-unframed'), 'no box by default, as the DOM component');
+		await React.act(async () => root.render(React.createElement(EmptyState, { kind: 'outage', frame: true })));
+		assert.ok(!place('.bui-empty-outage').classList.contains('bui-empty-unframed'), 'a box when asked for');
+		await React.act(async () => root.render(React.createElement(EmptyState, { title: 'No machines yet' })));
+		assert.ok(!place('.bui-empty').classList.contains('bui-empty-unframed'), 'an empty place keeps its box');
+		await React.act(async () => root.render(React.createElement(Section, { title: 'Machines', unavailable: true })));
+		assert.ok(place('.bui-section .bui-empty-outage').classList.contains('bui-empty-unframed'), 'a section’s outage is the same line');
+	} finally { await React.act(async () => root.unmount()); host.remove(); }
+});

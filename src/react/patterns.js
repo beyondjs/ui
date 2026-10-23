@@ -38,8 +38,11 @@ export function Checklist({ title = null, steps = [], level = 3, labels }) {
 	return h('div', { ref: host, className: 'bui-host' });
 }
 
-/** A place with nothing to show yet: its kind, title, one sentence, one action and a first run's steps. */
-export function EmptyState({ kind = 'empty', title, text = null, action = null, onClear = null, checklist = null, glyph = null, frame = true, labels }) {
+/**
+ * A place with nothing to show yet: its kind, title, one sentence, one action and a first run's steps. `frame`
+ * left unset takes the DOM component's default (0.25.1): a box for every kind but an outage, one quiet line.
+ */
+export function EmptyState({ kind = 'empty', title, text = null, action = null, onClear = null, checklist = null, glyph = null, frame = null, labels }) {
 	const latest = useLatest({ action, onClear, checklist });
 	const given = action ? { label: action.label, href: action.href ?? null, run: action.href ? null : event => latest.current.action?.onSelect?.(event) } : null;
 	const steps = checklist ? { ...checklist, steps: actions(checklist.steps ?? [], { current: { steps: checklist.steps ?? [] } }) } : null;

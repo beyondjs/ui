@@ -30,6 +30,7 @@ const measure = page =>
 			said: [...notice.children].filter(node => !node.matches('details, .bui-hidden')).map(node => node.textContent.trim()).filter(Boolean).join(' '),
 			rows: details?.querySelectorAll('tbody tr').length ?? 0,
 			places: [...document.querySelectorAll('.bui-section .bui-empty-outage')].map(node => node.textContent),
+			boxes: [...document.querySelectorAll('.bui-section .bui-empty-outage')].filter(node => parseFloat(getComputedStyle(node).borderTopWidth) > 0).length,
 			kept: document.querySelector('.bui-last-update')?.textContent ?? null,
 			viewport: innerWidth
 		};
@@ -52,6 +53,7 @@ export const checks = [
 						expect(found.actions === 1, `one Try again: ${where}`);
 						expect(!/Machines|Your conversations|Requests|The project/.test(found.said), `the notice lists nothing: ${where}`);
 						expect(found.places.length === 2 && found.places.every(text => text === 'Not available right now'), `each region says it in its place: ${where}`);
+						expect(found.boxes === 0, `each place is one quiet line, with no box (0.24.1, React since 0.25.1): ${where}`);
 						expect(/^Last updated \d\d:\d\d$/.test(found.kept ?? ''), `kept content says when it was read: ${where}`);
 						expect(found.rows === 4, `one Technical details with a row per read: ${where}`);
 						expect(Math.abs(found.notice.left - found.h1.left) <= 1, `the notice starts on the H1’s edge (D159): ${where}`);
