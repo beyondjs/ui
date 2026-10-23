@@ -37,6 +37,10 @@ Until readiness, application siblings are hidden from sight, focus and the acces
 
 Public documents that already contain their content, native OS splash screens and session-renewal landings do not acquire an application opening. A retained client-rendered product can adopt the document presentation without adding product capability.
 
+## Hosts that serve the package's sources
+
+Bundled products need nothing more. A host that serves `@beyond-js/ui`'s source modules to the browser itself, as Projects' service does from `src/dom/`, serves `src/opening/words.js` too: since 0.21.0 `src/dom/feedback.js` imports the opening's words from it, so `loading.step` and the opening say a step in the same words.
+
 ## In-page loading lines
 
 `loading(label)` / React `Loading` draws an announced waiting line whose mark, since 0.21.0, is work in progress's half-filled circle in the colour of work in progress, pulsing a few times and then still (still at once under reduced motion), as `Status`' busy. Structural skeletons retain their shape without continuous animation.
