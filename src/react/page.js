@@ -8,6 +8,7 @@ import { PageDock } from '../dom/page/dock.js';
 import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
 import { PageHeader as Heading } from '../dom/page/header.js';
+import { Waiting } from './simple.js';
 import { PageCompact } from '../dom/page/compact.js';
 import { Cut, NameTip } from '../dom/core/cut.js';
 import { Mark } from './simple.js';
@@ -150,15 +151,15 @@ export function PageHeader({ title, crumbs = [], kind = null, status = null, fac
 	return held ? h(React.Fragment, null, held, header) : header;
 }
 
-/** A flat section: `title`, one `description` line, its `actions` and its content. */
-export function Section({ title, description = null, actions = null, level = 2, raised = false, children }) {
+/** A flat section: `title`, one `description` line, its `actions` and its content; `waiting` (true or a shape, 0.23.0) holds its body in a `Waiting` while it reads. */
+export function Section({ title, description = null, actions = null, level = 2, raised = false, waiting = null, children }) {
 	const id = `bui-section-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 	return h(
 		'section',
-		{ className: 'bui-section', 'aria-labelledby': id, 'data-raised': raised ? '' : undefined },
+		{ className: 'bui-section', 'aria-labelledby': id, 'data-raised': raised ? '' : undefined, 'aria-busy': waiting ? 'true' : undefined },
 		h('div', { className: 'bui-section-head' }, h(level === 3 ? 'h3' : 'h2', { id, className: 'bui-section-title' }, title), actions ? h('div', { className: 'bui-section-actions' }, actions) : null),
 		description ? h('p', { className: 'bui-section-description' }, description) : null,
-		h('div', { className: 'bui-section-body' }, children)
+		h('div', { className: 'bui-section-body' }, waiting ? h(Waiting, waiting === true ? {} : waiting) : children)
 	);
 }
 

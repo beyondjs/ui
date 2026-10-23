@@ -66,6 +66,20 @@ export function skeleton(shape = 3) {
 	return el('div', { class: `bui-skeleton${type === 'lines' ? '' : ` bui-skeleton-${type}`}`, 'aria-hidden': 'true' }, Array.from({ length: rows }, type === 'lines' ? line : row));
 }
 
+/**
+ * A region's wait (0.23.0, LOAD-01): what Conduict's Home drew first, for every product. The region keeps
+ * its heading and actions; in its body one visible, announced "Loading…" line and placeholders in the
+ * shape of what comes, on the raised frame the region's content will take. `frame: false` inside a region
+ * that is already framed. `label` names the wait (`loading.text`), else `language` picks the default.
+ */
+export function waiting(shape = {}) {
+	const { label = null, language = 'en', rows = 1, kind = 'list', frame = true } = typeof shape === 'number' ? { rows: shape } : (shape ?? {});
+	return el('div', { class: 'bui-waiting', 'data-frame': frame ? '' : null }, [
+		el('p', { class: 'bui-waiting-label', role: 'status', text: label ?? loading.labels[language] ?? loading.labels.en }),
+		skeleton({ rows, kind })
+	]);
+}
+
 /** A visually hidden text for assistive technology only. */
 export function hidden(text) {
 	return el('span', { class: 'bui-hidden', text });

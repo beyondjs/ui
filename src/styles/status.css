@@ -86,7 +86,7 @@
 	width: 9px;
 	height: 9px;
 	border-radius: var(--radius-round);
-	background: var(--color-surface-sunken);
+	background: var(--color-border-strong);
 }
 .bui-skeleton-text {
 	display: grid;

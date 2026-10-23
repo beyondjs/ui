@@ -32,7 +32,8 @@
 /* A card or panel raised inside a page (amends D10): its own surface, a border and a hairline shadow.
    Sections stay flat; `Section` takes `raised` for a panel that is an object of its own. */
 .bui-raised,
-.bui-section[data-raised] {
+.bui-section[data-raised],
+.bui-waiting[data-frame] {
 	padding: var(--space-4);
 	border: 1px solid var(--color-border);
 	border-radius: var(--radius-base);

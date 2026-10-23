@@ -1,6 +1,7 @@
 /** Types of the helpers a React product reuses (0.11.1; `Bytes` and `CopyButton` since 0.11.2), re-exported by `@beyond-js/ui/react`. */
 import type { ReactElement, RefObject } from 'react';
 import type { Copy } from './notifications.js';
+import type { WaitingShape } from './dom.js';
 export { Age, Hint, Bytes, Highlighter, ComposerDictation, PageDock } from './dom.js';
 export type { ComposerCommand, DictationOptions, HighlighterKind } from './dom.js';
 export type { AgeWords } from './dom.js';
@@ -18,3 +19,6 @@ export function ActionLine(props: { facts?: Array<import('react').ReactNode>; la
 // The React Diff (0.11.2)
 export * from './react-diff.js';
 export { Recency, Matches } from './parts.js';
+
+/** A region's wait (0.23.0, LOAD-01), as the DOM `waiting`. */
+export function Waiting(props: WaitingShape): ReactElement;

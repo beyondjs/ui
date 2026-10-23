@@ -139,6 +139,11 @@ export function Skeleton({ lines = 3, rows = lines, kind = 'lines' }) {
 	return h('div', { className: `bui-skeleton${type === 'lines' ? '' : ` bui-skeleton-${type}`}`, 'aria-hidden': 'true' }, Array.from({ length: rows }, (_, index) => (type === 'lines' ? line(index) : row(index))));
 }
 
+/** A region's wait (0.23.0, LOAD-01), as the DOM `waiting`: an announced "Loading…" line and row-shaped placeholders on the region's raised frame. */
+export function Waiting({ label = null, language = 'en', rows = 1, kind = 'list', frame = true }) {
+	return h('div', { className: 'bui-waiting', 'data-frame': frame ? '' : undefined }, h('p', { className: 'bui-waiting-label', role: 'status' }, label ?? Loading.labels[language] ?? Loading.labels.en), h(Skeleton, { rows, kind }));
+}
+
 // The default label in English and Spanish, and the named lines (0.7.6), as the DOM `loading` builder's.
 Loading.labels = loading.labels;
 Loading.names = loading.names;

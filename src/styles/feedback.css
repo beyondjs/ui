@@ -157,8 +157,9 @@
 	display: block;
 	height: 12px;
 	border-radius: var(--radius-control);
-	background: var(--color-surface-sunken);
-	/* Placeholders preserve the content’s shape without moving what the person reads. */
+	/* Placeholders preserve the content’s shape without moving what the person reads; drawn in the divider
+	   role since 0.23.0 (LOAD-01), as Home's were, after the sunken surface read as a blank page in dark. */
+	background: var(--color-border-strong);
 }
 .bui-skeleton-line:nth-child(3n + 1) {
 	width: 90%;
@@ -168,6 +169,22 @@
 }
 .bui-skeleton-line:nth-child(3n) {
 	width: 55%;
+}
+
+/* A region's wait (0.23.0, LOAD-01): the "Loading…" line above row-shaped placeholders, on the raised frame
+   of `links.css` unless the region is framed already. No shimmer, no staged delay. */
+.bui-waiting {
+	display: grid;
+}
+.bui-waiting:not([data-frame]) {
+	padding: var(--space-3) 0;
+}
+.bui-waiting-label {
+	margin: 0 0 var(--space-2);
+	color: var(--color-text-muted);
+}
+.bui-waiting > .bui-skeleton {
+	padding: 0;
 }
 
 .bui-empty {

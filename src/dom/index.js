@@ -36,7 +36,7 @@ export { FocusedForm } from './form.js';
 export { Tooltip } from './tooltip.js';
 export { Help } from './help.js';
 export { Collection } from './collection/collection.js';
-export { status, badge, callout, loading, skeleton, hidden } from './feedback.js';
+export { status, badge, callout, loading, skeleton, waiting, hidden } from './feedback.js';
 export { Toaster } from './toaster.js';
 export { Header } from './header.js';
 export { lockup } from './lockup.js';

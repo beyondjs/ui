@@ -177,8 +177,23 @@ export class Tabs extends Component {
 
 /** A flat section: a heading, one description line, its actions and its content. */
 export class Section extends Component {
-	constructor(options: { title: string | Node; description?: string | Node | null; actions?: Array<Node | { element: Node } | null>; children?: Node[]; level?: 2 | 3; /** A raised surface inside the page (0.15.0, C2) */ raised?: boolean });
+	constructor(options: { title: string | Node; description?: string | Node | null; actions?: Array<Node | { element: Node } | null>; children?: Node[]; level?: 2 | 3; /** A raised surface inside the page (0.15.0, C2) */ raised?: boolean; /** Starts waiting in this shape (0.23.0, LOAD-01) */ waiting?: true | number | WaitingShape | null });
+	/** Replaces the content, ending a wait. */
 	children: Node[];
+	/** Waits in place: heading and actions kept, the body a `waiting(shape)`, `aria-busy` until `children` is set (0.23.0, LOAD-01). */
+	wait(shape?: number | WaitingShape): void;
+}
+
+/** A region's wait (0.23.0, LOAD-01): an announced "Loading…" line and row-shaped placeholders on the region's raised frame (`frame: false` inside a framed region). */
+export function waiting(shape?: number | WaitingShape): HTMLElement;
+
+/** A wait's shape and words (0.23.0). */
+export interface WaitingShape {
+	label?: string | null;
+	language?: 'en' | 'es';
+	rows?: number;
+	kind?: 'lines' | 'list' | 'table';
+	frame?: boolean;
 }
 
 export interface ArrivalLabels {
