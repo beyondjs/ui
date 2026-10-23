@@ -38,3 +38,17 @@ export class OpeningPlugin {
 		generateBundle(this: any): void;
 	};
 }
+/**
+ * Notices, under a running server, that another copy of the package was installed (0.25.0): `watch`
+ * calls back once the install has settled. The Vite adapter restarts its development server with it; a
+ * static host that keeps running can read the package again.
+ */
+export class OpeningInstall {
+	static interval: number;
+	static settle: number;
+	/** `root`: the installed package's directory (`node_modules/@beyond-js/ui/`). */
+	constructor(root: URL);
+	readonly version: string;
+	watch(changed: (version: string) => void): void;
+	stop(): void;
+}

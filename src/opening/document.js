@@ -82,3 +82,5 @@ export class OpeningDocument {
 }
 
 export { OpeningPlugin } from './plugin.js';
+// A static host that keeps running while its package is installed again follows installs with it (0.25.0)
+export { OpeningInstall } from './install.js';
