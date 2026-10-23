@@ -32,3 +32,6 @@ export class RailMoment extends Component {
 
 // Only the declarations marked `export` are public.
 export {};
+
+// 0.22.0: concurrent work as lanes on one time axis, beside the rail.
+export * from './lanes.js';
