@@ -22,8 +22,9 @@ test('an outage’s place says it is not available, with its mark and no action,
 	assert.equal(new EmptyState({ kind: 'outage', labels: EmptyState.labels.es }).element.textContent, 'No disponible en este momento');
 	assert.equal(new EmptyState({ kind: 'outage', title: 'Machines are not available right now' }).element.querySelector('.bui-empty-title').textContent, 'Machines are not available right now');
 	assert.ok(Object.keys(EmptyState.labels.en).every(key => key in EmptyState.labels.es));
-	assert.ok(new EmptyState({ kind: 'outage', frame: false }).element.classList.contains('bui-empty-unframed'), 'no box inside a framed region');
-	assert.ok(!place.element.classList.contains('bui-empty-unframed'));
+	assert.ok(place.element.classList.contains('bui-empty-unframed'), 'an outage’s place is one quiet line, with no box (0.24.1)');
+	assert.ok(!new EmptyState({ kind: 'outage', frame: true }).element.classList.contains('bui-empty-unframed'), 'a box only when asked for');
+	assert.ok(!new EmptyState({ kind: 'empty', title: 'No machines yet' }).element.classList.contains('bui-empty-unframed'), 'an empty place keeps its box');
 });
 
 test('kept content says when it was read, or that it may be out of date when that is unknown', () => {

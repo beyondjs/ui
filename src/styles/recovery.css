@@ -117,9 +117,26 @@
 	}
 }
 
-/* A place whose read did not answer: the outage's mark in the warning color, never an empty place's. */
+/* A place whose read did not answer is one quiet line (0.24.1): the outage's mark in the warning color beside
+   its words, never an empty place's box, so several places of one outage never read as a stack of boxes. */
+.bui-empty-outage {
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	column-gap: var(--space-2);
+}
 .bui-empty-outage .bui-empty-mark {
 	color: var(--color-warning);
+}
+.bui-empty-outage .bui-empty-mark > .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-empty-outage .bui-empty-title {
+	color: var(--color-text-muted);
+	font-weight: var(--weight-regular);
+}
+.bui-empty-outage .bui-empty-body {
+	grid-column: 2;
 }
 /* An empty or unavailable place inside a region that is framed already: no box inside a box (0.24.0). */
 .bui-empty-unframed {

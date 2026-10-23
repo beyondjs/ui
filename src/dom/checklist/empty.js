@@ -17,6 +17,8 @@ const marks = { empty: 'box', match: 'search', context: 'folder', outage: 'globe
  * Since 0.24.0 (D163) a place whose read did not answer is `'outage'`: "Not available right now" by
  * default, with the outage's mark and no action of its own, since who did not answer and the one Try
  * again are said once by the page's `Recovery`. It is never drawn as empty: a failed read is unavailable.
+ * Since 0.24.1 it is one quiet line, the mark beside its words, with no box unless `frame` asks for one:
+ * several places of one outage never read as a stack of boxes.
  */
 export class EmptyState extends Component {
 	/** The copy in English and Spanish. */
@@ -34,13 +36,15 @@ export class EmptyState extends Component {
 	 * @param {(() => void)|null} [options.clear] clears the filter (`kind: 'match'`)
 	 * @param {ConstructorParameters<typeof Checklist>[0]|Checklist|null} [options.checklist] a first run's steps
 	 * @param {string|null} [options.glyph] another mark from the catalog
-	 * @param {boolean} [options.frame] false inside a region that is framed already, as `waiting`'s (0.24.0)
+	 * @param {boolean|null} [options.frame] false inside a region that is framed already, as `waiting`'s (0.24.0); an
+	 * outage is unframed unless it is true (0.24.1)
 	 */
-	constructor({ kind = 'empty', title = null, text = null, action = null, clear = null, checklist = null, glyph: mark = null, frame = true, labels = {} }) {
+	constructor({ kind = 'empty', title = null, text = null, action = null, clear = null, checklist = null, glyph: mark = null, frame = null, labels = {} }) {
 		super();
 		const type = Object.hasOwn(marks, kind) ? kind : 'empty';
 		const words = new Labels(defaults, labels);
 		const outage = type === 'outage';
+		frame ??= !outage;
 		this.#checklist = outage ? null : checklist instanceof Checklist ? checklist : checklist ? new Checklist(checklist) : null;
 		const actions = outage ? [] : [EmptyState.#action(action), type === 'match' && clear ? el('button', { type: 'button', class: 'bui-button bui-button-quiet bui-button-small', onclick: () => clear() }, [el('span', { text: words.text('clear') })]) : null].filter(Boolean);
 		this.#element = el('div', { class: `bui-empty bui-empty-${type}${frame ? '' : ' bui-empty-unframed'}`, 'data-kind': type }, [
