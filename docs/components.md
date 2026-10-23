@@ -148,7 +148,7 @@ const hint = new Hint(toolbar); // <button class="bui-icon-button" aria-label="C
 
 ## Opening a product
 
-The build-time public module `@beyond-js/ui/opening` supplies `OpeningDocument` for static servers and `OpeningPlugin` for Vite. The [opening guide](opening.md) defines application entry selection, readiness, recovery and continuity with DOM and React loading lines. It creates no session or request policy.
+The build-time public module `@beyond-js/ui/opening` supplies `OpeningDocument` for static servers, `OpeningPlugin` for Vite and, since 0.25.0, `OpeningInstall` for a server that keeps running while the package is installed again. The [opening guide](opening.md) defines application entry selection, readiness, recovery (only what is true, only what can work), a development server that follows installs, and continuity with DOM and React loading lines. It creates no session or request policy.
 
 ## Collections and feedback
 

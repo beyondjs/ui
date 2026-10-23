@@ -59,17 +59,24 @@ export class OpeningPlugin {
 		};
 	}
 
-	/** Restarts a listening development server once another copy of the package is installed */
+	/**
+	 * Restarts a listening development server once another copy of the package is installed. It follows
+	 * from the moment the server listens until it closes: a restart that fails leaves the earlier server
+	 * running, and the next install is still followed.
+	 */
 	#follow(server) {
-		if (!server.httpServer || typeof server.restart !== 'function') return;
+		const http = server.httpServer;
+		if (!http || typeof server.restart !== 'function') return;
 		const install = new OpeningInstall(new URL('../../', import.meta.url));
 		const running = install.version;
-		install.watch(version => {
-			install.stop();
+		const follow = () => install.watch(version => {
+			if (!http.listening) return;
 			server.config?.logger?.info(`@beyond-js/ui ${version || 'changed'} installed (this server runs ${running}): restarting`, { timestamp: true });
 			Promise.resolve(server.restart(true)).catch(error => server.config?.logger?.error(`Restart after installing @beyond-js/ui failed: ${error?.message ?? error}`));
 		});
-		server.httpServer.once('close', () => install.stop());
+		if (http.listening) follow();
+		else http.once('listening', follow);
+		http.once('close', () => install.stop());
 	}
 
 	/** The document module as installed now: a new copy only after an install, the same one otherwise */

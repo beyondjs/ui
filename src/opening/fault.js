@@ -28,17 +28,27 @@ export class OpeningFault {
 			this.#text = words.text('unloaded', { address: event.target.src });
 			return;
 		}
-		// A module that cannot link fails before it runs; a syntax error once the product runs is its own
-		const linked = (!started || !drawn) && (reason instanceof SyntaxError || /^(uncaught )?syntaxerror\b/i.test(String(event.message ?? '')));
+		// A module that cannot link fails before the document's modules have run; a syntax error after that, or in
+		// a promise (JSON that does not parse), is the product's own failure
+		const linked = event.type === 'error' && !started && (reason instanceof SyntaxError || /^(uncaught )?syntaxerror\b/i.test(String(event.message ?? '')));
 		const imported = /dynamically imported module|importing a module script failed/i.test(message);
 		this.#kind = linked || imported ? 'load' : event.type === 'error' && !drawn && !started ? 'start' : 'later';
 		const place = event.filename ? `${event.filename}:${event.lineno}` : '';
 		this.#text = [event.type === 'error' ? event.message || message : message, place].filter(Boolean).join(' · ');
 	}
 
-	/** Whether an event is a failure of opening: a script, the window or a promise nobody handled */
+	/**
+	 * Whether an event is a failure of opening: the window, a promise nobody handled, or one of the page's
+	 * own scripts (an extension's or another origin's script that fails is not the product's code)
+	 */
 	static counts(event) {
-		return event.type === 'unhandledrejection' || event.target === globalThis.window || event.target?.tagName === 'SCRIPT';
+		if (event.type === 'unhandledrejection' || event.target === globalThis.window) return true;
+		if (event.target?.tagName !== 'SCRIPT') return false;
+		try {
+			return new URL(event.target.src, globalThis.location.href).origin === globalThis.location.origin;
+		} catch {
+			return false;
+		}
 	}
 
 	/** `load`, `start` or `later` */

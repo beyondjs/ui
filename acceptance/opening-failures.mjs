@@ -21,7 +21,7 @@ export class OpeningFailures {
 
 	/** The checks, each returning when it passed */
 	get checks() {
-		return [() => this.#unloaded(), () => this.#linked(), () => this.#thrown(), () => this.#outlived(), () => this.#offline(), () => this.#earlier(), () => this.#overlay()];
+		return [() => this.#unloaded(), () => this.#linked(), () => this.#thrown(), () => this.#revived(), () => this.#outlived(), () => this.#offline(), () => this.#earlier(), () => this.#overlay()];
 	}
 
 	/** Counts the page's loads in its tab, the first one included, before any of its scripts runs */
@@ -82,6 +82,32 @@ export class OpeningFailures {
 		} finally { await context.close(); }
 	}
 
+	/**
+	 * A start that threw, then offline: reconnecting cannot fix it, so the failure stays said and its Reload
+	 * waits for the connection; when the product moves anyway, the opening waits again, then opens
+	 */
+	async #revived() {
+		const { context, page, release } = await this.#open({ clock: false, entry: 'revived.js' });
+		const reload = () => page.getByRole('button', { name: 'Volver a cargar', exact: true });
+		try {
+			await page.getByText('No se pudo abrir Projects', { exact: true }).waitFor();
+			await context.setOffline(true);
+			await page.evaluate(() => dispatchEvent(new Event('offline')));
+			await reload().waitFor({ state: 'hidden' });
+			assert.equal(await page.getByText('Estás sin conexión', { exact: true }).count(), 0, 'no promise that reconnecting opens it');
+			assert.equal(await page.getByText('No se pudo abrir Projects', { exact: true }).isVisible(), true);
+			assert.deepEqual(await this.#steps(page), ['failed Cargando Projects'], 'a step that failed stays failed whatever is said next');
+			await context.setOffline(false);
+			await page.evaluate(() => dispatchEvent(new Event('online'))).catch(() => null);
+			await reload().waitFor();
+			await page.waitForFunction(() => document.querySelector('[data-opening-recovery]').hidden && document.querySelector('[data-opening-status]').textContent === 'Confirmando tu sesión');
+			assert.deepEqual(await this.#steps(page), ['failed Cargando Projects', 'active Confirmando tu sesión'], 'it waits again, saying what failed and what runs');
+			release();
+			await page.locator('#bui-opening').waitFor({ state: 'detached' });
+			await page.getByRole('heading', { name: 'Your projects' }).waitFor();
+		} finally { await context.close(); }
+	}
+
 	/** A failure once the product drew: nothing said while it may finish, "longer than expected" once nothing moves */
 	async #outlived() {
 		const { context, page, release } = await this.#open();
@@ -110,7 +136,7 @@ export class OpeningFailures {
 			await context.setOffline(true);
 			await page.evaluate(() => dispatchEvent(new Event('offline')));
 			await page.getByText('Estás sin conexión', { exact: true }).waitFor();
-			assert.equal(await page.getByText('Projects se abre en cuanto vuelvas a tener conexión.', { exact: true }).isVisible(), true);
+			assert.equal(await page.getByText('La apertura continúa en cuanto vuelvas a tener conexión.', { exact: true }).isVisible(), true);
 			assert.equal(await page.getByRole('button', { name: 'Volver a cargar', exact: true }).isVisible(), false, 'Reload offline would put the browser’s error in place of the page');
 			assert.equal(await page.locator('.bui-opening-details').isVisible(), false);
 			release();
@@ -141,14 +167,14 @@ export class OpeningFailures {
 			assert.equal(await page.locator('.bui-opening-help, .bui-opening-panel').count(), 0, 'nothing of the earlier markup stays');
 			assert.equal(await page.locator('.bui-opening-lockup .bui-opening-wordmark').getAttribute('src'), '/wordmark.svg');
 			await page.clock.fastForward(12100);
-			await page.getByText('Su servidor de desarrollo está desactualizado. Reinícialo y vuelve a cargar.', { exact: true }).waitFor();
+			await page.getByText('El servidor de desarrollo de Projects está desactualizado. Detenlo, vuelve a iniciarlo y vuelve a cargar.', { exact: true }).waitFor();
 			assert.equal(await page.locator('.bui-opening-details').evaluate(node => node.open), false, 'still running: the details stay closed');
-			assert.match(await page.locator('[data-opening-text]').textContent(), /Página: una versión anterior/);
+			assert.match(await page.locator('[data-opening-text]').textContent(), /Página generada por: una versión anterior/);
 			release();
 			await page.locator('#bui-opening').waitFor({ state: 'detached' });
 			await page.getByRole('heading', { name: 'Your projects' }).waitFor();
 			assert.deepEqual(errors, [], 'nothing throws');
-			assert.ok(warned.some(line => /restart the development server/.test(line)), 'the console says it to whoever develops');
+			assert.ok(warned.some(line => /stop the development server and start it again/.test(line)), 'the console says it to whoever develops');
 		} finally { await context.close(); }
 	}
 

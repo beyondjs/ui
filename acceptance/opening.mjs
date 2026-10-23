@@ -104,7 +104,7 @@ class OpeningAcceptance {
 			assert.deepEqual(await page.locator('.bui-opening-lockup').boundingBox(), identity, 'the identity never moves while steps and recovery appear');
 			await page.locator('.bui-opening-details summary').click();
 			const details = await page.locator('[data-opening-text]').textContent();
-			assert.match(details, /^Paso: Confirmando tu sesión\nPasos: Cargando Projects \(interface\) [^·]+ · Confirmando tu sesión \(session\) [^\n]+\nVersión: @beyond-js\/ui \d+\.\d+\.\d+\nDirección: http:\/\/127\.0\.0\.1:\d+\/\?project=kept#context\nHora: \d{4}-/);
+			assert.match(details, /^Paso: Confirmando tu sesión\nPasos: Cargando Projects \(interface\) [^·]+ · Confirmando tu sesión \(session\) [^\n]+\nApertura: @beyond-js\/ui \d+\.\d+\.\d+\nDirección: http:\/\/127\.0\.0\.1:\d+\/\?project=kept#context\nHora: \d{4}-/);
 			if (width === 390) {
 				mkdirSync('.artifacts/opening', { recursive: true });
 				await page.screenshot({ path: `.artifacts/opening/${this.#engine}-${theme}.png` });

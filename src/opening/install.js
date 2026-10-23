@@ -8,13 +8,15 @@ import { readFileSync, statSync } from 'node:fs';
  * installed.
  *
  * Every `interval` it compares the package's manifest with the one seen when it was made; polling
- * survives an install replacing the package's directory. Once the manifest differs, it waits until the
- * manifest and the installer's record of `node_modules` have both been still for `settle`. An install
- * of another package changes the record alone, and nothing is called.
+ * survives an install replacing the package's directory. Once the manifest differs, the install has
+ * settled when npm has written its record of `node_modules` (`.package-lock.json`, written last) after
+ * the manifest, or after `bound` without one, and both have then been still for `settle`. An install of
+ * another package changes the record alone, and nothing is called.
  */
 export class OpeningInstall {
 	static interval = 1000;
 	static settle = 1500;
+	static bound = 60000;
 
 	#manifest;
 	#record;
@@ -44,14 +46,20 @@ export class OpeningInstall {
 		this.stop();
 		let moving = '';
 		let since = 0;
+		let first = 0;
 		this.#timer = setInterval(() => {
 			const manifest = OpeningInstall.#stamp(this.#manifest);
 			if (!manifest || manifest === this.#seen) return void (moving = '');
+			const now = Date.now();
+			first ||= now;
 			const both = `${manifest}|${OpeningInstall.#stamp(this.#record)}`;
-			if (both !== moving) return void ((moving = both), (since = Date.now()));
-			if (Date.now() - since < OpeningInstall.settle) return;
+			if (both !== moving) return void ((moving = both), (since = now));
+			// npm writes its record last: until it follows the manifest the install is still running
+			if (OpeningInstall.#time(this.#record) < OpeningInstall.#time(this.#manifest) && now - first < OpeningInstall.bound) return;
+			if (now - since < OpeningInstall.settle) return;
 			this.#seen = manifest;
 			moving = '';
+			first = 0;
 			changed(this.version);
 		}, OpeningInstall.interval);
 		// A server that closes is never kept alive by this
@@ -69,6 +77,14 @@ export class OpeningInstall {
 			return `${mtimeMs}:${size}`;
 		} catch {
 			return '';
+		}
+	}
+
+	static #time(file) {
+		try {
+			return statSync(file).mtimeMs;
+		} catch {
+			return 0;
 		}
 	}
 }

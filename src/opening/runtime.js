@@ -49,6 +49,8 @@ class OpeningRuntime {
 	#failed = false;
 	#reloading = false;
 	#slow = false;
+	/** The failure the technical details name */
+	#cause = null;
 
 	constructor(script) {
 		this.#specs = JSON.parse(decodeURIComponent(script.dataset.opening));
@@ -99,7 +101,7 @@ class OpeningRuntime {
 	#outdated(frame) {
 		this.#recovery.cause = 'outdated';
 		this.#recovery.keep({ page: frame.drawn ? `@beyond-js/ui ${frame.drawn}` : this.#words.text('earlier') });
-		console.warn(`[@beyond-js/ui] This page was drawn by ${frame.drawn ? `@beyond-js/ui ${frame.drawn}` : 'an earlier @beyond-js/ui'}, and its opening is ${OpeningFrame.version}: restart the development server to serve what is installed.`);
+		console.warn(`[@beyond-js/ui] This page was drawn by ${frame.drawn ? `@beyond-js/ui ${frame.drawn}` : 'an earlier @beyond-js/ui'}, and its opening is ${OpeningFrame.version}: stop the development server and start it again to serve what is installed.`);
 	}
 
 	/** Follows the product: its root drawn, the step its waiting element names, or a useful screen */
@@ -114,9 +116,20 @@ class OpeningRuntime {
 		const id = pending.getAttribute('data-bui-opening-wait') ?? '';
 		if (!this.#steps.begin(id, steps.includes(id) ? '' : this.#line(pending))) return;
 		this.#slow = false;
-		// Progress: a failure the product outlived is no longer waited on
+		// Progress: a failure the product outlived is no longer waited on, nor said
 		clearTimeout(this.#stall);
+		if (this.#failed) this.#revive();
 		if (!this.#recovery.state) this.#say(this.#steps.label);
+	}
+
+	/** The product moved after the opening said it could not open: it is alive, and the opening waits again */
+	#revive() {
+		this.#failed = false;
+		this.#broken = false;
+		if (this.#recovery.state === 'offline') return;
+		this.#recovery.hide();
+		this.#element.dataset.state = 'opening';
+		if (performance.now() >= OpeningRuntime.bound) this.#late();
 	}
 
 	/**
@@ -159,7 +172,7 @@ class OpeningRuntime {
 		this.#steps.show();
 		const step = this.#steps.label;
 		if (state === 'failed') this.#steps.end();
-		this.#steps.mark(state === 'failed' || this.#broken ? 'failed' : 'late');
+		this.#steps.mark(state === 'failed' || this.#failed || this.#broken ? 'failed' : 'late');
 		this.#element.dataset.state = state;
 		this.#say(this.#recovery.show(state, { ...(step ? { step } : {}), steps: this.#steps.text }));
 	}
@@ -169,14 +182,21 @@ class OpeningRuntime {
 		if (this.#ended || this.#reloading || !this.#element || !OpeningFault.counts(event)) return;
 		const root = document.querySelector(this.#specs.root);
 		const fault = new OpeningFault(event, { drawn: Boolean(root?.children.length), started: this.#started, words: this.#words });
-		this.#recovery.keep({ error: fault.text });
+		// The details keep the failure that matters: the first one, unless a later one is final
+		if (!this.#cause || (fault.final && !this.#cause.final)) {
+			this.#cause = fault;
+			this.#recovery.keep({ error: fault.text });
+		}
 		if (!fault.final) return void this.#hold();
 		// Code that could not load is loaded again once, by itself, before anything is said
 		if (fault.kind === 'load' && navigator.onLine !== false && new OpeningRetry(this.#specs.key).run()) return void (this.#reloading = true);
 		this.#broken ||= fault.kind === 'load';
 		this.#failed = true;
 		clearTimeout(this.#stall);
-		this.#show(navigator.onLine === false ? 'offline' : 'failed');
+		// Offline, code that could not load loads again on reconnecting; a start that threw stays said
+		const offline = navigator.onLine === false;
+		this.#show(offline && this.#broken ? 'offline' : 'failed');
+		if (offline) this.#recovery.connected(false);
 	};
 
 	/** A failure the product may outlive: said only when nothing moves within `stall`, by what is on screen */
@@ -190,13 +210,21 @@ class OpeningRuntime {
 		}, OpeningRuntime.stall);
 	}
 
+	/**
+	 * Offline is said only when reconnecting can help: over a start that threw, which a connection cannot
+	 * fix, the failure stays said and its Reload waits for the connection
+	 */
 	#offline = () => {
-		if (!this.#ended) this.#show('offline');
+		if (this.#ended) return;
+		this.#recovery.connected(false);
+		if (!(this.#failed && !this.#broken)) this.#show('offline');
 	};
 
 	/** Back online: code that could not load is loaded again; otherwise the product's own reads continue */
 	#online = () => {
-		if (this.#ended || this.#recovery.state !== 'offline') return;
+		if (this.#ended) return;
+		this.#recovery.connected(true);
+		if (this.#recovery.state !== 'offline') return;
 		if (this.#broken) return location.reload();
 		if (this.#failed) return this.#show('failed');
 		this.#recovery.hide();
@@ -248,6 +276,7 @@ class OpeningRuntime {
 	#release() {
 		for (const timer of this.#timers) clearTimeout(timer);
 		clearTimeout(this.#stall);
+		this.#steps?.end();
 		this.#observer?.disconnect();
 		this.#language?.disconnect();
 		removeEventListener('error', this.#fault, true);

@@ -29,6 +29,7 @@ export class OpeningRecovery {
 	#facts = {};
 	#cause = '';
 	#development;
+	#online = true;
 
 	/**
 	 * @param {{ parent: HTMLElement, before?: Node | null, words: import('./words.js').OpeningWords, development?: boolean }} specs
@@ -91,9 +92,8 @@ export class OpeningRecovery {
 		this.keep(facts);
 		this.#element.dataset.state = state;
 		this.#element.hidden = false;
-		const reachable = state !== 'offline';
-		this.#reload.hidden = !reachable;
-		this.#details.hidden = !reachable;
+		this.#details.hidden = state === 'offline';
+		this.#reload.hidden = state === 'offline' || !this.#online;
 		if (state === 'failed' && this.#development) this.#details.open = true;
 		this.#text.textContent = this.details;
 		return this.speak();
@@ -101,6 +101,12 @@ export class OpeningRecovery {
 
 	hide() {
 		this.#element.hidden = true;
+	}
+
+	/** Whether the browser has a connection: Reload is offered only with one, since offline it shows the browser's own error */
+	connected(online) {
+		this.#online = online;
+		this.#reload.hidden = this.#element.dataset.state === 'offline' || !online;
 	}
 
 	/** Says every part again in the document's language now; returns the announced sentence */

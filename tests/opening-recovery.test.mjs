@@ -41,7 +41,7 @@ test('a failure is said by what it means for the opening: code that cannot load 
 	const fault = (event, state = {}) => new OpeningFault(event, { drawn: false, started: false, words, ...state });
 	const script = fault({ type: 'error', target: { tagName: 'SCRIPT', src: 'http://localhost/src/main.js' } });
 	assert.equal(script.kind, 'load');
-	assert.equal(script.text, 'Could not load http://localhost/src/main.js');
+	assert.equal(script.text, 'Couldn’t load http://localhost/src/main.js');
 	const linked = { type: 'error', target: window, message: "Uncaught SyntaxError: The requested module '/node_modules/.vite/deps/@beyond-js_ui.js' does not provide an export named 'waiting'", filename: 'http://localhost/src/main.js', lineno: 1 };
 	assert.equal(fault(linked).kind, 'load', 'a module that names an export its dependency lacks never runs');
 	assert.match(fault(linked).text, /does not provide an export named 'waiting' · http:\/\/localhost\/src\/main\.js:1$/);
@@ -54,11 +54,17 @@ test('a failure is said by what it means for the opening: code that cannot load 
 	assert.equal(fault(thrown).final, true);
 	assert.equal(fault(thrown, { started: true }).kind, 'later', 'after the modules ran, the product may outlive it');
 	assert.equal(fault(thrown, { drawn: true }).kind, 'later');
+	assert.equal(fault({ ...linked, error: new SyntaxError('Unexpected token < in JSON') }, { started: true }).kind, 'later', 'once the modules ran, a syntax error is the product’s (a top-level await of JSON that does not parse)');
 	assert.equal(fault({ type: 'unhandledrejection', reason: new Error('Session store failed') }).final, false, 'a promise nobody handled may still be outlived');
+	assert.equal(fault({ type: 'unhandledrejection', reason: new SyntaxError('Unexpected token < in JSON at position 0') }).kind, 'later', 'JSON that does not parse is the product’s failure, not code that cannot link');
 	assert.equal(OpeningFault.counts({ type: 'error', target: { tagName: 'IMG' } }), false, 'a missing image is not a failure of opening');
 	assert.equal(OpeningFault.counts({ type: 'error', target: window }), true);
-	assert.equal(OpeningFault.counts({ type: 'error', target: { tagName: 'SCRIPT' } }), true);
 	assert.equal(OpeningFault.counts({ type: 'unhandledrejection' }), true);
+	swap({ location: { href: 'http://localhost/#/org', origin: 'http://localhost' } }, () => {
+		assert.equal(OpeningFault.counts({ type: 'error', target: { tagName: 'SCRIPT', src: '/src/main.js' } }), true, 'the page’s own script');
+		assert.equal(OpeningFault.counts({ type: 'error', target: { tagName: 'SCRIPT', src: 'chrome-extension://abc/inject.js' } }), false, 'an extension’s script is not the product’s code');
+		assert.equal(OpeningFault.counts({ type: 'error', target: { tagName: 'SCRIPT', src: 'https://cdn.example.com/x.js' } }), false);
+	});
 });
 
 test('code that could not load reloads by itself once per address and window, never without session storage', () => {
@@ -94,24 +100,30 @@ test('each state offers only what can work: waiting or Reload when late, Reload 
 	const part = selector => stage.querySelector(selector);
 	assert.equal(recovery.state, null);
 	assert.equal(part('[data-opening-recovery]').hidden, true, 'nothing until a cause');
-	recovery.keep({ version: '@beyond-js/ui 0.25.0', error: 'Could not load http://localhost/src/main.js' });
+	recovery.keep({ version: '@beyond-js/ui 0.25.0', error: 'Couldn’t load http://localhost/src/main.js' });
 	assert.equal(recovery.show('late', { step: 'Confirming your session', steps: 'Loading Conduict (interface) 0.4 s · Confirming your session (session) 12 s' }), 'Taking longer than expected. You can keep waiting or reload.');
 	assert.equal(part('.bui-opening-heading').textContent, 'Taking longer than expected');
 	assert.equal(part('.bui-opening-reload').hidden, false);
 	assert.equal(part('.bui-opening-details').open, false);
-	assert.match(part('.bui-opening-text').textContent, /^Step: Confirming your session\nSteps: .+\nError: Could not load http:\/\/localhost\/src\/main\.js\nVersion: @beyond-js\/ui 0\.25\.0\nAddress: http:\/\/localhost\/\nTime: \d{4}-/);
+	assert.match(part('.bui-opening-text').textContent, /^Step: Confirming your session\nSteps: .+\nError: Couldn’t load http:\/\/localhost\/src\/main\.js\nOpening: @beyond-js\/ui 0\.25\.0\nAddress: http:\/\/localhost\/\nTime: \d{4}-/);
 	assert.equal(recovery.show('failed'), 'Couldn’t open Conduict.', 'a heading and Reload: no note that restates the button');
 	assert.equal(part('.bui-opening-note').hidden, true);
 	assert.equal(part('.bui-opening-details').open, false, 'a real installation keeps the details closed');
-	assert.equal(recovery.show('offline'), 'You’re offline. Conduict opens as soon as you’re back online.');
+	assert.equal(recovery.show('offline'), 'You’re offline. Opening continues as soon as you’re back online.');
 	assert.equal(part('.bui-opening-reload').hidden, true, 'Reload cannot work offline: the browser would replace the page with its own error');
 	assert.equal(part('.bui-opening-details').hidden, true);
 	recovery.cause = 'outdated';
-	assert.equal(recovery.show('failed'), 'Couldn’t open Conduict. Its development server is out of date. Restart it, then reload.', 'an established cause in place of silence');
-	assert.equal(recovery.show('late'), 'Taking longer than expected. Its development server is out of date. Restart it, then reload.');
-	assert.equal(recovery.show('offline'), 'You’re offline. Conduict opens as soon as you’re back online.', 'offline says itself');
+	assert.equal(recovery.show('failed'), 'Couldn’t open Conduict. Conduict’s development server is out of date. Stop it and start it again, then reload.', 'an established cause in place of silence, with the remedy that works');
+	assert.equal(recovery.show('late'), 'Taking longer than expected. Conduict’s development server is out of date. Stop it and start it again, then reload.');
+	assert.equal(recovery.show('offline'), 'You’re offline. Opening continues as soon as you’re back online.', 'offline says itself');
+	recovery.connected(false);
+	assert.equal(recovery.show('failed'), 'Couldn’t open Conduict. Conduict’s development server is out of date. Stop it and start it again, then reload.');
+	assert.equal(part('.bui-opening-reload').hidden, true, 'a failure said offline waits for the connection to offer Reload');
+	recovery.connected(true);
+	assert.equal(part('.bui-opening-reload').hidden, false);
+	recovery.show('offline');
 	document.documentElement.lang = 'es';
-	assert.equal(recovery.speak(), 'Estás sin conexión. Conduict se abre en cuanto vuelvas a tener conexión.');
+	assert.equal(recovery.speak(), 'Estás sin conexión. La apertura continúa en cuanto vuelvas a tener conexión.');
 	recovery.cause = '';
 	assert.equal(recovery.show('late'), 'Está tardando más de lo esperado. Puedes seguir esperando o volver a cargar.');
 	assert.equal(part('.bui-opening-reload').textContent, 'Volver a cargar');
@@ -164,7 +176,11 @@ const replace = (root, version) => {
 	writeFileSync(manifest, JSON.stringify({ ...JSON.parse(readFileSync(manifest, 'utf8')), version }, null, '\t'));
 	const later = new Date(Date.now() + 5000);
 	utimesSync(manifest, later, later);
-	writeFileSync(join(root, '..', '..', '.package-lock.json'), `{"lockfileVersion":3,"version":"${version}"}`);
+	// npm writes its record of node_modules last
+	const record = join(root, '..', '..', '.package-lock.json');
+	writeFileSync(record, `{"lockfileVersion":3,"version":"${version}"}`);
+	const last = new Date(later.getTime() + 1000);
+	utimesSync(record, last, last);
 };
 
 test('an install is noticed once it has settled, and an unrelated install changes nothing', async () => {
@@ -205,7 +221,8 @@ test('a development server builds its document from what is installed and restar
 	assert.equal(await drawn(), '9.9.9', 'the module Node loaded first never draws the document: the installed one does');
 	const restarts = [];
 	const logged = [];
-	const server = { httpServer: new EventEmitter(), restart: force => { restarts.push(force); return Promise.resolve(); }, config: { logger: { info: line => logged.push(line), error: line => logged.push(line) } }, middlewares: { use() {} } };
+	let refuse = true;
+	const server = { httpServer: Object.assign(new EventEmitter(), { listening: true }), restart: force => { restarts.push(force); return refuse ? ((refuse = false), Promise.reject(new Error('server restart failed'))) : Promise.resolve(); }, config: { logger: { info: line => logged.push(line), error: line => logged.push(line) } }, middlewares: { use() {} } };
 	const [interval, settle] = [Installed.interval, Installed.settle];
 	Object.assign(Installed, { interval: 20, settle: 80 });
 	try {
@@ -215,8 +232,17 @@ test('a development server builds its document from what is installed and restar
 		await new Promise(resolve => setTimeout(resolve, 200));
 		assert.deepEqual(restarts, [true], 'one restart, preparing its dependencies again');
 		assert.match(logged[0], /@beyond-js\/ui 9\.9\.10 installed \(this server runs 9\.9\.9\): restarting/);
+		assert.match(logged[1], /Restart after installing @beyond-js\/ui failed: server restart failed/);
+		replace(root, '9.9.11');
+		await until(() => restarts.length === 2);
+		assert.deepEqual(restarts, [true, true], 'a restart that failed left the earlier server running, and the next install is still followed');
 		plugin.configureServer({ ...server, httpServer: undefined });
-		assert.equal(restarts.length, 1, 'a server that does not listen (middleware mode) is left alone');
+		const idle = Object.assign(new EventEmitter(), { listening: false });
+		plugin.configureServer({ ...server, httpServer: idle });
+		replace(root, '9.9.12');
+		await new Promise(resolve => setTimeout(resolve, 400));
+		assert.equal(restarts.length, 3, 'only the listening server restarts: middleware mode and a server that never listened are left alone');
+		idle.emit('close');
 	} finally {
 		server.httpServer.emit('close');
 		Object.assign(Installed, { interval, settle });

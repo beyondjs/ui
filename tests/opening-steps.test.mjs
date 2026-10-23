@@ -38,7 +38,7 @@ test('the words: every key in both languages, the family’s steps, a product’
 	assert.equal(said.text('failed'), 'No se pudo abrir Conduict');
 	document.documentElement.lang = 'en';
 	assert.equal(said.step('projects'), 'Connecting to Beyond Projects');
-	assert.equal(said.text('reconnect'), 'Conduict opens as soon as you’re back online.');
+	assert.equal(said.text('reconnect'), 'Opening continues as soon as you’re back online.', 'the opening is the subject, not the product');
 	assert.equal(said.product, 'Conduict');
 });
 

@@ -30,7 +30,7 @@ test('the opening is in the document, escaped, localized and independent of the 
 test('the opening says nothing it cannot back: no help without a cause, a fallback only for a controller that never ran (0.21.0, 0.25.0)', () => {
 	const html = new OpeningDocument({ product: 'Conduict', key: 'fixture', logo }).render(source);
 	assert.doesNotMatch(html, /Trouble opening|No se abre|Use your browser to reload/, 'no standing help that says nothing');
-	assert.match(html, /data-opening-fallback><span lang="en">Couldn’t open Conduict\. Reload this page to try again\.<\/span>/);
+	assert.match(html, /data-opening-fallback><span lang="en">Conduict hasn’t opened yet\. Reload this page to try again\.<\/span>/);
 	assert.doesNotMatch(html, /data-opening-steps|data-opening-recovery/, 'the controller draws the steps and the recovery, so a document only paints the identity, the trace and one line (0.25.0)');
 	assert.equal((html.match(/role="status"/g) ?? []).length, 1, 'one announced line');
 	const css = readFileSync(new URL('../src/opening/opening.css', import.meta.url), 'utf8');
