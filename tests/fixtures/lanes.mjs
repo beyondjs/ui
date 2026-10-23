@@ -1,5 +1,5 @@
 /**
- * A crew of subagents for `Lanes` (0.22.0), as Conduict's crew block gives it: started at 10:42:05 local
+ * A crew of subagents for `Lanes` (0.27.0), as Conduict's crew block gives it: started at 10:42:05 local
  * time on 23 October 2026, read at `start` + 102 s, one finished, one failed, two working (one nested under
  * another), one waiting for the person, with the product's own words for each state and tokens as facts.
  */

@@ -1,4 +1,4 @@
-// The fictional crew of the lanes pages (0.22.0): six subagents of one turn, started at 10:42:05 local time
+// The fictional crew of the lanes pages (0.27.0): six subagents of one turn, started at 10:42:05 local time
 // on 23 October 2026 and read 102 s later, one nested, with the product's words in English and Spanish.
 export const start = new Date(2026, 9, 23, 10, 42, 5).getTime();
 

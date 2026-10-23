@@ -1,5 +1,5 @@
 /**
- * The copy of `Lanes` (0.22.0) in English and Spanish: the units of a duration (the long-operation
+ * The copy of `Lanes` (0.27.0) in English and Spanish: the units of a duration (the long-operation
  * components' own), when a lane started and how long it ran (its description and its trace's tooltip),
  * the states in words for a product that gives none of its own (`stateLabel` is the product's word, such
  * as "Waiting for you"), and the group's name when the product gives no `label`. Public as `Lanes.labels`.

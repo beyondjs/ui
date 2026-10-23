@@ -6,7 +6,7 @@ import { h, useInstance, useLatest, useSync } from './hooks.js';
 const { forwardRef, useImperativeHandle } = React;
 
 /**
- * 0.22.0's `Lanes` in React, driven by its DOM class: `lanes` are applied when their content changes (a
+ * 0.27.0's `Lanes` in React, driven by its DOM class: `lanes` are applied when their content changes (a
  * lane that stays keeps its button and focus), `label` and `trace` in place, and `onChoose` is read from
  * the latest props. `clock`, `locale` and `labels` make a new instance (memoize `labels`). The ref moves
  * focus to a lane (`focus(key, options?)`). In React a lane's `title`, `kind` and `now` are text.

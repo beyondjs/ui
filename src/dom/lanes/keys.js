@@ -1,5 +1,5 @@
 /**
- * The keyboard of a block of lanes (0.22.0): one lane in the tab order (a roving tabindex), and the
+ * The keyboard of a block of lanes (0.27.0): one lane in the tab order (a roving tabindex), and the
  * arrows between lanes. The lane in the tab order is the one that holds focus, else the current one (the
  * lane whose detail is open), else the one focused last, else the first. ArrowDown and ArrowUp move to the
  * next and previous lane and Home and End to the first and last, without wrapping; Enter and Space are

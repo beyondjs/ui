@@ -1,4 +1,4 @@
-// The lanes page of the plain DOM consumer (0.22.0): a crew of subagents as one block of Lanes on an
+// The lanes page of the plain DOM consumer (0.27.0): a crew of subagents as one block of Lanes on an
 // injected clock, the same crew in a box under 40rem (its two-line form at any window width), and every
 // state once. Choosing a lane makes it current, as a product opening its detail would. window.fixture
 // moves the clock, changes a live line, appends a lane, ends the crew and records what was chosen.

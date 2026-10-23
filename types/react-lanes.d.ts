@@ -1,4 +1,4 @@
-/** Types of the React form of 0.22.0's `Lanes`, re-exported by `@beyond-js/ui/react` (through `react-conversation.d.ts`). */
+/** Types of the React form of 0.27.0's `Lanes`, re-exported by `@beyond-js/ui/react` (through `react-conversation.d.ts`). */
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 import type { Copy } from './notifications.js';
 import type { Clock } from './operations.js';
@@ -21,5 +21,5 @@ export interface LanesProps {
 	locale?: string;
 	labels?: Copy;
 }
-/** Concurrent work as lanes on one time axis, driven by the DOM `Lanes` (0.22.0). */
+/** Concurrent work as lanes on one time axis, driven by the DOM `Lanes` (0.27.0). */
 export const Lanes: ForwardRefExoticComponent<LanesProps & RefAttributes<LanesHandle>> & { labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> } };

@@ -1,4 +1,4 @@
-/** Types of 0.22.0's `Lanes`, re-exported by `@beyond-js/ui` and `/dom` (through `rail.d.ts`). */
+/** Types of 0.27.0's `Lanes`, re-exported by `@beyond-js/ui` and `/dom` (through `rail.d.ts`). */
 import type { Component, Content } from './dom.js';
 import type { Copy } from './notifications.js';
 import type { Clock, Moment } from './operations.js';
@@ -40,7 +40,7 @@ export interface LanesOptions {
 	/** What choosing a lane (a press, Enter or Space) does. */
 	choose?: ((key: string, event: Event) => void) | null;
 }
-/** Concurrent work as lanes on one time axis, aligned in shared columns, one line from 40rem and two below (0.22.0). */
+/** Concurrent work as lanes on one time axis, aligned in shared columns, one line from 40rem and two below (0.27.0). */
 export class Lanes extends Component {
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	static readonly states: readonly LaneState[];

@@ -1,5 +1,5 @@
 /**
- * Where a nested lane hangs from (0.22.0): for each lane of the given order, its depth (0 to 3), whether
+ * Where a nested lane hangs from (0.27.0): for each lane of the given order, its depth (0 to 3), whether
  * a sibling follows it at its depth (`middle`, drawn ├) or not (`last`, drawn └), and which shallower
  * levels continue past it to a later sibling (drawn │). The order is the product's and is never changed;
  * a depth outside 0 to 3 is drawn at the nearest one (the product counts deeper work on its parent).

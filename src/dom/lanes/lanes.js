@@ -13,7 +13,7 @@ import { lanes as copy } from './labels.js';
 const said = value => value !== null && value !== undefined && value !== '';
 
 /**
- * Concurrent work drawn as lanes on one time axis (0.22.0): a coding agent's subagents first, and any
+ * Concurrent work drawn as lanes on one time axis (0.27.0): a coding agent's subagents first, and any
  * parallel work a product follows (a preparation's parallel steps, a delivery's jobs). A group named by
  * `label` holds one button per lane, in the product's order (never sorted here), each one row of a grid
  * whose columns every lane shares, so they align: the mark and the title (indented by depth under a tree

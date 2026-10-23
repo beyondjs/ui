@@ -1,4 +1,4 @@
-/* Lanes (0.22.0): concurrent work as lanes on one time axis. The list is one grid and every lane a
+/* Lanes (0.27.0): concurrent work as lanes on one time axis. The list is one grid and every lane a
    subgrid row of it, so the columns align across lanes by their content with nothing measured in script:
    the mark and the title (indented by depth under a tree connector), the kind, the live line, the time and
    the facts in tabular figures, and the trace. Its kind, facts and trace columns exist only when a lane

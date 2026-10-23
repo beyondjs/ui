@@ -1,5 +1,5 @@
 /**
- * The one time axis of a block of lanes (0.22.0): it starts at the earliest start, and while any lane is
+ * The one time axis of a block of lanes (0.27.0): it starts at the earliest start, and while any lane is
  * live it ends at the next whole step above the time the block has run (1, 2, 5, 10, 15, 30, 60 and 120
  * minutes, then doubling), so a running bar grows at its end and the scale changes rarely; once every lane
  * ended it ends at the last end. A block with no start has no axis (`start` is null) and a minute's span,

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Page as Window } from './support/page.mjs';
 import { start, crew } from './fixtures/lanes.mjs';
 
-/** The React form of 0.22.0's `Lanes`, driven by its DOM class: one block under StrictMode, lanes patched by content, the latest onChoose, the ref's focus. */
+/** The React form of 0.27.0's `Lanes`, driven by its DOM class: one block under StrictMode, lanes patched by content, the latest onChoose, the ref's focus. */
 const page = new Window();
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const { default: React } = await import('react');

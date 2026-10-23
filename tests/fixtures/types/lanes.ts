@@ -1,4 +1,4 @@
-/** Declarations of 0.22.0's Lanes, as a DOM consumer uses them. */
+/** Declarations of 0.27.0's Lanes, as a DOM consumer uses them. */
 import { Lanes, Clock } from '@beyond-js/ui';
 import type { Lane, LaneState } from '@beyond-js/ui';
 

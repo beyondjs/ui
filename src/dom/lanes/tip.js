@@ -1,7 +1,7 @@
 import { Tooltip } from '../tooltip.js';
 
 /**
- * A lane's tooltip, made on first need (0.22.0): the package's `Tooltip` over `trigger`, placed by
+ * A lane's tooltip, made on first need (0.27.0): the package's `Tooltip` over `trigger`, placed by
  * `Floating`, hidden from assistive technology because the lane's own name and description already say
  * its words. It is made on the trigger's first hover (and first focus, with `focus`), so a lane nobody
  * points at adds nothing to the page; from then on the tooltip's own listeners show and hide it. Each time

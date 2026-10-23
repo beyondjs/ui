@@ -13,7 +13,7 @@ const said = value => value !== null && value !== undefined && value !== '';
 const separator = () => el('span', { class: 'bui-hidden', text: ', ' });
 
 /**
- * One lane of a `Lanes` block (0.22.0): a button that is one row of the block's grid, its cells in the
+ * One lane of a `Lanes` block (0.27.0): a button that is one row of the block's grid, its cells in the
  * block's shared columns: the mark (the state's `Status` shape and hue, still) beside the title, indented
  * by its depth under a tree connector; the kind; the live line; the time; the facts; the trace. A hidden
  * state word is read before the title, separators make the name read as a sentence, and the start is its

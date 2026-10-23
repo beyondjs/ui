@@ -5,7 +5,7 @@ import { Page } from './support/page.mjs';
 import { start, crew } from './fixtures/lanes.mjs';
 
 /**
- * `Lanes` (0.22.0) in time: a tick writes only the live lanes' times and bars, the clock is heard only
+ * `Lanes` (0.27.0) in time: a tick writes only the live lanes' times and bars, the clock is heard only
  * while a lane is live, the axis' steps while live and its end once all ended, the bars' custom
  * properties, the tooltips' words, Spanish, and the stylesheet's narrow layout and still marks.
  */

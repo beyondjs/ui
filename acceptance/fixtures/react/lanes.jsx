@@ -1,4 +1,4 @@
-// The lanes page of the React consumers, in Spanish (0.22.0): the same crew as the DOM page through the
+// The lanes page of the React consumers, in Spanish (0.27.0): the same crew as the DOM page through the
 // React Lanes with Lanes.labels.es, a box under 40rem and every state once; choosing a lane makes it
 // current. window.fixture moves the clock, changes a live line, appends a lane and ends the crew.
 import '@beyond-js/ui/tokens.css';

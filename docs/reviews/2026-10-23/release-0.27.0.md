@@ -1,6 +1,6 @@
-# Local UI 0.22.0: Lanes
+# Local UI 0.27.0: Lanes
 
-UI 0.22.0 adds `Lanes` (DOM and React), concurrent work drawn as lanes on one time axis, for the multi-agent round of 2026-10-23: a coding agent's subagents first (Conduict's crew block) and any parallel work a product follows. Its contract is the [catalog entry](../../components.md#conversations). It builds on 0.20.4; the coordinated 0.20.5 and 0.21.0 work of other sessions is not in this branch and is merged by the round's coordinator.
+UI 0.27.0 adds `Lanes` (DOM and React), concurrent work drawn as lanes on one time axis, for the multi-agent round of 2026-10-23: a coding agent's subagents first (Conduict's crew block) and any parallel work a product follows. Its contract is the [catalog entry](../../components.md#conversations). It was written over 0.20.4 as 0.22.0 on 2026-10-23, rebased over 0.21.2 the same day and over 0.26.0 on 2026-10-24, when it took 0.27.0: 0.22.0 had been held for it while other lines released 0.23.0 to 0.26.0.
 
 ## What it adds
 
@@ -18,9 +18,14 @@ UI 0.22.0 adds `Lanes` (DOM and React), concurrent work drawn as lanes on one ti
 
 ## Executed checks
 
-Run on 2026-10-23 on the round's machine:
+Run again on 2026-10-24 as 0.27.0, rebased over 0.26.0, on the round's machine:
 
-- **Archive.** `dist-pack/beyond-ui-0.22.0.tgz`, packed by `npm run pack:consumers` with no consumer named, so nothing was copied into another repository. SHA-256 `f7c0694df2f5c217f63c99263b317c0ed5d1ef7acdf27f62d17dad57107f396a`; integrity `sha512-cklG3/CfKcuWwTO8YGgGEvPF3FntejmqG9oTE6fVWdDijI0nizkS96/IEK7f8FT8YLv54LGW812XOpMCTzBaiA==`, the archive the second full acceptance run below packed and tested.
+- **Archive.** `dist-pack/beyond-ui-0.27.0.tgz`, packed by `npm run pack:consumers` with no consumer named, so nothing was copied into another repository. SHA-256 `a8670b152f25e9f0377e748655b415213b4c1b76566dbf185838fc5af5c65321`; integrity `sha512-1bpgeaK9hTAB7G06ILJGn/u6hAuZCbRLcACCBl/zT8RBAl6Sj3h7+ahbrGxm88kp9tzvUI/Dxi/hQEmUIn9QqA==`.
+- **Unit and declarations.** `npm test`: 814 tests, 814 pass. `npm run types` compiles.
+- **In Chrome.** `npm run acceptance -- "lanes:"`: 10 of 10 (DOM, React 19 and React 18 consumers); "one edge, one lane (D96)": 1 of 1. Firefox, WebKit and the whole acceptance were not run again over 0.26.0.
+
+Run on 2026-10-23 as 0.22.0 over 0.20.4 (the source of `Lanes` is unchanged since; only the base and the version moved):
+
 - **Unit and declarations.** `npm test`: 766 tests, 766 pass, React 18.3.1 included through `react18.test.mjs` (with `react-lanes.test.mjs`). `npm run types` compiles, its expected errors included.
 - **Lanes in three engines.** `npm run acceptance -- "lanes:"`: 10 of 10 (DOM, React 19 and React 18 consumers) in Chrome 155.0.8059.85, Firefox 155.0 and WebKit 26.6.
 - **The whole acceptance in Chrome.** 353 of 353. The first full run of the draft failed one check, "one edge, one lane (D96)" on the DOM page, which passed on the untouched 0.20.4 archive; its cause was the class collision described above, corrected before this run. The whole acceptance was not run in Firefox or WebKit for this release.

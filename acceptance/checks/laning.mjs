@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import { expect, overflow } from '../support/browser.mjs';
 
 /**
- * `Lanes` (0.22.0) in a real engine, on the `lanes.html` pages (the DOM page in English, the React pages
+ * `Lanes` (0.27.0) in a real engine, on the `lanes.html` pages (the DOM page in English, the React pages
  * in Spanish): the columns align across lanes in both themes, one line a lane from 40rem of the block and
  * two below it (kind and trace gone), marks told apart by shape and never moving, a tick that moves only
  * the live bars' ends, a live line or a new lane that moves no other lane, no sideways scroll at 320 px,

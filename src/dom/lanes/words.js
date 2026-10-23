@@ -1,7 +1,7 @@
 import { TimeWords } from '../time/words.js';
 
 /**
- * What a lane says about time (0.22.0): its duration in the words of the long-operation components
+ * What a lane says about time (0.27.0): its duration in the words of the long-operation components
  * ("1 min 42 s", through `TimeWords`), when it started to the second ("Started 10:42:05", with the day
  * when that was not today), and the sentence of its trace's tooltip ("Started 10:42:05 · ran 1 min 42 s",
  * "Started 10:42:05 · 1 min 42 s so far"). Times of day come from `Intl` in the lane's locale on a

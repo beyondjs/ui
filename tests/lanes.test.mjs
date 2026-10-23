@@ -4,7 +4,7 @@ import { Page } from './support/page.mjs';
 import { start, crew, spoken } from './fixtures/lanes.mjs';
 
 /**
- * `Lanes` (0.22.0): concurrent work as lanes on one time axis. Its structure and names, the states and
+ * `Lanes` (0.27.0): concurrent work as lanes on one time axis. Its structure and names, the states and
  * their marks, depth under a tree connector, patching by key with focus and identity kept, the product's
  * order, the roving keyboard, choosing, the current lane, and the group's name and trace column.
  */

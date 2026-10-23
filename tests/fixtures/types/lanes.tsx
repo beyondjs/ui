@@ -1,4 +1,4 @@
-/** Declarations of 0.22.0's Lanes in React. */
+/** Declarations of 0.27.0's Lanes in React. */
 import { createRef } from 'react';
 import { Lanes } from '@beyond-js/ui/react';
 import type { LanesHandle } from '@beyond-js/ui/react';
