@@ -40,12 +40,12 @@ It confirmed that Vite awaits an asynchronous `configResolved`, that a successfu
 - Unit suite: 785 of 785 (`npm test`), including `opening-recovery.test.mjs`. It covers what each failure means, the page's own scripts, the one reload by itself, and what each state offers in both languages, with Reload waiting for the connection. It also covers a document another version drew, an install noticed once npm's record follows it, and an installed copy in a scratch `node_modules`. That copy's development server builds its document from what is installed, keeps following after a restart that failed, and leaves alone a server that never listened.
 - Declarations: `npm run types` passes.
 - Opening acceptance (`npm run acceptance:opening`): 20 of 20 in each of Chrome, Firefox and WebKit, `acceptance/opening-failures.mjs` among them. A product that throws and then moves anyway (`revived.js`) is checked offline and back.
-- A real development server: Vite 6.4.3 in a scratch application with the package installed from its archive. Installing another copy under the running server logged that it was restarting, forced the dependencies' preparation and served the installed document from the same process, about 2 s after the install ended. A second install restarted it once more; an install of an unrelated package did not.
+- A real development server: Vite 6.4.3 in a scratch application with the package installed from its archive. Installing another copy under the running server logged that it was restarting, forced the dependencies' preparation and served the installed document from the same process, about 2 s after the install ended. A second install restarted it once more, and an install of an unrelated package did not. Repeated on this release's archive: started on 0.25.0, an install of a copy marked 0.25.1-check restarted it, and it served that copy's document.
 
 ## Artifact
 
 - Archive: `dist-pack/beyond-ui-0.25.0.tgz`, packed from the release commit.
-- SHA-256: SHA.
-- Integrity: INTEGRITY.
+- SHA-256: `98ddc9f295883a530ccbd1a5c7a7b5d85356c8d65e68b27db41eafcd591a78c1`.
+- Integrity: `sha512-NX9m1rSFXNgKqnQVXGKaYrZDxWMXiNXTR2e9C2dadDxtR0VCZZ3c3z1XclXrVmVxCXBrxuevcya/eucz73X2mw==`.
 
 Not run: screen readers, a hosted product, the products' own adoption (each product's record), the owner's review.
