@@ -1,5 +1,6 @@
 import { el, content } from './core/element.js';
 import { glyph } from './core/icons.js';
+import { steps, words } from '../opening/words.js';
 import { Labels } from './core/labels.js';
 import { TechnicalDetails } from './operations/details.js';
 
@@ -86,3 +87,12 @@ loading.text = ({ name, kind = 'loading', language = 'en' }) => {
 	const names = loading.names[language] ?? loading.names.en;
 	return new Labels(names).text(kind in names ? kind : 'loading', { name });
 };
+
+/**
+ * The words of a step of opening (0.21.0), the same the document's opening says for it: `session`
+ * ("Confirming your session…"), `signin` ("Signing you in with Beyond Accounts…") or `projects`
+ * ("Connecting Beyond Projects…"). A product's initial waiting element names its step with
+ * `data-bui-opening-wait="<step>"` and shows these words.
+ */
+loading.step = ({ step, language = 'en' }) => (steps.includes(step) ? `${words[language === 'es' ? 'es' : 'en'][step]}…` : (loading.labels[language] ?? loading.labels.en));
+loading.steps = steps;

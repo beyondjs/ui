@@ -143,6 +143,8 @@ export function Skeleton({ lines = 3, rows = lines, kind = 'lines' }) {
 Loading.labels = loading.labels;
 Loading.names = loading.names;
 Loading.text = loading.text;
+Loading.step = loading.step;
+Loading.steps = loading.steps;
 // The words of the states and their tones, as on the DOM `Status` (0.15.0).
 Status.labels = Shape.labels;
 Status.states = Shape.states;

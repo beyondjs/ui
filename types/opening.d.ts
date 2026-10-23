@@ -13,6 +13,7 @@ export interface OpeningOptions {
 /** Static document adapter for servers that do not use a bundler. */
 export class OpeningDocument {
 	constructor(options: OpeningOptions);
+	/** The opening's words in both languages, its steps' included (0.21.0). */
 	static readonly labels: Readonly<Record<'en' | 'es', Readonly<Record<string, string>>>>;
 	readonly files: Map<string, string | Uint8Array>;
 	readonly script: { defer: true; src: string; 'data-opening': string };

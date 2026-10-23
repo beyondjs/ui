@@ -268,11 +268,11 @@ export function status(label: Content, tone?: Tone | 'progress'): HTMLElement;
 export function badge(label: Content, tone?: Tone): HTMLElement;
 export function callout(options: { tone?: Exclude<Tone, 'neutral'>; title: Content; body?: Content | null; actions?: Node[]; live?: boolean; /** 0.15.0, D43 */ details?: import('./family.js').FailureDetails | null }): HTMLElement;
 export function loading(label?: string): HTMLElement;
-/** The default label in English and Spanish (0.7.2), and the named lines (0.7.6). */
+/** The default label in English and Spanish (0.7.2), the named lines (0.7.6) and a step of opening's words, as the document's opening says it, with the steps a product may name on its initial waiting element (0.21.0). */
 export namespace loading {
 	const labels: { readonly en: string; readonly es: string };
 	const names: { readonly en: Readonly<Record<'loading' | 'opening' | 'reading', string>>; readonly es: Readonly<Record<'loading' | 'opening' | 'reading', string>> };
-	function text(options: { name: string; kind?: 'loading' | 'opening' | 'reading'; language?: 'en' | 'es' }): string;
+	function text(options: { name: string; kind?: 'loading' | 'opening' | 'reading'; language?: 'en' | 'es' }): string; function step(options: { step: 'session' | 'signin' | 'projects'; language?: 'en' | 'es' }): string; const steps: readonly ['session', 'signin', 'projects'];
 }
 /** `skeleton(3)`, or since 0.15.0 `skeleton({ rows, kind })` in the shape of what comes. */
 export function skeleton(shape?: number | { rows?: number; kind?: 'lines' | 'list' | 'table' }): HTMLElement;

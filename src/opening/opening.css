@@ -1,39 +1,105 @@
-/* The first document paint: one quiet, precise identity and an honest state, without fake progress. */
+/* The first document paint (0.21.0): the product's identity and a live trace; past a quick opening, its
+   steps with their times; when it cannot simply wait, what happened and the way on. One left edge for
+   every part, the product hidden behind it until it hands over. Tokens only. */
 .bui-opening {
+	--bui-opening-height: 32px;
 	position: fixed;
 	inset: 0;
 	z-index: 2147483646;
 	display: grid;
-	place-items: center;
-	align-items: safe center;
+	justify-items: center;
+	align-content: start;
 	overflow: auto;
 	box-sizing: border-box;
-	padding: var(--space-6);
-	background: var(--color-canvas);
+	/* The identity stays where it first painted, a little above the middle; what is said later grows below it. */
+	padding: max(var(--space-8), calc(38vh - var(--bui-opening-height))) var(--space-4) var(--space-8);
 	color: var(--color-text);
 	font: var(--weight-regular) var(--text-body)/var(--leading-body) var(--font-sans);
 }
 .bui-opening * { box-sizing: border-box; }
-.bui-opening-panel { width: min(100%, 26rem); display: grid; gap: var(--space-6); }
-.bui-opening-brand { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); }
-.bui-opening-brand img { display: block; width: 120px; height: 30px; object-fit: contain; }
-.bui-opening-name { font: var(--weight-regular) var(--text-title-2)/var(--leading-title-2) var(--font-brand); }
-.bui-opening-signal { display: grid; grid-template-columns: 16px minmax(0, 1fr); align-items: center; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--color-border-strong); }
 .bui-opening p { margin: 0; overflow-wrap: anywhere; }
-.bui-opening-status { color: var(--color-text-muted); }
-.bui-opening-slow { display: none; }
-.bui-opening[data-state='slow'] .bui-opening-wait { display: none; }
-.bui-opening[data-state='slow'] .bui-opening-slow { display: inline; }
-.bui-opening-recovery { display: grid; gap: var(--space-4); }
+.bui-opening[data-state='leaving'] { pointer-events: none; }
+/* The surface: the canvas, and in the dark appearance a faint light around the identity in the colour of
+   work in progress (in the light one the same mix would read as a shadow). Same selectors as the tokens'. */
+.bui-opening { --bui-opening-glow: transparent; }
+:root[data-beyond-mode='dark'] .bui-opening { --bui-opening-glow: color-mix(in srgb, var(--color-info) 8%, transparent); }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-beyond-mode='light']) .bui-opening { --bui-opening-glow: color-mix(in srgb, var(--color-info) 8%, transparent); }
+}
+.bui-opening-veil { position: fixed; inset: 0; background: radial-gradient(44rem 24rem at 50% 38%, var(--bui-opening-glow), transparent 72%), var(--color-canvas); }
+.bui-opening-stage { position: relative; width: min(100%, 26rem); display: grid; gap: var(--space-5); }
+
+/* The family lockup, larger: the wordmark, the divider and the name in the brand face, in the bar's proportions. */
+.bui-opening-lockup { display: flex; align-items: center; gap: calc(var(--bui-opening-height) * 0.38); min-width: 0; line-height: 1; }
+.bui-opening-wordmark { display: block; flex: none; width: auto; height: var(--bui-opening-height); }
+.bui-opening-divider { flex: none; width: 1px; height: calc(var(--bui-opening-height) * 0.714); background: color-mix(in srgb, currentColor 45%, transparent); translate: 0 calc(var(--bui-opening-height) * -0.0555); }
+.bui-opening-name { font-family: var(--font-brand); font-size: calc(var(--bui-opening-height) * 0.714); font-weight: var(--weight-medium); white-space: nowrap; translate: 0 calc(var(--bui-opening-height) * -0.02); }
+/* As the family lockup's name (header.css): where text-box trimming exists, the name's box is its cap
+   height, so the box that moves into the bar is the box it lands on. */
+@supports (text-box: trim-both cap alphabetic) {
+	.bui-opening-name { text-box: trim-both cap alphabetic; padding-block: calc(var(--bui-opening-height) * 0.107); translate: 0 calc(var(--bui-opening-height) * -0.0555); }
+}
+
+/* The trace: work without a known end, as the family's indeterminate band (Awaited), in the colour of work in progress. */
+.bui-opening-trace { position: relative; height: 1px; background: var(--color-border-strong); clip-path: inset(-12px 0); }
+.bui-opening-trace::after { content: ''; position: absolute; top: -0.5px; left: 0; width: 34%; height: 2px; border-radius: var(--radius-round); background: linear-gradient(90deg, transparent, var(--color-info) 62%, color-mix(in srgb, var(--color-info) 40%, var(--color-text)) 88%, transparent); filter: drop-shadow(0 0 5px var(--color-info)); animation: bui-opening-travel 1.8s cubic-bezier(0.45, 0, 0.25, 1) infinite; }
+.bui-opening:is([data-state='failed'], [data-state='offline']) .bui-opening-trace::after { display: none; }
+@keyframes bui-opening-travel { from { transform: translateX(-100%); } to { transform: translateX(265%); } }
+
+/* The one announced line, for assistive technology: what is seen is the steps and the recovery. */
+.bui-opening-status { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* The steps, each with the family's mark for its state (D129) and its time in tabular figures. */
+.bui-opening-steps { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; font-size: var(--text-small); line-height: var(--leading-small); animation: bui-opening-in var(--motion-standard) var(--motion-ease); }
+.bui-opening-steps[hidden] { display: none; }
+.bui-opening-step { display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-3); color: var(--color-text-muted); }
+.bui-opening-step:not([data-state='done']) { color: var(--color-text); }
+.bui-opening-label { min-width: 0; overflow-wrap: anywhere; }
+.bui-opening-time { color: var(--color-text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bui-opening-step[data-late] .bui-opening-time { color: var(--color-text); }
+.bui-opening-dot { width: 9px; height: 9px; border-radius: var(--radius-round); }
+.bui-opening-step[data-state='done'] .bui-opening-dot { background: var(--color-success); }
+.bui-opening-step[data-state='active'] .bui-opening-dot { border: 1.5px solid var(--color-info); background: linear-gradient(to right, var(--color-info) 50%, transparent 50%); animation: bui-opening-pulse 1.2s ease-in-out 4; }
+.bui-opening-step[data-state='late'] .bui-opening-dot { border-radius: 1px; background: var(--color-warning); transform: rotate(45deg) scale(0.85); }
+.bui-opening-step[data-state='failed'] .bui-opening-dot { border-radius: 2px; background: var(--color-danger); }
+@keyframes bui-opening-pulse { 50% { opacity: 0.4; } }
+@keyframes bui-opening-in { from { opacity: 0; } }
+
+/* When it cannot simply wait: what happened, the way on and the details to copy. */
+.bui-opening-recovery { display: grid; gap: var(--space-3); justify-items: start; padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
 .bui-opening-recovery[hidden] { display: none; }
-.bui-opening-note, .bui-opening-help { color: var(--color-text-muted); font-size: var(--text-small); }
-.bui-opening button { justify-self: start; padding: var(--space-2) var(--space-4); min-height: 44px; border: 1px solid var(--color-border-control); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text); font: inherit; cursor: pointer; }
-.bui-opening button:focus-visible, .bui-opening summary:focus-visible { outline: 2px solid var(--color-action); outline-offset: 3px; }
-.bui-opening summary { cursor: pointer; min-height: 44px; display: list-item; align-content: center; }
+.bui-opening-heading { font-size: var(--text-title-3); line-height: var(--leading-title-3); font-weight: var(--weight-semibold); }
+.bui-opening-note { color: var(--color-text-muted); font-size: var(--text-small); }
+.bui-opening button { display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--space-4); border: 1px solid var(--color-border-control); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: var(--text-small); font-weight: var(--weight-medium); cursor: pointer; }
+.bui-opening .bui-opening-reload { border-color: transparent; background: var(--color-action); color: var(--color-on-action); }
+.bui-opening .bui-opening-reload:hover { background: var(--color-action-hover); }
+.bui-opening button:focus-visible, .bui-opening summary:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.bui-opening-details { width: 100%; color: var(--color-text-muted); font-size: var(--text-small); }
+.bui-opening-details summary { min-height: 44px; display: list-item; align-content: center; cursor: pointer; }
+.bui-opening-details[open] { display: grid; gap: var(--space-2); justify-items: start; }
+.bui-opening-text { width: 100%; margin: 0; padding: var(--space-3); border-radius: var(--radius-control); background: var(--color-surface-sunken); color: var(--color-text); font: var(--text-label)/var(--leading-small) var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; user-select: all; }
+.bui-opening-said:empty { display: none; }
+
+/* Shown by the stylesheet alone, after 15 s, only when the controller never ran to remove it. */
+.bui-opening-fallback { color: var(--color-text-muted); font-size: var(--text-small); visibility: hidden; animation: bui-opening-fallback 0s linear 15s forwards; }
+@keyframes bui-opening-fallback { to { visibility: visible; } }
+.bui-opening noscript p { font-size: var(--text-small); }
+.bui-opening:has(noscript p) :is(.bui-opening-trace, .bui-opening-status, .bui-opening-fallback) { display: none; }
+
 .bui-opening [lang='es'] { display: none; }
 :root:lang(es) .bui-opening [lang='en'] { display: none; }
 :root:lang(es) .bui-opening [lang='es'] { display: inline; }
-.bui-opening-noscript { display: none; }
-/* Neither the state mark nor the surface moves, including under reduced motion. */
 
-.bui-opening:has(noscript p) .bui-opening-signal { display: none; }
+@media (max-width: 30rem) {
+	.bui-opening { --bui-opening-height: 26px; }
+}
+/* Nothing moves under reduced motion: the trace is a still, dashed band, as the family's indeterminate one. */
+@media (prefers-reduced-motion: reduce) {
+	.bui-opening-trace { background: repeating-linear-gradient(to right, var(--color-info) 0 var(--space-2), transparent var(--space-2) var(--space-4)); }
+	.bui-opening-trace::after { display: none; }
+	.bui-opening-steps, .bui-opening-step .bui-opening-dot { animation: none; }
+}
+@media (forced-colors: active) {
+	.bui-opening-trace, .bui-opening-dot { forced-color-adjust: none; background: CanvasText; }
+	.bui-opening-trace::after { display: none; }
+}

@@ -24,7 +24,7 @@ class Build {
 		writeFileSync(`${directory}tokens.css`, `${new TokenSheet(tokens).css}\n`);
 		writeFileSync(`${directory}tokens.json`, `${JSON.stringify(tokens, null, '\t')}\n`);
 		writeFileSync(`${directory}styles.css`, this.styles);
-		buildSync({ entryPoints: [fileURLToPath(new URL('src/opening/runtime.js', this.#root))], bundle: true, format: 'iife', target: 'es2022', outfile: `${directory}opening.js` });
+		buildSync({ entryPoints: [fileURLToPath(new URL('src/opening/runtime.js', this.#root))], bundle: true, minify: true, format: 'iife', target: 'es2022', outfile: `${directory}opening.js` });
 		console.log(`Built tokens ${tokens.version} (${tokens.status}) and ${Build.order.length} component stylesheets into dist/`);
 	}
 

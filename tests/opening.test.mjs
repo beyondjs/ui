@@ -12,17 +12,31 @@ test('the opening is in the document, escaped, localized and independent of the 
 	assert.deepEqual(Object.keys(OpeningDocument.labels.en), Object.keys(OpeningDocument.labels.es));
 	const snapshot = opening.files; snapshot.clear();
 	assert.ok(opening.files.size > 0, 'a consumer cannot clear the document’s asset state');
-	assert.match(html, /&lt;Example&gt;/);
-	assert.match(html, /Abriendo…/);
+	assert.match(html, /<span class="bui-opening-name">&lt;Example&gt;<\/span>/);
+	assert.match(html, /<span lang="es">Abriendo &lt;Example&gt;<\/span>/, 'the one announced line names the product in both languages');
 	assert.match(html, /Enable JavaScript/);
 	assert.match(html, /<script defer src="\/opening-[a-f0-9]+\.js"/);
 	assert.ok(html.indexOf('data-opening=') < html.indexOf('type="module"'));
 	assert.ok(html.indexOf('id="bui-opening"') < html.indexOf('id="root"'));
 	const css = [...opening.files].find(([name]) => name.endsWith('.css'))[1];
-	assert.match(css, /visibility: hidden/);
+	assert.match(css, /:not\(\[data-state='leaving'\]\)\) > :not\(#bui-opening\)[^{]*\{ visibility: hidden; \}/, 'the product stays hidden until the hand-over starts');
 	const tokens = readFileSync(new URL('../dist/tokens.css', import.meta.url), 'utf8');
 	const own = readFileSync(new URL('../src/opening/opening.css', import.meta.url), 'utf8');
-	for (const [, name] of own.matchAll(/var\((--[^)]+)\)/g)) assert.ok(tokens.includes(`${name}:`), `${name} is a canonical token`);
+	for (const [, name] of own.matchAll(/var\((--[^),]+)/g)) assert.ok(tokens.includes(`${name}:`) || own.includes(`${name}:`), `${name} is a canonical token or the opening's own property`);
+});
+
+test('the opening says nothing it cannot back: no help without a cause, a fallback only for a controller that never ran (0.21.0)', () => {
+	const html = new OpeningDocument({ product: 'Conduict', key: 'fixture', logo }).render(source);
+	assert.doesNotMatch(html, /Trouble opening|No se abre|Use your browser to reload/, 'no standing help that says nothing');
+	assert.match(html, /data-opening-fallback><span lang="en">Conduict hasn’t opened\. Reload this page to try again\.<\/span>/);
+	assert.match(html, /<ol class="bui-opening-steps" data-opening-steps aria-hidden="true" hidden><\/ol>/, 'the steps are drawn by the controller, hidden from assistive technology');
+	assert.match(html, /data-opening-recovery hidden>/, 'recovery waits for a cause');
+	assert.match(html, /<span lang="en">Technical details<\/span>/);
+	assert.equal((html.match(/role="status"/g) ?? []).length, 1, 'one announced line');
+	const css = readFileSync(new URL('../src/opening/opening.css', import.meta.url), 'utf8');
+	assert.match(css, /\.bui-opening-fallback \{[^}]*visibility: hidden; animation: bui-opening-fallback 0s linear 15s forwards;/);
+	assert.match(css, /prefers-reduced-motion: reduce[\s\S]*\.bui-opening-trace::after \{ display: none; \}/, 'nothing travels under reduced motion');
+	assert.doesNotMatch(css, /text-transform/);
 });
 
 test('Vite includes only explicitly selected application documents and emits every referenced asset', () => {

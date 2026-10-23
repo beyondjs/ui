@@ -1,14 +1,12 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
+import { words } from './words.js';
 
 /** Produces the shared, self-contained opening document and assets without weakening a host's CSP. */
 export class OpeningDocument {
-	/** All document copy in the two supported product languages. */
-	static labels = Object.freeze({
-		en: Object.freeze({ opening: 'Opening…', slow: 'Opening hasn’t finished', note: 'You can reload this page, or wait here for it to finish.', reload: 'Reload', trouble: 'Trouble opening?', help: 'Use your browser to reload this page. If you are offline, reconnect first.', disabled: 'Enable JavaScript in your browser to open this product.' }),
-		es: Object.freeze({ opening: 'Abriendo…', slow: 'La apertura no ha terminado', note: 'Puedes volver a cargar la página o esperar aquí a que termine.', reload: 'Volver a cargar', trouble: '¿No se abre?', help: 'Vuelve a cargar esta página desde tu navegador. Si no tienes conexión, reconéctate primero.', disabled: 'Activa JavaScript en tu navegador para abrir este producto.' })
-	});
+	/** All document copy in the two supported product languages (0.21.0: the opening's own words and its steps). */
+	static labels = words;
 
 	#specs;
 	#files = new Map();
@@ -22,8 +20,9 @@ export class OpeningDocument {
 		for (const name of readdirSync(fonts)) if (/\.(woff2|txt)$/.test(name)) this.#files.set(`opening-fonts/${name}`, readFileSync(new URL(name, fonts)));
 		const faces = readFileSync(new URL('fonts.css', fonts), 'utf8').replaceAll("url('./", "url('./opening-fonts/");
 		const tokens = readFileSync(new URL('../../dist/tokens.css', import.meta.url), 'utf8');
-		const style = readFileSync(new URL('./opening.css', import.meta.url), 'utf8') + readFileSync(new URL('../styles/signal.css', import.meta.url), 'utf8');
-		const hidden = 'body:has(> #bui-opening) > :not(#bui-opening):not(script):not(style):not(link)';
+		const style = readFileSync(new URL('./opening.css', import.meta.url), 'utf8');
+		// The product stays hidden behind the opening until it hands over (`leaving`), then shows at once
+		const hidden = "body:has(> #bui-opening:not([data-state='leaving'])) > :not(#bui-opening):not(script):not(style):not(link)";
 		this.#add('css', `${faces}\n${tokens}\n${style}\n${hidden} { visibility: hidden; }`);
 		this.#add('js', readFileSync(new URL('../../dist/opening.js', import.meta.url)));
 		this.#add('svg', readFileSync(logo));
@@ -42,24 +41,36 @@ export class OpeningDocument {
 		return String(value).replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 	}
 
+	/** A line in both languages; the stylesheet shows the document's */
+	#say(key) {
+		const fill = text => OpeningDocument.#escape(text.replaceAll('{product}', this.#specs.product));
+		return `<span lang="en">${fill(words.en[key])}</span><span lang="es">${fill(words.es[key])}</span>`;
+	}
+
 	/** Files keyed by host-relative path. Hosts serve them as CSS, JavaScript, SVG and fonts. */
 	get files() { return new Map(this.#files); }
 
 	/** Bootstrap attributes for a build adapter that controls final script ordering. */
 	get script() { return { defer: true, src: this.#url('js'), 'data-opening': encodeURIComponent(JSON.stringify(this.#specs)) }; }
 
-	/** Inserts before the application's modules; session landings must be excluded by the caller. */
+	/**
+	 * Inserts before the application's modules; session landings must be excluded by the caller. The
+	 * identity and the trace paint first; the steps, the recovery and their words are drawn by the
+	 * controller, and the last line shows by itself only when the controller never ran.
+	 */
 	render(html) {
-		const escape = OpeningDocument.#escape;
-		const words = key => `<span lang="en">${escape(OpeningDocument.labels.en[key])}</span><span lang="es">${escape(OpeningDocument.labels.es[key])}</span>`;
+		const say = key => this.#say(key);
 		const settings = encodeURIComponent(JSON.stringify(this.#specs));
 		const head = `<link rel="stylesheet" href="${this.#url('css')}" data-bui-opening><script defer src="${this.#url('js')}" data-opening="${settings}"></script>`;
-		const body = `<div id="bui-opening" class="bui-opening"><div class="bui-opening-panel">
-<div class="bui-opening-brand"><img src="${this.#url('svg')}" alt="Beyond" width="120" height="30"><span class="bui-opening-name">${escape(this.#specs.product)}</span></div>
-<div class="bui-opening-signal"><span class="bui-opening-mark" aria-hidden="true"></span><p class="bui-opening-status" role="status" data-opening-status><span class="bui-opening-wait">${words('opening')}</span><span class="bui-opening-slow">${words('slow')}</span></p></div>
-<div class="bui-opening-recovery" data-opening-recovery hidden><p class="bui-opening-note">${words('note')}</p><button type="button">${words('reload')}</button></div>
-<details class="bui-opening-help"><summary>${words('trouble')}</summary><p>${words('help')}</p></details>
-<noscript><p>${words('disabled')}</p></noscript>
+		const body = `<div id="bui-opening" class="bui-opening" data-state="opening"><div class="bui-opening-veil"></div><div class="bui-opening-stage">
+<div class="bui-opening-lockup"><img class="bui-opening-wordmark" src="${this.#url('svg')}" alt="Beyond" width="120" height="30"><span class="bui-opening-divider" aria-hidden="true"></span><span class="bui-opening-name">${OpeningDocument.#escape(this.#specs.product)}</span></div>
+<div class="bui-opening-trace" aria-hidden="true"></div>
+<p class="bui-opening-status" role="status" data-opening-status>${say('opening')}</p>
+<ol class="bui-opening-steps" data-opening-steps aria-hidden="true" hidden></ol>
+<div class="bui-opening-recovery" data-opening-recovery hidden><p class="bui-opening-heading" data-opening-heading></p><p class="bui-opening-note" data-opening-note></p><button type="button" class="bui-opening-reload" data-opening-reload>${say('reload')}</button>
+<details class="bui-opening-details"><summary>${say('details')}</summary><pre class="bui-opening-text" data-opening-text></pre><button type="button" class="bui-opening-copy" data-opening-copy>${say('copy')}</button><p class="bui-opening-said" data-opening-said aria-live="polite"></p></details></div>
+<p class="bui-opening-fallback" data-opening-fallback>${say('fallback')}</p>
+<noscript><p>${say('disabled')}</p></noscript>
 </div></div>`;
 		return html.replace(/<script\b|<\/head>/i, match => head + match).replace(/(<body[^>]*>)/i, `$1${body}`);
 	}
