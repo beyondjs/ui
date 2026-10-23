@@ -20,3 +20,5 @@ Now `frame` left unset takes the DOM component's default: a box for every kind e
 ## Artifact
 
 - Archive: `dist-pack/beyond-ui-0.25.1.tgz`, packed from the release commit.
+- SHA-256: `282865583328ce5130e805f3b97cf6e8cd3d54e9f7d65dec92f90d10de8951d5`.
+- Integrity: `sha512-PMU7lZ5xnOmGACngPw2BcuYXQLcByHht1VS/xP+EIkGy/FS6Yd/OgpfAo+eEsXTXeyx94IkO1nTzBTTMCTs6Gw==`, the same as the archive the acceptance packed.
