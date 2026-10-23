@@ -48,6 +48,16 @@ DOM `Collection.Tools` constructs the same toolbar for a product that owns its o
 
 `Collection.Tools.labels.en` and `.es` contain the toolbar copy. Collection/table label overrides also accept these keys: `search`, `placeholder`, `tools`, `filters`, `filtered`, `remove`, `reset`, `erase`, `query`, `all` and `unknown`. DataTable's `clearFilters` labels its no-match reset of search and filters together. Preserve their interpolation tokens. Filters uses the catalog's `filter` glyph with its visible label; it does not extend the closed list of unlabeled controls. A product that has no search or filters supplies neither control; an icon must never imply an unsupported function.
 
+## List rules (0.21.1)
+
+The family's list rules (D162) add three behaviors to a collection's tools when `Collection` uses `presentation: 'list'`:
+
+- Down from the search moves the focus to the first row's name, wherever the toolbar is placed (L7). Up, Down, Home and End then move between the rows' names.
+- The search's words are marked in names the columns or `row` give as text (`Matches`, L8). A name given as a node is left as given.
+- The last page ends with one end line (`end`, L5). A filtered or searched list ends with it too; a page with more after it has none.
+
+Placement follows the rule L8: the page header's action region, before the page's own actions, when the list is the page; a section's heading line when the list is one of several or a tab. The Beyond Suite's `branding/docs/list-patterns.md` states every rule. A date or period filter has no shared kind yet.
+
 ## Verification scope
 
-Focused React checks cover external placement, target changes, StrictMode cleanup, restored filter state and current matching callbacks. Typed fixtures cover the DOM constructor, both collection getters, React outlets and filter-state contracts. These checks do not establish toolbar layout, focus-ring visibility or product browser acceptance.
+Focused React checks cover external placement, target changes, StrictMode cleanup, restored filter state and current matching callbacks. Typed fixtures cover the DOM constructor, both collection getters, React outlets and filter-state contracts. These checks do not establish toolbar layout, focus-ring visibility or product browser acceptance. `tests/list-rules.test.mjs` holds Down from the search, the arrow keys, marked matches and the end line in happy-dom; the browser check "a grouped list" measures the labels, marks, menu and end line in Chrome ([0.21.1](reviews/2026-10-23/release-0.21.1.md)).
