@@ -16,4 +16,6 @@ Evidence baseline: UI `d063a03` (0.24.0, an outage said once) plus this change, 
 
 ## Artifact
 
-To be recorded when the archive is packed.
+- Archive: `dist-pack/beyond-ui-0.24.1.tgz`, packed from the release commit.
+- SHA-256: `db9b4fe22c01de2ccbd8ea962e0800673dfc6ab782ba5147b859660a34385fc8`.
+- Integrity: `sha512-7ka31zZXVziEiPf/MEn0abplGyJwXAankuf9twJlqn2K8Ffk9qt4eqt4CY6fgfxNIuQAvCmyJVbcyblMEXeCoA==`.
