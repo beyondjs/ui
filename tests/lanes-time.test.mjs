@@ -17,13 +17,13 @@ beforeEach(() => page.reset());
 let at = start + 102_000;
 const clock = new ui.Clock({ now: () => at });
 const make = (options = {}) => new ui.Lanes({ label: 'Subagents of this turn', clock, locale: 'en', ...options }).mount(document.body);
-const lane = (lanes, key) => lanes.element.querySelector(`.bui-lane[data-key="${key}"]`);
+const lane = (lanes, key) => lanes.element.querySelector(`.bui-lanes-lane[data-key="${key}"]`);
 const span = lanes => Number(lanes.element.style.getPropertyValue('--bui-lanes-span'));
 const bar = (lanes, key) => {
-	const node = lane(lanes, key).querySelector('.bui-lane-bar');
-	return { from: Number(node.style.getPropertyValue('--bui-lane-from')), to: Number(node.style.getPropertyValue('--bui-lane-to')), open: node.hasAttribute('data-open'), hidden: node.hidden };
+	const node = lane(lanes, key).querySelector('.bui-lanes-bar');
+	return { from: Number(node.style.getPropertyValue('--bui-lanes-from')), to: Number(node.style.getPropertyValue('--bui-lanes-to')), open: node.hasAttribute('data-open'), hidden: node.hidden };
 };
-const time = (lanes, key) => lane(lanes, key).querySelector('.bui-lane-time').textContent.replace(/^, /, '');
+const time = (lanes, key) => lane(lanes, key).querySelector('.bui-lanes-time').textContent.replace(/^, /, '');
 const pointer = target => target.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
 
 test('a tick writes only the live lanes\' times and bars; the clock is heard only while a lane is live', () => {
@@ -42,8 +42,8 @@ test('a tick writes only the live lanes\' times and bars; the clock is heard onl
 	const live = ['explore', 'plan', 'index', 'fix'];
 	for (const record of records) {
 		const node = record.target.nodeType === 3 ? record.target.parentNode : record.target;
-		const owner = node.closest('.bui-lane')?.dataset.key;
-		const allowed = (live.includes(owner) && (node.closest('.bui-lane-time') || node.matches('.bui-lane-bar'))) || node === lanes.element;
+		const owner = node.closest('.bui-lanes-lane')?.dataset.key;
+		const allowed = (live.includes(owner) && (node.closest('.bui-lanes-time') || node.matches('.bui-lanes-bar'))) || node === lanes.element;
 		assert.ok(allowed, `a tick touched ${record.type} of ${node.className} in ${owner}`);
 		assert.notEqual(record.type, 'childList', 'no node is replaced');
 	}
@@ -98,7 +98,7 @@ test('once every lane ended the axis ends at the last end; a lane whose end is n
 	assert.deepEqual(bar(lanes, 'b'), { from: 10_000, to: 125_000, open: false, hidden: false });
 	assert.deepEqual(bar(lanes, 'c'), { from: 20_000, to: 20_000, open: true, hidden: false });
 	assert.equal(bar(lanes, 'd').hidden, true, 'no start, no bar');
-	assert.equal(lane(lanes, 'c').querySelector('.bui-lane-time').hidden, true, 'no end, no duration');
+	assert.equal(lane(lanes, 'c').querySelector('.bui-lanes-time').hidden, true, 'no end, no duration');
 	assert.equal(lane(lanes, 'd').hasAttribute('aria-describedby'), false, 'no start, no description');
 	lanes.update({ lanes: [{ key: 'z', state: 'done', title: 'Z' }] });
 	assert.equal(span(lanes), 60_000, 'nothing to measure: a minute, never nothing');
@@ -110,7 +110,7 @@ test('the trace\'s tooltip says when a lane started and how long it ran, kept cu
 	const lanes = make();
 	lanes.update({ lanes: crew() });
 	assert.equal(document.querySelectorAll('.bui-tooltip').length, 0, 'no tooltip before anyone points');
-	pointer(lane(lanes, 'explore').querySelector('.bui-lane-trace'));
+	pointer(lane(lanes, 'explore').querySelector('.bui-lanes-trace'));
 	const tip = document.querySelector('.bui-tooltip');
 	assert.equal(tip.textContent, 'Started 10:42:05 · 1 min 42 s so far');
 	assert.equal(tip.getAttribute('aria-hidden'), 'true', 'the lane\'s own words say it to assistive technology');
@@ -118,9 +118,9 @@ test('the trace\'s tooltip says when a lane started and how long it ran, kept cu
 	at = start + 104_000;
 	clock.tick();
 	assert.equal(tip.textContent, 'Started 10:42:05 · 1 min 44 s so far', 'a tick keeps a shown tooltip current');
-	pointer(lane(lanes, 'map').querySelector('.bui-lane-trace'));
+	pointer(lane(lanes, 'map').querySelector('.bui-lanes-trace'));
 	assert.equal(document.querySelectorAll('.bui-tooltip')[1].textContent, 'Started 10:42:05 · ran 1 min 35 s');
-	const title = lane(lanes, 'plan').querySelector('.bui-lane-title');
+	const title = lane(lanes, 'plan').querySelector('.bui-lanes-title');
 	Object.defineProperty(title, 'scrollWidth', { value: 240, configurable: true });
 	Object.defineProperty(title, 'clientWidth', { value: 100, configurable: true });
 	pointer(lane(lanes, 'plan'));
@@ -135,14 +135,14 @@ test('Spanish: the description, the trace\'s words, the units, the state words a
 	const items = crew().map(({ stateLabel, ...item }) => item);
 	lanes.update({ lanes: [...items, { key: 'yesterday', state: 'done', title: 'Ayer', since: start - 86_400_000, until: start - 86_000_000 }] });
 	assert.equal(lanes.element.getAttribute('aria-label'), 'Trabajo en paralelo');
-	const words = key => lane(lanes, key).querySelector('.bui-lane-head > .bui-hidden').textContent;
+	const words = key => lane(lanes, key).querySelector('.bui-lanes-head > .bui-hidden').textContent;
 	assert.deepEqual(['explore', 'map', 'fix', 'bench'].map(words), ['En curso', 'Hecho', 'En espera', 'Falló']);
 	const said = key => document.getElementById(lane(lanes, key).getAttribute('aria-describedby')).textContent;
 	assert.equal(said('explore'), 'Empezó a las 10:42:05');
 	assert.match(said('yesterday'), /^Empezó el 22 oct\.?,? 10:42:05$/);
-	pointer(lane(lanes, 'map').querySelector('.bui-lane-trace'));
+	pointer(lane(lanes, 'map').querySelector('.bui-lanes-trace'));
 	assert.equal(document.querySelector('.bui-tooltip').textContent, 'Empezó a las 10:42:05 · duró 1 min 35 s');
-	pointer(lane(lanes, 'explore').querySelector('.bui-lane-trace'));
+	pointer(lane(lanes, 'explore').querySelector('.bui-lanes-trace'));
 	assert.equal(document.querySelectorAll('.bui-tooltip')[1].textContent, 'Empezó a las 10:42:05 · 1 min 42 s hasta ahora');
 	assert.deepEqual(Object.keys(ui.Lanes.labels.es), Object.keys(ui.Lanes.labels.en));
 	assert.match(ui.Lanes.labels.en.started({ time: '22 Oct, 10:42:05', day: true }), /^Started 22 Oct/);
@@ -154,17 +154,18 @@ const rule = selector => [...sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([,
 
 test('the stylesheet: subgrid rows, a container query for two lines below 40rem, tabular figures and still marks', () => {
 	assert.match(rule('.bui-lanes'), /container:\s*bui-lanes \/ inline-size/);
-	assert.match(rule('.bui-lane'), /grid-template-columns:\s*subgrid/);
-	assert.match(rule('.bui-lane'), /grid-column:\s*1 \/ -1/);
+	assert.match(rule('.bui-lanes-lane'), /grid-template-columns:\s*subgrid/);
+	assert.match(rule('.bui-lanes-lane'), /grid-column:\s*1 \/ -1/);
 	const narrow = /@container bui-lanes \(width < 40rem\)\s*\{([\s\S]*?)\n\}/.exec(sheet)?.[1] ?? '';
-	assert.match(narrow, /\.bui-lane-kind,\s*\.bui-lane-trace\s*\{\s*display:\s*none/, 'no kind and no trace below 40rem');
+	assert.match(narrow, /\.bui-lanes-kind,\s*\.bui-lanes-trace\s*\{\s*display:\s*none/, 'no kind and no trace below 40rem');
 	assert.match(narrow, /grid-template-rows:\s*repeat\(2, minmax\(1lh, auto\)\)/, 'two lines, each one line high whatever it holds');
-	assert.match(narrow, /\.bui-lane-now,\s*\.bui-lane-facts\s*\{\s*grid-row:\s*2/);
-	assert.match(rule('.bui-lane .bui-lane-mark .bui-status-dot'), /animation:\s*none/, 'a mark never pulses (LOAD-01)');
-	for (const selector of ['.bui-lane-time', '.bui-lane-facts']) assert.match(rule(selector), /font-variant-numeric:\s*tabular-nums/, selector);
-	assert.match(rule('.bui-lane-bar'), /var\(--bui-lane-from, 0\) \/ var\(--bui-lanes-span\)/, 'bars placed by custom properties');
-	assert.match(rule('.bui-lane[aria-current=\'true\']'), /--color-surface-selected/);
-	assert.match(rule('.bui-lane:focus-visible'), /outline:\s*2px solid var\(--color-focus\)/);
+	assert.match(narrow, /\.bui-lanes-now,\s*\.bui-lanes-facts\s*\{\s*grid-row:\s*2/);
+	assert.match(rule('.bui-lanes-lane .bui-lanes-mark .bui-status-dot'), /animation:\s*none/, 'a mark never pulses (LOAD-01)');
+	for (const selector of ['.bui-lanes-time', '.bui-lanes-facts']) assert.match(rule(selector), /font-variant-numeric:\s*tabular-nums/, selector);
+	assert.match(rule('.bui-lanes-bar'), /var\(--bui-lanes-from, 0\) \/ var\(--bui-lanes-span\)/, 'bars placed by custom properties');
+	assert.match(rule('.bui-lanes-lane[aria-current=\'true\']'), /--color-surface-selected/);
+	assert.match(rule('.bui-lanes-lane:focus-visible'), /outline:\s*2px solid var\(--color-focus\)/);
 	const own = readFileSync(new URL('../src/styles/lanes.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
 	assert.doesNotMatch(own, /transition|@keyframes|animation:(?!\s*none)/, 'nothing in the lanes moves by itself');
+	assert.doesNotMatch(own, /\.bui-lane(?![s\w])/, 'the thread template\'s lane classes (.bui-lane, .bui-lane-wide, D96) are not restyled here');
 });

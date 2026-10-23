@@ -29,17 +29,17 @@ export class Lane {
 
 	#key;
 	#element;
-	#mark = el('span', { class: 'bui-lane-mark bui-status', 'aria-hidden': 'true' }, [el('span', { class: 'bui-status-dot' })]);
+	#mark = el('span', { class: 'bui-lanes-mark bui-status', 'aria-hidden': 'true' }, [el('span', { class: 'bui-status-dot' })]);
 	#word = el('span', { class: 'bui-hidden' });
-	#title = el('span', { class: 'bui-lane-title' });
-	#kind = el('span', { class: 'bui-lane-kind', hidden: true });
-	#now = el('span', { class: 'bui-lane-now' });
-	#time = el('span', { class: 'bui-lane-time', hidden: true });
+	#title = el('span', { class: 'bui-lanes-title' });
+	#kind = el('span', { class: 'bui-lanes-kind', hidden: true });
+	#now = el('span', { class: 'bui-lanes-now' });
+	#time = el('span', { class: 'bui-lanes-time', hidden: true });
 	#elapsed = document.createTextNode('');
-	#facts = el('span', { class: 'bui-lane-facts', hidden: true });
-	#trace = el('span', { class: 'bui-lane-trace', 'aria-hidden': 'true' });
-	#bar = el('span', { class: 'bui-lane-bar', hidden: true });
-	#start = el('span', { id: Ids.next('bui-lane-start'), hidden: true });
+	#facts = el('span', { class: 'bui-lanes-facts', hidden: true });
+	#trace = el('span', { class: 'bui-lanes-trace', 'aria-hidden': 'true' });
+	#bar = el('span', { class: 'bui-lanes-bar', hidden: true });
+	#start = el('span', { id: Ids.next('bui-lanes-start'), hidden: true });
 	#labels;
 	#words;
 	#clock;
@@ -67,8 +67,8 @@ export class Lane {
 		this.#clock = now;
 		this.#time.append(separator(), this.#elapsed);
 		this.#trace.append(this.#bar);
-		const head = el('span', { class: 'bui-lane-head' }, [this.#mark, this.#word, this.#title]);
-		this.#element = el('button', { type: 'button', class: 'bui-lane', tabindex: '-1', dataset: { key } }, [head, this.#kind, this.#now, this.#time, this.#facts, this.#trace, this.#start]);
+		const head = el('span', { class: 'bui-lanes-head' }, [this.#mark, this.#word, this.#title]);
+		this.#element = el('button', { type: 'button', class: 'bui-lanes-lane', tabindex: '-1', dataset: { key } }, [head, this.#kind, this.#now, this.#time, this.#facts, this.#trace, this.#start]);
 		this.#name = new LaneTip(this.#element, { focus: true, text: () => this.#whole(), when: () => this.cut && !this.#tip.shown });
 		this.#tip = new LaneTip(this.#trace, {
 			text: () => this.#words.trace(this.times, this.#clock()),
@@ -176,7 +176,7 @@ export class Lane {
 		if (state === this.#state) return;
 		this.#state = state;
 		const tone = Status.tone(marks[state]);
-		this.#mark.className = `bui-lane-mark bui-status bui-status-${tone}`;
+		this.#mark.className = `bui-lanes-mark bui-status bui-status-${tone}`;
 		this.#element.dataset.state = state;
 		this.#element.dataset.tone = tone;
 	}
@@ -198,7 +198,7 @@ export class Lane {
 		this.#facts.replaceChildren(
 			...items.map(fact => {
 				const { text, label } = typeof fact === 'object' ? fact : { text: fact, label: null };
-				return el('span', { class: 'bui-lane-fact' }, [separator(), String(text), said(label) ? el('span', { class: 'bui-hidden', text: ` ${label}` }) : null]);
+				return el('span', { class: 'bui-lanes-fact' }, [separator(), String(text), said(label) ? el('span', { class: 'bui-hidden', text: ` ${label}` }) : null]);
 			})
 		);
 	}
@@ -214,7 +214,7 @@ export class Lane {
 	/** Its depth and the tree connector it hangs from. */
 	#hang(depth, branch, through) {
 		this.#element.dataset.depth = String(depth);
-		this.#element.style.setProperty('--bui-lane-depth', String(depth));
+		this.#element.style.setProperty('--bui-lanes-depth', String(depth));
 		if (branch) this.#element.dataset.branch = branch;
 		else delete this.#element.dataset.branch;
 		if (through.length) this.#element.dataset.through = through.join(' ');
@@ -225,7 +225,7 @@ export class Lane {
 	#set(name, value) {
 		if (this.#placed[name] === value) return;
 		this.#placed[name] = value;
-		this.#bar.style.setProperty(`--bui-lane-${name}`, String(value));
+		this.#bar.style.setProperty(`--bui-lanes-${name}`, String(value));
 	}
 
 	/** The words its name tooltip shows: the whole title, and the kind when that is cut too. */

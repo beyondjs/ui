@@ -15,7 +15,7 @@ beforeEach(() => page.reset());
 
 const clock = (at = start + 102_000) => new ui.Clock({ now: () => at });
 const make = (options = {}) => new ui.Lanes({ label: 'Subagents of this turn', clock: clock(), locale: 'en', ...options }).mount(document.body);
-const buttons = lanes => [...lanes.element.querySelectorAll('button.bui-lane')];
+const buttons = lanes => [...lanes.element.querySelectorAll('button.bui-lanes-lane')];
 
 test('a group named by its label holds one button per lane, in the given order, its cells in the shared columns', () => {
 	const lanes = make();
@@ -25,9 +25,9 @@ test('a group named by its label holds one button per lane, in the given order, 
 	const [first, second] = buttons(lanes);
 	assert.deepEqual(lanes.keys, ['explore', 'map', 'plan', 'index', 'fix', 'bench']);
 	assert.equal(first.type, 'button');
-	assert.deepEqual([...first.children].map(node => node.className), ['bui-lane-head', 'bui-lane-kind', 'bui-lane-now', 'bui-lane-time', 'bui-lane-facts', 'bui-lane-trace', '']);
-	assert.equal(first.querySelector('.bui-lane-mark').getAttribute('aria-hidden'), 'true', 'the mark is not read');
-	assert.equal(first.querySelector('.bui-lane-trace').getAttribute('aria-hidden'), 'true', 'the trace is not read');
+	assert.deepEqual([...first.children].map(node => node.className), ['bui-lanes-head', 'bui-lanes-kind', 'bui-lanes-now', 'bui-lanes-time', 'bui-lanes-facts', 'bui-lanes-trace', '']);
+	assert.equal(first.querySelector('.bui-lanes-mark').getAttribute('aria-hidden'), 'true', 'the mark is not read');
+	assert.equal(first.querySelector('.bui-lanes-trace').getAttribute('aria-hidden'), 'true', 'the trace is not read');
 	assert.equal(spoken(first), 'Working, Explore the auth module, Explore, Reading src/auth/session.ts, 1 min 42 s, 48k tokens', 'the state word first, then a sentence');
 	assert.equal(spoken(second), 'Finished, Map the payments API, Explore, Finished · 31 steps, 1 min 35 s, 61k');
 	const description = document.getElementById(first.getAttribute('aria-describedby'));
@@ -42,7 +42,7 @@ test('each state takes the shape and hue of a Status state, never pulsing; a mis
 	const lanes = make();
 	const states = ['running', 'waiting', 'done', 'failed', 'stopped', 'unknown', 'exploded'];
 	lanes.update({ lanes: states.map(state => ({ key: state, state, title: state, since: start })) });
-	const tones = buttons(lanes).map(button => [button.dataset.state, button.dataset.tone, button.querySelector('.bui-lane-mark').className.split(' ').at(-1)]);
+	const tones = buttons(lanes).map(button => [button.dataset.state, button.dataset.tone, button.querySelector('.bui-lanes-mark').className.split(' ').at(-1)]);
 	assert.deepEqual(tones, [
 		['running', 'progress', 'bui-status-progress'],
 		['waiting', 'attention', 'bui-status-attention'],
@@ -52,12 +52,12 @@ test('each state takes the shape and hue of a Status state, never pulsing; a mis
 		['unknown', 'unknown', 'bui-status-unknown'],
 		['unknown', 'unknown', 'bui-status-unknown']
 	]);
-	assert.deepEqual(buttons(lanes).map(button => button.querySelector('.bui-lane-head > .bui-hidden').textContent), ['Running', 'Waiting', 'Done', 'Failed', 'Stopped', 'Unknown', 'Unknown']);
+	assert.deepEqual(buttons(lanes).map(button => button.querySelector('.bui-lanes-head > .bui-hidden').textContent), ['Running', 'Waiting', 'Done', 'Failed', 'Stopped', 'Unknown', 'Unknown']);
 	assert.deepEqual([...ui.Lanes.states], ['running', 'waiting', 'done', 'failed', 'stopped', 'unknown']);
 	lanes.update({ lanes: [{ key: 'running', state: 'failed', stateLabel: 'Falló', title: 'running' }] });
 	const [only] = buttons(lanes);
 	assert.equal(only.dataset.tone, 'failure', 'a state patched in place');
-	assert.equal(only.querySelector('.bui-lane-head > .bui-hidden').textContent, 'Falló');
+	assert.equal(only.querySelector('.bui-lanes-head > .bui-hidden').textContent, 'Falló');
 	lanes.destroy();
 });
 
@@ -65,7 +65,7 @@ test('depth indents a lane under a tree connector: ├ while a sibling follows, 
 	const lanes = make();
 	const depths = [['a', 0], ['b', 1], ['c', 2], ['d', 1], ['e', 0], ['f', 7], ['g', -2], ['h', 'x']];
 	lanes.update({ lanes: depths.map(([key, depth]) => ({ key, depth, state: 'done', title: key })) });
-	const drawn = buttons(lanes).map(button => [button.dataset.key, button.dataset.depth, button.style.getPropertyValue('--bui-lane-depth'), button.dataset.branch ?? null, button.dataset.through ?? null]);
+	const drawn = buttons(lanes).map(button => [button.dataset.key, button.dataset.depth, button.style.getPropertyValue('--bui-lanes-depth'), button.dataset.branch ?? null, button.dataset.through ?? null]);
 	assert.deepEqual(drawn, [
 		['a', '0', '0', null, null],
 		['b', '1', '1', 'middle', null],
@@ -86,15 +86,15 @@ test('update patches by key: a lane that stays keeps its button and focus, a new
 	const lanes = make();
 	lanes.update({ lanes: crew() });
 	const before = buttons(lanes);
-	const title = before[1].querySelector('.bui-lane-title');
+	const title = before[1].querySelector('.bui-lanes-title');
 	before[1].focus();
 	const changed = crew().map(lane => (lane.key === 'map' ? { ...lane, now: 'Writing the report', facts: ['64k'] } : lane));
 	lanes.update({ lanes: [...changed, { key: 'late', state: 'running', title: 'A late subagent', since: start + 90_000 }] });
 	const after = buttons(lanes);
 	before.forEach((button, index) => assert.ok(after[index] === button, `lane ${index} kept its button`));
-	assert.ok(after[1].querySelector('.bui-lane-title') === title, 'an unchanged cell is not rewritten');
+	assert.ok(after[1].querySelector('.bui-lanes-title') === title, 'an unchanged cell is not rewritten');
 	assert.ok(document.activeElement === before[1], 'focus stays on the patched lane');
-	assert.equal(after[1].querySelector('.bui-lane-now').textContent, ', Writing the report');
+	assert.equal(after[1].querySelector('.bui-lanes-now').textContent, ', Writing the report');
 	assert.equal(after.at(-1).dataset.key, 'late', 'a new lane is appended in the order given');
 	lanes.update({ lanes: changed.filter(lane => lane.key !== 'map') });
 	assert.ok(document.activeElement === buttons(lanes)[1], 'a removed lane that held focus hands it to the lane now in its place');
@@ -108,7 +108,7 @@ test('the order is the product\'s, never sorted; keys are taken once and lanes w
 	assert.deepEqual(lanes.keys, ['bench', 'fix', 'index', 'plan', 'map', 'explore']);
 	lanes.update({ lanes: [{ key: 'b', title: 'B' }, null, { title: 'no key' }, { key: 'a', title: 'A' }, { key: 'b', title: 'again' }, { key: 3, title: 'three' }] });
 	assert.deepEqual(lanes.keys, ['b', 'a', '3']);
-	assert.equal(buttons(lanes)[0].querySelector('.bui-lane-title').textContent, ', B', 'the first lane of a key wins');
+	assert.equal(buttons(lanes)[0].querySelector('.bui-lanes-title').textContent, ', B', 'the first lane of a key wins');
 	lanes.destroy();
 });
 
@@ -142,7 +142,7 @@ test('pressing a lane calls choose with its key; focus(key) moves the roving foc
 	lanes.update({ lanes: crew() });
 	const all = buttons(lanes);
 	all[2].click();
-	all[2].querySelector('.bui-lane-title').click();
+	all[2].querySelector('.bui-lanes-title').click();
 	assert.deepEqual(chosen, [['plan', 'click'], ['plan', 'click']], 'a press anywhere on the lane');
 	assert.equal(lanes.focus('fix'), true);
 	assert.ok(document.activeElement === all[4]);

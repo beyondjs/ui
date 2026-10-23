@@ -192,7 +192,7 @@ export class Lanes extends Component {
 	}
 
 	#press(event) {
-		const button = event.target.closest?.('.bui-lane');
+		const button = event.target.closest?.('.bui-lanes-lane');
 		const lane = this.#sequence.find(item => item.element === button);
 		if (lane) this.#choose?.(lane.key, event);
 	}

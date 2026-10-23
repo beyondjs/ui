@@ -32,9 +32,9 @@
 	column-gap: var(--bui-lanes-gap);
 	margin-inline: calc(-1 * var(--bui-lanes-pad));
 }
-.bui-lane {
-	--bui-lane-line: 50%;
-	--bui-lane-reach: calc(50% + 0.5px);
+.bui-lanes-lane {
+	--bui-lanes-line: 50%;
+	--bui-lanes-reach: calc(50% + 0.5px);
 	position: relative;
 	display: grid;
 	grid-column: 1 / -1;
@@ -58,52 +58,52 @@
 	text-align: start;
 	cursor: pointer;
 }
-.bui-lane:not([aria-current='true']):hover {
+.bui-lanes-lane:not([aria-current='true']):hover {
 	background: var(--overlay-lift);
 }
-.bui-lane:active {
+.bui-lanes-lane:active {
 	background: var(--color-surface-sunken);
 }
 /* The lane whose detail is open: the selection's surface and its coral edge (C2) */
-.bui-lane[aria-current='true'] {
+.bui-lanes-lane[aria-current='true'] {
 	background: var(--color-surface-selected);
 	box-shadow: inset 2px 0 0 var(--color-accent);
 }
-.bui-lane[aria-current='true']:dir(rtl) {
+.bui-lanes-lane[aria-current='true']:dir(rtl) {
 	box-shadow: inset -2px 0 0 var(--color-accent);
 }
-.bui-lane:focus-visible {
+.bui-lanes-lane:focus-visible {
 	outline: 2px solid var(--color-focus);
 	outline-offset: -2px;
 }
-.bui-lane-head,
-.bui-lane-kind,
-.bui-lane-now,
-.bui-lane-time,
-.bui-lane-facts {
+.bui-lanes-head,
+.bui-lanes-kind,
+.bui-lanes-now,
+.bui-lanes-time,
+.bui-lanes-facts {
 	grid-row: 1;
 	min-width: 0;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
-.bui-lane-head {
+.bui-lanes-head {
 	grid-column: head;
 	display: flex;
 	align-items: flex-start;
 	gap: var(--space-2);
-	padding-inline-start: calc(var(--bui-lane-depth, 0) * var(--bui-lanes-indent));
+	padding-inline-start: calc(var(--bui-lanes-depth, 0) * var(--bui-lanes-indent));
 }
-.bui-lane-mark {
+.bui-lanes-mark {
 	flex: none;
 	justify-content: center;
 	width: var(--bui-lanes-mark);
 }
 /* Still: the shape says the state, the time says it lives (LOAD-01, D95) */
-.bui-lane .bui-lane-mark .bui-status-dot {
+.bui-lanes-lane .bui-lanes-mark .bui-status-dot {
 	animation: none;
 }
-.bui-lane-title {
+.bui-lanes-title {
 	flex: 1 1 auto;
 	min-width: 0;
 	overflow: hidden;
@@ -111,20 +111,20 @@
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
-.bui-lane-kind {
+.bui-lanes-kind {
 	grid-column: kind;
 	color: var(--color-text-muted);
 }
-.bui-lane-now {
+.bui-lanes-now {
 	grid-column: now;
 	color: var(--color-text-muted);
 }
-.bui-lane-time {
+.bui-lanes-time {
 	grid-column: time;
 	font-variant-numeric: tabular-nums;
 	text-align: end;
 }
-.bui-lane-facts {
+.bui-lanes-facts {
 	grid-column: facts;
 	display: flex;
 	justify-content: flex-end;
@@ -132,93 +132,93 @@
 	font-variant-numeric: tabular-nums;
 }
 /* The trace: a track the width of the axis and the lane's bar on it, placed by custom properties in
-   milliseconds (`--bui-lane-from`, `--bui-lane-to` against the block's `--bui-lanes-span`) */
-.bui-lane-trace {
+   milliseconds (`--bui-lanes-from`, `--bui-lanes-to` against the block's `--bui-lanes-span`) */
+.bui-lanes-trace {
 	grid-row: 1;
 	grid-column: trace;
 	position: relative;
 	height: 1lh;
 }
-.bui-lane-trace::before,
-.bui-lane-bar {
+.bui-lanes-trace::before,
+.bui-lanes-bar {
 	position: absolute;
 	top: calc(50% - 2px);
 	height: 4px;
 	border-radius: 2px;
 }
-.bui-lane-trace::before {
+.bui-lanes-trace::before {
 	content: '';
 	inset-inline: 0;
 	background: var(--color-border);
 }
 /* No trace column: no trace cell, which would otherwise take a column of its own */
-.bui-lanes:not([data-trace]) .bui-lane-trace {
+.bui-lanes:not([data-trace]) .bui-lanes-trace {
 	display: none;
 }
-.bui-lane-bar {
-	inset-inline-start: min(calc(100% - 4px), calc(var(--bui-lane-from, 0) / var(--bui-lanes-span) * 100%));
-	width: max(4px, calc((var(--bui-lane-to, 0) - var(--bui-lane-from, 0)) / var(--bui-lanes-span) * 100%));
+.bui-lanes-bar {
+	inset-inline-start: min(calc(100% - 4px), calc(var(--bui-lanes-from, 0) / var(--bui-lanes-span) * 100%));
+	width: max(4px, calc((var(--bui-lanes-to, 0) - var(--bui-lanes-from, 0)) / var(--bui-lanes-span) * 100%));
 	max-width: 100%;
 	background: var(--color-text-muted);
 }
-.bui-lane[data-tone='progress'] .bui-lane-bar {
+.bui-lanes-lane[data-tone='progress'] .bui-lanes-bar {
 	background: var(--color-info);
 }
-.bui-lane[data-tone='attention'] .bui-lane-bar {
+.bui-lanes-lane[data-tone='attention'] .bui-lanes-bar {
 	background: var(--color-warning);
 }
-.bui-lane[data-tone='success'] .bui-lane-bar {
+.bui-lanes-lane[data-tone='success'] .bui-lanes-bar {
 	background: var(--color-success);
 }
-.bui-lane[data-tone='failure'] .bui-lane-bar {
+.bui-lanes-lane[data-tone='failure'] .bui-lanes-bar {
 	background: var(--color-danger);
 }
-.bui-lane[data-tone='unknown'] .bui-lane-bar {
+.bui-lanes-lane[data-tone='unknown'] .bui-lanes-bar {
 	background: var(--color-border-strong);
 }
 /* The tree connector: ├ or └ from the parent's mark to the lane's own, and │ where a shallower level
    continues past the lane to a later sibling. Decoration only, under the lane's words. */
-.bui-lane[data-branch]::before,
-.bui-lane[data-through]::after {
+.bui-lanes-lane[data-branch]::before,
+.bui-lanes-lane[data-through]::after {
 	content: '';
 	position: absolute;
 	inset-block: 0;
 	pointer-events: none;
 }
-.bui-lane[data-branch]::before {
-	inset-inline-start: calc(var(--bui-lanes-pad) + (var(--bui-lane-depth, 1) - 1) * var(--bui-lanes-indent) + var(--bui-lanes-mark) / 2);
+.bui-lanes-lane[data-branch]::before {
+	inset-inline-start: calc(var(--bui-lanes-pad) + (var(--bui-lanes-depth, 1) - 1) * var(--bui-lanes-indent) + var(--bui-lanes-mark) / 2);
 	width: calc(var(--bui-lanes-indent) - var(--bui-lanes-mark) / 2 - 2px);
 	background:
-		var(--bui-lanes-guide) no-repeat left 0 top 0 / 1px var(--bui-lane-reach),
-		var(--bui-lanes-guide) no-repeat left 0 top var(--bui-lane-line) / 100% 1px;
+		var(--bui-lanes-guide) no-repeat left 0 top 0 / 1px var(--bui-lanes-reach),
+		var(--bui-lanes-guide) no-repeat left 0 top var(--bui-lanes-line) / 100% 1px;
 }
-.bui-lane[data-branch='middle']::before {
-	--bui-lane-reach: 100%;
+.bui-lanes-lane[data-branch='middle']::before {
+	--bui-lanes-reach: 100%;
 }
-.bui-lane[data-through]::after {
+.bui-lanes-lane[data-through]::after {
 	inset-inline-start: calc(var(--bui-lanes-pad) + var(--bui-lanes-mark) / 2);
 	width: calc(var(--bui-lanes-indent) + 1px);
 }
-.bui-lane[data-through='1']::after {
+.bui-lanes-lane[data-through='1']::after {
 	background: var(--bui-lanes-guide) no-repeat left 0 top 0 / 1px 100%;
 }
-.bui-lane[data-through='2']::after {
+.bui-lanes-lane[data-through='2']::after {
 	background: var(--bui-lanes-guide) no-repeat right 0 top 0 / 1px 100%;
 }
-.bui-lane[data-through='1 2']::after {
+.bui-lanes-lane[data-through='1 2']::after {
 	background:
 		var(--bui-lanes-guide) no-repeat left 0 top 0 / 1px 100%,
 		var(--bui-lanes-guide) no-repeat right 0 top 0 / 1px 100%;
 }
-.bui-lane[data-branch]:dir(rtl)::before {
+.bui-lanes-lane[data-branch]:dir(rtl)::before {
 	background:
-		var(--bui-lanes-guide) no-repeat right 0 top 0 / 1px var(--bui-lane-reach),
-		var(--bui-lanes-guide) no-repeat right 0 top var(--bui-lane-line) / 100% 1px;
+		var(--bui-lanes-guide) no-repeat right 0 top 0 / 1px var(--bui-lanes-reach),
+		var(--bui-lanes-guide) no-repeat right 0 top var(--bui-lanes-line) / 100% 1px;
 }
-.bui-lane[data-through='1']:dir(rtl)::after {
+.bui-lanes-lane[data-through='1']:dir(rtl)::after {
 	background: var(--bui-lanes-guide) no-repeat right 0 top 0 / 1px 100%;
 }
-.bui-lane[data-through='2']:dir(rtl)::after {
+.bui-lanes-lane[data-through='2']:dir(rtl)::after {
 	background: var(--bui-lanes-guide) no-repeat left 0 top 0 / 1px 100%;
 }
 /* Narrow: two lines a lane, the title and the time, then the live line under the title and the facts */
@@ -226,20 +226,20 @@
 	.bui-lanes-list {
 		grid-template-columns: [head now] minmax(0, 1fr) [time facts] minmax(5rem, max-content);
 	}
-	.bui-lane {
-		--bui-lane-line: calc(var(--space-1) + 0.5lh - 0.5px);
-		--bui-lane-reach: calc(var(--space-1) + 0.5lh + 0.5px);
+	.bui-lanes-lane {
+		--bui-lanes-line: calc(var(--space-1) + 0.5lh - 0.5px);
+		--bui-lanes-reach: calc(var(--space-1) + 0.5lh + 0.5px);
 		grid-template-rows: repeat(2, minmax(1lh, auto));
 	}
-	.bui-lane-kind,
-	.bui-lane-trace {
+	.bui-lanes-kind,
+	.bui-lanes-trace {
 		display: none;
 	}
-	.bui-lane-now,
-	.bui-lane-facts {
+	.bui-lanes-now,
+	.bui-lanes-facts {
 		grid-row: 2;
 	}
-	.bui-lane-now {
-		padding-inline-start: calc(var(--bui-lane-depth, 0) * var(--bui-lanes-indent) + var(--bui-lanes-mark) + var(--space-2));
+	.bui-lanes-now {
+		padding-inline-start: calc(var(--bui-lanes-depth, 0) * var(--bui-lanes-indent) + var(--bui-lanes-mark) + var(--space-2));
 	}
 }

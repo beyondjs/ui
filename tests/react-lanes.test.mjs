@@ -26,7 +26,7 @@ beforeEach(async () => {
 
 const clock = new dom.Clock({ now: () => start + 102_000 });
 const render = element => act(() => root.render(h(StrictMode, null, element)));
-const buttons = () => [...document.querySelectorAll('.bui-lanes button.bui-lane')];
+const buttons = () => [...document.querySelectorAll('.bui-lanes button.bui-lanes-lane')];
 
 test('Lanes under StrictMode: one block, lanes patched by content with their buttons and focus kept, the latest onChoose', async () => {
 	const chosen = [];
@@ -43,7 +43,7 @@ test('Lanes under StrictMode: one block, lanes patched by content with their but
 	const after = buttons();
 	before.forEach((button, index) => assert.ok(after[index] === button, `lane ${index} kept its button`));
 	assert.ok(document.activeElement === before[2], 'focus stays on the patched lane');
-	assert.equal(after[2].querySelector('.bui-lane-now').textContent, ', Reading db/schema.sql');
+	assert.equal(after[2].querySelector('.bui-lanes-now').textContent, ', Reading db/schema.sql');
 	assert.equal(document.querySelector('.bui-lanes').getAttribute('aria-label'), 'Subagentes de este turno', 'the label in place');
 	after[4].click();
 	assert.deepEqual(chosen, ['second:fix'], 'onChoose read from the latest props');

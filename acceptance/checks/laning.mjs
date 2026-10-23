@@ -16,7 +16,7 @@ const words = {
 
 async function open(browser, consumer, options = {}) {
 	const view = await browser.open(consumer, { file: 'lanes.html', viewport: { width: 1440, height: 900 }, ...options });
-	await view.page.waitForSelector('.fixture-marks .bui-lane');
+	await view.page.waitForSelector('.fixture-marks .bui-lanes-lane');
 	await view.page.evaluate(() => document.fonts.ready);
 	return view;
 }
@@ -30,11 +30,11 @@ const lanes = (page, block) =>
 			// Where its words start: past its padding (a narrow lane's live line is indented to the title's words)
 			return { left, right, top, bottom, width, height, words: left + Number.parseFloat(getComputedStyle(node).paddingLeft) };
 		};
-		return [...document.querySelectorAll(`${selector} .bui-lane`)].map(lane => ({
+		return [...document.querySelectorAll(`${selector} .bui-lanes-lane`)].map(lane => ({
 			key: lane.dataset.key,
 			depth: Number(lane.dataset.depth),
 			line: Number.parseFloat(getComputedStyle(lane).lineHeight),
-			...Object.fromEntries(['lane', 'head', 'mark', 'title', 'kind', 'now', 'time', 'facts', 'trace', 'bar'].map(part => [part, box(part === 'lane' ? lane : lane.querySelector(`.bui-lane-${part}`))]))
+			...Object.fromEntries(['lane', 'head', 'mark', 'title', 'kind', 'now', 'time', 'facts', 'trace', 'bar'].map(part => [part, box(part === 'lane' ? lane : lane.querySelector(`.bui-lanes-${part}`))]))
 		}));
 	}, block);
 
@@ -98,7 +98,7 @@ export const checks = [
 					);
 					expect(new Set(marks.map(mark => mark.shape)).size === 6, `${at}: six states, six marks: ${JSON.stringify(marks)}`);
 					expect(marks.every(mark => mark.moving === 0), `${at}: no mark moves (LOAD-01)`);
-					const bars = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.fixture-wide .bui-lane')].map(lane => [lane.dataset.state, getComputedStyle(lane.querySelector('.bui-lane-bar')).backgroundColor])));
+					const bars = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.fixture-wide .bui-lanes-lane')].map(lane => [lane.dataset.state, getComputedStyle(lane.querySelector('.bui-lanes-bar')).backgroundColor])));
 					expect(new Set(Object.values(bars)).size === 4, `${at}: running, done, waiting and failed bars in their own hues: ${JSON.stringify(bars)}`);
 					await shoot(page, browser, consumer, `${scheme}-${width}`);
 					await page.close();
@@ -129,7 +129,7 @@ export const checks = [
 			const boxes = async () => (await lanes(page, '.fixture-wide')).map(lane => ({ key: lane.key, lane: lane.lane, bar: lane.bar }));
 			const before = await boxes();
 			await page.evaluate(() => window.fixture.at(112_000));
-			await page.waitForFunction(() => document.querySelector('.fixture-wide .bui-lane[data-key="explore"] .bui-lane-time').textContent.includes('52'));
+			await page.waitForFunction(() => document.querySelector('.fixture-wide .bui-lanes-lane[data-key="explore"] .bui-lanes-time').textContent.includes('52'));
 			const after = await boxes();
 			const live = ['explore', 'plan', 'index', 'fix'];
 			for (const [index, lane] of after.entries()) {
@@ -143,11 +143,11 @@ export const checks = [
 			await page.evaluate(() => window.fixture.at(130_000));
 			await page.waitForFunction(() => getComputedStyle(document.querySelector('.fixture-wide .bui-lanes')).getPropertyValue('--bui-lanes-span').trim() === '300000');
 			await page.evaluate(() => window.fixture.say('Reading a very long path that a narrow column cuts: src/payments/providers/stripe/webhooks/handlers/refunds.ts'));
-			await page.waitForFunction(() => document.querySelector('.fixture-wide .bui-lane[data-key="plan"] .bui-lane-now').textContent.includes('refunds'));
+			await page.waitForFunction(() => document.querySelector('.fixture-wide .bui-lanes-lane[data-key="plan"] .bui-lanes-now').textContent.includes('refunds'));
 			const said = await boxes();
 			for (const [index, lane] of said.entries()) expect(JSON.stringify(lane.lane) === JSON.stringify(before[index].lane), `${lane.key} kept its box when a live line grew`);
 			await page.evaluate(() => window.fixture.add());
-			await page.waitForFunction(() => document.querySelectorAll('.fixture-wide .bui-lane').length === 7);
+			await page.waitForFunction(() => document.querySelectorAll('.fixture-wide .bui-lanes-lane').length === 7);
 			const added = await boxes();
 			for (const [index, lane] of before.entries()) expect(JSON.stringify(added[index].lane) === JSON.stringify(lane.lane), `${lane.key} stayed in place when a lane was appended`);
 			expect(added[6].key === 'summary' && added[6].lane.top >= before[5].lane.bottom - 0.5, 'the new lane is appended at the end');
@@ -170,20 +170,20 @@ export const checks = [
 			}
 			await page.keyboard.press('Enter');
 			await page.waitForFunction(() => window.fixture.chosen.includes('map'));
-			await page.waitForSelector('.fixture-wide .bui-lane[data-key="map"][aria-current="true"]');
+			await page.waitForSelector('.fixture-wide .bui-lanes-lane[data-key="map"][aria-current="true"]');
 			expect((await focused()) === 'fixture-wide:map', 'focus stays on the chosen lane once it is current');
 			await page.keyboard.press('ArrowDown');
 			await page.keyboard.press(' ');
 			await page.waitForFunction(() => window.fixture.chosen.includes('plan'));
 			await page.evaluate(() => window.fixture.at(105_000));
 			await page.evaluate(() => window.fixture.say('Writing the review'));
-			await page.waitForFunction(() => document.querySelector('.fixture-wide .bui-lane[data-key="plan"] .bui-lane-now').textContent.includes('review'));
+			await page.waitForFunction(() => document.querySelector('.fixture-wide .bui-lanes-lane[data-key="plan"] .bui-lanes-now').textContent.includes('review'));
 			expect((await focused()) === 'fixture-wide:plan', `focus survives a tick and a patch: ${await focused()}`);
 			await page.keyboard.press('Tab');
 			expect((await focused()) === 'fixture-narrow:plan', `Tab moves to the next block's current lane: ${await focused()}`);
-			const tabbable = await page.evaluate(() => document.querySelectorAll('.fixture-wide .bui-lane[tabindex="0"]').length);
+			const tabbable = await page.evaluate(() => document.querySelectorAll('.fixture-wide .bui-lanes-lane[tabindex="0"]').length);
 			expect(tabbable === 1, `one lane of a block in the tab order: ${tabbable}`);
-			await page.locator('.fixture-wide .bui-lane[data-key="explore"] .bui-lane-trace').hover();
+			await page.locator('.fixture-wide .bui-lanes-lane[data-key="explore"] .bui-lanes-trace').hover();
 			const tip = page.locator('.bui-tooltip:not([hidden])');
 			await tip.waitFor();
 			const shown = await tip.evaluate(node => ({ text: node.textContent, top: node.matches(':popover-open'), box: node.getBoundingClientRect().toJSON() }));
