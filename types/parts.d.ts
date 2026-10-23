@@ -101,11 +101,11 @@ export interface CollectionOptions<Row> {
 	explain?: ((error: unknown) => string) | null;
 	/** `list` (0.15.0, DQ-12): rows as `ListRow`s, two short lines on a phone. */
 	presentation?: 'table' | 'list';
-	/** 0.20.5 (D162): the list presentation's own `ListRow` options for a row, over the columns' */
+	/** 0.21.1 (D162): the list presentation's own `ListRow` options for a row, over the columns' */
 	row?: ((row: Row) => Partial<import('./patterns.js').ListRowOptions>) | null;
-	/** 0.20.5 (D162): consecutive rows under a label (`Recency` for a list ordered by activity) */
+	/** 0.21.1 (D162): consecutive rows under a label (`Recency` for a list ordered by activity) */
 	group?: ((row: Row) => { key: string; label: string }) | null;
-	/** 0.20.5 (D162): the list's end line on its last page; true the family's words, a function of the rows' count the product's, false none */
+	/** 0.21.1 (D162): the list's end line on its last page; true the family's words, a function of the rows' count the product's, false none */
 	end?: boolean | Content | ((list: { count: number }) => Content);
 	labels?: Copy;
 }
@@ -120,18 +120,18 @@ export class Collection<Row = Record<string, unknown>> extends Component {
 	load(): Promise<void>;
 }
 
-/** When something was last active, as a list ordered by activity groups it (0.20.5, D162). */
+/** When something was last active, as a list ordered by activity groups it (0.21.1, D162). */
 export class Recency {
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options?: { locale?: string; now?: () => number; labels?: Copy });
 	of(value: Date | number | string | null | undefined): { key: string; label: string };
 	group<Row>(moment: (row: Row) => Date | number | string | null | undefined): (row: Row) => { key: string; label: string };
 }
-/** The words a search matched, marked in a text (0.20.5, D162). */
+/** The words a search matched, marked in a text (0.21.1, D162). */
 export class Matches {
 	static mark(text: string, query: string | null | undefined): Array<string | HTMLElement>;
 }
-/** The arrow keys of a list of rows (0.20.5, D162): Up, Down, Home and End between the rows' names. */
+/** The arrow keys of a list of rows (0.21.1, D162): Up, Down, Home and End between the rows' names. */
 export class RowKeys {
 	constructor(list: HTMLElement);
 	first(): boolean;

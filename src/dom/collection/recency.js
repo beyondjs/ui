@@ -6,7 +6,7 @@ const words = Object.freeze({
 });
 
 /**
- * When something was last active, as a list ordered by activity groups it (0.20.5, the list rule L4):
+ * When something was last active, as a list ordered by activity groups it (0.21.1, the list rule L4):
  * Today, Yesterday, Previous 7 days, Previous 30 days, then by month ("September", "August 2025" outside
  * the current year), in calendar days of the person's own time zone. A moment ahead of the clock counts
  * as today; one that is not a moment as Earlier. `group(moment)` gives `Collection`'s `group` option.

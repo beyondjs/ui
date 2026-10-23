@@ -67,7 +67,7 @@ export const checks = [
 				const listing = document.getElementById('listing');
 				listing.style.width = '200px';
 				const edge = listing.getBoundingClientRect().right;
-				// The body hangs its rows' padding into the gutter (0.20.5, D159 and D162): it may pass the edge by that much, never more
+				// The body hangs its rows' padding into the gutter (0.21.1, D159 and D162): it may pass the edge by that much, never more
 				const hang = node => (node.classList.contains('bui-collection-body') ? Math.max(0, -parseFloat(getComputedStyle(node).marginRight)) : 0);
 				const outside = [...listing.querySelectorAll('.bui-collection, .bui-collection-tools, .bui-collection-filter, .bui-collection-body')].filter(node => node.getBoundingClientRect().right > edge + hang(node) + 0.5).map(node => node.className);
 				const body = listing.querySelector('.bui-collection-body');

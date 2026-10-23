@@ -1,5 +1,5 @@
 /**
- * The arrow keys of a list of the family's rows (0.20.5, the list rule L7): Up and Down move between the
+ * The arrow keys of a list of the family's rows (0.21.1, the list rule L7): Up and Down move between the
  * rows' names, Home and End reach the first and the last, and Enter opens the one in focus as its link
  * does. Tab still leaves the list; keys with a modifier keep their own meaning. A list a product draws
  * itself attaches it to the element that holds its rows; `Collection`'s list presentation does it.

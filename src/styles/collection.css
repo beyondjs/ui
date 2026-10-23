@@ -44,7 +44,7 @@
 	opacity: 0.6;
 }
 
-/* A table hangs into the gutter as a list's rows do (0.20.5, D159, P5): its first and last cells keep their
+/* A table hangs into the gutter as a list's rows do (0.21.1, D159, P5): its first and last cells keep their
    padding, so their words stay on the content edge while a hovered row's surface reaches past them. */
 .bui-table {
 	width: calc(100% + 2 * var(--space-3));

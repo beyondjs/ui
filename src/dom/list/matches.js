@@ -1,7 +1,7 @@
 import { el } from '../core/element.js';
 
 /**
- * The words a search matched, marked where they appear (0.20.5, the list rule L8): each word of the
+ * The words a search matched, marked where they appear (0.21.1, the list rule L8): each word of the
  * query, ignoring case and taken literally, in a `<mark class="bui-match">`. A list marks them in its
  * rows' names.
  */

@@ -1,4 +1,4 @@
-/* The family's list rules (0.20.5, D162). A row's lead sits on its name's line, so marks read down one
+/* The family's list rules (0.21.1, D162). A row's lead sits on its name's line, so marks read down one
    column at the names' height (L2). */
 .bui-row-lead {
 	align-self: flex-start;

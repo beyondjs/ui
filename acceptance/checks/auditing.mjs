@@ -125,7 +125,7 @@ export const checks = [
 		}
 	},
 	{
-		name: 'ListRow and DataTable rows share one geometry: the same hang, content edge, divider and hover (0.20.5, D159)',
+		name: 'ListRow and DataTable rows share one geometry: the same hang, content edge, divider and hover (0.21.1, D159)',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			for (const scheme of ['light', 'dark']) {
@@ -171,7 +171,7 @@ export const checks = [
 		}
 	},
 	{
-		name: 'a grouped list: each label on the content edge, each mark on its name\'s line, a menu shown only where the pointer rests or the focus is, and an end line on the edge (0.20.5, D162)',
+		name: 'a grouped list: each label on the content edge, each mark on its name\'s line, a menu shown only where the pointer rests or the focus is, and an end line on the edge (0.21.1, D162)',
 		consumers: ['dom'],
 		async run(browser, consumer) {
 			for (const scheme of ['light', 'dark']) {

@@ -21,7 +21,7 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 			new List({
 				label,
 				presentation,
-				// The list's own row options and groups (0.20.5) read the latest props
+				// The list's own row options and groups (0.21.1) read the latest props
 				row: row ? item => latest.current.row?.(item) ?? {} : null,
 				group: group ? item => latest.current.group(item) : null,
 				end,

@@ -1,6 +1,6 @@
 // The 0.15.0 audit page of the plain DOM consumer: Floating's menus against the sticky bar, in a box that
 // scrolls and at a composer's caret; a chip folded behind Options; Status, ListRow, DataTable, Tabs, a
-// sidebar count and a CommandCard; since 0.20.5 a grouped list with its rows' marks, menus and end line
+// sidebar count and a CommandCard; since 0.21.1 a grouped list with its rows' marks, menus and end line
 // (D162). window.fixture exposes them to the checks.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';

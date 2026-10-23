@@ -10,7 +10,7 @@ import { Matches } from '../list/matches.js';
  * so a list stays two short lines a row on a phone instead of a card of labels and values. With `link`
  * the row opens its detail; `onopen` takes over plain clicks as the table's links do.
  *
- * Since 0.20.5 (the family's list rules, D162): `row(row)` gives the row's own `ListRow` options over the
+ * Since 0.21.1 (the family's list rules, D162): `row(row)` gives the row's own `ListRow` options over the
  * columns' (its state's `lead`, its `meta` line, its `menu`); `group(row)` gives `{ key, label }` and
  * groups consecutive rows under a label, each group a list named by it (`Recency` for a list ordered by
  * activity); the search's words are marked in a name given as text; and the arrow keys move between rows.

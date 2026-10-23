@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Page } from './support/page.mjs';
 
 /**
- * The family's list rules (0.20.5, D162) in `Collection`'s list presentation: a row's own options over the
+ * The family's list rules (0.21.1, D162) in `Collection`'s list presentation: a row's own options over the
  * columns', consecutive rows grouped under their labels with each group a list it names, a search's words
  * marked in the names, the end line only on the last page, the arrow keys between rows and Down from the
  * search; `Recency` and `Matches` alone. Geometry is a browser's to prove (`acceptance/checks/auditing.mjs`).

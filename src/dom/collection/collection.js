@@ -56,10 +56,10 @@ export class Collection extends Component {
 	 * @param {(state: {query: string, filters: object, page: number}) => void} [options.onstate]
 	 * @param {{title: string, body?: string, action?: Node}} [options.empty] the empty collection
 	 * @param {() => void} [options.onrender] runs after each redraw of the rows (the React adapter fills cells then)
-	 * @param {(row: object) => object} [options.row] the list presentation's own `ListRow` options for a row (0.20.5)
-	 * @param {(row: object) => {key: string, label: string}} [options.group] groups consecutive rows under a label (0.20.5, `Recency`)
+	 * @param {(row: object) => object} [options.row] the list presentation's own `ListRow` options for a row (0.21.1)
+	 * @param {(row: object) => {key: string, label: string}} [options.group] groups consecutive rows under a label (0.21.1, `Recency`)
 	 * @param {boolean|string|Node|((list: {count: number}) => string|Node)} [options.end] the list's end line on its
-	 * last page (0.20.5): true (default) says the family's words, a text, node or function of how many rows the
+	 * last page (0.21.1): true (default) says the family's words, a text, node or function of how many rows the
 	 * list holds the product's, false none
 	 */
 	constructor(options) {
@@ -149,7 +149,7 @@ export class Collection extends Component {
 	}
 
 	/**
-	 * A list's end line on its last page (0.20.5, the list rule L5): it says the list is whole, so a short
+	 * A list's end line on its last page (0.21.1, the list rule L5): it says the list is whole, so a short
 	 * list never reads as one still loading, and where a pointer moves it, the keys that go through it
 	 */
 	#end(count) {
