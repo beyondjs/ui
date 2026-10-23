@@ -19,8 +19,14 @@ On 2026-10-23 the owner reviewed Conduict Home while Beyond Accounts was not ans
 
 - Unit suite: 777 of 777 (`npm test`), including the rewritten `tests/recovery.test.mjs`, `tests/outage-places.test.mjs` and the React forms under StrictMode in `tests/recovery-react.test.mjs`.
 - Declarations: `npm run types` passes with the fixtures `tests/fixtures/types/recovery.ts` and `.tsx`, one of which expects a `reason` to be refused.
-- Browser acceptance, installed from the packed archive: see below.
+- Browser acceptance, installed from the packed archive into the `dom`, `react19` (React 19.3.0) and `react18` (React 18.3.1) consumers: the new `checks/recovering.mjs` (the line on the H1's edge at 1440, 390 and 320 px in both themes, the places, the evidence fitting at 320 px, the page form measured against an `Unavailable` in the same column, Try again opening what answered with no reload, the Spanish page) 7 of 7, with the technical details and outage checks (6 and 4), in each of Chrome 155, Firefox and WebKit. The whole acceptance in Chrome passed 355 of 355 on the implementation before `EmptyState`'s `frame` option and the declaration files' split; those two changes were then checked by the unit suite, the declarations and the three engines' recovery, technical details and outage runs above.
 
 ## Artifact
 
-To be recorded when the archive is packed.
+- Archive: `dist-pack/beyond-ui-0.24.0.tgz`, packed from `b244f77`.
+- SHA-256: `49f293b16da4369008165035a2f4d46e4a5b21823cf3515564f384f7e4bb2f8b`.
+- Integrity: `sha512-BgFrz8/d/UJVGq5ilRb47WlhWYkAK3qON+in7ar93fp2HGPkcLie1vnGbcFw6XOLJ6eCZe6L7NcGZ1fvjVi0hQ==`.
+
+## Not done here
+
+Each product's adoption, the family reference's representation and the public documentation follow in their own repositories and are recorded there.
