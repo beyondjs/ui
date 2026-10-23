@@ -1,0 +1,5 @@
+/* The lanes pages (0.22.0): a wide block and the same crew in a box under 40rem, so its two-line form
+   shows at any window width. Layout only; the lanes' styles come from the package. */
+.fixture-narrow {
+	max-width: 30rem;
+}

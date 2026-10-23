@@ -31,7 +31,7 @@ test('a tick writes only the live lanes\' times and bars; the clock is heard onl
 	const lanes = make();
 	lanes.update({ lanes: crew() });
 	assert.equal(clock.size, 1, 'live lanes follow the clock');
-	assert.deepEqual(['explore', 'map', 'plan', 'index', 'fix', 'bench'].map(key => time(lanes, key)), ['1 min 42 s', '2 min 5 s', '58 s', '20 s', '33 s', '41 s']);
+	assert.deepEqual(['explore', 'map', 'plan', 'index', 'fix', 'bench'].map(key => time(lanes, key)), ['1 min 42 s', '1 min 35 s', '58 s', '20 s', '33 s', '41 s']);
 	const observer = new window.MutationObserver(() => {});
 	observer.observe(lanes.element, { subtree: true, childList: true, attributes: true, characterData: true });
 	at = start + 103_000;
@@ -48,7 +48,7 @@ test('a tick writes only the live lanes\' times and bars; the clock is heard onl
 		assert.notEqual(record.type, 'childList', 'no node is replaced');
 	}
 	assert.equal(time(lanes, 'explore'), '1 min 43 s');
-	assert.equal(time(lanes, 'map'), '2 min 5 s', 'an ended lane keeps its duration');
+	assert.equal(time(lanes, 'map'), '1 min 35 s', 'an ended lane keeps its duration');
 	assert.equal(bar(lanes, 'explore').to, 103_000);
 	lanes.update({ lanes: crew().map(item => ({ ...item, state: 'done', until: item.until ?? start + 103_000 })) });
 	assert.equal(clock.size, 0, 'nothing live: the clock is released');
@@ -75,6 +75,9 @@ test('while a lane is live the axis ends at the next whole step above the time r
 	lanes.update({ lanes: [{ key: 'a', state: 'running', title: 'A', since: start }, { key: 'b', state: 'waiting', title: 'B', since: start - 30_000 }] });
 	assert.equal(span(lanes), minutes(2), 'the axis starts at the earliest start: 75 s run');
 	assert.deepEqual([bar(lanes, 'b').from, bar(lanes, 'a').from, bar(lanes, 'a').to], [0, 30_000, 75_000]);
+	at = start + 50_000;
+	lanes.update({ lanes: [{ key: 'a', state: 'running', title: 'A', since: start }, { key: 'c', state: 'done', title: 'C', since: start, until: start + 70_000 }] });
+	assert.equal(span(lanes), minutes(2), 'an end reported past the page\'s now (a clock ahead) still fits on the axis');
 	lanes.destroy();
 });
 
@@ -116,7 +119,7 @@ test('the trace\'s tooltip says when a lane started and how long it ran, kept cu
 	clock.tick();
 	assert.equal(tip.textContent, 'Started 10:42:05 · 1 min 44 s so far', 'a tick keeps a shown tooltip current');
 	pointer(lane(lanes, 'map').querySelector('.bui-lane-trace'));
-	assert.equal(document.querySelectorAll('.bui-tooltip')[1].textContent, 'Started 10:42:05 · ran 2 min 5 s');
+	assert.equal(document.querySelectorAll('.bui-tooltip')[1].textContent, 'Started 10:42:05 · ran 1 min 35 s');
 	const title = lane(lanes, 'plan').querySelector('.bui-lane-title');
 	Object.defineProperty(title, 'scrollWidth', { value: 240, configurable: true });
 	Object.defineProperty(title, 'clientWidth', { value: 100, configurable: true });
@@ -138,7 +141,7 @@ test('Spanish: the description, the trace\'s words, the units, the state words a
 	assert.equal(said('explore'), 'Empezó a las 10:42:05');
 	assert.match(said('yesterday'), /^Empezó el 22 oct\.?,? 10:42:05$/);
 	pointer(lane(lanes, 'map').querySelector('.bui-lane-trace'));
-	assert.equal(document.querySelector('.bui-tooltip').textContent, 'Empezó a las 10:42:05 · duró 2 min 5 s');
+	assert.equal(document.querySelector('.bui-tooltip').textContent, 'Empezó a las 10:42:05 · duró 1 min 35 s');
 	pointer(lane(lanes, 'explore').querySelector('.bui-lane-trace'));
 	assert.equal(document.querySelectorAll('.bui-tooltip')[1].textContent, 'Empezó a las 10:42:05 · 1 min 42 s hasta ahora');
 	assert.deepEqual(Object.keys(ui.Lanes.labels.es), Object.keys(ui.Lanes.labels.en));

@@ -29,7 +29,7 @@ test('a group named by its label holds one button per lane, in the given order, 
 	assert.equal(first.querySelector('.bui-lane-mark').getAttribute('aria-hidden'), 'true', 'the mark is not read');
 	assert.equal(first.querySelector('.bui-lane-trace').getAttribute('aria-hidden'), 'true', 'the trace is not read');
 	assert.equal(spoken(first), 'Working, Explore the auth module, Explore, Reading src/auth/session.ts, 1 min 42 s, 48k tokens', 'the state word first, then a sentence');
-	assert.equal(spoken(second), 'Finished, Map the payments API, Explore, Finished · 31 steps, 2 min 5 s, 61k');
+	assert.equal(spoken(second), 'Finished, Map the payments API, Explore, Finished · 31 steps, 1 min 35 s, 61k');
 	const description = document.getElementById(first.getAttribute('aria-describedby'));
 	assert.equal(description.textContent, 'Started 10:42:05', 'the start is the lane\'s description');
 	assert.ok(description.hidden && first.contains(description));

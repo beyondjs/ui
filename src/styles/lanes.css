@@ -149,7 +149,11 @@
 .bui-lane-trace::before {
 	content: '';
 	inset-inline: 0;
-	background: var(--color-surface-sunken);
+	background: var(--color-border);
+}
+/* No trace column: no trace cell, which would otherwise take a column of its own */
+.bui-lanes:not([data-trace]) .bui-lane-trace {
+	display: none;
 }
 .bui-lane-bar {
 	inset-inline-start: min(calc(100% - 4px), calc(var(--bui-lane-from, 0) / var(--bui-lanes-span) * 100%));

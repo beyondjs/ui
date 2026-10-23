@@ -9,7 +9,7 @@ export const start = new Date(2026, 9, 23, 10, 42, 5).getTime();
 export function crew() {
 	return [
 		{ key: 'explore', state: 'running', stateLabel: 'Working', title: 'Explore the auth module', kind: 'Explore', now: 'Reading src/auth/session.ts', facts: [{ text: '48k', label: 'tokens' }], since: start },
-		{ key: 'map', state: 'done', stateLabel: 'Finished', title: 'Map the payments API', kind: 'Explore', now: 'Finished · 31 steps', facts: ['61k'], since: start, until: start + 125_000 },
+		{ key: 'map', state: 'done', stateLabel: 'Finished', title: 'Map the payments API', kind: 'Explore', now: 'Finished · 31 steps', facts: ['61k'], since: start, until: start + 95_000 },
 		{ key: 'plan', state: 'running', stateLabel: 'Working', title: 'Review the migration plan', kind: 'Plan', now: 'Searching "lease"', facts: [{ text: '22k', label: 'tokens' }], since: start + 44_000 },
 		{ key: 'index', depth: 1, state: 'running', stateLabel: 'Working', title: 'Check index usage', now: 'Running psql -c "explain …"', facts: ['8k'], since: start + 82_000 },
 		{ key: 'fix', state: 'waiting', stateLabel: 'Waiting for you', title: 'Fix the flaky test', now: 'Waiting for you · run npm test', facts: ['11k'], since: start + 69_000 },

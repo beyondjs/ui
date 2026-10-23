@@ -35,11 +35,14 @@ export class LaneAxis {
 		const starts = times.map(time => time.since).filter(since => since !== null);
 		this.#start = starts.length ? Math.min(...starts) : null;
 		if (this.#start === null) this.#span = LaneAxis.least;
-		else if (times.some(time => time.live)) this.#span = LaneAxis.step(now - this.#start);
 		else {
+			// An end reported past the page's now (a server's clock ahead of it) still fits on the axis
 			const ends = times.flatMap(time => [time.since, time.until]).filter(moment => moment !== null);
-			const span = Math.max(...ends) - this.#start;
-			this.#span = span > 0 ? span : LaneAxis.least;
+			if (times.some(time => time.live)) this.#span = LaneAxis.step(Math.max(now, ...ends) - this.#start);
+			else {
+				const span = Math.max(...ends) - this.#start;
+				this.#span = span > 0 ? span : LaneAxis.least;
+			}
 		}
 		return this.#span !== before;
 	}
