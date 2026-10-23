@@ -25,7 +25,7 @@ export function Page(props: { template?: PageTemplate; width?: PageWidth | null;
 /** The page's one header: crumbs, the H1, one status, facts, the line's actions and the tabs. */
 export function PageHeader(props: { title: ReactNode; crumbs?: Array<PageCrumb | null | false>; /** The object's kind or variant beside the H1: words or one control (0.19.1) */ kind?: ReactNode; status?: ReactNode; facts?: ReactNode; actions?: ReactNode; tabs?: ReactNode; headingRef?: Ref<HTMLHeadingElement> | null; labels?: { crumbs?: string }; /** The compact line on scroll, before the header (0.11.0) */ compact?: boolean | { actions?: ReactNode } | null }): ReactElement;
 /** A flat section: a heading, one description line, its actions and its content. */
-export function Section(props: { title: ReactNode; description?: ReactNode; actions?: ReactNode; level?: 2 | 3; /** 0.15.0 */ raised?: boolean; /** The body waits in this shape, the section busy (0.23.0, LOAD-01) */ waiting?: boolean | WaitingShape | null; children?: ReactNode }): ReactElement;
+export function Section(props: { title: ReactNode; description?: ReactNode; actions?: ReactNode; level?: 2 | 3; /** 0.15.0 */ raised?: boolean; /** The body waits in this shape, the section busy (0.23.0, LOAD-01) */ waiting?: boolean | WaitingShape | null; /** Its read did not answer: "Not available right now" in place (0.24.0, D163) */ unavailable?: boolean | { title?: string; text?: string | null; frame?: boolean; labels?: Copy } | null; /** The kept content's time, said above it (0.24.0) */ updated?: Moment | { time: Moment | null; locale?: string; labels?: Copy } | null; children?: ReactNode }): ReactElement;
 /** The arrival line (D54), driven by the DOM `Arrival`. */
 export function Arrival(props: { product: string; href: string; onDismiss?: (() => void) | null; onNavigate?: ((item: { href: string; url: string }, event: MouseEvent) => void) | null; labels?: Partial<ArrivalLabels> }): ReactElement;
 /** A resource's areas as tabs, driven by the DOM `Tabs`. */
@@ -174,6 +174,7 @@ export interface CollectionProps<Row> {
 	labels?: Copy;
 	/** `list` (0.15.0): rows as `ListRow`s */ presentation?: 'table' | 'list';
 	/** 0.21.1 (D162): the list's own `ListRow` options for a row, its groups and its end line */ row?: ((row: Row) => Partial<import('./patterns.js').ListRowOptions>) | null; group?: ((row: Row) => { key: string; label: string }) | null; end?: boolean | string | ((list: { count: number }) => string);
+	/** 0.24.0 (D163): the page's notice from `useRecovery`; a failure `outage` names joins it and the list says "Not available right now" in place */ recovery?: import('./again.js').Recovery | null; outage?: ((error: unknown) => boolean) | null; details?: ((error: unknown) => DetailsRecord | null) | null;
 }
 export function Collection<Row = Record<string, unknown>>(props: CollectionProps<Row>): ReactElement;
 
@@ -293,8 +294,5 @@ export * from './react-resource.js';
 export * from './react-shared.js';
 export * from './react-patterns.js';
 export * from './react-family.js';
+export * from './react-recovery.js';
 import type { FamilyBarProps } from './react-family.js';
-
-/** Labelled secondary refresh action; `busy` tracks the owning read. */
-export function RetryAction(props: { onClick?: ButtonProps['onClick']; labels?: Copy; busy?: boolean; small?: boolean; name?: string | null }): ReactElement;
-export namespace RetryAction { const labels: Copies; }

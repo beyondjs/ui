@@ -103,6 +103,7 @@ export const freshness = freeze({
 export const details = freeze({
 	en: {
 		summary: 'Technical details',
+		affected: 'Affected',
 		request: 'Request',
 		time: 'Time',
 		copy: 'Copy details',
@@ -111,6 +112,7 @@ export const details = freeze({
 	},
 	es: {
 		summary: 'Detalles técnicos',
+		affected: 'Afectado',
 		request: 'Solicitud',
 		time: 'Hora',
 		copy: 'Copiar detalles',

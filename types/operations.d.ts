@@ -31,6 +31,17 @@ export interface DetailsRecord {
 	text?: string;
 	request?: string | null;
 	time?: Moment | null;
+	/** The reads one incident affected, a row each under one disclosure (0.24.0, D163). */
+	entries?: DetailsEntry[];
+}
+
+/** One read an incident affected, in its Technical details (0.24.0). */
+export interface DetailsEntry {
+	/** What the read is ("Machines"). */
+	label: string;
+	text?: string;
+	request?: string | null;
+	time?: Moment | null;
 }
 
 export interface Step {

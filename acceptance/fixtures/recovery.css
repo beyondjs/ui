@@ -1,0 +1,12 @@
+/* The 0.24.0 recovery fixture: a page and its regions. Tokens only. */
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+}
+.recovery-kept {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}

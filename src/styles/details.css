@@ -109,6 +109,38 @@ details[open] > .bui-summary > .bui-icon {
 .bui-details-facts code {
 	font-family: var(--font-mono);
 }
+/* The reads one incident affected (0.24.0, D163): a row each, its request and time; long identifiers wrap. */
+.bui-details-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--text-small);
+	line-height: var(--leading-body);
+}
+.bui-details-table th,
+.bui-details-table td {
+	padding: 2px var(--space-3) 2px 0;
+	font-weight: var(--weight-regular);
+	text-align: start;
+	vertical-align: baseline;
+	overflow-wrap: anywhere;
+}
+.bui-details-table th:last-child,
+.bui-details-table td:last-child {
+	padding-inline-end: 0;
+}
+.bui-details-table thead th {
+	color: var(--color-text-muted);
+}
+.bui-details-table code {
+	font-family: var(--font-mono);
+}
+.bui-details-table time {
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.bui-details-said td {
+	padding-bottom: var(--space-2);
+}
 .bui-details-actions {
 	display: flex;
 	flex-wrap: wrap;

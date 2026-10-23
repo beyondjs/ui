@@ -8,6 +8,7 @@ import { Loader, local } from './loader.js';
 import { Table } from './table.js';
 import { CollectionRows } from './rows.js';
 import { ColumnFit } from './columns.js';
+import { CollectionOutage } from './outage.js';
 import { defaults, spanish } from './labels.js';
 
 /**
@@ -25,6 +26,11 @@ import { defaults, spanish } from './labels.js';
  * field whose placeholder names what it searches (its label is kept for assistive technology); and
  * `presentation: 'list'` draws the rows as `ListRow`s (the primary column the name, `end` columns at the
  * row's end, the others its muted line), which stay two short lines on a phone.
+ *
+ * Since 0.24.0 (D163) a read that did not answer joins the page's `Recovery` (`recovery`, with `outage`
+ * naming which failures are its cause and `details` their evidence): the list says "Not available right
+ * now" in its place with no Try again of its own, the notice reads it again, and it leaves the notice
+ * when it answers.
  */
 export class Collection extends Component {
 	static local = local;
@@ -44,6 +50,7 @@ export class Collection extends Component {
 	#paged = false;
 	#columns;
 	#rows = null;
+	#outage;
 
 	/**
 	 * @param {object} options
@@ -61,12 +68,16 @@ export class Collection extends Component {
 	 * @param {boolean|string|Node|((list: {count: number}) => string|Node)} [options.end] the list's end line on its
 	 * last page (0.21.1): true (default) says the family's words, a text, node or function of how many rows the
 	 * list holds the product's, false none
+	 * @param {import('../again/recovery.js').Recovery|null} [options.recovery] the page's notice for this read's cause (0.24.0)
+	 * @param {(error: unknown) => boolean} [options.outage] which failures are that cause's outage (0.24.0)
+	 * @param {(error: unknown) => object|null} [options.details] a failure's evidence for the notice (0.24.0)
 	 */
 	constructor(options) {
 		super();
 		const { label, source, search = true, filters = [], state = {}, labels = {} } = options;
 		this.#options = options;
 		this.#labels = new Labels(defaults, labels);
+		this.#outage = new CollectionOutage({ recovery: options.recovery ?? null, outage: options.outage ?? null, details: options.details ?? null, title: typeof label === 'string' ? label : this.#labels.text('outage'), words: this.#labels.text('outage') });
 		this.#loader = new Loader(source);
 		this.#state = { query: state.query ?? '', filters: { ...(state.filters ?? {}) }, page: Math.max(1, Number(state.page) || 1) };
 		this.#tools = new CollectionTools({ label, search, filters, state: this.#state, labels, compact: options.tools !== 'expanded', delay: options.delay ?? 250, onchange: state => this.#change(state) });
@@ -120,6 +131,7 @@ export class Collection extends Component {
 		if (result.stale || this.destroyed) return;
 		this.#region.setAttribute('aria-busy', 'false');
 		if (result.error) return this.#failed(result.error);
+		this.#outage.release();
 		const { rows = [], total = null, more = null } = result.answer ?? {};
 		const pages = total !== null ? Math.max(1, Math.ceil(total / limit)) : null;
 		if (!rows.length && this.#state.page > 1 && (pages === null || this.#state.page > pages)) return this.#go(pages ?? this.#state.page - 1);
@@ -142,6 +154,7 @@ export class Collection extends Component {
 
 	destroy() {
 		this.#loader.cancel();
+		this.#outage.release();
 		this.#rows?.destroy?.();
 		this.#columns.release();
 		this.#tools.destroy();
@@ -203,9 +216,11 @@ export class Collection extends Component {
 	}
 
 	#failed(error) {
+		// An outage of the page's cause is said once by its notice, which reads the list again; it answers by leaving it
+		const outage = this.#outage.takes(error);
 		const retry = el('button', { type: 'button', class: 'bui-button bui-button-secondary', onclick: () => this.load() }, [glyph('refresh'), el('span', { text: this.#labels.text('retry') })]);
-		const message = this.#options.explain?.(error) ?? this.#labels.text('failure');
-		fill(this.#region, [callout({ tone: 'danger', title: message, actions: [retry] })]);
+		const message = outage ? this.#labels.text('outage') : (this.#options.explain?.(error) ?? this.#labels.text('failure'));
+		fill(this.#region, [outage ? this.#outage.draw(error, async () => (await this.load(), false)) : callout({ tone: 'danger', title: message, actions: [retry] })]);
 		this.#columns.attach(null, this.#region);
 		fill(this.#pager, []);
 		this.#status.textContent = message;

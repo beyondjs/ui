@@ -177,12 +177,28 @@ export class Tabs extends Component {
 
 /** A flat section: a heading, one description line, its actions and its content. */
 export class Section extends Component {
-	constructor(options: { title: string | Node; description?: string | Node | null; actions?: Array<Node | { element: Node } | null>; children?: Node[]; level?: 2 | 3; /** A raised surface inside the page (0.15.0, C2) */ raised?: boolean; /** Starts waiting in this shape (0.23.0, LOAD-01) */ waiting?: true | number | WaitingShape | null });
+	constructor(options: { title: string | Node; description?: string | Node | null; actions?: Array<Node | { element: Node } | null>; children?: Node[]; level?: 2 | 3; /** A raised surface inside the page (0.15.0, C2) */ raised?: boolean; /** Starts waiting in this shape (0.23.0, LOAD-01) */ waiting?: true | number | WaitingShape | null; /** Starts unavailable (0.24.0, D163) */ unavailable?: true | SectionOutage | null; /** The kept content's time (0.24.0) */ updated?: SectionUpdate | null });
 	/** Replaces the content, ending a wait. */
 	children: Node[];
 	/** Waits in place: heading and actions kept, the body a `waiting(shape)`, `aria-busy` until `children` is set (0.23.0, LOAD-01). */
 	wait(shape?: number | WaitingShape): void;
+	/** Says in place that the read did not answer: "Not available right now", no action of its own (0.24.0, D163). */
+	unavailable(options?: SectionOutage): void;
+	/** When the kept content was read, said above it; null while it is current (0.24.0). */
+	updated: SectionUpdate | null;
 }
+
+/** What a section whose read did not answer says (0.24.0): `EmptyState`'s title, sentence and words. */
+export interface SectionOutage {
+	title?: string | Node;
+	text?: string | Node | null;
+	/** false inside a section that is framed already */
+	frame?: boolean;
+	labels?: Copy;
+}
+
+/** The time of content kept from an earlier read, or with its language and words; `{ time: null }` says it may be out of date (0.24.0). */
+export type SectionUpdate = import('./operations.js').Moment | { time: import('./operations.js').Moment | null; locale?: string; labels?: Copy };
 
 /** A region's wait (0.23.0, LOAD-01): an announced "Loading…" line and row-shaped placeholders on the region's raised frame (`frame: false` inside a framed region). */
 export function waiting(shape?: number | WaitingShape): HTMLElement;

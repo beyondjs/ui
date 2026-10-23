@@ -1,22 +1,36 @@
 import { Component } from '../core/component.js';
 import { Ids } from '../core/ids.js';
 import { el } from '../core/element.js';
+import { glyph } from '../core/icons.js';
+import { TechnicalDetails } from '../operations/details.js';
 import { Again } from './again.js';
 import { AgainLine } from './line.js';
 import { RetryAction } from './action.js';
-import { RecoveryEntry } from './entry.js';
 
 /**
- * One notice for one explicitly identified dependency and context. Products create separate
- * instances for independent failures. Entries are failed reads or lost transports, never writes.
- * Each symptom stays until its owner confirms an answer, including a refusal, or removes it.
+ * One outage of one explicitly identified dependency and context, said once (D163, 0.24.0): a line in
+ * the warning tone with who did not answer (`title`, from the family's catalog of causes, D133), when it
+ * last tried (D132) and one Try again (D101). It lists nothing: each read it affects says it is
+ * unavailable in its own place (`EmptyState`'s `outage`, `Section`'s `unavailable`), and the evidence of
+ * every read is one "Technical details" with a row per read. When nothing on the page could be read the
+ * product sets `whole`, and the notice is the page's body in `Unavailable`'s form instead of a line above
+ * empty regions.
+ *
+ * Products create separate instances for independent failures. Entries are failed reads or lost
+ * transports, never writes. Each symptom stays until its owner confirms an answer, including a refusal,
+ * or removes it.
  */
 export class Recovery extends Component {
 	#element;
-	#body;
-	#summary;
+	#title;
+	#words;
+	#status;
+	#details = null;
+	#evidence = '';
 	#entries = new Map();
-	#views = new Map();
+	#labels;
+	#locale;
+	#level;
 	#focus;
 	#again;
 	#line;
@@ -25,45 +39,88 @@ export class Recovery extends Component {
 	#running = null;
 	#manual = false;
 
-	/** `title` names the shared connection; every `run` must have its own request bound. */
-	constructor({ title, labels = {}, locale, again = {}, focus = null }) {
+	/**
+	 * @param {object} options
+	 * @param {string} options.title who did not answer ("Beyond Accounts did not answer")
+	 * @param {object} [options.labels] the words of Try again, the last-tried line and Technical details
+	 * @param {string} [options.locale] the language of times
+	 * @param {object} [options.again] `Again`'s options but `run`
+	 * @param {(() => HTMLElement|null)|null} [options.focus] where focus goes when the last symptom ends
+	 * @param {boolean} [options.whole] the page's body itself, when nothing on it could be read
+	 * @param {2|3|4|5|6} [options.level] the heading level of the page form (2)
+	 */
+	constructor({ title, labels = {}, locale = undefined, again = {}, focus = null, whole = false, level = 2 }) {
 		super();
+		this.#labels = labels;
+		this.#locale = locale;
+		this.#level = [2, 3, 4, 5, 6].includes(Number(level)) ? Number(level) : 2;
 		this.#focus = focus;
 		this.#again = new Again({ ...again, run: () => this.#read(this.#manual) });
 		this.#line = new AgainLine({ again: this.#again, labels, locale, now: again.now });
 		this.#action = new RetryAction({ labels, run: () => this.now() });
-		this.#body = el('div');
-		this.#summary = el('p', { class: 'bui-hidden', role: 'status' });
 		const id = Ids.next('bui-recovery');
-		this.#element = el('section', { class: 'bui-unavailable bui-unavailable-outage bui-callout-warning', 'data-recovery': '', 'aria-labelledby': id, hidden: true }, [
-			el('div', { class: 'bui-unavailable-body' }, [
-				el('h2', { id, class: 'bui-unavailable-title', text: title }), this.#summary, this.#body, this.#line.element,
-				el('div', { class: 'bui-unavailable-actions' }, [this.#action.element])
-			])
+		this.#title = el('p', { id, class: 'bui-recovery-title', text: title });
+		this.#words = el('div', { class: 'bui-recovery-words' }, [this.#title, this.#line.element]);
+		this.#status = el('p', { class: 'bui-hidden', role: 'status' });
+		this.#element = el('section', { class: 'bui-recovery', 'data-recovery': 'line', 'aria-labelledby': id, hidden: true }, [
+			el('span', { class: 'bui-recovery-mark', 'aria-hidden': 'true' }, [glyph('globe')]),
+			this.#words,
+			el('div', { class: 'bui-recovery-actions' }, [this.#action.element]),
+			this.#status
 		]);
-		this.#release = this.#again.listen(state => { this.#action.busy = state.trying || this.#running !== null; });
+		this.whole = whole;
+		this.#release = this.#again.listen(state => {
+			this.#action.busy = state.trying || this.#running !== null;
+		});
 	}
 
-	get element() { return this.#element; }
+	get element() {
+		return this.#element;
+	}
+
 	/** Number of affected reads or transports. */
-	get size() { return this.#entries.size; }
+	get size() {
+		return this.#entries.size;
+	}
+
+	/** Who did not answer. */
+	get title() {
+		return this.#title.textContent;
+	}
+
+	set title(value) {
+		const text = String(value ?? '');
+		if (this.#title.textContent === text) return;
+		this.#title.textContent = text;
+		this.#draw();
+	}
+
+	/** Whether it is the page's body (`Unavailable`'s form) rather than a line above the page's regions. */
+	get whole() {
+		return this.#element.dataset.recovery === 'page';
+	}
+
+	set whole(value) {
+		const whole = Boolean(value);
+		const tag = whole ? `h${this.#level}` : 'p';
+		if (this.#title.localName !== tag) {
+			const title = el(tag, { id: this.#title.id, class: 'bui-recovery-title', text: this.#title.textContent });
+			this.#title.replaceWith(title);
+			this.#title = title;
+		}
+		this.#element.dataset.recovery = whole ? 'page' : 'line';
+	}
 
 	/**
-	 * Adds or updates a symptom without resetting its retry schedule. `automatic: false` means the
-	 * transport already reconnects itself; the manual action still reconnects it. The callback returns
-	 * false or rejects until answered. Replacing an entry invalidates its previous pending answer.
+	 * Adds or updates a symptom without resetting its retry schedule: `title` names what could not be
+	 * read, in Technical details; `details` (`{ request, time, text }`) is its evidence. `automatic: false`
+	 * means the transport already reconnects itself; the manual action still reconnects it. The callback
+	 * returns false or rejects until answered. Replacing an entry invalidates its previous pending answer.
 	 */
-	set(key, { title, reason = '', details = null, run, automatic = true }) {
+	set(key, { title, details = null, run, automatic = true }) {
 		if (this.destroyed) return;
 		if (typeof run !== 'function') throw new TypeError('Recovery needs a bounded read');
-		const entry = { title, reason, details, run, automatic };
-		this.#entries.set(key, entry);
-		if (this.#views.has(key)) this.#views.get(key).update(entry);
-		else {
-			const view = new RecoveryEntry(entry);
-			this.#views.set(key, view);
-			this.#body.append(view.element);
-		}
+		this.#entries.set(key, { title, details, run, automatic });
 		this.#draw();
 		if ([...this.#entries.values()].some(entry => entry.automatic)) this.#again.start();
 		else this.#again.stop();
@@ -72,13 +129,11 @@ export class Recovery extends Component {
 	/** Removes only the symptom its owner confirmed, never every symptom on one success. */
 	delete(key) {
 		if (!this.#entries.delete(key)) return;
-		const view = this.#views.get(key);
 		const active = this.#element.ownerDocument.activeElement;
-		const focused = view.element.contains(active) || (!this.size && this.#element.contains(active));
-		view.destroy();
-		this.#views.delete(key);
+		const inside = this.#element.contains(active);
 		this.#draw();
-		if (focused) (this.size ? this.#action.element : this.#focus?.())?.focus({ preventScroll: true });
+		// Its evidence left with it, or the notice did: focus goes to Try again, else to the page
+		if (inside && (!this.size || !this.#element.contains(active))) (this.size ? this.#action.element : this.#focus?.())?.focus({ preventScroll: true });
 		if (![...this.#entries.values()].some(entry => entry.automatic)) this.#again.stop();
 	}
 
@@ -86,7 +141,9 @@ export class Recovery extends Component {
 	now() {
 		if (!this.#again.active) return this.#read(true);
 		this.#manual = true;
-		return this.#again.now().finally(() => { this.#manual = false; });
+		return this.#again.now().finally(() => {
+			this.#manual = false;
+		});
 	}
 
 	#read(manual) {
@@ -96,22 +153,46 @@ export class Recovery extends Component {
 		const reads = new Map();
 		this.#action.busy = true;
 		// Defer callbacks until the promise is installed: synchronous callbacks can ask to retry too.
-		this.#running = Promise.resolve().then(() => Promise.allSettled(entries.map(async ([key, entry]) => {
-			// Several symptoms may share one bounded page read. Invoke it only once per attempt.
-			if (!reads.has(entry.run)) reads.set(entry.run, Promise.resolve().then(() => entry.run()));
-			const answered = await reads.get(entry.run);
-			if (answered !== false && this.#entries.get(key) === entry) this.delete(key);
-		}))).then(() => ![...this.#entries.values()].some(entry => entry.automatic)).finally(() => {
-			this.#running = null;
-			if (!this.destroyed) this.#action.busy = false;
-		});
+		this.#running = Promise.resolve()
+			.then(() =>
+				Promise.allSettled(
+					entries.map(async ([key, entry]) => {
+						// Several symptoms may share one bounded page read. Invoke it only once per attempt.
+						if (!reads.has(entry.run)) reads.set(entry.run, Promise.resolve().then(() => entry.run()));
+						const answered = await reads.get(entry.run);
+						if (answered !== false && this.#entries.get(key) === entry) this.delete(key);
+					})
+				)
+			)
+			.then(() => ![...this.#entries.values()].some(entry => entry.automatic))
+			.finally(() => {
+				this.#running = null;
+				if (!this.destroyed) this.#action.busy = false;
+			});
 		return this.#running;
 	}
 
+	/** Shown while a symptom stays; said once when it appears; its evidence patched in place. */
 	#draw() {
 		this.#element.hidden = !this.#entries.size;
-		const summary = [...this.#entries.values()].map(entry => entry.title).join('. ');
-		if (this.#summary.textContent !== summary) this.#summary.textContent = summary;
+		const said = this.#entries.size ? this.#title.textContent : '';
+		if (this.#status.textContent !== said) this.#status.textContent = said;
+		const rows = [...this.#entries.values()]
+			.filter(entry => entry.details)
+			.map(({ title, details }) => ({ label: title, text: details.text ?? '', request: details.request ?? null, time: details.time ?? null }));
+		const evidence = JSON.stringify(rows);
+		// Identical evidence keeps the disclosure, its focus and a copy's result as they are
+		if (evidence === this.#evidence) return;
+		this.#evidence = evidence;
+		if (!rows.length) {
+			this.#details?.destroy();
+			this.#details = null;
+		} else if (this.#details) this.#details.update({ entries: rows });
+		else {
+			const given = [...this.#entries.values()].find(entry => entry.details)?.details ?? {};
+			this.#details = new TechnicalDetails({ entries: rows, locale: this.#locale ?? given.locale, labels: { ...(given.labels ?? {}), ...this.#labels } });
+			this.#status.before(this.#details.element);
+		}
 	}
 
 	destroy() {
@@ -120,8 +201,7 @@ export class Recovery extends Component {
 		this.#again.stop();
 		this.#line.destroy();
 		this.#action.destroy();
-		for (const view of this.#views.values()) view.destroy();
-		this.#views.clear();
+		this.#details?.destroy();
 		super.destroy();
 	}
 }

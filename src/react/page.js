@@ -9,6 +9,8 @@ import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
 import { PageHeader as Heading } from '../dom/page/header.js';
 import { Waiting } from './simple.js';
+import { EmptyState } from './patterns.js';
+import { LastUpdate } from './again.js';
 import { PageCompact } from '../dom/page/compact.js';
 import { Cut, NameTip } from '../dom/core/cut.js';
 import { Mark } from './simple.js';
@@ -151,15 +153,23 @@ export function PageHeader({ title, crumbs = [], kind = null, status = null, fac
 	return held ? h(React.Fragment, null, held, header) : header;
 }
 
-/** A flat section: `title`, one `description` line, its `actions` and its content; `waiting` (true or a shape, 0.23.0) holds its body in a `Waiting` while it reads. */
-export function Section({ title, description = null, actions = null, level = 2, raised = false, waiting = null, children }) {
+/**
+ * A flat section: `title`, one `description` line, its `actions` and its content; `waiting` (true or a
+ * shape, 0.23.0) holds its body in a `Waiting` while it reads. Since 0.24.0 (D163) `unavailable` (true or
+ * `EmptyState`'s props) says in place that its read did not answer, and `updated` (a time, or `{ time,
+ * locale, labels }`) says when the content it keeps from an earlier read was read.
+ */
+export function Section({ title, description = null, actions = null, level = 2, raised = false, waiting = null, unavailable = null, updated = null, children }) {
 	const id = `bui-section-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+	const kept = updated === null || updated === undefined ? null : typeof updated === 'object' && !(updated instanceof Date) ? updated : { time: updated };
+	const body = unavailable ? h(EmptyState, { ...(unavailable === true ? {} : unavailable), kind: 'outage' }) : waiting ? h(Waiting, waiting === true ? {} : waiting) : children;
 	return h(
 		'section',
-		{ className: 'bui-section', 'aria-labelledby': id, 'data-raised': raised ? '' : undefined, 'aria-busy': waiting ? 'true' : undefined },
+		{ className: 'bui-section', 'aria-labelledby': id, 'data-raised': raised ? '' : undefined, 'aria-busy': waiting && !unavailable ? 'true' : undefined },
 		h('div', { className: 'bui-section-head' }, h(level === 3 ? 'h3' : 'h2', { id, className: 'bui-section-title' }, title), actions ? h('div', { className: 'bui-section-actions' }, actions) : null),
 		description ? h('p', { className: 'bui-section-description' }, description) : null,
-		h('div', { className: 'bui-section-body' }, waiting ? h(Waiting, waiting === true ? {} : waiting) : children)
+		kept ? h(LastUpdate, kept) : null,
+		h('div', { className: 'bui-section-body' }, body)
 	);
 }
 

@@ -60,8 +60,8 @@ export class RetryAction extends Button {
 
 /** A failed read or transport belonging to one explicitly identified dependency and context. */
 export interface RecoveryEntry {
+	/** What could not be read, in the notice's Technical details; the read says it in its own place. */
 	title: string;
-	reason?: string;
 	details?: import('./operations.js').DetailsRecord | null;
 	/** Bounded read: false/rejection retains the symptom; an answer removes it. Never a write. */
 	run: () => unknown | Promise<unknown>;
@@ -69,11 +69,29 @@ export interface RecoveryEntry {
 	automatic?: boolean;
 }
 
-/** One notice and recovery action for one explicitly scoped incident; independent instances never merge. */
+/**
+ * One outage said once (0.24.0, D163): a line with who did not answer, when it last tried and one Try again,
+ * listing nothing; its reads' evidence under one Technical details. `whole`: the page's body in
+ * `Unavailable`'s form when nothing on the page could be read. Independent instances never merge.
+ */
 export class Recovery extends Component {
-	constructor(options: { title: string; labels?: Copy; locale?: string; again?: Omit<AgainOptions, 'run'>; focus?: (() => HTMLElement | null) | null });
+	constructor(options: { title: string; labels?: Copy; locale?: string; again?: Omit<AgainOptions, 'run'>; focus?: (() => HTMLElement | null) | null; whole?: boolean; level?: 2 | 3 | 4 | 5 | 6 });
 	readonly size: number;
+	/** Who did not answer. */
+	title: string;
+	/** The page's body rather than a line above the page's regions. */
+	whole: boolean;
 	set(key: unknown, entry: RecoveryEntry): void;
 	delete(key: unknown): void;
 	now(): Promise<boolean>;
+}
+
+/** "Last updated 12:04" over content kept from an earlier read, or "May be out of date" when its time is unknown (0.24.0). */
+export class LastUpdate extends Component {
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
+	constructor(options?: { time?: import('./operations.js').Moment | null; locale?: string; labels?: Copy; now?: () => number });
+	readonly text: string;
+	/** When the kept content was read, in milliseconds, or null. */
+	time: number | null;
+	static say(time: import('./operations.js').Moment | null, options?: { labels?: Copy; locale?: string; now?: number }): string;
 }

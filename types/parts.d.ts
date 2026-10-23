@@ -108,6 +108,11 @@ export interface CollectionOptions<Row> {
 	/** 0.21.1 (D162): the list's end line on its last page; true the family's words, a function of the rows' count the product's, false none */
 	end?: boolean | Content | ((list: { count: number }) => Content);
 	labels?: Copy;
+	/** 0.24.0 (D163): the page's notice for this read's cause; a failure `outage` names joins it and the list says "Not available right now" in place */
+	recovery?: import('./again.js').Recovery | null;
+	outage?: ((error: unknown) => boolean) | null;
+	/** 0.24.0: a failure's evidence for the notice's Technical details */
+	details?: ((error: unknown) => import('./operations.js').DetailsRecord | null) | null;
 }
 export class Collection<Row = Record<string, unknown>> extends Component {
 	static readonly Tools: CollectionToolsConstructor;

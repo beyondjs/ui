@@ -6,6 +6,7 @@ import { Button } from '../button.js';
 import { glyph } from '../core/icons.js';
 import { TimeWords } from '../time/words.js';
 import { details } from './labels.js';
+import { DetailsEntries } from './entries.js';
 
 /**
  * "Technical details" (decision D43 as amended on 2026-10-03): a closed disclosure under a failure or
@@ -18,6 +19,9 @@ import { details } from './labels.js';
  * the Clipboard API under a bound; when the browser refuses it (no API, no permission, no answer
  * within `TechnicalDetails.bound`) the component says so in place and selects the text, so the person
  * copies it with the keyboard. The time is shown in the person's language and copied as ISO 8601.
+ *
+ * Since 0.24.0 (D163) `entries` holds the reads one incident affected, one row each with its request and
+ * time, so an outage keeps every read's evidence under one disclosure instead of one per read.
  */
 export class TechnicalDetails extends Component {
 	/** The copy in English and Spanish. */
@@ -32,17 +36,18 @@ export class TechnicalDetails extends Component {
 	#result;
 	#button;
 	#revision = 0;
-	#values = { text: '', request: null, time: null };
+	#values = { text: '', request: null, time: null, entries: [] };
 
 	/**
 	 * @param {object} options
 	 * @param {string} [options.text] the source's own words (an error message, a command's output)
 	 * @param {string|null} [options.request] the request identifier
 	 * @param {string|number|Date|null} [options.time] when it happened
+	 * @param {Array<{label: string, text?: string, request?: string|null, time?: string|number|Date|null}>} [options.entries] the reads one incident affected (0.24.0)
 	 * @param {boolean} [options.open] starts open
 	 * @param {string} [options.locale] the language of the shown time
 	 */
-	constructor({ text = '', request = null, time = null, open = false, locale = undefined, labels = {} } = {}) {
+	constructor({ text = '', request = null, time = null, entries = [], open = false, locale = undefined, labels = {} } = {}) {
 		super();
 		this.#labels = new Labels(details.en, labels);
 		this.#locale = locale;
@@ -53,7 +58,7 @@ export class TechnicalDetails extends Component {
 			el('summary', { class: 'bui-details-summary bui-summary' }, [glyph('chevron'), el('span', { text: this.#labels.text('summary') })]),
 			el('div', { class: 'bui-details-body' }, [this.#content, el('div', { class: 'bui-details-actions' }, [this.#button.element, this.#result])])
 		]);
-		this.update({ text, request, time });
+		this.update({ text, request, time, entries });
 	}
 
 	get element() {
@@ -68,32 +73,39 @@ export class TechnicalDetails extends Component {
 		this.#element.open = Boolean(value);
 	}
 
-	/** Everything the copy action copies: the words, then the request and the time, one per line. */
+	/** Everything the copy action copies: the words, then the request and the time, one per line, then a block per affected read. */
 	get report() {
 		const { text, request, time } = this.#values;
 		const moment = TimeWords.moment(time);
-		return [
+		const own = [
 			text,
 			request ? `${this.#labels.text('request')}: ${request}` : null,
 			moment === null ? null : `${this.#labels.text('time')}: ${new Date(moment).toISOString()}`
 		].filter(Boolean).join('\n');
+		return [own, this.#entries().report].filter(Boolean).join('\n\n');
 	}
 
-	/** Replaces any of `text`, `request` and `time`. */
+	/** Replaces any of `text`, `request`, `time` and `entries`. */
 	update(values = {}) {
 		this.#revision++;
-		this.#values = { ...this.#values, ...values };
+		this.#values = { ...this.#values, ...values, entries: values.entries ?? this.#values.entries ?? [] };
 		const { text, request } = this.#values;
 		const moment = TimeWords.moment(this.#values.time);
 		const facts = [
 			request ? [this.#labels.text('request'), el('code', { text: String(request) })] : null,
 			moment === null ? null : [this.#labels.text('time'), el('time', { datetime: new Date(moment).toISOString(), text: this.#shown(moment) })]
 		].filter(Boolean);
+		const entries = this.#entries();
 		fill(this.#content, [
 			text ? el('pre', { class: 'bui-details-text', text: String(text) }) : null,
-			facts.length ? el('dl', { class: 'bui-details-facts' }, facts.map(([term, value]) => el('div', {}, [el('dt', { text: term }), el('dd', {}, [value])]))) : null
+			facts.length ? el('dl', { class: 'bui-details-facts' }, facts.map(([term, value]) => el('div', {}, [el('dt', { text: term }), el('dd', {}, [value])]))) : null,
+			entries.size ? entries.draw() : null
 		]);
 		this.#result.textContent = '';
+	}
+
+	#entries() {
+		return new DetailsEntries({ entries: this.#values.entries ?? [], labels: this.#labels, locale: this.#locale });
 	}
 
 	/**

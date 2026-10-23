@@ -61,10 +61,10 @@ export function Freshness({ label, tone = 'neutral', checked = null, connected =
 	return h('span', { ref: host, className: 'bui-host' });
 }
 
-/** "Technical details": the source's words, the request and the time, copyable for support. */
-export function TechnicalDetails({ text = '', request = null, time = null, open = false, locale = undefined, labels }) {
-	const [host, facts] = useInstance(() => new Facts({ text, request, time, open, locale, labels }), [locale, labels]);
-	useSync(facts, current => current.update({ text, request, time }), [text, request, String(time)]);
+/** "Technical details": the source's words, the request and the time, copyable for support; since 0.24.0 `entries`, the reads one incident affected, a row each. */
+export function TechnicalDetails({ text = '', request = null, time = null, entries = [], open = false, locale = undefined, labels }) {
+	const [host, facts] = useInstance(() => new Facts({ text, request, time, entries, open, locale, labels }), [locale, labels]);
+	useSync(facts, current => current.update({ text, request, time, entries }), [text, request, String(time), JSON.stringify(entries)]);
 	return h('div', { ref: host, className: 'bui-host' });
 }
 

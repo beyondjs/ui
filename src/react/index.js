@@ -20,7 +20,7 @@ export { FamilyBar, ProductNav, Unavailable, Sidebar } from './family.js';
 export { useSession } from './session.js';
 export { NotificationEntry, NotificationInbox, useToaster } from './notifications.js';
 export { Steps, Awaited, AwaitedLine, Freshness, TechnicalDetails } from './operations.js';
-export { useAgain, AgainLine, RetryAction } from './again.js';
+export { useAgain, AgainLine, RetryAction, Recovery, useRecovery, LastUpdate } from './again.js';
 export { Again } from '../dom/again/again.js';
 export { Clock } from '../dom/time/clock.js';
 export { Age } from '../dom/time/age.js';

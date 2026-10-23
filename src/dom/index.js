@@ -46,6 +46,7 @@ export { ProductNav } from './nav.js';
 export { Unavailable } from './unavailable.js';
 export { RetryAction } from './again/action.js';
 export { Recovery } from './again/recovery.js';
+export { LastUpdate } from './again/update.js';
 export { Again } from './again/again.js';
 export { AgainLine } from './again/line.js';
 export { availability } from './availability.js';

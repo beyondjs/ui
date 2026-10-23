@@ -1,0 +1,133 @@
+/* An outage said once (Recovery, 0.24.0, D163): one line in the warning tone with who did not answer, when it
+   last tried and one Try again, its evidence folded below on the words' edge. It lists nothing: each read it
+   affects says so in its own place (an outage's empty state, a section's last update). */
+.bui-recovery {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	grid-template-areas:
+		'mark words action'
+		'. details details';
+	align-items: center;
+	column-gap: var(--space-3);
+	padding: var(--space-3) var(--space-4);
+	border: 1px solid var(--color-border);
+	border-left: 3px solid var(--color-warning);
+	border-radius: var(--radius-control);
+	background: var(--color-warning-surface);
+	color: var(--color-text);
+}
+.bui-recovery[hidden] {
+	display: none;
+}
+.bui-recovery-mark {
+	grid-area: mark;
+	display: inline-flex;
+	color: var(--color-warning);
+}
+.bui-recovery-mark > .bui-icon {
+	width: 18px;
+	height: 18px;
+}
+.bui-recovery-words {
+	grid-area: words;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 2px var(--space-3);
+	min-width: 0;
+}
+.bui-recovery-title {
+	margin: 0;
+	color: var(--color-text);
+	font-size: var(--text-body);
+	font-weight: var(--weight-semibold);
+	line-height: var(--leading-body);
+	overflow-wrap: anywhere;
+}
+.bui-recovery-actions {
+	grid-area: action;
+	display: flex;
+	gap: var(--space-2);
+}
+.bui-recovery > .bui-details {
+	grid-area: details;
+	margin-top: var(--space-1);
+}
+/* A narrow region: Try again under the words, on their edge. */
+@media (max-width: 480px) {
+	.bui-recovery {
+		grid-template-columns: auto minmax(0, 1fr);
+		grid-template-areas:
+			'mark words'
+			'. action'
+			'. details';
+		align-items: start;
+		row-gap: var(--space-2);
+	}
+	.bui-recovery-mark {
+		margin-top: calc((1lh - 18px) / 2);
+	}
+}
+
+/* The page form: nothing on the page could be read, so the outage is the page's body, as `Unavailable` draws one. */
+.bui-recovery[data-recovery='page'] {
+	grid-template-columns: auto minmax(0, 1fr);
+	grid-template-areas:
+		'mark words'
+		'. action'
+		'. details';
+	align-items: start;
+	row-gap: var(--space-2);
+	max-width: 44rem;
+	padding: var(--space-6);
+	border-left-width: 1px;
+	border-color: var(--color-border);
+	border-radius: var(--radius-base);
+	background: var(--color-surface);
+}
+.bui-recovery[data-recovery='page'] .bui-recovery-mark {
+	display: grid;
+	place-items: center;
+	width: var(--space-6);
+	height: var(--space-6);
+	margin-top: calc((var(--text-title-2) * var(--leading-title-2) - var(--space-6)) / 2);
+}
+.bui-recovery[data-recovery='page'] .bui-recovery-mark > .bui-icon {
+	width: 20px;
+	height: 20px;
+}
+.bui-recovery[data-recovery='page'] .bui-recovery-words {
+	display: grid;
+	gap: var(--space-2);
+}
+.bui-recovery[data-recovery='page'] .bui-recovery-title {
+	font-size: var(--text-title-2);
+	line-height: var(--leading-title-2);
+}
+.bui-recovery[data-recovery='page'] .bui-recovery-actions {
+	margin-top: var(--space-2);
+}
+@media (max-width: 480px) {
+	.bui-recovery[data-recovery='page'] {
+		padding: var(--space-4);
+	}
+}
+
+/* A place whose read did not answer: the outage's mark in the warning color, never an empty place's. */
+.bui-empty-outage .bui-empty-mark {
+	color: var(--color-warning);
+}
+/* An empty or unavailable place inside a region that is framed already: no box inside a box (0.24.0). */
+.bui-empty-unframed {
+	padding: var(--space-3) 0;
+	border: 0;
+}
+
+/* When content kept from an earlier read was read: quiet, its time in tabular figures. */
+.bui-last-update {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	font-variant-numeric: tabular-nums;
+}

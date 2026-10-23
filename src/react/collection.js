@@ -11,11 +11,13 @@ const { useRef, useState } = React;
  * returning React content; it is rendered into the cell through a portal. `state` is applied when it
  * changes (for example from the address on back and forward) and `onState` reports the person's
  * changes. `link(row)` makes rows open their detail; `onOpen(row, event)` takes over the navigation.
+ * Since 0.24.0 (D163) `recovery` (a notice from `useRecovery`), `outage(error)` and `details(error)` let a
+ * read that did not answer join the page's notice and say "Not available right now" in its place.
  */
-export function Collection({ label, columns, source, link = null, onOpen = null, search = true, filters = [], tools = 'compact', toolsTarget = null, state = null, onState = null, limit = 20, empty = null, explain = null, labels, presentation = 'table', row = null, group = null, end = true }) {
+export function Collection({ label, columns, source, link = null, onOpen = null, search = true, filters = [], tools = 'compact', toolsTarget = null, state = null, onState = null, limit = 20, empty = null, explain = null, labels, presentation = 'table', row = null, group = null, end = true, recovery = null, outage = null, details = null }) {
 	const cells = useRef([]);
 	const [portals, setPortals] = useState([]);
-	const latest = useLatest({ source, onOpen, onState, explain, columns, link, row, group, end });
+	const latest = useLatest({ source, onOpen, onState, explain, columns, link, row, group, end, recovery, outage, details });
 	const [host, list] = useInstance(
 		() =>
 			new List({
@@ -38,6 +40,10 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 				onopen: onOpen ? (row, event) => latest.current.onOpen?.(row, event) : null,
 				onstate: next => latest.current.onState?.(next),
 				explain: error => latest.current.explain?.(error),
+				// The page's notice is read when a failure happens: it may be made after the list (`useRecovery`)
+				recovery: { set: (key, entry) => latest.current.recovery?.set(key, entry), delete: key => latest.current.recovery?.delete(key) },
+				outage: error => Boolean(latest.current.recovery && latest.current.outage?.(error)),
+				details: error => latest.current.details?.(error) ?? null,
 				columns: columns.map((column, index) => ({ ...column, render: undefined, value: row => cell(row, index) })),
 				onrender: () => setPortals(cells.current.splice(0))
 			}),

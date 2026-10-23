@@ -39,11 +39,11 @@ export function Checklist({ title = null, steps = [], level = 3, labels }) {
 }
 
 /** A place with nothing to show yet: its kind, title, one sentence, one action and a first run's steps. */
-export function EmptyState({ kind = 'empty', title, text = null, action = null, onClear = null, checklist = null, glyph = null, labels }) {
+export function EmptyState({ kind = 'empty', title, text = null, action = null, onClear = null, checklist = null, glyph = null, frame = true, labels }) {
 	const latest = useLatest({ action, onClear, checklist });
 	const given = action ? { label: action.label, href: action.href ?? null, run: action.href ? null : event => latest.current.action?.onSelect?.(event) } : null;
 	const steps = checklist ? { ...checklist, steps: actions(checklist.steps ?? [], { current: { steps: checklist.steps ?? [] } }) } : null;
-	const [host] = useInstance(() => new Empty({ kind, title, text, glyph, labels, action: given, clear: onClear ? () => latest.current.onClear?.() : null, checklist: steps }), [kind, title, text, glyph, labels, action?.label, action?.href, Boolean(onClear), JSON.stringify(checklist)]);
+	const [host] = useInstance(() => new Empty({ kind, title, text, glyph, frame, labels, action: given, clear: onClear ? () => latest.current.onClear?.() : null, checklist: steps }), [kind, title, text, glyph, frame, labels, action?.label, action?.href, Boolean(onClear), JSON.stringify(checklist)]);
 	return h('div', { ref: host, className: 'bui-host' });
 }
 

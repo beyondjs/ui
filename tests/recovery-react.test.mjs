@@ -107,3 +107,66 @@ test('a rejected RetryAction after unmount leaves its replacement usable', async
 		assert.equal(button.getAttribute('aria-disabled'), null);
 	} finally { await React.act(async () => root.unmount()); host.remove(); }
 });
+
+test('React Recovery (0.24.0, D163): one line for the reads in its props; a read leaves when it leaves them', async () => {
+	const { Recovery } = await import('@beyond-js/ui/react');
+	const host = document.createElement('div'); document.body.append(host);
+	const root = createRoot(host);
+	const runs = [];
+	const reads = names => names.map(name => ({ key: name, title: name, details: { request: `req_${name}`, text: 'Beyond Accounts is unavailable' }, run: async () => { runs.push(name); } }));
+	const render = (names, whole = false) => React.act(async () => root.render(React.createElement(React.StrictMode, null,
+		React.createElement(Recovery, { title: 'Beyond Accounts did not answer', reads: reads(names), whole, again: { events: null, page: null } }))));
+	try {
+		await render(['Machines', 'Conversations']);
+		const notice = host.querySelector('.bui-recovery');
+		assert.equal(host.querySelectorAll('.bui-recovery').length, 1, 'StrictMode leaves one notice');
+		assert.equal(notice.hidden, false);
+		assert.equal(notice.querySelector('.bui-recovery-title').textContent, 'Beyond Accounts did not answer');
+		assert.equal(notice.querySelectorAll('tbody tr').length, 2);
+		await React.act(async () => { notice.querySelector('.bui-recovery-actions button').click(); });
+		await React.act(async () => { await new Promise(resolve => setTimeout(resolve, 0)); });
+		assert.deepEqual(runs.sort(), ['Conversations', 'Machines'], 'Try again reads each again');
+		assert.equal(host.querySelector('.bui-recovery').hidden, false, 'only the props say a read answered');
+		await render(['Conversations'], true);
+		assert.equal(host.querySelectorAll('tbody tr').length, 1);
+		assert.equal(host.querySelector('.bui-recovery').dataset.recovery, 'page');
+		await render([]);
+		assert.equal(host.querySelector('.bui-recovery').hidden, true);
+	} finally { await React.act(async () => root.unmount()); host.remove(); }
+});
+
+test('useRecovery shares one notice with a Collection, which says “Not available right now” in place', async () => {
+	const { Recovery, useRecovery, Collection, Section, LastUpdate, EmptyState } = await import('@beyond-js/ui/react');
+	const host = document.createElement('div'); document.body.append(host);
+	const root = createRoot(host);
+	let down = true;
+	const source = async () => {
+		if (down) throw Object.assign(new Error('unavailable'), { outage: true, request: 'req_list' });
+		return { rows: [{ id: 'r1', title: 'First' }], total: 1 };
+	};
+	function Page() {
+		const notice = useRecovery({ title: 'Beyond Accounts did not answer', again: { events: null, page: null } });
+		return React.createElement(React.Fragment, null,
+			React.createElement(Recovery, { notice }),
+			React.createElement(Collection, { label: 'Requests', columns: [{ key: 'title', label: 'Request', primary: true }], source, recovery: notice, outage: error => error.outage, details: error => ({ request: error.request }) }),
+			React.createElement(Section, { title: 'Machines', unavailable: true }),
+			React.createElement(Section, { title: 'Work', updated: { time: null } }, 'kept'),
+			React.createElement(LastUpdate, { time: null, labels: LastUpdate.labels.es }),
+			React.createElement(EmptyState, { kind: 'outage' }));
+	}
+	try {
+		await React.act(async () => root.render(React.createElement(React.StrictMode, null, React.createElement(Page))));
+		await React.act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
+		const notice = host.querySelector('.bui-recovery');
+		assert.equal(notice.hidden, false);
+		assert.match(notice.querySelector('details').textContent, /Requests.*req_list/s);
+		assert.equal(host.querySelector('.bui-collection .bui-empty-outage .bui-empty-title').textContent, 'Not available right now');
+		assert.equal(host.querySelectorAll('.bui-section .bui-empty-outage').length, 1);
+		assert.match(host.textContent, /May be out of date/);
+		assert.match(host.textContent, /Puede no estar al día/);
+		down = false;
+		await React.act(async () => { notice.querySelector('.bui-recovery-actions button').click(); await new Promise(resolve => setTimeout(resolve, 20)); });
+		assert.equal(host.querySelector('.bui-recovery').hidden, true, 'the list answered and left the notice');
+		assert.ok(host.querySelector('.bui-collection tbody tr, .bui-collection .bui-rows li'));
+	} finally { await React.act(async () => root.unmount()); host.remove(); }
+});
