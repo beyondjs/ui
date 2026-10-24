@@ -141,7 +141,7 @@ export class Collection extends Component {
 		this.#rows = rows.length ? this.#table(rows) : null;
 		const table = this.#rows?.element ?? null;
 		const further = more ?? (pages !== null ? this.#state.page < pages : false);
-		fill(this.#region, [table ?? this.#nothing(), table && !further ? this.#end((this.#state.page - 1) * limit + rows.length) : null]);
+		fill(this.#region, [table ?? this.#nothing(), table && !further ? this.#end((this.#state.page - 1) * limit + rows.length, rows.length) : null]);
 		if (focused !== null) [...this.#region.querySelectorAll('[data-key]')].find(row => row.dataset.key === focused)?.querySelector('.bui-row-title, .bui-row-link')?.focus({ preventScroll: true });
 		this.#columns.attach(table?.localName === 'table' ? table : null, this.#region);
 		this.#options.onrender?.();
@@ -170,12 +170,14 @@ export class Collection extends Component {
 	 * A list's end line on its last page (0.21.1, the list rule L5): it says the list is whole, so a short
 	 * list never reads as one still loading, and where a pointer moves it, the keys that go through it
 	 */
-	#end(count) {
+	#end(count, shown) {
 		const { end = true, presentation = 'table' } = this.#options;
 		if (presentation !== 'list' || end === false) return null;
 		const said = end === true ? this.#labels.text('end') : typeof end === 'function' ? end({ count }) : end;
-		// The keys open only rows that open: a list of names without a destination says no keys
-		const keys = this.#options.link ? el('span', { class: 'bui-keys bui-rows-keys', text: this.#labels.text('keys') }) : null;
+		// The keys open only rows that open: a list of names without a destination says no keys. They are said
+		// only where the focus can move (0.31.1): one row alone moves nowhere, unless a search's Down reaches it
+		const moves = shown > 1 || Boolean(this.#state.query);
+		const keys = this.#options.link && moves ? el('span', { class: 'bui-keys bui-rows-keys', text: this.#labels.text('keys') }) : null;
 		return el('p', { class: 'bui-rows-end' }, [el('span', {}, [content(said)]), keys]);
 	}
 

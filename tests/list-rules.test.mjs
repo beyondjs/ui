@@ -75,6 +75,23 @@ test('the last page ends with one end line, with the keys; a page with more afte
 	off.destroy();
 });
 
+test('the keys are said only where the focus can move: one row alone says none, unless a search reaches it (0.31.1)', async () => {
+	const one = make({ source: async ({ query }) => ({ rows: rows.slice(2, 3).filter(row => row.title.includes(query)), more: false }) });
+	await page.until(() => one.element.querySelector('.bui-rows-end'));
+	assert.equal(one.element.querySelector('.bui-rows-end .bui-keys'), null, 'Up and Down move nowhere from the only row');
+	assert.equal(one.element.querySelector('.bui-rows-end').textContent, 'Nothing more');
+	one.destroy();
+	const found = make({ state: { query: 'hola' } });
+	await page.until(() => found.element.querySelector('.bui-rows-end'));
+	assert.equal(found.element.querySelectorAll('.bui-row').length, 1);
+	assert.ok(found.element.querySelector('.bui-rows-end .bui-keys'), 'Down from the search reaches the one match');
+	found.destroy();
+	const last = make({ state: { page: 2 }, limit: 3, source: async ({ page: at }) => ({ rows: at === 2 ? rows.slice(3) : rows.slice(0, 3), total: 4 }) });
+	await page.until(() => last.element.querySelector('.bui-rows-end'));
+	assert.equal(last.element.querySelector('.bui-rows-end .bui-keys'), null, 'a last page of one row moves nowhere either');
+	last.destroy();
+});
+
 test('a search\'s words are marked in names given as text', async () => {
 	const list = make({ state: { query: 'the' } });
 	await page.until(() => list.element.querySelector('.bui-row'));

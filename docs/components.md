@@ -160,7 +160,7 @@ The build-time public module `@beyond-js/ui/opening` supplies `OpeningDocument` 
 
 - `row(row)` returns the row's own `ListRow` options (its state's `lead`, its `meta` line, its `menu`), applied over the options the columns give. The columns still give the name and the link.
 - `group(row)` returns `{ key, label }`. Consecutive rows with one key go under its label (L4). Each group is a `ul.bui-rows` named by its label (`aria-labelledby`), inside `.bui-rows-groups`. The label is a label by design (`data-bui-label`).
-- `end` is the list's end line, drawn only on its last page and never for an empty list (L5). `true` (the default) says "Nothing more" ("No hay más"); a text, a node or a function of `{ count }` gives the product's words; `false` draws none. A pointer screen also shows the keys ("↑ ↓ to move · Enter to open") in `.bui-keys`, hidden on touch. The table presentation draws no end line.
+- `end` is the list's end line, drawn only on its last page and never for an empty list (L5). `true` (the default) says "Nothing more" ("No hay más"); a text, a node or a function of `{ count }` gives the product's words; `false` draws none. A pointer screen also shows the keys ("↑ ↓ to move · Enter to open") in `.bui-keys`, hidden on touch, when the focus can move: since 0.31.1, on a page of two rows or more, or of one row a search reached (Down from the search goes to it). The table presentation draws no end line.
 - A name given as text marks the search's words (L8). Up, Down, Home and End move between the rows' names, and Down from the collection's search reaches the first row (L7).
 
 React `Collection` takes `row`, `group` and `end` (`true`, `false` or a text); `row` and `group` read the latest props.
