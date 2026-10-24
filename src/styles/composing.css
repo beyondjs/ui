@@ -180,6 +180,13 @@
 	}
 }
 
+/* A narrow composer (a phone) keeps one inset too, a smaller one, so its chips keep their room (0.29.0) */
+@container bui-composer (max-width: 30rem) {
+	.bui-composer-box {
+		--bui-composer-inset: var(--space-2);
+	}
+}
+
 /* One inset (0.29.0, D184): the first line's capitals stand one inset under the box's edge, measured from
    the font itself (the half-leading above the capitals taken off), so the space above the words and the
    space under the controls read the same. Without the `lh` and `cap` units it keeps 8 px. */

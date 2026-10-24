@@ -17,10 +17,13 @@ html:has(.bui-page-compact) {
 html:has(.bui-sidebar[data-mode='drawer']):has(.bui-page-compact) {
 	scroll-padding-top: calc(var(--layout-family) + var(--bui-sidebar-row, 44px) + var(--bui-page-compact) + var(--space-2));
 }
-/* While the line says a part in view (0.29.0, D181) it may take two lines: targets land below its taller form. */
+/* While the line may say a part in view (0.29.0, D181), on a thread or once it does, it may take two lines:
+   targets land below its taller form, the same on every turn, so a page's sticky edge never moves. */
+html:has(.bui-page[data-template='thread'] .bui-page-compact),
 html:has(.bui-page-compact[data-subject]) {
 	scroll-padding-top: calc(var(--layout-family) + var(--bui-page-compact-tall) + var(--space-2));
 }
+html:has(.bui-sidebar[data-mode='drawer']):has(.bui-page[data-template='thread'] .bui-page-compact),
 html:has(.bui-sidebar[data-mode='drawer']):has(.bui-page-compact[data-subject]) {
 	scroll-padding-top: calc(var(--layout-family) + var(--bui-sidebar-row, 44px) + var(--bui-page-compact-tall) + var(--space-2));
 }

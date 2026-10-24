@@ -51,11 +51,11 @@ export const checks = [
 						// A running turn on a phone keeps Interrupt and Queue in words: only there, folded, may its actions take a second row
 						expect(found.one || (query && width < 480 && found.level === 'fold'), `${at}: one toolbar row: ${JSON.stringify(found)}`);
 						expect(found.inside, `${at}: every item inside the composer: ${JSON.stringify(found)}`);
-						// Since 0.14.0 (D96) the dock beside the panel is at the lane (about 34rem): Claude Code's chips are shown
-						// there; a running Codex turn's long chips with Interrupt and Queue fold behind Options with its summary
+						// The dock beside the panel is at the composer's lane (48rem since 0.29.0, D180): Claude Code's chips are
+						// shown there; a running Codex turn's long chips with Interrupt and Queue fold behind Options with its summary
 						if (width >= 1024 && !query) expect(found.level !== 'fold', `${at}: the chips are shown, not folded: ${JSON.stringify(found)}`);
-						// Since 0.14.0 (D96) the composer beside the panel is at the lane: its chips say their value there
-						if (width >= 1920 && !query) expect(found.level !== 'fold' && found.width <= 600, `${at}: at the lane, chips shown: ${JSON.stringify(found)}`);
+						// The composer beside the panel is at its lane (48rem since 0.29.0): its chips say their value there
+						if (width >= 1920 && !query) expect(found.level !== 'fold' && found.width <= 48 * 16 + 1, `${at}: at the lane, chips shown: ${JSON.stringify(found)}`);
 						expect(!(await overflow(page)), `${at}: no sideways scroll`);
 						await context.close();
 					}

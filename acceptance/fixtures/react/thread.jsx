@@ -100,7 +100,7 @@ function View() {
 								<Facts label={copy.changes} rows={rows(copy, <Button label={copy.copy} variant="quiet" />).slice(0, 2)} />
 							</div>
 						</div>
-						<div className="dock">
+						<div className="dock bui-lane">
 							<Composer label={copy.message} placeholder={copy.placeholder} labels={labels.composer} locale="es" status={{ text: copy.stopped, action: { label: copy.start, onSelect: () => log.push('start') } }} settings={settings} attach={attach} attachments={items} onSuggest={suggest} suggest={{ bound: 1500 }} compact={shape.compact} summary={turn.summary} actions={turn.actions} stop={turn.stop ? { label: turn.stop, onSelect: () => log.push('interrupt') } : null} onSubmit={message => (log.push(`send:${message.text}:${(message.attachments ?? []).length}`), change([]), Promise.resolve())} />
 						</div>
 					</Page>

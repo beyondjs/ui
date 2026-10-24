@@ -1,5 +1,5 @@
 // The round page of the plain DOM consumer (0.14.0): the Sidebar's objects with their action, search icon,
-// folding groups and ⌘K; a thread page with its anchored dock (D94), lanes (D96), a panel that moves
+// folding groups and ⌘K; a thread page with its anchored dock (D94), its turns and the composer's lane (D180), a panel that moves
 // (D95), Facts' column (D99) and a quiet action line (D102); the composer's tray, commands, recall, cap with
 // Expand and Dictate (D100). window.fixture records what the page heard and drives it.
 import '@beyond-js/ui/tokens.css';
@@ -20,8 +20,8 @@ const main = shell.appendChild(el('main', { id: 'main' }));
 
 const highlighter = new Highlighter('javascript');
 const block = turn => {
-	if (turn.kind === 'message') return el('p', { class: 'message bui-lane', text: turn.text });
-	if (turn.kind === 'prose') return el('p', { class: 'answer bui-lane', text: turn.text });
+	if (turn.kind === 'message') return el('p', { class: 'message', text: turn.text });
+	if (turn.kind === 'prose') return el('p', { class: 'answer', text: turn.text });
 	return highlighter.fill(el('pre', { class: 'code bui-lane-wide' }), turn.text);
 };
 const copier = new CopyButton({ text: 'answer', variant: 'quiet' });

@@ -130,6 +130,8 @@ export class TurnIndex extends Component {
 		const back = step < 0 && this.#covered && index >= 0;
 		const goal = back ? this.#sequence[index] : this.#sequence[Math.min(Math.max(Math.max(index, 0) + step, 0), this.#sequence.length - 1)];
 		if (!goal || (!back && goal.key === this.#current)) return false;
+		// The goal is read from now on, its message in view: a second press moves on from it, before the scroll ends
+		this.#seen({ key: goal.key, covered: false });
 		this.#go(goal, 'key');
 		return true;
 	}

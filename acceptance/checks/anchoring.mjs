@@ -3,8 +3,8 @@ import { expect, overflow } from '../support/browser.mjs';
 /**
  * The thread template of 0.14.0 in a real engine, on the `round.html` pages: the dock anchored at the same
  * distance from the window's bottom at the top, the middle and the end of the scroll and on a short and an
- * empty thread (D94), its hairline only while content passes beneath; one lane for the message, prose and
- * the composer, code passing it, the panel next to the lane (D96); Facts' value column (D99); a quiet
+ * empty thread (D94), its hairline only while content passes beneath; the turns across the thread with the
+ * composer on its lane and the panel next to the turns (D180, amending D96); Facts' value column (D99); a quiet
  * action line (D102); highlighted code.
  */
 export async function open(browser, consumer, { width = 1440, height = 900, query = '', ...options } = {}) {
@@ -53,27 +53,28 @@ export const checks = [
 		}
 	},
 	{
-		name: 'one edge, one lane (D96): the message, prose and composer share a right edge, code passes it, the panel comes next to the lane and the rest falls on the far side, at 2000 and 1440 px, with the panel hidden too',
+		name: 'a thread reads by turns (D180): the message, prose and code end on the turn\'s edge, the composer keeps its 48rem lane at the turns\' start, the panel comes next to the turns and the rest falls on the far side, at 2000 and 1440 px, with the panel hidden too',
 		consumers: ['dom'],
 		async run(browser, consumer) {
 			for (const width of [2000, 1440]) {
 				const { page } = await open(browser, consumer, { width, height: 1000 });
 				const edges = () =>
 					page.evaluate(() => {
-						const right = selector => Math.round(document.querySelector(selector).getBoundingClientRect().right);
+						const box = selector => document.querySelector(selector).getBoundingClientRect();
 						const panel = document.querySelector('.bui-page-panel');
-						return { message: right('.message'), prose: right('.answer'), composer: right('.bui-page-dock .bui-composer'), code: right('.code'), panel: panel.hidden ? null : Math.round(panel.getBoundingClientRect().left), region: Math.round(document.querySelector('.bui-page').getBoundingClientRect().right) };
+						const frame = document.querySelector('.bui-page-frame');
+						return { rem: parseFloat(getComputedStyle(document.documentElement).fontSize), gutter: parseFloat(getComputedStyle(frame).paddingRight), start: Math.round(box('.answer').left), message: Math.round(box('.message').right), prose: Math.round(box('.answer').right), code: Math.round(box('.code').right), composer: { left: Math.round(box('.bui-page-dock .bui-composer').left), width: Math.round(box('.bui-page-dock .bui-composer').width) }, panel: panel.hidden ? null : Math.round(panel.getBoundingClientRect().left), region: Math.round(box('.bui-page').right) };
 					});
 				const beside = await edges();
-				expect(Math.abs(beside.message - beside.prose) <= 1 && Math.abs(beside.prose - beside.composer) <= 1, `one right edge at ${width}: ${JSON.stringify(beside)}`);
-				expect(beside.code >= beside.prose - 1, `code may pass the lane: ${JSON.stringify(beside)}`);
-				expect(Math.abs(beside.panel - beside.prose - 32) <= 2, `the panel one gap after the lane at ${width}: ${JSON.stringify(beside)}`);
+				expect(Math.abs(beside.message - beside.prose) <= 1 && Math.abs(beside.prose - beside.code) <= 1, `one right edge for the turn at ${width}: ${JSON.stringify(beside)}`);
+				expect(beside.composer.width <= Math.min(48 * beside.rem, beside.prose - beside.start) + 1 && Math.abs(beside.composer.left - beside.start) <= 1, `the composer on its lane, at the turns' start: ${JSON.stringify(beside)}`);
+				expect(Math.abs(beside.panel - beside.prose - 32) <= 2, `the panel one gap after the turns at ${width}: ${JSON.stringify(beside)}`);
 				await page.locator('.bui-page-header .bui-button', { hasText: 'Details' }).click();
 				await page.waitForFunction(() => document.querySelector('.bui-page-panel').hidden);
 				const alone = await edges();
-				expect(Math.abs(alone.message - alone.prose) <= 1 && Math.abs(alone.prose - alone.composer) <= 1, `one right edge without the panel: ${JSON.stringify(alone)}`);
-				expect(alone.code > alone.prose + 100, `code widens to the wide lane without the panel: ${JSON.stringify(alone)}`);
-				expect(alone.region - alone.code > 0, 'what is left falls on the far side');
+				expect(Math.abs(alone.message - alone.prose) <= 1 && Math.abs(alone.prose - alone.code) <= 1, `one right edge without the panel: ${JSON.stringify(alone)}`);
+				expect(alone.prose >= beside.prose && alone.prose - alone.start <= 80 * alone.rem + 1, `the turns take the panel's room up to 80rem: ${JSON.stringify(alone)}`);
+				expect(alone.region - alone.prose >= alone.gutter - 1, `what is left falls on the far side: ${JSON.stringify(alone)}`);
 			}
 		}
 	},

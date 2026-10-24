@@ -3,8 +3,8 @@ import { survey } from '../../tests/support/names.mjs';
 import { unlabeled } from '../support/unlabeled.mjs';
 
 /**
- * The thread page of 0.11.0 in a real engine, on the `thread.html` pages: the thread tier with a panel
- * whose width is fluid between --layout-aside and --layout-aside-max (and --layout-aside-wide in its wide
+ * The thread page of 0.11.0 in a real engine, on the `thread.html` pages: the thread tier (the turns' 80rem
+ * since 0.29.0) with a panel whose width is fluid between --layout-aside and --layout-aside-max (and --layout-aside-wide in its wide
  * form) and no band between them; the panel's own head and its hide control; the header's compact line on
  * scroll without layout shift, still under reduced motion; Facts and Meters; the sidebar's ages and
  * count; and the page from 320 to 2560 px in both themes with its icon-only controls named.
@@ -14,7 +14,8 @@ const words = {
 	es: { details: 'Detalles', hide: 'Ocultar Detalles', title: 'Corregir la redirección del pago tras un pago fallido', near: 'Cerca del límite', recent: 'Recientes' }
 };
 const rem = 16;
-const sizes = { aside: 22 * rem, max: 40 * rem, wide: 48 * rem, thread: 52 * rem, form: 40 * rem, gap: 2 * rem };
+// The thread tier is the turns' 80rem since token set 0.7.0 (D180; 52rem before)
+const sizes = { aside: 22 * rem, max: 40 * rem, wide: 48 * rem, thread: 80 * rem, form: 40 * rem, gap: 2 * rem };
 
 export async function open(browser, consumer, { width = 1440, height = 900, query = '', ...options } = {}) {
 	const view = await browser.open(consumer, { file: 'thread.html', query, viewport: { width, height }, ...options });
@@ -31,7 +32,7 @@ const measure = page =>
 
 export const checks = [
 	{
-		name: 'thread tier at 1440, 1920 and 2560 px in both themes: the panel beside with its head, fluid between the aside tier and its maximum (40rem since 0.11.2), next to the lane since 0.14.0, no band between thread and panel; the wide form takes every width the thread leaves, to the region\'s edge',
+		name: 'thread tier at 1440, 1920 and 2560 px in both themes: the panel beside with its head, fluid between the aside tier and its maximum (40rem since 0.11.2), next to the turns (D180), no band between thread and panel; the wide form takes every width the thread leaves, to the region\'s edge',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const copy = words[consumer.language];
@@ -44,15 +45,10 @@ export const checks = [
 					expect(found.panel.width >= sizes.aside - 1 && found.panel.width <= sizes.max + 1, `${at}: the panel between its tiers: ${found.panel.width}`);
 					expect(Math.abs(found.panel.left - found.main.right - sizes.gap) <= 1.5, `${at}: one gap between thread and panel, no band: ${found.panel.left - found.main.right}`);
 					expect(found.main.width <= sizes.thread + 1, `${at}: the thread at most its tier: ${found.main.width}`);
-					// Since 0.14.0 (D96) the panel comes next to the lane: the main column is the lane, the panel at its maximum
-					const lane = await page.evaluate(() => {
-						const probe = document.querySelector('.bui-page-main').appendChild(document.createElement('div'));
-						probe.style.width = 'var(--layout-lane)';
-						const measured = probe.getBoundingClientRect().width;
-						probe.remove();
-						return measured;
-					});
-					if (width >= 1920) expect(Math.abs(found.panel.width - sizes.max) <= 1 && Math.abs(found.main.width - lane) <= 1, `${at}: the thread at its lane and the panel at its maximum: ${JSON.stringify({ ...found, lane })}`);
+					// Since 0.29.0 (D180) the turns come first: the panel takes what they leave, between its tiers
+					const panel = Math.min(sizes.max, Math.max(sizes.aside, found.body.width - sizes.thread - sizes.gap));
+					expect(Math.abs(found.panel.width - panel) <= 1.5 && Math.abs(found.main.width - (found.body.width - sizes.gap - found.panel.width)) <= 1.5, `${at}: the turns first, the panel what they leave: ${JSON.stringify({ ...found, panel })}`);
+					if (width >= 2560) expect(Math.abs(found.panel.width - sizes.max) <= 1 && Math.abs(found.main.width - sizes.thread) <= 1.5, `${at}: the turns at their tier and the panel at its maximum: ${JSON.stringify(found)}`);
 					if (width === 1440) expect(found.panel.width > sizes.aside - 1 && found.main.width < sizes.thread, `${at}: the thread gives first: ${JSON.stringify(found)}`);
 					const head = page.locator('.bui-page-panel-head');
 					expect((await head.locator('h2').textContent()) === copy.details && (await head.locator('.bui-page-panel-hide').getAttribute('aria-label')) === copy.hide, `${at}: the panel's head`);

@@ -80,7 +80,7 @@ const review = new Button({ label: copy.review, variant: 'quiet', onclick: () =>
 const pull = new Button({ label: copy.pull, variant: 'primary' });
 const header = new PageHeader({ title: copy.title, status: status(copy.status, 'progress'), facts: copy.facts, actions: [review, details], compact: { actions: [pull] } });
 const thread = el('div', { class: 'thread', id: 'thread' }, [own, el('p', { class: 'message', text: 'Also add a test for a failed payment that keeps the cart.' }), ...paragraphs.map(text => el('p', { class: 'answer', text })), narrow]);
-const page = new Page({ template: 'detail', width: 'thread', header, children: [thread, el('div', { class: 'dock' }, [composer.element])], aside: [changes.element, engine.element, window5.element, week.element], label: copy.panel, panel: { cut: '73rem', title: copy.details, head: true, wide: shape.wide, onchange: shown => log.push(`panel:${shown}`) } }).mount(main);
+const page = new Page({ template: 'detail', width: 'thread', header, children: [thread, el('div', { class: 'dock bui-lane' }, [composer.element])], aside: [changes.element, engine.element, window5.element, week.element], label: copy.panel, panel: { cut: '73rem', title: copy.details, head: true, wide: shape.wide, onchange: shown => log.push(`panel:${shown}`) } }).mount(main);
 page.panel.control(details.element);
 
 Object.assign(fixture, {

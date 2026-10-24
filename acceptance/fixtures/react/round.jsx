@@ -16,7 +16,7 @@ function Round() {
 			<main id="main">
 				<Page template="thread" header={<PageHeader title="Fix the checkout redirect" />} dock={<Composer label="Message to Claude Code" commands={commands(log)} recall={() => 'Also add a test'} tray={<button type="button" className="bui-button bui-button-secondary">web · Ready</button>} onSubmit={message => log.push(`send:${message.text}`)} />}>
 					<div className="thread" id="thread">
-						{turns().map((turn, index) => (turn.kind === 'code' ? <pre key={index} className="code bui-lane-wide">{turn.text}</pre> : <p key={index} className={`${turn.kind === 'message' ? 'message' : 'answer'} bui-lane`}>{turn.text}</p>))}
+						{turns().map((turn, index) => (turn.kind === 'code' ? <pre key={index} className="code bui-lane-wide">{turn.text}</pre> : <p key={index} className={turn.kind === 'message' ? 'message' : 'answer'}>{turn.text}</p>))}
 					</div>
 				</Page>
 			</main>
