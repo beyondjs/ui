@@ -153,3 +153,23 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 ## UI 0.28.0: a visible action named whole (D179)
 
 `tests/ellipses.test.mjs` holds D179: `Ellipses` warns once for a shown action ending in "…" (or "...") outside a menu, added after it started, and never for a menu's entry, an option, a disabled or busy action (a busy `Button`'s `{label}…`), a hidden one or words only for assistive technology, and it is off outside a development build; `RefChooser`'s escape keeps its "…" as the menu's entry and is named whole as the visible link; and every `text-overflow: ellipsis` of the built stylesheet is one of the reviewed names, values and the composer's placeholder, never a button's, a link button's, a menu button's or a menu entry's label. `tests/cut.test.mjs` adds a `ListRow`'s cut name whole on hover and keyboard focus (and no tooltip left behind once the row is drawn again or destroyed), and the command palette's label and detail among the opened lists that wrap. `tests/chooser.test.mjs` asserts the visible escape's words in Spanish. `tests/fixtures/types/ellipses.ts` holds its declarations.
+
+## UI 0.29.0: a thread read by turns (D180 to D184)
+
+- **Unit.** `tests/turns.test.mjs` holds `TurnIndex` (D182), on `tests/fixtures/turns.mjs`:
+  - its names and states' shapes, hidden below two turns;
+  - patching by key with focus kept, and a link that loses its address becoming a button that keeps focus;
+  - the roving keyboard;
+  - the turn being read under the sticky edge, its message out of view reported once, and the last turn at the page's end;
+  - Option/Alt with the arrows: back to the message first, never from a field, and a second press moving on from the first one's turn;
+  - choosing without `choose` (the address replaced, a button scrolling to its turn);
+  - the preview's words, its description of the mark it shows, Escape and touch;
+  - the Spanish copy, and no listener left after `destroy()`.
+- **Unit, the other parts.** `tests/thread.test.mjs` holds the compact line's `subject` (D181). `tests/alarm.test.mjs` holds the quiet empty Send (D183), with `composer.test.mjs` and `attach.test.mjs` for a refused send said in the state band. `composing.test.mjs` and `edges.test.mjs` hold the composer's one inset in the stylesheet (D184). `tokens.test.mjs` holds token set 0.7.0's `thread` and `lane` (D180).
+- **Browser.** `acceptance/checks/turning.mjs`, on the `turns.html` pages, measures:
+  - the turns' width and the composer's lane on their axis from 1024 to 2560 px in both themes;
+  - the index in the gutter, its preview in the top layer beside it, the marks lengthening, still under reduced motion and gone under a 1024 px region;
+  - the compact line saying the message of the turn being read and going back to it, and Option/Alt with the arrows;
+  - the quiet Send, and the composer's inset from the font's own capitals against its controls.
+
+  The D96 checks of `anchoring.mjs`, `thread.mjs` and `fitting.mjs` now measure D180.

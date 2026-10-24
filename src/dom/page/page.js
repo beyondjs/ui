@@ -19,11 +19,10 @@ const widths = Object.freeze(['fluid', 'standard', 'form', 'reading', 'thread'])
  *
  * Its blocks take a width tier (`width`): `fluid` for collections and tools (up to
  * `--layout-fluid-max`), `standard` for a main column with its aside, `form` for inputs and tasks and
- * `reading` for prose (`--layout-measure`), and since 0.11.0 `thread` for a conversation's thread
- * (`--layout-thread`, about 52rem: the family proposal D67, adopted by Conduict, not an approved family
- * rule), whose panel kept in view takes the width the thread leaves. The arrival line and the header come first; `aside` is a
- * resource page's side panel, beside the main column once the region holds a form-width column and
- * the panel (68rem), and below it otherwise. `template` names the page's kind (overview, list,
+ * `reading` for prose (`--layout-measure`), and since 0.11.0 `thread` for a conversation's turns
+ * (`--layout-thread`, 80rem since 0.29.0, D180), whose panel kept in view takes the width they leave.
+ * The arrival line and the header come first; `aside` is a resource page's side panel, beside the main
+ * column once the region holds a form-width column and the panel (68rem), and below it otherwise. `template` names the page's kind (overview, list,
  * detail, settings, task or tool) as `data-template`, for checks and for the tool template, which has
  * no gutter (D22's departures).
  *
@@ -37,10 +36,11 @@ const widths = Object.freeze(['fluid', 'standard', 'form', 'reading', 'thread'])
  * is a column whose last block is the `dock` (`PageDock`): pushed to the column's end and sticky at
  * the window's bottom with one gutter and the safe area under it, at the same distance from the bottom
  * whatever the scroll and the content's length. The header ends at the thread's edge, so a toggle in it
- * never moves when the panel shows or hides; the person's message, prose, the rail and the dock share
- * one lane (`--layout-lane`) and only code, diffs, tool output and approval cards widen to the thread
- * (`.bui-lane-wide`); a panel kept in view comes next to the lane and takes what is left up to its
- * maximum, the rest falling on the far side.
+ * never moves when the panel shows or hides; since 0.29.0 (D180, amending D96) a thread reads by turns:
+ * the person's message, prose, the rail and the work take the thread (`--layout-thread`) and only the
+ * dock's composer keeps its lane (`--layout-lane`), on the same axis; from a 1024 px region its gutter
+ * holds the index of its turns (`TurnIndex`); a panel kept in view comes next to the turns and takes what
+ * they leave up to its maximum, the rest falling on the far side.
  *
  * Since 0.15.0 (decision C2, amending D52 for this template; DQ-14) `lane: 'center'` centers the thread's
  * column, its header with it, in the region left beside a panel kept in view (or the whole region).
