@@ -1,4 +1,5 @@
 import { el } from '../core/element.js';
+import { Relayout } from '../core/relayout.js';
 
 const levels = Object.freeze(['full', 'short', 'fold']);
 
@@ -25,8 +26,10 @@ const levels = Object.freeze(['full', 'short', 'fold']);
  * the level of the width before: a frame runs the window's resize and media query listeners (where the
  * Sidebar and a page's panel follow the new width) before its animation callbacks, where the fit
  * measures, and those before its layout and paint. Fonts that finish loading are decided in a frame too.
- * A width that changes without the window's (a panel shown beside) is decided in the frame after the one
- * that lays it out, since deciding inside the observer's callback is a loop other observers report.
+ * A width that changes without the window's is decided in the frame it lands too when the part that
+ * changed it says so (`Relayout`: a page's panel shown or hidden beside, its wide form, the Sidebar's
+ * panel); any other is decided in the frame after the one that lays it out, since deciding inside the
+ * observer's callback is a loop other observers report.
  */
 export class ComposerFit {
 	static levels = levels;
@@ -77,6 +80,8 @@ export class ComposerFit {
 		if (view?.addEventListener) {
 			this.#view = view;
 			view.addEventListener('resize', this.#settle);
+			// So is a change of the columns a page's part says it made (`Relayout`): a panel shown or hidden beside
+			root.ownerDocument.addEventListener(Relayout.event, this.#settle);
 		}
 		if (view?.MutationObserver) {
 			this.#mutation = new view.MutationObserver(() => this.measure());
@@ -120,6 +125,7 @@ export class ComposerFit {
 		if (this.#frame) this.#root.ownerDocument.defaultView?.cancelAnimationFrame?.(this.#frame);
 		this.#root.removeEventListener('focusout', this.#leave);
 		this.#view?.removeEventListener('resize', this.#settle);
+		this.#root.ownerDocument.removeEventListener(Relayout.event, this.#settle);
 		this.#resize?.disconnect();
 		this.#mutation?.disconnect();
 		this.#fonts?.removeEventListener?.('loadingdone', this.#settle);

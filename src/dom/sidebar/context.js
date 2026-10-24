@@ -1,4 +1,5 @@
 import { Motion } from '../core/motion.js';
+import { Relayout } from '../core/relayout.js';
 
 /** The contextual panel's visibility and motion, without animating its live content. */
 export class SidebarContext {
@@ -21,7 +22,7 @@ export class SidebarContext {
 		const animate = wide && enabled && previous !== null;
 		this.#visible = visible;
 		const paint = () => {
-			this.#panel.hidden = !visible;
+			Relayout.hide(this.#panel, !visible, this.#host);
 			this.#host.toggleAttribute('data-panel', shown);
 		};
 		if (visible === previous && animate) {

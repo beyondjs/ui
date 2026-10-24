@@ -6,6 +6,8 @@
  * toolbar's level (`data-fit`, with `bare`). A task that finds the window another width than its frame began with
  * read a layout no frame painted (the viewport changed in between) and says so (`painted: false`). The recorder
  * stops by itself once `span` milliseconds of frames at the new width are read, or after `bound` milliseconds.
+ * A change that keeps the window's width (a panel hidden beside) is found by a mark instead: the page sets
+ * `window.__frames.marked` in the task that makes the change, and the first frame begun after it lands it.
  */
 export class Frames {
 	#page;
@@ -15,8 +17,8 @@ export class Frames {
 		this.#page = page;
 	}
 
-	/** Starts recording the composers `selectors` name, until `span` ms of frames at `width` are read. */
-	start(selectors, { width, span = 300, bound = 4000 }) {
+	/** Starts recording the composers `selectors` name, until `span` ms of frames at `width` (or after the mark) are read. */
+	start(selectors, { width = null, span = 300, bound = 4000 } = {}) {
 		return this.#page.evaluate(record, { selectors, width, span, bound });
 	}
 
@@ -29,7 +31,8 @@ export class Frames {
 
 /**
  * The frames of a resize read against the settled one (0.32.0): the first painted frame at the new width is the
- * frame the resize lands; the settled geometry is the last frame's. A frame is misplaced when any of its measures
+ * frame the resize lands (with no width, the first painted frame begun after the page's mark); the settled
+ * geometry is the last frame's. A frame is misplaced when any of its measures
  * differs from the settled one by more than `tolerance` pixels, or its toolbar takes another number of rows or
  * another level.
  */
@@ -88,7 +91,7 @@ export class Settling {
 	}
 
 	#landing() {
-		return this.#samples.findIndex(sample => sample.painted && sample.width === this.#width);
+		return this.#samples.findIndex(sample => sample.painted && (this.#width === null ? sample.marked : sample.width === this.#width));
 	}
 
 	#differences(composer, settled) {
@@ -136,23 +139,25 @@ function record({ selectors, width, span, bound }) {
 		const fit = `${root.dataset.fit ?? 'full'}${root.hasAttribute('data-bare') ? ' bare' : ''}`;
 		return { left: round(box.left), width: round(box.width), height: round(box.height), text: round(text - box.left), start: round(first - box.left), rows: rows(items), fit };
 	};
-	const state = { samples: [], done: false, frame: 0 };
+	const state = { samples: [], done: false, frame: 0, marked: false };
 	window.__frames = state;
 	const begun = performance.now();
 	let landed = null;
 	let began = innerWidth;
+	let marked = false;
 	const channel = new MessageChannel();
 	channel.port1.onmessage = () => {
 		const now = performance.now();
 		const painted = innerWidth === began;
-		if (painted && began === width && landed === null) landed = now;
-		state.samples.push({ frame: state.frame, at: Math.round(now - begun), width: began, painted, composers: selectors.map(read) });
+		if (painted && landed === null && (width === null ? marked : began === width)) landed = now;
+		state.samples.push({ frame: state.frame, at: Math.round(now - begun), width: began, painted, marked, composers: selectors.map(read) });
 		if ((landed !== null && now - landed >= span) || now - begun >= bound) state.done = true;
 	};
 	const tick = () => {
 		if (state.done) return;
 		state.frame += 1;
 		began = innerWidth;
+		marked = state.marked;
 		channel.port2.postMessage(null);
 		requestAnimationFrame(tick);
 	};

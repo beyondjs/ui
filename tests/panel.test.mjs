@@ -167,3 +167,29 @@ test('crossing the cut transfers focus only after the native sheet finishes its 
 		assert.ok(aside.contains(document.activeElement), 'focus follows content after exit');
 	} finally { view.destroy(); style.remove(); }
 });
+
+test('each time the panel moves the columns it tells the page\'s parts (bui-layout, 0.32.0): hidden, shown, its wide form, the cut crossed', () => {
+	const told = [];
+	const hear = event => told.push(event.target);
+	document.addEventListener('bui-layout', hear);
+	try {
+		const { view, panel, toggle } = scene();
+		told.length = 0;
+		toggle.click();
+		assert.equal(told.length, 1, 'hidden beside: told once');
+		assert.ok(told[0] === view.element, 'from the page');
+		toggle.click();
+		assert.equal(told.length, 2, 'shown again');
+		panel.wide = true;
+		panel.wide = true;
+		assert.equal(told.length, 3, 'the wide form, once');
+		resize(800);
+		assert.equal(panel.mode, 'sheet');
+		assert.equal(told.length, 4, 'below the cut it leaves the columns');
+		panel.shown = true;
+		assert.equal(told.length, 4, 'nothing moved, nothing told');
+		view.destroy();
+	} finally {
+		document.removeEventListener('bui-layout', hear);
+	}
+});

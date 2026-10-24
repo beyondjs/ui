@@ -31,7 +31,14 @@ async function open(browser, consumer, query, width) {
 	return view;
 }
 
-export const checks = pages.map(({ query, name }) => ({
+/** Presses the page's Details in the task that marks the frames: the panel hides or shows beside, the window unchanged. */
+const toggle = (page, label) =>
+	page.evaluate(text => {
+		window.__frames.marked = true;
+		[...document.querySelectorAll('.bui-page-header button')].find(button => button.textContent.trim() === text).click();
+	}, label);
+
+const narrowing = pages.map(({ query, name }) => ({
 	name: `settling: ${name} is drawn settled on every frame from the one a narrowing lands, across the panel's cut, the Sidebar's and the composer's 30rem`,
 	consumers: ['dom', 'react19'],
 	async run(browser, consumer) {
@@ -61,3 +68,44 @@ export const checks = pages.map(({ query, name }) => ({
 		expect(changed >= 2, `the narrowings change the toolbar's level: ${report.filter(line => line.includes(' → ') && line.includes('px:')).join('; ')}`);
 	}
 }));
+
+/**
+ * A change of the columns without the window's (0.32.0): at 1440 px the panel beside the thread is hidden and
+ * shown again with Details, which widens and narrows the composer (768 and 710 px) and changes its toolbar's
+ * level. The page's panel says so (`Relayout`), so the composer decides in the frame the change lands, as it does
+ * for the window's resize; until 0.32.0 its first frame drew the level of the width before.
+ */
+const panel = {
+	name: 'settling: a composer docked in a thread is drawn settled on every frame from the one its panel is hidden or shown beside, with the window unchanged',
+	consumers: ['dom', 'react19'],
+	async run(browser, consumer) {
+		// The page's Details, as `fixtures/data/settle.js` words it (that module reads the page's address)
+		const label = consumer.name === 'dom' ? 'Details' : 'Detalles';
+		const { page, context } = await open(browser, consumer, '', 1440);
+		let changed = 0;
+		for (const step of ['hidden', 'shown']) {
+			const frames = new Frames(page);
+			await frames.start(['.bui-composer']);
+			await page.waitForTimeout(50);
+			await toggle(page, label);
+			const settling = new Settling(await frames.read(), null);
+			const [settled] = settling.settled;
+			const [before] = settling.before;
+			expect(settling.frames.length >= 5 && settled && before, `${step}: the frames after the change were read: ${settling.frames.length}`);
+			expect(Math.abs(settled.width - before.width) > 1, `${step}: the composer's width changed: ${before.width} → ${settled.width}`);
+			if (before.fit !== settled.fit || before.rows !== settled.rows) changed += 1;
+			// A panel leaving keeps its space through its exit (D95): a frame may still be at the width before,
+			// but each frame draws the toolbar of its own width, never the other's
+			const same = (a, b) => ['height', 'text', 'start'].every(name => Math.abs(a[name] - b[name]) <= 1) && a.rows === b.rows && a.fit === b.fit;
+			const wrong = settling.frames
+				.map((frame, index) => ({ index, composer: frame.composers[0] }))
+				.filter(({ composer }) => !(Math.abs(composer.width - settled.width) <= 1 ? same(composer, settled) : Math.abs(composer.width - before.width) <= 1 && same(composer, before)));
+			expect(!wrong.length, `${step}: ${wrong.length} frames draw another width's toolbar, the first ${JSON.stringify(wrong[0])}; ${settling.lines().slice(0, 4).join(' / ')}`);
+			await page.waitForTimeout(400);
+		}
+		expect(changed === 2, `hiding and showing the panel change the toolbar's level both ways: ${changed}`);
+		await context.close();
+	}
+};
+
+export const checks = [...narrowing, panel];

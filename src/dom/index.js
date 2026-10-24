@@ -85,6 +85,7 @@ export { Diff } from './diff/diff.js';
 export { Highlighter } from './code/highlighter.js';
 export { ActionLine } from './actions/line.js';
 export { Floating } from './core/floating.js';
+export { Relayout } from './core/relayout.js';
 export { Status } from './status/status.js';
 export { ListRow } from './list/row.js';
 export { RowKeys } from './list/keys.js';

@@ -6,6 +6,7 @@ import { Motion } from '../core/motion.js';
 import { Labels } from '../core/labels.js';
 import { SideSheet } from '../sheet.js';
 import { PanelHead } from './head.js';
+import { Relayout } from '../core/relayout.js';
 
 /**
  * A page's side panel kept in view (0.10.0), such as a conversation's context: beside the main column
@@ -113,7 +114,7 @@ export class PagePanel extends Component {
 	/** The wide form: beside, it may grow to `--layout-aside-wide`, such as while it shows a review of changes. */
 	set wide(value) {
 		this.#wide = Boolean(value);
-		this.#page.toggleAttribute('data-panel-wide', this.#wide);
+		Relayout.mark(this.#page, 'data-panel-wide', this.#wide);
 	}
 
 	/** The head's title (beside) and the sheet's, when it has a head (0.11.0). */
@@ -253,7 +254,7 @@ export class PagePanel extends Component {
 	}
 
 	#paint() {
-		this.#element.hidden = this.#empty || this.#mode === 'sheet' || (!this.#shown && !this.#motion.leaving);
+		Relayout.hide(this.#element, this.#empty || this.#mode === 'sheet' || (!this.#shown && !this.#motion.leaving), this.#page);
 		const expanded = String(this.expanded);
 		const target = this.#mode === 'sheet' ? this.#sheet.element.id : this.#element.id;
 		for (const button of this.#controls.keys()) {

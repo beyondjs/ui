@@ -50,3 +50,16 @@ export class Floating {
 	place(): void;
 	destroy(): void;
 }
+
+/**
+ * Tells a page's parts that its columns changed width without the window's (0.32.0): a `bui-layout` event
+ * bubbling from the part that changed, so a composer's toolbar decides in the frame the change lands.
+ */
+export class Relayout {
+	static readonly event: 'bui-layout';
+	static tell(node: EventTarget | null | undefined): void;
+	/** Shows or hides `element`, and tells from `node` when that changed. */
+	static hide(element: HTMLElement, hidden: boolean, node?: EventTarget): void;
+	/** Sets or removes an attribute, and tells from the element when that changed. */
+	static mark(element: Element, name: string, on: boolean): void;
+}

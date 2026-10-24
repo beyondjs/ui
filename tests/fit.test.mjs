@@ -222,14 +222,14 @@ function frames() {
 	return { asked, fonts, release: () => (Object.defineProperty(page.window, 'requestAnimationFrame', own), delete document.fonts) };
 }
 
-test('a window that changes size and fonts that finish loading are decided in the next animation frame, never in their event (0.32.0)', () => {
+test('a window that changes size, fonts that finish loading and a column a page\'s part moved (Relayout) are decided in the next animation frame, never in their event (0.32.0)', () => {
 	const held = frames();
 	try {
 		const composer = compose();
 		layout = new Flow(composer, 1000);
 		composer.toolbar.measure();
 		held.asked.length = 0;
-		for (const [target, type] of [[window, 'resize'], [held.fonts, 'loadingdone']]) {
+		for (const [target, type] of [[window, 'resize'], [held.fonts, 'loadingdone'], [document, 'bui-layout']]) {
 			layout.width = 250;
 			target.dispatchEvent(new Event(type));
 			// Between a window's change and its resize steps the other components still follow the width before
@@ -260,9 +260,11 @@ test('destroy releases the fit: no gauge left, no listener on the window or the 
 		assert.ok(gauge, 'the gauge across the composer');
 		assert.equal(gauge.getAttribute('aria-hidden'), 'true');
 		assert.ok(listeners.present().includes('window:resize'), 'the window is heard');
+		assert.ok(listeners.present().includes('document:bui-layout'), 'and the page\'s parts that move the columns');
 		composer.destroy();
 		assert.equal(composer.element.querySelector('.bui-composer-gauge'), null);
-		assert.deepEqual(listeners.present().filter(name => name === 'window:resize'), before.filter(name => name === 'window:resize'));
+		const heard = name => name === 'window:resize' || name === 'document:bui-layout';
+		assert.deepEqual(listeners.present().filter(heard), before.filter(heard));
 		held.asked.length = 0;
 		window.dispatchEvent(new Event('resize'));
 		held.fonts.dispatchEvent(new Event('loadingdone'));
