@@ -39,6 +39,7 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 	href?: string | null;
 	onClick?: ((event: ReactMouseEvent<HTMLElement>) => void) | null;
 	busy?: boolean;
+	/** 0.32.0 (D183): a step not yet taken, quiet and reachable, a press only going to `place()` */ waiting?: boolean; place?: (() => HTMLElement | null | undefined) | null;
 	labels?: { busy?: string };
 	type?: 'button' | 'submit' | 'reset';
 	small?: boolean;

@@ -55,7 +55,9 @@ export class Quiet {
 	}
 
 	#press(event) {
-		if (!this.#control.contains(event.target) || !this.waiting) return;
+		// The path, not the target: a control inside a shadow root is seen from the document as its host
+		const path = event.composedPath?.() ?? [];
+		if (!(path.length ? path.includes(this.#control) : this.#control.contains(event.target)) || !this.waiting) return;
 		event.preventDefault();
 		event.stopImmediatePropagation();
 		this.#place?.()?.focus();

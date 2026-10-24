@@ -55,6 +55,13 @@ const quiet = () => {
 	const waits = new Quiet(add.element, { waiting: () => !choice.checked, place: () => search });
 	choice.addEventListener('change', () => waits.settle());
 	section('quieting').append(search, el('label', {}, [choice, 'acme/web']), add.element);
+	// The same Add inside a shadow root, whose press the document sees retargeted to the root's host
+	const host = section('shadowed');
+	const shadow = host.attachShadow({ mode: 'open' });
+	const inner = el('input', { type: 'search', 'aria-label': 'Search inside' });
+	const button = el('button', { type: 'button', text: 'Add inside', onclick: () => log.push('quiet:inside') });
+	shadow.append(inner, button);
+	new Quiet(button, { waiting: () => true, place: () => inner });
 };
 if (shape.sheet) sheet.open();
 window.fixture = { log, stall: false, sheet, open: value => value ? sheet.open() : sheet.close(), opener: opener.element, secret, quiet, ready: true };

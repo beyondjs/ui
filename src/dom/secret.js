@@ -3,6 +3,7 @@ import { el, fill, content } from './core/element.js';
 import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 import { status } from './feedback.js';
+import { Required } from './core/required.js';
 
 const words = {
 	en: {
@@ -35,7 +36,8 @@ const words = {
  *
  * A `required` secret still to give is `missing` (0.32.0, D183): nothing stored to keep and nothing
  * pasted. Given to a `FocusedForm`'s `fields`, it keeps the submit quiet, and a press opens the fold
- * and puts the caret in its input, saying nothing.
+ * and puts the caret in its input, saying nothing. It also marks itself `data-missing` and answers
+ * `Required`'s `bui-focus`, so a form without fields, React's `Form` among them, waits for it the same way.
  */
 export class SecretField extends Component {
 	/** The copy in English and Spanish. */
@@ -74,6 +76,12 @@ export class SecretField extends Component {
 			this.#body
 		]);
 		this.#draw();
+		this.#input.addEventListener('input', () => this.#mark());
+		// A form without fields asks a marked part to put the caret where it is given (`Required`)
+		this.#element.addEventListener(Required.ask, event => {
+			event.preventDefault();
+			this.focus();
+		});
 	}
 
 	get element() {
@@ -99,6 +107,7 @@ export class SecretField extends Component {
 		this.#stored = Boolean(value);
 		this.#replacing = false;
 		this.#draw();
+		this.#tell();
 	}
 
 	/** Whether a required secret is still to give: nothing stored to keep and nothing pasted (D183). */
@@ -139,15 +148,20 @@ export class SecretField extends Component {
 			const action = this.#replacing
 				? el('button', { type: 'button', class: 'bui-link-button', onclick: () => this.#replace(false) }, [this.#labels.text('keep', { credential })])
 				: el('button', { type: 'button', class: 'bui-link-button', onclick: () => this.#replace(true) }, [this.#labels.text('replace')]);
-			return fill(this.#body, [el('p', { class: 'bui-secret-stored' }, [status(this.#labels.text('stored'), 'success'), el('span', { 'aria-hidden': 'true', text: ' · ' }), action]), this.#replacing ? field : null]);
+			fill(this.#body, [el('p', { class: 'bui-secret-stored' }, [status(this.#labels.text('stored'), 'success'), el('span', { 'aria-hidden': 'true', text: ' · ' }), action]), this.#replacing ? field : null]);
+			return this.#mark();
 		}
 		const fold = el('details', { class: 'bui-secret-fold' }, [el('summary', { class: 'bui-secret-summary', text: this.#labels.text('paste', { credential }) }), el('div', { class: 'bui-secret-inside' }, [el('p', { class: 'bui-secret-last', text: this.#labels.text('last', { credential }) }), field])]);
 		fold.addEventListener('toggle', () => {
 			this.#input.disabled = !fold.open;
-			if (!fold.open) this.#input.value = '';
+			if (fold.open || !this.#input.value) return;
+			// A closed fold keeps nothing: what was pasted is gone, and a form waits for it again
+			this.#input.value = '';
+			this.#tell();
 		});
 		this.#input.disabled = true;
 		fill(this.#body, [fold]);
+		this.#mark();
 	}
 
 	#replace(open) {
@@ -155,7 +169,17 @@ export class SecretField extends Component {
 		this.#draw();
 		if (open) this.#input.focus();
 		else this.#body.querySelector('.bui-link-button')?.focus();
-		// What a form waits for changed: it reads `missing` again on an input event, as for a typed value
+		this.#tell();
+	}
+
+	/** Marks the part `data-missing` while a required secret is still to give, for a form without fields. */
+	#mark() {
+		this.#element.toggleAttribute('data-missing', this.missing);
+	}
+
+	/** What a form waits for changed without a typed value: it reads it again on an input event, as for one. */
+	#tell() {
+		this.#mark();
 		this.#element.dispatchEvent(new this.#element.ownerDocument.defaultView.Event('input', { bubbles: true }));
 	}
 }

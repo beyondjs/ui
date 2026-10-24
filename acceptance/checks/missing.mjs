@@ -140,6 +140,12 @@ export const checks = [
 			expect(!(await add.getAttribute('aria-disabled')), 'a choice makes it able');
 			await press(page, add);
 			expect((await page.evaluate(() => window.fixture.log)).includes('quiet:add'), 'then it acts');
+			// Inside a shadow root the document sees the press on the root's host: Quiet reads its path
+			const inside = page.locator('#shadowed').getByRole('button', { name: 'Add inside' });
+			await press(page, inside);
+			await settle(page);
+			const shadowed = await page.evaluate(() => ({ acted: window.fixture.log.includes('quiet:inside'), caret: document.querySelector('#shadowed').shadowRoot.activeElement?.getAttribute('aria-label') ?? null }));
+			expect(!shadowed.acted && shadowed.caret === 'Search inside', `inside a shadow root too: ${JSON.stringify(shadowed)}`);
 			await context.close();
 		}
 	},

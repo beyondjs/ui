@@ -22,6 +22,9 @@ const following = 4;
  * and React's `Form` are built on it, and a product's own form uses it as it is.
  */
 export class Required {
+	/** The event a marked part answers, with `preventDefault()`, when it puts the caret where it is given itself. */
+	static ask = 'bui-focus';
+
 	/** Whether a required control has nothing in it yet; a control the browser does not validate never waits. */
 	static empty(control) {
 		if (!control?.required || control.willValidate === false || control.validity?.badInput) return false;
@@ -76,12 +79,16 @@ export class Required {
 		}
 	}
 
-	/** Puts the caret in the first part that waits: a field, a control, or a marked part's chosen option or first control. */
+	/**
+	 * Puts the caret in the first part that waits: a field, a control, or a marked part. A marked part that
+	 * knows where its caret goes answers `Required.ask` (a cancelable `bui-focus` event) and puts it there,
+	 * as `SecretField` opens its fold; else its chosen option or its first control takes it.
+	 */
 	focus() {
 		const first = this.first;
 		if (!first) return false;
 		if (first.nodeType !== 1 || first.matches(controls)) first.focus();
-		else (first.querySelector('input:checked') ?? first.querySelector(reachable) ?? first).focus();
+		else if (first.dispatchEvent(new first.ownerDocument.defaultView.CustomEvent(Required.ask, { cancelable: true }))) (first.querySelector('input:checked') ?? first.querySelector(reachable) ?? first).focus();
 		return true;
 	}
 

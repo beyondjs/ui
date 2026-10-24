@@ -35,7 +35,7 @@ function svg(glyph) {
  * A button (or a link styled as one with `href`). While `busy` it keeps focus but ignores presses,
  * shows a spinner and says it is working: `labels.busy` (default `{label}…`) replaces a text label.
  */
-export function Button({ label, children, variant = 'secondary', glyph = null, href = null, onClick = null, disabled = false, busy = false, type = 'button', small = false, name, labels = {}, ...rest }) {
+export function Button({ label, children, variant = 'secondary', glyph = null, href = null, onClick = null, disabled = false, busy = false, waiting = false, place = null, type = 'button', small = false, name, labels = {}, ...rest }) {
 	const className = `bui-button bui-button-${variant}${small ? ' bui-button-small' : ''}${rest.className ? ` ${rest.className}` : ''}`;
 	const text = label ?? children;
 	const shown = busy && typeof text === 'string' ? (labels.busy ?? '{label}…').replace('{label}', text) : text;
@@ -49,11 +49,13 @@ export function Button({ label, children, variant = 'secondary', glyph = null, h
 			type,
 			disabled,
 			'aria-label': name,
-			'aria-disabled': busy ? 'true' : undefined,
+			'aria-disabled': busy || waiting ? 'true' : undefined,
 			'data-busy': busy ? '' : undefined,
 			onClick: event => {
-				if (busy) {
+				if (busy || waiting) {
 					event.preventDefault();
+					// A step not yet taken (0.32.0, D183): the press only puts the person where they can act
+					if (!busy) place?.()?.focus();
 					return;
 				}
 				onClick?.(event);

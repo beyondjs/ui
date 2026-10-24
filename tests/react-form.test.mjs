@@ -77,3 +77,42 @@ test('a part the product marks data-missing waits across redraws, a footer that 
 	await act(async () => host.querySelector('form').requestSubmit());
 	assert.deepEqual(sent, ['inner', 'outer']);
 });
+
+test('a required SecretField inside React\'s Form keeps it waiting, and a press opens its fold with the caret in its input', async () => {
+	const sent = [];
+	await render(h(ui.Form, { onSubmit: event => (event.preventDefault(), sent.push('connect')) }, h(ui.SecretField, { label: 'Supabase access', credential: 'access token', required: true }), h('button', { type: 'submit' }, 'Connect')));
+	const form = host.querySelector('form');
+	const connect = form.querySelector('button[type="submit"]');
+	assert.equal(connect.getAttribute('aria-disabled'), 'true', 'no token pasted yet');
+	await act(async () => form.requestSubmit());
+	assert.deepEqual(sent, [], 'an empty token is never sent');
+	assert.equal(form.querySelector('details').open, true);
+	const input = form.querySelector('input[type="password"]');
+	assert.ok(document.activeElement === input);
+	await act(async () => {
+		input.value = 'sbp_123';
+		input.dispatchEvent(new Event('input', { bubbles: true }));
+	});
+	assert.equal(connect.hasAttribute('aria-disabled'), false);
+	await act(async () => form.requestSubmit());
+	assert.deepEqual(sent, ['connect']);
+});
+
+test('a React Button waiting for a step not yet taken is quiet and reachable, and a press only goes to place()', async () => {
+	let added = 0;
+	const search = React.createRef();
+	function Probe({ chosen }) {
+		return h(React.Fragment, null, h('input', { ref: search, type: 'search', 'aria-label': 'Search' }), h(ui.Button, { label: 'Add', variant: 'primary', waiting: !chosen, place: () => search.current, onClick: () => (added += 1) }));
+	}
+	await render(h(Probe, { chosen: false }));
+	const add = host.querySelector('button');
+	assert.equal(add.getAttribute('aria-disabled'), 'true');
+	assert.equal(add.disabled, false);
+	await act(async () => add.click());
+	assert.equal(added, 0);
+	assert.ok(document.activeElement === search.current);
+	await render(h(Probe, { chosen: true }));
+	assert.equal(add.hasAttribute('aria-disabled'), false);
+	await act(async () => add.click());
+	assert.equal(added, 1);
+});

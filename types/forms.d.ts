@@ -15,6 +15,8 @@ export interface Waited {
  * change until `destroy()`.
  */
 export class Required {
+	/** The event a marked part answers with `preventDefault()` when it puts the caret where it is given itself (`bui-focus`). */
+	static readonly ask: 'bui-focus';
 	/** Whether a required control has nothing in it yet; a control the browser does not validate never waits. */
 	static empty(control: Element | { required?: boolean; willValidate?: boolean; validity?: Partial<ValidityState>; type?: string; value?: string } | null | undefined): boolean;
 	constructor(form: HTMLFormElement, options?: { fields?: Waited[] });

@@ -17,6 +17,10 @@ const defaults = { busy: '{label}…' };
  * name (visually hidden, and its `aria-label`) and the family tooltip shows it on hover and focus. Only a
  * glyph of the closed list (`unlabeled`, D11) stands alone this way; `bare` can change while it lives,
  * as a composer's Send does when a step needs its words.
+ *
+ * Since 0.32.0 (D183) a button may be `waiting` for a step not yet taken, such as Add while nothing is
+ * chosen: it is quiet (`aria-disabled`) and still reachable, and a press only puts the person at
+ * `place()`, its own action never running. A form's submit waits through `Required` instead.
  */
 export class Button extends Component {
 	#element;
@@ -24,6 +28,8 @@ export class Button extends Component {
 	#glyph;
 	#labels;
 	#busy = false;
+	#waiting = false;
+	#place = null;
 	#disabled;
 	#bare = false;
 	#name;
@@ -38,6 +44,8 @@ export class Button extends Component {
 	 * @param {(event: Event) => void} [options.onclick]
 	 * @param {string} [options.name] accessible name when it differs from the label
 	 * @param {boolean} [options.bare] the glyph alone, its label the name and the tooltip (0.26.0, D165)
+	 * @param {boolean} [options.waiting] a step not yet taken: quiet, a press only going to `place` (0.32.0, D183)
+	 * @param {(() => HTMLElement|null|undefined)|null} [options.place] where a press puts the person while it waits
 	 */
 	constructor({
 		label,
@@ -52,6 +60,8 @@ export class Button extends Component {
 		name = null,
 		describedby = null,
 		bare = false,
+		waiting = false,
+		place = null,
 		labels = {}
 	}) {
 		super();
@@ -71,6 +81,8 @@ export class Button extends Component {
 				: el('button', { ...props, type, disabled, onclick: event => this.#press(event, onclick) });
 		if (href && !disabled && onclick) this.#element.addEventListener('click', onclick);
 		this.#bare = Boolean(bare && glyph);
+		this.#place = place;
+		this.#waiting = Boolean(waiting);
 		this.busy = busy;
 	}
 
@@ -84,10 +96,19 @@ export class Button extends Component {
 
 	set busy(value) {
 		this.#busy = Boolean(value);
-		if (this.#busy) this.#element.setAttribute('aria-disabled', 'true');
-		else this.#element.removeAttribute('aria-disabled');
+		this.#quiet();
 		this.#element.toggleAttribute('data-busy', this.#busy);
 		this.#render();
+	}
+
+	get waiting() {
+		return this.#waiting;
+	}
+
+	/** Waits quiet for a step not yet taken, a press only going to `place` (true), or acts (false). */
+	set waiting(value) {
+		this.#waiting = Boolean(value);
+		this.#quiet();
 	}
 
 	get disabled() {
@@ -149,12 +170,19 @@ export class Button extends Component {
 	}
 
 	#press(event, handler) {
-		if (this.#busy) {
+		if (this.#busy || this.#waiting) {
 			event.preventDefault();
 			event.stopImmediatePropagation();
+			// A step not yet taken: the press only puts the person where they can act, saying nothing
+			if (!this.#busy) this.#place?.()?.focus();
 			return;
 		}
 		handler?.(event);
+	}
+
+	#quiet() {
+		if (this.#busy || this.#waiting) this.#element.setAttribute('aria-disabled', 'true');
+		else this.#element.removeAttribute('aria-disabled');
 	}
 
 	#render() {

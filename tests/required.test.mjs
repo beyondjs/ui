@@ -164,3 +164,74 @@ test('Quiet: a control waits for a choice made elsewhere; a press while it waits
 	assert.equal(send.hasAttribute('aria-disabled'), false, 'heard on the form\'s input');
 	assert.throws(() => new ui.Quiet(send, {}), TypeError);
 });
+
+test('a marked part that knows where its caret goes answers bui-focus, and a required SecretField marks itself, so a form without fields waits for it', () => {
+	const form = document.createElement('form');
+	const part = document.createElement('div');
+	part.setAttribute('data-missing', '');
+	const inside = Object.assign(document.createElement('input'), { 'aria-label': 'Where the caret goes' });
+	part.append(Object.assign(document.createElement('button'), { type: 'button', textContent: 'First' }), inside);
+	part.addEventListener(ui.Required.ask, event => (event.preventDefault(), inside.focus()));
+	form.append(part, document.createElement('button'));
+	document.body.append(form);
+	const required = new ui.Required(form);
+	required.focus();
+	assert.ok(document.activeElement === inside, 'the part put the caret where it wanted it');
+	const other = document.createElement('form');
+	const value = new ui.SecretField({ label: 'Value', credential: 'value', required: true, labels: { paste: 'Enter the value' } });
+	const save = document.createElement('button');
+	other.append(value.element, save);
+	document.body.append(other);
+	const waits = new ui.Required(other);
+	assert.equal(value.element.hasAttribute('data-missing'), true, 'a required secret still to give marks itself');
+	assert.equal(save.getAttribute('aria-disabled'), 'true');
+	assert.equal(waits.hold(new Event('submit', { cancelable: true })), true);
+	assert.equal(value.element.querySelector('details').open, true, 'asked, it opens its fold');
+	assert.ok(document.activeElement === value.control, 'and puts the caret in its input');
+	type(value.control, 's3cret');
+	assert.equal(value.element.hasAttribute('data-missing'), false);
+	assert.equal(save.hasAttribute('aria-disabled'), false, 'a value pasted: the form is able');
+	const fold = value.element.querySelector('details');
+	fold.open = false;
+	fold.dispatchEvent(new Event('toggle'));
+	assert.equal(value.control.value, '', 'a closed fold keeps nothing');
+	assert.equal(save.getAttribute('aria-disabled'), 'true', 'and the form waits for it again');
+	value.stored = true;
+	assert.equal(save.hasAttribute('aria-disabled'), false, 'a stored secret is kept: nothing to give');
+	assert.equal(new ui.SecretField({ label: 'Access', credential: 'token' }).element.hasAttribute('data-missing'), false, 'a secret that is not required never marks itself');
+});
+
+test('a Button waiting for a step not yet taken is quiet and reachable, and a press only goes to place(), its action never running', async () => {
+	let added = 0;
+	const search = Object.assign(document.createElement('input'), { type: 'search' });
+	document.body.append(search);
+	const add = new ui.Button({ label: 'Add', variant: 'primary', waiting: true, place: () => search, onclick: () => (added += 1) }).mount(document.body);
+	assert.equal(add.element.getAttribute('aria-disabled'), 'true');
+	assert.equal(add.element.disabled, false, 'still reachable');
+	add.element.click();
+	assert.equal(added, 0);
+	assert.ok(document.activeElement === search, 'the press goes where the step is taken');
+	await add.run(() => Promise.resolve());
+	assert.equal(add.element.getAttribute('aria-disabled'), 'true', 'after a busy run it still waits');
+	add.waiting = false;
+	assert.equal(add.element.hasAttribute('aria-disabled'), false);
+	add.element.click();
+	assert.equal(added, 1);
+	add.destroy();
+});
+
+// happy-dom does not retarget a shadow root's events, so this holds the behavior and the browser check proves it
+test('Quiet hears a press inside a shadow root by its path, not its retargeted target', () => {
+	let added = 0;
+	const host = document.createElement('div');
+	document.body.append(host);
+	const shadow = host.attachShadow({ mode: 'open' });
+	const search = Object.assign(document.createElement('input'), { type: 'search' });
+	const button = Object.assign(document.createElement('button'), { type: 'button', textContent: 'Add' });
+	button.addEventListener('click', () => (added += 1));
+	shadow.append(search, button);
+	const quiet = new ui.Quiet(button, { waiting: () => true, place: () => search });
+	button.click();
+	assert.equal(added, 0, 'the control\'s own handler never runs while it waits');
+	quiet.destroy();
+});

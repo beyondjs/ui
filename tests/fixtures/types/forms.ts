@@ -1,5 +1,5 @@
 /** Declarations of 0.32.0's Required and Quiet (D183). */
-import { Required, Quiet, Field } from '@beyond-js/ui';
+import { Required, Quiet, Field, Button } from '@beyond-js/ui';
 
 const form = document.createElement('form');
 const required = new Required(form);
@@ -17,4 +17,7 @@ quiet.destroy();
 fielded.destroy();
 // @ts-expect-error a quiet control says what it waits for
 new Quiet(document.createElement('button'), {});
-void [waits, held, buttons, first, empty, still];
+const add = new Button({ label: 'Add', waiting: true, place: () => document.querySelector('input') });
+add.waiting = false;
+const ask: string = Required.ask;
+void [waits, held, buttons, first, empty, still, ask];
