@@ -23,7 +23,8 @@ const words = {
 		facts: (index) => [index % 3 === 0 ? 'Changed 2 files' : null, `12:${String(index * 3 + 1).padStart(2, '0')}`, `${index + 1} min ${(index * 7) % 60} s`],
 		needs: 'Needs you',
 		placeholder: 'Message Claude Code…',
-		label: 'Message to Claude Code'
+		label: 'Message to Claude Code',
+		attach: 'Say what to do with the attached files'
 	},
 	es: {
 		title: 'Corregir la redirección del pago',
@@ -46,7 +47,8 @@ const words = {
 		facts: (index) => [index % 3 === 0 ? 'Cambió 2 archivos' : null, `12:${String(index * 3 + 1).padStart(2, '0')}`, `${index + 1} min ${(index * 7) % 60} s`],
 		needs: 'Te necesita',
 		placeholder: 'Escribe a Claude Code…',
-		label: 'Mensaje a Claude Code'
+		label: 'Mensaje a Claude Code',
+		attach: 'Di qué hacer con los archivos adjuntos'
 	}
 };
 

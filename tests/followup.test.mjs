@@ -52,9 +52,12 @@ test('the dialog, the questions, Unavailable and Toaster carry Spanish copy', as
 	assert.equal(dialog.querySelector('.bui-dialog-head button').getAttribute('aria-label'), 'Cerrar');
 	page.key(dialog, 'Escape');
 	assert.equal(await asked, false);
-	const value = ui.prompt({ title: 'Renombrar', label: 'Nombre', labels: ui.prompt.labels.es });
+	const value = ui.prompt({ title: 'Renombrar', label: 'Nombre', labels: ui.prompt.labels.es, validate: name => (name === 'x' ? 'Elige otro nombre.' : null) });
 	const form = document.querySelector('dialog form');
 	form.querySelector('input').value = '';
+	form.dispatchEvent(new Event('submit', { cancelable: true }));
+	assert.equal(form.querySelector('.bui-field-error').hidden, true, 'an empty field says nothing (D183)');
+	form.querySelector('input').value = 'x';
 	form.dispatchEvent(new Event('submit', { cancelable: true }));
 	assert.ok(form.querySelector('.bui-field-error').textContent.length > 0, 'the field\'s error says something');
 	page.key(document.querySelector('dialog'), 'Escape');

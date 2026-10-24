@@ -131,16 +131,21 @@ export const checks = [
 		}
 	},
 	{
-		name: 'prompt: a required value is explained before the prompt resolves',
+		name: 'prompt: an empty field keeps Confirm quiet, and Enter keeps the caret there, saying nothing (D183); a value resolves it',
 		consumers: ['dom'],
 		async run(browser, consumer) {
 			const { page } = await browser.open(consumer);
 			await page.getByRole('button', { name: 'Name area' }).click();
 			const dialog = page.getByRole('dialog');
+			const field = dialog.getByLabel('Area name');
+			expect((await dialog.getByRole('button', { name: 'Confirm' }).getAttribute('aria-disabled')) === 'true', 'nothing to confirm yet');
 			await page.keyboard.press('Enter');
-			await dialog.getByText('Name the area.').waitFor();
-			expect(await dialog.getByLabel('Area name').getAttribute('aria-invalid') === 'true', 'field marked invalid');
+			await page.waitForTimeout(100);
+			expect(await dialog.isVisible(), 'the prompt stays open');
+			expect(!(await dialog.getByText('Name the area.').count()) && (await field.getAttribute('aria-invalid')) !== 'true', 'an empty field is no failure');
+			expect(await field.evaluate(node => node === document.activeElement), 'the caret stays where the name is written');
 			await page.keyboard.type('Billing');
+			expect(!(await dialog.getByRole('button', { name: 'Confirm' }).getAttribute('aria-disabled')), 'a name makes Confirm able');
 			await page.keyboard.press('Enter');
 			await dialog.waitFor({ state: 'hidden' });
 			expect((await page.evaluate(() => window.fixture.log)).includes('prompt:Billing'), 'prompt resolved with the value');

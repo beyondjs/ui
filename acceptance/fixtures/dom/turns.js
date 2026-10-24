@@ -34,7 +34,8 @@ const index = new TurnIndex({ onview: ({ key, covered }) => {
 	const turn = drawn.find(each => each.key === key);
 	header.subject = covered && turn ? { text: turn.message, href: turn.href } : null;
 } });
-const composer = new Composer({ label: words.label, placeholder: words.placeholder, add: [{ label: 'Mention a file', run: () => log.push('mention') }], onsubmit: message => (log.push(`send:${message.text}`), Promise.resolve()) });
+// Its files wait for words (0.32.0, D183): a ready file alone is nothing to send, and the field says so
+const composer = new Composer({ label: words.label, placeholder: words.placeholder, add: [{ label: 'Mention a file', run: () => log.push('mention') }], attach: { onfiles: () => undefined, onremove: () => (composer.attachments = []), words: words.attach }, onsubmit: message => (log.push(`send:${message.text}`), Promise.resolve()) });
 const page = new Page({ template: 'thread', lane: 'center', header, children: [index.element, thread], dock: composer }).mount(main);
 index.update({ turns: drawn });
 
@@ -43,6 +44,10 @@ Object.assign(fixture, {
 	header,
 	composer,
 	page,
+	/** A ready file, as one the product has finished uploading. */
+	attach() {
+		composer.attachments = [{ key: 'f1', name: 'trace.png', size: 2048, type: 'image/png', state: 'ready' }];
+	},
 	destroy() {
 		for (const component of [page, header, index, composer, sidebar, bar]) component.destroy();
 	},

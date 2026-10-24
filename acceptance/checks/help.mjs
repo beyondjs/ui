@@ -55,8 +55,7 @@ export const checks = [
 			const { page } = await browser.open(consumer);
 			const copy = words[consumer.language];
 			const form = page.locator('#form');
-			await form.getByRole('button', { name: copy.submit }).click();
-			expect(await form.getByLabel(copy.title).evaluate(node => node === document.activeElement || node.matches(':invalid')), 'an empty title is refused first');
+			// An empty title is no failure (D183): `missing.mjs` checks that case
 			await form.getByLabel(copy.title).fill('Export invoices');
 			await form.getByRole('button', { name: copy.submit }).dblclick();
 			await form.getByText(copy.busy).waitFor();
