@@ -13,6 +13,8 @@ export class ComposerField {
 	#element;
 	#control;
 	#shown = el('span', { class: 'bui-composer-placeholder', 'aria-hidden': 'true' });
+	#placeholder = null;
+	#hint = null;
 
 	/**
 	 * @param {object} options
@@ -27,13 +29,13 @@ export class ComposerField {
 		if (typeof label !== 'string' || !label.trim()) throw new TypeError('A composer is named by its label');
 		const lines = (count, fallback) => (Number.isFinite(count) && count >= 1 ? Math.round(count) : fallback);
 		const low = lines(min, 1);
-		this.#control = el('textarea', { class: 'bui-composer-field', rows: String(low), 'aria-label': label, placeholder, name, autocomplete: 'off' });
+		this.#control = el('textarea', { class: 'bui-composer-field', rows: String(low), 'aria-label': label, name, autocomplete: 'off' });
 		this.#control.style.setProperty('--bui-composer-min', String(low));
 		this.#control.style.setProperty('--bui-composer-max', String(Math.max(low, lines(max, 12))));
 		this.#control.value = String(value ?? '');
 		this.#control.addEventListener('input', () => this.fit());
-		this.#shown.textContent = placeholder ?? '';
 		this.#element = el('div', { class: 'bui-composer-input' }, [this.#control, this.#shown]);
+		this.placeholder = placeholder;
 	}
 
 	/** The field with its placeholder line. */
@@ -58,6 +60,18 @@ export class ComposerField {
 	}
 
 	set placeholder(text) {
+		this.#placeholder = text || null;
+		this.#say();
+	}
+
+	/** Words said in place of the placeholder while set, such as what attached files wait for (0.32.0); null for none. */
+	set hint(text) {
+		this.#hint = text || null;
+		this.#say();
+	}
+
+	#say() {
+		const text = this.#hint ?? this.#placeholder;
 		if (text) this.#control.setAttribute('placeholder', text);
 		else this.#control.removeAttribute('placeholder');
 		this.#shown.textContent = text ?? '';

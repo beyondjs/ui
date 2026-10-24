@@ -4,6 +4,7 @@ import { glyph } from './core/icons.js';
 import { Ids } from './core/ids.js';
 import { Labels } from './core/labels.js';
 import { Suggestion } from './core/suggestion.js';
+import { Required } from './core/required.js';
 
 const defaults = { optional: '(optional)', invalid: 'Check this value.', suggested: 'Suggested' };
 // The constraint-validation failures, in the order a message is chosen.
@@ -14,9 +15,13 @@ const failures = ['valueMissing', 'typeMismatch', 'patternMismatch', 'tooShort',
  *
  * The hint and the error describe the control (`aria-describedby`); an error also marks it
  * `aria-invalid`. `check()` validates with the browser's constraints and the optional `validate`
- * function and shows the consumer's message for the failure (`messages.valueMissing`, …), falling
+ * function and shows the consumer's message for the failure (`messages.typeMismatch`, …), falling
  * back to the browser's own text. Once an error shows, the field rechecks as the person types, so
  * the message disappears as soon as the value is fixed.
+ *
+ * A required field with nothing written (blanks are nothing) is `missing`: a step not yet taken,
+ * never said as a failure (0.32.0, D183). `check()` answers false for it without a message and without
+ * asking `validate`, so a form puts the caret there instead, and its submit waits quiet (`FocusedForm`).
  *
  * With `suggest` (0.7.0, D56), the field shows a value derived from context, marked "Suggested", and
  * follows each new `suggest` until the person edits it; an emptied field takes the suggestion back
@@ -149,6 +154,11 @@ export class Field extends Component {
 		return this.#shown;
 	}
 
+	/** Whether the field is required and nothing is written yet (blanks are nothing, an unchecked box is nothing). */
+	get missing() {
+		return Required.empty(this.#control);
+	}
+
 	/** Shows a message under the control, or clears it with `null`. */
 	set error(message) {
 		this.#shown = Boolean(message);
@@ -162,8 +172,12 @@ export class Field extends Component {
 		else this.#control.removeAttribute('aria-describedby');
 	}
 
-	/** Validates the value; shows and returns whether it is valid. */
+	/** Validates the value; shows and returns whether it is valid. A missing value says nothing (D183). */
 	check() {
+		if (this.missing) {
+			this.error = null;
+			return false;
+		}
 		const custom = this.#validate?.(this.#control.value) ?? null;
 		const validity = this.#control.validity;
 		const failure = validity && !validity.valid ? failures.find(key => validity[key]) : null;

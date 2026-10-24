@@ -62,7 +62,7 @@ export class Composer extends Component {
 		this.#actions = new ComposerActions({ labels: this.#labels, run: action => this.#send(action, true), refocus: () => this.focus() });
 		const box = this.#box.element;
 		this.#element = el('div', { class: 'bui-composer', 'data-submit': submit }, [box, this.#keys.guide]);
-		this.#marks = new ComposerMarks(this.#element, () => !this.#field.value.trim() && !this.#context?.files.ready, empty => (this.#actions.empty = empty));
+		this.#marks = new ComposerMarks(this.#element, () => !this.#field.value.trim() && !this.#context?.sendable, empty => ((this.#actions.empty = empty), (this.#field.hint = this.#context?.hint)));
 		const control = this.#field.control;
 		this.#context = new ComposerContext({ root: this.#element, box, field: control, labels: this.#labels, locale, attach, onsuggest, suggest, commands, recall, dictation, refocus: () => this.focus(), oninsert: (text, caret) => this.#write(text, caret) });
 		this.#toolbar = new ComposerToolbar({ root: this.#element, controls: this.#context.controls, actions: this.#actions.element, labels: this.#labels, compact });

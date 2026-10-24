@@ -33,7 +33,7 @@ export interface ComposerProps {
 	/** The turn's choices at the toolbar's start, React content (0.11.0). */
 	settings?: ReactNode;
 	/** Files from paste, drop and Attach; callbacks read from the latest props (0.11.0). */
-	attach?: { label?: string | null; accept?: string | null; multiple?: boolean; onFiles: (files: File[], via: 'paste' | 'drop' | 'pick') => void; onRemove?: ((item: ComposerAttachment) => void) | null; onRetry?: ((item: ComposerAttachment) => void) | null; /** The work surface where a drop attaches too: an element or a ref to one, read after each render (0.11.2). */ zone?: Element | { readonly current: Element | null } | null } | null;
+	attach?: { label?: string | null; accept?: string | null; multiple?: boolean; onFiles: (files: File[], via: 'paste' | 'drop' | 'pick') => void; onRemove?: ((item: ComposerAttachment) => void) | null; onRetry?: ((item: ComposerAttachment) => void) | null; /** The work surface where a drop attaches too: an element or a ref to one, read after each render (0.11.2). */ zone?: Element | { readonly current: Element | null } | null; /** What ready files wait for, said in the field: files alone are then nothing to send (0.32.0, D183). */ words?: string | null } | null;
 	/** The chips (0.11.0). */
 	attachments?: ComposerAttachment[] | null;
 	/** Suggestions after the trigger, read from the latest props (0.11.0). */

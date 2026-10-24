@@ -170,14 +170,25 @@ test('confirm with work stays busy, keeps a failure in the dialog, and resolves 
 	assert.equal(attempts, 2);
 });
 
-test('prompt validates before resolving its value, and resolves null when cancelled', async () => {
-	const asked = ui.prompt({ title: 'New area', label: 'Name', messages: { valueMissing: 'Name the area.' } });
+test('prompt: an empty field says nothing and keeps the caret (D183), a wrong value is said, and Cancel resolves null', async () => {
+	const asked = ui.prompt({ title: 'New area', label: 'Name', messages: { valueMissing: 'Name the area.' }, validate: value => (value.length < 3 ? 'Use three letters or more.' : null) });
 	const dialog = document.querySelector('dialog');
 	const input = dialog.querySelector('input');
+	const accept = [...dialog.querySelectorAll('button')].find(button => button.textContent === 'Confirm');
 	assert.equal(document.activeElement, input);
+	assert.equal(accept.getAttribute('aria-disabled'), 'true', 'nothing to confirm yet, and still reachable');
+	assert.equal(accept.disabled, false);
 	dialog.querySelector('form').requestSubmit();
-	assert.match(dialog.textContent, /Name the area/);
+	assert.doesNotMatch(dialog.textContent, /Name the area|three letters/, 'an empty field is no failure');
+	assert.equal(dialog.querySelector('.bui-field-error').hidden, true);
+	assert.equal(document.activeElement, input, 'the caret stays where the name is written');
+	input.value = 'Bi';
+	input.dispatchEvent(new Event('input'));
+	assert.equal(accept.hasAttribute('aria-disabled'), false, 'something written makes Confirm able');
+	dialog.querySelector('form').requestSubmit();
+	assert.match(dialog.textContent, /Use three letters or more/, 'a wrong value is said');
 	input.value = 'Billing';
+	input.dispatchEvent(new Event('input'));
 	dialog.querySelector('form').requestSubmit();
 	assert.equal(await asked, 'Billing');
 	const cancelled = ui.prompt({ title: 'Rename', label: 'Name', value: 'Old' });

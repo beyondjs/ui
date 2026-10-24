@@ -79,24 +79,32 @@ export function useConfirm(labels = {}) {
 /**
  * A focused form: `onSubmit(values, data)` runs once at a time and the form is busy meanwhile;
  * `children` may be a function of `busy` to render the submit label. A failure shows `explain(error)`.
+ * While a required field is empty its submit buttons are quiet, and a submission puts the caret in the
+ * first empty one, saying nothing (0.32.0, D183).
  */
 export function FocusedForm({ onSubmit, explain, onSuccess, labels, className, children, ...rest }) {
 	const form = useRef(null);
+	const behavior = useRef(null);
 	const [busy, setBusy] = useState(false);
 	const submit = useLatest(onSubmit);
 	const explaining = useLatest(explain);
 	const success = useLatest(onSuccess);
 	useLayoutEffect(() => {
-		const behavior = new Submission(form.current, {
+		behavior.current = new Submission(form.current, {
 			submit: (values, data) => submit.current(values, data),
 			explain: error => explaining.current?.(error),
 			onsuccess: result => success.current?.(result),
 			onbusy: setBusy,
 			labels: { failure: labels?.failure }
 		});
-		return () => behavior.destroy();
+		return () => {
+			behavior.current.destroy();
+			behavior.current = null;
+		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [labels?.failure]);
+	// React may redraw the submit buttons: they are drawn quiet again while a required field is empty (0.32.0, D183)
+	useLayoutEffect(() => behavior.current?.settle());
 	return h('form', { ...rest, ref: form, className: `bui-form${className ? ` ${className}` : ''}` }, typeof children === 'function' ? children(busy) : children);
 }
 

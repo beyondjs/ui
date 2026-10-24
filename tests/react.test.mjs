@@ -165,6 +165,34 @@ test('FocusedForm renders its busy state and ignores a second submission', async
 	await page.until(() => form.querySelector('button').textContent === 'Save');
 });
 
+test('FocusedForm keeps its submit quiet while a required field is empty, across redraws (0.32.0, D183)', async () => {
+	let sent = 0;
+	let draw = null;
+	function Probe() {
+		const [count, setCount] = React.useState(0);
+		draw = () => setCount(value => value + 1);
+		return h(ui.FocusedForm, { onSubmit: () => ((sent += 1), Promise.resolve()) }, busy => [h('input', { key: 'name', name: 'name', required: true, 'aria-label': 'Name' }), h('button', { key: 'save', type: 'submit', 'data-count': count }, busy ? 'Saving…' : 'Save')]);
+	}
+	await render(h(Probe));
+	const form = host.querySelector('form');
+	const input = form.querySelector('input');
+	const button = form.querySelector('button');
+	assert.equal(button.getAttribute('aria-disabled'), 'true', 'nothing to save yet');
+	await act(async () => draw());
+	assert.equal(button.getAttribute('aria-disabled'), 'true', 'a redraw keeps it quiet');
+	await act(async () => form.requestSubmit());
+	assert.equal(sent, 0);
+	assert.ok(document.activeElement === input, 'the caret goes to the empty field');
+	await act(async () => {
+		input.value = 'Alpha';
+		input.dispatchEvent(new Event('input', { bubbles: true }));
+	});
+	assert.equal(button.hasAttribute('aria-disabled'), false);
+	await act(async () => form.requestSubmit());
+	await page.until(() => sent === 1 && !button.hasAttribute('data-busy'));
+	assert.equal(button.hasAttribute('aria-disabled'), false, 'able again after the send, its value kept');
+});
+
 test('useConfirm applies the product labels to every question', async () => {
 	let ask = null;
 	function Probe() {

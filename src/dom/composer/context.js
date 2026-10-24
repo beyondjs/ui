@@ -21,6 +21,7 @@ export class ComposerContext {
 	#commands = null;
 	#recall = null;
 	#dictation = null;
+	#words = null;
 
 	/**
 	 * @param {object} options
@@ -29,7 +30,7 @@ export class ComposerContext {
 	 * @param {HTMLTextAreaElement} options.field the field
 	 * @param {import('../core/labels.js').Labels} options.labels the composer's copy
 	 * @param {string|undefined} options.locale the language of sizes and percents
-	 * @param {object|null} options.attach `{ label?, accept?, multiple?, onfiles, onremove?, onretry? }`
+	 * @param {object|null} options.attach `{ label?, accept?, multiple?, onfiles, onremove?, onretry?, words? }`
 	 * @param {((query: string, signal: AbortSignal) => Promise<unknown>)|null} options.onsuggest the suggestions' source
 	 * @param {object|null} options.suggest `{ trigger?, bound?, delay?, label?, explain? }`
 	 * @param {Array<object>|((query: string, signal: AbortSignal) => unknown)|null} [options.commands] the product's commands (0.14.0)
@@ -40,6 +41,7 @@ export class ComposerContext {
 	 */
 	constructor({ root, box, field, labels, locale, attach, onsuggest, suggest, commands = null, recall = null, dictation = null, refocus, oninsert }) {
 		this.#files = new ComposerFiles({ labels, locale, refocus, callbacks: { onremove: item => attach?.onremove?.(item), onretry: attach?.onretry ? item => attach.onretry(item) : null } });
+		if (typeof attach?.words === 'string' && attach.words.trim()) this.#words = attach.words.trim();
 		if (attach) this.#intake = new ComposerIntake({ root, box, field, labels, attach });
 		this.#add = new ComposerAdd({ labels, pick: this.#intake ? () => this.#intake.pick() : null, attach: attach?.label ?? null });
 		if (onsuggest) {
@@ -58,6 +60,19 @@ export class ComposerContext {
 	/** The chips' list, at the box's top. */
 	get files() {
 		return this.#files;
+	}
+
+	/**
+	 * Whether ready files are something to send by themselves: not when `attach.words` says files wait for
+	 * words (0.32.0, D183), so Send stays quiet until there are words.
+	 */
+	get sendable() {
+		return this.#files.ready && !this.#words;
+	}
+
+	/** What the field says while ready files wait for words (`attach.words`), or null. */
+	get hint() {
+		return this.#words && this.#files.ready ? this.#words : null;
 	}
 
 	/** The **+** and its file input, for the toolbar's start (the + is not drawn with nothing to add). */

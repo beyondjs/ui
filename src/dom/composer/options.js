@@ -21,7 +21,7 @@
  * @property {(text: string) => void} [onchange] the text changed, by the person or by sending
  * @property {((error: unknown) => string|null)} [explain] what a rejected send says
  * @property {Array<Node|{element: Node}>} [settings] the turn's choices at the toolbar's start (0.11.0)
- * @property {object|null} [attach] `{ label?, accept?, multiple?, onfiles(files, via), onremove?(item), onretry?(item), zone? }` (0.11.0; `zone` since 0.11.2)
+ * @property {object|null} [attach] `{ label?, accept?, multiple?, onfiles(files, via), onremove?(item), onretry?(item), zone?, words? }` (0.11.0; `zone` since 0.11.2; `words`, what ready files wait for, since 0.32.0)
  * @property {Array<object>} [attachments] the chips: `{ key, name, size?, type?, state, progress?, reason?, thumbnail?, file? }` (0.11.0)
  * @property {((query: string, signal: AbortSignal) => Promise<unknown>)|null} [onsuggest] suggestions after the trigger (0.11.0)
  * @property {{trigger?: string, bound?: number, delay?: number, label?: string|null, explain?: ((error: unknown) => string|null)|null}|null} [suggest]

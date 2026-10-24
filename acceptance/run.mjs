@@ -47,6 +47,7 @@ import { checks as dialogs } from './checks/dialog-motion.mjs';
 import { checks as recovery } from './checks/recovery-details.mjs';
 import { checks as recovering } from './checks/recovering.mjs';
 import { checks as hierarchy } from './checks/hierarchy.mjs';
+import { checks as missing } from './checks/missing.mjs';
 import { checks as waiting } from './checks/waiting.mjs';
 
 /**
@@ -57,7 +58,7 @@ import { checks as waiting } from './checks/waiting.mjs';
 class Acceptance {
 	#root = fileURLToPath(new URL('..', import.meta.url));
 	#consumers = [new Consumer('dom', 'dom'), new Consumer('react19', 'react', '19.3.0'), new Consumer('react18', 'react', '18.3.1')];
-	#checks = [...disclosure, ...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...choosing, ...icons, ...prose, ...session, ...composing, ...panels, ...thread, ...attaching, ...folding, ...fitting, ...diffing, ...railing, ...laning, ...turning, ...ending, ...anchoring, ...moving, ...seeking, ...editing, ...auditing, ...commanding, ...holding, ...navigating, ...hierarchy, ...dismissal, ...sheets, ...dialogs, ...recovery, ...recovering, ...waiting];
+	#checks = [...disclosure, ...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...choosing, ...icons, ...prose, ...session, ...composing, ...panels, ...thread, ...attaching, ...folding, ...fitting, ...diffing, ...railing, ...laning, ...turning, ...missing, ...ending, ...anchoring, ...moving, ...seeking, ...editing, ...auditing, ...commanding, ...holding, ...navigating, ...hierarchy, ...dismissal, ...sheets, ...dialogs, ...recovery, ...recovering, ...waiting];
 	#filter = process.argv[2] ?? '';
 
 	async run() {

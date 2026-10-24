@@ -97,6 +97,8 @@ export class Field extends Component {
 	readonly control: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 	readonly value: string;
 	readonly invalid: boolean;
+	/** Whether the field is required and nothing is written yet: `check()` then says nothing (0.32.0, D183). */
+	readonly missing: boolean;
 	/** Whether the person's own value stands over the suggestion (0.7.0). */
 	readonly edited: boolean;
 	set suggest(value: string | null);
@@ -219,9 +221,13 @@ export namespace alert { const labels: { readonly en: Readonly<Copy>; readonly e
 export class FocusedForm {
 	/** The copy in English and Spanish (0.7.2). */
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
-	constructor(form: HTMLFormElement, options: { submit: (values: Record<string, string>, data: FormData) => Promise<unknown>; fields?: Array<{ check(): boolean; focus(): void }>; explain?: ((error: unknown) => string) | null; onsuccess?: ((result: unknown) => void) | null; onbusy?: ((busy: boolean) => void) | null; labels?: Copy });
+	constructor(form: HTMLFormElement, options: { submit: (values: Record<string, string>, data: FormData) => Promise<unknown>; fields?: Array<{ check(): boolean; focus(): void; readonly missing?: boolean }>; explain?: ((error: unknown) => string) | null; onsuccess?: ((result: unknown) => void) | null; onbusy?: ((busy: boolean) => void) | null; labels?: Copy });
 	readonly busy: boolean;
 	readonly form: HTMLFormElement;
+	/** Whether a required field is still empty: the submit buttons are quiet meanwhile (0.32.0, D183). */
+	readonly missing: boolean;
+	/** Draws the submit buttons quiet while a required field is empty; call it again after redrawing them. */
+	settle(): void;
 	set problem(message: string | null);
 	destroy(): void;
 }

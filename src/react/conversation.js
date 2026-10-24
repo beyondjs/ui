@@ -28,7 +28,7 @@ function slot(tag, name) {
  * The message box. `tools`, `extras`, `settings` and a non-text `status` are React content; `status` may
  * also be `{ text, action }` with the action React content or `{ label, onSelect }` (0.11.0); `stop` is
  * `{ label, onSelect, busy? }`; `onSubmit({ text, action, attachments? })` returns a promise (a rejection
- * gives the text back). `attach` is `{ label?, accept?, multiple?, onFiles, onRemove?, onRetry? }` and
+ * gives the text back). `attach` is `{ label?, accept?, multiple?, onFiles, onRemove?, onRetry?, words? }` and
  * `attachments` the chips; `onSuggest(query, signal)` lists suggestions after `suggest.trigger` (0.11.0).
  * `value` is applied when it changes; the ref has `focus()`, `submit(action?)`, `attach()`, `value`,
  * `busy` and `sending`. A change of `label`, `submit`, `min`, `max`, `name`, `labels` (memoize it),
@@ -49,7 +49,7 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 	const voice = dictation ? { labels: dictation.labels, cap: dictation.cap, bound: dictation.bound, minimum: dictation.minimum, transcribe: (blob, options) => latest.current.dictation?.transcribe?.(blob, options), explain: dictation.explain ? error => latest.current.dictation?.explain?.(error) : undefined } : null;
 	const line = new StatusLine(status, slots, latest);
 	const halt = () => (stop?.label ? { label: stop.label, busy: Boolean(stop.busy), run: () => latest.current.stop?.onSelect?.() } : null);
-	const intake = attach ? { label: attach.label ?? null, accept: attach.accept ?? null, multiple: attach.multiple !== false, onfiles: (files, via) => latest.current.attach?.onFiles?.(files, via), onremove: item => latest.current.attach?.onRemove?.(item), onretry: attach.onRetry ? item => latest.current.attach?.onRetry?.(item) : null } : null;
+	const intake = attach ? { label: attach.label ?? null, accept: attach.accept ?? null, multiple: attach.multiple !== false, onfiles: (files, via) => latest.current.attach?.onFiles?.(files, via), onremove: item => latest.current.attach?.onRemove?.(item), onretry: attach.onRetry ? item => latest.current.attach?.onRetry?.(item) : null, words: attach.words ?? null } : null;
 	const [host, box] = useInstance(
 		() =>
 			new Box({
@@ -86,7 +86,7 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 				onchange: text => latest.current.onChange?.(text),
 				explain: explain === undefined ? undefined : error => latest.current.explain?.(error) ?? null
 			}),
-		[label, submit, min, max, name, labels, locale, compact !== false, explain === undefined, Boolean(attach), Boolean(attach?.onRetry), Boolean(onSuggest), JSON.stringify(suggest ?? null), Boolean(commands), Boolean(recall), Boolean(dictation), dictation?.cap, dictation?.bound, dictation?.minimum, Boolean(dictation?.explain)]
+		[label, submit, min, max, name, labels, locale, compact !== false, explain === undefined, Boolean(attach), Boolean(attach?.onRetry), attach?.words ?? null, Boolean(onSuggest), JSON.stringify(suggest ?? null), Boolean(commands), Boolean(recall), Boolean(dictation), dictation?.cap, dictation?.bound, dictation?.minimum, Boolean(dictation?.explain)]
 	);
 	// The adapter places the element itself, so the field's height is fitted once it is in the page
 	useSync(box, current => current.fit(), []);
