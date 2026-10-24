@@ -151,9 +151,14 @@ export const checks = [
 			});
 			expect(line.shown && line.said && line.text === safari && line.title, `the line says the turn's message in place of the title: ${JSON.stringify(line)}`);
 			expect(line.lines === 2, `as written, on two lines: ${JSON.stringify(line)}`);
-			await page.locator('.bui-page-compact-subject').click();
+			const before = await page.evaluate(() => ({ y: Math.round(scrollY), hash: location.hash }));
+			// Pressed where the person sees it: a locator's click would first scroll the sticky line's holder into
+			// view (WebKit does), which changes the turn being read before the press
+			const box = await page.locator('.bui-page-compact-subject').boundingBox();
+			await page.mouse.click(box.x + Math.min(box.width / 2, 120), box.y + box.height / 2);
 			await settle(page);
-			expect(Math.abs(await offset(page, 't4')) <= 2, `pressed, it goes back to the message: ${await offset(page, 't4')}`);
+			const after = await page.evaluate(() => ({ y: Math.round(scrollY), hash: location.hash, focus: document.activeElement?.className ?? null, edge: getComputedStyle(document.documentElement).scrollPaddingTop }));
+			expect(Math.abs(await offset(page, 't4')) <= 2, `pressed, it goes back to the message: ${await offset(page, 't4')} ${JSON.stringify({ before, after })}`);
 			await page.evaluate(() => document.activeElement?.blur());
 			await reach(page, 't4', 240);
 			await page.keyboard.press('Alt+ArrowUp');

@@ -19,7 +19,7 @@ This is the canonical instruction source for this independent repository. Read [
 
 ## Product writing
 
-Use task or object headings, specific action verbs and one term per concept. Keep one idea per sentence; aim for 15 words without hiding permissions, costs, privacy or recovery. Remove filler and repeated introductions. Distinguish dynamic values from explanatory copy and offer contextual help only when useful. Review the complete journey in English and Spanish. A wait shows progress only while something runs, and a failure offers only what can work then, says only an established cause and never restates its button. The family reference owns the full guidance in Beyond Suite's `branding/docs/writing.md` (D156); this paragraph remains sufficient in a standalone checkout.
+Use task or object headings, specific action verbs and one term per concept. Keep one idea per sentence; aim for 15 words without hiding permissions, costs, privacy or recovery. Remove filler and repeated introductions. Distinguish dynamic values from explanatory copy and offer contextual help only when useful. Review the complete journey in English and Spanish. A wait shows progress only while something runs, and a failure offers only what can work then, says only an established cause and never restates its button. An empty field or a step not yet taken is never said as a failure. The family reference owns the full guidance in Beyond Suite's `branding/docs/writing.md` (D156); this paragraph remains sufficient in a standalone checkout.
 
 ## Family reference synchronization
 

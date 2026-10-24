@@ -1,12 +1,12 @@
 /**
  * The copy of `Composer` in English and Spanish: the default action, the split menu's name, the
  * keyboard hint read with the field (by the way the composer sends), and what it says when a message
- * was not sent (an empty one says nothing since 0.29.0, D183); since 0.11.0 its attachments (Attach, the drop target, the chips' states and
- * what is announced) and its suggestions (their states and what is announced); since 0.11.1 the narrow
- * toolbar's Options and a truncated list's last line; since 0.11.2 a file the product refused; since
- * 0.14.0 the commands' list and the taller editor's Expand and Collapse; since 0.26.0 (D165) the "+"
- * control's names: **Attach files** when it only attaches, **Add** when it opens the product's menu.
- * Public as `Composer.labels`.
+ * was not sent (an empty one says nothing since 0.29.0, D183); since 0.11.0 its attachments (Attach,
+ * the drop target, the chips' states and what is announced) and its suggestions (their states and what
+ * is announced); since 0.11.1 the narrow toolbar's Options and a truncated list's last line; since
+ * 0.11.2 a file the product refused; since 0.14.0 the commands' list and the taller editor's Expand and
+ * Collapse; since 0.26.0 (D165) the "+" control's names: **Attach files** when it only attaches, **Add**
+ * when it opens the product's menu. Public as `Composer.labels`.
  */
 const freeze = sets => Object.freeze({ en: Object.freeze(sets.en), es: Object.freeze(sets.es) });
 

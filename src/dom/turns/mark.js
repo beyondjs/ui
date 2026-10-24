@@ -7,9 +7,9 @@ const marks = Object.freeze({ running: 'running', waiting: 'attention', failed: 
 
 /**
  * One turn of a `TurnIndex` (0.29.0, D182): one row of the index, a link to the turn when it has an
- * address (`href`), so it opens in another tab and copies as a link, else a button. It draws a short dash,
- * longer for the turn in view and under the pointer, and for a turn that runs, needs the person or
- * failed, that state's `Status` shape after it, still. Its name is the turn's message, then the state in
+ * address (`href`), so it opens in another tab and copies as a link, else a button. It draws a short dash
+ * at the row's end beside the turns, longer for the turn in view and under the pointer, and for a turn
+ * that runs, needs the person or failed, that state's `Status` shape before it, still. Its name is the turn's message, then the state in
  * words; the dash and the shape are hidden from assistive technology. `update()` writes only what
  * changed, so the control that may hold focus stays, unless the turn gains or loses its address.
  */

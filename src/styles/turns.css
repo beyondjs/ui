@@ -34,9 +34,11 @@
 	display: flex;
 	min-height: 0;
 }
-/* A mark is the whole row, so the pointer never falls between two turns */
+/* A mark is the whole row, so the pointer never falls between two turns. Its dash stands at the row's end,
+   beside the turns it indexes, and grows away from them into the gutter; a state's shape comes before it. */
 .bui-turns-mark {
 	display: flex;
+	flex-direction: row-reverse;
 	align-items: center;
 	gap: var(--space-1);
 	box-sizing: border-box;
