@@ -45,12 +45,9 @@ They then directed the refined proposal to be implemented to the highest standar
 
 ## Executed checks
 
-- **Unit suite:** `npm test`, 829 of 829. New: `turns.test.mjs` (9), `alarm.test.mjs` (2), the compact line's subject in `thread.test.mjs`; updated: `composer.test.mjs`, `attach.test.mjs`, `composing.test.mjs`, `edges.test.mjs`, `foundations.test.mjs` (the preview overlaps, so it may take `--elevation-menu`) and `tokens.test.mjs` (token set 0.7.0).
+- **Unit suite:** `npm test`, 830 of 830. New: `turns.test.mjs` (10), `alarm.test.mjs` (2), the compact line's subject in `thread.test.mjs`; updated: `composer.test.mjs`, `attach.test.mjs`, `composing.test.mjs`, `edges.test.mjs`, `foundations.test.mjs` (the preview overlaps, so it may take `--elevation-menu`) and `tokens.test.mjs` (token set 0.7.0).
 - **Declarations:** `npm run types` compiles, with `tests/fixtures/types/turns.ts` and `turns.tsx`.
-- **Browser acceptance:** `npm run acceptance` from the packed 0.29.0 archive into the `dom`, `react19` and `react18` consumers, in each engine:
-  - Chrome: RESULT_CHROME;
-  - Firefox: RESULT_FIREFOX;
-  - WebKit: RESULT_WEBKIT.
+- **Browser acceptance:** `npm run acceptance`, 373 of 373 in each of Chrome 155.0.8059.85, Firefox 155.0 and WebKit 26.6, installed from the packed 0.29.0 archive into the `dom`, `react19` and `react18` consumers (`BEYOND_UI_TARBALL`, the archive below).
 
   New checks (`turning.mjs`, on the new `turns.html` pages, the React page in Spanish):
   - the turns up to 80rem and the composer's lane on their axis, from 1024 to 2560 px in both themes;
@@ -59,10 +56,13 @@ They then directed the refined proposal to be implemented to the highest standar
   - the quiet Send, and the inset measured from the font's own capitals: 13 px above them and 13 px under the controls from the box's outer edge (12 px and its border), the + and Send one inset from the sides.
 
   The D96 checks of `anchoring.mjs`, `thread.mjs` and `fitting.mjs` now measure D180.
-- **Corrections the browser showed before release:**
+- **Corrections before release:**
   - **A phone's chips.** At 320 px the wider inset folded a phone's chips behind Options, so a composer under 30rem keeps an 8 px inset.
   - **The sticky edge.** It moved when the line changed form, so a thread keeps the taller form.
   - **A second Option/Alt press.** Pressed before the page had scrolled, it repeated the first turn; it now moves on from it.
+  - **The marks beside a narrowed region.** With a panel beside the thread, the dashes stood against the navigation and read as part of it. Each dash now stands at its row's end, beside the turns, and grows away from them.
+  - **No turn read yet.** Found in the code review: with turns given without their elements nothing is read, and Option/Alt with ArrowDown went to the second turn. The next turn is now the first and the previous the last.
+  - **WebKit's press on the compact line.** The check pressed the line through Playwright's locator, which first scrolled its sticky holder into view and changed the turn being read. It presses the line where it is drawn, as a person does. An earlier full run had failed this check in WebKit only, in the `dom` and `react19` consumers (2 of 373).
 
 ## Limits
 
@@ -71,7 +71,3 @@ This is package evidence only. Conduict adopts 0.29.0 in the same round (its `do
 ## Family reference synchronization
 
 The family reference (Beyond Suite's `branding/`) records D180 to D184 in its round `turned` and draws Conduict's conversation on this package.
-
-## Artifact
-
-Packed by `npm run pack:consumers` from the release commit: ARCHIVE_LINE.
