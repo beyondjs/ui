@@ -5,7 +5,7 @@ import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine, useConfirm } from '@beyond-js/ui/react';
+import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine, useConfirm, Form } from '@beyond-js/ui/react';
 import { Collection as List } from '@beyond-js/ui';
 import { shape, accounts, source, recognize, branches, projects, repositories, columns } from '../data/choosing.js';
 
@@ -53,6 +53,29 @@ function Choosing() {
 	);
 }
 
+// 0.32.0 (D183): the family's form for a product that sends its own submission, a choice it marks
+// data-missing and a footer that names the form; drawn only when a check asks for it
+function Adding() {
+	const [chosen, setChosen] = useState(false);
+	return (
+		<>
+			<Form id="adding-form" onSubmit={event => (event.preventDefault(), log.push('form:submit'))}>
+				<div data-missing={chosen ? undefined : ''}>
+					<input type="search" aria-label="Buscar repositorios" />
+					<label><input type="checkbox" checked={chosen} onChange={event => setChosen(event.target.checked)} />acme/web</label>
+				</div>
+				<label>Nota <input name="note" required /></label>
+			</Form>
+			<button type="submit" form="adding-form" className="bui-button bui-button-primary">Añadir</button>
+		</>
+	);
+}
+
 localStorage.removeItem('attempt');
 createRoot(document.getElementById('root')).render(<StrictMode><Choosing /></StrictMode>);
+window.fixture.form = () => {
+	const holder = document.getElementById('root').appendChild(document.createElement('section'));
+	holder.id = 'adding';
+	createRoot(holder).render(<StrictMode><Adding /></StrictMode>);
+};
 window.fixture.ready = true;

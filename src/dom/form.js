@@ -16,9 +16,10 @@ const defaults = { failure: 'That did not work. Try again.' };
  * alert with the consumer's explanation and leaves every value in place. The form element stays the
  * consumer's: `destroy()` releases the listener and removes only what this class added.
  *
- * Nothing still to write is a failure (0.32.0, D183): while a required field is empty (`missing`), the
- * submit buttons are quiet (`aria-disabled`, still reachable), and a submission puts the caret in the
- * first empty field and says nothing. Only a value that is wrong is said, as before.
+ * Nothing still to write is a failure (0.32.0, D183): while a part waits (`Required`: a required field
+ * empty, or a part the product marks `data-missing`), the submit buttons are quiet (`aria-disabled`,
+ * still reachable, a dialog footer's that name the form included), and a submission puts the caret in
+ * the first part that waits and says nothing. Only a value that is wrong is said, as before.
  */
 export class FocusedForm {
 	/** The copy in English and Spanish (0.7.2). */
@@ -26,6 +27,7 @@ export class FocusedForm {
 
 	#form;
 	#fields;
+	#required;
 	#submit;
 	#explain;
 	#labels;
@@ -55,25 +57,18 @@ export class FocusedForm {
 		form.noValidate = true;
 		form.append(this.#problem);
 		this.#listeners.add(form, 'submit', event => this.#send(event, onsuccess));
-		this.#listeners.add(form, 'input', () => this.settle());
-		this.#listeners.add(form, 'change', () => this.settle());
-		this.settle();
+		// What the form waits for, heard on every input and change: the given fields, else its own controls
+		this.#required = new Required(form, { fields });
 	}
 
-	/** Whether a required field is still empty: the given fields' `missing`, else the form's required controls. */
+	/** Whether a part still waits (`Required`): the given fields' `missing`, else the form's own controls and marked parts. */
 	get missing() {
-		if (this.#fields.length) return this.#fields.some(field => field.missing === true);
-		return this.#controls().some(control => Required.empty(control));
+		return this.#required.missing;
 	}
 
-	/** Draws the submit buttons quiet while something required is empty; a consumer that redraws them calls it again. */
+	/** Draws the submit buttons quiet while a part waits; a consumer that redraws them calls it again. */
 	settle() {
-		if (this.#busy) return;
-		const quiet = this.missing;
-		for (const button of this.#buttons()) {
-			if (quiet) button.setAttribute('aria-disabled', 'true');
-			else button.removeAttribute('aria-disabled');
-		}
+		if (!this.#busy) this.#required.settle();
 	}
 
 	get busy() {
@@ -94,7 +89,7 @@ export class FocusedForm {
 		this.#listeners.release();
 		this.#problem.remove();
 		this.#mark(false);
-		for (const button of this.#buttons()) button.removeAttribute('aria-disabled');
+		this.#required.destroy();
 	}
 
 	async #send(event, onsuccess) {
@@ -105,13 +100,16 @@ export class FocusedForm {
 			invalid[0].focus();
 			return;
 		}
-		// Without Field objects the first control that needs something gets the caret: an empty one says
-		// nothing (D183), a wrong one says the browser's own constraint message
-		const first = this.#fields.length ? null : this.#controls().find(control => Required.empty(control) || !control.validity.valid);
-		if (first) {
-			if (Required.empty(first)) first.focus();
-			else first.reportValidity();
-			return;
+		// Without Field objects the first part that needs something gets the caret: one that waits says
+		// nothing (D183), a wrong control says the browser's own constraint message
+		if (!this.#fields.length) {
+			const waiting = this.#required.first;
+			const wrong = this.#controls().find(control => !Required.empty(control) && !control.validity.valid);
+			if (wrong && !(waiting && waiting.compareDocumentPosition(wrong) & 4)) {
+				wrong.reportValidity();
+				return;
+			}
+			if (this.#required.hold(event)) return;
 		}
 		const data = new FormData(this.#form);
 		const values = Object.fromEntries([...data].map(([key, value]) => [key, typeof value === 'string' ? value : value.name]));
@@ -142,7 +140,7 @@ export class FocusedForm {
 	}
 
 	#buttons() {
-		return [...this.#form.querySelectorAll('button[type="submit"], button:not([type]), input[type="submit"]')];
+		return this.#required.buttons;
 	}
 
 	/** The form's own controls that take part in validation. */

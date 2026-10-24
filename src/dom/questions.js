@@ -5,6 +5,7 @@ import { el, content } from './core/element.js';
 import { Labels } from './core/labels.js';
 import { callout } from './feedback.js';
 import { consequence } from './consequence.js';
+import { Required } from './core/required.js';
 
 const defaults = { accept: 'Confirm', cancel: 'Cancel', ok: 'OK', close: 'Close', failure: 'That did not work. Try again or cancel.', ...consequence.labels.en, optional: '(optional)', invalid: 'Check this value.' };
 const spanish = { accept: 'Confirmar', cancel: 'Cancelar', ok: 'Aceptar', close: 'Cerrar', failure: 'No funcionó. Vuelve a intentarlo o cancela.', ...consequence.labels.es, optional: '(opcional)', invalid: 'Revisa este valor.' };
@@ -28,6 +29,7 @@ export class Question {
 	#labels;
 	#options;
 	#field = null;
+	#required = null;
 	#accept;
 	#cancel;
 	#problem = el('div', { class: 'bui-question-problem', role: 'alert' });
@@ -65,20 +67,14 @@ export class Question {
 		const safe = cancel && (options.focus ? options.focus === 'cancel' : danger);
 		const first = this.#field ? this.#field.control : safe ? cancel.element : this.#accept.element;
 		first.setAttribute('data-autofocus', '');
-		this.#field?.control.addEventListener('input', () => this.#ready());
-		this.#ready();
-	}
-
-	/** A prompt's Accept waits quiet while its required field is empty, and a press only keeps the caret there (0.32.0, D183). */
-	#ready() {
-		if (!this.#field || this.#accept.busy) return;
-		if (this.#field.missing) this.#accept.element.setAttribute('aria-disabled', 'true');
-		else this.#accept.element.removeAttribute('aria-disabled');
+		// A prompt's Accept waits quiet while its required field is empty, and a press only keeps the caret there (0.32.0, D183)
+		if (form) this.#required = new Required(form, { fields: [this.#field] });
 	}
 
 	/** Opens the question and resolves with the raw dialog value. */
 	async ask() {
 		const value = await this.#dialog.open();
+		this.#required?.destroy();
 		this.#dialog.destroy();
 		return value;
 	}
@@ -112,7 +108,7 @@ export class Question {
 				this.#dialog.busy = false;
 				this.#accept.busy = false;
 				if (this.#cancel) this.#cancel.disabled = false;
-				this.#ready();
+				this.#required?.settle();
 			}
 		}
 	}

@@ -2,7 +2,7 @@
 import type { ReactElement, RefObject } from 'react';
 import type { Copy } from './notifications.js';
 import type { WaitingShape } from './dom.js';
-export { Age, Hint, Bytes, Highlighter, ComposerDictation, PageDock } from './dom.js';
+export { Age, Hint, Bytes, Highlighter, ComposerDictation, PageDock, Required, Quiet } from './dom.js';
 export type { ComposerCommand, DictationOptions, HighlighterKind } from './dom.js';
 export type { AgeWords } from './dom.js';
 
@@ -22,3 +22,10 @@ export { Recency, Matches } from './parts.js';
 
 /** A region's wait (0.23.0, LOAD-01), as the DOM `waiting`. */
 export function Waiting(props: WaitingShape): ReactElement;
+
+/**
+ * The family's form for a product that sends its own submission (0.32.0, D183): its submit buttons wait
+ * quiet while a required control is empty or a part is marked `data-missing`, a press or Enter only puts
+ * the caret there, and `onSubmit` runs once nothing waits. The ref is the form element.
+ */
+export const Form: import('react').ForwardRefExoticComponent<import('react').FormHTMLAttributes<HTMLFormElement> & import('react').RefAttributes<HTMLFormElement>>;

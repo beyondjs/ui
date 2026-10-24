@@ -10,7 +10,9 @@ export { ChoiceMenu, ChoiceChip, RefChooser, ProjectPicker, SecretField, CopyMes
 export { Bytes } from '../dom/core/bytes.js';
 export { SideSheet } from './sheet.js';
 export { Draft } from '../dom/draft.js';
-export { Dialog, useConfirm, FocusedForm, Consequence } from './dialog.js';
+export { Dialog, useConfirm, FocusedForm, Form, Consequence } from './dialog.js';
+export { Required } from '../dom/core/required.js';
+export { Quiet } from '../dom/core/quiet.js';
 export { consequence } from '../dom/consequence.js';
 export { Picker } from './picker.js';
 export { Collection } from './collection.js';

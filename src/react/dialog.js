@@ -4,9 +4,10 @@ import { Dialog as Modal } from '../dom/dialog.js';
 import { FocusedForm as Submission } from '../dom/form.js';
 import { Question, confirm, prompt, alert } from '../dom/questions.js';
 import { consequence as stated } from '../dom/consequence.js';
+import { Required } from '../dom/core/required.js';
 import { h, living, useLatest } from './hooks.js';
 
-const { useLayoutEffect, useMemo, useRef, useState } = React;
+const { forwardRef, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } = React;
 
 /**
  * A modal dialog driven by the DOM `Dialog` class: React renders `children` into its body and
@@ -75,6 +76,37 @@ export function useConfirm(labels = {}) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [JSON.stringify(labels)]);
 }
+
+/**
+ * The family's form for a product that sends its own submission (0.32.0, D183): while a required control
+ * is empty or a part is marked `data-missing`, its submit buttons wait quiet (`aria-disabled`, still
+ * reachable, a dialog footer's that name the form with `form` included), and a press or Enter only puts
+ * the caret in the first part that waits, saying nothing (`Required`). Once nothing waits `onSubmit`
+ * runs, where the product says what is wrong in a value, in its field; the browser's own validation is
+ * off. A form drawn inside its tree, such as a dialog's through a portal, submits only itself. The ref is
+ * the form element.
+ */
+export const Form = forwardRef(function Form({ onSubmit, children, ...rest }, ref) {
+	const form = useRef(null);
+	const required = useRef(null);
+	useImperativeHandle(ref, () => form.current, []);
+	useLayoutEffect(() => {
+		required.current = new Required(form.current);
+		return () => {
+			required.current.destroy();
+			required.current = null;
+		};
+	}, []);
+	// React may draw the controls and the buttons again: what waits is read after every render
+	useLayoutEffect(() => required.current?.settle());
+	const submit = event => {
+		// A form inside this one's React tree sends its submission up that tree, never as this one's
+		if (event.target !== event.currentTarget) return;
+		if (required.current?.hold(event)) return;
+		onSubmit?.(event);
+	};
+	return h('form', { ...rest, ref: form, noValidate: true, onSubmit: submit }, children);
+});
 
 /**
  * A focused form: `onSubmit(values, data)` runs once at a time and the form is busy meanwhile;

@@ -4,7 +4,7 @@
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine, Field, FocusedForm, confirm, el } from '@beyond-js/ui';
+import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine, Field, FocusedForm, Quiet, confirm, el } from '@beyond-js/ui';
 import { shape, accounts, source, recognize, branches, projects, repositories, columns } from '../data/choosing.js';
 
 const log = [];
@@ -47,5 +47,14 @@ const secret = () => {
 	section('secreting').append(form);
 	new FocusedForm(form, { fields: [name, value], submit: () => (log.push(`secret:${name.control.value}`), Promise.resolve()) });
 };
+// 0.32.0 (D183): Add waits quiet for a choice made beside it, and a press only goes to the search
+const quiet = () => {
+	const search = el('input', { type: 'search', 'aria-label': 'Search repositories' });
+	const choice = el('input', { type: 'checkbox' });
+	const add = new Button({ label: 'Add', variant: 'primary', onclick: () => log.push('quiet:add') });
+	const waits = new Quiet(add.element, { waiting: () => !choice.checked, place: () => search });
+	choice.addEventListener('change', () => waits.settle());
+	section('quieting').append(search, el('label', {}, [choice, 'acme/web']), add.element);
+};
 if (shape.sheet) sheet.open();
-window.fixture = { log, stall: false, sheet, open: value => value ? sheet.open() : sheet.close(), opener: opener.element, secret, ready: true };
+window.fixture = { log, stall: false, sheet, open: value => value ? sheet.open() : sheet.close(), opener: opener.element, secret, quiet, ready: true };

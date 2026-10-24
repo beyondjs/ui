@@ -183,12 +183,12 @@ test('prompt: an empty field says nothing and keeps the caret (D183), a wrong va
 	assert.equal(dialog.querySelector('.bui-field-error').hidden, true);
 	assert.equal(document.activeElement, input, 'the caret stays where the name is written');
 	input.value = 'Bi';
-	input.dispatchEvent(new Event('input'));
+	input.dispatchEvent(new Event('input', { bubbles: true }));
 	assert.equal(accept.hasAttribute('aria-disabled'), false, 'something written makes Confirm able');
 	dialog.querySelector('form').requestSubmit();
 	assert.match(dialog.textContent, /Use three letters or more/, 'a wrong value is said');
 	input.value = 'Billing';
-	input.dispatchEvent(new Event('input'));
+	input.dispatchEvent(new Event('input', { bubbles: true }));
 	dialog.querySelector('form').requestSubmit();
 	assert.equal(await asked, 'Billing');
 	const cancelled = ui.prompt({ title: 'Rename', label: 'Name', value: 'Old' });

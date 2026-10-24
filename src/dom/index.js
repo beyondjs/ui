@@ -33,6 +33,8 @@ export { Dialog } from './dialog.js';
 export { Question, confirm, prompt, alert } from './questions.js';
 export { consequence } from './consequence.js';
 export { FocusedForm } from './form.js';
+export { Required } from './core/required.js';
+export { Quiet } from './core/quiet.js';
 export { Tooltip } from './tooltip.js';
 export { Help } from './help.js';
 export { Collection } from './collection/collection.js';

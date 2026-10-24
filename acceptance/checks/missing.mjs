@@ -5,9 +5,9 @@ import { copy } from '../fixtures/data/turns.js';
 /**
  * Nothing still to write is a failure in no form (0.32.0, D183), in a real engine: the focused form of the
  * main page waits quiet while its required title is empty and a press puts the caret there, saying
- * nothing; a required secret behind its fold waits the same way on the choosing page; and a composer's
- * files wait for words on the turns page, Send quiet and the field saying what they wait for. The prompt's
- * own case is `keyboard.mjs`'s.
+ * nothing; on the choosing page a required secret behind its fold, a `Quiet` Add and React's `Form` with
+ * a footer that names it wait the same way; and a composer's files wait for words on the turns page, Send
+ * quiet and the field saying what they wait for. The prompt's own case is `keyboard.mjs`'s.
  */
 const settle = page => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 30)))));
 
@@ -119,6 +119,56 @@ export const checks = [
 			expect(!(await page.evaluate(() => window.fixture.log)).some(entry => entry.startsWith('secret:')), 'nothing was sent');
 			await page.keyboard.type('s3cret');
 			expect(!(await save.getAttribute('aria-disabled')), 'a value makes it able');
+			await context.close();
+		}
+	},
+	{
+		name: 'Quiet: Add waits quiet for a choice made beside it, a press only goes to the search, and a choice makes it act (0.32.0, D183)',
+		consumers: ['dom'],
+		async run(browser, consumer) {
+			const { page, context } = await browser.open(consumer, { file: 'choosing.html', viewport: { width: 1440, height: 900 } });
+			await page.waitForFunction(() => window.fixture?.ready);
+			await page.evaluate(() => window.fixture.quiet());
+			const holder = page.locator('#quieting');
+			const add = holder.getByRole('button', { name: 'Add' });
+			expect((await add.getAttribute('aria-disabled')) === 'true', 'nothing chosen yet');
+			await press(page, add);
+			await settle(page);
+			expect(await holder.locator('input[type="search"]').evaluate(node => document.activeElement === node), 'a press goes to the search');
+			expect(!(await page.evaluate(() => window.fixture.log)).includes('quiet:add'), 'and does nothing else');
+			await holder.locator('input[type="checkbox"]').check();
+			expect(!(await add.getAttribute('aria-disabled')), 'a choice makes it able');
+			await press(page, add);
+			expect((await page.evaluate(() => window.fixture.log)).includes('quiet:add'), 'then it acts');
+			await context.close();
+		}
+	},
+	{
+		name: 'React Form: a footer that names the form waits for a marked choice and a required note, a press goes to each in turn, then it submits (0.32.0, D183)',
+		consumers: ['react19'],
+		async run(browser, consumer) {
+			const { page, context } = await browser.open(consumer, { file: 'choosing.html', viewport: { width: 1440, height: 900 } });
+			await page.waitForFunction(() => window.fixture?.ready);
+			await page.evaluate(() => window.fixture.form());
+			const holder = page.locator('#adding');
+			const add = holder.getByRole('button', { name: 'Añadir' });
+			await add.waitFor();
+			const caret = selector => holder.locator(selector).evaluate(node => document.activeElement === node);
+			const submitted = () => page.evaluate(() => window.fixture.log.includes('form:submit'));
+			expect((await add.getAttribute('aria-disabled')) === 'true', 'nothing chosen yet');
+			await press(page, add);
+			await settle(page);
+			expect((await caret('input[type="search"]')) && !(await submitted()), 'a press goes to where the choice is made, sending nothing');
+			await holder.locator('input[type="checkbox"]').check();
+			await settle(page);
+			expect((await add.getAttribute('aria-disabled')) === 'true', 'the note still waits');
+			await press(page, add);
+			await settle(page);
+			expect((await caret('input[name="note"]')) && !(await submitted()), 'then to the note');
+			await holder.locator('input[name="note"]').fill('Para la tienda');
+			expect(!(await add.getAttribute('aria-disabled')), 'nothing waits: able');
+			await press(page, add);
+			await page.waitForFunction(() => window.fixture.log.includes('form:submit'));
 			await context.close();
 		}
 	}
