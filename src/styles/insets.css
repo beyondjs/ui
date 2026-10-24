@@ -158,8 +158,8 @@
 
 @supports (text-box: trim-start cap alphabetic) {
 	/* Code in its own face, trimmed to its capitals and baseline: the inset holds in any monospace. A `code`
-	   inside takes the browser's own monospace, so it is the line that trims; inside one activity exchange
-	   the code is the exchange's row, not a box */
+	   inside is the box's one line, so it is the line that trims; inside one activity exchange the code is the
+	   exchange's row, not a box */
 	:is(.bui-command-code, .bui-activity-code, .bui-activity-tail):not(textarea, .bui-activity-exchange *),
 	.bui-copy-text.bui-copy-command {
 		padding-block: var(--bui-code-inset, var(--bui-text-inset));

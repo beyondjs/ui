@@ -144,3 +144,9 @@ test('the components draw the parts the insets hold', () => {
 	assert.ok(lost.querySelector(':scope > :first-child > dt') && lost.querySelector(':scope > :last-child > dd'), 'a consequence: a label first, words last');
 	for (const component of [dialog, sheet, toaster, missing, details, card, recovery]) component.destroy();
 });
+
+test("a side sheet's actions stand one inset from its bottom and divider, and a code box's <code> takes the box's monospace", () => {
+	assert.match(sheet, /\.bui-sheet-actions\s*\{\s*padding:\s*var\(--bui-sheet-inset,\s*var\(--space-5\)\)/, 'the sheet\'s actions at its inset, not 12 px');
+	// The browser's own style gives <code> its default monospace (Courier in Chrome): the box's face is inherited
+	assert.match(sheet, /:is\(\.bui-command-code,\s*\.bui-copy-command,\s*\.bui-activity-code\)\s*>\s*code\s*\{\s*font:\s*inherit/);
+});

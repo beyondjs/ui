@@ -46,6 +46,11 @@
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
 }
+/* A <code> inside a code box takes the box's face and size: the browser's own style gives <code> its default
+   monospace (Courier in Chrome), whatever the box says (0.32.0) */
+:is(.bui-command-code, .bui-copy-command, .bui-activity-code) > code {
+	font: inherit;
+}
 .bui-command-code[data-folded] {
 	max-height: calc(8lh + 2 * var(--space-2));
 	overflow: hidden;

@@ -28,6 +28,10 @@
 .bui-dialog-head {
 	padding-inline-end: calc(var(--bui-dialog-inset, var(--space-5)) - (var(--bui-target) - 18px) / 2);
 }
+/* A side sheet's actions stand one inset from its bottom and from its divider, their row on its words' edge */
+.bui-sheet-actions {
+	padding: var(--bui-sheet-inset, var(--space-5));
+}
 .bui-sheet-head {
 	padding-inline-end: calc(var(--bui-sheet-inset, var(--space-5)) - (var(--bui-target) - 18px) / 2);
 }
