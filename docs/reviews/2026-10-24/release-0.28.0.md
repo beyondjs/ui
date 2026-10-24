@@ -73,3 +73,9 @@ This is package evidence only: no product has re-vendored 0.28.0, and nothing he
 ## Family reference synchronization
 
 No reference impact from this repository's side: the family reference (Beyond Suite's `branding/`) records D179 and its writing guidance in the suite's own stream. The visible escape's words and `Ellipses` are package behavior the reference's catalog may name when it next syncs its `RefChooser` and development-warning entries.
+
+## Artifact
+
+- Archive: `dist-pack/beyond-ui-0.28.0.tgz`, packed by `npm run pack:consumers` from the release commit with no consumer named, so nothing was copied into another repository.
+- SHA-256: `2deca7ab255e2b623d38843cd9bf1319af3dc9b0eb4e265d8a5e1bd79ed90bbb`.
+- Integrity: `sha512-QO5RUD1jewswj/tp5bOLX5mRxw3+8gwd7IOjEI6ZATb0O4Klfdf4luN/08qx0U4cxH+NRXqEROu3dpSIkCbEqg==`, the same as the archive the browser acceptance packed.
