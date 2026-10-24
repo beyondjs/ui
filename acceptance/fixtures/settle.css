@@ -1,0 +1,21 @@
+/* The settling page's layout only (0.32.0): the body and the thread's paragraphs. Everything else (the thread
+   template, its dock, the plain page's section, the Sidebar, the panel and the composer) is the package's own. */
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+	font-size: var(--text-body);
+	line-height: var(--leading-body);
+}
+.fixture-thread {
+	display: grid;
+	gap: var(--space-3);
+	min-width: 0;
+}
+.fixture-thread p {
+	margin: 0;
+}

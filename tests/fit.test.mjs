@@ -1,6 +1,7 @@
 import { test, after, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { Page } from './support/page.mjs';
+import { Listeners } from './support/listeners.mjs';
 
 /**
  * A composer's one toolbar row (0.11.2): `ComposerFit` tries the chips as written, then shortened to their
@@ -211,14 +212,65 @@ test("a chip's state goes into its tooltip with its word; Options says what send
 	engine.destroy();
 });
 
-test('destroy releases the fit: no gauge left, nothing measured afterwards', () => {
-	const composer = compose();
-	layout = new Flow(composer, 250);
-	const gauge = composer.element.querySelector('.bui-composer-gauge');
-	assert.ok(gauge, 'the gauge across the composer');
-	assert.equal(gauge.getAttribute('aria-hidden'), 'true');
-	composer.destroy();
-	assert.equal(composer.element.querySelector('.bui-composer-gauge'), null);
-	composer.toolbar.measure();
-	assert.equal(composer.element.hasAttribute('data-fit'), false);
+/** Holds the window's animation frames and gives the document a font set, for the fit's timing (0.32.0). */
+function frames() {
+	const own = Object.getOwnPropertyDescriptor(page.window, 'requestAnimationFrame');
+	const asked = [];
+	page.window.requestAnimationFrame = callback => asked.push(callback);
+	const fonts = new page.window.EventTarget();
+	Object.defineProperty(document, 'fonts', { value: fonts, configurable: true });
+	return { asked, fonts, release: () => (Object.defineProperty(page.window, 'requestAnimationFrame', own), delete document.fonts) };
+}
+
+test('a window that changes size and fonts that finish loading are decided in the next animation frame, never in their event (0.32.0)', () => {
+	const held = frames();
+	try {
+		const composer = compose();
+		layout = new Flow(composer, 1000);
+		composer.toolbar.measure();
+		held.asked.length = 0;
+		for (const [target, type] of [[window, 'resize'], [held.fonts, 'loadingdone']]) {
+			layout.width = 250;
+			target.dispatchEvent(new Event(type));
+			// Between a window's change and its resize steps the other components still follow the width before
+			assert.equal(composer.toolbar.level, 'full', `${type}: nothing measured in the event`);
+			assert.equal(held.asked.length, 1, `${type}: one frame asked for`);
+			held.asked.shift()(0);
+			assert.equal(composer.toolbar.level, 'fold', `${type}: decided in that frame`);
+			layout.width = 1000;
+			composer.toolbar.measure();
+		}
+		window.dispatchEvent(new Event('resize'));
+		held.fonts.dispatchEvent(new Event('loadingdone'));
+		assert.equal(held.asked.length, 1, 'one frame however many events ask for it');
+		composer.destroy();
+	} finally {
+		held.release();
+	}
+});
+
+test('destroy releases the fit: no gauge left, no listener on the window or the fonts, nothing measured afterwards', () => {
+	const held = frames();
+	const listeners = new Listeners(page.window).install();
+	try {
+		const before = listeners.present();
+		const composer = compose();
+		layout = new Flow(composer, 250);
+		const gauge = composer.element.querySelector('.bui-composer-gauge');
+		assert.ok(gauge, 'the gauge across the composer');
+		assert.equal(gauge.getAttribute('aria-hidden'), 'true');
+		assert.ok(listeners.present().includes('window:resize'), 'the window is heard');
+		composer.destroy();
+		assert.equal(composer.element.querySelector('.bui-composer-gauge'), null);
+		assert.deepEqual(listeners.present().filter(name => name === 'window:resize'), before.filter(name => name === 'window:resize'));
+		held.asked.length = 0;
+		window.dispatchEvent(new Event('resize'));
+		held.fonts.dispatchEvent(new Event('loadingdone'));
+		assert.equal(held.asked.length, 0, 'no frame asked for once destroyed');
+		composer.toolbar.measure();
+		assert.equal(composer.element.hasAttribute('data-fit'), false);
+	} finally {
+		listeners.uninstall();
+		held.release();
+	}
 });

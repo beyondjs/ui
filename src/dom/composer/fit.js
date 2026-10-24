@@ -20,6 +20,13 @@ const levels = Object.freeze(['full', 'short', 'fold']);
  * It is measured when the composer's width changes (a zero-height gauge across the composer, so a
  * change of level never resizes what is observed), when the toolbar's content changes and when fonts
  * finish loading. While Options is open or holds focus the level stays, so nothing focused is hidden.
+ *
+ * Since 0.32.0 a change of the window's size is decided in the frame it lands, so no frame is drawn at
+ * the level of the width before: a frame runs the window's resize and media query listeners (where the
+ * Sidebar and a page's panel follow the new width) before its animation callbacks, where the fit
+ * measures, and those before its layout and paint. Fonts that finish loading are decided in a frame too.
+ * A width that changes without the window's (a panel shown beside) is decided in the frame after the one
+ * that lays it out, since deciding inside the observer's callback is a loop other observers report.
  */
 export class ComposerFit {
 	static levels = levels;
@@ -29,11 +36,13 @@ export class ComposerFit {
 	#fold;
 	#enabled;
 	#gauge = el('span', { class: 'bui-composer-gauge', 'aria-hidden': 'true' });
+	#view = null;
 	#resize = null;
 	#mutation = null;
 	#fonts = null;
 	#done = false;
 	#frame = 0;
+	#settle = () => this.#later();
 	#leave = event => event.target === this.#fold.button && queueMicrotask(() => this.measure());
 
 	/**
@@ -63,16 +72,25 @@ export class ComposerFit {
 			});
 			this.#resize.observe(this.#gauge);
 		}
+		// A window's resize is decided in the frame it lands: an animation frame asked for from its resize
+		// event runs in that frame, after the listeners that follow the new width (0.32.0)
+		if (view?.addEventListener) {
+			this.#view = view;
+			view.addEventListener('resize', this.#settle);
+		}
 		if (view?.MutationObserver) {
 			this.#mutation = new view.MutationObserver(() => this.measure());
 			this.#mutation.observe(bar, { childList: true, subtree: true, characterData: true });
 		}
 		// A trial is never made while Options holds focus: once focus leaves it, the fit is decided again
 		root.addEventListener('focusout', this.#leave);
+		// Fonts that finish loading are decided in a frame too: Chrome reports a load between the window's
+		// change of size and its resize event, when a measure reads the page still laid out for the width
+		// before (a permanent sidebar on a phone's width, a panel squeezing the composer to nothing)
 		const fonts = root.ownerDocument.fonts;
 		if (fonts?.addEventListener) {
-			this.#fonts = () => this.measure();
-			fonts.addEventListener('loadingdone', this.#fonts);
+			this.#fonts = fonts;
+			fonts.addEventListener('loadingdone', this.#settle);
 		}
 	}
 
@@ -101,9 +119,10 @@ export class ComposerFit {
 		this.#done = true;
 		if (this.#frame) this.#root.ownerDocument.defaultView?.cancelAnimationFrame?.(this.#frame);
 		this.#root.removeEventListener('focusout', this.#leave);
+		this.#view?.removeEventListener('resize', this.#settle);
 		this.#resize?.disconnect();
 		this.#mutation?.disconnect();
-		if (this.#fonts) this.#root.ownerDocument.fonts?.removeEventListener?.('loadingdone', this.#fonts);
+		this.#fonts?.removeEventListener?.('loadingdone', this.#settle);
 		this.#gauge.remove();
 	}
 
