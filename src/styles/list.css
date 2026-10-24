@@ -29,6 +29,16 @@
 .bui-rows > :first-child > .bui-row::before {
 	content: none;
 }
+/* Under a row's name (0.30.0): what a list item holds after its row (its quiet actions, a fold, its
+   technical details) starts where the row's name does, past the row's padding, a lead mark and the gap.
+   `--bui-row-axis` is that distance from the item's edge for a row led by a state's mark; an item whose
+   row leads with an icon, or with nothing, sets it itself. */
+:root {
+	--bui-row-axis: calc(var(--space-3) + 9px + var(--space-3));
+}
+.bui-row-under {
+	margin-inline: var(--bui-row-axis) var(--space-3);
+}
 .bui-row {
 	container: bui-row / inline-size;
 	position: relative;

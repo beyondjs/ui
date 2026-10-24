@@ -23,6 +23,8 @@ export interface PageOptions {
 	aside?: Node[] | null;
 	/** The side panel's accessible name. */
 	label?: string | null;
+	/** The side panel raised on a surface of its own, as a resource page holds its conditions (0.30.0); ignored with `panel`. */
+	raised?: boolean;
 	/** The aside as a panel kept in view (0.10.0): beside and sticky from `cut`, a side sheet below it. */
 	panel?: PagePanelOptions | null;
 	/** What the thread template docks at the window's bottom, such as its composer (0.14.0, D94); other templates throw. */
@@ -102,6 +104,8 @@ export class Page extends Component {
 	readonly panel: PagePanel | null;
 	main: Node[];
 	aside: Node[] | null;
+	/** Whether the side panel is raised on a surface of its own (0.30.0). */
+	raised: boolean;
 	width: PageWidth;
 	/** The thread template's dock, or null in any other template (0.14.0). */
 	get dock(): PageDock | null;

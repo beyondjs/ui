@@ -191,6 +191,47 @@ export const checks = [
 		}
 	},
 	{
+		name: "page: a resource page's raised panel holds its conditions on a surface of its own with no shadow, its regions divided, a row's mark on its edge and what follows the row under its name (0.30.0)",
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			for (const scheme of ['light', 'dark']) {
+				for (const width of [390, 1024, 1440]) {
+					const at = `${width}px ${scheme}`;
+					const { page, context } = await open(browser, consumer, { width, scheme, query: '?raised=1' });
+					const found = await page.evaluate(() => {
+						const aside = document.querySelector('.bui-page-aside');
+						const style = getComputedStyle(aside);
+						const left = selector => aside.querySelector(selector).getBoundingClientRect().left;
+						const sections = [...aside.querySelectorAll(':scope > .bui-section')];
+						// The raised surface's own colour, resolved as the page resolves it (white on a white page in the light theme, where its line sets it apart)
+						const probe = document.body.appendChild(Object.assign(document.createElement('div'), { style: 'background: var(--color-surface-raised)' }));
+						const token = getComputedStyle(probe).backgroundColor;
+						probe.remove();
+						return {
+							raised: aside.hasAttribute('data-raised'),
+							surface: style.backgroundColor,
+							token,
+							border: style.borderTopWidth,
+							shadow: style.boxShadow,
+							divided: sections.length === 2 && getComputedStyle(sections[1]).borderTopWidth === '1px',
+							edge: left('.bui-section-title'),
+							mark: left('.bui-row-lead'),
+							name: left('.bui-row-title'),
+							under: left('.bui-row-under .bui-action-line')
+						};
+					});
+					expect(found.raised, `${at}: the aside is raised`);
+					expect(found.surface === found.token && found.border === '1px' && found.shadow === 'none', `${at}: a surface of its own with a line and no shadow: ${JSON.stringify(found)}`);
+					expect(found.divided, `${at}: its regions are divided by a line`);
+					expect(Math.abs(found.mark - found.edge) <= 1, `${at}: the row's mark starts on the panel's edge, ${found.mark} / ${found.edge}`);
+					expect(Math.abs(found.under - found.name) <= 1, `${at}: what follows the row starts under its name, ${found.under} / ${found.name}`);
+					expect(!(await overflow(page)), `${at}: no sideways scroll`);
+					await context.close();
+				}
+			}
+		}
+	},
+	{
 		name: 'page: "Language and appearance" opens from the profile menu, applies at once and offers "Change for all of Beyond"',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {

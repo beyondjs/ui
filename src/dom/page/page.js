@@ -22,7 +22,9 @@ const widths = Object.freeze(['fluid', 'standard', 'form', 'reading', 'thread'])
  * `reading` for prose (`--layout-measure`), and since 0.11.0 `thread` for a conversation's turns
  * (`--layout-thread`, 80rem since 0.29.0, D180), whose panel kept in view takes the width they leave.
  * The arrival line and the header come first; `aside` is a resource page's side panel, beside the main
- * column once the region holds a form-width column and the panel (68rem), and below it otherwise. `template` names the page's kind (overview, list,
+ * column once the region holds a form-width column and the panel (68rem), and below it otherwise; since
+ * 0.30.0 `raised` draws it as a resource page's raised panel of its conditions (a surface of its own with
+ * no shadow, C2, its regions divided by a line). `template` names the page's kind (overview, list,
  * detail, settings, task or tool) as `data-template`, for checks and for the tool template, which has
  * no gutter (D22's departures).
  *
@@ -69,13 +71,14 @@ export class Page extends Component {
 	 * @param {Node[]} [options.children] the main column
 	 * @param {Node[]|null} [options.aside] the side panel's content; no panel without it
 	 * @param {string} [options.label] the side panel's accessible name
+	 * @param {boolean} [options.raised] the side panel raised on a surface of its own (0.30.0), as a resource page holds its conditions
 	 * @param {{cut?: number|string, open?: boolean, onchange?: (shown: boolean) => void, title?: string|null, head?: boolean, wide?: boolean, labels?: {close?: string, hide?: string}}|null} [options.panel]
 	 *   the aside as a panel kept in view (0.10.0): beside and sticky from `cut`, a side sheet below it;
 	 *   since 0.11.0 with a head of its own (`head`) and a wide form (`wide`)
 	 * @param {Node|{element: Node}|Array<Node|{element: Node}>|null} [options.dock] what the thread template docks at the window's bottom, such as its composer (0.14.0)
 	 * @param {'start'|'center'} [options.lane] where the thread template's column sits (0.15.0)
 	 */
-	constructor({ template = 'detail', width = null, arrival = null, header = null, children = [], aside = null, label = null, panel = null, dock = null, lane = 'start' } = {}) {
+	constructor({ template = 'detail', width = null, arrival = null, header = null, children = [], aside = null, label = null, raised = false, panel = null, dock = null, lane = 'start' } = {}) {
 		super();
 		if (!templates.includes(template)) throw new TypeError(`A page's template is one of ${templates.join(', ')}`);
 		width ??= template === 'thread' ? 'thread' : 'standard';
@@ -92,6 +95,7 @@ export class Page extends Component {
 		this.main = children;
 		this.dock = dock;
 		this.aside = aside;
+		this.raised = raised;
 		// One primary action per region, warned in a development build (0.16.0, DQ-09)
 		if (Primaries.enabled) this.#primaries = new Primaries({ root: this.#element });
 		// A heading outranks what it names, warned in a development build (0.19.0, D158)
@@ -146,6 +150,16 @@ export class Page extends Component {
 		}
 		fill(this.#aside, children);
 		if (this.#aside.parentNode !== this.#body) this.#body.append(this.#aside);
+	}
+
+	/** Whether the side panel is raised on a surface of its own (0.30.0); a panel kept in view is never raised. */
+	get raised() {
+		return 'raised' in this.#aside.dataset;
+	}
+
+	set raised(raised) {
+		if (raised && !this.#panel) this.#aside.dataset.raised = '';
+		else delete this.#aside.dataset.raised;
 	}
 
 	/** The width tier of the main column. */

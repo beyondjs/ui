@@ -173,3 +173,8 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
   - the quiet Send, and the composer's inset from the font's own capitals against its controls.
 
   The D96 checks of `anchoring.mjs`, `thread.mjs` and `fitting.mjs` now measure D180.
+
+## UI 0.30.0: a resource page's raised panel
+
+- **Unit.** `tests/page.test.mjs` holds `raised`: flat by default, `data-raised` once raised, kept across an aside removed and given again, and never on a panel kept in view. `tests/react-page.test.mjs` renders React's `raised` with the DOM page's markup. `tests/fixtures/types/` compiles the option and the setter.
+- **Browser.** `acceptance/checks/layout.mjs`, on the `layout.html` pages with `?raised=1`, measures at 390, 1024 and 1440 px in both themes: the aside on the raised surface's own colour with a 1 px line and no shadow; its two regions divided by a line; a copy's mark on the panel's edge (the section heading's); its quiet actions in `.bui-row-under` starting under the row's name; no sideways scroll. Run `npm run acceptance -- "raised panel"`, then with `BEYOND_UI_BROWSER=firefox` and `BEYOND_UI_BROWSER=webkit`. See [the release evidence](reviews/2026-10-24/release-0.30.0.md).

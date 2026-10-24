@@ -33,9 +33,10 @@ const Panel = createContext(null);
  * it; since 0.11.0 with a head of its own and a wide form); `panelRef` receives it (`open()`, `close()`,
  * `toggle()`) and a `PanelToggle` inside the page toggles it. `width` takes `thread` since 0.11.0. The
  * `thread` template (0.14.0, D94) takes `dock`, React content docked at the window's bottom (the composer),
- * as the DOM `Page`'s; its width is `thread` unless given.
+ * as the DOM `Page`'s; its width is `thread` unless given. `raised` (0.30.0) draws the aside as a resource
+ * page's raised panel, as the DOM `Page`'s.
  */
-export function Page({ template = 'detail', width = null, arrival = null, header = null, aside = null, label = null, panel = null, panelRef = null, dock = null, lane = 'start', children }) {
+export function Page({ template = 'detail', width = null, arrival = null, header = null, aside = null, label = null, raised = false, panel = null, panelRef = null, dock = null, lane = 'start', children }) {
 	if (!Region.templates.includes(template)) throw new TypeError(`A page's template is one of ${Region.templates.join(', ')}`);
 	width ??= template === 'thread' ? 'thread' : 'standard';
 	if (dock && template !== 'thread') throw new TypeError("A page's dock belongs to the thread template");
@@ -97,7 +98,7 @@ export function Page({ template = 'detail', width = null, arrival = null, header
 			{ className: 'bui-page-frame' },
 			arrival,
 			header,
-			h('div', { ref: body, className: 'bui-page-body' }, h('div', { className: 'bui-page-main' }, children, docked), !wanted && aside ? h('aside', { className: 'bui-page-aside', 'aria-label': label ?? undefined }, aside) : null)
+			h('div', { ref: body, className: 'bui-page-body' }, h('div', { className: 'bui-page-main' }, children, docked), !wanted && aside ? h('aside', { className: 'bui-page-aside', 'aria-label': label ?? undefined, 'data-raised': raised ? '' : undefined }, aside) : null)
 		)
 	);
 	return h(Panel.Provider, { value: instance }, region, instance && aside ? ReactDOM.createPortal(aside, instance.slot) : null);

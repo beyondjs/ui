@@ -4,7 +4,7 @@
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { FamilyBar, Sidebar, ProductNav, Page, PageHeader, Tabs, Section, Arrival, Button, ListRow, Preferences, status, el } from '@beyond-js/ui';
+import { FamilyBar, Sidebar, ProductNav, Page, PageHeader, Tabs, Section, Arrival, Button, ListRow, ActionLine, Preferences, status, el } from '@beyond-js/ui';
 import { chosen, fallback, product } from '../data/family.js';
 import { shape, words, groups } from '../data/layout.js';
 
@@ -27,7 +27,14 @@ const repositories = new Section({ title: 'Repositories', description: words.des
 // A wide table that scrolls inside its own box, as a collection does: it must never widen the page
 const table = el('div', {}, [el('div', { class: 'layout-scroll' }, [el('table', {}, [el('tr', {}, words.columns.map(text => el('td', { text })))])])]);
 const access = new Section({ title: 'Access', children: [el('p', { class: 'bui-reading', text: words.description }), table] });
-const page = new Page({ template: shape.template, width: shape.width, arrival, header, children: [repositories.element, access.element], aside: shape.aside ? [el('h2', { text: 'About' }), el('ul', {}, words.facts2.map(fact => el('li', { text: fact })))] : null, label: 'About this environment' }).mount(main);
+// A resource page's raised panel (0.30.0): its regions, and a copy whose actions start under its name
+const copy = () => el('li', {}, [
+	new ListRow({ title: words.copy.machine, lead: { state: 'success', label: 'Ready' }, meta: words.copy.meta, tag: 'div' }).element,
+	el('div', { class: 'bui-row-under' }, [new ActionLine({ actions: words.copy.actions.map(label => new Button({ label, variant: 'quiet', small: true })) }).element])
+]);
+const raised = () => [new Section({ title: 'About', children: [el('ul', {}, words.facts2.map(fact => el('li', { text: fact })))] }).element, new Section({ title: 'Working copies', children: [el('ul', { class: 'bui-rows' }, [copy()])] }).element];
+const aside = shape.raised ? raised() : shape.aside ? [el('h2', { text: 'About' }), el('ul', {}, words.facts2.map(fact => el('li', { text: fact })))] : null;
+const page = new Page({ template: shape.template, width: shape.width, arrival, header, children: [repositories.element, access.element], aside, raised: shape.raised, label: 'About this environment' }).mount(main);
 
 window.fixture = {
 	preferences,

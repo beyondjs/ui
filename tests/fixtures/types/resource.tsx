@@ -8,7 +8,7 @@ export function Round({ wide }: { wide: boolean }) {
 	void composer.current?.attach();
 	const model = <ChoiceChip label="Model" options={[{ value: 'opus', label: 'Opus 5.5' }]} value="opus" state={['Default', 'neutral']} onChange={value => void value} />;
 	return (
-		<Page width="thread" header={<PageHeader title="Fix the redirect" compact={{ actions: <button>Create pull request</button> }} />} aside={<Facts head={{ title: 'Changes', value: '3 files' }} rows={[{ key: 'branch', label: 'Branch', value: 'conduict/fix', mono: true, action: <button>Copy</button> }]} />} label="Details" panel={{ cut: '73rem', title: 'Details', head: true, wide }}>
+		<Page width="thread" header={<PageHeader title="Fix the redirect" compact={{ actions: <button>Create pull request</button> }} />} aside={<Facts head={{ title: 'Changes', value: '3 files' }} rows={[{ key: 'branch', label: 'Branch', value: 'conduict/fix', mono: true, action: <button>Copy</button> }]} />} label="Details" raised={false} panel={{ cut: '73rem', title: 'Details', head: true, wide }}>
 			<Meter label="5-hour window" value={0.5} reset="Resets 23:10" />
 			<Composer
 				ref={composer}

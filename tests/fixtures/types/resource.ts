@@ -47,6 +47,11 @@ const bar: HTMLElement | null = header.bar;
 header.measure();
 const page = new Page({ width: 'thread', header, aside: [facts.element], label: 'Details', panel: { cut: '73rem', title: 'Details', head: true, wide: false, labels: { hide: 'Hide {title}' } } });
 if (page.panel) page.panel.wide = true;
+// A resource page's raised panel (0.30.0)
+const resource = new Page({ header, aside: [facts.element], raised: true });
+resource.raised = false;
+const flat: boolean = resource.raised;
+void flat;
 // @ts-expect-error a width tier the family has
 void new Page({ width: 'chat' });
 

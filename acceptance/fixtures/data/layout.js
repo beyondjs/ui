@@ -1,11 +1,12 @@
 // The layout fixture's page, shared by the DOM and React consumers: `?template=`, `?width=`, `?aside=1`,
-// `?arrival=1` and `?nav=tabs` (ProductNav instead of the Sidebar) choose what the page shows.
+// `?raised=1` (the aside as a resource page's raised panel, 0.30.0), `?arrival=1` and `?nav=tabs` (ProductNav instead of the Sidebar) choose what the page shows.
 const query = new URLSearchParams(location.search);
 
 export const shape = {
 	template: query.get('template') ?? 'detail',
 	width: query.get('width') ?? 'standard',
-	aside: query.get('aside') === '1',
+	aside: query.get('aside') === '1' || query.get('raised') === '1',
+	raised: query.get('raised') === '1',
 	arrival: query.get('arrival') === '1',
 	nav: query.get('nav') ?? 'sidebar'
 };
@@ -20,7 +21,8 @@ export const words = {
 	rows: ['acme/web', 'acme/docs', 'acme/api'],
 	nested: ['acme/api · main', 'acme/api · feature/cart'],
 	columns: ['Repository', 'Branch', 'Head', 'Changes', 'Last turn', 'Cloned from', 'Access', 'Worktrees', 'Drift'].map(name => `${name} of the working copy`),
-	facts2: ['Profile: standard', 'Disk: 100 GB', 'Cost: about $0.21 per hour']
+	facts2: ['Profile: standard', 'Disk: 100 GB', 'Cost: about $0.21 per hour'],
+	copy: { machine: 'web', meta: ['Ready', 'main', '2 changes'], actions: ['Open files', 'Fetch'] }
 };
 
 export const groups = [
