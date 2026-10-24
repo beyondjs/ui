@@ -1,0 +1,23 @@
+/* The insets fixture (D184): one column of boxes at a product's body text, each box in its own block so the
+   check measures it alone. Layout only; every component style comes from the package. Tokens only. */
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+	font-size: var(--text-body);
+	line-height: var(--leading-body);
+}
+.insets-page {
+	display: grid;
+	gap: var(--space-6);
+	max-width: var(--layout-form);
+	padding: var(--space-6) var(--space-4);
+}
+/* A product's own paragraphs inside a box, without the browser's margins, as a product's reset draws them */
+.insets-page p {
+	margin: 0;
+}

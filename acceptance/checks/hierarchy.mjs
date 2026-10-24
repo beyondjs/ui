@@ -54,7 +54,15 @@ export const checks = [
 					expect(title.color === body.color, 'the title keeps the readable text contrast');
 					expect(Math.abs(title.box.left - body.box.left) < 1 && Math.abs(title.box.left - actions.box.left) < 1, 'body and action align with the heading');
 					expect(title.box.left - icon.box.right <= 12.5 && title.box.left >= icon.box.right, 'the icon sits close to the heading');
-					expect(Math.abs(icon.box.top + icon.box.height / 2 - (title.box.top + 19 * 1.4 / 2)) <= 2, 'icon aligns with the first heading line');
+					// The heading's first line as drawn: since 0.32.0 (D184) a heading that leads its box trims its box to its
+					// capitals, so its line's middle is read from the line itself, not from the box's top and a line height
+					const line = await page.locator('.bui-unavailable-title').first().evaluate(node => {
+						const range = document.createRange();
+						range.selectNodeContents(node);
+						const first = range.getClientRects()[0];
+						return (first.top + first.bottom) / 2;
+					});
+					expect(Math.abs(icon.box.top + icon.box.height / 2 - line) <= 2, `icon aligns with the first heading line: ${icon.box.top + icon.box.height / 2} ${line}`);
 					expect(!(await overflow(page)), 'the wrapped card does not widen the page');
 				} finally { await context.close(); }
 			}
