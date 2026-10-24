@@ -57,6 +57,12 @@
 	min-width: 0;
 	padding-top: 2px;
 }
+/* A step's first line centred on its 24 px mark at any line height, so a last step ends on its mark (D184) */
+@supports (padding-top: calc(1lh)) {
+	.bui-step-body {
+		padding-top: max(0px, calc((24px - 1lh) / 2));
+	}
+}
 .bui-step-head {
 	display: flex;
 	flex-wrap: wrap;

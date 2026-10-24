@@ -1,0 +1,229 @@
+/* One inset (D184): a box's content keeps one inset on every side, measured optically: from the border to the
+   first line's capitals, to the controls' edges and to the text's start, its controls starting on the text's
+   edge. Each box names its inset (`--bui-<box>-inset`, a step of the spacing scale, its earlier side padding).
+   - Where the box's own text starts or ends it, the padding takes off the half-leading its line keeps above
+     the capitals and below the baseline, `calc(inset - (1lh - 1cap) / 2)`, as the composer's does.
+   - Where a heading or a label in another size, or code in its own face, starts or ends it, that line trims
+     itself to its capitals and baseline (`text-box`), which holds in any font and in Chrome's whole-pixel
+     baseline (the formula is 1.3 px off there for a 19 px title-2).
+   - Where a row of controls starts or ends it, the padding is the inset itself; folded Technical details hang
+     their summary's target below its words.
+   Without these units a box keeps its earlier padding. The page's boxes here; the surfaces that float over it
+   in insets-floating.css. Late in the cascade, so they hold over each component's own padding. Tokens only. */
+.bui-callout {
+	--bui-callout-inset: var(--space-4);
+}
+.bui-unavailable {
+	--bui-unavailable-inset: var(--space-6);
+}
+.bui-recovery {
+	--bui-recovery-inset: var(--space-4);
+}
+.bui-recovery[data-recovery='page'] {
+	--bui-recovery-inset: var(--space-6);
+}
+.bui-empty:not(.bui-empty-unframed) {
+	--bui-empty-inset: var(--space-4);
+}
+.bui-command {
+	--bui-command-inset: var(--space-4);
+}
+.bui-awaited {
+	--bui-awaited-inset: var(--space-4);
+}
+.bui-card-choice {
+	--bui-card-inset: var(--space-3);
+}
+.bui-checklist {
+	--bui-checklist-inset: var(--space-4);
+}
+.bui-raised,
+.bui-section[data-raised] {
+	--bui-raised-inset: var(--space-4);
+}
+.bui-page-aside[data-raised] {
+	--bui-panel-inset: var(--space-5);
+}
+.bui-consequence,
+.bui-details-body,
+.bui-help-panel,
+.bui-copy-text,
+.bui-textarea {
+	--bui-text-inset: var(--space-3);
+}
+.bui-command-code,
+.bui-activity-code,
+.bui-activity-tail {
+	--bui-code-inset: var(--space-3);
+}
+@media (max-width: 480px) {
+	.bui-unavailable,
+	.bui-recovery[data-recovery='page'] {
+		--bui-unavailable-inset: var(--space-4);
+		--bui-recovery-inset: var(--space-4);
+	}
+}
+
+/* A select's chevron and a choice's chevron end one inset from the border, as their words start one in */
+.bui-select {
+	--bui-select-inset: var(--space-3);
+}
+.bui-select > .bui-icon {
+	right: calc(var(--bui-select-inset) + 1px);
+}
+.bui-choice-button {
+	--bui-choice-inset: var(--space-3);
+	padding-inline: var(--bui-choice-inset);
+}
+.bui-card-radio {
+	inset: var(--bui-card-inset) var(--bui-card-inset) auto auto;
+}
+/* A request stretched by its row keeps its parts at the top, its code block its own height */
+.bui-command {
+	align-content: start;
+}
+
+@supports (padding-top: calc(1lh - 1cap)) {
+	/* A callout's title and last words one inset from its border; its actions' edges too */
+	.bui-callout {
+		padding-block: calc(var(--bui-callout-inset) - (1lh - 1cap) / 2);
+	}
+	.bui-callout:has(> .bui-callout-body > :last-child:is(.bui-callout-actions, .bui-details), > .bui-callout-body > .bui-host:last-child > .bui-details) {
+		padding-block-end: var(--bui-callout-inset);
+	}
+	/* Boxes of their own text: help, a message to copy, a textarea, technical details above their Copy */
+	:is(.bui-help-panel, .bui-copy-text, .bui-textarea, .bui-details-body) {
+		padding-block: calc(var(--bui-text-inset) - (1lh - 1cap) / 2);
+	}
+	.bui-details-body {
+		padding-block-end: var(--bui-text-inset);
+	}
+	/* Technical details' own words lead them in a monospace that scrolls (a scroller trims nothing in Firefox):
+	   the words take off their own half-leading */
+	.bui-details-body:has(> .bui-details-content > .bui-details-text:first-child) {
+		padding-block-start: var(--bui-text-inset);
+	}
+	.bui-details-content > .bui-details-text:first-child {
+		margin-block-start: calc((1cap - 1lh) / 2);
+	}
+	/* An empty state: its mark above and its action or steps below keep the inset; its words, when they end it, too */
+	.bui-empty:not(.bui-empty-unframed) {
+		padding-block: var(--bui-empty-inset);
+	}
+	.bui-empty:not(.bui-empty-unframed, :has(> .bui-empty-actions, > .bui-checklist)) {
+		padding-block-end: calc(var(--bui-empty-inset) - (1lh - 1cap) / 2);
+	}
+	/* The recovery line: Try again's edges at the inset, the words centred on it; where Try again goes under
+	   the words (a narrow region), the title's capitals at the inset and the mark centred on them */
+	.bui-recovery:not([data-recovery='page']) {
+		padding-block: var(--bui-recovery-inset);
+	}
+	@media (max-width: 480px) {
+		.bui-recovery:not([data-recovery='page']) .bui-recovery-title {
+			margin-block-start: calc((1cap - 1lh) / 2);
+		}
+		.bui-recovery:not([data-recovery='page']) > .bui-recovery-mark {
+			margin-top: calc((1cap - 18px) / 2);
+			font-size: var(--text-body);
+		}
+	}
+	/* The awaited card: its head on the title's line, the title's capitals at the inset; its steps' marks,
+	   its bar or its actions end it at their edges */
+	.bui-awaited {
+		padding-block: var(--bui-awaited-inset);
+	}
+	.bui-awaited-head {
+		margin-block-start: calc((1cap - 1lh) / 2);
+		font-size: var(--text-body);
+		line-height: var(--leading-body);
+	}
+	.bui-awaited-head > .bui-awaited-time {
+		line-height: calc(var(--text-body) * var(--leading-body));
+	}
+	/* A checklist: its title's capitals at the inset, on the steps' edge (a current step draws its surface
+	   there); its last step ends it by its own content */
+	.bui-checklist-head:has(> .bui-checklist-title) {
+		margin-block-start: calc((1cap - 1lh) / 2);
+		font-size: var(--text-title-3);
+	}
+	/* A choice card: the head's title and the radio at the inset, the last line one inset from the border */
+	.bui-card-choice {
+		padding-block: var(--bui-card-inset) calc(var(--bui-card-inset) - (1lh - 1cap) / 2);
+	}
+	.bui-card-head {
+		margin-block-start: calc((1cap - 1lh) / 2);
+		font-size: var(--text-body);
+	}
+}
+
+@supports (text-box: trim-start cap alphabetic) {
+	/* Code in its own face, trimmed to its capitals and baseline: the inset holds in any monospace. A `code`
+	   inside takes the browser's own monospace, so it is the line that trims; inside one activity exchange
+	   the code is the exchange's row, not a box */
+	:is(.bui-command-code, .bui-activity-code, .bui-activity-tail):not(textarea, .bui-activity-exchange *),
+	.bui-copy-text.bui-copy-command {
+		padding-block: var(--bui-code-inset, var(--bui-text-inset));
+	}
+	:is(.bui-command-code, .bui-activity-code, .bui-activity-tail, .bui-copy-command):not(textarea, .bui-activity-exchange *, :has(> code)) {
+		text-box: trim-both cap alphabetic;
+	}
+	:is(.bui-command-code, .bui-activity-code, .bui-copy-command):not(.bui-activity-exchange *) > code {
+		display: block;
+		text-box: trim-both cap alphabetic;
+	}
+	/* A heading leads its box: its capitals one inset from the border, its mark centred on its capitals */
+	:is(.bui-unavailable-title, .bui-recovery[data-recovery='page'] .bui-recovery-title, .bui-command-title, .bui-section[data-raised] > .bui-section-head .bui-section-title, .bui-page-aside[data-raised] .bui-section-title) {
+		text-box: trim-start cap alphabetic;
+	}
+	.bui-unavailable {
+		padding-block: var(--bui-unavailable-inset);
+	}
+	.bui-recovery[data-recovery='page'] {
+		padding-block: var(--bui-recovery-inset);
+	}
+	:is(.bui-unavailable-icon, .bui-recovery[data-recovery='page'] .bui-recovery-mark) {
+		margin-block-start: calc((1cap - var(--space-6)) / 2);
+		margin-inline-start: calc((20px - var(--space-6)) / 2);
+		font-size: var(--text-title-2);
+	}
+	.bui-command {
+		padding-block: var(--bui-command-inset);
+	}
+	:is(.bui-raised, .bui-section[data-raised]) {
+		padding-block: var(--bui-raised-inset);
+	}
+	.bui-page-aside[data-raised] {
+		padding-block: var(--bui-panel-inset);
+	}
+	/* Words that end a box end at its inset: a notice's, a section's last paragraph, an answered request's line */
+	:is(.bui-unavailable-body > p:last-child:not(.bui-unavailable-code), .bui-section[data-raised] > .bui-section-body > p:last-child, .bui-command-line) {
+		text-box: trim-end cap alphabetic;
+	}
+	/* The consequence of a confirmation: its first label's capitals and its last words at the inset */
+	.bui-consequence {
+		padding-block: var(--bui-text-inset);
+	}
+	.bui-consequence > :first-child > dt {
+		text-box: trim-start cap alphabetic;
+	}
+	.bui-consequence > :last-child > dd {
+		text-box: trim-end cap alphabetic;
+	}
+}
+
+/* Technical details folded at a box's end: the summary's words end the box, its target hangs below them; so
+   do a quiet action's in the box's last row, which keeps a bordered neighbour's top */
+@supports (padding-top: calc(1cap)) {
+	:is(.bui-callout-body, .bui-unavailable-body, .bui-empty) > :is(.bui-callout-actions, .bui-unavailable-actions, .bui-empty-actions):last-child > .bui-button-quiet {
+		align-self: flex-start;
+		margin-block-end: calc((1cap - var(--bui-control)) / 2);
+	}
+	:is(.bui-callout-body, .bui-unavailable-body, .bui-empty) > :is(.bui-callout-actions, .bui-unavailable-actions, .bui-empty-actions):last-child > .bui-button-quiet.bui-button-small {
+		margin-block-end: calc((1cap - max(var(--bui-control) - 6px, var(--bui-target))) / 2);
+	}
+	:is(.bui-callout-body > .bui-details:last-child, .bui-callout-body > .bui-host:last-child > .bui-details, .bui-unavailable-body > .bui-details:last-child, .bui-recovery > .bui-details):not([open]) > .bui-summary {
+		display: flex;
+		width: fit-content;
+		margin-block-end: calc((1cap - var(--bui-target)) / 2);
+	}
+}

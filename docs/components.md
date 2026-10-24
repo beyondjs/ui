@@ -630,3 +630,41 @@ const files = Diff.parse(text);       // the same data without a DOM; never thro
 ## Connection recovery
 
 See [connection recovery](recovery.md) for scoped outage ownership, `RetryAction`, `Recovery` and readable technical details. The source patch awaits coordinated packaging and rendered checks.
+
+## One inset (D184)
+
+Since 0.32.0 every box of the package that holds text or controls inside a border or a fill keeps one inset on every side, measured optically (D184, the owner's direction of 2026-10-24, first carried out by the composer in 0.29.0): from the inner border edge to the first line's capitals, to the controls' edges and to the text's start, its controls starting on the text's edge and ending on its end. A box names its inset as a custom property on the box, a step of the spacing scale that is its earlier side padding, so widths do not change; a product may set it on one box. The rules live in `styles/insets.css` (the page's boxes) and `styles/insets-floating.css` (the surfaces over the page), late in the cascade:
+
+- **The box's own text** starts or ends it: its padding takes off the half-leading the line keeps above its capitals and below its baseline, `calc(inset − (1lh − 1cap) / 2)`, as the composer's does, inside `@supports (padding-top: calc(1lh − 1cap))`. Inter's capitals sit in the middle of its line, so this holds within 0.3 px in Firefox and WebKit and 0.7 px in Chrome at the body, small and label sizes.
+- **A heading, a label or code** in another size or face leads or ends it: that line trims itself to its capitals and its baseline (`text-box: trim-start | trim-end cap alphabetic`, inside `@supports (text-box: …)`), exact in any font. Chrome places a baseline on a whole pixel, which puts the formula 1.3 px off for a 19 px title-2 line. A code block trims its `code` (a `<code>` inside takes the browser's own monospace, so it is that line's face that counts); text that scrolls in its own box takes off its own half-leading instead (`margin-block-start: calc((1cap − 1lh) / 2)`), since Firefox trims nothing in a scroller.
+- **A row of controls** starts or ends it: the padding is the inset itself, to the controls' edges. A borderless control is its words or its glyph: a close button's glyph ends one inset from the end and its 32 px target hangs past it (`calc(inset − (target − 18px) / 2)`); folded Technical details at a box's end, and a quiet action that ends a callout's, an `Unavailable`'s or an empty state's last row, hang their target below their words (`margin-block-end: calc((1cap − height) / 2)`), the quiet action keeping a bordered neighbour's top.
+- **A free side** (a short line in a box wider than what it holds, a last row that is the product's own) may hold more room but never less than the inset.
+- Without `lh` and `cap`, or `text-box`, a box keeps its earlier padding.
+
+| Box | Inset | What holds it |
+| --- | --- | --- |
+| `callout` / `Callout` | `--bui-callout-inset`, 16 px | the formula; its actions' edges or folded details' words at the end |
+| `Unavailable` | `--bui-unavailable-inset`, 24 px, 16 px under 480 px | its title trimmed, its mark centred on the title's capitals and its glyph on the edge; its last words trimmed, or its actions' edges |
+| `Recovery` | `--bui-recovery-inset`, 16 px; 24 px as the page (16 px under 480 px) | Try again's edges, the words centred on it; under 480 px the title's capitals; its folded details' words at the end; the page form as `Unavailable` |
+| `EmptyState` (framed) | `--bui-empty-inset`, 16 px (24 px above and below until 0.31.0) | its mark above, its action or steps below, or its words |
+| `Checklist` | `--bui-checklist-inset`, 16 px | its title's capitals; its last step ends it by its own content (below) |
+| `CommandCard` | `--bui-command-inset`, 16 px (12 px below until 0.31.0) | its title trimmed, its decisions' edges or its answered line trimmed; its parts stay at the top when its row stretches it |
+| A command's, an activity's, a copied command's code | `--bui-code-inset`, 12 px | the code trimmed in the face it is drawn in |
+| `ChoiceCards`' card | `--bui-card-inset`, 12 px | the head on its title's capitals with the radio at the inset; its last line by the formula |
+| Raised `Section`, `.bui-raised` | `--bui-raised-inset`, 16 px | the section's title trimmed; a last paragraph trimmed |
+| A resource page's raised panel (`Page`'s `raised`) | `--bui-panel-inset`, 20 px | every region's title trimmed, under the panel's edge and each divider; its last row is the product's |
+| Help's panel, `CopyMessage`, a textarea, Technical details | `--bui-text-inset`, 12 px | the formula; Technical details' Copy at the end, its own words leading them |
+| The consequence of a confirmation | `--bui-text-inset`, 12 px | its first label and last words trimmed |
+| The awaited card | `--bui-awaited-inset`, 16 px | its head on its title's capitals (its time on the title's line); a step's line centred on its 24 px mark, so the last mark ends it |
+| `Select` | `--bui-select-inset`, 12 px | its words centred in the control; the chevron ends one inset from the border (8 px until 0.31.0) |
+| `ChoiceMenu`'s button | `--bui-choice-inset`, 12 px | as `Select`: its chevron one inset from the end (8 px until 0.31.0) |
+| `Dialog`, `confirm`, `prompt`, `alert` | `--bui-dialog-inset`, 20 px | its title trimmed, the close button centred on its capitals with its glyph on the edge; its body and actions at 20 px already |
+| `SideSheet` | `--bui-sheet-inset`, 20 px | its head as a dialog's; its footer (below) |
+| Toasts | `--bui-toast-inset`, 12 px | the formula, its mark and close button centred on the first line without growing it, the close glyph on the edge; a detail trimmed by its own margin |
+| Menus (`ActionMenu`, `ChoiceMenu`, `ChoiceChip`, `RefChooser`, `ProjectPicker`) | `--bui-menu-inset`, 16 px | each entry keeps 12 px to its own edges, so the menu's words keep 16 px to its border |
+| A notification row, as a box under the pointer | `--bui-notice-inset`, 8 px | the formula |
+| A turn's preview | `--bui-preview-inset`, 12 px | its message's capitals at the inset; its keys' edges at the end (its facts' words on touch) |
+| `CommandPalette` | `--bui-palette-inset`, 16 px | the field's words one inset from the top and from its divider; the count line by the formula |
+| `Field`'s input, `Tooltip`, `Hint` | 12 px, 8 px | already even (an input's words centred in its 36 px control; a tooltip's 4 × 8 px padding at its small size) |
+
+**Not yet even, each a decision of its own** (measured by the `insets` checks for the record): a side sheet's footer keeps its buttons 12 px from the sheet's edge against its 20 px sides; a `ChoiceChip` is a target-tall pill whose words stand 10 px from its edges against 8 px and its chevron 4 px from its end; the family bar's menu panels and the notification panel keep their head's and last row's words 13 to 21 px from their edges against 16 px (their rows' surfaces are their controls); an activity exchange keeps a quiet Copy whose target sets each part's row and whose words end 24 px from its end; a choice menu with nothing chosen keeps its check column empty, so its words start 40 px in. `CopyValue` draws no box. A checklist's last step, a raised panel's last row and a box ending in a quiet action line that is the product's own (an `ActionLine` under a row) end the box by their own content: text there keeps its half-leading under its baseline unless the product trims it.

@@ -1,0 +1,104 @@
+/* One inset (D184) for the surfaces that float over the page: dialogs, side sheets, toasts, menus, notification
+   rows, the preview of a turn and the command palette, by insets.css's rules. A borderless close button is its
+   glyph: its target hangs outside it, centred on the title's capitals, its glyph ending one inset from the end.
+   The tooltip keeps 8 px on every side already (D184 measured). A part drawn outside its box (a product's own
+   markup with a menu's entry or a dialog's head) falls back to the inset its box names. Tokens only. */
+.bui-dialog {
+	--bui-dialog-inset: var(--space-5);
+}
+.bui-sheet {
+	--bui-sheet-inset: var(--space-5);
+}
+.bui-toast {
+	--bui-toast-inset: var(--space-3);
+}
+.bui-menu {
+	--bui-menu-inset: var(--space-4);
+}
+.bui-notice {
+	--bui-notice-inset: var(--space-2);
+}
+.bui-turns-preview {
+	--bui-preview-inset: var(--space-3);
+}
+.bui-palette {
+	--bui-palette-inset: var(--space-4);
+}
+/* The close glyph's end on the inset: its target hangs (target − glyph) / 2 past it */
+.bui-dialog-head {
+	padding-inline-end: calc(var(--bui-dialog-inset, var(--space-5)) - (var(--bui-target) - 18px) / 2);
+}
+.bui-sheet-head {
+	padding-inline-end: calc(var(--bui-sheet-inset, var(--space-5)) - (var(--bui-target) - 18px) / 2);
+}
+
+@supports (text-box: trim-start cap alphabetic) {
+	/* A dialog's and a side sheet's title: its capitals one inset from the top, the close button centred on them */
+	:is(.bui-dialog-title, .bui-sheet-title) {
+		padding-top: 0;
+		text-box: trim-start cap alphabetic;
+	}
+	.bui-dialog-head {
+		padding-block-start: var(--bui-dialog-inset, var(--space-5));
+		font-size: var(--text-title-3);
+	}
+	.bui-sheet-head {
+		padding-block-start: var(--bui-sheet-inset, var(--space-5));
+		font-size: var(--text-title-2);
+	}
+	:is(.bui-dialog-head, .bui-sheet-head) > .bui-icon-button {
+		margin-block-start: calc((1cap - var(--bui-target)) / 2);
+	}
+}
+
+@supports (padding-top: calc(1lh - 1cap)) {
+	/* A toast: its words one inset from the border, its mark and its close button centred on the first line
+	   without growing the row, the close glyph one inset from the end; a detail ends it at its own baseline */
+	.bui-toast {
+		padding-block: calc(var(--bui-toast-inset) - (1lh - 1cap) / 2);
+		padding-inline-end: calc(var(--bui-toast-inset) - (var(--bui-target) - 18px) / 2);
+	}
+	.bui-toast:has(.bui-toast-detail) {
+		padding-block-end: var(--bui-toast-inset);
+	}
+	.bui-toast-detail {
+		margin-block-end: calc((1cap - 1lh) / 2);
+	}
+	.bui-toast-text {
+		padding-top: 0;
+	}
+	.bui-toast > .bui-icon {
+		margin-top: calc((1lh - 18px) / 2);
+	}
+	.bui-toast > .bui-icon-button {
+		margin-block: calc((1lh - var(--bui-target)) / 2);
+	}
+	/* A menu's entries keep 12 px from their own edges, so its words keep 16 px from its border */
+	.bui-menu-item {
+		padding-block: calc(var(--bui-menu-inset, var(--space-4)) - var(--space-1) - (1lh - 1cap) / 2);
+	}
+	/* A notification row, drawn as a box under the pointer: its words one inset from its edges */
+	.bui-notice {
+		padding-block: calc(var(--bui-notice-inset) - (1lh - 1cap) / 2);
+	}
+	/* The preview of a turn: its message's capitals at the inset; its keys' edges, or its facts' words, end it */
+	.bui-turns-preview {
+		padding-block: var(--bui-preview-inset);
+	}
+	.bui-turns-preview > .bui-turns-preview-title {
+		margin-block-start: calc((1cap - 1lh) / 2);
+	}
+	@media (hover: none) and (pointer: coarse) {
+		.bui-turns-preview {
+			padding-block-end: calc(var(--bui-preview-inset) - (1lh - 1cap) / 2);
+		}
+	}
+	/* The command palette: the field's words one inset from the top and from its divider, the count line's too */
+	.bui-palette-search {
+		padding-block: calc(var(--bui-palette-inset, var(--space-4)) - (var(--bui-target) - 1cap) / 2);
+		font-size: var(--text-title-3);
+	}
+	.bui-palette-status {
+		padding-block: calc(var(--bui-palette-inset, var(--space-4)) - (1lh - 1cap) / 2);
+	}
+}
