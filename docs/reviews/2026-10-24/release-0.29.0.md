@@ -71,3 +71,9 @@ This is package evidence only. Conduict adopts 0.29.0 in the same round (its `do
 ## Family reference synchronization
 
 The family reference (Beyond Suite's `branding/`) records D180 to D184 in its round `turned` and draws Conduict's conversation on this package.
+
+## Artifact
+
+- Archive: `dist-pack/beyond-ui-0.29.0.tgz`, packed by `npm run pack:consumers` from the release commit with no consumer named, so nothing was copied into another repository.
+- SHA-256: `0e83282b7046edeafef32157eed4dac8d56ad3b1d804d02b468c8e9e55b74141`.
+- Integrity: `sha512-y2rZM5P2s2+reluaYOEXA122AYjFiHy6gs0eMQv/EIRwub/FQLjaWEHHUdlf8XO42mPdFBHA/hM0vZKqCnvEZQ==`, byte for byte the archive the browser acceptance installed.
