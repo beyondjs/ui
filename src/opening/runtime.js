@@ -5,6 +5,7 @@ import { OpeningFonts } from './fonts.js';
 import { OpeningFrame } from './frame.js';
 import { OpeningRecovery } from './recovery.js';
 import { OpeningRetry } from './retry.js';
+import { OpeningScreen } from './screen.js';
 import { OpeningSteps } from './steps.js';
 import { OpeningUsual } from './usual.js';
 import { OpeningWords, steps } from './words.js';
@@ -19,10 +20,11 @@ import { OpeningWords, steps } from './words.js';
  * running past `bound` (or after a failure the product may outlive, with no progress within `stall`),
  * unable to open (its code could not load or threw before drawing anything: every sign of progress
  * stops), or offline (it opens by itself on reconnecting). Code that could not load reloads by itself
- * once first. When the product's root holds a useful screen with no waiting element, it hands over: the
- * identity settles into the family bar and the rest fades, with the product usable from the first frame.
- * A page restored from the back-forward cache before it opened is opened again, and a development
- * server's error overlay is never covered.
+ * once first. Once the product's root holds its structure with no waiting element, the opening covers
+ * it (`arriving`) until its first screen is complete, within a budget (`OpeningScreen`, 0.31.0), then hands
+ * over: the identity settles into the family bar and the rest fades, the product usable from the first
+ * frame. A page restored from the back-forward cache before it opened is opened again, and a
+ * development server's error overlay is never covered.
  */
 class OpeningRuntime {
 	/** Milliseconds from the navigation's start before the steps are said: a quick opening says none */
@@ -41,6 +43,7 @@ class OpeningRuntime {
 	#recovery;
 	#observer;
 	#language;
+	#screen = new OpeningScreen();
 	#timers = [];
 	#stall = 0;
 	#started = false;
@@ -48,6 +51,7 @@ class OpeningRuntime {
 	#broken = false;
 	#failed = false;
 	#reloading = false;
+	#arriving = false;
 	#slow = false;
 	/** The failure the technical details name */
 	#cause = null;
@@ -112,14 +116,34 @@ class OpeningRuntime {
 		const root = document.querySelector(this.#specs.root);
 		if (!root || !root.children.length) return;
 		const pending = root.querySelector(this.#specs.pending ?? '[data-bui-opening-wait]');
-		if (!pending) return void this.#end(root);
+		if (!pending) return void this.#arrive(root);
+		if (this.#arriving) this.#resume();
 		const id = pending.getAttribute('data-bui-opening-wait') ?? '';
-		if (!this.#steps.begin(id, steps.includes(id) ? '' : this.#line(pending))) return;
+		if (!this.#steps.begin(id, steps.includes(id) ? '' : this.#words.line(pending))) return;
 		this.#slow = false;
 		// Progress: a failure the product outlived is no longer waited on, nor said
 		clearTimeout(this.#stall);
 		if (this.#failed) this.#revive();
 		if (!this.#recovery.state) this.#say(this.#steps.label);
+	}
+
+	/**
+	 * The product drew its structure: its last step ends here. A quick opening covers it until the first
+	 * screen is complete, within its budget, so the product arrives once; one that already said its steps
+	 * or its recovery hands over at once, since the person waited and each region's wait now says more.
+	 */
+	#arrive(root) {
+		this.#steps.end();
+		if (this.#steps.shown || this.#recovery.state || !this.#screen.holds(root)) return void this.#end(root);
+		this.#arriving = true;
+		this.#screen.watch(() => this.#check());
+	}
+
+	/** The product named a step again after drawing its structure: the opening waits for it as before */
+	#resume() {
+		this.#arriving = false;
+		this.#screen.reset();
+		if (performance.now() >= OpeningRuntime.reveal) this.#reveal();
 	}
 
 	/** The product moved after the opening said it could not open: it is alive, and the opening waits again */
@@ -132,24 +156,14 @@ class OpeningRuntime {
 		if (performance.now() >= OpeningRuntime.bound) this.#late();
 	}
 
-	/**
-	 * A step the product does not name, in its own words: its status line, else its first line of text, to
-	 * the end of the first sentence; what a region adds later below that line starts no new step (0.21.2)
-	 */
-	#line(pending) {
-		const status = pending.matches('[role="status"]') ? pending : pending.querySelector('[role="status"]');
-		const leaf = [...(status ?? pending).querySelectorAll('*')].find(node => !node.children.length && node.textContent.trim());
-		const text = (leaf ?? status ?? pending).textContent.replace(/\s+/g, ' ').trim();
-		return text.split(/(?<=[.…!?])\s/)[0];
-	}
-
 	/** The one announced line: never the ticking time, and the same words are not said twice */
 	#say(text) {
 		if (this.#status && this.#status.textContent !== text) this.#status.textContent = text;
 	}
 
+	/** Past `reveal`, the steps; never while the opening covers a drawn structure, which ends within its budget */
 	#reveal() {
-		if (this.#ended) return;
+		if (this.#ended || this.#arriving) return;
 		this.#steps.show();
 		if (!this.#recovery.state) this.#say(this.#steps.label);
 		this.#timers.push(setInterval(() => this.#watch(), 500));
@@ -181,6 +195,8 @@ class OpeningRuntime {
 	#fault = event => {
 		if (this.#ended || this.#reloading || !this.#element || !OpeningFault.counts(event)) return;
 		const root = document.querySelector(this.#specs.root);
+		// What fails once the product drew its structure is the product's to say: the opening steps aside
+		if (this.#arriving && root) return void this.#end(root);
 		const fault = new OpeningFault(event, { drawn: Boolean(root?.children.length), started: this.#started, words: this.#words });
 		// The details keep the failure that matters: the first one, unless a later one is final
 		if (!this.#cause || (fault.final && !this.#cause.final)) {
@@ -252,15 +268,7 @@ class OpeningRuntime {
 		this.#steps.end();
 		// Only an opening that went as expected is measured
 		if (!this.#recovery.state) this.#usual.keep(this.#steps.durations);
-		const focused = this.#element.contains(document.activeElement);
-		const leaving = new OpeningExit(this.#element, root).run();
-		// A person who reached recovery keeps a keyboard destination when the page arrives late.
-		if (focused) {
-			const destination = root.querySelector('h1, main, button, a[href]') ?? root;
-			if (!destination.hasAttribute('tabindex')) destination.setAttribute('tabindex', '-1');
-			destination.focus({ preventScroll: true });
-		}
-		await leaving;
+		await new OpeningExit(this.#element, root).run();
 		this.#element.remove();
 		// One set of faces from now on: the application's own, once the ones in use have loaded (0.17.1)
 		new OpeningFonts(document.querySelector('link[data-bui-opening]')?.sheet ?? null).release().catch(() => false);
@@ -276,6 +284,7 @@ class OpeningRuntime {
 	#release() {
 		for (const timer of this.#timers) clearTimeout(timer);
 		clearTimeout(this.#stall);
+		this.#screen.reset();
 		this.#steps?.end();
 		this.#observer?.disconnect();
 		this.#language?.disconnect();

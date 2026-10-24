@@ -29,6 +29,13 @@
 .bui-opening-veil { position: fixed; inset: 0; background: radial-gradient(44rem 24rem at 50% 38%, var(--bui-opening-glow), transparent 72%), var(--color-canvas); }
 .bui-opening-stage { position: relative; width: min(100%, 26rem); display: grid; gap: var(--space-5); }
 
+/* The hand-over's landing (0.31.0): while the identity moves into the family bar, the bar's own wordmark and name
+   wait hidden under it, and its separator and the product menu's chevron, which do not move, wait unseen, so
+   nothing of the bar shows through the identity, a bar drawn again meanwhile included (`OpeningExit`). */
+.bui-family[data-bui-landing='flight'] :is(.bui-lockup-mark, .bui-lockup-name) { visibility: hidden; }
+.bui-family[data-bui-landing='flight'] .bui-family-product::before,
+.bui-family[data-bui-landing='flight'] .bui-family-product .bui-navmenu-button > .bui-icon { opacity: 0; }
+
 /* The family lockup, larger: the wordmark, the divider and the name in the brand face, in the bar's proportions. */
 .bui-opening-lockup { display: flex; align-items: center; gap: calc(var(--bui-opening-height) * 0.38); min-width: 0; line-height: 1; }
 .bui-opening-wordmark { display: block; flex: none; width: auto; height: var(--bui-opening-height); }
@@ -96,11 +103,15 @@
 	.bui-opening { --bui-opening-height: 26px; }
 }
 /* Motion exists only for a person who did not ask for less (0.21.2): the trace's light, the running step's few
-   pulses and the steps' arrival are declared here alone, so no rule of a product's can bring them back. */
+   pulses, the steps' arrival, the stage's entrance and the landing's fade (0.31.0) are declared here alone, so no
+   rule of a product's can bring them back. */
 @media (prefers-reduced-motion: no-preference) {
 	.bui-opening-trace::after { animation: bui-opening-travel 1.8s cubic-bezier(0.45, 0, 0.25, 1) infinite; }
 	.bui-opening-step[data-state='active'] .bui-opening-dot { animation: bui-opening-pulse 1.2s ease-in-out 4; }
 	.bui-opening-steps { animation: bui-opening-in var(--motion-standard) var(--motion-ease); }
+	.bui-opening-stage { animation: bui-opening-in var(--motion-standard) var(--motion-ease) both; }
+	.bui-family[data-bui-landing='landed'] .bui-family-product::before,
+	.bui-family[data-bui-landing='landed'] .bui-family-product .bui-navmenu-button > .bui-icon { transition: opacity var(--motion-standard) var(--motion-ease); }
 }
 /* Under reduced motion the trace is a still, dashed band, as the family's indeterminate one. */
 @media (prefers-reduced-motion: reduce) {

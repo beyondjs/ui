@@ -38,6 +38,11 @@ export class OpeningSteps {
 		return active ? this.#label(active) : '';
 	}
 
+	/** Whether the steps are said: the opening was not quick (`show`) */
+	get shown() {
+		return this.#shown;
+	}
+
 	/** Whether the running step has passed its usual time on this device */
 	get late() {
 		const active = this.active;

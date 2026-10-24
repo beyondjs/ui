@@ -21,3 +21,28 @@ h1 {
 .bui-lockup-name {
 	font: 500 15px Rubik, sans-serif;
 }
+/* The product menu after the wordmark (0.31.0): its separator is drawn before it, as the family bar's is, and its chevron follows the name. */
+.bui-family-product {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.bui-family-product::before {
+	content: '';
+	width: 1px;
+	height: 15px;
+	background: currentColor;
+}
+.bui-navmenu-button {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+}
+.bui-navmenu-button > .bui-icon {
+	width: 12px;
+	height: 12px;
+}

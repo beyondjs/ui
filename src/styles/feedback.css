@@ -172,7 +172,7 @@
 }
 
 /* A region's wait (0.23.0, LOAD-01): the "Loading…" line above row-shaped placeholders, on the raised frame
-   of `links.css` unless the region is framed already. No shimmer, no staged delay. */
+   of `links.css` unless the region is framed already. No shimmer and no stagger; its grace is below (0.31.0). */
 .bui-waiting {
 	display: grid;
 }
@@ -185,6 +185,27 @@
 }
 .bui-waiting > .bui-skeleton {
 	padding: 0;
+}
+
+/* A wait shows only when its read is slow (0.31.0, D185): it is in place, busy and announced at once, but seen
+   only past its grace, so a read that answers within it goes straight to its content, and then it fades in, so
+   one that answers just after leaves no flash. Nothing waits for it: content replaces it the moment it arrives.
+   Under reduced motion it appears at the grace without fading. What answers a person's own action (a busy
+   button, a loading line) is not a region's wait and shows at once. */
+.bui-waiting,
+.bui-skeleton:not(.bui-waiting .bui-skeleton) {
+	animation: bui-waiting-in 0s linear 300ms both;
+}
+@keyframes bui-waiting-in {
+	from {
+		opacity: 0;
+	}
+}
+@media (prefers-reduced-motion: no-preference) {
+	.bui-waiting,
+	.bui-skeleton:not(.bui-waiting .bui-skeleton) {
+		animation: bui-waiting-in var(--motion-standard) var(--motion-ease) 300ms both;
+	}
 }
 
 .bui-empty {

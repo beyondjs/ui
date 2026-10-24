@@ -86,9 +86,10 @@
 	}
 }
 
-/* Nothing moves for a person who asked for reduced motion; state changes stay visible as text. */
+/* Nothing moves for a person who asked for reduced motion; state changes stay visible as text. A region's wait
+   keeps its grace (feedback.css, 0.31.0): it does not move, it is only seen once its read is slow. */
 @media (prefers-reduced-motion: reduce) {
-	:where([class^='bui-'], [class*=' bui-']),
+	:where([class^='bui-']:not(.bui-waiting, .bui-skeleton), [class*=' bui-']:not(.bui-waiting, .bui-skeleton)),
 	:where([class^='bui-'], [class*=' bui-'])::before,
 	:where([class^='bui-'], [class*=' bui-'])::after,
 	:where([class^='bui-'], [class*=' bui-'])::backdrop {

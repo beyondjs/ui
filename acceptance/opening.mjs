@@ -5,12 +5,13 @@ import { once } from 'node:events';
 import { chromium, firefox, webkit } from 'playwright-core';
 import { OpeningDocument } from '@beyond-js/ui/opening';
 import { OpeningFailures } from './opening-failures.mjs';
+import { OpeningArrival } from './opening-arrival.mjs';
 
 /**
  * Checks the opening under strict CSP, against a fictional delayed application (0.21.0, 0.25.0): the
  * identity that never moves, the steps said with their times, a late opening, the measured usual, a page
- * restored from the cache and the hand-over into the product's bar; `OpeningFailures` holds what it says
- * and offers when it cannot simply wait.
+ * restored from the cache and the hand-over into the product's bar; `OpeningArrival` holds how a product
+ * arrives once, complete (0.31.0), and `OpeningFailures` what it says and offers when it cannot simply wait.
  */
 class OpeningAcceptance {
 	#document = new OpeningDocument({ product: 'Projects', key: 'opening-fixture', device: true, logo: new URL('./fixtures/brand/wordmark.svg', import.meta.url) });
@@ -33,7 +34,8 @@ class OpeningAcceptance {
 			await this.#usual();
 			await this.#restored();
 			await this.#handover();
-			for (const check of new OpeningFailures({ open: options => this.#open(options), steps: page => this.#steps(page) }).checks) {
+			const helpers = { open: options => this.#open(options), steps: page => this.#steps(page) };
+			for (const check of [...new OpeningArrival(helpers).checks, ...new OpeningFailures(helpers).checks]) {
 				await check();
 				this.#count++;
 			}
@@ -51,7 +53,7 @@ class OpeningAcceptance {
 		if (this.#document.files.has(name)) return send(types[name.split('.').pop()], this.#document.files.get(name));
 		if (/^[a-z]+\.js$/.test(name) || name === 'app.css') return send(types[name.split('.').pop()], readFileSync(new URL(`./fixtures/opening/${name}`, import.meta.url)));
 		if (name === 'wordmark.svg') return send(types.svg, readFileSync(new URL('./fixtures/brand/wordmark.svg', import.meta.url)));
-		if (name === 'state') return send('application/json', '{}');
+		if (name === 'state' || name === 'content') return send('application/json', '{}');
 		// The application's own faces, as its `@beyond-js/ui/fonts.css` declares them (0.17.1)
 		if (name.startsWith('fonts/')) return send(types[name.split('.').pop()] ?? 'text/css', readFileSync(new URL(`../${name}`, import.meta.url)));
 		response.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; require-trusted-types-for 'script'; trusted-types 'none'");
@@ -201,8 +203,8 @@ class OpeningAcceptance {
 			await page.waitForFunction(() => document.querySelector('[data-opening-status]').textContent === 'Confirmando tu sesión');
 			release();
 			await page.waitForFunction(() => document.getElementById('bui-opening')?.dataset.state === 'leaving');
-			const leaving = await page.evaluate(() => ({ pointer: getComputedStyle(document.getElementById('bui-opening')).pointerEvents, app: getComputedStyle(document.getElementById('root')).visibility, target: document.querySelector('.bui-family .bui-lockup-mark').style.visibility }));
-			assert.deepEqual(leaving, { pointer: 'none', app: 'visible', target: 'hidden' }, 'the product shows and takes the pointer at once; its wordmark waits under the moving one');
+			const leaving = await page.evaluate(() => ({ pointer: getComputedStyle(document.getElementById('bui-opening')).pointerEvents, app: getComputedStyle(document.getElementById('root')).visibility, target: getComputedStyle(document.querySelector('.bui-family .bui-lockup-mark')).visibility, landing: document.querySelector('.bui-family').dataset.buiLanding }));
+			assert.deepEqual(leaving, { pointer: 'none', app: 'visible', target: 'hidden', landing: 'flight' }, 'the product shows and takes the pointer at once; its wordmark waits under the moving one');
 			const started = Date.now();
 			await page.locator('#bui-opening').waitFor({ state: 'detached', timeout: 2000 });
 			assert.ok(Date.now() - started < 1000, 'the hand-over is bounded');

@@ -1,9 +1,10 @@
 // The 0.17.1 page of the plain DOM consumer: a family bar whose descriptor changes while a menu is open,
-// a CopyValue in a fact's narrow value, and an outage that tries again by itself. window.fixture drives them.
+// a CopyValue in a fact's narrow value, and an outage that tries again by itself; since 0.31.0 a region that
+// starts waiting for its first read on demand. window.fixture drives them.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { FamilyBar, CopyValue, Unavailable, el } from '@beyond-js/ui';
+import { FamilyBar, CopyValue, Unavailable, Section, el } from '@beyond-js/ui';
 import { chosen, fallback, product } from '../data/family.js';
 
 const root = document.getElementById('root');
@@ -36,6 +37,10 @@ window.fixture = {
 	/** The same descriptor again */
 	same() {
 		bar.descriptor = { ...descriptor, projects: [...descriptor.projects] };
+	},
+	/** A region that starts waiting for its first read now (0.31.0) */
+	wait() {
+		main.append(new Section({ title: 'Recent', waiting: { rows: 2 } }).element);
 	},
 	ready: true
 };

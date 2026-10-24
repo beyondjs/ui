@@ -105,6 +105,18 @@ export class OpeningWords {
 		return text || this.text('opening');
 	}
 
+	/**
+	 * A step the product does not name, in its own words from its waiting element: its status line, else its
+	 * first line of text, to the end of the first sentence; what a region adds later below that line starts
+	 * no new step (0.21.2)
+	 */
+	line(pending) {
+		const status = pending.matches('[role="status"]') ? pending : pending.querySelector('[role="status"]');
+		const leaf = [...(status ?? pending).querySelectorAll('*')].find(node => !node.children.length && node.textContent.trim());
+		const text = (leaf ?? status ?? pending).textContent.replace(/\s+/g, ' ').trim();
+		return text.split(/(?<=[.…!?])\s/)[0];
+	}
+
 	/** A duration as a person reads it: "< 0.1 s", "0.4 s", "12 s", "1 min 5 s" (decimals in the document's language) */
 	time(ms) {
 		const seconds = Math.max(0, ms) / 1000;

@@ -84,5 +84,17 @@ test('placeholders are drawn in the divider role and the framed wait is a raised
 	assert.match(css('feedback.css'), /\.bui-skeleton-line \{[^}]*background: var\(--color-border-strong\)/);
 	assert.match(css('status.css'), /\.bui-skeleton-mark \{[^}]*background: var\(--color-border-strong\)/);
 	assert.match(css('links.css'), /\.bui-waiting\[data-frame\] \{[^}]*background: var\(--color-surface-raised\)/);
-	assert.doesNotMatch(css('feedback.css'), /\.bui-waiting[^{]*\{[^}]*animation/);
+});
+
+test('a wait is seen only past its grace, fades in only for a person who did not ask for less motion and never shimmers (0.31.0, D185)', () => {
+	const feedback = readFileSync(new URL('../src/styles/feedback.css', import.meta.url), 'utf8');
+	const waits = '\\.bui-waiting,\\s*\\.bui-skeleton:not\\(\\.bui-waiting \\.bui-skeleton\\)';
+	// In place and announced at once, seen past 300 ms: at once under reduced motion, a nested placeholder not graced twice
+	assert.match(feedback, new RegExp(`(^|\\n)${waits} \\{\\s*animation: bui-waiting-in 0s linear 300ms both;\\s*\\}`));
+	const motion = feedback.match(/@media \(prefers-reduced-motion: no-preference\) \{[\s\S]*?\n\}/)[0];
+	assert.match(motion, new RegExp(`${waits} \\{\\s*animation: bui-waiting-in var\\(--motion-standard\\) var\\(--motion-ease\\) 300ms both;`), 'the fade only for a person who did not ask for less');
+	assert.match(feedback, /@keyframes bui-waiting-in \{\s*from \{\s*opacity: 0;\s*\}\s*\}/, 'opacity alone: nothing moves (D95)');
+	assert.doesNotMatch(feedback, /bui-waiting-in[^;]*(infinite|alternate)/, 'no shimmer');
+	assert.equal([...feedback.matchAll(/animation: bui-waiting-in/g)].length, 2);
+	assert.doesNotMatch(feedback, /\.bui-(waiting|skeleton)[^{}]*\{[^}]*animation: (?!bui-waiting-in)/, 'the grace is the wait’s only motion');
 });

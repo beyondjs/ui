@@ -5,6 +5,12 @@
  * Without a bar in view, the presentation fades alone. It only overlaps, so it may move (D95); under
  * reduced motion, or where the browser cannot animate, it is removed at once. The motion is bounded:
  * whatever happens, it ends within `bound` milliseconds.
+ *
+ * Since 0.31.0 the bar is marked as landing while the identity moves (`data-bui-landing="flight"`): its own
+ * wordmark and name wait hidden under the moving ones, and its separator and the product menu's chevron,
+ * which do not move, wait unseen, so nothing of the bar shows through the identity, even a bar drawn again
+ * meanwhile. On landing (`landed`) the bar's wordmark and name show where the moving ones arrive and the
+ * separator and the chevron fade in; the mark then goes.
  */
 export class OpeningExit {
 	static duration = 360;
@@ -14,7 +20,7 @@ export class OpeningExit {
 
 	#element;
 	#root;
-	#hidden = new Map();
+	#bar = null;
 
 	/**
 	 * @param {HTMLElement} element The presentation (`#bui-opening`)
@@ -32,15 +38,23 @@ export class OpeningExit {
 
 	/** Runs the hand-over and resolves once the presentation can be removed */
 	async run() {
+		const focused = this.#element.contains(document.activeElement);
 		this.#element.dataset.state = 'leaving';
+		if (focused) this.#keep();
 		if (!this.moving) return;
 		const motions = [...this.#flights(), ...this.#fades()];
 		try {
 			await Promise.race([Promise.allSettled(motions.map(motion => motion.finished)), new Promise(resolve => setTimeout(resolve, OpeningExit.bound))]);
 		} finally {
-			// The bar's own wordmark and name show again where the moving ones landed
-			for (const [place, value] of this.#hidden) place.style.visibility = value;
+			this.#land();
 		}
+	}
+
+	/** A person who reached recovery keeps a keyboard destination when the page arrives late */
+	#keep() {
+		const destination = this.#root.querySelector('h1, main, button, a[href]') ?? this.#root;
+		if (!destination.hasAttribute('tabindex')) destination.setAttribute('tabindex', '-1');
+		destination.focus({ preventScroll: true });
 	}
 
 	/** The wordmark and the name, each to its place in the bar when the bar shows it */
@@ -59,10 +73,20 @@ export class OpeningExit {
 		if (!start.height || !end?.height || end.bottom < 0 || end.top > innerHeight) return this.#fade(part, OpeningExit.fade);
 		const shift = `translate(${end.left - start.left}px, ${end.top - start.top}px) scale(${end.height / start.height})`;
 		part.style.transformOrigin = '0 0';
-		// Only one of each is seen: the bar's waits under the moving one until it lands
-		this.#hidden.set(place, place.style.visibility);
-		place.style.visibility = 'hidden';
+		// Only one of each is seen: the bar waits, landing, under the moving one
+		this.#bar = place.closest('.bui-family');
+		if (this.#bar) this.#bar.dataset.buiLanding = 'flight';
 		return part.animate([{ transform: 'none' }, { transform: shift }], { duration: OpeningExit.duration, easing: OpeningExit.ease, fill: 'forwards' });
+	}
+
+	/** The identity has landed: the bar's own shows where it arrived and what did not move fades in, then the mark goes */
+	#land() {
+		const bar = this.#bar;
+		if (!bar) return;
+		bar.dataset.buiLanding = 'landed';
+		setTimeout(() => {
+			if (bar.dataset.buiLanding === 'landed') delete bar.dataset.buiLanding;
+		}, OpeningExit.fade * 2);
 	}
 
 	/**

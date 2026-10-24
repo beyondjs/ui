@@ -178,3 +178,15 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 
 - **Unit.** `tests/page.test.mjs` holds `raised`: flat by default, `data-raised` once raised, kept across an aside removed and given again, and never on a panel kept in view. `tests/react-page.test.mjs` renders React's `raised` with the DOM page's markup. `tests/fixtures/types/` compiles the option and the setter.
 - **Browser.** `acceptance/checks/layout.mjs`, on the `layout.html` pages with `?raised=1`, measures at 390, 1024 and 1440 px in both themes: the aside on the raised surface's own colour with a 1 px line and no shadow; its two regions divided by a line; a copy's mark on the panel's edge (the section heading's); its quiet actions in `.bui-row-under` starting under the row's name; no sideways scroll. Run `npm run acceptance -- "raised panel"`, then with `BEYOND_UI_BROWSER=firefox` and `BEYOND_UI_BROWSER=webkit`. See [the release evidence](reviews/2026-10-24/release-0.30.0.md).
+
+## UI 0.31.0: a product arrives once (D185)
+
+- **Unit.** `tests/opening-screen.test.mjs` holds `OpeningScreen`: a structure with nothing waiting is complete at once and starts no budget; a region waiting for its first read holds the screen within the budget, counted from the first time it is asked; every shared wait counts (a placeholder, a collection's or table's placeholder rows, the family bar's read) and a loading line does not; a wait in a part that is not drawn holds nothing; a product that names a step again starts a new budget; the screen asks again once, when the budget runs out, and not after a reset. happy-dom draws nothing, so a part that is not drawn says so through `checkVisibility()` there. `tests/waiting.test.mjs` holds the waits' grace: seen past 300 ms, faded in only for a person who did not ask for less motion, opacity alone, never a shimmer.
+- **Browser, the opening.** `acceptance/opening-arrival.mjs` (`OpeningArrival`), on the fixture's `?regions` page:
+  - the structure is drawn under the opening while its first read runs, and past 800 ms the opening still says no steps; the product then shows once, complete, and "usual" measures the opening's own steps;
+  - a read slower than the budget is shown at it, with its wait in place;
+  - an opening that already said its steps hands over at the structure;
+  - with motion, the stage fades in, and the identity lands on a bar whose wordmark, name, separator and chevron show nothing through it while it moves, even after the bar drew its brand again, and show on landing.
+
+  The hand-over check of `acceptance/opening.mjs` reads the landing mark instead of the wordmark's inline style.
+- **Browser, the waits.** `acceptance/checks/waiting.mjs`, on the `hold.html` pages (`window.fixture.wait()`), measures a region's wait in the `dom`, `react19` and `react18` consumers: busy and announced at once with nothing seen, one animation of 200 ms after a 300 ms delay, its placeholders not graced a second time, then seen; under reduced motion the same grace with no fading.
