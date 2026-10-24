@@ -141,6 +141,23 @@ test('Option/Alt with the arrows moves between turns from the page, back to the 
 	assert.equal(chosen.length, count, 'a destroyed index hears no key');
 });
 
+test('with no turn read yet, as for turns given without their elements, the next turn is the first and the previous the last', () => {
+	const chosen = [];
+	const index = make({ choose: (key, how) => chosen.push([key, how]) });
+	index.update({ turns: turns() });
+	assert.equal(index.current, null);
+	assert.equal(index.move(1), true);
+	assert.deepEqual(chosen.at(-1), ['t1', 'key']);
+	assert.equal(index.move(1), true);
+	assert.deepEqual(chosen.at(-1), ['t2', 'key'], 'and on from there');
+	const other = make({ choose: (key, how) => chosen.push([key, how]) });
+	other.update({ turns: turns() });
+	assert.equal(other.move(-1), true);
+	assert.deepEqual(chosen.at(-1), ['t5', 'key']);
+	index.destroy();
+	other.destroy();
+});
+
 test('without choose: the keys replace the address with the turn\'s; a mark without an address scrolls to its turn', () => {
 	const index = make();
 	index.update({ turns: place(turns(), [-1400, -800, 160, 700, 1300], document) });

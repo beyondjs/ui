@@ -128,7 +128,9 @@ export class TurnIndex extends Component {
 	move(step) {
 		const index = this.#sequence.findIndex(mark => mark.key === this.#current);
 		const back = step < 0 && this.#covered && index >= 0;
-		const goal = back ? this.#sequence[index] : this.#sequence[Math.min(Math.max(Math.max(index, 0) + step, 0), this.#sequence.length - 1)];
+		// With no turn read yet (turns given without their elements), the next turn is the first and the previous the last
+		const from = index >= 0 ? index : step > 0 ? -1 : this.#sequence.length;
+		const goal = back ? this.#sequence[index] : this.#sequence[Math.min(Math.max(from + step, 0), this.#sequence.length - 1)];
 		if (!goal || (!back && goal.key === this.#current)) return false;
 		// The goal is read from now on, its message in view: a second press moves on from it, before the scroll ends
 		this.#seen({ key: goal.key, covered: false });
