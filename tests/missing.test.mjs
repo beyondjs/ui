@@ -160,8 +160,9 @@ test('a required secret still to give keeps the form quiet, and a press opens it
 	kept.destroy();
 });
 
-test('a composer\'s files may wait for words: Send stays quiet and the field says what they wait for', () => {
-	const composer = new ui.Composer({ label: 'Message', placeholder: 'What should Codex do?', onsubmit: () => Promise.resolve(), attach: { onfiles: () => undefined, words: 'Say what to do with the attached files' } }).mount(document.body);
+test('a composer\'s files may wait for words: Send stays quiet, a press and Enter send nothing, and the field says what they wait for', async () => {
+	const sent = [];
+	const composer = new ui.Composer({ label: 'Message', placeholder: 'What should Codex do?', onsubmit: message => (sent.push(message), Promise.resolve()), attach: { onfiles: () => undefined, words: 'Say what to do with the attached files' } }).mount(document.body);
 	const root = composer.element;
 	const field = composer.field;
 	const send = root.querySelector('.bui-composer-go');
@@ -172,18 +173,28 @@ test('a composer\'s files may wait for words: Send stays quiet and the field say
 	assert.equal(send.getAttribute('aria-disabled'), 'true');
 	assert.equal(field.getAttribute('placeholder'), 'Say what to do with the attached files');
 	assert.equal(root.querySelector('.bui-composer-placeholder').textContent, 'Say what to do with the attached files');
+	assert.equal(await composer.submit(), false, 'a press sends nothing');
+	assert.ok(document.activeElement === field, 'and puts the caret where the words go');
+	page.key(field, 'Enter');
+	await page.until(() => !composer.sending);
+	assert.deepEqual(sent, [], 'Enter sends nothing either');
+	assert.equal(root.querySelector('.bui-composer-status').textContent.trim(), '', 'nothing is said as a refusal');
 	type(field, 'Use it for the layout');
 	assert.equal(root.hasAttribute('data-empty'), false, 'words make it something to send');
 	assert.equal(send.hasAttribute('aria-disabled'), false);
-	type(field, '');
+	assert.equal(await composer.submit(), true);
+	assert.deepEqual(sent.map(message => [message.text, message.attachments?.length]), [['Use it for the layout', 1]], 'the words go with the files');
+	composer.attachments = [{ key: 'b', name: 'log.txt', state: 'ready' }];
 	assert.equal(field.getAttribute('placeholder'), 'Say what to do with the attached files');
 	composer.attachments = [];
 	assert.equal(field.getAttribute('placeholder'), 'What should Codex do?', 'no files: the product\'s own words again');
 	composer.placeholder = 'Message Codex';
 	assert.equal(field.getAttribute('placeholder'), 'Message Codex');
 	composer.destroy();
-	const alone = new ui.Composer({ label: 'Message', onsubmit: () => Promise.resolve(), attach: { onfiles: () => undefined } }).mount(document.body);
+	const alone = new ui.Composer({ label: 'Message', onsubmit: message => (sent.push(message), Promise.resolve()), attach: { onfiles: () => undefined } }).mount(document.body);
 	alone.attachments = [{ key: 'a', name: 'trace.png', state: 'ready' }];
 	assert.equal(alone.element.hasAttribute('data-empty'), false, 'without words, a ready file goes by itself as before');
+	assert.equal(await alone.submit(), true);
+	assert.deepEqual([sent.at(-1).text, sent.at(-1).attachments.length], ['', 1]);
 	alone.destroy();
 });

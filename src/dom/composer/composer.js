@@ -57,7 +57,7 @@ export class Composer extends Component {
 		this.#keys = new ComposerKeys({ submit, view: document.defaultView ?? null });
 		this.#onchange = onchange;
 		this.#field = new ComposerField({ label, placeholder, value, min, max, name });
-		const host = { alive: () => !this.destroyed, files: () => this.#context.files, primary: () => this.#actions.primary.id, draw: () => this.#draw(), root: () => this.#element };
+		const host = { alive: () => !this.destroyed, files: () => this.#context.files, sendable: () => Boolean(this.#context?.sendable), primary: () => this.#actions.primary.id, draw: () => this.#draw(), root: () => this.#element };
 		this.#sender = new ComposerSend({ field: this.#field, status: this.#status, labels: this.#labels, onsubmit, onchange, explain, host });
 		this.#actions = new ComposerActions({ labels: this.#labels, run: action => this.#send(action, true), refocus: () => this.focus() });
 		const box = this.#box.element;

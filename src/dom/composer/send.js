@@ -5,7 +5,7 @@ import { Interaction } from '../core/interaction.js';
  * trimmed, leaves the field at once and the product's `onsubmit({ text, action, attachments? })` runs.
  * When it rejects, the text comes back before anything typed meanwhile and the box's state band says why
  * (`explain(error)`, the default sentence, or nothing). Since 0.11.0 a message with a ready attachment
- * may have no text.
+ * may have no text, unless the product's `attach.words` says files wait for words (0.32.0).
  *
  * An empty message is not sent and is no failure (0.29.0, D183): Enter does nothing, and a press on the
  * quiet Send only puts the caret in the field, saying nothing (before 0.29.0 it said "Write a message
@@ -29,7 +29,7 @@ export class ComposerSend {
 	 * @param {(message: {text: string, action: string, attachments: object[]}) => Promise<unknown>} options.onsubmit
 	 * @param {((text: string) => void)|null} options.onchange
 	 * @param {((error: unknown) => string|null)|undefined} options.explain
-	 * @param {{alive: () => boolean, files: () => {ready: boolean, attached: object[]}, primary: () => string, draw: () => void, root: () => HTMLElement}} options.host
+	 * @param {{alive: () => boolean, files: () => {ready: boolean, attached: object[]}, sendable: () => boolean, primary: () => string, draw: () => void, root: () => HTMLElement}} options.host
 	 *   the composer: whether it still lives, its attachments, its primary action, a redraw and its element
 	 */
 	constructor({ field, status, labels, onsubmit, onchange, explain, host }) {
@@ -52,7 +52,8 @@ export class ComposerSend {
 		const raw = this.#field.value;
 		const text = raw.trim();
 		const files = this.#host.files();
-		if (!text && !files.ready) {
+		// Ready files are something to send by themselves only without `attach.words` (0.32.0, D183)
+		if (!text && !this.#host.sendable()) {
 			// Nothing to send is no failure: a press puts the caret where the message is written, and says nothing
 			if (pressed) this.#field.control.focus();
 			return false;

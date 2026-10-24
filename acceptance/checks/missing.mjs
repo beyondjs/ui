@@ -57,7 +57,7 @@ export const checks = [
 		}
 	},
 	{
-		name: 'composer: files that wait for words keep Send quiet and the field says what they wait for; words make it able (0.32.0, D183)',
+		name: 'composer: files that wait for words keep Send quiet, a press and Enter send nothing and the field says what they wait for; words make it able (0.32.0, D183)',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const said = copy(consumer.name === 'dom' ? 'en' : 'es');
@@ -77,10 +77,23 @@ export const checks = [
 			expect(waiting.placeholder === said.attach && waiting.quiet && waiting.chips === 1, `a ready file waits for words: ${JSON.stringify(waiting)}`);
 			const shown = await page.locator(`${dock} .bui-composer-placeholder`).evaluate(node => node.getClientRects().length > 0 && getComputedStyle(node).visibility !== 'hidden');
 			expect(shown, 'the field says it where the person writes');
-			await page.locator(`${dock} .bui-composer-field`).fill(consumer.name === 'dom' ? 'Use it for the layout' : 'Úsala para el diseño');
+			const sent = () => page.evaluate(() => window.fixture.log.filter(entry => entry.startsWith('send:')));
+			await press(page, page.locator(`${dock} .bui-composer-go`));
+			await settle(page);
+			const pressed = await page.evaluate(selector => ({ caret: document.activeElement === document.querySelector(`${selector} .bui-composer-field`), said: document.querySelector(`${selector} .bui-composer-status`)?.textContent.trim() ?? '' }), dock);
+			expect(pressed.caret && !pressed.said, `a press puts the caret where the words go, saying nothing: ${JSON.stringify(pressed)}`);
+			await page.keyboard.press('Enter');
+			await settle(page);
+			expect(!(await sent()).length, 'neither a press nor Enter sends the files without words');
+			const written = consumer.name === 'dom' ? 'Use it for the layout' : 'Úsala para el diseño';
+			await page.locator(`${dock} .bui-composer-field`).fill(written);
 			expect(!(await read()).quiet, 'words make it something to send');
 			await page.locator(`${dock} .bui-composer-field`).fill('');
 			expect((await read()).quiet, 'emptied again, it waits again');
+			await page.locator(`${dock} .bui-composer-field`).fill(written);
+			await page.keyboard.press('Enter');
+			await page.waitForFunction(() => window.fixture.log.some(entry => entry.startsWith('send:')));
+			expect((await sent()).join() === `send:${written}`, 'the words go with the files');
 			await context.close();
 		}
 	},
