@@ -646,9 +646,9 @@ Since 0.32.0 every box of the package that holds text or controls inside a borde
 | `callout` / `Callout` | `--bui-callout-inset`, 16 px | the formula; its actions' edges or folded details' words at the end |
 | `Unavailable` | `--bui-unavailable-inset`, 24 px, 16 px under 480 px | its title trimmed, its mark centred on the title's capitals and its glyph on the edge; its last words trimmed, or its actions' edges |
 | `Recovery` | `--bui-recovery-inset`, 16 px; 24 px as the page (16 px under 480 px) | Try again's edges, the words centred on it; under 480 px the title's capitals; its folded details' words at the end; the page form as `Unavailable` |
-| `EmptyState` (framed) | `--bui-empty-inset`, 16 px (24 px above and below until 0.31.0) | its mark above, its action or steps below, or its words |
+| `EmptyState` (framed) | `--bui-empty-inset`, 16 px (24 px above and below until 0.31.1) | its mark above, its action or steps below, or its words |
 | `Checklist` | `--bui-checklist-inset`, 16 px | its title's capitals; its last step ends it by its own content (below) |
-| `CommandCard` | `--bui-command-inset`, 16 px (12 px below until 0.31.0) | its title trimmed, its decisions' edges or its answered line trimmed; its parts stay at the top when its row stretches it |
+| `CommandCard` | `--bui-command-inset`, 16 px (12 px below until 0.31.1) | its title trimmed, its decisions' edges or its answered line trimmed; its parts stay at the top when its row stretches it |
 | A command's, an activity's, a copied command's code | `--bui-code-inset`, 12 px | the code trimmed in the face it is drawn in |
 | `ChoiceCards`' card | `--bui-card-inset`, 12 px | the head on its title's capitals with the radio at the inset; its last line by the formula |
 | Raised `Section`, `.bui-raised` | `--bui-raised-inset`, 16 px | the section's title trimmed; a last paragraph trimmed |
@@ -656,8 +656,8 @@ Since 0.32.0 every box of the package that holds text or controls inside a borde
 | Help's panel, `CopyMessage`, a textarea, Technical details | `--bui-text-inset`, 12 px | the formula; Technical details' Copy at the end, its own words leading them |
 | The consequence of a confirmation | `--bui-text-inset`, 12 px | its first label and last words trimmed |
 | The awaited card | `--bui-awaited-inset`, 16 px | its head on its title's capitals (its time on the title's line); a step's line centred on its 24 px mark, so the last mark ends it |
-| `Select` | `--bui-select-inset`, 12 px | its words centred in the control; the chevron ends one inset from the border (8 px until 0.31.0) |
-| `ChoiceMenu`'s button | `--bui-choice-inset`, 12 px | as `Select`: its chevron one inset from the end (8 px until 0.31.0) |
+| `Select` | `--bui-select-inset`, 12 px | its words centred in the control; the chevron ends one inset from the border (8 px until 0.31.1) |
+| `ChoiceMenu`'s button | `--bui-choice-inset`, 12 px | as `Select`: its chevron one inset from the end (8 px until 0.31.1) |
 | `Dialog`, `confirm`, `prompt`, `alert` | `--bui-dialog-inset`, 20 px | its title trimmed, the close button centred on its capitals with its glyph on the edge; its body and actions at 20 px already |
 | `SideSheet` | `--bui-sheet-inset`, 20 px | its head as a dialog's; its footer (below) |
 | Toasts | `--bui-toast-inset`, 12 px | the formula, its mark and close button centred on the first line without growing it, the close glyph on the edge; a detail trimmed by its own margin |
