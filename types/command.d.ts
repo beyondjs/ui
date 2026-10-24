@@ -1,4 +1,4 @@
-/** Types of 0.16.0's `CommandPalette`, `ChoiceCards` and `Primaries`, and 0.19.0's `Hierarchy`, re-exported by `@beyond-js/ui/dom`. */
+/** Types of 0.16.0's `CommandPalette`, `ChoiceCards` and `Primaries`, 0.19.0's `Hierarchy` and 0.28.0's `Ellipses`, re-exported by `@beyond-js/ui/dom`. */
 import type { Copy } from './notifications.js';
 import type { Component } from './dom.js';
 
@@ -68,6 +68,18 @@ export class Primaries {
 	static enabled: boolean;
 	constructor(options: { root: Element; warn?: ((message: string, region: Element) => void) | null });
 	check(): Array<{ region: Element; count: number }>;
+	destroy(): void;
+}
+
+/** A visible action is named whole, its "…" only on a menu's entry, warned while a product is developed (D179). */
+export class Ellipses {
+	static actions: string;
+	static menus: string;
+	static enabled: boolean;
+	/** The words a person sees on an element, less what is only for assistive technology. */
+	static words(node: Element): string;
+	constructor(options: { root: Element; warn?: ((message: string, action: Element) => void) | null });
+	check(): Array<{ action: Element; text: string }>;
 	destroy(): void;
 }
 

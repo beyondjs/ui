@@ -98,3 +98,4 @@ export { CommandPalette } from './palette/palette.js';
 export { ChoiceCards } from './choice/cards.js';
 export { Primaries } from './core/primaries.js';
 export { Hierarchy } from './core/hierarchy.js';
+export { Ellipses } from './core/ellipses.js';

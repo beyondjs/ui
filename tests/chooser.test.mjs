@@ -82,11 +82,13 @@ test('RefChooser: loading is a placeholder, unavailable offers Try again and the
 	assert.equal(chooser.element.querySelector('.bui-refs-problem').textContent, 'No se pudieron leer las ramas.');
 	chooser.element.querySelector('.bui-refs-actions .bui-button').click();
 	assert.equal(retried, 1);
-	chooser.element.querySelector('.bui-refs-escape').click();
+	const link = chooser.element.querySelector('.bui-refs-escape');
+	assert.equal(link.textContent, 'Usar un commit u otra referencia', 'a visible action is named whole, its "…" only in the menu (D179)');
+	link.click();
 	assert.equal(chooser.element.querySelector('.bui-refs-other').hidden, false, 'the escape works while the branches are unavailable');
 	chooser.refs = [];
 	assert.equal(chooser.element.querySelector('.bui-refs-empty').textContent, 'No hay ramas para elegir.');
-	assert.ok(chooser.element.querySelector('.bui-refs-escape'));
+	assert.equal(chooser.element.querySelector('.bui-refs-escape').textContent, 'Usar un commit u otra referencia');
 	chooser.refs = refs().slice(0, 3);
 	assert.ok(!chooser.element.querySelector('.bui-refs-problem'));
 	assert.equal(names(chooser.element).length, 3);

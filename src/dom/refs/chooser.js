@@ -17,8 +17,9 @@ import { labels as copy } from './labels.js';
  * (`feature/…`). A value that is not one of the refs (a commit, a tag) is listed first with "Commit or
  * other ref". Its states are told apart: loading (a placeholder line, never a made-up list),
  * unavailable ("Couldn't read the branches", Try again, the escape still usable) and empty (no
- * branches, the escape). With `layout: 'field'` (default) its label sits above the control, as a
- * form's; `'inline'` names it on the button ("Branch: main"), for a composer's toolbar.
+ * branches, the escape). Outside the menu the escape is a visible action named whole, "Use a commit or
+ * another ref", with no "…" (0.28.0, D179). With `layout: 'field'` (default) its label sits above the
+ * control, as a form's; `'inline'` names it on the button ("Branch: main"), for a composer's toolbar.
  *
  * Refs: `{ name, default?, note? }`. `onchange(value)` runs for each new choice; setting `value`,
  * `refs`, `loading` or `unavailable` redraws without calling it.
@@ -164,8 +165,13 @@ export class RefChooser extends Component {
 		return [statement, this.#name ? el('input', { type: 'hidden', name: this.#name, value: this.#value }) : null].filter(Boolean);
 	}
 
+	/**
+	 * The escape drawn as a visible action, when the branches can't be read or there are none: named whole,
+	 * without the menu's "…" (0.28.0, D179), which stays on the menu's own entry.
+	 */
 	#link() {
-		return el('button', { type: 'button', class: 'bui-link-button bui-refs-escape', onclick: () => this.other() }, [this.#labels.text('escape')]);
+		const text = this.#labels.text('escape').replace(/\s*(…|\.\.\.)$/, '');
+		return el('button', { type: 'button', class: 'bui-link-button bui-refs-escape', onclick: () => this.other() }, [text]);
 	}
 
 	#chosen(value) {

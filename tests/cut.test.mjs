@@ -66,13 +66,34 @@ test('the family bar shows a cut organization or project name whole on hover and
 test('the opened menus wrap names: no ellipsis on a menu row, an option or a chip', async () => {
 	const { readFileSync } = await import('node:fs');
 	const sheet = readFileSync(new URL('../dist/styles.css', import.meta.url), 'utf8');
-	for (const selector of ['.bui-navmenu-label', '.bui-option-label', '.bui-chip-label', '.bui-choice-value', '.bui-choice-name']) {
+	for (const selector of ['.bui-navmenu-label', '.bui-option-label', '.bui-chip-label', '.bui-choice-value', '.bui-choice-name', '.bui-palette-label', '.bui-palette-detail']) {
 		const rules = [...sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, list]) => list.split(',').map(part => part.trim()).includes(selector));
 		assert.ok(rules.length, selector);
 		for (const [, , body] of rules) assert.doesNotMatch(body, /text-overflow|white-space:\s*nowrap/, selector);
 		// The choice menu's names inherit their wrapping from `.bui-choice-item > *`.
 		if (selector !== '.bui-choice-name') assert.ok(rules.some(([, , body]) => /overflow-wrap:\s*anywhere/.test(body)), `${selector} wraps`);
 	}
+});
+
+test('a row\'s cut name shows whole on hover and keyboard focus, and none that fits (0.28.0)', async () => {
+	const row = new ui.ListRow({ title: 'Storefront redesign for the spring catalogue', href: '/projects/storefront' }).mount(document.createElement('ul'));
+	document.body.append(row.element.parentNode);
+	const name = row.element.querySelector('.bui-row-title');
+	measure(name, false);
+	name.focus();
+	assert.equal(shown().length, 0, 'a name that fits shows no tooltip');
+	name.blur();
+	measure(name, true);
+	name.focus();
+	assert.deepEqual(shown().map(node => node.textContent), ['Storefront redesign for the spring catalogue']);
+	assert.equal(shown()[0].getAttribute('aria-hidden'), 'true', 'not heard twice');
+	name.blur();
+	pointer(name, 'pointerenter');
+	assert.equal(shown().length, 1, 'on hover too');
+	row.update({ title: 'Storefront', run: () => {} });
+	assert.equal(document.querySelectorAll('.bui-tooltip').length, 0, 'a name drawn again as a button leaves no tooltip of the old one');
+	row.destroy();
+	assert.equal(document.querySelectorAll('.bui-tooltip').length, 0, 'destroying the row removes its tooltip');
 });
 
 test('the sidebar\'s product row never cuts its section name, a fixed label: it wraps and the row grows', async () => {

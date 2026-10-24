@@ -4,6 +4,7 @@ import { Page as Region } from '../dom/page/page.js';
 import { PagePanel } from '../dom/page/panel.js';
 import { Primaries } from '../dom/core/primaries.js';
 import { Hierarchy } from '../dom/core/hierarchy.js';
+import { Ellipses } from '../dom/core/ellipses.js';
 import { PageDock } from '../dom/page/dock.js';
 import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
@@ -71,6 +72,12 @@ export function Page({ template = 'detail', width = null, arrival = null, header
 	useLayoutEffect(() => {
 		if (!Hierarchy.enabled || !frame.current) return undefined;
 		const watched = new Hierarchy({ root: frame.current });
+		return () => watched.destroy();
+	}, []);
+	// A visible action is named whole, its "…" only inside a menu, warned in a development build (0.28.0, D179)
+	useLayoutEffect(() => {
+		if (!Ellipses.enabled || !frame.current) return undefined;
+		const watched = new Ellipses({ root: frame.current });
 		return () => watched.destroy();
 	}, []);
 	useLayoutEffect(() => {

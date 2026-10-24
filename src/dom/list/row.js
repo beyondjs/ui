@@ -2,6 +2,7 @@ import { Component } from '../core/component.js';
 import { el, fill, content } from '../core/element.js';
 import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
+import { Cut, NameTip } from '../core/cut.js';
 import { Labels } from '../core/labels.js';
 import { ActionMenu } from '../menu.js';
 import { Button } from '../button.js';
@@ -21,6 +22,9 @@ const defaults = { more: 'More actions for {title}', select: 'Choose {title}' };
  * meta and the actions wrap after them: facts stay visible and long values wrap, never a card of labels
  * and values. With `select` the row is a choice in a picker: a checkbox before the name, its state given
  * by the product. `update()` patches the row in place: the name keeps focus, the menu keeps its instance.
+ *
+ * The name stays on one line and may be cut at its end only while it shows whole in a tooltip on hover
+ * and keyboard focus (0.28.0, D44), which a name that fits never shows.
  */
 export class ListRow extends Component {
 	/** The copy in English and Spanish. */
@@ -30,6 +34,7 @@ export class ListRow extends Component {
 	#lead = el('span', { class: 'bui-row-lead' });
 	#main = el('div', { class: 'bui-row-main' });
 	#name = null;
+	#tip = null;
 	#meta = el('p', { class: 'bui-row-meta' });
 	#end = el('div', { class: 'bui-row-end' });
 	#actions = new ActionLine();
@@ -88,6 +93,7 @@ export class ListRow extends Component {
 	}
 
 	destroy() {
+		this.#tip?.destroy();
 		this.#menu?.destroy();
 		this.#actions.destroy();
 		for (const button of this.#buttons) button.destroy();
@@ -103,6 +109,8 @@ export class ListRow extends Component {
 			if (this.#name) this.#name.replaceWith(next);
 			else this.#main.append(next, this.#meta);
 			this.#name = next;
+			this.#tip?.destroy();
+			this.#tip = new NameTip(next, { text: () => next.textContent, cut: () => Cut.text(next) });
 			if (focused) next.focus({ preventScroll: true });
 		}
 		if (href) this.#name.setAttribute('href', href);
