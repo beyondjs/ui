@@ -190,3 +190,7 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 
   The hand-over check of `acceptance/opening.mjs` reads the landing mark instead of the wordmark's inline style.
 - **Browser, the waits.** `acceptance/checks/waiting.mjs`, on the `hold.html` pages (`window.fixture.wait()`), measures a region's wait in the `dom`, `react19` and `react18` consumers: busy and announced at once with nothing seen, one animation of 200 ms after a 300 ms delay, its placeholders not graced a second time, then seen; under reduced motion the same grace with no fading. See [the release evidence](reviews/2026-10-24/release-0.31.0.md).
+
+## UI 0.31.1: a list's keys only where the focus can move
+
+- **Unit.** `tests/list-rules.test.mjs` holds the end line's keys: none on a list of one row or a last page of one row, and shown on one row a search reached. The [release record](reviews/2026-10-24/release-0.31.1.md) lists the archive and the runs.
