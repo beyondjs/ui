@@ -18,7 +18,7 @@
 	align-items: center;
 	gap: var(--space-1) var(--space-2);
 	min-width: 0;
-	padding: var(--space-1) var(--space-2) var(--space-2);
+	padding: var(--space-2) var(--bui-composer-inset) var(--bui-composer-inset);
 	border-top: 1px solid var(--color-border);
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
@@ -52,10 +52,11 @@
 	height: 16px;
 }
 
-/* The taller editor: the same box in a modal dialog over the content, as tall as the window allows. */
+/* The taller editor: the same box in a modal dialog over the content, as tall as the window allows, at the
+   composer's own lane (0.29.0: the turns' 80rem would make its lines longer than the dock's). */
 .bui-composer-editor {
 	box-sizing: border-box;
-	width: min(var(--layout-thread), calc(100vw - 2 * var(--space-4)));
+	width: min(var(--layout-lane), calc(100vw - 2 * var(--space-4)));
 	max-width: none;
 	height: min(48rem, calc(100dvh - 2 * var(--space-6)));
 	max-height: none;

@@ -141,9 +141,13 @@ test('a rejected send gives the text back, before what was typed meanwhile, and 
 	assert.equal(problem.hidden, false);
 	assert.equal(problem.getAttribute('role'), 'alert');
 	assert.equal(problem.textContent, 'Not sent. Your message is still here.');
-	assert.ok(field.getAttribute('aria-describedby').includes(problem.id));
+	const band = problem.closest('.bui-composer-line');
+	assert.ok(band && band === composer.element.querySelector('.bui-composer-box').firstElementChild, 'said in the box\'s first band (0.29.0, D183)');
+	assert.equal(band.hidden, false, 'the band shows for the failure alone');
+	assert.ok(field.getAttribute('aria-describedby').startsWith(problem.id), 'the failure describes the field first');
 	field.dispatchEvent(new Event('input'));
 	assert.equal(problem.hidden, true, 'typing clears it');
+	assert.equal(band.hidden, true, 'and the band, which says nothing else');
 	composer.destroy();
 	const quiet = make({ explain: error => (error.quiet ? null : `Not sent: ${error.message}`) });
 	quiet.composer.value = 'one';
@@ -157,17 +161,6 @@ test('a rejected send gives the text back, before what was typed meanwhile, and 
 	await settle();
 	assert.equal(quiet.composer.element.querySelector('.bui-composer-problem').textContent, 'Not sent: refused');
 	quiet.composer.destroy();
-});
-
-test('an empty Enter does nothing; an empty press says why and moves focus to the field', () => {
-	const { composer, sent, field } = make();
-	assert.equal(enter(field).defaultPrevented, true);
-	assert.equal(composer.element.querySelector('.bui-composer-problem').hidden, true);
-	composer.element.querySelector('.bui-button-primary').click();
-	assert.equal(sent.length, 0);
-	assert.equal(composer.element.querySelector('.bui-composer-problem').textContent, 'Write a message first.');
-	assert.ok(document.activeElement === field);
-	composer.destroy();
 });
 
 test('the primary action and the other ways to send in a split menu; disabled says its reason beside the action', async () => {

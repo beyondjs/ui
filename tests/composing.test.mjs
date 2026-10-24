@@ -167,7 +167,10 @@ test('the stylesheet draws one geometry: round glyphs and pills one target tall,
 	assert.match(sheet, /\.bui-composer \.bui-chip \.bui-choice-button\s*\{[^}]*min-height:\s*var\(--bui-target\)[^}]*border-radius:\s*var\(--radius-round\)/);
 	assert.match(sheet, /\.bui-composer \.bui-chip \.bui-choice-label,\s*\.bui-composer \.bui-chip \.bui-chip-state\[data-tone='success'\]\s*\{[^}]*clip:\s*rect\(0 0 0 0\)/, 'a chip shows its value; its label and a ready state are its name and tooltip');
 	assert.match(sheet, /\.bui-composer-line\s*\{[^}]*border-bottom:\s*1px solid var\(--color-border\)/, 'the state line is a band of the box');
-	assert.match(sheet, /\.bui-composer\[data-empty\] \.bui-composer-go:not\(\[data-words\], \[data-busy\]\),[^{]*\.bui-menu-button\s*\{[^}]*background:\s*var\(--color-disabled\)/, 'Send and its chevron quiet with nothing to send');
+	assert.match(sheet, /\.bui-composer\[data-empty\] \.bui-composer-go:not\(\[data-step\], \[data-busy\]\),[^{]*\.bui-menu-button\s*\{[^}]*background:\s*var\(--color-disabled\)/, 'Send and its chevron quiet with nothing to send, unless a step acts without a message (D183)');
+	assert.match(sheet, /\.bui-composer-bar\s*\{[^}]*padding:\s*var\(--space-1\) var\(--bui-composer-inset\) var\(--bui-composer-inset\)/, 'one inset under the controls and on their side (D184)');
+	assert.match(sheet, /\.bui-composer-tray\s*\{[^}]*padding:\s*var\(--space-2\) var\(--bui-composer-inset\) var\(--bui-composer-inset\)/, 'and under the tray');
+	assert.match(sheet, /\.bui-composer-problem\s*\{[^}]*flex:\s*1 1 100%/, 'a failure is a row of the state band (D183)');
 	assert.match(sheet, /\.bui-composer-line:not\(\[hidden\]\) ~ \.bui-composer-input > \.bui-composer-field\s*\{[^}]*padding-block-start:\s*var\(--space-2\)/, 'under the state band the field needs less room above it');
 	const edge = sheet.match(/\.bui-composer\[data-live\] \.bui-composer-box::before\s*\{([^}]*)\}/)[1];
 	assert.match(edge, /animation:\s*bui-composer-live 2400ms ease-in-out 2;/, 'the light runs twice, then the line holds (D95)');

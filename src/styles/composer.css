@@ -3,7 +3,9 @@
    toolbar's start holds Attach, the turn's settings and the tools. Since 0.26.0 (D165) the box is one
    rounded surface: the state line is its first band, and every control of its toolbar is one target tall,
    round when it is a glyph alone (+, Dictate, Interrupt, Send) and a pill when it has words (a chip, a
-   step), each with a quiet edge of its own; only Send is filled. Tokens only. */
+   step), each with a quiet edge of its own; only Send is filled. Since 0.29.0 (D184) its parts keep one
+   inset, `--bui-composer-inset`, on every side: the first line's capitals stand one inset under the box's
+   edge, the controls one inset above it and the + on the text's edge. Tokens only. */
 .bui-composer {
 	--bui-composer-radius: calc(var(--radius-base) * 2.5);
 	--bui-composer-inset: var(--space-3);
@@ -27,7 +29,8 @@
 	outline: none;
 }
 /* The state line, the box's first band (0.26.0), with its action at its end; it is not the field's content.
-   It shares the box's edges: its words start where the field's do. */
+   It shares the box's edges: its words start where the field's do. Since 0.29.0 it is also where a send
+   that failed says why, on a row of its own above the sentence (D183). */
 .bui-composer-line {
 	display: flex;
 	flex-wrap: wrap;
@@ -70,10 +73,10 @@
 	box-sizing: border-box;
 	display: block;
 	width: 100%;
-	min-height: calc(var(--bui-composer-min, 1) * 1lh + var(--space-3) + var(--space-1));
-	max-height: min(calc(var(--bui-composer-max, 12) * 1lh + var(--space-3) + var(--space-1)), var(--bui-composer-cap, 33dvh));
+	min-height: calc(var(--bui-composer-min, 1) * 1lh + var(--space-2) + var(--space-1));
+	max-height: min(calc(var(--bui-composer-max, 12) * 1lh + var(--space-2) + var(--space-1)), var(--bui-composer-cap, 33dvh));
 	margin: 0;
-	padding: var(--space-3) var(--bui-composer-inset) var(--space-1);
+	padding: var(--space-2) var(--bui-composer-inset) var(--space-1);
 	border: 0;
 	border-radius: var(--bui-composer-radius) var(--bui-composer-radius) 0 0;
 	background: transparent;
@@ -98,7 +101,7 @@
 }
 .bui-composer-placeholder {
 	position: absolute;
-	inset-block-start: var(--space-3);
+	inset-block-start: var(--space-2);
 	inset-inline: var(--bui-composer-inset);
 	overflow: hidden;
 	color: var(--color-text-muted);
@@ -114,13 +117,17 @@
 }
 .bui-composer-problem {
 	display: flex;
+	flex: 1 1 100%;
 	align-items: flex-start;
 	gap: var(--space-2);
+	min-width: 0;
 	margin: 0;
-	padding: var(--space-1) var(--bui-composer-inset) 0;
+	padding-block: var(--space-1);
 	color: var(--color-danger);
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
+	line-height: var(--leading-small);
+	overflow-wrap: anywhere;
 }
 .bui-composer-problem .bui-icon {
 	width: 16px;
@@ -133,7 +140,7 @@
 	align-items: center;
 	gap: var(--space-2);
 	min-width: 0;
-	padding: var(--space-1) var(--space-2) var(--space-2);
+	padding: var(--space-1) var(--bui-composer-inset) var(--bui-composer-inset);
 }
 .bui-composer-start,
 .bui-composer-settings,

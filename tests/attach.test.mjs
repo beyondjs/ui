@@ -193,7 +193,8 @@ test('a message with a ready attachment may have no text, and carries the attach
 	const { composer, sent, root } = make();
 	composer.attachments = [{ key: 'a', name: 'a.png', state: 'uploading', progress: 0.2 }];
 	assert.equal(await composer.submit(), false);
-	assert.equal(root.querySelector('.bui-composer-problem').textContent, 'Write a message first.');
+	assert.equal(root.querySelector('.bui-composer-problem').hidden, true, 'nothing failed, so nothing is said (D183)');
+	assert.equal(root.querySelector('.bui-composer-go').getAttribute('aria-disabled'), 'true', 'Send is quiet while the file uploads');
 	composer.attachments = [{ key: 'a', name: 'a.png', state: 'ready' }];
 	assert.equal(await composer.submit(), true);
 	assert.deepEqual(sent, [{ text: '', action: 'send', attachments: [{ key: 'a', name: 'a.png', state: 'ready' }] }]);

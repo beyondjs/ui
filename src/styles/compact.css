@@ -5,6 +5,8 @@
 :root,
 .bui-page {
 	--bui-page-compact: 3rem;
+	/* Its height with a part in view said on two lines (0.29.0) */
+	--bui-page-compact-tall: 3.5rem;
 }
 /* What a page scrolls to (an address's `#target` or `?turn=`, a heading focused by code, scrollIntoView)
    lands below every sticky line (0.11.2): the family bar, the sidebar's row below its cut, and the
@@ -14,6 +16,13 @@ html:has(.bui-page-compact) {
 }
 html:has(.bui-sidebar[data-mode='drawer']):has(.bui-page-compact) {
 	scroll-padding-top: calc(var(--layout-family) + var(--bui-sidebar-row, 44px) + var(--bui-page-compact) + var(--space-2));
+}
+/* While the line says a part in view (0.29.0, D181) it may take two lines: targets land below its taller form. */
+html:has(.bui-page-compact[data-subject]) {
+	scroll-padding-top: calc(var(--layout-family) + var(--bui-page-compact-tall) + var(--space-2));
+}
+html:has(.bui-sidebar[data-mode='drawer']):has(.bui-page-compact[data-subject]) {
+	scroll-padding-top: calc(var(--layout-family) + var(--bui-sidebar-row, 44px) + var(--bui-page-compact-tall) + var(--space-2));
 }
 .bui-page .bui-page-frame > .bui-page-compact {
 	position: sticky;
@@ -71,6 +80,29 @@ html:has(.bui-sidebar[data-mode='drawer']):has(.bui-page-compact) {
 	line-height: var(--leading-body);
 	white-space: nowrap;
 	text-overflow: ellipsis;
+}
+/* The part in view (0.29.0, D181): what the product names in place of the title, such as the message of the
+   turn being read, quoted as written on up to two lines; pressing it goes there. */
+.bui-page-compact-subject {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	min-width: 0;
+	overflow: hidden;
+	padding-inline-start: var(--space-3);
+	border-inline-start: 2px solid var(--color-border-strong);
+	color: var(--color-text);
+	font-size: var(--text-body);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-body);
+	text-decoration: none;
+	white-space: pre-line;
+	overflow-wrap: anywhere;
+	cursor: pointer;
+}
+.bui-page-compact-subject:hover {
+	border-inline-start-color: var(--color-text);
 }
 .bui-page-compact-status {
 	flex: none;

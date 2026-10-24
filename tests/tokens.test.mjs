@@ -16,7 +16,8 @@ import { tokens, TokenSheet, Contrast } from '@beyond-js/ui/tokens';
  * with no line of the sheet changed but its version; 0.6.0 carries decision C2 (2026-10-17): Inter and
  * the brand face, weight 600, links in the text color, off-white text on dark, the light bar and sidebar
  * on the page's surface, neutral disabled controls, raised surfaces, tooltips' own roles and the bar's
- * hover per theme.
+ * hover per theme; 0.7.0 carries D180 (2026-10-24): the thread's turns up to 80rem and the composer's
+ * 48rem lane.
  * Imported through the package's own export, as consumers import it.
  */
 const fixture = new URL('./fixtures/branding-tokens-0.1.0.css', import.meta.url);
@@ -54,7 +55,7 @@ const changes = {
 		'\t--overlay-lift: rgb(255 255 255 / 0.1);'
 	],
 	added: [
-		'/* Beyond family tokens 0.6.0 (approved). Generated from src/foundations; do not edit. */',
+		'/* Beyond family tokens 0.7.0 (approved). Generated from src/foundations; do not edit. */',
 		// 0.6.0: decision C2
 		"\t--font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;",
 		"\t--font-brand: 'Rubik', system-ui, sans-serif;",
@@ -71,13 +72,15 @@ const changes = {
 		'\t--motion-exit: 120ms;',
 		'\t--motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);',
 		'\t--layout-indent: 2.125rem;',
-		'\t--layout-lane: calc(var(--layout-measure) + var(--layout-indent));',
+		// 0.7.0: D180, the composer's lane (the reading measure after the rail's indent until 0.6.0)
+		'\t--layout-lane: 48rem;',
 		// 0.5.0: the proposed code colors, light (in :root) and dark (twice)
 		...code.light.map(line => `\t${line}`),
 		...code.dark.map(line => `\t${line}`),
 		...code.dark.map(line => `\t${line}`),
 		// 0.4.0: the family proposal D67, adopted by Conduict and shipped as pending; 0.4.1 raises the panel's maximum; 0.5.1 records them approved (D67 as amended by D96)
-		'\t--layout-thread: 52rem;',
+		// 0.7.0: D180, a thread's turns (52rem until 0.6.0)
+		'\t--layout-thread: 80rem;',
 		'\t--layout-aside-max: 40rem;',
 		'\t--layout-aside-wide: 48rem;',
 		// 0.3.1: the reading measure, measured against LR-02 (no line of prose past 80 characters)
@@ -111,7 +114,7 @@ const without = (lines, listed) => {
 	});
 };
 
-test('the 0.6.0 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
+test('the 0.7.0 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
 	const baseline = readFileSync(fixture, 'utf8').split('\n');
 	const current = `${new TokenSheet(tokens).css}\n`.split('\n');
 	// A line removed as many times as listed (a dark value may stay in the other theme block)
@@ -126,7 +129,11 @@ test('the packed tokens.css is the generated sheet', () => {
 });
 
 test('version, status, approval and provenance of the token set are recorded', () => {
-	assert.equal(tokens.version, '0.6.0');
+	assert.equal(tokens.version, '0.7.0');
+	const turns = tokens.approval.turns;
+	assert.deepEqual([turns.date, turns.by, turns.decisions, turns.amends], ['2026-10-24', 'owner', ['D180'], ['D96', 'D67']], 'the owner\'s direction on a thread\'s turns (0.7.0)');
+	assert.deepEqual(turns.tokens, ['layout.thread', 'layout.lane']);
+	assert.deepEqual([tokens.layout.thread.value, tokens.layout.lane.value], ['80rem', '48rem'], 'the turns up to 80rem, the composer\'s lane 48rem');
 	const visual = tokens.approval.visual;
 	assert.deepEqual([visual.date, visual.decisions, visual.amends], ['2026-10-17', ['C2'], ['D08', 'D09', 'D10', 'D12', 'D52']]);
 	assert.match(visual.by, /delegation/, 'decided under the owner\'s delegation, not the owner\'s approval');

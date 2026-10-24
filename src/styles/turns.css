@@ -1,0 +1,174 @@
+/* A thread's index of its turns (TurnIndex, 0.29.0, D182): one mark per turn in the thread's gutter, beside
+   the turns, halfway down the window while the thread scrolls; shown from two turns and from a 1024 px
+   region. The holder takes no room in the thread's column; the list hangs in the gutter before it.
+   Tokens only. */
+.bui-turns {
+	--bui-turns-pitch: 12px;
+	--bui-turns-width: 1.875rem;
+	position: sticky;
+	inset-block-start: 50%;
+	z-index: 1;
+	height: 0;
+	/* No room of its own between the thread's blocks */
+	margin-block-end: calc(-1 * var(--bui-page-gap, 0px));
+}
+/* In React the index's host is no box of its own: the index stays sticky in the thread's column */
+.bui-host:has(> .bui-turns) {
+	display: contents;
+}
+.bui-turns-list {
+	position: absolute;
+	inset-block-start: 0;
+	inset-inline-start: calc(-1 * (var(--bui-turns-width) + var(--space-2) + var(--space-1)));
+	display: grid;
+	grid-auto-rows: var(--bui-turns-pitch);
+	width: var(--bui-turns-width);
+	max-height: 60dvh;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	list-style: none;
+	translate: 0 -50%;
+}
+.bui-turns-row {
+	display: flex;
+	min-height: 0;
+}
+/* A mark is the whole row, so the pointer never falls between two turns */
+.bui-turns-mark {
+	display: flex;
+	align-items: center;
+	gap: var(--space-1);
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: var(--radius-control);
+	background: none;
+	color: inherit;
+	font: inherit;
+	text-decoration: none;
+	cursor: pointer;
+}
+.bui-turns-mark:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: -1px;
+}
+/* The dash: 8 px at rest, 14 px for the turn being read, longer under the pointer and its neighbours */
+.bui-turns-dash {
+	flex: none;
+	width: 0.5rem;
+	height: 2px;
+	border-radius: 1px;
+	background: var(--color-border-strong);
+	transition: width var(--motion-quick) var(--motion-ease), background-color var(--motion-quick) var(--motion-ease);
+}
+.bui-turns-mark[aria-current='true'] .bui-turns-dash {
+	width: 0.875rem;
+	background: var(--color-text);
+}
+.bui-turns-mark[data-near='2'] .bui-turns-dash {
+	width: 0.625rem;
+}
+.bui-turns-mark[data-near='1'] .bui-turns-dash {
+	width: 0.75rem;
+	background: var(--color-text-muted);
+}
+.bui-turns-mark[data-near='0'] .bui-turns-dash,
+.bui-turns-mark:focus-visible .bui-turns-dash {
+	width: 1.125rem;
+	background: var(--color-text);
+}
+/* A turn that runs, needs the person or failed: its state's Status shape after the dash, still */
+.bui-turns-state {
+	flex: none;
+	gap: 0;
+}
+.bui-turns-state .bui-status-dot {
+	animation: none;
+}
+/* Below a 1024 px region the index leaves the page; the keys still move between turns */
+@container bui-page (max-width: 1023px) {
+	.bui-turns {
+		display: none;
+	}
+}
+
+/* The preview: what the turn holds, beside the index at the mark's height, read-only (the pointer stays on
+   the index), raised over the page as a menu is. */
+.bui-turns-preview {
+	box-sizing: border-box;
+	display: grid;
+	gap: var(--space-1);
+	width: max-content;
+	max-width: min(22rem, calc(100vw - 2 * var(--space-4)));
+	padding: var(--space-3);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-base);
+	background: var(--color-surface-raised);
+	box-shadow: var(--elevation-menu);
+	color: var(--color-text);
+	font-size: var(--text-small);
+	line-height: var(--leading-small);
+	pointer-events: none;
+	animation: bui-enter var(--motion-quick) var(--motion-ease);
+}
+.bui-turns-preview[hidden] {
+	display: none;
+}
+.bui-turns-preview > p {
+	min-width: 0;
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+.bui-turns-preview-title,
+.bui-turns-preview-summary {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	overflow: hidden;
+}
+.bui-turns-preview-title {
+	font-size: var(--text-body);
+	font-weight: var(--weight-semibold);
+	line-height: var(--leading-body);
+}
+.bui-turns-preview-summary,
+.bui-turns-preview-facts,
+.bui-turns-preview-keys {
+	color: var(--color-text-muted);
+}
+.bui-turns-preview-facts {
+	font-variant-numeric: tabular-nums;
+}
+.bui-turns-preview-facts .bui-status {
+	display: inline-flex;
+	color: var(--color-text);
+}
+.bui-turns-preview-keys {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1);
+	margin-block-start: var(--space-1);
+	padding-block-start: var(--space-2);
+	border-block-start: 1px solid var(--color-border);
+	font-size: var(--text-label);
+}
+.bui-turns-preview-keys kbd {
+	padding: 0 var(--space-1);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-control);
+	font-family: var(--font-mono);
+	font-size: var(--text-label);
+}
+/* Key hints are not offered where there is no keyboard to press them on */
+@media (hover: none) and (pointer: coarse) {
+	.bui-turns-preview-keys {
+		display: none;
+	}
+}

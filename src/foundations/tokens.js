@@ -33,12 +33,15 @@ import { typography, space, radius, elevation, overlay, motion, density, layout,
  * primary action, the selection and focus; Inter for the interface at 400, 500 and 600 with Rubik kept for
  * the wordmark (`font-brand`); raised surfaces inside a page; neutral disabled controls; one surface
  * family in the light theme (the bar and the sidebar on the page's surface); off-white text on dark.
+ * Token set 0.7.0 (2026-10-24) records the owner's direction D180 (`approval.turns`, amending D96 and D67):
+ * a thread reads by turns, which take the region's width up to `thread` (80rem), while the composer keeps
+ * its `lane` (48rem) on the same axis; the reading measure stays 54ch for every other page's prose.
  * Each entry's own `provenance` still says whether its value
  * was captured or introduced by the family reference. `version` identifies the token set; a product
  * review cites it together with the package version.
  */
 export const tokens = {
-	version: '0.6.0',
+	version: '0.7.0',
 	status: 'approved',
 	source: 'Verified capture of the public Beyond site, 2026-09-18, with the family reference\'s additions',
 	approval: {
@@ -67,6 +70,14 @@ export const tokens = {
 			amends: ['D08', 'D09', 'D10', 'D12', 'D52'],
 			tokens: ['color.link', 'color.text', 'color.disabled', 'color.on-disabled', 'color.surface-raised', 'color.sidebar', 'color.sidebar-hover', 'color.tooltip', 'color.on-tooltip', 'color.family-bar', 'color.family-text', 'color.family-muted', 'color.family-marker', 'typography.family.sans', 'typography.family.brand', 'typography.weight.semibold', 'elevation.raised', 'overlay.lift'],
 			note: 'The family audit\'s visual rules (decision C2 of 2026-10-17, decided under the owner\'s delegation; the owner may override it): coral only for the primary action, the selection and focus, links in the text color and underlined on hover; Inter for the interface at 400/500/600 and Rubik for the wordmark; a monospace for identifiers; raised surfaces inside pages; status told apart by shape; neutral disabled controls; one surface family in the light theme. Values are engineering defaults to be measured. Token set 0.6.0.'
+		},
+		turns: {
+			date: '2026-10-24',
+			by: 'owner',
+			decisions: ['D180'],
+			amends: ['D96', 'D67'],
+			tokens: ['layout.thread', 'layout.lane'],
+			note: 'The owner\'s direction of 2026-10-24 on a conversation\'s page (D180, amending D96\'s one lane and D67\'s tier): a thread reads by turns; the person\'s message, the work and the answer take the region\'s width up to 80rem, centred, and the composer keeps a 48rem lane on the same axis. Values are engineering defaults to be measured. Token set 0.7.0.'
 		}
 	},
 	pending: {

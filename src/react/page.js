@@ -122,9 +122,11 @@ function assign(ref, value) {
  * H1 `title`, its `kind` beside it (words or one control, 0.19.1), one `status`, a `facts` line, the
  * title line's `actions` and the `tabs`. `headingRef` reaches the H1
  * for focus after a navigation. `compact` (`true` or `{ actions }`, 0.11.0) adds the sticky line that
- * shows the title and the status once the title has scrolled out, placed right before the header.
+ * shows the title and the status once the title has scrolled out, placed right before the header;
+ * `subject` (`{ text, href }`, 0.29.0, D181) is what that line names in place of the title, such as the
+ * message of the turn being read.
  */
-export function PageHeader({ title, crumbs = [], kind = null, status = null, facts = null, actions = null, tabs = null, headingRef = null, labels = {}, compact = null }) {
+export function PageHeader({ title, crumbs = [], kind = null, status = null, facts = null, actions = null, tabs = null, headingRef = null, labels = {}, compact = null, subject = null }) {
 	const id = `bui-page-title-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 	const levels = (crumbs ?? []).filter(Boolean);
 	const bar = useRef(null);
@@ -140,11 +142,18 @@ export function PageHeader({ title, crumbs = [], kind = null, status = null, fac
 		};
 	}, [Boolean(compact)]);
 	const tools = compact?.actions ?? null;
+	// The part in view, said in place of the title (0.29.0, D181): as written, without empty lines
+	const part = typeof subject?.text === 'string' ? subject.text.trim().replace(/[ \t]*\n\s*/g, '\n') : '';
 	const held = compact
 		? h(
 				'div',
-				{ ref: bar, className: 'bui-page-compact' },
-				h('div', { className: 'bui-page-compact-line' }, h('div', { className: 'bui-page-compact-text', 'aria-hidden': 'true' }, h('span', { ref: named, className: 'bui-page-compact-title' }, title), h('span', { className: 'bui-page-compact-status' }, status)), h('div', { className: 'bui-page-compact-actions', hidden: !tools }, tools))
+				{ ref: bar, className: 'bui-page-compact', 'data-subject': part ? '' : undefined },
+				h(
+					'div',
+					{ className: 'bui-page-compact-line' },
+					h('div', { className: 'bui-page-compact-text', 'aria-hidden': 'true' }, h('a', { className: 'bui-page-compact-subject', tabIndex: -1, href: (part && subject.href) || undefined, hidden: !part }, part), h('span', { ref: named, className: 'bui-page-compact-title', hidden: Boolean(part) }, title), h('span', { className: 'bui-page-compact-status' }, status)),
+					h('div', { className: 'bui-page-compact-actions', hidden: !tools }, tools)
+				)
 			)
 		: null;
 	const header = h(

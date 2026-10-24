@@ -167,6 +167,9 @@ test('focus draws the box’s own border in the focus color, no outline ring bes
 	assert.match(body, /border-color: var\(--color-focus\)/);
 	assert.match(body, /inset 0 0 0 1px var\(--color-focus\)/);
 	assert.doesNotMatch(body, /outline/);
-	assert.match(css, /max-height: min\(calc\(var\(--bui-composer-max, 12\) \* 1lh \+ var\(--space-3\) \+ var\(--space-1\)\), var\(--bui-composer-cap, 33dvh\)\)/);
+	assert.match(css, /max-height: min\(calc\(var\(--bui-composer-max, 12\) \* 1lh \+ var\(--space-2\) \+ var\(--space-1\)\), var\(--bui-composer-cap, 33dvh\)\)/);
+	const inset = css.slice(css.indexOf('@supports (padding-top: calc(1lh - 1cap))'));
+	assert.match(inset, /max-height: min\(calc\(var\(--bui-composer-max, 12\) \* 1lh \+ var\(--bui-composer-inset\) - \(1lh - 1cap\) \/ 2 \+ var\(--space-1\)\), var\(--bui-composer-cap, 33dvh\)\)/, 'with the font\'s own metrics, the capitals one inset under the edge (D184)');
+	assert.match(inset, /\.bui-composer-placeholder\s*\{\s*inset-block-start:\s*calc\(var\(--bui-composer-inset\) - \(1lh - 1cap\) \/ 2\)/, 'and the placeholder on the same line');
 	for (const set of ['en', 'es']) for (const key of ['commands', 'expand', 'collapse']) assert.ok(ui.Composer.labels[set][key], `${set}.${key}`);
 });

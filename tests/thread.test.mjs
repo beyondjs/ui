@@ -123,6 +123,36 @@ test("the header's compact line: placed by Page right before the header, the tit
 	assert.equal(bar.isConnected, false);
 });
 
+test('the compact line says the part in view in place of the title: as written, on up to two lines, a link out of the tab order (D181)', () => {
+	const { view, heading } = scene({ header: { compact: true } });
+	const bar = heading.bar;
+	const subject = bar.querySelector('.bui-page-compact-subject');
+	const title = bar.querySelector('.bui-page-compact-title');
+	assert.ok(subject.hidden && !title.hidden, 'the title until the product names a part');
+	assert.ok(bar.querySelector('.bui-page-compact-text').contains(subject), 'said for sight only, as the title is');
+	heading.subject = { text: '  Make the composer quieter\n\n\n  and fix its edges  ', href: '#/conversations/c1?turn=t2' };
+	assert.equal(subject.hidden, false);
+	assert.equal(title.hidden, true, 'in place of the title');
+	assert.equal(subject.textContent, 'Make the composer quieter\nand fix its edges', 'as written, without the empty lines that would take a line');
+	assert.equal(subject.getAttribute('href'), '#/conversations/c1?turn=t2');
+	assert.equal(subject.getAttribute('tabindex'), '-1', 'out of the tab order: the page says it in place');
+	assert.ok(bar.hasAttribute('data-subject'), 'the page\'s targets land below its taller form');
+	assert.deepEqual(heading.subject, { text: 'Make the composer quieter\nand fix its edges', href: '#/conversations/c1?turn=t2' });
+	heading.subject = { text: '   ' };
+	assert.equal(heading.subject, null, 'blank words name nothing');
+	assert.ok(subject.hidden && !title.hidden && !bar.hasAttribute('data-subject'));
+	heading.subject = { text: 'Ship it' };
+	assert.equal(subject.hasAttribute('href'), false, 'without an address it only says');
+	heading.subject = null;
+	assert.ok(subject.hidden && !title.hidden);
+	view.destroy();
+	heading.destroy();
+	const plain = new ui.PageHeader({ title: 'Settings' });
+	plain.subject = { text: 'Kept for a compact line that never comes' };
+	assert.equal(plain.subject.text, 'Kept for a compact line that never comes');
+	plain.destroy();
+});
+
 test('without compact there is no line; a destroyed compact header leaves no listener on the window', async () => {
 	const plain = new ui.PageHeader({ title: 'Settings' });
 	assert.equal(plain.bar, null);

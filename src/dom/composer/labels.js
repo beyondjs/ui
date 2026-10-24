@@ -1,7 +1,7 @@
 /**
  * The copy of `Composer` in English and Spanish: the default action, the split menu's name, the
  * keyboard hint read with the field (by the way the composer sends), and what it says when a message
- * is empty or was not sent; since 0.11.0 its attachments (Attach, the drop target, the chips' states and
+ * was not sent (an empty one says nothing since 0.29.0, D183); since 0.11.0 its attachments (Attach, the drop target, the chips' states and
  * what is announced) and its suggestions (their states and what is announced); since 0.11.1 the narrow
  * toolbar's Options and a truncated list's last line; since 0.11.2 a file the product refused; since
  * 0.14.0 the commands' list and the taller editor's Expand and Collapse; since 0.26.0 (D165) the "+"
@@ -18,7 +18,6 @@ export const composer = freeze({
 		enter: 'Enter sends. Shift+Enter adds a line.',
 		mod: '{key}+Enter sends. Enter adds a line.',
 		touch: 'Enter adds a line. Use {action} to send.',
-		empty: 'Write a message first.',
 		failed: 'Not sent. Your message is still here.',
 		attach: 'Attach files',
 		add: 'Add',
@@ -57,7 +56,6 @@ export const composer = freeze({
 		enter: 'Intro envía. Mayús+Intro añade una línea.',
 		mod: '{key}+Intro envía. Intro añade una línea.',
 		touch: 'Intro añade una línea. Usa «{action}» para enviar.',
-		empty: 'Escribe un mensaje primero.',
 		failed: 'No se envió. Tu mensaje sigue aquí.',
 		attach: 'Adjuntar archivos',
 		add: 'Añadir',

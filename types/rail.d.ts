@@ -35,3 +35,5 @@ export {};
 
 // 0.27.0: concurrent work as lanes on one time axis, beside the rail.
 export * from './lanes.js';
+// 0.29.0: a thread's index of its turns (D182).
+export * from './turns.js';

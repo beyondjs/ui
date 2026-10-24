@@ -40,6 +40,7 @@ export { Composer, LiveText, ActivityRow, ActivityGroup } from './conversation.j
 export { ComposerDictation } from '../dom/composer/dictation/dictation.js';
 export { Rail, RailItem, RailMoment } from './rail.js';
 export { Lanes } from './lanes.js';
+export { TurnIndex } from './turns.js';
 export { Facts, Meter } from './resource.js';
 export { useInstance } from './hooks.js';
 export { Diff } from './diff.js';

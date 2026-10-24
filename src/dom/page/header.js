@@ -26,6 +26,11 @@ const defaults = { crumbs: 'Breadcrumb' };
  * motion under reduced motion. `bar` is that line's holder, which `Page` places right before the
  * header; a product that places the header itself places `bar` before it. The line repeats what the
  * header says, so its title and status are hidden from assistive technology.
+ *
+ * Since 0.29.0 (D181) the compact line says where the person is: the page's title, or the part of the page
+ * in view that the product names (`subject`, such as the message of the turn being read in a thread),
+ * as written, on up to two lines, in place of the title. Pressing it goes to that part (`href`); like the
+ * title it is hidden from assistive technology and out of the tab order, since the page says it in place.
  */
 export class PageHeader extends Component {
 	/** The copy in English and Spanish (0.7.2). */
@@ -44,6 +49,7 @@ export class PageHeader extends Component {
 	#line = null;
 	#watch = null;
 	#tip = null;
+	#subject = null;
 
 	/**
 	 * @param {object} options
@@ -149,6 +155,25 @@ export class PageHeader extends Component {
 		this.#heading.focus({ preventScroll: true });
 	}
 
+	/** What the compact line names in place of the title (0.29.0, D181): `{ text, href }`, or null for the title. */
+	get subject() {
+		return this.#subject;
+	}
+
+	set subject(value) {
+		// As written, without the empty lines between paragraphs, which would take one of its two lines
+		const text = typeof value?.text === 'string' ? value.text.trim().replace(/[ \t]*\n\s*/g, '\n') : '';
+		this.#subject = text ? { text, href: value.href ?? null } : null;
+		if (!this.#line) return;
+		const { subject, title } = this.#line;
+		subject.textContent = this.#subject?.text ?? '';
+		if (this.#subject?.href) subject.setAttribute('href', this.#subject.href);
+		else subject.removeAttribute('href');
+		subject.hidden = !this.#subject;
+		title.hidden = Boolean(this.#subject);
+		this.#bar.toggleAttribute('data-subject', Boolean(this.#subject));
+	}
+
 	/** Decides at once whether the compact line shows, as after a product placed the page itself. */
 	measure() {
 		this.#watch?.measure();
@@ -164,10 +189,12 @@ export class PageHeader extends Component {
 	#compact(line, { actions = [] } = {}) {
 		const title = el('span', { class: 'bui-page-compact-title' });
 		const status = el('span', { class: 'bui-page-compact-status' });
+		// The part in view, a link out of the tab order: the page itself says it where it stands (D181)
+		const subject = el('a', { class: 'bui-page-compact-subject', tabindex: '-1', hidden: true });
 		const tools = el('div', { class: 'bui-page-compact-actions' }, (actions ?? []).map(action => action?.element ?? action));
 		tools.hidden = !tools.childNodes.length;
-		this.#line = { title, status };
-		this.#bar = el('div', { class: 'bui-page-compact' }, [el('div', { class: 'bui-page-compact-line' }, [el('div', { class: 'bui-page-compact-text', 'aria-hidden': 'true' }, [title, status]), tools])]);
+		this.#line = { title, status, subject };
+		this.#bar = el('div', { class: 'bui-page-compact' }, [el('div', { class: 'bui-page-compact-line' }, [el('div', { class: 'bui-page-compact-text', 'aria-hidden': 'true' }, [subject, title, status]), tools])]);
 		this.#tip = new NameTip(title, { text: () => title.textContent, cut: () => Cut.text(title) });
 		this.#watch = new PageCompact({ header: line, bar: this.#bar });
 	}

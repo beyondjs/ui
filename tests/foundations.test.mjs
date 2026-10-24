@@ -57,7 +57,7 @@ test('controls take border-control; dividers and tags keep border-strong (D08)',
 });
 
 test('elevation only on what overlaps the page, and since 0.15.0 the raised surfaces inside it (D10 as amended by C2)', () => {
-	const overlapping = /\.bui-(menu|disclosure-panel|disclosure-leaving|tooltip|toast|dialog|drawer-panel|sheet|composer-editor|palette)\b/;
+	const overlapping = /\.bui-(menu|disclosure-panel|disclosure-leaving|tooltip|toast|dialog|drawer-panel|sheet|composer-editor|palette|turns-preview)\b/;
 	const inside = /^(\.bui-raised|\.bui-section\[data-raised\]|\.bui-command|\.bui-checklist)(, |$)/;
 	const raised = rules.filter(rule => /box-shadow:\s*var\(--elevation-/.test(rule.body));
 	assert.ok(raised.length >= 4, `${raised.length} rules`);

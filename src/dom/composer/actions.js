@@ -15,6 +15,10 @@ import { ActionMenu } from '../menu.js';
  * label ("Interrupt"). Send says its words only when they are what the person must read before sending:
  * a step a message needs (`step`, "Choose a machine and send") or an action that is not a send
  * (`words: true`, "Check whether it started").
+ *
+ * With nothing to send (`empty`, 0.29.0, D183) Send is quiet and `aria-disabled`, the split menu's ways to
+ * send are disabled with it, and nothing is said: a press only puts the caret in the field. A step stays
+ * able, since it acts without a message.
  */
 export class ComposerActions {
 	#element;
@@ -35,6 +39,8 @@ export class ComposerActions {
 	#others = [];
 	#disabled = null;
 	#step = null;
+	#empty = false;
+	#busy = false;
 
 	/**
 	 * @param {object} options
@@ -77,6 +83,15 @@ export class ComposerActions {
 		this.#send.label = this.#step?.label ?? this.#label;
 		this.#send.element.toggleAttribute('data-step', Boolean(this.#step));
 		this.#face();
+		this.#able();
+	}
+
+	/** Whether there is nothing to send now (no words, no ready file): Send is quiet while it can't act (0.29.0). */
+	set empty(value) {
+		if (this.#empty === Boolean(value)) return;
+		this.#empty = Boolean(value);
+		this.#able();
+		this.#items();
 	}
 
 	/** Send's glyph alone, or its words when they are what the person must read first (a step, `words`). */
@@ -99,6 +114,7 @@ export class ComposerActions {
 		this.#words = primary.words === true;
 		this.#send.label = this.#step?.label ?? primary.label;
 		this.#face();
+		this.#able();
 		this.#others = actions.filter(action => action !== primary).map(action => ({ id: String(action.id ?? action.label), label: action.label }));
 		if (this.#others.length && !this.#menu) {
 			this.#menu = new ActionMenu({ label: null, name: this.#labels.text('more'), glyph: 'chevron', items: [], align: 'end' });
@@ -140,18 +156,15 @@ export class ComposerActions {
 	 */
 	draw({ disabled, busy }) {
 		this.#disabled = disabled ?? null;
-		this.#send.busy = Boolean(busy);
+		this.#busy = Boolean(busy);
+		this.#send.busy = this.#busy;
 		const reason = this.#disabled?.reason ?? null;
 		this.#reason.hidden = !this.#disabled;
 		fill(this.#reason, reason ? [content(reason)] : []);
 		const button = this.#send.element;
-		if (this.#disabled) {
-			button.setAttribute('aria-disabled', 'true');
-			if (reason) button.setAttribute('aria-describedby', this.#reason.id);
-		} else {
-			if (!busy) button.removeAttribute('aria-disabled');
-			button.removeAttribute('aria-describedby');
-		}
+		if (this.#disabled && reason) button.setAttribute('aria-describedby', this.#reason.id);
+		else button.removeAttribute('aria-describedby');
+		this.#able();
 		this.#items();
 	}
 
@@ -161,10 +174,24 @@ export class ComposerActions {
 		this.#send.destroy();
 	}
 
+	/** Whether Send can't act now: nothing to send, and no step, which acts without a message. */
+	get #quiet() {
+		return this.#empty && !this.#step;
+	}
+
+	/** Send's `aria-disabled`: while sending is unavailable, while busy (the button's own) and while quiet. */
+	#able() {
+		const button = this.#send.element;
+		if (this.#disabled || this.#quiet) button.setAttribute('aria-disabled', 'true');
+		else if (!this.#busy) button.removeAttribute('aria-disabled');
+	}
+
 	#items() {
 		if (!this.#menu) return;
 		const reason = this.#disabled?.reason ?? null;
-		this.#menu.items = this.#others.map(action => ({ label: action.label, run: () => this.#run(action.id), disabled: Boolean(this.#disabled), reason }));
+		// With nothing to send the other ways to send can't act either; there is no reason to read (D183)
+		const quiet = this.#empty;
+		this.#menu.items = this.#others.map(action => ({ label: action.label, run: () => this.#run(action.id), disabled: Boolean(this.#disabled) || quiet, reason }));
 	}
 
 	/** Runs the stop action once at a time; its button stays busy while it works or the product says so. */

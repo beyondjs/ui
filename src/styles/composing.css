@@ -75,8 +75,9 @@
 }
 /* Send (0.26.0): one filled round target with its glyph, the box's one primary; its words show only when
    they must be read first (a step, an action that is not a send), as a pill ending with the glyph. With
-   nothing to send it reads quiet (the family's disabled surface), and a press still says why. The other
-   ways to send are its chevron, joined to it by a hairline. */
+   nothing to send it reads quiet (the family's disabled surface) unless a step acts without a message,
+   and since 0.29.0 a press says nothing (D183). The other ways to send are its chevron, joined to it by a
+   hairline. */
 .bui-composer-send {
 	display: inline-flex;
 	align-items: stretch;
@@ -102,8 +103,8 @@
 	width: 16px;
 	height: 16px;
 }
-.bui-composer[data-empty] .bui-composer-go:not([data-words], [data-busy]),
-.bui-composer[data-empty] .bui-composer-send:has(> .bui-composer-go:not([data-words], [data-busy])) .bui-menu-button {
+.bui-composer[data-empty] .bui-composer-go:not([data-step], [data-busy]),
+.bui-composer[data-empty] .bui-composer-send:has(> .bui-composer-go:not([data-step], [data-busy])) .bui-menu-button {
 	background: var(--color-disabled);
 	color: var(--color-on-disabled);
 }
@@ -179,3 +180,16 @@
 	}
 }
 
+/* One inset (0.29.0, D184): the first line's capitals stand one inset under the box's edge, measured from
+   the font itself (the half-leading above the capitals taken off), so the space above the words and the
+   space under the controls read the same. Without the `lh` and `cap` units it keeps 8 px. */
+@supports (padding-top: calc(1lh - 1cap)) {
+	.bui-composer-field {
+		min-height: calc(var(--bui-composer-min, 1) * 1lh + var(--bui-composer-inset) - (1lh - 1cap) / 2 + var(--space-1));
+		max-height: min(calc(var(--bui-composer-max, 12) * 1lh + var(--bui-composer-inset) - (1lh - 1cap) / 2 + var(--space-1)), var(--bui-composer-cap, 33dvh));
+		padding-block-start: calc(var(--bui-composer-inset) - (1lh - 1cap) / 2);
+	}
+	.bui-composer-placeholder {
+		inset-block-start: calc(var(--bui-composer-inset) - (1lh - 1cap) / 2);
+	}
+}

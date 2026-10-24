@@ -24,7 +24,8 @@ import { composer as copy } from './labels.js';
  *
  * Sending is one path for the keys (`submit`, `ComposerKeys`), the button and the menu: the trimmed text
  * leaves the field at once and `onsubmit({ text, action, attachments? })` runs, one send at a time and
- * none while `busy` or `disabled`; a rejection gives the text back with `explain(error)`. Since 0.14.0
+ * none while `busy` or `disabled`; a rejection gives the text back with `explain(error)`, said in the
+ * state band. With nothing to send, Send is quiet and a press says nothing (0.29.0, D183). Since 0.14.0
  * (D100) a new and a started conversation share it (a `tray` of chips, focus as the box's border, `commands`
  * after "/", `recall`, **Expand**, `dictation`); its states and marks are `ComposerMarks`'.
  */
@@ -57,18 +58,18 @@ export class Composer extends Component {
 		this.#onchange = onchange;
 		this.#field = new ComposerField({ label, placeholder, value, min, max, name });
 		const host = { alive: () => !this.destroyed, files: () => this.#context.files, primary: () => this.#actions.primary.id, draw: () => this.#draw(), root: () => this.#element };
-		this.#sender = new ComposerSend({ field: this.#field, labels: this.#labels, onsubmit, onchange, explain, host });
+		this.#sender = new ComposerSend({ field: this.#field, status: this.#status, labels: this.#labels, onsubmit, onchange, explain, host });
 		this.#actions = new ComposerActions({ labels: this.#labels, run: action => this.#send(action, true), refocus: () => this.focus() });
 		const box = this.#box.element;
 		this.#element = el('div', { class: 'bui-composer', 'data-submit': submit }, [box, this.#keys.guide]);
-		this.#marks = new ComposerMarks(this.#element, () => !this.#field.value.trim() && !this.#context?.files.ready);
+		this.#marks = new ComposerMarks(this.#element, () => !this.#field.value.trim() && !this.#context?.files.ready, empty => (this.#actions.empty = empty));
 		const control = this.#field.control;
 		this.#context = new ComposerContext({ root: this.#element, box, field: control, labels: this.#labels, locale, attach, onsuggest, suggest, commands, recall, dictation, refocus: () => this.focus(), oninsert: (text, caret) => this.#write(text, caret) });
 		this.#toolbar = new ComposerToolbar({ root: this.#element, controls: this.#context.controls, actions: this.#actions.element, labels: this.#labels, compact });
 		this.#expand = new ComposerExpand({ root: this.#element, box, field: control, labels: this.#labels });
 		const voice = this.#context.dictation;
 		if (voice) this.#actions.voice = voice.button;
-		this.#box.hold([this.#status.element, this.#context.files.element, this.#expand.element, this.#field.element, this.#sender.element, voice?.element, this.#toolbar.element]);
+		this.#box.hold([this.#status.element, this.#context.files.element, this.#expand.element, this.#field.element, voice?.element, this.#toolbar.element]);
 		this.#element.append(this.#context.files.announcer, this.#expand.dialog);
 		this.#keys.watch(control, { take: event => this.#context.keys(event), send: () => this.#send(null, false) });
 		control.addEventListener('input', () => (this.#say(null), this.#marks.empty(), this.#onchange?.(control.value)));
@@ -290,11 +291,10 @@ export class Composer extends Component {
 		this.#keys.instruct(this.#labels, this.#actions.primary.label);
 	}
 
-	/** The field is described by the state line, the keys, the reason sending is unavailable and a failure. */
+	/** The field is described by a failure, the state line, the keys and the reason sending is unavailable. */
 	#describe() {
 		if (!this.#actions) return;
-		const ids = [this.#status.id, this.#keys.guide.id, this.#marks.disabled?.reason ? this.#actions.reason : null, this.#sender.id];
+		const ids = [this.#status.problem, this.#status.id, this.#keys.guide.id, this.#marks.disabled?.reason ? this.#actions.reason : null];
 		this.#field.control.setAttribute('aria-describedby', ids.filter(Boolean).join(' '));
 	}
-
 }

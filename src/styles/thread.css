@@ -1,7 +1,9 @@
-/* A conversation's page (the `thread` template, 0.14.0): an anchored dock (D94) and one edge, one lane
-   (D96). The frame fills the window under the chrome and keeps no padding under its content; the main
-   column is a column whose last block is the dock, pushed to its end and sticky at the window's bottom
-   with one gutter and the safe area under it, so its distance to the bottom never changes. Tokens only. */
+/* A conversation's page (the `thread` template, 0.14.0): an anchored dock (D94), read by turns (D180,
+   0.29.0, amending D96's one lane). The frame fills the window under the chrome and keeps no padding under
+   its content; the main column is a column whose last block is the dock, pushed to its end and sticky at
+   the window's bottom with one gutter and the safe area under it, so its distance to the bottom never
+   changes. The turns take the thread's width (`--layout-thread`), the dock's composer its lane
+   (`--layout-lane`). Tokens only. */
 .bui-page[data-template='thread'] {
 	--bui-page-gap: var(--space-8);
 }
@@ -25,6 +27,13 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--bui-page-gap);
+}
+/* From a 1024 px region a thread's gutter is 48 px (0.29.0, D182): it holds the index of its turns, beside
+   them, whether or not the thread has turns yet, so nothing moves when the second turn arrives. */
+@container bui-page (min-width: 1024px) {
+	.bui-page[data-template='thread'] .bui-page-frame {
+		--layout-gutter: var(--space-12);
+	}
 }
 .bui-page[data-template='thread'] .bui-page-panel {
 	align-self: start;
@@ -69,7 +78,8 @@
 	gap: var(--space-2);
 	min-width: 0;
 	margin-top: auto;
-	padding: var(--space-2) 0 calc(var(--layout-gutter) + env(safe-area-inset-bottom, 0px));
+	/* One gutter under it, never the wider gutter that holds a thread's index (0.29.0): the dock keeps its place */
+	padding: var(--space-2) 0 calc(min(var(--layout-gutter), var(--layout-gutter-wide)) + env(safe-area-inset-bottom, 0px));
 	background: var(--color-canvas);
 }
 .bui-page-dock::before {
@@ -93,6 +103,13 @@
 	min-width: 0;
 	max-width: var(--layout-lane);
 }
+/* A centred thread's composer stands under the middle of its turns, on their axis (D180) */
+.bui-page[data-lane='center'] .bui-page-dock {
+	justify-items: center;
+}
+.bui-page[data-lane='center'] .bui-page-dock > * {
+	width: 100%;
+}
 /* The end mark takes no room: it sits on the dock's lower edge, inside the column's last gap. */
 .bui-page-dock-end {
 	flex: none;
@@ -101,8 +118,10 @@
 	pointer-events: none;
 }
 
-/* One edge, one lane (D96): the person's message, prose, the rail's marks and the composer share the
-   lane's right edge; code, diffs, tool output and approval cards widen to the thread (the wide lane). */
+/* A thread reads by turns (D180, 0.29.0, amending D96): the person's message, prose, the rail's items and
+   the work take the turn's width, the thread's (`--layout-thread`, 80rem); only the composer keeps the
+   lane (`--layout-lane`, 48rem), centred on the same axis. `.bui-lane` and `.bui-lane-wide` keep giving a
+   product's own blocks those two widths. */
 .bui-lane {
 	min-width: 0;
 	max-width: var(--layout-lane);
@@ -111,12 +130,9 @@
 	min-width: 0;
 	max-width: var(--layout-thread);
 }
-.bui-page[data-template='thread'] :is(.bui-rail-item:not([data-wide]), .bui-activity-head, .bui-activity-tail, .bui-live) {
-	max-width: var(--layout-lane);
-}
-/* A panel kept in view comes next to the lane and grows up to its maximum; what is left falls on the far
-   side, never inside the thread (D96). */
+/* A panel kept in view comes next to the turns and grows up to its maximum; what is left falls on the far
+   side, never inside the thread (D96, with the turns' width since D180). */
 .bui-page[data-width='thread'][data-panel='beside']:not([data-panel-wide]) .bui-page-body:has(> .bui-page-panel:not([hidden])) {
-	grid-template-columns: minmax(0, var(--layout-lane)) clamp(var(--layout-aside), calc(100% - var(--layout-lane) - var(--space-8)), var(--layout-aside-max));
-	max-width: calc(var(--layout-lane) + var(--space-8) + var(--layout-aside-max));
+	grid-template-columns: minmax(0, var(--layout-thread)) clamp(var(--layout-aside), calc(100% - var(--layout-thread) - var(--space-8)), var(--layout-aside-max));
+	max-width: calc(var(--layout-thread) + var(--space-8) + var(--layout-aside-max));
 }

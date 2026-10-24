@@ -154,6 +154,8 @@ export class PageHeader extends Component {
 	readonly bar: HTMLElement | null;
 	/** Whether the compact line is shown now (0.11.0). */
 	readonly compacted: boolean;
+	/** What the compact line names in place of the title, such as the turn being read (0.29.0, D181); null for the title. */
+	subject: { text: string; href?: string | null } | null;
 	/** Decides at once whether the compact line shows (0.11.0). */
 	measure(): void;
 }
