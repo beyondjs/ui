@@ -4,7 +4,7 @@
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine, confirm, el } from '@beyond-js/ui';
+import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine, Field, FocusedForm, confirm, el } from '@beyond-js/ui';
 import { shape, accounts, source, recognize, branches, projects, repositories, columns } from '../data/choosing.js';
 
 const log = [];
@@ -37,5 +37,15 @@ const following = section('following');
 new Choices({ legend: 'AI engine', type: 'radio', name: 'engine', options: [{ value: 'claude', label: 'Claude Code', hint: 'Connected with the Max plan · its sign-in lasts until you disconnect it', status: ['Ready', 'success'] }] }).mount(following);
 new AwaitedLine({ title: 'Cloning acme/web', since: Date.now() - 40_000, expected: { median: 60_000, p90: 120_000 } }).mount(following);
 new Button({ label: 'Delete My first VM', variant: 'danger', onclick: () => confirm({ title: 'Delete My first VM?', accept: 'Delete environment', tone: 'danger', consequence: { affected: ['2 running conversations stop'], lost: 'The machine and its copies', costing: 'The disk snapshot, until you delete it', recovery: 'Deletion cannot be undone.' } }).then(answer => log.push(`confirm:${answer}`)) }).mount(section('consequence'));
+// 0.32.0 (D183): a required secret still to give behind its fold, as Conduict asks for a secret's value;
+// drawn only when a check asks for it
+const secret = () => {
+	const form = el('form', { id: 'secret-form' });
+	const name = new Field({ label: 'Name', name: 'name', required: true });
+	const value = new SecretField({ label: 'Value', credential: 'value', required: true, labels: { paste: 'Enter the value' } });
+	form.append(name.element, value.element, new Button({ label: 'Save', variant: 'primary', type: 'submit' }).element);
+	section('secreting').append(form);
+	new FocusedForm(form, { fields: [name, value], submit: () => (log.push(`secret:${name.control.value}`), Promise.resolve()) });
+};
 if (shape.sheet) sheet.open();
-window.fixture = { log, stall: false, sheet, open: value => value ? sheet.open() : sheet.close(), opener: opener.element, ready: true };
+window.fixture = { log, stall: false, sheet, open: value => value ? sheet.open() : sheet.close(), opener: opener.element, secret, ready: true };

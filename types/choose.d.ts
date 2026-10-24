@@ -106,11 +106,16 @@ export class ProjectPicker extends Component {
 /** A secret with Connect first and the pasted credential folded beneath as the last resort. */
 export class SecretField extends Component {
 	static readonly labels: Copies;
-	constructor(options: { label: Content; connect?: { label: string; run?: (() => void) | null; href?: string | null } | null; credential?: string; stored?: boolean; hint?: Content | null; name?: string | null; labels?: Copy });
+	constructor(options: { label: Content; connect?: { label: string; run?: (() => void) | null; href?: string | null } | null; credential?: string; stored?: boolean; hint?: Content | null; name?: string | null; required?: boolean; labels?: Copy });
 	readonly control: HTMLInputElement;
 	/** The pasted text while an input is open, else null (a held secret is kept). */
 	readonly value: string | null;
 	stored: boolean;
+	/** A `required` secret still to give: nothing stored to keep and nothing pasted (0.32.0, D183). */
+	readonly missing: boolean;
+	check(): boolean;
+	/** Opens the fold and puts the caret in its input, or on the stored one's action. */
+	focus(): void;
 }
 
 export type DraftKey = 'environment' | 'provider' | 'agent' | 'from' | 'for';

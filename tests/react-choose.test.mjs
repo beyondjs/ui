@@ -163,3 +163,17 @@ test('0.7.2: React Consequence renders the DOM builder\'s markup; the Spanish se
 	await render(h(ui.Loading, { label: ui.Loading.labels.es }));
 	assert.equal(host.textContent, 'Cargando…');
 });
+
+test('0.32.0: a required React SecretField says through its ref that it waits, and focus() opens its fold with the caret in it (D183)', async () => {
+	const secret = React.createRef();
+	await render(h(ui.SecretField, { ref: secret, label: 'Value', credential: 'value', required: true }));
+	assert.equal(secret.current.missing, true, 'nothing pasted behind a closed fold');
+	assert.equal(secret.current.check(), false);
+	await act(async () => secret.current.focus());
+	assert.equal(host.querySelector('details').open, true);
+	const input = host.querySelector('input[type="password"]');
+	assert.ok(document.activeElement === input, 'the caret in its input');
+	input.value = 's3cret';
+	assert.equal(secret.current.missing, false);
+	assert.equal(secret.current.value, 's3cret');
+});

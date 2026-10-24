@@ -5,8 +5,9 @@ import { copy } from '../fixtures/data/turns.js';
 /**
  * Nothing still to write is a failure in no form (0.32.0, D183), in a real engine: the focused form of the
  * main page waits quiet while its required title is empty and a press puts the caret there, saying
- * nothing; and a composer's files wait for words on the turns page, Send quiet and the field saying what
- * they wait for. The prompt's own case is `keyboard.mjs`'s.
+ * nothing; a required secret behind its fold waits the same way on the choosing page; and a composer's
+ * files wait for words on the turns page, Send quiet and the field saying what they wait for. The prompt's
+ * own case is `keyboard.mjs`'s.
  */
 const settle = page => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 30)))));
 
@@ -80,6 +81,31 @@ export const checks = [
 			expect(!(await read()).quiet, 'words make it something to send');
 			await page.locator(`${dock} .bui-composer-field`).fill('');
 			expect((await read()).quiet, 'emptied again, it waits again');
+			await context.close();
+		}
+	},
+	{
+		name: 'secret field: a required secret still to give keeps Save quiet, and a press opens its fold with the caret in it, saying nothing (0.32.0, D183)',
+		consumers: ['dom'],
+		async run(browser, consumer) {
+			const { page, context } = await browser.open(consumer, { file: 'choosing.html', viewport: { width: 1440, height: 900 } });
+			await page.waitForFunction(() => window.fixture?.ready);
+			await page.evaluate(() => window.fixture.secret());
+			const form = page.locator('#secret-form');
+			await form.getByLabel('Name').fill('TOKEN');
+			const save = form.getByRole('button', { name: 'Save' });
+			expect((await save.getAttribute('aria-disabled')) === 'true', 'the form waits for the value');
+			await press(page, save);
+			await settle(page);
+			const after = await form.evaluate(node => ({
+				open: node.querySelector('details').open,
+				caret: document.activeElement === node.querySelector('input[type="password"]'),
+				said: [...node.querySelectorAll('.bui-field-error, .bui-form-problem')].filter(part => part.getClientRects().length && part.textContent.trim()).map(part => part.textContent.trim())
+			}));
+			expect(after.open && after.caret && !after.said.length, `a press opens the fold with the caret in it, saying nothing: ${JSON.stringify(after)}`);
+			expect(!(await page.evaluate(() => window.fixture.log)).some(entry => entry.startsWith('secret:')), 'nothing was sent');
+			await page.keyboard.type('s3cret');
+			expect(!(await save.getAttribute('aria-disabled')), 'a value makes it able');
 			await context.close();
 		}
 	}

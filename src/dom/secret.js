@@ -32,6 +32,10 @@ const words = {
  * ("Keep the stored {credential}" goes back to that). A closed fold submits nothing either. The input
  * is a password field the browser neither fills nor remembers, and the component keeps no draft.
  * `value` is the pasted text while an input is open, else null.
+ *
+ * A `required` secret still to give is `missing` (0.32.0, D183): nothing stored to keep and nothing
+ * pasted. Given to a `FocusedForm`'s `fields`, it keeps the submit quiet, and a press opens the fold
+ * and puts the caret in its input, saying nothing.
  */
 export class SecretField extends Component {
 	/** The copy in English and Spanish. */
@@ -53,11 +57,12 @@ export class SecretField extends Component {
 	 * @param {boolean} [options.stored] a secret is held
 	 * @param {string|Node|null} [options.hint]
 	 * @param {string|null} [options.name] the input's form name
+	 * @param {boolean} [options.required] a form waits for it (D183)
 	 */
-	constructor({ label, connect = null, credential = 'token', stored = false, hint = null, name = null, labels = {} }) {
+	constructor({ label, connect = null, credential = 'token', stored = false, hint = null, name = null, required = false, labels = {} }) {
 		super();
 		this.#labels = new Labels(words.en, labels);
-		this.#options = { connect, credential, name };
+		this.#options = { connect, credential, name, required: Boolean(required) };
 		this.#stored = Boolean(stored);
 		const id = Ids.next('bui-secret');
 		this.#input = el('input', { id: `${id}-input`, type: 'password', class: 'bui-input', name, autocomplete: 'off', spellcheck: 'false', 'data-1p-ignore': true, 'data-lpignore': 'true', disabled: true });
@@ -96,6 +101,28 @@ export class SecretField extends Component {
 		this.#draw();
 	}
 
+	/** Whether a required secret is still to give: nothing stored to keep and nothing pasted (D183). */
+	get missing() {
+		if (!this.#options.required || (this.#stored && !this.#replacing)) return false;
+		return !(this.value ?? '').trim();
+	}
+
+	/** False while the secret is missing, saying nothing of it, so a form waits for it. */
+	check() {
+		return !this.missing;
+	}
+
+	/** Puts the caret where the secret is given: the fold opened and its input, or the stored one's action. */
+	focus() {
+		if (this.#stored && !this.#replacing) return this.#body.querySelector('.bui-link-button')?.focus();
+		const fold = this.#body.querySelector('.bui-secret-fold');
+		if (fold && !fold.open) {
+			fold.open = true;
+			this.#input.disabled = false;
+		}
+		this.#input.focus();
+	}
+
 	#connect() {
 		const connect = this.#options.connect;
 		if (!connect?.label) return null;
@@ -128,5 +155,7 @@ export class SecretField extends Component {
 		this.#draw();
 		if (open) this.#input.focus();
 		else this.#body.querySelector('.bui-link-button')?.focus();
+		// What a form waits for changed: it reads `missing` again on an input event, as for a typed value
+		this.#element.dispatchEvent(new this.#element.ownerDocument.defaultView.Event('input', { bubbles: true }));
 	}
 }

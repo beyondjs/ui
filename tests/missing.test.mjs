@@ -7,7 +7,8 @@ import { Page } from './support/page.mjs';
  * `missing`, and `check()` answers false without a message and without asking `validate`; a
  * `FocusedForm` keeps its submit quiet (`aria-disabled`, still reachable) while a required field is
  * empty and a submission puts the caret in the first empty one, saying nothing; only a wrong value is
- * said. A composer's files may wait for words (`attach.words`): Send stays quiet and the field says them.
+ * said. A required `SecretField` still to give is `missing` the same way. A composer's files may wait for
+ * words (`attach.words`): Send stays quiet and the field says them.
  */
 const page = new Page();
 const ui = await import('@beyond-js/ui/dom');
@@ -118,6 +119,45 @@ test('without Field objects an empty required control gets the caret silently, a
 	assert.equal(reported, 1, 'a wrong value is said by the browser');
 	assert.equal(sent.length, 0);
 	behavior.destroy();
+});
+
+test('a required secret still to give keeps the form quiet, and a press opens its fold with the caret in it, saying nothing', () => {
+	const form = document.createElement('form');
+	const name = new ui.Field({ label: 'Name', name: 'name', required: true });
+	const value = new ui.SecretField({ label: 'Value', credential: 'value', required: true, labels: { paste: 'Enter the value' } });
+	const submit = document.createElement('button');
+	form.append(name.element, value.element, submit);
+	document.body.append(form);
+	const sent = [];
+	const behavior = new ui.FocusedForm(form, { fields: [name, value], submit: values => (sent.push(values), Promise.resolve()) });
+	type(name.control, 'TOKEN');
+	assert.equal(value.missing, true, 'nothing pasted behind a closed fold');
+	assert.equal(submit.getAttribute('aria-disabled'), 'true', 'the form waits for the value');
+	form.requestSubmit();
+	const fold = value.element.querySelector('details');
+	assert.equal(fold.open, true, 'a press opens the fold');
+	assert.ok(document.activeElement === value.control, 'and puts the caret in its input');
+	assert.equal(form.querySelectorAll('.bui-field-error:not([hidden]), .bui-form-problem .bui-callout').length, 0, 'nothing is said');
+	assert.equal(sent.length, 0);
+	type(value.control, '   ');
+	assert.equal(value.missing, true, 'blanks are nothing');
+	type(value.control, 's3cret');
+	assert.equal(submit.hasAttribute('aria-disabled'), false, 'a value makes it able');
+	behavior.destroy();
+	const optional = new ui.SecretField({ label: 'Access', credential: 'token' });
+	assert.equal(optional.missing, false, 'a secret that is not required is never missing');
+	const held = new ui.SecretField({ label: 'Value', credential: 'value', required: true, stored: true });
+	const again = document.createElement('form');
+	const save = document.createElement('button');
+	again.append(held.element, save);
+	document.body.append(again);
+	const kept = new ui.FocusedForm(again, { fields: [held], submit: () => Promise.resolve() });
+	assert.equal(held.missing, false, 'a stored secret is kept');
+	held.element.querySelector('.bui-secret-stored .bui-link-button').click();
+	assert.equal(save.getAttribute('aria-disabled'), 'true', 'Replace makes it a secret to give, and the form reads it at once');
+	held.element.querySelector('.bui-secret-stored .bui-link-button').click();
+	assert.equal(save.hasAttribute('aria-disabled'), false, 'keeping the stored one makes it able again');
+	kept.destroy();
 });
 
 test('a composer\'s files may wait for words: Send stays quiet and the field says what they wait for', () => {

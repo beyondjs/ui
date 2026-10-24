@@ -78,14 +78,17 @@ export function ProjectPicker({ projects = [], product, value = null, label = nu
 	return h('div', { ref: host, className: 'bui-host' });
 }
 
-/** A secret with Connect first and the pasted credential as the folded last resort. The ref exposes `value`. */
-export const SecretField = forwardRef(function SecretField({ label, connect = null, credential = 'token', stored = false, hint = null, name = null, labels }, ref) {
+/**
+ * A secret with Connect first and the pasted credential as the folded last resort. The ref exposes `value`, and
+ * for a form's `fields` `missing`, `check()` and `focus()` (a `required` secret still to give, 0.32.0, D183).
+ */
+export const SecretField = forwardRef(function SecretField({ label, connect = null, credential = 'token', stored = false, hint = null, name = null, required = false, labels }, ref) {
 	const latest = useLatest(connect);
-	const [host, field] = useInstance(() => new Secret({ label, credential, stored, hint, name, labels, connect: connect ? { label: connect.label, href: connect.href ?? null, run: () => latest.current?.onSelect?.() } : null }), [label, credential, hint, name, labels, connect?.label, connect?.href]);
+	const [host, field] = useInstance(() => new Secret({ label, credential, stored, hint, name, required, labels, connect: connect ? { label: connect.label, href: connect.href ?? null, run: () => latest.current?.onSelect?.() } : null }), [label, credential, hint, name, required, labels, connect?.label, connect?.href]);
 	useSync(field, current => {
 		if (current.stored !== stored) current.stored = stored;
 	}, [stored]);
-	useImperativeHandle(ref, () => ({ get value() { return field?.value ?? null; } }), [field]);
+	useImperativeHandle(ref, () => ({ get value() { return field?.value ?? null; }, get missing() { return field?.missing ?? false; }, check: () => field?.check() ?? true, focus: () => field?.focus() }), [field]);
 	return h('div', { ref: host, className: 'bui-host' });
 });
 

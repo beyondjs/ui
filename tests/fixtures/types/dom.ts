@@ -131,6 +131,9 @@ refs.loading = true;
 const projects = new ProjectPicker({ product: 'Delegate', projects: [{ id: 'prj_1', name: 'Storefront', here: { state: 'unset' } }], only: 'unset', onchange: id => void id });
 const secret = new SecretField({ label: 'Supabase access', connect: { label: 'Connect Supabase', run: () => {} }, credential: 'access token', stored: true, name: 'token' });
 const pasted: string | null = secret.value;
+const value = new SecretField({ label: 'Value', credential: 'value', required: true });
+const waits: boolean = value.missing && !value.check();
+value.focus();
 const draft = Draft.read('https://conduict.example.test/#/acme/web?environment=env_1&from=conduict');
 const next: string = new Draft({ ...draft.values, agent: 'claude' }).address('/new');
 const panel = new SideSheet({ title: 'Add repositories', width: 'form' });
@@ -151,7 +154,7 @@ slug.suggest = 'storefront-2';
 const columns = new Collection({ label: 'Repositories', columns: [{ key: 'name', label: 'Name', primary: true }, { key: 'branch', label: 'Branch', priority: 2 }], source: Collection.local([]), labels: Collection.labels.es });
 // @ts-expect-error a side sheet is form or standard wide
 void new SideSheet({ title: 'x', width: 'reading' });
-void [viewing, projects, pasted, next, where, menu, slug.edited, columns, refs];
+void [viewing, projects, pasted, waits, next, where, menu, slug.edited, columns, refs];
 // 0.7.1: statements keep the hint and state; Spanish for the questions, Dialog, Unavailable and Toaster; AwaitedLine.
 import { AwaitedLine, Question, Toaster as Toasts, alert as tell, prompt as ask, Choices as Group } from '@beyond-js/ui';
 const lone = new Group({ legend: 'AI engine', type: 'radio', options: [{ value: 'claude', label: 'Claude Code', hint: 'Connected', status: ['Ready', 'success'] }] });

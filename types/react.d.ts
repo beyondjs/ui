@@ -72,7 +72,7 @@ export namespace RefChooser { const labels: Copies; }
 export function ProjectPicker(props: { projects: PickedProject[]; product: string; value?: string | null; label?: string | null; only?: 'unset' | null; actions?: Array<ReactChoiceAction | null | false>; name?: string | null; onChange?: ((id: string) => void) | null; labels?: Copy }): ReactElement;
 export namespace ProjectPicker { const labels: Copies; }
 /** A secret with Connect first (0.7.0); the ref's `value` is the pasted text, or null when the stored one is kept. */
-export const SecretField: ForwardRefExoticComponent<{ label: string; connect?: { label: string; onSelect?: (() => void) | null; href?: string | null } | null; credential?: string; stored?: boolean; hint?: string | null; name?: string | null; labels?: Copy } & RefAttributes<{ readonly value: string | null }>> & { labels: Copies };
+export const SecretField: ForwardRefExoticComponent<{ label: string; connect?: { label: string; onSelect?: (() => void) | null; href?: string | null } | null; credential?: string; stored?: boolean; hint?: string | null; name?: string | null; required?: boolean; labels?: Copy } & RefAttributes<{ readonly value: string | null; readonly missing?: boolean; check?(): boolean; focus?(): void }>> & { labels: Copies };
 /** A prewritten message, link or command with one copy action (0.7.0). */
 export function CopyMessage(props: { text: string; kind?: 'message' | 'command' | 'link'; label?: string | null; labels?: Copy }): ReactElement;
 export namespace CopyMessage { const labels: Copies; }
