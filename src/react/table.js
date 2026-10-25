@@ -4,14 +4,16 @@ import { DataTable as Table } from '../dom/table/table.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 import { useTools } from './collection-tools.js';
 
-const { useEffect, useRef, useState } = React;
+const { useEffect, useLayoutEffect, useRef, useState } = React;
 const none = Object.freeze([]);
 
 /**
  * A table of rows the product holds (0.15.0), driven by the DOM `DataTable`. A column may give
  * `render(row)` returning React content, rendered into its cell through a portal. `rows`, `state` and
  * `status` are applied when they change; `onChange` reports the person's changes (write them to the
- * address); `onOpen` and `onRetry` are read from the latest props.
+ * address); `onOpen` and `onRetry` are read from the latest props. A cell whose React content renders
+ * nothing (no text, no element) is empty, as the DOM table reads a value: a narrow line leaves out its
+ * label and its separator (0.35.0).
  */
 export function DataTable({ label, columns, rows = none, rowKey = null, search = true, filters = [], tools = 'compact', toolsTarget = null, group = null, state = null, onChange = null, size = 50, link = null, onOpen = null, empty = null, status = 'ready', onRetry = null, labels }) {
 	const cells = useRef([]);
@@ -42,6 +44,22 @@ export function DataTable({ label, columns, rows = none, rowKey = null, search =
 		[label, String(search), JSON.stringify(filters), tools, size, labels, Boolean(link), Boolean(onOpen), Boolean(onRetry), Boolean(group), columns.map(column => column.key).join('|')]
 	);
 	useTools(table, toolsTarget, tools);
+	// What each drawn cell rendered decides whether it is empty, read again whenever its content changes
+	useLayoutEffect(() => {
+		const holders = portals.map(portal => portal.holder);
+		const mark = () => {
+			for (const holder of holders) {
+				const cell = holder.parentElement;
+				if (cell?.localName === 'td') cell.toggleAttribute('data-empty', !holder.textContent && !holder.childElementCount);
+			}
+		};
+		mark();
+		const view = holders[0]?.ownerDocument?.defaultView;
+		if (!view?.MutationObserver) return undefined;
+		const observer = new view.MutationObserver(mark);
+		for (const holder of holders) observer.observe(holder, { childList: true, subtree: true, characterData: true });
+		return () => observer.disconnect();
+	}, [portals]);
 	// Each drawn cell is a holder; its React content is rendered with every render of the table (0.16.2),
 	// so a cell whose content changes while its row does not is drawn again, keyed by its row and column.
 	function cell(row, index) {

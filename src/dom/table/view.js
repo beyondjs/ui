@@ -60,7 +60,8 @@ export class DataTableView {
 		const opens = primary && (link || onopen);
 		const inner = opens ? el(link ? 'a' : 'button', { class: 'bui-row-link', href: link ? link(row) : null, type: link ? null : 'button', onclick: event => DataTableView.#open(event, row, onopen, Boolean(link)) }, [content(value)]) : content(value);
 		const classes = [column.align === 'end' ? 'bui-numeric' : null, column.mono ? 'bui-mono' : null].filter(Boolean).join(' ') || null;
-		// A React cell's holder (`bui-cell`) is filled after the drawing: never taken for empty
+		// A React cell's holder (`bui-cell`) is filled after the drawing: never taken for empty here, React's
+		// DataTable marks it once it knows what it rendered (0.35.0)
 		const empty = value === null || value === undefined || value === '' || (typeof value === 'object' && typeof value.nodeType === 'number' && !value.classList?.contains('bui-cell') && !value.textContent && !value.childElementCount && value.localName !== 'img');
 		return el(primary ? 'th' : 'td', { class: classes, scope: primary ? 'row' : null, 'data-label': typeof column.label === 'string' ? column.label : column.label?.textContent || null, 'data-summary': !primary && column.summary ? '' : null, 'data-empty': !primary && empty ? '' : null }, [inner]);
 	}
