@@ -13,7 +13,9 @@ const defaults = { nav: 'Product' };
  * tab's focus ring is drawn inside it so the scrolling row never clips it. The current tab carries
  * `aria-current="page"`. It is not sticky unless `sticky` asks for it, in which case it stays under
  * the family bar. Since 0.15.0 (X-15, PKG-19) an end that holds more tabs than it shows says so with a
- * fade and a chevron that scrolls the row (`ScrollEdges`).
+ * fade and a chevron that scrolls the row (`ScrollEdges`). Since 0.33.0 (D179) the current tab shows
+ * whole, never under that fade and chevron or the row's padding, from the first frame and again once
+ * fonts load or the row changes size, until the person moves the row.
  */
 export class ProductNav extends Component {
 	/** The copy in English and Spanish (0.7.2). */
@@ -58,7 +60,6 @@ export class ProductNav extends Component {
 	set items(items) {
 		this.#list.replaceChildren(...items.filter(Boolean).map(item => el('li', {}, [this.#link(item)])));
 		this.#reveal();
-		this.#edges?.update();
 	}
 
 	mount(parent, before = null) {
@@ -68,27 +69,13 @@ export class ProductNav extends Component {
 	}
 
 	/**
-	 * Scrolls the row, never the page, so the current tab is visible; again once the page's fonts have
-	 * loaded, since a web font changes the tabs' widths.
+	 * Keeps the current tab whole in view, clear of both ends of the row: its padding and the cues that say
+	 * an end holds more, as they are drawn (0.33.0, D179). The row scrolls by whole pixels and never the
+	 * page, now and again whenever the row or its tabs change size, since a web font that loads changes
+	 * the tabs' widths (`ScrollEdges.reveal`).
 	 */
 	#reveal() {
-		this.#scroll();
-		this.#element.ownerDocument.fonts?.ready.then(() => !this.destroyed && (this.#scroll(), this.#edges.update()));
-	}
-
-	/**
-	 * Moves the row by whole pixels, rounded away from the tab, inside the row's padding: WebKit keeps
-	 * only whole pixels of `scrollLeft`, so a fractional move would leave the tab a fraction outside.
-	 */
-	#scroll() {
-		const current = this.#list.querySelector('[aria-current]');
-		if (!current || !this.#element.isConnected) return;
-		const style = this.#element.ownerDocument.defaultView.getComputedStyle(this.#list);
-		const box = this.#list.getBoundingClientRect();
-		const [start, end] = [box.left + parseFloat(style.paddingLeft || '0'), box.right - parseFloat(style.paddingRight || '0')];
-		const tab = current.getBoundingClientRect();
-		if (tab.left < start) this.#list.scrollLeft -= Math.ceil(start - tab.left);
-		else if (tab.right > end) this.#list.scrollLeft += Math.ceil(Math.min(tab.right - end, tab.left - start));
+		this.#edges?.reveal(this.#list.querySelector('[aria-current]'));
 	}
 
 	#link(item) {
