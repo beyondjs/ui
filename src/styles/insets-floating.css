@@ -81,6 +81,14 @@
 	.bui-menu-item {
 		padding-block: calc(var(--bui-menu-inset, var(--space-4)) - var(--space-1) - (1lh - 1cap) / 2);
 	}
+	/* On a touch screen an entry is a 44 px target with its words centred in it: the target's height decides an
+	   action menu's inset, which its sides keep (0.34.0) */
+	@media (pointer: coarse) {
+		ul.bui-menu .bui-menu-item {
+			justify-content: center;
+			padding: calc((var(--bui-target) - 1lh) / 2) calc((var(--bui-target) - 1cap) / 2);
+		}
+	}
 	/* A notification row, drawn as a box under the pointer: its words one inset from its edges */
 	.bui-notice {
 		padding-block: calc(var(--bui-notice-inset) - (1lh - 1cap) / 2);

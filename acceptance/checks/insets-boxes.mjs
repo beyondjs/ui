@@ -6,7 +6,11 @@
  * pixel (all four unless said), `free` the sides that may hold free room but never come closer (a textarea taller than its
  * words, a last row that is the product's own); an empty `sides` measures a box for the record only, a box
  * that cannot keep one inset without a design decision. A right side a short line does not reach is free room
- * by itself (the measurement's `free`).
+ * by itself (the measurement's `free`). `touch` gives what a box keeps instead on a touch screen (0.34.0), where
+ * every target is 44 px tall: an action menu's `even` sides, since its entries' height decides its inset; a
+ * notification row measured for the record, since its last line's targets grow it and hanging them past its edge
+ * would cover the next row's (a design decision, `family-touch-notification-rows`); the notification panel,
+ * whose taller rows scroll it by design.
  */
 const es = consumer => consumer.name !== 'dom';
 const closed = async page => (await page.keyboard.press('Escape'), page.waitForFunction(() => !document.querySelector('dialog.bui-dialog[open]')));
@@ -86,11 +90,11 @@ export const pages = {
 		{ file: null, steps: [
 			{ boxes: [{ name: 'a form field', box: '#form input', field: true, inset: 'even' }] },
 			{ open: (page, consumer) => page.getByRole('button', { name: es(consumer) ? 'Abrir diálogo' : 'Open dialog' }).click(), boxes: [{ name: 'Dialog', box: 'dialog.bui-dialog[open]', inset: '--bui-dialog-inset' }, { name: 'a dialog\'s field', box: 'dialog.bui-dialog[open] input', field: true, inset: 'even' }] },
-			{ open: async (page, consumer) => (await closed(page), page.getByRole('button', { name: es(consumer) ? 'Más acciones' : 'More actions' }).click()), boxes: [{ name: 'ActionMenu at rest', box: '.bui-menu:not([hidden])', flat: ['.bui-menu-item'], inset: '--bui-menu-inset' }] },
+			{ open: async (page, consumer) => (await closed(page), page.getByRole('button', { name: es(consumer) ? 'Más acciones' : 'More actions' }).click()), boxes: [{ name: 'ActionMenu at rest', box: '.bui-menu:not([hidden])', flat: ['.bui-menu-item'], inset: '--bui-menu-inset', touch: { inset: 'even' } }] },
 			{ open: (page, consumer) => page.getByRole('menuitem', { name: es(consumer) ? 'Aviso' : 'Toast' }).click(), boxes: [{ name: 'toast', box: '.bui-toast', inset: '--bui-toast-inset' }] },
 			{ open: (page, consumer) => page.getByRole('button', { name: es(consumer) ? 'Ayuda: Identificador del proyecto' : 'Help: Project identifier' }).click(), boxes: [{ name: 'help', box: '#helping .bui-help-panel', inset: '--bui-text-inset' }] },
 			{ open: page => page.locator('#helping button').filter({ hasText: /Copy address|Copiar dirección/ }).hover(), boxes: [{ name: 'Tooltip', box: '[role="tooltip"]:not([hidden])', inset: 8 }] },
-			{ open: async page => (await page.locator('.bui-notify > button').click(), await page.waitForSelector('.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice'), page.locator('.bui-notify .bui-notice').first().hover()), boxes: [{ name: 'a notification row under the pointer', box: '.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice', inset: '--bui-notice-inset' }, { name: 'notification panel', box: '.bui-notify .bui-disclosure-panel:not([hidden])', flat: ['.bui-notice', '.bui-notify-all'], inset: 16, sides: record }] }
+			{ open: async page => (await page.locator('.bui-notify > button').click(), await page.waitForSelector('.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice'), page.locator('.bui-notify .bui-notice').first().hover()), boxes: [{ name: 'a notification row under the pointer', box: '.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice', inset: '--bui-notice-inset', touch: { sides: record } }, { name: 'notification panel', box: '.bui-notify .bui-disclosure-panel:not([hidden])', flat: ['.bui-notice', '.bui-notify-all'], inset: 16, sides: record, touch: { scrolls: true } }] }
 		] },
 		{ file: 'choosing.html', steps: [
 			{ boxes: [{ name: 'CopyMessage', box: '.bui-copy-text', inset: '--bui-text-inset' }] },

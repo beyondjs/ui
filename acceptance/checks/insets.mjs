@@ -12,7 +12,8 @@ import { pages } from './insets-boxes.mjs';
  * Boxes that keep their unevenness until a design decision are measured for the record only. With
  * `BEYOND_UI_INSETS` naming a file outside the repository, every measurement is appended to it as a JSON line.
  * Since 0.34.0 every box is measured again at compact density (`data-density="compact"` on the root) and
- * with a coarse pointer (touch emulated), in the plain DOM consumer, whose markup the React one shares.
+ * with a coarse pointer (touch emulated), in the plain DOM consumer, whose markup the React one shares, a box's
+ * `touch` giving what it keeps instead on a touch screen; an inset that is not a length fails.
  */
 const sides = ['top', 'bottom', 'left', 'right'];
 
@@ -73,6 +74,7 @@ function hold(found, box, value, at) {
 	const said = `${at} ${box.name}: ${JSON.stringify({ ...found, inset: value })}`;
 	if (found.missing || found.empty) return [`${said}: the box is drawn with content`];
 	const broken = [];
+	if (!Number.isFinite(value)) return [`${said}: its inset is a length`];
 	if (!box.scrolls && found.scrolls > 1) broken.push(`${said}: nothing in it scrolls by what an inset trimmed (${found.scrolls} px)`);
 	for (const side of box.sides ?? sides) {
 		const free = box.free?.includes(side) || (side === 'right' && found.free);
@@ -93,7 +95,8 @@ async function measure(browser, consumer, list, mode = 'comfortable') {
 				const opened = await view(browser, consumer, page, width, scheme, mode);
 				for (const step of page.steps) {
 					await step.open?.(opened.page, consumer);
-					for (const box of step.boxes) {
+					for (const listed of step.boxes) {
+						const box = mode === 'coarse' && listed.touch ? { ...listed, ...listed.touch } : listed;
 						await opened.page.locator(box.box).nth(box.nth ?? 0).waitFor({ state: 'visible', timeout: 5000 });
 						await still(opened.page, box);
 						const found = await Insets.measure(opened.page, box);
