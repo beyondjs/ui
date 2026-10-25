@@ -164,7 +164,7 @@
 	.bui-copy-text.bui-copy-command {
 		padding-block: var(--bui-code-inset, var(--bui-text-inset));
 	}
-	:is(.bui-command-code, .bui-activity-code, .bui-activity-tail, .bui-copy-command):not(textarea, .bui-activity-exchange *, :has(> code)) {
+	:is(.bui-command-code, .bui-activity-code, .bui-activity-tail, .bui-copy-text.bui-copy-command):not(textarea, .bui-activity-exchange *, :has(> code)) {
 		text-box: trim-both cap alphabetic;
 	}
 	:is(.bui-command-code, .bui-activity-code, .bui-copy-command):not(.bui-activity-exchange *) > code {

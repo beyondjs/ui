@@ -101,7 +101,10 @@
 	overflow-wrap: anywhere;
 	user-select: all;
 }
-.bui-copy-command {
+/* A command's code box keeps its lines and scrolls in its own box. Its holder carries `bui-copy-command`
+   too (its kind), so the rule names the box: the holder's label, Copy and result keep the interface's face,
+   and its measure is counted in it (0.34.0). */
+.bui-copy-text.bui-copy-command {
 	overflow-x: auto;
 	white-space: pre;
 	overflow-wrap: normal;

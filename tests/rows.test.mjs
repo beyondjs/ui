@@ -1,5 +1,6 @@
 import { test, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { Page } from './support/page.mjs';
 
 /** StatusRow, CopyMessage and ProviderWindow (0.7.0): one state with its way on, a text to copy, and a provider's window read from the server. */
@@ -49,6 +50,26 @@ test('StatusRow: one state with how fresh it is, its reason, who can change it, 
 	assert.match(spanish.element.textContent, /Quién puede cambiarlo: Propietarios/);
 	row.destroy();
 	spanish.destroy();
+});
+
+test('CopyMessage of a command: its holder keeps its kind\'s class, and only its code box takes the code\'s face, lines and trim (0.34.0)', () => {
+	const command = new ui.CopyMessage({ text: 'npm run dev', kind: 'command' }).mount(document.body);
+	const holder = command.element;
+	const box = holder.querySelector('pre');
+	assert.equal(holder.className, 'bui-copy bui-copy-command', 'a product\'s selector of the kind keeps working');
+	assert.equal(box.className, 'bui-copy-text bui-copy-command');
+	assert.equal(box.querySelector('code').textContent, 'npm run dev');
+	// Every rule of the built stylesheet that names the kind: those that would draw the holder in the code's
+	// face, keep its lines or trim it name the code box itself, or only reach the code inside it
+	const sheet = readFileSync(new URL('../dist/styles.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+	const rules = [...sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(([, selector, body]) => ({ selector: selector.trim(), body })).filter(rule => rule.selector.includes('bui-copy-command'));
+	assert.ok(rules.length >= 3);
+	for (const rule of rules) {
+		// Naming the kind alone is the holder's class too, unless the rule's subject is the code inside
+		const alone = /\.bui-copy-command/.test(rule.selector.replace(/\.bui-copy-text\.bui-copy-command/g, ''));
+		assert.equal(alone && !/>\s*code\s*$/.test(rule.selector), false, `${rule.selector} reaches the holder`);
+	}
+	command.destroy();
 });
 
 test('CopyMessage: the text whole, one copy action, and a refused or silent clipboard said in place with the text selected', async () => {
