@@ -55,6 +55,8 @@ test('the opening\'s own focus is the person\'s and the document itself is no de
 	approve.focus();
 	approve.focus();
 	assert.deepEqual(focus.asked, [approve], 'one entry per target');
+	assert.throws(() => window.HTMLElement.prototype.focus.call(undefined), TypeError, 'a call on no element is the platform\'s to refuse');
+	assert.deepEqual(focus.asked, [approve], 'and keeps nothing');
 	for (let index = 0; index < OpeningFocus.kept + 2; index += 1) document.body.appendChild(document.createElement('button')).focus();
 	assert.equal(focus.asked.length, OpeningFocus.kept, 'a bounded memory');
 	assert.ok(!focus.asked.includes(approve), 'the oldest leave first');

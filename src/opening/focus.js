@@ -69,9 +69,11 @@ export class OpeningFocus {
 	}
 
 	#keep(target, options) {
-		if (!this.#live) return;
+		// Only an element of the product: the opening's own focus is the person's, and the document itself no
+		// destination; a call on anything else is left to the platform, which refuses it
+		if (!this.#live || target?.nodeType !== 1 || this.#element.contains(target)) return;
 		const document = this.#element.ownerDocument;
-		if (this.#element.contains(target) || target === document.body || target === document.documentElement) return;
+		if (target === document.body || target === document.documentElement) return;
 		this.#asked = this.#asked.filter(entry => entry.target !== target);
 		this.#asked.push({ target, options });
 		if (this.#asked.length > OpeningFocus.kept) this.#asked.shift();
