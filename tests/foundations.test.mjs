@@ -65,8 +65,9 @@ test('elevation only on what overlaps the page, and since 0.15.0 the raised surf
 		if (/--elevation-raised/.test(rule.body)) assert.match(rule.selector, inside, `only a raised in-page surface: ${rule.selector}`);
 		else assert.match(rule.selector, overlapping, rule.selector);
 	}
-	// Every other shadow is a mark (inset) or none.
+	// Every other shadow is a mark (inset) or none, or since 0.34.0 a focused box's halo: a ring of the edge's own
+	// light, with no offset and no blur, which never lifts anything (D187)
 	for (const rule of rules.filter(rule => /box-shadow:/.test(rule.body) && !/box-shadow:\s*var\(--elevation-/.test(rule.body))) {
-		assert.match(rule.body, /box-shadow:\s*(none|inset\b)/, rule.selector);
+		assert.match(rule.body, /box-shadow:\s*(none|inset\b|var\(--bui-focus-halo(-danger)?\)|0 0 0 1px var\(--color-focus-edge\))/, rule.selector);
 	}
 });

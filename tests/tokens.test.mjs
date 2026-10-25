@@ -17,7 +17,7 @@ import { tokens, TokenSheet, Contrast } from '@beyond-js/ui/tokens';
  * the brand face, weight 600, links in the text color, off-white text on dark, the light bar and sidebar
  * on the page's surface, neutral disabled controls, raised surfaces, tooltips' own roles and the bar's
  * hover per theme; 0.7.0 carries D180 (2026-10-24): the thread's turns up to 80rem and the composer's
- * 48rem lane.
+ * 48rem lane; 0.8.0 carries D187 (2026-10-25): the focus edge's light, in the text's tone.
  * Imported through the package's own export, as consumers import it.
  */
 const fixture = new URL('./fixtures/branding-tokens-0.1.0.css', import.meta.url);
@@ -55,7 +55,11 @@ const changes = {
 		'\t--overlay-lift: rgb(255 255 255 / 0.1);'
 	],
 	added: [
-		'/* Beyond family tokens 0.7.0 (approved). Generated from src/foundations; do not edit. */',
+		'/* Beyond family tokens 0.8.0 (approved). Generated from src/foundations; do not edit. */',
+		// 0.8.0: D187, the light a focused box gives its own border, light (in :root) and dark (twice)
+		'\t--color-focus-edge: #121f36;',
+		'\t--color-focus-edge: #e6e9ef;',
+		'\t--color-focus-edge: #e6e9ef;',
 		// 0.6.0: decision C2
 		"\t--font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;",
 		"\t--font-brand: 'Rubik', system-ui, sans-serif;",
@@ -114,7 +118,7 @@ const without = (lines, listed) => {
 	});
 };
 
-test('the 0.7.0 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
+test('the 0.8.0 sheet is the 0.1.0 extraction baseline with exactly the recorded changes', () => {
 	const baseline = readFileSync(fixture, 'utf8').split('\n');
 	const current = `${new TokenSheet(tokens).css}\n`.split('\n');
 	// A line removed as many times as listed (a dark value may stay in the other theme block)
@@ -129,7 +133,12 @@ test('the packed tokens.css is the generated sheet', () => {
 });
 
 test('version, status, approval and provenance of the token set are recorded', () => {
-	assert.equal(tokens.version, '0.7.0');
+	assert.equal(tokens.version, '0.8.0');
+	const focus = tokens.approval.focus;
+	assert.deepEqual([focus.date, focus.by, focus.decisions, focus.amends, focus.tokens], ['2026-10-25', 'owner', ['D187'], ['D126', 'D95', 'D165'], ['color.focus-edge']], 'the owner\'s direction on focus (0.8.0)');
+	assert.match(focus.note, /not the owner\'s acceptance/);
+	for (const theme of ['light', 'dark']) assert.equal(themes[theme]['focus-edge'], themes[theme].text, `the focus edge in the text's tone (${theme})`);
+	for (const surface of ['canvas', 'surface', 'surface-raised']) assert.ok(pairs.some(([foreground, background, kind]) => foreground === 'focus-edge' && background === surface && kind === 'graphic'), surface);
 	const turns = tokens.approval.turns;
 	assert.deepEqual([turns.date, turns.by, turns.decisions, turns.amends], ['2026-10-24', 'owner', ['D180'], ['D96', 'D67']], 'the owner\'s direction on a thread\'s turns (0.7.0)');
 	assert.deepEqual(turns.tokens, ['layout.thread', 'layout.lane']);

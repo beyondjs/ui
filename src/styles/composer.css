@@ -24,7 +24,7 @@
 	border-radius: var(--bui-composer-radius);
 	background: var(--color-surface);
 }
-/* The field draws no ring of its own: the box's own border shows focus (editor.css, 0.14.0). */
+/* The field draws no ring of its own: the box lights its own edge while the field has the focus (focus.css, D187). */
 .bui-composer-field:focus-visible {
 	outline: none;
 }

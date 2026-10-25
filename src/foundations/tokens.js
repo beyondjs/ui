@@ -36,12 +36,15 @@ import { typography, space, radius, elevation, overlay, motion, density, layout,
  * Token set 0.7.0 (2026-10-24) records the owner's direction D180 (`approval.turns`, amending D96 and D67):
  * a thread reads by turns, which take the region's width up to `thread` (80rem), while the composer keeps
  * its `lane` (48rem) on the same axis; the reading measure stays 54ch for every other page's prose.
+ * Token set 0.8.0 (2026-10-25) records D187 (`approval.focus`, amending D126, the coral of C2): focus says
+ * what the keys do there; the `focus-edge` role is the light a box that takes typing or keys gives its own
+ * border, while coral keeps the ring around a control, the cursor's inner ring and the caret.
  * Each entry's own `provenance` still says whether its value
  * was captured or introduced by the family reference. `version` identifies the token set; a product
  * review cites it together with the package version.
  */
 export const tokens = {
-	version: '0.7.0',
+	version: '0.8.0',
 	status: 'approved',
 	source: 'Verified capture of the public Beyond site, 2026-09-18, with the family reference\'s additions',
 	approval: {
@@ -78,6 +81,14 @@ export const tokens = {
 			amends: ['D96', 'D67'],
 			tokens: ['layout.thread', 'layout.lane'],
 			note: 'The owner\'s direction of 2026-10-24 on a conversation\'s page (D180, amending D96\'s one lane and D67\'s tier): a thread reads by turns; the person\'s message, the work and the answer take the region\'s width up to 80rem, centred, and the composer keeps a 48rem lane on the same axis. Values are engineering defaults to be measured. Token set 0.7.0.'
+		},
+		focus: {
+			date: '2026-10-25',
+			by: 'owner',
+			decisions: ['D187'],
+			amends: ['D126', 'D95', 'D165'],
+			tokens: ['color.focus-edge'],
+			note: 'The owner\'s direction of 2026-10-25 on the focus indicator, implementing the agent\'s critical proposal (D187, amending D126\'s coral for focus, D95\'s motion and D165\'s live edge): a control the keyboard reached is ringed in coral, a box that takes typing or keys lights its own border in the focus edge\'s light with a coral caret, the item the arrow keys are on is lit and ringed inside, and a place reading starts draws nothing. Values are engineering defaults to be measured; implementation is not the owner\'s acceptance. Token set 0.8.0.'
 		}
 	},
 	pending: {

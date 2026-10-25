@@ -11,9 +11,6 @@
 	font-weight: var(--weight-regular);
 	line-height: var(--leading-small);
 }
-.bui-diff-lines:focus-visible {
-	outline-offset: -2px;
-}
 .bui-diff-rows {
 	display: grid;
 	width: max-content;
@@ -39,8 +36,11 @@
 	--bui-diff-row: var(--color-surface-sunken);
 	color: var(--color-text-muted);
 }
-.bui-diff-hunk:focus-visible {
+/* The hunk `]` and `[` reach is the cursor (D187): ringed inside, at once, though it is no Tab stop */
+.bui-diff-lines .bui-diff-hunk:focus-visible {
+	outline: 2px solid var(--color-focus);
 	outline-offset: -2px;
+	animation: none;
 }
 .bui-diff-gutter {
 	position: sticky;

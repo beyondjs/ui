@@ -103,6 +103,7 @@ a.bui-sidebar-item:hover {
 .bui-sidebar-item:focus-visible {
 	outline: 2px solid var(--color-focus);
 	outline-offset: -2px;
+	animation: none;
 }
 /* The current item is not a link (D98): the text color at weight 500, with the accent bar on the selection's
    surface (token set 0.6.0, C2: coral marks the selection). */

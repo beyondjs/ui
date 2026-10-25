@@ -69,7 +69,7 @@ export class Composer extends Component {
 		this.#expand = new ComposerExpand({ root: this.#element, box, field: control, labels: this.#labels });
 		const voice = this.#context.dictation;
 		if (voice) this.#actions.voice = voice.button;
-		this.#box.hold([this.#status.element, this.#context.files.element, this.#expand.element, this.#field.element, voice?.element, this.#toolbar.element]);
+		this.#box.hold([this.#status.element, this.#context.files.element, this.#expand.element, this.#field.element, voice?.element, this.#toolbar.element], control);
 		this.#element.append(this.#context.files.announcer, this.#expand.dialog);
 		this.#keys.watch(control, { take: event => this.#context.keys(event), send: () => this.#send(null, false) });
 		control.addEventListener('input', () => (this.#say(null), this.#marks.empty(), this.#onchange?.(control.value)));

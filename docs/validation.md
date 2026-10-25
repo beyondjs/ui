@@ -211,6 +211,20 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 
   Run `npm run acceptance -- "outage close"` in each engine. The [release record](reviews/2026-10-25/release-0.33.0.md) lists the runs.
 
+## UI 0.34.0: focus says what the keys do there (D187)
+
+- **Unit.** `tests/tokens.test.mjs` holds token set 0.8.0: `--color-focus-edge` in the text's tone, its pairs on the canvas, the surface and the raised surface, and `approval.focus`. `tests/edges.test.mjs` holds the composer's box lighting its edge with the halo and a coral caret, never the coral border. `tests/foundations.test.mjs` admits a focused box's halo as a mark (a ring of the edge's light with no offset and no blur), never elevation.
+- **Browser.** `acceptance/checks/focusing.mjs` (`dom`, the `focus` fixture) holds what only a real engine says:
+  - the ring: coral, 2 px, 2 px out, settling, none after a press, at once under reduced motion;
+  - the edge: a pressed field lit with its halo and a coral caret, no ring, in both themes; a wrong value's danger edge; a select from the keyboard; and in Chrome a forced-colors outline;
+  - the composer: its box lit while its field has the focus and resting while a control has it; a press in its empty room reaching the field; the live line 1 px inside the edge;
+  - the cursor: the row the arrow keys are on, lit and ringed inside, at once;
+  - nothing: a side sheet's title and a heading focused for reading, the next Tab ringed;
+  - an approval card lit whenever it has the focus, its attention stripe kept;
+  - never covered: every link Tab reaches in a thread above the dock, with a taller composer too.
+
+  Run `node acceptance/run.mjs "focus, "` in each engine.
+
 ## UI 0.32.1: the review's corrections to the family's waits (D183)
 
 - **Unit.** `tests/waits.test.mjs` holds each correction over happy-dom:

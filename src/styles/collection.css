@@ -25,6 +25,7 @@
 	min-width: 0;
 	max-width: 100%;
 }
+/* After a page change focus moves to the new rows' region, where reading starts: it draws nothing (D187) */
 .bui-collection-body:focus {
 	outline: none;
 }
@@ -35,10 +36,6 @@
 	margin-inline: calc(-1 * var(--space-3));
 	padding-inline: var(--space-3);
 	overflow-x: auto;
-}
-.bui-collection-body:focus-visible {
-	outline: 2px solid var(--color-focus);
-	outline-offset: -2px;
 }
 .bui-collection-body[aria-busy='true'] .bui-table {
 	opacity: 0.6;
@@ -121,6 +118,7 @@
 .bui-table-links tbody tr:has(.bui-row-link:focus-visible) {
 	outline: 2px solid var(--color-focus);
 	outline-offset: -2px;
+	animation: none;
 }
 .bui-row-link:focus-visible {
 	outline: none;

@@ -33,6 +33,7 @@ button.bui-activity-head:hover {
 }
 .bui-activity-head:focus-visible {
 	outline-offset: -2px;
+	animation: none;
 }
 .bui-activity-mark {
 	display: inline-grid;

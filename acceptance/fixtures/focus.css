@@ -1,0 +1,20 @@
+/* The focus page's own layout: a column of the controls, a gap between them so a ring or a halo is never cut. */
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+}
+.fixture-focus {
+	display: grid;
+	gap: var(--space-5);
+	max-width: 40rem;
+	padding: var(--space-6);
+}
+.fixture-row {
+	display: flex;
+	gap: var(--space-3);
+}
+.fixture-thread p {
+	margin: 0 0 var(--space-4);
+}

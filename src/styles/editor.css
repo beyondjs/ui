@@ -1,14 +1,7 @@
-/* The composer's edges (0.14.0, D100): focus as the box's own border, the context tray on its lower edge,
-   the growth cap near a third of the window with Expand, and the taller editor over the content. */
-
-/* Focus draws the box's border in the focus color, 2 px, with no offset ring beside it (CV-16); since 0.26.0
-   (D165) a soft glow of the same color inside it, which never reaches past the box's edge. */
-.bui-composer-box:has(.bui-composer-field:focus-visible) {
-	border-color: var(--color-focus);
-	box-shadow:
-		inset 0 0 0 1px var(--color-focus),
-		inset 0 0 var(--space-4) color-mix(in srgb, var(--color-focus) 12%, transparent);
-}
+/* The composer's edges (0.14.0, D100): the context tray on its lower edge, the growth cap near a third of the
+   window with Expand, and the taller editor over the content. Since 0.34.0 (D187) the box lights its own edge
+   while its field has the focus, as every box that takes typing does (focus.css); until then a coral border
+   with a glow inside it, which read as the box's error. */
 
 /* The context tray: one line of compact chips attached to the box's lower edge, inside its frame, wrapping
    on a narrow screen. */
@@ -79,9 +72,6 @@
 	flex: 1 1 auto;
 	min-height: 0;
 	box-shadow: var(--elevation-dialog);
-}
-.bui-composer-editor > .bui-composer-box:has(.bui-composer-field:focus-visible) {
-	box-shadow: inset 0 0 0 1px var(--color-focus), var(--elevation-dialog);
 }
 .bui-composer-editor .bui-composer-input {
 	display: flex;

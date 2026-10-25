@@ -58,6 +58,7 @@
 .bui-turns-mark:focus-visible {
 	outline: 2px solid var(--color-focus);
 	outline-offset: -1px;
+	animation: none;
 }
 /* The dash: 8 px at rest, 14 px for the turn being read, longer under the pointer and its neighbours */
 .bui-turns-dash {

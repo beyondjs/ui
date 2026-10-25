@@ -75,6 +75,7 @@
 .bui-lanes-lane:focus-visible {
 	outline: 2px solid var(--color-focus);
 	outline-offset: -2px;
+	animation: none;
 }
 .bui-lanes-head,
 .bui-lanes-kind,

@@ -73,12 +73,9 @@
 	font-weight: var(--weight-semibold);
 	overflow-wrap: anywhere;
 }
+/* Where reading starts when the sheet opens: it draws nothing, from the keyboard as from a pointer (D187) */
 .bui-sheet-title:focus {
 	outline: none;
-}
-.bui-sheet-title:focus-visible {
-	outline: 2px solid var(--color-focus);
-	outline-offset: 2px;
 }
 .bui-sheet-description {
 	flex: none;

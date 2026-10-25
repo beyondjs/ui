@@ -151,12 +151,13 @@
 /* The product's work runs (0.26.0, `live`): a still line along the box's top edge, inside its corners, in
    the hue of work in progress (never the coral of the primary, C2), with a light that runs along it twice
    and then holds, as a live status dot pulses about five seconds (D95). A state, never content that
-   moves; nothing runs under reduced motion. */
+   moves; nothing runs under reduced motion. Since 0.34.0 (D187) it runs 1 px inside the edge, so the edge
+   a focused box lights, in the text's tone, never hides it. */
 .bui-composer[data-live] .bui-composer-box::before {
 	content: '';
 	position: absolute;
 	z-index: 1;
-	inset-block-start: -1px;
+	inset-block-start: 1px;
 	inset-inline: var(--bui-composer-radius);
 	height: 2px;
 	border-radius: var(--radius-round);

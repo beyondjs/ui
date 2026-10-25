@@ -119,6 +119,8 @@ export const primitives = {
  * surface with muted words, never a dimmed coral; `surface-raised` is a card or panel raised inside a
  * page; `sidebar` and `sidebar-hover` put the sidebar on the page's surface in light; `tooltip` and
  * `on-tooltip` keep tooltips dark in both themes, now that the light bar is not. Dark text is `mist-100`.
+ * Token set 0.8.0 (D187): `focus` is the coral of the ring, the cursor's inner ring and the caret; `focus-edge` the
+ * light a focused box gives its own border, in the text's tone: a coral border would read as the box's error.
  */
 export const themes = {
 	light: {
@@ -135,6 +137,7 @@ export const themes = {
 		link: 'navy-800',
 		accent: 'coral-500',
 		focus: 'coral-500',
+		'focus-edge': 'navy-800',
 		action: 'coral-600',
 		'action-hover': 'coral-700',
 		'on-action': 'white',
@@ -182,6 +185,7 @@ export const themes = {
 		link: 'mist-100',
 		accent: 'coral-500',
 		focus: 'coral-200',
+		'focus-edge': 'mist-100',
 		action: 'coral-400',
 		'action-hover': 'coral-200',
 		'on-action': 'navy-900',
@@ -247,6 +251,9 @@ export const pairs = [
 	['on-code', 'code', 'text'],
 	['focus', 'canvas', 'graphic'],
 	['focus', 'surface', 'graphic'],
+	['focus-edge', 'canvas', 'graphic'],
+	['focus-edge', 'surface', 'graphic'],
+	['focus-edge', 'surface-raised', 'graphic'],
 	['accent', 'canvas', 'graphic'],
 	['border-strong', 'canvas', 'decorative'],
 	['border-control', 'canvas', 'graphic'],

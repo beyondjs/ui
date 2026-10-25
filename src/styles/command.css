@@ -12,10 +12,6 @@
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
 }
-.bui-command:focus-visible {
-	outline: 2px solid var(--color-focus);
-	outline-offset: 2px;
-}
 .bui-command[data-state='allowed'] {
 	border-inline-start-color: var(--color-success);
 }

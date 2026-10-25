@@ -152,6 +152,7 @@
 .bui-sidebar-fold:focus-visible {
 	outline: 2px solid var(--color-focus);
 	outline-offset: -2px;
+	animation: none;
 }
 .bui-sidebar-fold .bui-icon {
 	width: 14px;

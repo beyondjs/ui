@@ -1,0 +1,129 @@
+/* Focus says what the keys do there (0.34.0, D187). The family draws the keyboard's place in four forms, never one
+   ring for everything:
+   - the ring: a control the keyboard reached, in coral, 2 px, 2 px outside its own shape, settling onto it;
+   - the edge: a box that takes typing or keys lights its own border in the focus edge's light, with a halo of that
+     light and a coral caret; nothing rings it, since a coral border reads as the box's error;
+   - the cursor: the item the arrow keys are on is lit as the pointer lights it and ringed inside, drawn with its
+     component (a menu's entries, a list's rows, a picker's options, a diff's hunks), and moves at once;
+   - nothing: a place the product moves focus to so reading starts there.
+   Every form stays seen in a forced-colors theme. Tokens only. */
+
+/* The edge's halo: a ring of the edge's own light around the box, a mark and never elevation (D10). It is computed
+   where a theme is set, so a frame in the other theme draws its own. */
+:root,
+[data-beyond-mode] {
+	--bui-focus-halo: 0 0 0 3px color-mix(in srgb, var(--color-focus-edge) 14%, transparent);
+	--bui-focus-halo-danger: 0 0 0 3px color-mix(in srgb, var(--color-danger) 16%, transparent);
+}
+
+/* The ring: a control the keyboard reached, the package's own and, at no specificity, every product's, so that a
+   component's or a product's own rule wins. A pointer's press draws none (`:focus-visible`). */
+:where(:focus-visible),
+:where([class^='bui-'], [class*=' bui-']):focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+}
+/* It settles onto the control, from 6 px out and clear to its place, in 150 ms: the eye finds where the keyboard
+   went. A cursor moving through its set, drawn inside its item, moves at once (`animation: none` where it is
+   drawn); under reduced motion the ring appears at once. */
+@media (prefers-reduced-motion: no-preference) {
+	:where(:focus-visible),
+	:where([class^='bui-'], [class*=' bui-']):focus-visible {
+		animation: bui-ring var(--motion-quick) var(--motion-ease);
+	}
+}
+@keyframes bui-ring {
+	from {
+		outline-offset: 6px;
+		outline-color: transparent;
+	}
+}
+
+/* Nothing: a place the product moves focus to so reading starts there (a page's title after a navigation, a side
+   sheet's or a dialog's title, a list's region after a page change, a row read again after an action, the main
+   after the skip link). Tab does not reach it (`tabindex="-1"`) and it has no interactive role, so it draws
+   nothing, from the keyboard as from a pointer; the next Tab rings the next control. An item that the arrow keys
+   reach names its role; a part that takes keys draws the edge (`CommandCard`). */
+:where(:not(a[href], area[href], button, input, select, textarea, summary, iframe, [contenteditable]:not([contenteditable='false']), [role='button'], [role='link'], [role='menuitem'], [role='menuitemcheckbox'], [role='menuitemradio'], [role='option'], [role='tab'], [role='treeitem'], [role='gridcell'], [role='row'], [role='checkbox'], [role='radio'], [role='switch'], [role='slider'], [role='spinbutton'], [role='combobox'], [role='textbox'], [role='searchbox'], [role='listbox'], [role='tree'], [role='treegrid'], [role='grid'], [role='menu'], [role='menubar'], [role='tablist'], [role='radiogroup'], [role='separator'], [role='application'], .bui-command))[tabindex='-1']:focus {
+	outline: none;
+	animation: none;
+}
+
+/* The edge: a box that takes typing or keys lights its own border while the focus is in it, from a pointer as from
+   the keyboard, with a halo of the same light; nothing rings it. A product's own box takes it with `bui-edge`,
+   lighting while a field inside it has the focus. The composer's box lights while its field has the focus, and
+   rests while one of its controls has it, which is ringed instead. */
+:is(.bui-input, .bui-select-control, .bui-command-edit):focus-visible,
+:is(.bui-edge, .bui-navmenu-search):has(:is(input, textarea, select):focus-visible),
+.bui-edge:focus-visible,
+.bui-composer-box:has(.bui-composer-field:focus-visible) {
+	border-color: var(--color-focus-edge);
+	box-shadow: var(--bui-focus-halo);
+	outline: none;
+	animation: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+	:is(.bui-input, .bui-select-control, .bui-command-edit, .bui-edge, .bui-navmenu-search, .bui-composer-box, .bui-command) {
+		transition:
+			border-color var(--motion-quick) var(--motion-ease),
+			box-shadow var(--motion-quick) var(--motion-ease);
+	}
+}
+/* Inside a lit box the field itself draws nothing */
+:is(.bui-edge, .bui-navmenu-search, .bui-composer-box) :is(input, textarea, select):focus-visible {
+	outline: none;
+	box-shadow: none;
+	animation: none;
+}
+/* A request waiting for an answer takes Enter and Escape while it has the focus, however it got it, so it lights
+   whenever it has it: a line of the edge's light around its border, keeping the attention's stripe and its
+   elevation. The taller editor keeps its dialog's elevation under the edge. */
+.bui-command:focus {
+	outline: none;
+	box-shadow:
+		0 0 0 1px var(--color-focus-edge),
+		0 0 0 4px color-mix(in srgb, var(--color-focus-edge) 14%, transparent),
+		var(--elevation-raised);
+	animation: none;
+}
+.bui-composer-editor > .bui-composer-box:has(.bui-composer-field:focus-visible) {
+	box-shadow: var(--bui-focus-halo), var(--elevation-dialog);
+}
+/* A region that scrolls by keys and has no border of its own (a diff's lines) lights its edge inside it */
+.bui-diff-lines:focus-visible {
+	outline: none;
+	box-shadow:
+		inset 0 0 0 1px var(--color-focus-edge),
+		inset 0 0 0 3px color-mix(in srgb, var(--color-focus-edge) 14%, transparent);
+	animation: none;
+}
+/* A wrong value keeps the danger's edge, its halo in the danger's tone: the failure stays said */
+:is(.bui-input, .bui-select-control):is([aria-invalid='true'], .bui-field-invalid *):focus-visible,
+.bui-edge[data-invalid]:has(:is(input, textarea, select):focus-visible) {
+	border-color: var(--color-danger);
+	box-shadow: var(--bui-focus-halo-danger);
+}
+
+/* The caret is the point the keys write at: coral, as the ring is (C2, D187) */
+:is(.bui-input, .bui-command-edit, .bui-composer-field, .bui-navmenu-field, .bui-palette-field),
+:is(input, textarea).bui-edge,
+.bui-edge :is(input, textarea) {
+	caret-color: var(--color-focus);
+}
+
+/* Every form stays seen in a forced-colors theme, where shadows and fills are not drawn: the edge and a box's
+   light take a system outline; a ring is an outline already. */
+@media (forced-colors: active) {
+	:is(.bui-input, .bui-select-control, .bui-command-edit):focus-visible,
+	:is(.bui-edge, .bui-navmenu-search):has(:is(input, textarea, select):focus-visible),
+	.bui-edge:focus-visible,
+	.bui-composer-box:has(.bui-composer-field:focus-visible),
+	.bui-command:focus {
+		outline: 2px solid Highlight;
+		outline-offset: 1px;
+	}
+	.bui-diff-lines:focus-visible {
+		outline: 2px solid Highlight;
+		outline-offset: -2px;
+	}
+}

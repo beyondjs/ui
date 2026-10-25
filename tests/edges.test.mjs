@@ -160,13 +160,15 @@ test('Dictate sits at the toolbar’s end before the primary action, its line in
 	}
 });
 
-test('focus draws the box’s own border in the focus color, no outline ring beside it (CV-16); the field stops near a third of the window', () => {
+test('focus lights the box’s own edge in the focus edge’s light with its halo, no ring beside it (D187, CV-16); the field stops near a third of the window', () => {
 	const css = readFileSync(new URL('../dist/styles.css', import.meta.url), 'utf8');
 	const focus = css.slice(css.indexOf('.bui-composer-box:has(.bui-composer-field:focus-visible) {'));
 	const body = focus.slice(0, focus.indexOf('}'));
-	assert.match(body, /border-color: var\(--color-focus\)/);
-	assert.match(body, /inset 0 0 0 1px var\(--color-focus\)/);
-	assert.doesNotMatch(body, /outline/);
+	assert.match(body, /border-color: var\(--color-focus-edge\)/);
+	assert.match(body, /box-shadow: var\(--bui-focus-halo\)/);
+	assert.match(body, /outline: none/, 'no ring around the box');
+	assert.doesNotMatch(body, /--color-focus\)/, 'never the coral of the ring: a coral border reads as the box’s error');
+	assert.match(css, /\.bui-composer-field,[^{]*\{\s*caret-color: var\(--color-focus\)/, 'the caret is coral');
 	assert.match(css, /max-height: min\(calc\(var\(--bui-composer-max, 12\) \* 1lh \+ var\(--space-2\) \+ var\(--space-1\)\), var\(--bui-composer-cap, 33dvh\)\)/);
 	const inset = css.slice(css.indexOf('@supports (padding-top: calc(1lh - 1cap))'));
 	assert.match(inset, /max-height: min\(calc\(var\(--bui-composer-max, 12\) \* 1lh \+ var\(--bui-composer-inset\) - \(1lh - 1cap\) \/ 2 \+ var\(--space-1\)\), var\(--bui-composer-cap, 33dvh\)\)/, 'with the font\'s own metrics, the capitals one inset under the edge (D184)');

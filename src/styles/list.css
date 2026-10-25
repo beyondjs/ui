@@ -55,7 +55,8 @@
 	font-weight: var(--weight-regular);
 	line-height: var(--leading-small);
 }
-.bui-row[data-open]:not([data-current]):hover {
+/* The row the arrow keys are on, the cursor, is lit as the pointer's row is, and ringed inside (0.34.0, D187) */
+.bui-row[data-open]:not([data-current]):is(:hover, :has(.bui-row-title:focus-visible)) {
 	background: var(--overlay-lift);
 }
 .bui-row[data-open]:has(.bui-row-title:active) {
@@ -119,6 +120,7 @@ span.bui-row-title {
 }
 .bui-row-title:focus-visible {
 	outline: none;
+	animation: none;
 }
 .bui-row[data-open]:has(.bui-row-title:focus-visible) {
 	outline: 2px solid var(--color-focus);

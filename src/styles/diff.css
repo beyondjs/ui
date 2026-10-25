@@ -99,6 +99,7 @@
 }
 .bui-diff-jump-item:focus-visible {
 	outline-offset: -2px;
+	animation: none;
 }
 
 /* One file: its header (a heading holding the disclosure button, and Copy path) and its body. */
@@ -157,6 +158,7 @@
 }
 .bui-diff-toggle:focus-visible {
 	outline-offset: -2px;
+	animation: none;
 }
 .bui-diff-chevron {
 	display: inline-grid;
