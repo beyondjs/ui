@@ -1,5 +1,5 @@
 /**
- * Focus a product asks for while the opening covers it (0.34.0). On a first load the opening keeps the
+ * Focus a product asks for while the opening covers it (0.35.0). On a first load the opening keeps the
  * product `visibility: hidden` until it hands over, so that neither Tab, a pointer nor a screen reader
  * reaches a product the person cannot see; and a hidden element takes no focus, so a product's own
  * `element.focus()` meanwhile (a router's focus on a page's title, an arrival's on the action it names)

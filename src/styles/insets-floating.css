@@ -82,7 +82,7 @@
 		padding-block: calc(var(--bui-menu-inset, var(--space-4)) - var(--space-1) - (1lh - 1cap) / 2);
 	}
 	/* On a touch screen an entry is a 44 px target with its words centred in it: the target's height decides an
-	   action menu's inset, which its sides keep (0.34.0) */
+	   action menu's inset, which its sides keep (0.35.0) */
 	@media (pointer: coarse) {
 		ul.bui-menu .bui-menu-item {
 			justify-content: center;

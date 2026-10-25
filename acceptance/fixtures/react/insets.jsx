@@ -1,6 +1,6 @@
 // The insets page of the React consumers (D184), in Spanish through the components' `labels.es`: the boxes
 // no other fixture page draws, each in a block of its own named by its id, as the DOM page draws them (since
-// 0.34.0 an editable CommandCard, an outage's line whose words wrap beside Try again and a command to copy),
+// 0.35.0 an editable CommandCard, an outage's line whose words wrap beside Try again and a command to copy),
 // and a toast with a detail shown by window.fixture.toast().
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';

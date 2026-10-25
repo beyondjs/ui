@@ -3,7 +3,7 @@ import { press, settle } from '../support/press.mjs';
 import { words } from '../fixtures/data/pressing.js';
 
 /**
- * Where a press puts the person (0.34.0, D183), in a real engine, on the `pressing.html` pages:
+ * Where a press puts the person (0.35.0, D183), in a real engine, on the `pressing.html` pages:
  * - a branch chip that waits for the repository chip is quiet and reachable, and a click, Enter, Space or
  *   ArrowDown only puts focus on the repository chip, opening nothing; a tray chip's whole face is its tooltip;
  * - the held Send's press goes there too, sending nothing, while Enter in the field keeps focus there;
@@ -32,7 +32,7 @@ async function choose(page) {
 
 export const checks = [
 	{
-		name: 'pressing: a branch chip that waits is quiet and reachable, and a click, Enter, Space or ArrowDown only puts focus on the repository chip, opening nothing; a repository lets it open (0.34.0, D183)',
+		name: 'pressing: a branch chip that waits is quiet and reachable, and a click, Enter, Space or ArrowDown only puts focus on the repository chip, opening nothing; a repository lets it open (0.35.0, D183)',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const { page, context } = await open(browser, consumer);
@@ -58,7 +58,7 @@ export const checks = [
 			expect((await page.locator('.bui-composer').evaluate(node => node.textContent)) === said, 'and nothing is said');
 			await choose(page);
 			expect(!(await branch.getAttribute('aria-disabled')), 'a repository makes it able');
-			// A tray chip shows its value alone: its whole face is its tooltip, as a setting's is (0.34.0)
+			// A tray chip shows its value alone: its whole face is its tooltip, as a setting's is (0.35.0)
 			await branch.focus();
 			await page.keyboard.press('Shift+Tab');
 			await page.locator('.bui-hint:not([hidden])').waitFor();
@@ -72,7 +72,7 @@ export const checks = [
 		}
 	},
 	{
-		name: 'pressing: a held Send puts a press on the repository chip and sends nothing; Enter in the field sends nothing and keeps focus there; a repository lets it send (0.34.0, D183)',
+		name: 'pressing: a held Send puts a press on the repository chip and sends nothing; Enter in the field sends nothing and keeps focus there; a repository lets it send (0.35.0, D183)',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const { page, context } = await open(browser, consumer);
@@ -97,7 +97,7 @@ export const checks = [
 		}
 	},
 	{
-		name: 'pressing: the line comments are a ComposerChip in the tray, one target tall beside its chips, its label muted beside its value, no chevron and whole, at 1440 and 390 px in both themes; a shortened toolbar sets a chip\'s label aside, its face then the tooltip (0.34.0)',
+		name: 'pressing: the line comments are a ComposerChip in the tray, one target tall beside its chips, its label muted beside its value, no chevron and whole, at 1440 and 390 px in both themes; a shortened toolbar sets a chip\'s label aside, its face then the tooltip (0.35.0)',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			for (const colorScheme of ['light', 'dark']) for (const width of [1440, 390]) {
@@ -155,7 +155,7 @@ export const checks = [
 		}
 	},
 	{
-		name: 'pressing: React\'s Form with report says the browser\'s own message for a wrong email, runs no onSubmit and leaves the email focused; corrected, it submits (0.34.0)',
+		name: 'pressing: React\'s Form with report says the browser\'s own message for a wrong email, runs no onSubmit and leaves the email focused; corrected, it submits (0.35.0)',
 		consumers: ['react19', 'react18'],
 		async run(browser, consumer) {
 			const { page, context } = await open(browser, consumer);

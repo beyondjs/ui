@@ -1,7 +1,7 @@
 // The insets page of the plain DOM consumer (D184): the boxes no other fixture page draws, each in a block of
 // its own named by its id, so the insets check measures one box at a time: callouts ending in actions, in
 // text and in technical details, a framed empty state, a checklist, a raised section, a textarea and a
-// refusal with no action; since 0.34.0 a request whose command may be corrected (an editable CommandCard),
+// refusal with no action; since 0.35.0 a request whose command may be corrected (an editable CommandCard),
 // an outage's line in a narrow block, its words wrapping beside Try again, and a command to copy
 // (CopyMessage's command form). window.fixture shows a toast with a detail and tears them down.
 import '@beyond-js/ui/tokens.css';

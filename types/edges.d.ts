@@ -1,4 +1,4 @@
-/** Types of 0.14.0's additions: the composer's tray, commands, recall, taller editor and dictation (D100), `ActionLine` (D102) and `Highlighter`, and since 0.34.0 the tray's `ComposerChip`, re-exported by `@beyond-js/ui` and `/dom`. */
+/** Types of 0.14.0's additions: the composer's tray, commands, recall, taller editor and dictation (D100), `ActionLine` (D102) and `Highlighter`, and since 0.35.0 the tray's `ComposerChip`, re-exported by `@beyond-js/ui` and `/dom`. */
 import type { Component, Content, Copy } from './dom.js';
 import type { IconName } from './icons.js';
 
@@ -101,7 +101,7 @@ export class Highlighter {
 	fill<T extends Element | DocumentFragment>(element: T, text: string): T;
 }
 
-/** The options of a chip that acts in a composer's tray (0.34.0). */
+/** The options of a chip that acts in a composer's tray (0.35.0). */
 export interface ComposerChipOptions {
 	/** What it is, muted ("Line comments") */
 	label?: Content | null;
@@ -115,7 +115,7 @@ export interface ComposerChipOptions {
 	onclick?: ((event: MouseEvent) => void) | null;
 }
 /**
- * A chip that acts, for what goes with a message in a composer's tray (0.34.0): a button in the chips'
+ * A chip that acts, for what goes with a message in a composer's tray (0.35.0): a button in the chips'
  * geometry (D165) with its muted label and its value, no chevron, its face its accessible name and its
  * `description` read after it; its whole face is its tooltip only while a toolbar that shortens it sets its
  * label aside, and its value is never cut (D179).

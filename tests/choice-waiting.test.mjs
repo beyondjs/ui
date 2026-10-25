@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { Page } from './support/page.mjs';
 
 /**
- * A chooser that waits and a held Send's place (0.34.0, D183): a `ChoiceMenu` or `ChoiceChip` that waits
+ * A chooser that waits and a held Send's place (0.35.0, D183): a `ChoiceMenu` or `ChoiceChip` that waits
  * for an earlier choice is quiet and still reachable, a press (a click, Enter or Space, ArrowDown or
  * ArrowUp) only puts the person at `place()` and opens nothing; and a composer whose sending is held
  * (`disabled`) puts a press on Send at its cause's `place()`, sending and saying nothing more.

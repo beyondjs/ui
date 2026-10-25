@@ -23,7 +23,7 @@ import { labels as copy } from './labels.js';
  * `ChoiceMenu.threshold` options (or `search: true`) it opens with a search field (0.7.0). A disabled
  * option stays reachable with its reason and is never chosen. One option that can be chosen and no
  * action is a statement, not a choice (D56; `statement: false` keeps the menu). The list is placed by
- * `Floating` (0.15.0). Since 0.34.0 (D183) a choice may wait for an earlier one (`waiting`): quiet and
+ * `Floating` (0.15.0). Since 0.35.0 (D183) a choice may wait for an earlier one (`waiting`): quiet and
  * still reachable, a press only puts the person at `place()` and opens nothing (`ChoicePress`).
  *
  * Options: `{ value, label, detail?, status?: [text, tone], disabled?, reason?, search? }`. Actions:
@@ -67,7 +67,7 @@ export class ChoiceMenu extends Component {
 	 * @param {string|null} [options.name] submits the value with a form in a hidden input
 	 * @param {(value: string) => void} [options.onchange]
 	 * @param {{state?: [string, string]|null}|null} [options.face] a chip's face, read at each drawing (`ChoiceChip`, 0.11.0)
-	 * @param {boolean} [options.waiting] waits for an earlier choice: quiet, a press only going to `place` (0.34.0, D183)
+	 * @param {boolean} [options.waiting] waits for an earlier choice: quiet, a press only going to `place` (0.35.0, D183)
 	 * @param {(() => HTMLElement|null|undefined)|null} [options.place] where a press puts the person while it waits
 	 */
 	constructor({ label, options, value = null, placeholder = null, actions = [], disabled = false, align = 'start', placement = 'auto', search = 'auto', statement = true, name = null, onchange = null, labels = {}, face = null, waiting = false, place = null }) {
@@ -127,7 +127,7 @@ export class ChoiceMenu extends Component {
 		return this.#press.waiting;
 	}
 
-	/** Waits quiet for an earlier choice, a press only going to `place` (true), or opens (false) (0.34.0, D183). */
+	/** Waits quiet for an earlier choice, a press only going to `place` (true), or opens (false) (0.35.0, D183). */
 	set waiting(value) {
 		this.#press.waiting = value;
 	}

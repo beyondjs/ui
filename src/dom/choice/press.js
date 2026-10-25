@@ -2,7 +2,7 @@
  * What a press on a `ChoiceMenu`'s button does: a click, Enter or Space opens the list or closes it, and
  * ArrowDown or ArrowUp opens it.
  *
- * Since 0.34.0 (D183) a choice may wait for an earlier one, such as a branch until a repository is chosen.
+ * Since 0.35.0 (D183) a choice may wait for an earlier one, such as a branch until a repository is chosen.
  * While it waits the button is quiet (`aria-disabled`, the family's quiet look) and still reachable by Tab,
  * and a press only puts the person at `place()`, saying nothing: the list does not open. Without `place`
  * a press while it waits does nothing. Becoming waiting closes an open list, focus that was in it going

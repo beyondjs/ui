@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Page } from './support/page.mjs';
 
 /**
- * The React forms of 0.34.0's waits (D183): `ChoiceMenu` and `ChoiceChip` take `waiting` and `place` (a
+ * The React forms of 0.35.0's waits (D183): `ChoiceMenu` and `ChoiceChip` take `waiting` and `place` (a
  * function returning an element, read from the latest props, as React `Button` takes it), and the
  * `Composer`'s `disabled` carries `place` for a press on its held Send. Also run on React 18.
  */

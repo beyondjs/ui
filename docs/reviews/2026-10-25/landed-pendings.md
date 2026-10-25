@@ -1,6 +1,6 @@
-# UI 0.34.0, phase 1: the pendings the round `settled` left in the package
+# UI 0.35.0, phase 1: the pendings the round `settled` left in the package
 
-Evidence baseline: UI `7568947` (0.32.1) on `feature/next` plus this branch (`claude/settled-close-20261025`), made in a worktree on 2026-10-25 for the suite's round `landed`. Token set 0.7.0 is unchanged. The branch is not yet rebased onto 0.33.0, which another session releases at the same time; this record is the phase-1 candidate's, and the release record follows the rebase. Implementation is not the owner's acceptance.
+Evidence baseline: this branch (`claude/settled-close-20261025`), made in a worktree on 2026-10-25 for the suite's round `landed` on UI `7568947` (0.32.1) and rebased onto 0.33.0 (`ac91ee2`) on `feature/next`, keeping both sides. Token set 0.7.0 is unchanged. The round's release is 0.35.0: another session releases 0.34.0 first, and the branch is rebased onto it before the release, whose record follows. The release record lists the released commits. Implementation is not the owner's acceptance.
 
 ## What changed, by pending
 
@@ -28,7 +28,7 @@ Evidence baseline: UI `7568947` (0.32.1) on `feature/next` plus this branch (`cl
 - Found in Chrome 155 and corrected:
   - the editable command's field held its capitals 10.5 px from its top against 12 px (a textarea trims nothing): it now takes off its own half-leading;
   - a touch screen's 44 px field held its words 15.6 px from its top and bottom against 12 px at its sides, and compact density's 30 px about 9 px: a single-line control's sides (a text field, a select, a choice's button) and its chevron now take the room its height leaves above its capitals there (`--bui-line-inset`), the comfortable 36 px control keeping its 12 px. The check holds such a control's sides to its own top (`even`);
-  - Recovery's wide form held its wrapping title's capitals 22.1 px from its border against 16 px: its words now take off their half-leading on both sides above 480 px, which keeps one line centred on Try again. This is Recovery's inset rule alone, committed separately (`17df828`) with the coordinator's agreement, since Recovery is 0.33.0's.
+  - Recovery's wide form held its wrapping title's capitals 22.1 px from its border against 16 px: its words now take off their half-leading on both sides above 480 px, which keeps one line centred on Try again. This is Recovery's inset rule alone, committed separately ("Keep one inset in Recovery's wide form…") with the coordinator's agreement, since Recovery is 0.33.0's.
 - The first run's compact density was never applied (an init script runs before the root exists); the check now sets it as soon as the root exists.
 
 ### The compact search's one accessible name (`family-journeys-compact-search-labels`)
@@ -49,11 +49,11 @@ Evidence baseline: UI `7568947` (0.32.1) on `feature/next` plus this branch (`cl
 - The document element carries `data-bui-opened` once the opening has handed over and the identity has landed on the bar (the bar's `data-bui-landing` gone), at once without an opening to run, and when the opening steps aside for a development server's error overlay. An opening whose recovery is shown never sets it, and nothing removes it. `OpeningExit.mark` names it and `OpeningExit.opened()` sets it; the exit's `landed` resolves once the landing mark has gone.
 - An attribute, not an event: a test reads it at any time, with a selector or a wait, where an event is lost to a listener added after it. Products' tests wait for `html[data-bui-opened]` instead of the opening's own parts.
 
-## What the independent review of `fef34b2` found, and its corrections
+## What the independent review of the first candidate found, and its corrections
 
-The coordinator had `fef34b2` (the first candidate) reviewed independently; each finding below is corrected, with the coordinator's decision where one was needed.
+The coordinator had the first candidate ("Let a ref chooser wait for its repository…") reviewed independently; each finding below is corrected, with the coordinator's decision where one was needed.
 
-- **The sidebar's search wrote under its glyph** (a regression of `807c64d`): the late `input.bui-input { padding-inline }` rule (0,1,1) beat `.bui-sidebar-query`'s (0,1,0). The fields' and selects' base rules in `forms.css` now read `--bui-line-inset` themselves, early in the cascade, and the late rules are gone, so every field's own padding keeps its place; the inset check asserts that the sidebar's search starts its words after its glyph. Every padding rule that reaches a `.bui-input` was checked again: the picker's and the choice menu's search fields (0,2,0) and the palette's field were never affected.
+- **The sidebar's search wrote under its glyph** (a regression of "Keep one inset in an editable command's field and in single-line controls…"): the late `input.bui-input { padding-inline }` rule (0,1,1) beat `.bui-sidebar-query`'s (0,1,0). The fields' and selects' base rules in `forms.css` now read `--bui-line-inset` themselves, early in the cascade, and the late rules are gone, so every field's own padding keeps its place; the inset check asserts that the sidebar's search starts its words after its glyph. Every padding rule that reaches a `.bui-input` was checked again: the picker's and the choice menu's search fields (0,2,0) and the palette's field were never affected.
 - **A waiting `RefChooser` with no refs said "No branches to choose from."**, "Loading branches…" or "Couldn't read the branches." with an able Try again. While it waits it now draws its quiet menu with its placeholder whatever its refs, `loading` or `unavailable` say, so its visible escape is never drawn while it waits and needs no wait of its own (that code, and the quiet link button's rule added with it, are gone).
 - **`ComposerChip`'s `name` failed WCAG 2.5.3, Label in Name.** Decision: its face is always its accessible name; `description` replaces `name`, read through `aria-describedby` from a visually hidden element beside the button. `element` is now a holder (`display: contents`) with the button and its description; `control` is the button.
 - **`land()` could focus several targets in a row**, overriding a target that hands its focus on: it now stops at the first call that moved the focus, or that left it inside the target.

@@ -5,7 +5,7 @@ import { Ids } from '../core/ids.js';
 import { Hint } from '../core/hint.js';
 
 /**
- * A chip that acts (0.34.0), for what goes with a message in a composer's tray, such as the line comments
+ * A chip that acts (0.35.0), for what goes with a message in a composer's tray, such as the line comments
  * that go with the next message ("Line comments 2", opening them where they are). It is a compact button
  * in the chips' geometry (D165): one target tall with the quiet edge, its muted `label` and its `value`,
  * and an optional `glyph` of the catalog before them. It opens no menu, so it draws no chevron.

@@ -12,7 +12,7 @@ Both DOM classes and React adapters accept `tools`:
 | `expanded` | Search stays expanded within the collection; Filters keeps its grouped choices. |
 | `external` | The collection owns the toolbar and state, while its caller supplies the placement. |
 
-The compact search's button and its field keep one accessible name (decided in 0.34.0): the button is a disclosure (`aria-expanded`, `aria-controls`) that opens the field it names, so both name one thing. A browser test opens it with `getByRole('button', { name: 'Search requests' })`, then reaches the field with `getByRole('searchbox', { name: 'Search requests' })`; `getByLabel('Search requests')` matches both and fails a strict locator.
+The compact search's button and its field keep one accessible name (decided in 0.35.0): the button is a disclosure (`aria-expanded`, `aria-controls`) that opens the field it names, so both name one thing. A browser test opens it with `getByRole('button', { name: 'Search requests' })`, then reaches the field with `getByRole('searchbox', { name: 'Search requests' })`; `getByLabel('Search requests')` matches both and fails a strict locator.
 
 In DOM code, place `collection.tools.element` in the page's action region when using `tools: 'external'`. Use the same element; do not construct a second toolbar for the same collection. Destroying the collection also destroys its toolbar. `collection.tools.focus()` opens and focuses search, or focuses the first control when search is disabled.
 

@@ -1,4 +1,4 @@
-// The pressing page of the React consumers (0.34.0, D183), in Spanish: the DOM page's composer through the
+// The pressing page of the React consumers (0.35.0, D183), in Spanish: the DOM page's composer through the
 // adapter (a branch chip that waits for the repository chip, a held Send whose press goes to it and the line
 // comments in the tray), and an invitation in React's `Form` with `report`, whose email the browser checks.
 // window.fixture logs what runs.

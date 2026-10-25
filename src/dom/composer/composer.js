@@ -208,7 +208,7 @@ export class Composer extends Component {
 		return this.#marks.disabled;
 	}
 
-	/** `{ reason, place? }` while sending is unavailable, or null; a press on Send then goes to `place()` (0.34.0). */
+	/** `{ reason, place? }` while sending is unavailable, or null; a press on Send then goes to `place()` (0.35.0). */
 	set disabled(value) {
 		this.#marks.disabled = value || null;
 		this.#draw();

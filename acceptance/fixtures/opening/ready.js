@@ -7,7 +7,7 @@
  * region holds its content and the bar has loaded. `?redraw` draws the bar's brand again while the
  * identity lands on it, as a bar that loads during the hand-over does.
  *
- * `?focus=title` or `?focus=button` (0.34.0): right after drawing its structure the page focuses its
+ * `?focus=title` or `?focus=button` (0.35.0): right after drawing its structure the page focuses its
  * title (`tabindex="-1"`) or its Approve button, as a router's arrival does, while the opening still
  * covers it.
  */

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Page } from './support/page.mjs';
 
 /**
- * React `Form`'s `report` (0.34.0, D183): off by default, so wrong values stay the product's to say in its
+ * React `Form`'s `report` (0.35.0, D183): off by default, so wrong values stay the product's to say in its
  * fields; with it, a control that breaks its own constraints, when nothing waits before it, says the
  * browser's own message (`Required.report`) and `onSubmit` does not run, as `FocusedForm` without fields
  * does. happy-dom validates types, patterns and ranges but its `reportValidity()` moves no focus, so the

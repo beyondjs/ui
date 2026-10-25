@@ -151,7 +151,7 @@ test("a side sheet's actions stand one inset from its bottom and divider, and a 
 	assert.match(sheet, /:is\(\.bui-command-code,\s*\.bui-copy-command,\s*\.bui-activity-code\)\s*>\s*code\s*\{\s*font:\s*inherit/);
 });
 
-test('an editable command keeps its first line one inset from its top, and a single-line control at compact density and on a touch screen keeps its sides to the room above its capitals (0.34.0)', () => {
+test('an editable command keeps its first line one inset from its top, and a single-line control at compact density and on a touch screen keeps its sides to the room above its capitals (0.35.0)', () => {
 	assert.match(units, rule(units, '.bui-command-edit', 'padding-block-start: calc(var(--bui-code-inset) - (1lh - 1cap) / 2)'), 'the textarea, which trims nothing, takes off its own half-leading');
 	const lines = blocks('@supports (padding-top: calc(1cap))');
 	assert.match(lines, /:root\[data-density='compact'\] :is\(input\.bui-input, \.bui-select, \.bui-choice-button\)\s*\{\s*--bui-line-inset:\s*calc\(\(var\(--bui-control\) - 2px - 1cap\) \/ 2\)/, 'compact density');
@@ -167,13 +167,13 @@ test('an editable command keeps its first line one inset from its top, and a sin
 	assert.doesNotMatch(sheet.replace(/@supports \(padding-top: calc\(1cap\)\)\s*\{[\s\S]*?\n\}/g, ''), /--bui-line-inset:/, 'without cap the controls keep their 12 px');
 });
 
-test('the recovery line\'s words, wrapping beside Try again, take off their half-leading on both sides in its wide form only (0.34.0)', () => {
+test('the recovery line\'s words, wrapping beside Try again, take off their half-leading on both sides in its wide form only (0.35.0)', () => {
 	assert.match(units, /@media \(min-width: 481px\)\s*\{\s*\.bui-recovery:not\(\[data-recovery='page'\]\) > \.bui-recovery-words\s*\{\s*margin-block:\s*calc\(\(1cap - 1lh\) \/ 2\)/);
 	assert.match(units, /\.bui-recovery\[data-offline\]:not\(\[data-recovery='page'\]\) > \.bui-recovery-mark\s*\{\s*margin-block:\s*calc\(\(1cap - 18px\) \/ 2\);\s*font-size:\s*var\(--text-body\)/, 'offline, with no Try again, the mark does not grow the line (0.35.0)');
 	assert.doesNotMatch(sheet.replace(/@supports \(padding-top: calc\(1lh - 1cap\)\)\s*\{[\s\S]*?\n\}/g, ''), /\.bui-recovery-words\s*\{[^}]*margin-block:\s*calc\(\(1cap/, 'only where lh and cap exist');
 });
 
-test("on a touch screen an action menu's entry centres its words in its 44 px target, its sides keeping that room, only where lh and cap exist (0.34.0)", () => {
+test("on a touch screen an action menu's entry centres its words in its 44 px target, its sides keeping that room, only where lh and cap exist (0.35.0)", () => {
 	assert.match(units, /@media \(pointer: coarse\)\s*\{\s*ul\.bui-menu \.bui-menu-item\s*\{\s*justify-content:\s*center;\s*padding:\s*calc\(\(var\(--bui-target\) - 1lh\) \/ 2\) calc\(\(var\(--bui-target\) - 1cap\) \/ 2\)/);
 	assert.doesNotMatch(sheet.replace(/@supports \(padding-top: calc\(1lh - 1cap\)\)\s*\{[\s\S]*?\n\}/g, ''), /ul\.bui-menu \.bui-menu-item/, 'without them an entry keeps its earlier padding');
 	const menu = new ui.ActionMenu({ label: 'More actions', items: [{ label: 'Duplicate', run: () => undefined }] });

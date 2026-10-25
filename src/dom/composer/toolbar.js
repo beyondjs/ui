@@ -10,7 +10,7 @@ import { ComposerFit } from './fit.js';
  * since 0.11.2 it folds only when the toolbar cannot keep one row even with its chips shortened to
  * their value, measured, never by a fixed width. The settings' chips show their whole words in the
  * family tooltip while the fit shortens them. Since 0.26.0 (D165) every control is one target tall and
- * the **+** is one target wide, so it stays in place and only the settings fold. Since 0.34.0 that tooltip
+ * the **+** is one target wide, so it stays in place and only the settings fold. Since 0.35.0 that tooltip
  * covers the whole box, so the tray's chips, which show their value alone too, say their whole face.
  */
 export class ComposerToolbar {
@@ -36,7 +36,7 @@ export class ComposerToolbar {
 		this.#fold = new ComposerFold({ root, bar: this.#element, labels, enabled: compact !== false, parts: [this.#settings], onchange: open => open || this.#fit.measure() });
 		this.#fit = new ComposerFit({ root, bar: this.#element, fold: this.#fold, enabled: compact !== false });
 		// A chip shows its value alone (0.26.0): its whole words ("Model: Opus 5.5 · High") are its tooltip, in
-		// the settings and the tray alike (0.34.0); the box moves into the taller editor, which then holds it
+		// the settings and the tray alike (0.35.0); the box moves into the taller editor, which then holds it
 		this.#hint = new Hint(box, { when: () => true });
 		this.#fold.available = false;
 	}

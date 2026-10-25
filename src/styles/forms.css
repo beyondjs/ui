@@ -38,7 +38,7 @@
 	display: none;
 }
 
-/* A single-line control's sides: 12 px, or since 0.34.0 the room its height leaves above its capitals where it
+/* A single-line control's sides: 12 px, or since 0.35.0 the room its height leaves above its capitals where it
    is not the comfortable 36 px (`--bui-line-inset`, set in insets.css at compact density and on a touch screen).
    The base rules read it, so a field's own padding (a search's glyph) keeps its place in the cascade. */
 .bui-input,

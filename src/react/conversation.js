@@ -41,7 +41,7 @@ function slot(tag, name) {
  * or a source), `recall` and `dictation` (`{ transcribe, cap?, bound?, minimum?, explain? }`) are read from
  * the latest props, and whether they are given (or the dictation's cap, bound or minimum) creates a new box.
  * Since 0.26.0 (D165) `add` is the + menu's entries after Attach files (`{ label, onSelect, keys? }`, each
- * `onSelect` read from the latest props) and `live` marks the box while the product's work runs. Since 0.34.0
+ * `onSelect` read from the latest props) and `live` marks the box while the product's work runs. Since 0.35.0
  * `disabled` may carry `place`, where a press on the held Send puts the person, read from the latest props.
  */
 export const Composer = forwardRef(function Composer({ label, placeholder = null, status = null, tools = null, extras = null, settings = null, actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value, min, max, name = null, onChange = null, onSubmit, explain, labels, attach = null, attachments = null, onSuggest = null, suggest = null, locale = undefined, compact = true, summary = null, tray = null, commands = null, recall = null, dictation = null, step = null, add = null, live = false }, ref) {
@@ -119,7 +119,7 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 });
 
 /**
- * A chip that acts (0.34.0), for what goes with a message in a composer's `tray`, driven by the DOM
+ * A chip that acts (0.35.0), for what goes with a message in a composer's `tray`, driven by the DOM
  * `ComposerChip`: `label` (muted, "Line comments") and `value` ("2") as text, an optional `glyph`,
  * `description` (what it is for, read after its face, which is its name) and `onClick`, read from the latest
  * props. A change of `glyph` makes a new chip; the others are set in place, keeping its focus.

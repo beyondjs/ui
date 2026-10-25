@@ -73,7 +73,7 @@
 	border: 1px solid var(--color-border);
 	border-radius: var(--radius-round);
 }
-/* A chip that acts (ComposerChip, 0.34.0): what goes with a message, such as "Line comments 2", in the chips'
+/* A chip that acts (ComposerChip, 0.35.0): what goes with a message, such as "Line comments 2", in the chips'
    geometry: a pill one target tall with the same quiet edge, its muted label and its value, no chevron since
    it opens no menu. It wraps rather than cuts; a toolbar that shortens its chips sets its label aside, its
    whole face then its tooltip, and never cuts its value, since an action is named whole (D179). */

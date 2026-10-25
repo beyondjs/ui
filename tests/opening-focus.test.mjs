@@ -5,7 +5,7 @@ import { OpeningFocus } from '../src/opening/focus.js';
 import { OpeningExit } from '../src/opening/exit.js';
 
 /**
- * 0.34.0: a focus the product asks for while the opening covers it lands when it shows. happy-dom hides
+ * 0.35.0: a focus the product asks for while the opening covers it lands when it shows. happy-dom hides
  * nothing and focuses any element, so a target that would not take the focus says so through its own
  * `focus`; the browser acceptance proves the hidden product and the hand-over (`acceptance/opening.mjs`).
  */
@@ -124,7 +124,7 @@ test('a person in recovery with nothing asked keeps the generic destination; a f
 	let view = scene();
 	view.reload.focus();
 	await new OpeningExit(view.presentation, view.root, new OpeningFocus(view.presentation, window)).run();
-	assert.ok(document.activeElement === view.title, 'the page\'s title, as before 0.34.0');
+	assert.ok(document.activeElement === view.title, 'the page\'s title, as before 0.35.0');
 	page.reset();
 	view = scene();
 	const focus = new OpeningFocus(view.presentation, window);

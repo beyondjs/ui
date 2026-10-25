@@ -52,7 +52,7 @@ test('StatusRow: one state with how fresh it is, its reason, who can change it, 
 	spanish.destroy();
 });
 
-test('CopyMessage of a command: its holder keeps its kind\'s class, and only its code box takes the code\'s face, lines and trim (0.34.0)', () => {
+test('CopyMessage of a command: its holder keeps its kind\'s class, and only its code box takes the code\'s face, lines and trim (0.35.0)', () => {
 	const command = new ui.CopyMessage({ text: 'npm run dev', kind: 'command' }).mount(document.body);
 	const holder = command.element;
 	const box = holder.querySelector('pre');

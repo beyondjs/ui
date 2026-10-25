@@ -1,4 +1,4 @@
-// The pressing page of the plain DOM consumer (0.34.0, D183): where a press puts the person. A new
+// The pressing page of the plain DOM consumer (0.35.0, D183): where a press puts the person. A new
 // conversation's composer, docked in the thread template, whose tray holds the repository chip, a branch
 // chip that waits for it and the line comments that go with the next message (`ComposerChip`); its Send is
 // held until a repository is chosen, a press on it going to the repository chip. The settings hold one

@@ -55,7 +55,7 @@ panel?.open();
 const mode: 'beside' | 'sheet' | null = panel?.mode ?? null;
 void new Steps({ label: 'Plan', steps: [], announce: false });
 void [sent, sending, state, finished, release, mode];
-// 0.34.0: a chip that acts in the tray, its label, value and name set in place
+// 0.35.0: a chip that acts in the tray, its label, value and name set in place
 const comments = new ComposerChip({ label: 'Line comments', value: 2, glyph: 'chat', description: 'They go with your next message. Opens them in the conversation\'s changes.', onclick: () => undefined });
 comments.value = 3;
 comments.description = null;

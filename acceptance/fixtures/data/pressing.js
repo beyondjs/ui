@@ -1,4 +1,4 @@
-// The fictional words of the pressing pages (0.34.0, D183): a new conversation's composer whose branch waits
+// The fictional words of the pressing pages (0.35.0, D183): a new conversation's composer whose branch waits
 // for a repository, whose Send is held until one is chosen, and the line comments that go with the next
 // message; on the React page, an invitation whose email the browser checks. English for the DOM page,
 // Spanish for the React pages.

@@ -11,13 +11,13 @@ import { pages } from './insets-boxes.mjs';
  * pixel; a free side (room a short line or a product's last row leaves) never comes closer than the inset.
  * Boxes that keep their unevenness until a design decision are measured for the record only. With
  * `BEYOND_UI_INSETS` naming a file outside the repository, every measurement is appended to it as a JSON line.
- * Since 0.34.0 every box is measured again at compact density (`data-density="compact"` on the root) and
+ * Since 0.35.0 every box is measured again at compact density (`data-density="compact"` on the root) and
  * with a coarse pointer (touch emulated), in the plain DOM consumer, whose markup the React one shares, a box's
  * `touch` giving what it keeps instead on a touch screen; an inset that is not a length fails.
  */
 const sides = ['top', 'bottom', 'left', 'right'];
 
-/** The ways a page is drawn: as it comes, at compact density, and with a coarse pointer (0.34.0). */
+/** The ways a page is drawn: as it comes, at compact density, and with a coarse pointer (0.35.0). */
 const modes = {
 	comfortable: { options: {}, prepare: () => undefined },
 	// Set as soon as the root element exists: an init script runs before the parser makes it
@@ -100,7 +100,7 @@ async function measure(browser, consumer, list, mode = 'comfortable') {
 						await opened.page.locator(box.box).nth(box.nth ?? 0).waitFor({ state: 'visible', timeout: 5000 });
 						await still(opened.page, box);
 						const found = await Insets.measure(opened.page, box);
-						// A single-line control's height decides the room above its capitals: its sides keep that room (0.34.0)
+						// A single-line control's height decides the room above its capitals: its sides keep that room (0.35.0)
 						const value = box.inset === 'even' ? found.top : await inset(opened.page, box);
 						const failed = hold(found, box, value, at);
 						if (process.env.BEYOND_UI_INSETS) appendFileSync(process.env.BEYOND_UI_INSETS, `${JSON.stringify({ engine: browser.engine, consumer: consumer.name, mode, width, scheme, box: box.name, inset: value, held: box.sides ?? sides, failed: failed.length, ...found })}\n`);
@@ -130,9 +130,9 @@ export const checks = [
 		consumers: ['dom', 'react19'],
 		run: (browser, consumer) => measure(browser, consumer, pages.overlays)
 	},
-	// Compact density and a coarse pointer change the controls' and targets' heights: every box again (0.34.0)
+	// Compact density and a coarse pointer change the controls' and targets' heights: every box again (0.35.0)
 	...['compact', 'coarse'].flatMap(mode => ['notices', 'cards', 'overlays'].map(group => ({
-		name: `insets (D184) ${mode === 'compact' ? 'at compact density' : 'with a coarse pointer'}: the ${group} keep one inset, at 1440 and 390 px in both themes (0.34.0)`,
+		name: `insets (D184) ${mode === 'compact' ? 'at compact density' : 'with a coarse pointer'}: the ${group} keep one inset, at 1440 and 390 px in both themes (0.35.0)`,
 		consumers: ['dom'],
 		run: (browser, consumer) => measure(browser, consumer, pages[group], mode)
 	})))

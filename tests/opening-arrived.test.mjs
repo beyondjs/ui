@@ -4,7 +4,7 @@ import { Page } from './support/page.mjs';
 import { OpeningExit } from '../src/opening/exit.js';
 
 /**
- * 0.34.0: one public mark that the product has arrived, `data-bui-opened` on the document element, set once
+ * 0.35.0: one public mark that the product has arrived, `data-bui-opened` on the document element, set once
  * the hand-over ended and the identity landed. happy-dom lays out nothing, so the flight's boxes are given
  * here; the opening's browser acceptance waits for the mark in a real engine (`acceptance/opening.mjs`).
  */

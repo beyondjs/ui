@@ -24,7 +24,7 @@ import { labels as copy } from './labels.js';
  * Refs: `{ name, default?, note? }`. `onchange(value)` runs for each new choice; setting `value`,
  * `refs`, `loading` or `unavailable` redraws without calling it.
  *
- * Since 0.34.0 (D183) it may wait for an earlier choice, such as a repository (`waiting`, `place`): whatever
+ * Since 0.35.0 (D183) it may wait for an earlier choice, such as a repository (`waiting`, `place`): whatever
  * its refs, loading or unavailable say, it draws its quiet menu with its placeholder, which waits as
  * `ChoiceMenu`'s does, a press only going to `place()`. An escape field already open closes, and `other()`
  * opens nothing; a person whose focus was in it, or in the menu's list, is put back on the quiet button.
@@ -60,7 +60,7 @@ export class RefChooser extends Component {
 	 * @param {'field'|'inline'} [options.layout]
 	 * @param {string|null} [options.name] submits the value with a form
 	 * @param {(value: string) => void} [options.onchange]
-	 * @param {boolean} [options.waiting] waits for an earlier choice: quiet, a press only going to `place` (0.34.0, D183)
+	 * @param {boolean} [options.waiting] waits for an earlier choice: quiet, a press only going to `place` (0.35.0, D183)
 	 * @param {(() => HTMLElement|null|undefined)|null} [options.place] where a press puts the person while it waits
 	 */
 	constructor({ label = null, refs = [], value = null, loading = false, unavailable = null, escape = true, validate = null, layout = 'field', name = null, onchange = null, labels = {}, waiting = false, place = null } = {}) {
@@ -108,7 +108,7 @@ export class RefChooser extends Component {
 		return this.#waiting;
 	}
 
-	/** Waits quiet for an earlier choice, its menu drawn quiet, a press only going to `place` (true), or acts (false) (0.34.0). */
+	/** Waits quiet for an earlier choice, its menu drawn quiet, a press only going to `place` (true), or acts (false) (0.35.0). */
 	set waiting(value) {
 		const active = this.#element.ownerDocument.activeElement;
 		// A person in the escape field or on the escape keeps a place: the quiet button, never the page's body
@@ -143,7 +143,7 @@ export class RefChooser extends Component {
 		this.#draw();
 	}
 
-	/** Opens the escape field; nothing while the chooser waits for an earlier choice (0.34.0). */
+	/** Opens the escape field; nothing while the chooser waits for an earlier choice (0.35.0). */
 	other() {
 		if (this.#waiting) return;
 		this.#menu.close(false);
@@ -160,7 +160,7 @@ export class RefChooser extends Component {
 	}
 
 	#draw() {
-		// Waiting for an earlier choice is none of the refs' states: the quiet menu, with its placeholder (0.34.0)
+		// Waiting for an earlier choice is none of the refs' states: the quiet menu, with its placeholder (0.35.0)
 		if (this.#waiting) return this.#chooser([]);
 		const escape = this.#escape ? this.#link() : null;
 		if (this.#loading) return fill(this.#body, [...this.#kept(), el('p', { class: 'bui-hidden', role: 'status', text: this.#labels.text('loading') }), skeleton(1)]);

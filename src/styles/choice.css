@@ -29,7 +29,7 @@
 	outline: 2px solid var(--color-focus);
 	outline-offset: 2px;
 }
-/* A choice that can never be made (`disabled`), and one that waits for an earlier choice (`waiting`, 0.34.0,
+/* A choice that can never be made (`disabled`), and one that waits for an earlier choice (`waiting`, 0.35.0,
    D183): quiet, the second still reachable, a press only putting the person where they can act. */
 .bui-choice-button:disabled,
 .bui-choice-button[aria-disabled='true'] {

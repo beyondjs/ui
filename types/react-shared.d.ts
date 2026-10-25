@@ -27,7 +27,7 @@ export function Waiting(props: WaitingShape): ReactElement;
  * The family's form for a product that sends its own submission (0.32.0, D183): its submit buttons wait
  * quiet while a required control is empty or a part is marked `data-missing`, a press or Enter only puts
  * the caret there, and `onSubmit` runs once nothing waits. The ref is the form element. With `report`
- * (0.34.0, off by default) a control that breaks its own constraints, when nothing waits before it, says
+ * (0.35.0, off by default) a control that breaks its own constraints, when nothing waits before it, says
  * the browser's own message and takes the focus, and `onSubmit` does not run.
  */
 export const Form: import('react').ForwardRefExoticComponent<import('react').FormHTMLAttributes<HTMLFormElement> & { report?: boolean } & import('react').RefAttributes<HTMLFormElement>>;

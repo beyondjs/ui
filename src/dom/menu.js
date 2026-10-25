@@ -12,7 +12,7 @@ import { Leaving } from './core/leaving.js';
  * The button opens the menu and focuses its first item (ArrowUp opens on the last). Arrow keys, Home
  * and End move between items, Escape closes and returns focus to the button, Tab closes and moves
  * on, and a press outside closes. A disabled item stays reachable so its reason can be read, but it
- * does nothing. Choosing an item closes the menu, returns focus and runs the item. Since 0.34.0 (D183) an
+ * does nothing. Choosing an item closes the menu, returns focus and runs the item. Since 0.35.0 (D183) an
  * item may wait (`waiting`) for a step not yet taken: it looks quiet, as a disabled one, and a press still
  * closes the menu and runs it, so its `run` puts the person where they can act.
  *

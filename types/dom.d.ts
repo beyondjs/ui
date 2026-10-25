@@ -38,7 +38,7 @@ export interface MenuItem {
 	disabled?: boolean;
 	reason?: string | null;
 	tone?: 'danger' | null;
-	/** Waits for a step not yet taken (0.34.0, D183): quiet as a disabled item, a press still closing the menu and running it */
+	/** Waits for a step not yet taken (0.35.0, D183): quiet as a disabled item, a press still closing the menu and running it */
 	waiting?: boolean;
 }
 export class ActionMenu extends Component {

@@ -25,7 +25,7 @@ import { OpeningWords, steps } from './words.js';
  * it (`arriving`) until its first screen is complete, within a budget (`OpeningScreen`, 0.31.0), then hands
  * over: the identity settles into the family bar and the rest fades, the product usable from the first
  * frame. A page restored from the back-forward cache before it opened is opened again, and a
- * development server's error overlay is never covered. Since 0.34.0 a focus the product asks for while
+ * development server's error overlay is never covered. Since 0.35.0 a focus the product asks for while
  * covered lands when it shows (`OpeningFocus`), and `html[data-bui-opened]` says the product has arrived.
  */
 class OpeningRuntime {
@@ -73,7 +73,7 @@ class OpeningRuntime {
 
 	#start() {
 		this.#element = document.getElementById('bui-opening');
-		// No opening to run: the product is there already, and the document says so (0.34.0)
+		// No opening to run: the product is there already, and the document says so (0.35.0)
 		if (!this.#element) return void (this.#release(), OpeningExit.opened());
 		this.#words = new OpeningWords(this.#specs.product);
 		const frame = new OpeningFrame(this.#element, this.#words);

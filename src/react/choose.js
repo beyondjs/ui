@@ -29,7 +29,7 @@ const shape = actions => JSON.stringify((actions ?? []).filter(Boolean).map(({ o
 
 /**
  * One choice among a few things that have a state (CNT-94). Actions: `{ label, onSelect, disabled?, reason? }`.
- * `waiting` (0.34.0, D183) waits for an earlier choice: quiet, a press only going to `place()`, read from the latest props.
+ * `waiting` (0.35.0, D183) waits for an earlier choice: quiet, a press only going to `place()`, read from the latest props.
  */
 export function ChoiceMenu(props) {
 	return useChoice(Menu, props);
@@ -60,7 +60,7 @@ function useChoice(Class, { label, options, value = null, placeholder = null, ac
 
 /**
  * A branch or ref: the default first, search past the threshold, and "Use a commit or another ref…". `unavailable.onRetry`
- * and `place` are read from the latest props; `waiting` (0.34.0, D183) waits for an earlier choice, such as a repository.
+ * and `place` are read from the latest props; `waiting` (0.35.0, D183) waits for an earlier choice, such as a repository.
  */
 export function RefChooser({ label = null, refs = [], value = null, loading = false, unavailable = null, escape = true, validate = null, layout = 'field', name = null, onChange = null, labels, waiting = false, place = null }) {
 	const latest = useLatest({ onChange, validate, unavailable, place });

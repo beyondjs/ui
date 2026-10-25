@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 
 /**
- * A focus the product asks for while the opening covers it (0.34.0), against the fixture's `?focus=` pages,
+ * A focus the product asks for while the opening covers it (0.35.0), against the fixture's `?focus=` pages,
  * whose structure focuses its title or its Approve button at its first paint: the hidden product takes no
  * focus meanwhile, and what it asked for lands at the hand-over; the platform's `focus()` is its own again
  * once the product shows, so a focus asked for later is untouched; and a person in the opening's recovery

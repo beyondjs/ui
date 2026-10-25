@@ -12,7 +12,7 @@
  * meanwhile. On landing (`landed`) the bar's wordmark and name show where the moving ones arrive and the
  * separator and the chevron fade in; the mark then goes.
  *
- * Since 0.34.0 the focus a product asked for while covered lands as it shows (`OpeningFocus`): where the
+ * Since 0.35.0 the focus a product asked for while covered lands as it shows (`OpeningFocus`): where the
  * person's focus is not in the product already, the last target asked for that still takes the focus gets
  * it, and a person in the opening's recovery, which leaves, gets it over the generic destination. And the
  * document carries one public mark once the product has arrived (`OpeningExit.opened()`).
@@ -22,7 +22,7 @@ export class OpeningExit {
 	static fade = 200;
 	static bound = 700;
 	static ease = 'cubic-bezier(0.2, 0.7, 0.3, 1)';
-	/** The document element's attribute that says the product has arrived (0.34.0), for tests and tools to wait for */
+	/** The document element's attribute that says the product has arrived (0.35.0), for tests and tools to wait for */
 	static mark = 'data-bui-opened';
 
 	/**
@@ -43,7 +43,7 @@ export class OpeningExit {
 	/**
 	 * @param {HTMLElement} element The presentation (`#bui-opening`)
 	 * @param {Element} root The product's root, where its family bar is
-	 * @param {import('./focus.js').OpeningFocus|null} [focus] What the product asked to focus while covered (0.34.0)
+	 * @param {import('./focus.js').OpeningFocus|null} [focus] What the product asked to focus while covered (0.35.0)
 	 */
 	constructor(element, root, focus = null) {
 		this.#element = element;

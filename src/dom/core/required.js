@@ -168,7 +168,7 @@ export class Required {
 	}
 
 	/**
-	 * Says the browser's own message for a wrong value (0.34.0): when the first part that needs something
+	 * Says the browser's own message for a wrong value (0.35.0): when the first part that needs something
 	 * is a control failing its own constraints (a type, a pattern, a range, a product's custom validity),
 	 * it stops the submission and reports that control (`reportValidity()`), which takes the focus; true
 	 * when it did. A part that waits before it is left to `hold`, which says nothing. `FocusedForm` without

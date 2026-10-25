@@ -1,4 +1,4 @@
-/** Declarations of 0.34.0's React waits (D183): a chooser that waits for an earlier choice, a held Send's place and Form's `report`. */
+/** Declarations of 0.35.0's React waits (D183): a chooser that waits for an earlier choice, a held Send's place and Form's `report`. */
 import { ChoiceMenu, ChoiceChip, Composer, Form, RefChooser } from '@beyond-js/ui/react';
 
 const earlier = () => document.querySelector<HTMLElement>('#repository');

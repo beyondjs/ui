@@ -39,7 +39,7 @@ export interface ChoiceMenuOptions {
 	name?: string | null;
 	onchange?: ((value: string) => void) | null;
 	labels?: Copy;
-	/** Waits for an earlier choice (0.34.0, D183): quiet and still reachable, a press only going to `place()` and opening nothing */
+	/** Waits for an earlier choice (0.35.0, D183): quiet and still reachable, a press only going to `place()` and opening nothing */
 	waiting?: boolean;
 	/** Where a press puts the person while it waits; without it a press does nothing */
 	place?: (() => HTMLElement | null | undefined) | null;
@@ -57,11 +57,11 @@ export class ChoiceMenu extends Component {
 	readonly chosen: ChoiceMenuOption | null;
 	value: string | null;
 	set disabled(disabled: boolean);
-	/** Waits quiet for an earlier choice (0.34.0, D183); becoming waiting closes an open list without moving focus. */
+	/** Waits quiet for an earlier choice (0.35.0, D183); becoming waiting closes an open list without moving focus. */
 	waiting: boolean;
 	set options(options: Array<ChoiceMenuOption | null | false>);
 	set actions(actions: Array<ChoiceMenuAction | null | false>);
-	/** Whether it opened (0.15.0): false when disabled, waiting (0.34.0), stated or its button is not drawn. */
+	/** Whether it opened (0.15.0): false when disabled, waiting (0.35.0), stated or its button is not drawn. */
 	open(): boolean;
 	close(refocus?: boolean): void;
 }
@@ -82,7 +82,7 @@ export interface RefChooserOptions {
 	name?: string | null;
 	onchange?: ((value: string) => void) | null;
 	labels?: Copy;
-	/** Waits for an earlier choice, such as a repository (0.34.0, D183): its quiet menu drawn whatever its refs' state, a press only going to `place()` */
+	/** Waits for an earlier choice, such as a repository (0.35.0, D183): its quiet menu drawn whatever its refs' state, a press only going to `place()` */
 	waiting?: boolean;
 	place?: (() => HTMLElement | null | undefined) | null;
 }
@@ -95,9 +95,9 @@ export class RefChooser extends Component {
 	set refs(refs: GitRef[]);
 	set loading(loading: boolean);
 	set unavailable(unavailable: { text?: string | null; retry?: (() => void) | null } | null);
-	/** Waits quiet for an earlier choice (0.34.0, D183); an open escape field closes. */
+	/** Waits quiet for an earlier choice (0.35.0, D183); an open escape field closes. */
 	waiting: boolean;
-	/** Opens the escape's field; nothing while it waits (0.34.0). */
+	/** Opens the escape's field; nothing while it waits (0.35.0). */
 	other(): void;
 	focus(): void;
 }

@@ -17,7 +17,7 @@ body {
 	max-width: var(--layout-form);
 	padding: var(--space-6) var(--space-4);
 }
-/* An outage's line in a narrow block (0.34.0): its words wrap beside Try again in its wide form */
+/* An outage's line in a narrow block (0.35.0): its words wrap beside Try again in its wide form */
 #recovery-wide {
 	max-width: 26rem;
 }

@@ -13,7 +13,7 @@ import { OpeningFocusing } from './opening-focusing.mjs';
  * identity that never moves, the steps said with their times, a late opening, the measured usual, a page
  * restored from the cache and the hand-over into the product's bar; `OpeningArrival` holds how a product
  * arrives once, complete (0.31.0), `OpeningFailures` what it says and offers when it cannot simply wait, and
- * `OpeningFocusing` where a focus asked for while covered lands (0.34.0).
+ * `OpeningFocusing` where a focus asked for while covered lands (0.35.0).
  */
 class OpeningAcceptance {
 	#document = new OpeningDocument({ product: 'Projects', key: 'opening-fixture', device: true, logo: new URL('./fixtures/brand/wordmark.svg', import.meta.url) });
@@ -61,7 +61,7 @@ class OpeningAcceptance {
 		if (name.startsWith('fonts/')) return send(types[name.split('.').pop()] ?? 'text/css', readFileSync(new URL(`../${name}`, import.meta.url)));
 		response.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; require-trusted-types-for 'script'; trusted-types 'none'");
 		const html = this.#document.render(readFileSync(new URL('./fixtures/opening/index.html', import.meta.url), 'utf8'));
-		// `/earlier`: the markup before 0.21.0 with this version's controller and stylesheet; `/bare` (0.34.0): no
+		// `/earlier`: the markup before 0.21.0 with this version's controller and stylesheet; `/bare` (0.35.0): no
 		// opening's markup at all, its controller still loaded
 		const opening = /<div id="bui-opening"[\s\S]*?<\/noscript>\n<\/div><\/div>/;
 		send('text/html', name === 'earlier' ? html.replace(opening, readFileSync(new URL('./fixtures/opening/earlier.html', import.meta.url), 'utf8').trim()) : name === 'bare' ? html.replace(opening, '') : html);
@@ -215,14 +215,14 @@ class OpeningAcceptance {
 			assert.ok(Date.now() - started < 1000, 'the hand-over is bounded');
 			assert.equal(await page.locator('.bui-family .bui-lockup-mark').evaluate(node => getComputedStyle(node).visibility), 'visible');
 			assert.ok(JSON.parse(await page.evaluate(() => localStorage.getItem('opening-fixture.opening'))).session.length === 1, 'a clean opening is measured');
-			// The one public mark of an arrival (0.34.0): once the identity has landed, its bar's mark gone
+			// The one public mark of an arrival (0.35.0): once the identity has landed, its bar's mark gone
 			await page.waitForFunction(() => document.documentElement.hasAttribute('data-bui-opened'), null, { timeout: 2000 });
 			assert.equal(await page.evaluate(() => 'buiLanding' in document.querySelector('.bui-family').dataset), false, 'the mark comes once the identity has landed');
 			this.#count++;
 		} finally { await context.close(); }
 	}
 
-	/** A document with no opening to run says at once that the product has arrived (0.34.0) */
+	/** A document with no opening to run says at once that the product has arrived (0.35.0) */
 	async #bare() {
 		const { context, page, release } = await this.#open({ path: '/bare' });
 		try {

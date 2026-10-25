@@ -120,7 +120,7 @@
 	}
 	/* Beside Try again, words that wrap taller than it keep their capitals at the inset: they take off their
 	   half-leading on both sides, which keeps one line centred on Try again, Inter's capitals being mid-line
-	   (0.34.0) */
+	   (0.35.0) */
 	@media (min-width: 481px) {
 		.bui-recovery:not([data-recovery='page']) > .bui-recovery-words {
 			margin-block: calc((1cap - 1lh) / 2);
@@ -165,7 +165,7 @@
 		padding-block: var(--bui-card-inset) calc(var(--bui-card-inset) - (1lh - 1cap) / 2);
 	}
 	/* A command the person may correct (an editable CommandCard's textarea, which trims nothing): its first
-	   line's capitals one inset from its top, in the code's face (0.34.0) */
+	   line's capitals one inset from its top, in the code's face (0.35.0) */
 	.bui-command-edit {
 		padding-block-start: calc(var(--bui-code-inset) - (1lh - 1cap) / 2);
 	}
@@ -230,7 +230,7 @@
 	}
 }
 
-/* A single-line control keeps its words one inset from every side (0.34.0): at compact density (30 px) and on a
+/* A single-line control keeps its words one inset from every side (0.35.0): at compact density (30 px) and on a
    touch screen (44 px) its sides take the room its height leaves above its capitals, as the comfortable 36 px
    control's 12 px are, and a select's or a choice's chevron ends on it. Without `cap` they keep 12 px. */
 @supports (padding-top: calc(1cap)) {

@@ -51,7 +51,7 @@ export interface ComposerProps {
 	actions?: ComposerAction[] | null;
 	/** The stop action while work runs; `onSelect` is read from the latest props. */
 	stop?: { label: string; onSelect?: (() => unknown) | null; busy?: boolean } | null;
-	/** Sending is unavailable, why, and where a press on Send puts the person (`place`, read from the latest props, 0.34.0) */
+	/** Sending is unavailable, why, and where a press on Send puts the person (`place`, read from the latest props, 0.35.0) */
 	disabled?: { reason?: string | null; place?: (() => HTMLElement | null | undefined) | null } | null;
 	busy?: boolean;
 	submit?: ComposerSubmit;
@@ -75,7 +75,7 @@ export interface ComposerProps {
 }
 /** A message box driven by the DOM `Composer` (0.10.0). */
 export const Composer: ForwardRefExoticComponent<ComposerProps & RefAttributes<ComposerHandle>> & { labels: Copies };
-/** A chip that acts in a composer's tray (0.34.0), driven by the DOM `ComposerChip`; `onClick` is read from the latest props and a new `glyph` makes a new chip. */
+/** A chip that acts in a composer's tray (0.35.0), driven by the DOM `ComposerChip`; `onClick` is read from the latest props and a new `glyph` makes a new chip. */
 export function ComposerChip(props: { label?: string | null; value?: string | number | null; glyph?: IconName | null; /** What it is for, read after its face, which is its name */ description?: string | null; onClick?: ((event: MouseEvent) => void) | null }): ReactElement;
 
 export interface LiveTextHandle {

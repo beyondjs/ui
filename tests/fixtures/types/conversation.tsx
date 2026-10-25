@@ -28,5 +28,5 @@ export const wrong = <ActivityRow title={<b>x</b>} />;
 // Since 0.26.0 (D165): the + entries read from the latest props and the live state
 export const Live = () => <Composer label="Message" onSubmit={async () => undefined} add={[{ label: 'Mention a file', keys: '@', onSelect: () => undefined }]} live />;
 
-// Since 0.34.0: a chip that acts in the tray, its onClick read from the latest props
+// Since 0.35.0: a chip that acts in the tray, its onClick read from the latest props
 export const Comments = () => <Composer label="Message" onSubmit={async () => undefined} tray={<ComposerChip label="Line comments" value={2} description="They go with your next message. Opens them in the conversation's changes." onClick={() => undefined} />} />;

@@ -157,7 +157,7 @@ export interface ComposerOptions extends ComposerEdges {
 	/** The ways to send ("Send" by default). */
 	actions?: ComposerAction[] | null;
 	stop?: ComposerStop | null;
-	/** Sending is unavailable, with the reason said beside the action (D44), and where a press on Send puts the person (`place`, 0.34.0, D183). */
+	/** Sending is unavailable, with the reason said beside the action (D44), and where a press on Send puts the person (`place`, 0.35.0, D183). */
 	disabled?: { reason?: string | null; place?: (() => HTMLElement | null | undefined) | null } | null;
 	/** The product's own work: nothing is sent meanwhile. */
 	busy?: boolean;

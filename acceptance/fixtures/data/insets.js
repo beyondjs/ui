@@ -1,5 +1,5 @@
 // The fictional words of the insets fixtures (D184): boxes no other page draws, each long enough to wrap so
-// its content reaches the box's end. English for the DOM page, Spanish for the React pages. Since 0.34.0 an
+// its content reaches the box's end. English for the DOM page, Spanish for the React pages. Since 0.35.0 an
 // editable request's command and an outage whose words wrap beside Try again.
 export const words = {
 	en: {

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { Page } from './support/page.mjs';
 
 /**
- * ComposerChip (0.34.0): a chip that acts, for what goes with a message in a composer's tray ("Line comments
+ * ComposerChip (0.35.0): a chip that acts, for what goes with a message in a composer's tray ("Line comments
  * 2"), in the chips' geometry (D165) with no chevron; its face is always its accessible name (WCAG 2.5.3) and
  * its description is read after it; its whole face is its family tooltip only while a toolbar sets its label
  * aside, and its value is never cut (D179). Also its React form, on React 19 and 18.

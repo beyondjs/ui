@@ -2,11 +2,11 @@
  * The boxes the insets check measures (D184), page by page: each `step` opens what it needs on the page
  * already loaded and names the boxes it then measures. A box's `inset` is its custom property (read on the box)
  * or the number its padding already keeps, or `even` for a single-line control, whose height decides the room
- * above its capitals and whose sides keep that room (0.34.0); `sides` lists what is held to that inset within a
+ * above its capitals and whose sides keep that room (0.35.0); `sides` lists what is held to that inset within a
  * pixel (all four unless said), `free` the sides that may hold free room but never come closer (a textarea taller than its
  * words, a last row that is the product's own); an empty `sides` measures a box for the record only, a box
  * that cannot keep one inset without a design decision. A right side a short line does not reach is free room
- * by itself (the measurement's `free`). `touch` gives what a box keeps instead on a touch screen (0.34.0), where
+ * by itself (the measurement's `free`). `touch` gives what a box keeps instead on a touch screen (0.35.0), where
  * every target is 44 px tall: an action menu's `even` sides, since its entries' height decides its inset; a
  * notification row measured for the record, since its last line's targets grow it and hanging them past its edge
  * would cover the next row's (a design decision, `family-touch-notification-rows`); the notification panel,
@@ -23,7 +23,7 @@ const palette = async page => {
 	await page.waitForSelector('.bui-palette-group[data-source="machines"] [role="option"]');
 };
 const record = [];
-/** The sidebar's search (0.34.0): its words start after its glyph, never under it, whatever the field's own sides. */
+/** The sidebar's search (0.35.0): its words start after its glyph, never under it, whatever the field's own sides. */
 const query = async page => {
 	const placed = await page.locator('.bui-sidebar-panel .bui-sidebar-query').first().evaluate(field => {
 		const style = getComputedStyle(field);
@@ -31,7 +31,7 @@ const query = async page => {
 	});
 	if (placed.words < placed.glyph + 4) throw new Error(`the sidebar's search writes under its glyph: ${JSON.stringify(placed)}`);
 };
-/** A command's CopyMessage (0.34.0): only its code box takes the code's face and lines; its holder, Copy and result keep the interface's. */
+/** A command's CopyMessage (0.35.0): only its code box takes the code's face and lines; its holder, Copy and result keep the interface's. */
 const holder = async page => {
 	const faces = await page.locator('#copy-command .bui-copy').evaluate(node => {
 		const style = element => getComputedStyle(element);

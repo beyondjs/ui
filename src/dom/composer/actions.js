@@ -188,7 +188,7 @@ export class ComposerActions {
 
 	/**
 	 * The other ways to send wait with Send: with nothing to send or while sending is held they are quiet, and
-	 * the reason is said once, beside Send, never under each (D101). Held with a `place` (0.34.0, D183), a
+	 * the reason is said once, beside Send, never under each (D101). Held with a `place` (0.35.0, D183), a
 	 * press on one closes the menu and goes there, as a press on Send does; without one it does nothing.
 	 */
 	#items() {

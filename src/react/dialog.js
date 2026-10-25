@@ -86,7 +86,7 @@ export function useConfirm(labels = {}) {
  * off. A form drawn inside its tree, such as a dialog's through a portal, submits only itself. The ref is
  * the form element.
  *
- * `report` (0.34.0, off by default) is for a product that does not say wrong values itself: a control
+ * `report` (0.35.0, off by default) is for a product that does not say wrong values itself: a control
  * that breaks its own constraints (a type, a pattern, a range), when nothing waits before it, says the
  * browser's own message and takes the focus (`Required.report`), and `onSubmit` does not run, as
  * `FocusedForm` without fields does.
