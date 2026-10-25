@@ -157,8 +157,10 @@ export const checks = [
 			await page.keyboard.press('Escape');
 			expect((await product.getAttribute('aria-expanded')) === 'false', 'Escape closes');
 			expect(await product.evaluate(node => node === document.activeElement), 'focus returns to the product button');
-			// The marker is the theme's (coral-600 on the light bar since token set 0.6.0, coral-400 on navy)
-			const [outline, marker] = await product.evaluate(node => {
+			// The marker is the theme's (coral-600 on the light bar since token set 0.6.0, coral-400 on navy), read once the
+			// ring has settled onto the button (0.34.0, D187: it comes in clear from 6 px out)
+			const [outline, marker] = await product.evaluate(async node => {
+				await Promise.all(node.getAnimations().map(animation => animation.finished.catch(() => undefined)));
 				const probe = document.body.appendChild(Object.assign(document.createElement('span'), { style: 'color: var(--color-family-marker)' }));
 				const color = getComputedStyle(probe).color;
 				probe.remove();

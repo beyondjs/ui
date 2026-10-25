@@ -12,23 +12,25 @@ const field = page => page.locator('.bui-page-dock .bui-composer-field');
 
 export const checks = [
 	{
-		name: 'focus draws the box’s own border, 2 px of the focus color with no outline ring; the tray sits inside the box on its lower edge',
+		name: 'focus lights the box’s own edge in the focus edge’s light, with its halo and no ring (D187); the tray sits inside the box on its lower edge',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const { page } = await open(browser, consumer);
 			await field(page).focus();
-			const box = await page.evaluate(() => {
+			const box = await page.evaluate(async () => {
 				const box = document.querySelector('.bui-page-dock .bui-composer-box');
+				// The edge lights in a 150 ms transition: read it lit
+				await Promise.all(box.getAnimations().map(animation => animation.finished.catch(() => undefined)));
 				const style = getComputedStyle(box);
 				const probe = document.body.appendChild(document.createElement('span'));
-				probe.style.color = 'var(--color-focus)';
+				probe.style.color = 'var(--color-focus-edge)';
 				const focus = getComputedStyle(probe).color;
 				probe.remove();
 				const tray = document.querySelector('.bui-page-dock .bui-composer-tray').getBoundingClientRect();
 				const frame = box.getBoundingClientRect();
 				return { border: style.borderTopColor, focus, shadow: style.boxShadow, outline: style.outlineStyle, tray: { inside: tray.left >= frame.left && tray.right <= frame.right && tray.bottom <= frame.bottom + 0.5, edge: Math.round(frame.bottom - tray.bottom) } };
 			});
-			expect(box.border === box.focus && box.shadow.includes('inset') && box.outline === 'none', `the border itself: ${JSON.stringify(box)}`);
+			expect(box.border === box.focus && /3px/.test(box.shadow) && !box.shadow.includes('inset') && box.outline === 'none', `the edge itself, lit with its halo: ${JSON.stringify(box)}`);
 			expect(box.tray.inside && box.tray.edge <= 2, `the tray on the box's lower edge: ${JSON.stringify(box.tray)}`);
 		}
 	},

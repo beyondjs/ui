@@ -97,8 +97,10 @@
 	opacity: 1;
 }
 /* What the keyboard reaches or the page scrolls to lands above the dock and its fade, never under them (0.34.0,
-   D187; WCAG 2.4.11): `PageDock` measures the dock's height, which grows with its composer. */
-html:has(.bui-page-dock:not(:empty)) {
+   D187; WCAG 2.4.11): `PageDock` measures the dock's height, which grows with its composer. While the focus is in
+   the dock the room is not kept: the dock's own field sits in it, and Chrome and WebKit scrolled the thread to
+   bring it out (330 px in Chrome) whenever the composer took the focus. */
+html:has(.bui-page-dock:not(:empty)):not(:has(.bui-page-dock :focus)) {
 	scroll-padding-bottom: calc(var(--bui-page-dock, 0px) + var(--space-6));
 }
 .bui-page-dock:empty {
