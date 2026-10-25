@@ -23,15 +23,25 @@ Evidence baseline: UI `7568947` (0.32.1) on `feature/next` plus this branch (`cl
 
 ### The package's boxes no fixture drew (`family-d184-product-boxes`, the package's part)
 
-- The insets pages draw an editable `CommandCard` (its textarea) and an outage's line in a narrow block, its words wrapping beside Try again, and the inset check measures every box again at compact density and with a coarse pointer (touch emulated), in the plain DOM consumer. Results and corrections: below.
+- The insets pages draw an editable `CommandCard` (its textarea), an outage's line in a narrow block whose words wrap beside Try again, and a command's `CopyMessage`; the inset check measures every box again at compact density and with a coarse pointer (touch emulated), in the plain DOM consumer, and says every side that broke in one failure.
+- Found in Chrome 155 and corrected:
+  - the editable command's field held its capitals 10.5 px from its top against 12 px (a textarea trims nothing): it now takes off its own half-leading;
+  - a touch screen's 44 px field held its words 15.6 px from its top and bottom against 12 px at its sides, and compact density's 30 px about 9 px: a single-line control's sides (a text field, a select, a choice's button) and its chevron now take the room its height leaves above its capitals there (`--bui-line-inset`), the comfortable 36 px control keeping its 12 px. The check holds such a control's sides to its own top (`even`);
+  - Recovery's wide form held its wrapping title's capitals 22.1 px from its border against 16 px: its words now take off their half-leading on both sides above 480 px, which keeps one line centred on Try again. This is Recovery's inset rule alone, committed separately (`17df828`) with the coordinator's agreement, since Recovery is 0.33.0's.
+- The first run's compact density was never applied (an init script runs before the root exists); the check now sets it as soon as the root exists.
 
 ### The compact search's one accessible name (`family-journeys-compact-search-labels`)
 
 - The decision, recorded in the catalog, the list tools' guide and the architecture: a list's compact search keeps one accessible name for its button and its field, since the button is a disclosure that opens the field it names. A test opens it with `getByRole('button', { name })`, then reaches the field with `getByRole('searchbox', { name })`. No code changed; the source showed no defect.
 
+### A command's CopyMessage drew its whole holder in the code's face (item 7, found by Beyond Home)
+
+- `CopyMessage` gives its holder its kind's class, so a command's holder (`div.bui-copy.bui-copy-command`) also matched the code box's rules (`pre.bui-copy-text.bui-copy-command`): `rows.css`'s monospace face, `white-space: pre` and scrolling took the holder, its Copy command and its result line, its 54ch measure was counted in monospace (about 20 px short of a 448 px column), and `insets.css`'s `text-box` trim matched it. Both rules now name the code box by its two classes; the classes are unchanged, so a product's selector keeps working. Beyond Home's own check selects `.bui-copy-command` and reads its first match, the holder, as monospace: it needs the code box's selector.
+
 ### A tray chip for what goes with a message (for `conduict-composer-waiting-comments`)
 
 - `ComposerChip` (DOM and React) is a chip that acts: a button in the chips' geometry (D165, one target tall, the quiet edge, round) with a muted `label`, a `value`, an optional `glyph`, `name` for its accessible name and `onclick`. It draws no chevron. Its whole face is its family tooltip only while a shortened toolbar sets its label aside; its value is never cut, since an action is named whole (D179). `label`, `value` and `name` are setters that keep its focus. It carries no copy of its own.
+- Found while building it: the composer's tray hid a `ChoiceChip`'s label (its value alone, D165) but had no tooltip, so the label was said only to assistive technology. The toolbar's tooltip now covers the box, the tray's chips with the settings', and the box carries it into the taller editor.
 
 ## Executed checks
 
