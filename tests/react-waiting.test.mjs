@@ -89,3 +89,18 @@ test("the Composer's held Send goes to the latest disabled.place; without one a 
 	await press(send);
 	assert.deepEqual(sent, ['Deploy it']);
 });
+
+test('React RefChooser waits for its repository, a press going to the latest place', async () => {
+	const first = document.body.appendChild(document.createElement('button'));
+	const view = (waiting, place) => h(ui.RefChooser, { refs: [{ name: 'main', default: true }, { name: 'fix' }], layout: 'inline', waiting, place });
+	await render(view(true, () => first));
+	const button = host.querySelector('.bui-choice-button');
+	assert.equal(button.getAttribute('aria-disabled'), 'true');
+	await press(button);
+	assert.ok(document.activeElement === first);
+	assert.equal(host.querySelector('.bui-choice-list').hidden, true);
+	await render(view(false, () => first));
+	assert.equal(button.hasAttribute('aria-disabled'), false);
+	await press(button);
+	assert.equal(host.querySelector('.bui-choice-list').hidden, false, 'it opens once nothing holds it');
+});

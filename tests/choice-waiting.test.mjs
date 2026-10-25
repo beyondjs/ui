@@ -160,3 +160,30 @@ test('a held Send without place is as before: a press does nothing and sends not
 	assert.deepEqual(Object.keys(box.disabled), ['reason'], 'the cause as given');
 	box.destroy();
 });
+
+test('a ref chooser waits for its repository: its menu and its visible escape are quiet, a press on either only going to place; an open escape field closes', () => {
+	const repository = new ui.ChoiceChip({ label: 'Repository', options: [{ value: 'web', label: 'acme/web' }], statement: false }).mount(document.body);
+	const refs = new ui.RefChooser({ refs: [{ name: 'main', default: true }, { name: 'fix/redirect' }], layout: 'inline', waiting: true, place: () => repository.control }).mount(document.body);
+	assert.equal(refs.waiting, true);
+	assert.equal(refs.control.getAttribute('aria-disabled'), 'true');
+	refs.control.click();
+	assert.ok(document.activeElement === repository.control, 'its menu opens nothing');
+	assert.equal(refs.element.querySelector('.bui-choice-list').hidden, true);
+	refs.unavailable = { text: 'Couldn\'t read the branches.' };
+	const escape = refs.element.querySelector('.bui-refs-escape');
+	assert.equal(escape.getAttribute('aria-disabled'), 'true', 'its visible escape waits with it');
+	escape.focus();
+	escape.click();
+	assert.ok(document.activeElement === repository.control, 'a press on the escape goes to the repository too');
+	assert.equal(refs.element.querySelector('.bui-refs-other').hidden, true, 'its field stays closed');
+	refs.waiting = false;
+	assert.equal(escape.hasAttribute('aria-disabled'), false, 'able once the repository is chosen');
+	escape.click();
+	assert.equal(refs.element.querySelector('.bui-refs-other').hidden, false, 'the escape opens its field');
+	refs.waiting = true;
+	assert.equal(refs.element.querySelector('.bui-refs-other').hidden, true, 'waiting again closes it');
+	refs.refs = [{ name: 'main', default: true }];
+	assert.equal(refs.control.getAttribute('aria-disabled'), 'true', 'new refs keep the wait');
+	refs.destroy();
+	repository.destroy();
+});

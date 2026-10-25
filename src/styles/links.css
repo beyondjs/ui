@@ -20,6 +20,13 @@
 :is(.bui-link-button, .bui-composer-status a, .bui-navmenu-notice a, .bui-reading a, .bui-callout-text a, .bui-unavailable-reason a):hover {
 	text-decoration-color: currentColor;
 }
+/* A link-styled button that waits for a step not yet taken (0.34.0, D183), such as a ref chooser's escape
+   while no repository is chosen: quiet, its words muted and no underline, still reachable */
+.bui-link-button[aria-disabled='true'] {
+	color: var(--color-text-muted);
+	text-decoration-line: none;
+	cursor: not-allowed;
+}
 
 /* Identifiers, paths, hashes and versions in the monospace face, a little smaller to sit on the line. */
 .bui-mono,

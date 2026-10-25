@@ -23,6 +23,10 @@ import { labels as copy } from './labels.js';
  *
  * Refs: `{ name, default?, note? }`. `onchange(value)` runs for each new choice; setting `value`,
  * `refs`, `loading` or `unavailable` redraws without calling it.
+ *
+ * Since 0.34.0 (D183) it may wait for an earlier choice, such as a repository (`waiting`, `place`): its menu
+ * waits as `ChoiceMenu`'s does, and its visible escape is quiet too, a press on either only going to
+ * `place()`. An escape field already open closes.
  */
 export class RefChooser extends Component {
 	/** The copy in English and Spanish. */
@@ -41,6 +45,10 @@ export class RefChooser extends Component {
 	#escape;
 	#onchange;
 	#name;
+	#waiting;
+	#place;
+	/** The escape drawn as a visible action, while drawn */
+	#exit = null;
 
 	/**
 	 * @param {object} options
@@ -54,8 +62,10 @@ export class RefChooser extends Component {
 	 * @param {'field'|'inline'} [options.layout]
 	 * @param {string|null} [options.name] submits the value with a form
 	 * @param {(value: string) => void} [options.onchange]
+	 * @param {boolean} [options.waiting] waits for an earlier choice: quiet, a press only going to `place` (0.34.0, D183)
+	 * @param {(() => HTMLElement|null|undefined)|null} [options.place] where a press puts the person while it waits
 	 */
-	constructor({ label = null, refs = [], value = null, loading = false, unavailable = null, escape = true, validate = null, layout = 'field', name = null, onchange = null, labels = {} } = {}) {
+	constructor({ label = null, refs = [], value = null, loading = false, unavailable = null, escape = true, validate = null, layout = 'field', name = null, onchange = null, labels = {}, waiting = false, place = null } = {}) {
 		super();
 		this.#labels = new Labels(copy.en, labels);
 		this.#label = label ?? this.#labels.text('label');
@@ -65,8 +75,10 @@ export class RefChooser extends Component {
 		this.#escape = escape;
 		this.#onchange = onchange;
 		this.#name = name;
+		this.#waiting = Boolean(waiting);
+		this.#place = place;
 		const id = Ids.next('bui-refs');
-		this.#menu = new ChoiceMenu({ label: this.#label, options: [], name, search: 'auto', statement: !escape, labels: { placeholder: this.#labels.text('placeholder'), search: this.#labels.text('search'), none: ({ query }) => this.#labels.text('none', { query }) }, onchange: chosen => this.#chosen(chosen) });
+		this.#menu = new ChoiceMenu({ label: this.#label, options: [], name, search: 'auto', statement: !escape, waiting: this.#waiting, place, labels: { placeholder: this.#labels.text('placeholder'), search: this.#labels.text('search'), none: ({ query }) => this.#labels.text('none', { query }) }, onchange: chosen => this.#chosen(chosen) });
 		this.#menu.control.id = `${id}-button`;
 		this.#other = new OtherRef({ labels: this.#labels, validate, onuse: chosen => this.#chosen(chosen), oncancel: () => this.#menu.control.focus() });
 		this.#body = el('div', { class: 'bui-refs-body' });
@@ -93,6 +105,18 @@ export class RefChooser extends Component {
 	set value(value) {
 		this.#value = value ?? null;
 		this.#draw();
+	}
+
+	get waiting() {
+		return this.#waiting;
+	}
+
+	/** Waits quiet for an earlier choice, a press on the menu or the escape only going to `place` (true), or acts (false) (0.34.0). */
+	set waiting(value) {
+		this.#waiting = Boolean(value);
+		this.#menu.waiting = this.#waiting;
+		if (this.#waiting && this.#other.shown) this.#other.hide();
+		this.#quiet();
 	}
 
 	/** Replaces the refs (a late or refreshed list): loading and unavailable end. */
@@ -171,7 +195,15 @@ export class RefChooser extends Component {
 	 */
 	#link() {
 		const text = this.#labels.text('escape').replace(/\s*(…|\.\.\.)$/, '');
-		return el('button', { type: 'button', class: 'bui-link-button bui-refs-escape', onclick: () => this.other() }, [text]);
+		this.#exit = el('button', { type: 'button', class: 'bui-link-button bui-refs-escape', onclick: () => (this.#waiting ? this.#place?.()?.focus() : this.other()) }, [text]);
+		this.#quiet();
+		return this.#exit;
+	}
+
+	/** The visible escape waits with the chooser: quiet and reachable, its press only going to `place` (0.34.0, D183). */
+	#quiet() {
+		if (this.#waiting) this.#exit?.setAttribute('aria-disabled', 'true');
+		else this.#exit?.removeAttribute('aria-disabled');
 	}
 
 	#chosen(value) {

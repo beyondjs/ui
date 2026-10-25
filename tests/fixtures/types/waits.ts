@@ -1,5 +1,5 @@
 /** Declarations of 0.34.0's waits (D183): a chooser that waits for an earlier choice, a held Send's place and `Required.report`. */
-import { ChoiceMenu, ChoiceChip, Composer, Required } from '@beyond-js/ui';
+import { ChoiceMenu, ChoiceChip, Composer, Required, RefChooser } from '@beyond-js/ui';
 
 const repository = new ChoiceChip({ label: 'Repository', options: [{ value: 'web', label: 'acme/web' }] });
 const branch = new ChoiceChip({ label: 'Branch', options: [{ value: 'main', label: 'main' }], waiting: true, place: () => repository.control });
@@ -17,3 +17,7 @@ void [waits, place];
 // React Form's `report` reads the same rule (0.34.0)
 const reported: boolean = new Required(document.createElement('form')).report(new Event('submit', { cancelable: true }));
 void reported;
+// A ref chooser waits for its repository too (0.34.0)
+const refs = new RefChooser({ refs: [{ name: 'main', default: true }], waiting: true, place: () => repository.control });
+refs.waiting = false;
+void refs.waiting;

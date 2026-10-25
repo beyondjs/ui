@@ -58,16 +58,20 @@ function useChoice(Class, { label, options, value = null, placeholder = null, ac
 	return h('div', { ref: host, className: 'bui-host' });
 }
 
-/** A branch or ref: the default first, search past the threshold, and "Use a commit or another ref…". `unavailable.onRetry` is read from the latest props. */
-export function RefChooser({ label = null, refs = [], value = null, loading = false, unavailable = null, escape = true, validate = null, layout = 'field', name = null, onChange = null, labels }) {
-	const latest = useLatest({ onChange, validate, unavailable });
-	const [host, chooser] = useInstance(() => new Refs({ label, escape, layout, name, labels, loading, validate: text => latest.current.validate?.(text) ?? null, onchange: chosen => latest.current.onChange?.(chosen) }), [label, escape, layout, name, labels]);
+/**
+ * A branch or ref: the default first, search past the threshold, and "Use a commit or another ref…". `unavailable.onRetry`
+ * and `place` are read from the latest props; `waiting` (0.34.0, D183) waits for an earlier choice, such as a repository.
+ */
+export function RefChooser({ label = null, refs = [], value = null, loading = false, unavailable = null, escape = true, validate = null, layout = 'field', name = null, onChange = null, labels, waiting = false, place = null }) {
+	const latest = useLatest({ onChange, validate, unavailable, place });
+	const [host, chooser] = useInstance(() => new Refs({ label, escape, layout, name, labels, loading, waiting, place: () => latest.current.place?.() ?? null, validate: text => latest.current.validate?.(text) ?? null, onchange: chosen => latest.current.onChange?.(chosen) }), [label, escape, layout, name, labels]);
 	useSync(chooser, current => {
 		current.refs = refs;
 		if (loading) current.loading = true;
 		if (unavailable) current.unavailable = { text: unavailable.text ?? null, retry: () => latest.current.unavailable?.onRetry?.() };
 		current.value = value;
 	}, [JSON.stringify(refs), loading, unavailable?.text ?? Boolean(unavailable), value]);
+	useSync(chooser, current => (current.waiting = waiting), [Boolean(waiting)]);
 	return h('div', { ref: host, className: 'bui-host' });
 }
 
