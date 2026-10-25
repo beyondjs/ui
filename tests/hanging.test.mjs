@@ -59,6 +59,7 @@ test('a composer keeps its quiet controls inside its border and ends its band\'s
 
 test('beside text a quiet control stands twice the hang away; in a row of controls it keeps its padding', () => {
 	assert.match(declarations('.bui-copy-value'), /gap: calc\(2 \* var\(--bui-quiet-hang\)\)/);
+	assert.match(declarations('.bui-copy-value > .bui-copy-button .bui-button-quiet'), /margin-inline-end: 0/, 'Copy stays inside its piece');
 	assert.match(declarations('.bui-diff-large'), /gap: var\(--space-1\) calc\(2 \* var\(--bui-quiet-hang\)\)/);
 	assert.match(declarations('.bui-button-quiet:is(.bui-list-query, .bui-list-restriction)'), /margin-inline: 0/);
 	assert.match(declarations('.bui-button-quiet.bui-composer-file-retry'), /margin-inline: 0/);
