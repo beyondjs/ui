@@ -21,7 +21,8 @@ const following = 4;
  * those outside the form that name it with `form` included; `hold(event)` stops a submission there,
  * putting the caret in the first part that waits and saying nothing. It quiets and frees only what it
  * quieted itself: a button a product keeps quiet stays so, and a busy one (`data-busy`) keeps what its
- * work draws. It hears the input and change of the form and of a control that names it, and
+ * work draws, as a package `Button` that waits for the product's own condition (`data-bui-waiting`,
+ * 0.35.0) keeps its wait; once either ends, the form is read again. It hears the input and change of the form and of a control that names it, and
  * `Required.change` from a part whose value was written without a typed one; it reads the form again in
  * the next frame after its structure changes (a control added, swapped, required or disabled; a part
  * marked), until `destroy()`. `FocusedForm`, `prompt` and React's `Form` are built on it, and a
@@ -43,6 +44,11 @@ export class Required {
 		// A choice is the browser's to read: an option with an empty value that is not the placeholder is a choice
 		if (control.tagName === 'SELECT' && control.validity) return Boolean(control.validity.valueMissing);
 		return !String(control.value ?? '').trim();
+	}
+
+	/** Whether a control keeps a state of its own that no form frees: its work (`data-busy`) or a package `Button`'s own wait (`data-bui-waiting`, 0.35.0). */
+	static held(control) {
+		return control.hasAttribute('data-busy') || control.hasAttribute('data-bui-waiting');
 	}
 
 	/** Whether `a` comes before `b` in the page. */
@@ -78,7 +84,8 @@ export class Required {
 		const view = form.ownerDocument?.defaultView;
 		if (view?.MutationObserver) {
 			this.#observer = new view.MutationObserver(() => this.#later(view));
-			this.#observer.observe(form, { subtree: true, childList: true, attributes: true, attributeFilter: ['required', 'data-missing', 'disabled'] });
+			// A button's own wait or work ending is read again too, so the form quiets it if a part still waits (0.35.0)
+			this.#observer.observe(form, { subtree: true, childList: true, attributes: true, attributeFilter: ['required', 'data-missing', 'disabled', 'data-busy', 'data-bui-waiting'] });
 		}
 		this.settle();
 	}
@@ -119,7 +126,7 @@ export class Required {
 	settle() {
 		const quiet = this.missing;
 		for (const button of this.buttons) {
-			if (button.hasAttribute('data-busy')) continue;
+			if (Required.held(button)) continue;
 			if (quiet && !button.hasAttribute('aria-disabled')) {
 				button.setAttribute('aria-disabled', 'true');
 				this.#quieted.add(button);
@@ -183,7 +190,7 @@ export class Required {
 		this.#observer?.disconnect();
 		if (this.#frame !== null) this.#form.ownerDocument?.defaultView?.cancelAnimationFrame?.(this.#frame);
 		this.#frame = null;
-		for (const button of this.#quieted) if (!button.hasAttribute('data-busy')) button.removeAttribute('aria-disabled');
+		for (const button of this.#quieted) if (!Required.held(button)) button.removeAttribute('aria-disabled');
 		this.#quieted.clear();
 	}
 

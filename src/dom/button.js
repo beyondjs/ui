@@ -21,7 +21,8 @@ const defaults = { busy: '{label}…' };
  * Since 0.32.0 (D183) a button may be `waiting` for a step not yet taken, such as Add while nothing is
  * chosen: it is quiet (`aria-disabled`) and still reachable, and a press only puts the person at
  * `place()`, its own action never running; a link that waits does not navigate. A form's submit waits
- * through `Required` instead.
+ * through `Required` instead. Since 0.35.0 its own wait carries `data-bui-waiting`, which `Required` and
+ * `Quiet` never free, so a product's condition on a form's submit stands once the form holds everything.
  */
 export class Button extends Component {
 	#element;
@@ -188,6 +189,8 @@ export class Button extends Component {
 	#quiet() {
 		if (this.#busy || this.#waiting) this.#element.setAttribute('aria-disabled', 'true');
 		else this.#element.removeAttribute('aria-disabled');
+		// Its own wait is marked, so a form's or a Quiet's settling never frees it (0.35.0)
+		this.#element.toggleAttribute('data-bui-waiting', this.#waiting);
 	}
 
 	#render() {

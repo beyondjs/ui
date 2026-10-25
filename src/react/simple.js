@@ -34,6 +34,7 @@ function svg(glyph) {
 /**
  * A button (or a link styled as one with `href`). While `busy` it keeps focus but ignores presses,
  * shows a spinner and says it is working: `labels.busy` (default `{label}…`) replaces a text label.
+ * `waiting` is quiet for a step not yet taken, marked `data-bui-waiting` so a form never frees it (0.35.0).
  */
 export function Button({ label, children, variant = 'secondary', glyph = null, href = null, onClick = null, disabled = false, busy = false, waiting = false, place = null, type = 'button', small = false, name, labels = {}, ...rest }) {
 	const className = `bui-button bui-button-${variant}${small ? ' bui-button-small' : ''}${rest.className ? ` ${rest.className}` : ''}`;
@@ -50,8 +51,10 @@ export function Button({ label, children, variant = 'secondary', glyph = null, h
 		onClick?.(event);
 	};
 	const quiet = busy || waiting ? 'true' : undefined;
-	if (href && !disabled) return h('a', { ...rest, className, href, onClick: press, 'aria-label': name, 'aria-disabled': quiet }, inner);
-	return h('button', { ...rest, className, type, disabled, 'aria-label': name, 'aria-disabled': quiet, 'data-busy': busy ? '' : undefined, onClick: press }, inner);
+	// Its own wait is marked, so a form's or a Quiet's settling never frees it (0.35.0)
+	const own = waiting ? '' : undefined;
+	if (href && !disabled) return h('a', { ...rest, className, href, onClick: press, 'aria-label': name, 'aria-disabled': quiet, 'data-bui-waiting': own }, inner);
+	return h('button', { ...rest, className, type, disabled, 'aria-label': name, 'aria-disabled': quiet, 'data-busy': busy ? '' : undefined, 'data-bui-waiting': own, onClick: press }, inner);
 }
 
 /**

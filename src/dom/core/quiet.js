@@ -4,7 +4,9 @@ import { Required } from './required.js';
 /**
  * A control that waits quiet while there is nothing for it to act on yet (0.32.0, D183), such as Add
  * while nothing is chosen. It keeps its name and place, draws the family's quiet look with
- * `aria-disabled` and stays reachable; a busy control (`data-busy`) keeps what its work draws. Given
+ * `aria-disabled` and stays reachable; a busy control (`data-busy`) keeps what its work draws, and a
+ * package `Button` that waits for a condition of its own (`data-bui-waiting`, 0.35.0) keeps its wait, the
+ * control drawn again once either ends. Given
  * `place`, a press while it waits only puts the person there, saying nothing, and the product's own
  * handler never runs; without it the press stays the product's, which decides what a press does while it
  * waits (a package `Button`'s `waiting` has no handler to defer to, so without `place` it only swallows the
@@ -16,6 +18,7 @@ export class Quiet {
 	#waiting;
 	#place;
 	#listeners = new Listeners();
+	#observer = null;
 
 	/**
 	 * @param {HTMLElement} control
@@ -33,6 +36,12 @@ export class Quiet {
 		// before any handler of the control's own, which a press while it waits never reaches
 		if (place) this.#listeners.add(control.getRootNode?.() ?? control.ownerDocument, 'click', event => this.#press(event), { capture: true });
 		if (form) for (const type of ['input', 'change', Required.change]) this.#listeners.add(form, type, () => this.settle());
+		// Its own work or wait ending draws it again (0.35.0)
+		const view = control.ownerDocument?.defaultView;
+		if (view?.MutationObserver) {
+			this.#observer = new view.MutationObserver(() => this.settle());
+			this.#observer.observe(control, { attributes: true, attributeFilter: ['data-busy', 'data-bui-waiting'] });
+		}
 		this.settle();
 	}
 
@@ -43,7 +52,7 @@ export class Quiet {
 
 	/** Draws the control quiet while it waits and able once it does not; a busy control keeps its state. */
 	settle() {
-		if (this.#control.hasAttribute('data-busy')) return;
+		if (Required.held(this.#control)) return;
 		if (this.waiting) this.#control.setAttribute('aria-disabled', 'true');
 		else this.#control.removeAttribute('aria-disabled');
 	}
@@ -51,7 +60,8 @@ export class Quiet {
 	/** Releases its listeners and leaves the control able. */
 	destroy() {
 		this.#listeners.release();
-		if (!this.#control.hasAttribute('data-busy')) this.#control.removeAttribute('aria-disabled');
+		this.#observer?.disconnect();
+		if (!Required.held(this.#control)) this.#control.removeAttribute('aria-disabled');
 	}
 
 	#press(event) {

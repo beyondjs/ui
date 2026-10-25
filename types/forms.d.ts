@@ -13,7 +13,8 @@ export interface Waited {
  * an unchecked required box, a radio group or a choice with nothing chosen; text the browser could not
  * read is wrong, not missing), or a part the product marks `data-missing`; given `fields`, theirs.
  * Its submit buttons wait quiet (`aria-disabled`, still reachable), those outside the form that name it
- * with `form` included, and a busy one (`data-busy`) keeps its state. It hears the form's input and
+ * with `form` included, and a busy one (`data-busy`) keeps its state, as a package `Button` that waits for
+ * the product's own condition (`data-bui-waiting`, 0.35.0) keeps its wait. It hears the form's input and
  * change until `destroy()`.
  */
 export class Required {
@@ -23,6 +24,8 @@ export class Required {
 	static readonly change: 'bui-change';
 	/** Sends `Required.change` from `node`, so a form reads it again (0.32.1). */
 	static tell(node: EventTarget | null | undefined): void;
+	/** Whether a control keeps a state of its own that no form or `Quiet` frees: its work (`data-busy`) or a package `Button`'s own wait (`data-bui-waiting`, 0.35.0). */
+	static held(control: Element): boolean;
 	/** Whether `a` comes before `b` in the page (0.32.1). */
 	static before(a: Node, b: Node): boolean;
 	/** Whether a required control has nothing in it yet; a control the browser does not validate never waits. */
@@ -50,7 +53,8 @@ export class Required {
 /**
  * A control that waits quiet while there is nothing for it to act on yet, such as Add while nothing is
  * chosen. Given `place`, a press while it waits only puts the person there and the control's own
- * handler never runs; given `form`, it is drawn again on every change of the form's fields.
+ * handler never runs; given `form`, it is drawn again on every change of the form's fields. A busy control
+ * and a package `Button`'s own wait (`data-bui-waiting`, 0.35.0) keep their state, drawn again once it ends.
  */
 export class Quiet {
 	constructor(control: HTMLElement, options: { waiting: () => boolean; place?: (() => HTMLElement | null | undefined) | null; form?: HTMLFormElement | null });

@@ -23,5 +23,7 @@ const ask: string = Required.ask;
 const told: string = Required.change;
 Required.tell(form);
 const order: boolean = Required.before(form, document.body);
+// A control's own state that no form frees (0.35.0)
+const kept: boolean = Required.held(form);
 const unread: Element | null = required.unread ?? required.wrong;
-void [waits, held, buttons, first, empty, still, ask, told, order, unread];
+void [waits, held, buttons, first, empty, still, ask, told, order, unread, kept];
