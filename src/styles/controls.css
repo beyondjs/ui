@@ -44,16 +44,20 @@
 /* A borderless control is placed by what it draws (0.37.0, D188): at rest only its words show, so they sit on
    the edge and in the gaps, and its surface (hover, press, focus) hangs past them by --bui-quiet-hang. The
    padding leaves room for the button's 1px border, so the words land exactly where the box would. Beside
-   another control it keeps its padding on that side, so the two surfaces never meet. */
+   another control, or what holds one, it keeps its padding on that side, so the two surfaces never meet; inside
+   a sentence (a paragraph's own control) it keeps it on both, its words part of the sentence. */
 .bui-button-quiet:not(.bui-button-bare) {
 	padding-inline: calc(var(--bui-quiet-hang) - 1px);
 	margin-inline: calc(-1 * var(--bui-quiet-hang));
 }
-:is(button, a, input, select, .bui-copy-button, .bui-menu-holder) + .bui-button-quiet:not(.bui-button-bare) {
+:is(button, a, input, select, .bui-copy-button, .bui-menu-holder, :has(button, input, select)) + .bui-button-quiet:not(.bui-button-bare) {
 	margin-inline-start: 0;
 }
 .bui-button-quiet:not(.bui-button-bare):has(+ :is(button, a, input, select, .bui-copy-button, .bui-menu-holder)) {
 	margin-inline-end: 0;
+}
+p > .bui-button-quiet:not(.bui-button-bare) {
+	margin-inline: 0;
 }
 .bui-button-quiet:not(:disabled, [aria-disabled='true']):hover {
 	background: var(--overlay-lift);

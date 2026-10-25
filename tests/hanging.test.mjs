@@ -29,8 +29,9 @@ test('a quiet button hangs its padding past its words, its border counted, and k
 	assert.match(own, /padding-inline: calc\(var\(--bui-quiet-hang\) - 1px\)/, 'its padding leaves room for its 1px border');
 	assert.match(own, /margin-inline: calc\(-1 \* var\(--bui-quiet-hang\)\)/, 'it hangs by the same token');
 	const controls = ':is(button, a, input, select, .bui-copy-button, .bui-menu-holder)';
-	assert.match(declarations(`${controls} + .bui-button-quiet:not(.bui-button-bare)`), /margin-inline-start: 0/);
+	assert.match(declarations(':is(button, a, input, select, .bui-copy-button, .bui-menu-holder, :has(button, input, select)) + .bui-button-quiet:not(.bui-button-bare)'), /margin-inline-start: 0/, 'after a control, or what holds one');
 	assert.match(declarations(`.bui-button-quiet:not(.bui-button-bare):has(+ ${controls})`), /margin-inline-end: 0/);
+	assert.match(declarations('p > .bui-button-quiet:not(.bui-button-bare)'), /margin-inline: 0/, 'inside a sentence its words are part of it');
 	for (const match of sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
 		const subject = match[1].replaceAll(':not(.bui-button-bare)', '');
 		if (match[2].includes('--bui-quiet-hang')) assert.doesNotMatch(subject, /\.bui-button-bare/, `${match[1].trim()}: a glyph alone keeps the box its geometry gives it`);
