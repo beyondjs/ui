@@ -118,3 +118,59 @@ test("React's Button marks its own wait, and React's Form never frees it", async
 	await act(async () => type(name, ''));
 	assert.equal(save.getAttribute('aria-disabled'), 'true', 'the form quiets it again');
 });
+
+test('a submit outside the form that names it is heard too: its own wait ending while a part waits quiets it again', async () => {
+	const form = Object.assign(document.createElement('form'), { id: 'rename' });
+	const name = Object.assign(document.createElement('input'), { required: true, 'aria-label': 'Name' });
+	form.append(name);
+	// A dialog's footer: the form's Save stands outside it and names it
+	const footer = document.createElement('footer');
+	const save = new dom.Button({ label: 'Save', type: 'submit', variant: 'primary' });
+	save.element.setAttribute('form', 'rename');
+	footer.append(save.element);
+	document.body.append(form, footer);
+	const required = new dom.Required(form);
+	assert.equal(save.element.getAttribute('aria-disabled'), 'true', 'the form quiets the footer\'s Save while the name waits');
+	save.waiting = true;
+	save.waiting = false;
+	await page.until(() => save.element.getAttribute('aria-disabled') === 'true');
+	type(name, 'Checkout');
+	assert.equal(save.element.hasAttribute('aria-disabled'), false);
+	required.destroy();
+	save.destroy();
+});
+
+test("React: a footer's Save outside the Form, whose own wait ends while nothing else draws, is quieted again while a part waits", async () => {
+	let set = null;
+	function Footer() {
+		const [waiting, setWaiting] = useState(false);
+		set = setWaiting;
+		return h(ui.Button, { type: 'submit', form: 'rename', variant: 'primary', waiting }, 'Save');
+	}
+	await act(() => root.render(h(StrictMode, null, h(React.Fragment, null, h(ui.Form, { id: 'rename', onSubmit: event => event.preventDefault() }, h('input', { name: 'name', required: true, 'aria-label': 'Name' })), h(Footer)))));
+	const save = host.querySelector('footer button, button');
+	assert.equal(save.getAttribute('aria-disabled'), 'true', 'the form quiets the footer\'s Save while the name waits');
+	await act(async () => set(true));
+	// Only the footer draws again: the form hears its button's own wait end
+	await act(async () => set(false));
+	await page.until(() => save.getAttribute('aria-disabled') === 'true');
+});
+
+test("a busy React link and a choice's own wait are held too: neither a form nor a Quiet frees them", async () => {
+	await act(() => root.render(h(ui.Button, { href: '/deploy', busy: true }, 'Deploy')));
+	const link = host.querySelector('a');
+	assert.equal(link.hasAttribute('data-busy'), true, 'a busy link says its work, as the DOM Button\'s does');
+	assert.equal(dom.Required.held(link), true);
+	// A choice that waits for an earlier one, under a Quiet a product placed over its button
+	const choice = new dom.ChoiceMenu({ label: 'Branch', options: [{ value: 'main', label: 'main' }, { value: 'fix', label: 'fix/redirect' }], waiting: true }).mount(document.body);
+	const button = choice.control;
+	assert.equal(button.hasAttribute('data-bui-waiting'), true, 'its own wait is marked');
+	const quiet = new dom.Quiet(button, { waiting: () => false });
+	assert.equal(button.getAttribute('aria-disabled'), 'true', 'the choice\'s own wait stands');
+	quiet.destroy();
+	assert.equal(button.getAttribute('aria-disabled'), 'true');
+	choice.waiting = false;
+	assert.equal(button.hasAttribute('data-bui-waiting'), false);
+	assert.equal(button.hasAttribute('aria-disabled'), false);
+	choice.destroy();
+});

@@ -108,6 +108,7 @@ class OpeningAcceptance {
 			assert.equal(await page.getByText('Está tardando más de lo esperado', { exact: true }).isVisible(), true);
 			assert.equal(await status.textContent(), 'Está tardando más de lo esperado. Puedes seguir esperando o volver a cargar.');
 			assert.deepEqual(await this.#steps(page), ['done Cargando Projects', 'late Confirmando tu sesión']);
+			assert.equal(await page.evaluate(() => document.documentElement.hasAttribute('data-bui-opened')), false, 'no mark while its recovery shows (0.35.0)');
 			assert.deepEqual(await page.locator('.bui-opening-lockup').boundingBox(), identity, 'the identity never moves while steps and recovery appear');
 			await page.locator('.bui-opening-details summary').click();
 			const details = await page.locator('[data-opening-text]').textContent();
@@ -121,6 +122,7 @@ class OpeningAcceptance {
 			await page.locator('#bui-opening').waitFor({ state: 'detached' });
 			await page.getByRole('heading', { name: 'Your projects' }).waitFor();
 			assert.equal(await page.locator('h1').evaluate(node => node === document.activeElement), true, 'a person in recovery keeps a keyboard destination');
+			await page.waitForFunction(() => document.documentElement.hasAttribute('data-bui-opened'), null, { timeout: 2000 });
 			// One set of faces once the application is ready: the opening's handed over to the application's
 			await page.clock.runFor(1000);
 			await page.waitForFunction(() => ![...document.querySelector('link[data-bui-opening]').sheet.cssRules].some(rule => rule.constructor.name === 'CSSFontFaceRule'));
@@ -168,6 +170,7 @@ class OpeningAcceptance {
 			await page.getByText('Turn on JavaScript in your browser to open Projects.', { exact: true }).waitFor();
 			assert.equal(await page.getByRole('status').count(), 0, 'nothing announces a wait that cannot happen');
 			assert.equal(await page.locator('.bui-opening-trace').isHidden(), true);
+			assert.equal(await page.locator('html[data-bui-opened]').count(), 0, 'a controller that never runs never marks it');
 			this.#count++;
 		} finally { await context.close(); }
 	}

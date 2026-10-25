@@ -35,6 +35,11 @@ export class OpeningFailures {
 		return page.evaluate(() => Number(sessionStorage.getItem('opening-loads')));
 	}
 
+	/** Whether the document says the opening has gone (`html[data-bui-opened]`, 0.35.0) */
+	static #opened(page) {
+		return page.evaluate(() => document.documentElement.hasAttribute('data-bui-opened'));
+	}
+
 	/** Nothing says it still runs: no travelling light and a plain divider instead of the dashed band */
 	static async #still(page) {
 		const trace = await page.locator('.bui-opening-trace').evaluate(node => ({ image: getComputedStyle(node).backgroundImage, light: getComputedStyle(node, '::after').display }));
@@ -53,6 +58,7 @@ export class OpeningFailures {
 			assert.equal(await page.locator('[data-opening-status]').textContent(), 'No se pudo abrir Projects.');
 			assert.match(await page.locator('[data-opening-text]').textContent(), /Error: No se pudo cargar http:\/\/127\.0\.0\.1:\d+\/ready\.js/);
 			await OpeningFailures.#still(page);
+			assert.equal(await OpeningFailures.#opened(page), false, 'no mark while its failure is said');
 			await page.unroute('**/ready.js');
 			await Promise.all([page.waitForEvent('framenavigated'), page.getByRole('button', { name: 'Volver a cargar', exact: true }).click()]);
 			await page.getByRole('heading', { name: 'Your projects' }).waitFor();
@@ -139,6 +145,7 @@ export class OpeningFailures {
 			assert.equal(await page.getByText('La apertura continúa en cuanto vuelvas a tener conexión.', { exact: true }).isVisible(), true);
 			assert.equal(await page.getByRole('button', { name: 'Volver a cargar', exact: true }).isVisible(), false, 'Reload offline would put the browser’s error in place of the page');
 			assert.equal(await page.locator('.bui-opening-details').isVisible(), false);
+			assert.equal(await OpeningFailures.#opened(page), false, 'no mark while offline is said');
 			release();
 			await page.waitForFunction(() => document.querySelector('[data-opening-recovery]').dataset.state === 'offline' && document.querySelector('.bui-opening-step[data-state="failed"]'));
 			await OpeningFailures.#still(page);
@@ -186,6 +193,7 @@ export class OpeningFailures {
 			await page.evaluate(() => document.body.append(Object.assign(document.createElement('vite-error-overlay'), { textContent: '[plugin:vite:react-babel] /src/main.tsx: Unexpected token (12:4)' })));
 			await page.locator('#bui-opening').waitFor({ state: 'detached' });
 			assert.equal(await page.locator('vite-error-overlay').evaluate(node => getComputedStyle(node).visibility), 'visible');
+			assert.equal(await OpeningFailures.#opened(page), true, 'the opening stepped aside: the document says so');
 		} finally { await context.close(); }
 	}
 }

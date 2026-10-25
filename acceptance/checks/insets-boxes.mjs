@@ -7,7 +7,7 @@
  * words, a last row that is the product's own); an empty `sides` measures a box for the record only, a box
  * that cannot keep one inset without a design decision. A right side a short line does not reach is free room
  * by itself (the measurement's `free`). `touch` gives what a box keeps instead on a touch screen (0.35.0), where
- * every target is 44 px tall: an action menu's `even` sides, since its entries' height decides its inset; a
+ * every target is 44 px tall: a menu's `even` sides (an action menu's, a choice's), since its entries' height decides its inset; a
  * notification row measured for the record, since its last line's targets grow it and hanging them past its edge
  * would cover the next row's (a design decision, `family-touch-notification-rows`); the notification panel,
  * whose taller rows scroll it by design.
@@ -75,10 +75,14 @@ export const pages = {
 		{ file: 'recovery.html', query: '?whole=1', steps: [{ boxes: [{ name: 'Recovery as the page', box: '.bui-recovery', inset: '--bui-recovery-inset' }] }] }
 	],
 	cards: [
-		{ file: 'insets.html', steps: [{ boxes: [{ name: 'an editable CommandCard', box: '#command-edit .bui-command', inset: '--bui-command-inset' }, { name: 'its command field', box: '#command-edit textarea', field: true, inset: '--bui-code-inset', free: ['bottom'] }] }] },
+		{ file: 'insets.html', steps: [
+			{ boxes: [{ name: 'an editable CommandCard', box: '#command-edit .bui-command', inset: '--bui-command-inset' }, { name: 'its command field', box: '#command-edit textarea', field: true, inset: '--bui-code-inset', free: ['bottom'] }] },
+			// A choice whose entries are one line each, as a composer's Effort (0.35.0)
+			{ open: page => page.locator('#effort .bui-choice-button').click(), boxes: [{ name: 'a choice menu of one-line entries', box: '.bui-choice-list:not([hidden])', flat: ['.bui-menu-item'], inset: '--bui-menu-inset', touch: { inset: 'even' } }] }
+		] },
 		{ file: 'audit.html', steps: [
 			{ boxes: [{ name: 'CommandCard', box: '.bui-command', inset: '--bui-command-inset' }, { name: 'CommandCard code', box: '.bui-command-code', inset: '--bui-code-inset' }, { name: 'ChoiceChip', box: '#chip .bui-choice-button', inset: 8, sides: record }] },
-			{ open: page => page.locator('#chip .bui-choice-button').click(), boxes: [{ name: 'a choice menu with one chosen', box: '.bui-choice-list:not([hidden])', flat: ['.bui-menu-item'], inset: '--bui-menu-inset' }] }
+			{ open: page => page.locator('#chip .bui-choice-button').click(), boxes: [{ name: 'a choice menu with one chosen', box: '.bui-choice-list:not([hidden])', flat: ['.bui-menu-item'], inset: '--bui-menu-inset', touch: { inset: 'even' } }] }
 		] },
 		{ file: 'wave.html', steps: [{ boxes: [{ name: 'the tallest choice card', box: '.bui-card-choice', nth: 2, inset: '--bui-card-inset' }, { name: 'the chosen choice card', box: '.bui-card-choice', nth: 0, inset: '--bui-card-inset', free: ['bottom'] }] }] },
 		{ file: 'layout.html', query: '?raised=1', steps: [{ boxes: [{ name: 'raised side panel', box: '.bui-page-aside[data-raised]', inset: '--bui-panel-inset', free: ['bottom'] }] }] },

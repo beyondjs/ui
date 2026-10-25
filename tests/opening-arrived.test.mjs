@@ -55,3 +55,15 @@ test('landed resolves once the identity has landed and the bar\'s landing mark h
 	assert.ok(Date.now() - started >= OpeningExit.fade * 2 - 20, 'after the bar\'s own parts showed');
 	delete globalThis.innerHeight;
 });
+
+test('landed, read before the hand-over runs, waits for it', async () => {
+	const still = scene({ flight: false });
+	const exit = new OpeningExit(still.presentation, still.root);
+	let done = false;
+	exit.landed.then(() => (done = true));
+	await new Promise(resolve => setTimeout(resolve, 0));
+	assert.equal(done, false, 'nothing has run yet');
+	await exit.run();
+	await exit.landed;
+	assert.equal(done, true);
+});

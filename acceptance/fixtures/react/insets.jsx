@@ -7,7 +7,7 @@ import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Callout, Button, EmptyState, Checklist, Section, Field, Unavailable, TechnicalDetails, CommandCard, Recovery, RetryAction, AgainLine, CopyMessage, useToaster } from '@beyond-js/ui/react';
+import { Callout, Button, EmptyState, Checklist, Section, Field, Unavailable, TechnicalDetails, CommandCard, Recovery, RetryAction, AgainLine, CopyMessage, ChoiceChip, useToaster } from '@beyond-js/ui/react';
 import { words } from '../data/insets.js';
 
 const copy = words.es;
@@ -56,6 +56,9 @@ function App() {
 			</div>
 			<div id="copy-command">
 				<CopyMessage text={copy.copy.command} kind="command" label={copy.copy.label} labels={CopyMessage.labels.es} />
+			</div>
+			<div id="effort">
+				<ChoiceChip label={copy.effort.label} options={copy.effort.options} value="medium" labels={ChoiceChip.labels.es} />
 			</div>
 		</main>
 	);

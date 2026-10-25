@@ -54,7 +54,12 @@ export class OpeningFocus {
 		for (const { target, options } of [...this.#asked].reverse()) {
 			if (!target.isConnected) continue;
 			const before = document.activeElement;
-			target.focus(options);
+			try {
+				target.focus(options);
+			} catch {
+				// A target whose focus() throws (a product's custom element) is passed over
+				continue;
+			}
 			if (document.activeElement !== before || target.contains(document.activeElement)) return true;
 		}
 		return false;

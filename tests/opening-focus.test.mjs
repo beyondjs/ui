@@ -168,3 +168,30 @@ test('land stops at the first call that moved the focus, a target that hands its
 	assert.equal(holder.land(), true, 'focus already on the target stops it at once');
 	assert.ok(document.activeElement === again.approve);
 });
+
+test('a focus() that throws never keeps the opening: land passes over it, and the hand-over ends and lands', async () => {
+	const { presentation, root, title, approve } = scene();
+	const focus = new OpeningFocus(presentation, window);
+	approve.focus();
+	title.focus();
+	// The last target asked for is a product's element whose focus() throws by the time the opening leaves
+	title.focus = () => {
+		throw new Error('a custom element that cannot take the focus');
+	};
+	document.activeElement.blur();
+	const exit = new OpeningExit(presentation, root, focus);
+	await exit.run();
+	assert.ok(document.activeElement === approve, 'the earlier target takes it');
+	await exit.landed;
+	// A person in recovery whose generic destination throws keeps the page as it is, and the hand-over still ends
+	page.reset();
+	const second = scene();
+	second.title.focus = () => {
+		throw new Error('a custom element that cannot take the focus');
+	};
+	second.reload.focus();
+	const leaving = new OpeningExit(second.presentation, second.root, new OpeningFocus(second.presentation, window));
+	await leaving.run();
+	await leaving.landed;
+	assert.equal(second.presentation.dataset.state, 'leaving');
+});

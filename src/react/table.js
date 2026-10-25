@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { DataTable as Table } from '../dom/table/table.js';
+import { CellContent } from '../dom/table/cell.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 import { useTools } from './collection-tools.js';
 
@@ -44,19 +45,21 @@ export function DataTable({ label, columns, rows = none, rowKey = null, search =
 		[label, String(search), JSON.stringify(filters), tools, size, labels, Boolean(link), Boolean(onOpen), Boolean(onRetry), Boolean(group), columns.map(column => column.key).join('|')]
 	);
 	useTools(table, toolsTarget, tools);
-	// What each drawn cell rendered decides whether it is empty, read again whenever its content changes
+	// What each drawn cell rendered decides whether it is empty, by the DOM table's rule (`CellContent`), read
+	// again for the cells whose content changed
 	useLayoutEffect(() => {
 		const holders = portals.map(portal => portal.holder);
-		const mark = () => {
-			for (const holder of holders) {
-				const cell = holder.parentElement;
-				if (cell?.localName === 'td') cell.toggleAttribute('data-empty', !holder.textContent && !holder.childElementCount);
-			}
+		const mark = holder => {
+			const cell = holder.parentElement;
+			if (cell?.localName === 'td') cell.toggleAttribute('data-empty', CellContent.held(holder));
 		};
-		mark();
+		holders.forEach(mark);
 		const view = holders[0]?.ownerDocument?.defaultView;
 		if (!view?.MutationObserver) return undefined;
-		const observer = new view.MutationObserver(mark);
+		const observer = new view.MutationObserver(records => {
+			const changed = new Set(records.map(record => (record.target.nodeType === 1 ? record.target : record.target.parentElement)?.closest('.bui-cell')).filter(Boolean));
+			changed.forEach(mark);
+		});
 		for (const holder of holders) observer.observe(holder, { childList: true, subtree: true, characterData: true });
 		return () => observer.disconnect();
 	}, [portals]);

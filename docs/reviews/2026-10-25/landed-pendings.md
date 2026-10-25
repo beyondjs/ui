@@ -60,7 +60,8 @@ Evidence baseline: this branch (`claude/settled-close-20261025`), made in a work
 
 ### The mark of an arrival (item 9, asked by the coordinator for the products' tests)
 
-- The document element carries `data-bui-opened` once the opening has handed over and the identity has landed on the bar (the bar's `data-bui-landing` gone), at once without an opening to run, and when the opening steps aside for a development server's error overlay. An opening whose recovery is shown never sets it, and nothing removes it. `OpeningExit.mark` names it and `OpeningExit.opened()` sets it; the exit's `landed` resolves once the landing mark has gone.
+- The document element carries `data-bui-opened` once the opening no longer covers the product: after the hand-over, once the identity has landed on the bar (the bar's `data-bui-landing` gone), and when the opening steps aside for a development server's error overlay; at once without the opening's markup, before the product's modules run. While its recovery shows it never sets it, nothing removes it, and a document that never loads the controller never carries it. Inside the package, `OpeningExit.opened()` sets it and the exit's `landed` resolves once the landing mark has gone; neither is exported.
+- Corrected after an independent review: the hand-over is guarded, so a focus that throws (a product's custom element) never keeps the veil over the product, and `landed` is one promise from the exit's construction, so it waits for the hand-over whenever it is read.
 - An attribute, not an event: a test reads it at any time, with a selector or a wait, where an event is lost to a listener added after it. Products' tests wait for `html[data-bui-opened]` instead of the opening's own parts.
 
 ## What the independent review of the first candidate found, and its corrections
@@ -74,6 +75,18 @@ The coordinator had the first candidate ("Let a ref chooser wait for its reposit
 - **The split menu's other ways to send ignored `place` and repeated the reason under each item.** While Send is held they are quiet (an `ActionMenu` item's new `waiting`): with `place`, a press closes the menu and goes there; the reason is said once, beside Send (D101).
 - **Focus dropped to the body** when a choice started waiting while its list or the escape field held it: it goes back to the quiet button; once a ref chooser's wait ends into a state without its menu, the button's focus goes to that state's first control.
 - **Cleanups:** `RefChooser.other()` opens nothing while it waits; the opening creates its focus recorder last in `#start()`, so a throw earlier never leaves `focus()` wrapped; the waiting chip's unit test presses Enter and Space as the platform's activation.
+
+## What the independent review of the later commits found, and its corrections
+
+The coordinator had the commits after the first review (the mark of an arrival, the touch menu, the offline Recovery line, a button's own wait, the narrow table's empty cell and the renumbering) reviewed independently; each finding is corrected:
+
+- **A named submit button outside the form was not heard** (a dialog's footer): its own wait ending while a part waited left it able until the next input. `Required` now observes each such button's `data-busy` and `data-bui-waiting` too, in the DOM and in React.
+- **A choice's menu kept the touch defect the action menu's fix had closed**: the rule named `ul.bui-menu`, while a choice's list is a panel around its own list. It now names every menu's entries; the insets page draws a choice of one-line entries (a composer's Effort), measured on a touch screen with the choice menus held even.
+- **What `data-bui-opened` says was too broad**: it says the opening no longer covers the product; without the opening's markup it is set before the product runs, so a test waits for the product's own content there; a document that never loads the controller never carries it; under a paused clock the hand-over's 700 ms and the landing's 400 ms are timers to advance. `OpeningExit.mark` is not exported, so no guide names it as public.
+- **A focus that throws could keep the veil over the product**: the hand-over is guarded (the opening leaves, the fonts are given back and the mark is set whatever it meets), and each focus the opening lands is caught. `landed` is one promise from the exit's construction, so it waits for the hand-over whenever it is read.
+- **The mark's other paths are checked in a real engine**: absent while the late, failed and offline recoveries show and with JavaScript off; set after a late recovery's hand-over and the overlay's step aside.
+- **The tables read emptiness two ways**: React took spaces for content, and the DOM took a childless field for empty. One rule (`CellContent`) now reads both, and React reads again only the cells whose content changed.
+- **The same class as a button's own wait**: React's busy link now says `data-busy`, as the DOM's does, and a choice's own wait is marked `data-bui-waiting`, so neither a form nor a `Quiet` frees them.
 
 ## Executed checks
 

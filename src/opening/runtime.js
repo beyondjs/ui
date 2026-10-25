@@ -26,7 +26,7 @@ import { OpeningWords, steps } from './words.js';
  * over: the identity settles into the family bar and the rest fades, the product usable from the first
  * frame. A page restored from the back-forward cache before it opened is opened again, and a
  * development server's error overlay is never covered. Since 0.35.0 a focus the product asks for while
- * covered lands when it shows (`OpeningFocus`), and `html[data-bui-opened]` says the product has arrived.
+ * covered lands when it shows (`OpeningFocus`), and `html[data-bui-opened]` says the opening has gone.
  */
 class OpeningRuntime {
 	/** Milliseconds from the navigation's start before the steps are said: a quick opening says none */
@@ -94,12 +94,9 @@ class OpeningRuntime {
 		this.#language.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 		this.#timers.push(setTimeout(() => this.#reveal(), Math.max(0, OpeningRuntime.reveal - performance.now())));
 		this.#timers.push(setTimeout(() => this.#late(), Math.max(0, OpeningRuntime.bound - performance.now())));
-		addEventListener('offline', this.#offline);
-		addEventListener('online', this.#online);
-		addEventListener('pageshow', this.#restored);
+		for (const [type, handler] of [['offline', this.#offline], ['online', this.#online], ['pageshow', this.#restored]]) addEventListener(type, handler);
 		if (navigator.onLine === false) this.#offline();
-		// Last, so nothing that throws above leaves the platform's focus() wrapped: from now until the hand-over,
-		// a focus the product asks for while hidden is kept for its arrival
+		// Last, so a throw above never leaves focus() wrapped: until the hand-over, a focus asked for is kept
 		this.#focus = new OpeningFocus(this.#element);
 		this.#check();
 	}
@@ -265,11 +262,15 @@ class OpeningRuntime {
 		// Only an opening that went as expected is measured
 		if (!this.#recovery.state) this.#usual.keep(this.#steps.durations);
 		const exit = new OpeningExit(this.#element, root, this.#focus);
-		await exit.run();
-		this.#element.remove();
-		// One set of faces from now on: the application's own, once the ones in use have loaded (0.17.1)
-		new OpeningFonts(document.querySelector('link[data-bui-opening]')?.sheet ?? null).release().catch(() => false);
-		exit.landed.then(() => OpeningExit.opened());
+		// Whatever the hand-over meets, the opening leaves and the document says so (0.35.0)
+		try {
+			await exit.run();
+		} finally {
+			this.#element.remove();
+			// One set of faces from now on: the application's own, once the ones in use have loaded (0.17.1)
+			new OpeningFonts(document.querySelector('link[data-bui-opening]')?.sheet ?? null).release().catch(() => false);
+			exit.landed.then(() => OpeningExit.opened());
+		}
 	}
 
 	/** Steps aside at once for a development server's error overlay */

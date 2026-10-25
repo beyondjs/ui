@@ -13,8 +13,9 @@ export interface Waited {
  * an unchecked required box, a radio group or a choice with nothing chosen; text the browser could not
  * read is wrong, not missing), or a part the product marks `data-missing`; given `fields`, theirs.
  * Its submit buttons wait quiet (`aria-disabled`, still reachable), those outside the form that name it
- * with `form` included, and a busy one (`data-busy`) keeps its state, as a package `Button` that waits for
- * the product's own condition (`data-bui-waiting`, 0.35.0) keeps its wait. It hears the form's input and
+ * with `form` included, and a busy one (`data-busy`) keeps its state, as a package `Button` or a choice that
+ * waits for the product's own condition (`data-bui-waiting`, 0.35.0) keeps its wait; once either ends, on a
+ * button inside the form or outside it that names it, the form is read again. It hears the form's input and
  * change until `destroy()`.
  */
 export class Required {

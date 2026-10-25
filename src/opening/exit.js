@@ -15,20 +15,22 @@
  * Since 0.35.0 the focus a product asked for while covered lands as it shows (`OpeningFocus`): where the
  * person's focus is not in the product already, the last target asked for that still takes the focus gets
  * it, and a person in the opening's recovery, which leaves, gets it over the generic destination. And the
- * document carries one public mark once the product has arrived (`OpeningExit.opened()`).
+ * document carries one public mark once the opening no longer covers the product (`OpeningExit.opened()`).
+ * A focus that throws (a product's custom element) never keeps the opening in place: the hand-over still
+ * ends and the identity still lands.
  */
 export class OpeningExit {
 	static duration = 360;
 	static fade = 200;
 	static bound = 700;
 	static ease = 'cubic-bezier(0.2, 0.7, 0.3, 1)';
-	/** The document element's attribute that says the product has arrived (0.35.0), for tests and tools to wait for */
+	/** The document element's attribute that says the opening no longer covers the product (0.35.0) */
 	static mark = 'data-bui-opened';
 
 	/**
 	 * Marks the document opened: once the hand-over ended and the identity landed, or when there was no
-	 * opening to run or it stepped aside. It is the one public mark of an arrival; the opening's own parts
-	 * and the bar's landing mark are internals that may change.
+	 * opening to run or it stepped aside. It is the one public mark that the opening has gone; the opening's
+	 * own parts and the bar's landing mark are internals that may change.
 	 */
 	static opened() {
 		document.documentElement.setAttribute(OpeningExit.mark, '');
@@ -38,7 +40,8 @@ export class OpeningExit {
 	#root;
 	#focus;
 	#bar = null;
-	#landed = Promise.resolve();
+	#landed;
+	#arrive;
 
 	/**
 	 * @param {HTMLElement} element The presentation (`#bui-opening`)
@@ -49,6 +52,8 @@ export class OpeningExit {
 		this.#element = element;
 		this.#root = root;
 		this.#focus = focus;
+		// One promise, whenever it is read: it resolves once the hand-over has run and the identity landed
+		this.#landed = new Promise(resolve => (this.#arrive = resolve));
 	}
 
 	/** Whether this browser and this person's settings allow the motion */
@@ -56,24 +61,24 @@ export class OpeningExit {
 		return typeof this.#element.animate === 'function' && !globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 	}
 
-	/** Resolves once the identity has landed and the bar's landing mark has gone, at once without a flight */
+	/** Resolves once the hand-over has run and the identity has landed, the bar's landing mark gone; without a flight, as it ends */
 	get landed() {
 		return this.#landed;
 	}
 
 	/** Runs the hand-over and resolves once the presentation can be removed */
 	async run() {
-		const active = document.activeElement;
-		const focused = this.#element.contains(active);
-		this.#element.dataset.state = 'leaving';
-		// The product shows: the platform's focus is its own again, and what the product asked to focus while
-		// covered lands, unless the person's focus is in the product already
-		this.#focus?.release();
-		const free = focused || !active || active === document.body || active === document.documentElement;
-		if (!(free && this.#focus?.land()) && focused) this.#keep();
-		if (!this.moving) return;
-		const motions = [...this.#flights(), ...this.#fades()];
 		try {
+			const active = document.activeElement;
+			const focused = this.#element.contains(active);
+			this.#element.dataset.state = 'leaving';
+			// The product shows: the platform's focus is its own again, and what the product asked to focus while
+			// covered lands, unless the person's focus is in the product already
+			this.#focus?.release();
+			const free = focused || !active || active === document.body || active === document.documentElement;
+			if (!(free && this.#focus?.land()) && focused) this.#keep();
+			if (!this.moving) return;
+			const motions = [...this.#flights(), ...this.#fades()];
 			await Promise.race([Promise.allSettled(motions.map(motion => motion.finished)), new Promise(resolve => setTimeout(resolve, OpeningExit.bound))]);
 		} finally {
 			this.#land();
@@ -84,7 +89,11 @@ export class OpeningExit {
 	#keep() {
 		const destination = this.#root.querySelector('h1, main, button, a[href]') ?? this.#root;
 		if (!destination.hasAttribute('tabindex')) destination.setAttribute('tabindex', '-1');
-		destination.focus({ preventScroll: true });
+		try {
+			destination.focus({ preventScroll: true });
+		} catch {
+			// A product's element whose focus() throws keeps the page as it is
+		}
 	}
 
 	/** The wordmark and the name, each to its place in the bar when the bar shows it */
@@ -112,12 +121,12 @@ export class OpeningExit {
 	/** The identity has landed: the bar's own shows where it arrived and what did not move fades in, then the mark goes */
 	#land() {
 		const bar = this.#bar;
-		if (!bar) return;
+		if (!bar) return this.#arrive();
 		bar.dataset.buiLanding = 'landed';
-		this.#landed = new Promise(resolve => setTimeout(() => {
+		setTimeout(() => {
 			if (bar.dataset.buiLanding === 'landed') delete bar.dataset.buiLanding;
-			resolve();
-		}, OpeningExit.fade * 2));
+			this.#arrive();
+		}, OpeningExit.fade * 2);
 	}
 
 	/**

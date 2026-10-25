@@ -53,7 +53,7 @@ export function Button({ label, children, variant = 'secondary', glyph = null, h
 	const quiet = busy || waiting ? 'true' : undefined;
 	// Its own wait is marked, so a form's or a Quiet's settling never frees it (0.35.0)
 	const own = waiting ? '' : undefined;
-	if (href && !disabled) return h('a', { ...rest, className, href, onClick: press, 'aria-label': name, 'aria-disabled': quiet, 'data-bui-waiting': own }, inner);
+	if (href && !disabled) return h('a', { ...rest, className, href, onClick: press, 'aria-label': name, 'aria-disabled': quiet, 'data-busy': busy ? '' : undefined, 'data-bui-waiting': own }, inner);
 	return h('button', { ...rest, className, type, disabled, 'aria-label': name, 'aria-disabled': quiet, 'data-busy': busy ? '' : undefined, 'data-bui-waiting': own, onClick: press }, inner);
 }
 

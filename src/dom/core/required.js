@@ -22,7 +22,8 @@ const following = 4;
  * putting the caret in the first part that waits and saying nothing. It quiets and frees only what it
  * quieted itself: a button a product keeps quiet stays so, and a busy one (`data-busy`) keeps what its
  * work draws, as a package `Button` that waits for the product's own condition (`data-bui-waiting`,
- * 0.35.0) keeps its wait; once either ends, the form is read again. It hears the input and change of the form and of a control that names it, and
+ * 0.35.0) keeps its wait; once either ends, on a button inside the form or outside it that names it, the
+ * form is read again. It hears the input and change of the form and of a control that names it, and
  * `Required.change` from a part whose value was written without a typed one; it reads the form again in
  * the next frame after its structure changes (a control added, swapped, required or disabled; a part
  * marked), until `destroy()`. `FocusedForm`, `prompt` and React's `Form` are built on it, and a
@@ -126,6 +127,8 @@ export class Required {
 	settle() {
 		const quiet = this.missing;
 		for (const button of this.buttons) {
+			// One outside the form that names it is heard too: its own wait or work ending is read again (0.35.0)
+			if (this.#observer && !this.#form.contains(button)) this.#observer.observe(button, { attributes: true, attributeFilter: ['data-busy', 'data-bui-waiting'] });
 			if (Required.held(button)) continue;
 			if (quiet && !button.hasAttribute('aria-disabled')) {
 				button.setAttribute('aria-disabled', 'true');

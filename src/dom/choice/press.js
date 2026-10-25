@@ -38,6 +38,8 @@ export class ChoicePress {
 	 */
 	set waiting(value) {
 		this.#waiting = Boolean(value);
+		// Its own wait is marked, as a package Button's, so a Quiet over the button never frees it (0.35.0)
+		this.#button.toggleAttribute('data-bui-waiting', this.#waiting);
 		if (!this.#waiting) return void this.#button.removeAttribute('aria-disabled');
 		this.#button.setAttribute('aria-disabled', 'true');
 		const active = this.#button.ownerDocument.activeElement;

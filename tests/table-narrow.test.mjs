@@ -104,3 +104,45 @@ test('the DOM table reads its own values so, and keeps a cell whose content is a
 	assert.equal(line(row), 'Mark:  · Zone: eu-west');
 	table.destroy();
 });
+
+test('the DOM and React tables read a cell alike: spaces and a childless span are nothing, an input or an image is content', async () => {
+	const { CellContent } = await import('../src/dom/table/cell.js');
+	const make = (tag, attributes = {}) => Object.assign(document.createElement(tag), attributes);
+	const cases = [
+		{ name: 'spaces', dom: '   ', react: () => '   ', empty: true },
+		{ name: 'a bare dot', dom: make('span', { className: 'bui-status-dot' }), react: () => h('span', { className: 'bui-status-dot' }), empty: true },
+		{ name: 'a field', dom: make('input', { 'aria-label': 'Port' }), react: () => h('input', { 'aria-label': 'Port', readOnly: true }), empty: false },
+		{ name: 'an image', dom: make('img', { alt: '' }), react: () => h('img', { alt: '' }), empty: false },
+		{ name: 'words', dom: 'us-east', react: () => h('em', null, 'us-east'), empty: false }
+	];
+	for (const item of cases) {
+		assert.equal(CellContent.empty(item.dom), item.empty, `the DOM table: ${item.name}`);
+		const table = new dom.DataTable({ label: 'Machines', columns: [{ key: 'name', label: 'Name', primary: true }, { key: 'value', label: 'Value', render: () => item.dom }], rows: [{ id: 'a', name: 'web' }] }).mount(document.body);
+		assert.equal(table.element.querySelector('tbody td').hasAttribute('data-empty'), item.empty, `the DOM table draws it so: ${item.name}`);
+		table.destroy();
+		await act(() => root.render(h(ui.DataTable, { label: 'Machines', rows: [{ id: 'a', name: 'web' }], columns: [{ key: 'name', label: 'Name', primary: true }, { key: 'value', label: 'Value', render: item.react }] })));
+		assert.equal(host.querySelector('tbody td').hasAttribute('data-empty'), item.empty, `React's table: ${item.name}`);
+	}
+});
+
+test("a change in one React cell reads that cell again, not every cell", async () => {
+	const { CellContent } = await import('../src/dom/table/cell.js');
+	let show = null;
+	function Late() {
+		const [shown, setShown] = useState(false);
+		show = setShown;
+		return shown ? 'Deploying' : null;
+	}
+	const many = Array.from({ length: 20 }, (_, index) => ({ id: `r${index}`, name: `app-${index}` }));
+	await act(() => root.render(h(ui.DataTable, { label: 'Applications', rows: many, rowKey: row => row.id, columns: [columns[0], { key: 'now', label: 'Now', render: row => (row.id === 'r3' ? h(Late) : 'Ready') }] })));
+	const held = CellContent.held;
+	let reads = 0;
+	CellContent.held = holder => (reads++, held.call(CellContent, holder));
+	try {
+		await act(async () => show(true));
+		await page.until(() => !host.querySelector('tbody tr[data-key="r3"] td').hasAttribute('data-empty'));
+		assert.ok(reads >= 1 && reads <= 2, `only the cell that changed is read again (${reads})`);
+	} finally {
+		CellContent.held = held;
+	}
+});
