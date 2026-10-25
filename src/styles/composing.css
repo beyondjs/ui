@@ -40,7 +40,7 @@
 .bui-composer .bui-chip .bui-choice-button:not([data-tone='danger'], [data-tone='warning']) {
 	border-color: var(--color-border);
 }
-.bui-composer .bui-chip .bui-choice-button:not(:disabled):hover,
+.bui-composer .bui-chip .bui-choice-button:not(:disabled, [aria-disabled='true']):hover,
 .bui-composer .bui-chip .bui-choice-button[aria-expanded='true'] {
 	border-color: var(--color-border-strong);
 	background: var(--overlay-lift);

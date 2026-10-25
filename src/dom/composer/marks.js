@@ -3,14 +3,15 @@
  * reason }` while sending is unavailable, `data-disabled`) and the product's own `busy`; `data-busy` while a
  * send is in flight or the product works; `data-empty` while there is nothing to send (no words, no ready
  * file: Send reads quiet and, since 0.29.0, a press says nothing, D183); and `data-live` while the
- * product's work runs (the engine answering), which the box's edge shows.
+ * product's work runs (the engine answering), which the box's edge shows. Since 0.34.0 (D183) a held Send
+ * may say where the person can act (`disabled.place`): a press on it only puts them there.
  */
 export class ComposerMarks {
 	#root;
 	#nothing;
 	#onempty;
 
-	/** Sending is unavailable, and why: `{ reason }`, or null. */
+	/** Sending is unavailable, why, and where a press puts the person (0.34.0): `{ reason, place? }`, or null. */
 	disabled = null;
 	/** The product's own work: nothing is sent meanwhile. */
 	busy = false;
@@ -42,5 +43,16 @@ export class ComposerMarks {
 
 	set live(value) {
 		this.#root.toggleAttribute('data-live', Boolean(value));
+	}
+
+	/**
+	 * Whether sending is held now (`disabled`). A press, never a key, on the held Send puts the person at
+	 * `disabled.place()`, such as the chooser of what sending waits for, and says nothing more than the
+	 * reason already beside it (0.34.0, D183); Enter in the field leaves focus where it is.
+	 */
+	held(pressed) {
+		if (!this.disabled) return false;
+		if (pressed) this.disabled.place?.()?.focus();
+		return true;
 	}
 }

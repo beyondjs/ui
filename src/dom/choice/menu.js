@@ -8,6 +8,7 @@ import { single } from '../core/statement.js';
 import { ChoiceEntry } from './entry.js';
 import { ChoiceFace } from './face.js';
 import { ChoiceFinder } from './finder.js';
+import { ChoicePress } from './press.js';
 import { labels as copy } from './labels.js';
 
 /**
@@ -22,7 +23,8 @@ import { labels as copy } from './labels.js';
  * `ChoiceMenu.threshold` options (or `search: true`) it opens with a search field (0.7.0). A disabled
  * option stays reachable with its reason and is never chosen. One option that can be chosen and no
  * action is a statement, not a choice (D56; `statement: false` keeps the menu). The list is placed by
- * `Floating` (0.15.0).
+ * `Floating` (0.15.0). Since 0.34.0 (D183) a choice may wait for an earlier one (`waiting`): quiet and
+ * still reachable, a press only puts the person at `place()` and opens nothing (`ChoicePress`).
  *
  * Options: `{ value, label, detail?, status?: [text, tone], disabled?, reason?, search? }`. Actions:
  * `{ label, run, disabled?, reason? }`.
@@ -51,6 +53,7 @@ export class ChoiceMenu extends Component {
 	#open = false;
 	#release = null;
 	#picture = null;
+	#press;
 
 	/**
 	 * @param {object} options
@@ -64,8 +67,10 @@ export class ChoiceMenu extends Component {
 	 * @param {string|null} [options.name] submits the value with a form in a hidden input
 	 * @param {(value: string) => void} [options.onchange]
 	 * @param {{state?: [string, string]|null}|null} [options.face] a chip's face, read at each drawing (`ChoiceChip`, 0.11.0)
+	 * @param {boolean} [options.waiting] waits for an earlier choice: quiet, a press only going to `place` (0.34.0, D183)
+	 * @param {(() => HTMLElement|null|undefined)|null} [options.place] where a press puts the person while it waits
 	 */
-	constructor({ label, options, value = null, placeholder = null, actions = [], disabled = false, align = 'start', placement = 'auto', search = 'auto', statement = true, name = null, onchange = null, labels = {}, face = null }) {
+	constructor({ label, options, value = null, placeholder = null, actions = [], disabled = false, align = 'start', placement = 'auto', search = 'auto', statement = true, name = null, onchange = null, labels = {}, face = null, waiting = false, place = null }) {
 		super();
 		this.#label = label;
 		this.#labels = new Labels(copy.en, placeholder ? { ...labels, placeholder } : labels);
@@ -73,7 +78,8 @@ export class ChoiceMenu extends Component {
 		if (face) face.slot = !(placeholder ?? labels.placeholder);
 		this.#onchange = onchange;
 		const id = Ids.next('bui-choice');
-		this.#button = el('button', { type: 'button', class: 'bui-choice-button', 'aria-haspopup': 'menu', 'aria-expanded': 'false', 'aria-controls': id, disabled, onclick: () => (this.#open ? this.close(true) : this.open()), onkeydown: event => this.#opener(event) });
+		this.#button = el('button', { type: 'button', class: 'bui-choice-button', 'aria-haspopup': 'menu', 'aria-expanded': 'false', 'aria-controls': id, disabled, onclick: () => this.#press.click(), onkeydown: event => this.#press.key(event) });
+		this.#press = new ChoicePress(this.#button, { menu: this, waiting, place });
 		this.#list = el('ul', { id, class: 'bui-choice-items', role: 'menu', 'aria-label': label });
 		this.#panel = el('div', { class: `bui-menu bui-choice-list bui-align-${align}`, hidden: true, onkeydown: event => this.#keys(event) }, [this.#list]);
 		this.#element = el('div', { class: `bui-menu-holder bui-choice${face ? ' bui-chip' : ''}` });
@@ -117,6 +123,15 @@ export class ChoiceMenu extends Component {
 		if (disabled) this.close(false);
 	}
 
+	get waiting() {
+		return this.#press.waiting;
+	}
+
+	/** Waits quiet for an earlier choice, a press only going to `place` (true), or opens (false) (0.34.0, D183). */
+	set waiting(value) {
+		this.#press.waiting = value;
+	}
+
 	/** Replaces the options; the value stays chosen only while an option still has it */
 	set options(options) {
 		this.#options = options.filter(Boolean);
@@ -135,11 +150,11 @@ export class ChoiceMenu extends Component {
 	}
 
 	/**
-	 * Opens the list on the chosen option (a long list on its search field); false when disabled, stated
-	 * or its button is not drawn (0.15.0: `bui-refused`, which a composer's Options answers).
+	 * Opens the list on the chosen option (a long list on its search field); false when disabled, waiting,
+	 * stated or its button is not drawn (0.15.0: `bui-refused`, which a composer's Options answers).
 	 */
 	open() {
-		if (this.destroyed || this.#button.disabled || this.stated) return false;
+		if (this.destroyed || this.#button.disabled || this.#press.waiting || this.stated) return false;
 		if (!this.#open) {
 			this.#picture?.remove();
 			this.#panel.hidden = false;
@@ -221,7 +236,7 @@ export class ChoiceMenu extends Component {
 		const limit = typeof search === 'number' ? search : ChoiceMenu.threshold;
 		const shown = search === true || ((search === 'auto' || typeof search === 'number') && this.#options.length > limit);
 		if (this.#finder && Boolean(this.#finder.field) === shown) return this.#finder;
-		return new ChoiceFinder({ search: shown, label: this.#labels.text('search', { label: this.#label }), controls: this.#list.id, onkeys: event => this.#field(event), oninput: () => this.#filter() });
+		return new ChoiceFinder({ search: shown, label: this.#labels.text('search', { label: this.#label }), controls: this.#list.id, onkeys: event => this.#finder.keys(event, this.#entries.filter(entry => entry.shown), entry => this.#choose(entry.item, entry.option), () => this.#filter()), oninput: () => this.#filter() });
 	}
 
 	/** Lists the options that match the query; actions always stay. */
@@ -237,31 +252,6 @@ export class ChoiceMenu extends Component {
 		this.#value = option.value;
 		this.#draw();
 		this.#onchange?.(option.value);
-	}
-
-	#opener(event) {
-		if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-			event.preventDefault();
-			this.open();
-		}
-	}
-
-	/** Keys in the search field: down into the list, Enter chooses the first match, Escape clears then closes. */
-	#field(event) {
-		const shown = this.#entries.filter(entry => entry.shown);
-		if (event.key === 'ArrowDown') {
-			event.preventDefault();
-			shown[0]?.node.focus({ preventScroll: true });
-		} else if (event.key === 'Enter') {
-			event.preventDefault();
-			const first = shown.find(entry => entry.option && !entry.item.disabled);
-			if (first) this.#choose(first.item, first.option);
-		} else if (event.key === 'Escape' && this.#finder.query) {
-			event.preventDefault();
-			event.stopPropagation();
-			this.#finder.clear();
-			this.#filter();
-		}
 	}
 
 	#keys(event) {

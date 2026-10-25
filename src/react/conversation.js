@@ -40,15 +40,17 @@ function slot(tag, name) {
  * or a source), `recall` and `dictation` (`{ transcribe, cap?, bound?, minimum?, explain? }`) are read from
  * the latest props, and whether they are given (or the dictation's cap, bound or minimum) creates a new box.
  * Since 0.26.0 (D165) `add` is the + menu's entries after Attach files (`{ label, onSelect, keys? }`, each
- * `onSelect` read from the latest props) and `live` marks the box while the product's work runs.
+ * `onSelect` read from the latest props) and `live` marks the box while the product's work runs. Since 0.34.0
+ * `disabled` may carry `place`, where a press on the held Send puts the person, read from the latest props.
  */
 export const Composer = forwardRef(function Composer({ label, placeholder = null, status = null, tools = null, extras = null, settings = null, actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value, min, max, name = null, onChange = null, onSubmit, explain, labels, attach = null, attachments = null, onSuggest = null, suggest = null, locale = undefined, compact = true, summary = null, tray = null, commands = null, recall = null, dictation = null, step = null, add = null, live = false }, ref) {
 	const [slots] = useState(() => ({ tools: slot('span', 'bui-composer-slot'), extras: slot('span', 'bui-composer-slot'), settings: slot('span', 'bui-composer-slot'), status: slot('span', 'bui-composer-slot'), action: slot('span', 'bui-composer-slot'), tray: slot('span', 'bui-composer-slot') }));
-	const latest = useLatest({ onChange, onSubmit, explain, stop, attach, onSuggest, status, commands, recall, dictation, step, add });
+	const latest = useLatest({ onChange, onSubmit, explain, stop, attach, onSuggest, status, commands, recall, dictation, step, add, disabled });
 	const entries = () => (latest.current.add ?? []).map((entry, index) => ({ label: entry.label, keys: entry.keys ?? null, run: () => latest.current.add?.[index]?.onSelect?.() }));
 	const voice = dictation ? { labels: dictation.labels, cap: dictation.cap, bound: dictation.bound, minimum: dictation.minimum, transcribe: (blob, options) => latest.current.dictation?.transcribe?.(blob, options), explain: dictation.explain ? error => latest.current.dictation?.explain?.(error) : undefined } : null;
 	const line = new StatusLine(status, slots, latest);
 	const halt = () => (stop?.label ? { label: stop.label, busy: Boolean(stop.busy), run: () => latest.current.stop?.onSelect?.() } : null);
+	const held = () => (disabled ? { ...disabled, place: disabled.place ? () => latest.current.disabled?.place?.() ?? null : null } : null);
 	const intake = attach ? { label: attach.label ?? null, accept: attach.accept ?? null, multiple: attach.multiple !== false, onfiles: (files, via) => latest.current.attach?.onFiles?.(files, via), onremove: item => latest.current.attach?.onRemove?.(item), onretry: attach.onRetry ? item => latest.current.attach?.onRetry?.(item) : null, words: () => latest.current.attach?.words ?? null } : null;
 	const [host, box] = useInstance(
 		() =>
@@ -70,7 +72,7 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 				settings: settings ? [slots.settings] : [],
 				actions,
 				stop: halt(),
-				disabled,
+				disabled: held(),
 				busy,
 				attach: intake,
 				attachments: attachments ?? [],
@@ -99,7 +101,7 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 	useSync(box, current => (current.attachments = attachments ?? []), [attachments, attach?.words ?? null]);
 	useSync(box, current => (current.actions = actions), [JSON.stringify(actions)]);
 	useSync(box, current => (current.stop = halt()), [stop?.label ?? null, Boolean(stop?.busy)]);
-	useSync(box, current => (current.disabled = disabled), [JSON.stringify(disabled ?? null)]);
+	useSync(box, current => (current.disabled = held()), [JSON.stringify(disabled ?? null), Boolean(disabled?.place)]);
 	useSync(box, current => (current.busy = busy), [busy]);
 	// The step a message needs first (0.16.0, DQ-03); its `onSelect({ text })` is read from the latest props
 	useSync(box, current => (current.step = step?.label ? { label: step.label, run: input => latest.current.step?.onSelect?.(input) } : null), [step?.label ?? null]);

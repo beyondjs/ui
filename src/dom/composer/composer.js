@@ -208,7 +208,7 @@ export class Composer extends Component {
 		return this.#marks.disabled;
 	}
 
-	/** `{ reason }` while sending is unavailable, or null. */
+	/** `{ reason, place? }` while sending is unavailable, or null; a press on Send then goes to `place()` (0.34.0). */
 	set disabled(value) {
 		this.#marks.disabled = value || null;
 		this.#draw();
@@ -260,7 +260,7 @@ export class Composer extends Component {
 	}
 
 	#send(action, pressed, stepped = false) {
-		if (this.#sender.sending || this.#marks.busy || this.#marks.disabled || this.destroyed || this.#step.running) return Promise.resolve(false);
+		if (this.destroyed || this.#sender.sending || this.#marks.busy || this.#step.running || this.#marks.held(pressed)) return Promise.resolve(false);
 		if (this.#step.active && !stepped) return this.#step.pass({ text: this.#field.value, draw: () => this.#draw(), send: () => this.#send(action, pressed, true) });
 		// What Options showed folds again once the message is sent (a refused one keeps it shown)
 		return this.#sender.send(action, pressed).then(sent => (sent && (this.#toolbar.fold.toggle(false), this.#expand.close()), sent));

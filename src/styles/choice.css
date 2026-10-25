@@ -22,14 +22,17 @@
 	text-align: left;
 	cursor: pointer;
 }
-.bui-choice-button:hover {
+.bui-choice-button:not(:disabled, [aria-disabled='true']):hover {
 	background: var(--color-surface-sunken);
 }
 .bui-choice-button:focus-visible {
 	outline: 2px solid var(--color-focus);
 	outline-offset: 2px;
 }
-.bui-choice-button:disabled {
+/* A choice that can never be made (`disabled`), and one that waits for an earlier choice (`waiting`, 0.34.0,
+   D183): quiet, the second still reachable, a press only putting the person where they can act. */
+.bui-choice-button:disabled,
+.bui-choice-button[aria-disabled='true'] {
 	color: var(--color-text-muted);
 	background: var(--color-surface-sunken);
 	cursor: not-allowed;

@@ -51,7 +51,8 @@ export interface ComposerProps {
 	actions?: ComposerAction[] | null;
 	/** The stop action while work runs; `onSelect` is read from the latest props. */
 	stop?: { label: string; onSelect?: (() => unknown) | null; busy?: boolean } | null;
-	disabled?: { reason?: string | null } | null;
+	/** Sending is unavailable, why, and where a press on Send puts the person (`place`, read from the latest props, 0.34.0) */
+	disabled?: { reason?: string | null; place?: (() => HTMLElement | null | undefined) | null } | null;
 	busy?: boolean;
 	submit?: ComposerSubmit;
 	/** Applied when it changes. */

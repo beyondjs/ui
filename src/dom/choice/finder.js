@@ -108,6 +108,27 @@ export class ChoiceFinder {
 	}
 
 	/**
+	 * Keys in the search field: ArrowDown goes into the `shown` entries, Enter chooses the first of them that
+	 * can be chosen (`choose(entry)`), and Escape clears a query (`onfilter` then filters) before a second
+	 * one closes the list.
+	 */
+	keys(event, shown, choose, onfilter) {
+		if (event.key === 'ArrowDown') {
+			event.preventDefault();
+			shown[0]?.node.focus({ preventScroll: true });
+		} else if (event.key === 'Enter') {
+			event.preventDefault();
+			const first = shown.find(entry => entry.option && !entry.item.disabled);
+			if (first) choose(first);
+		} else if (event.key === 'Escape' && this.query) {
+			event.preventDefault();
+			event.stopPropagation();
+			this.clear();
+			onfilter();
+		}
+	}
+
+	/**
 	 * A printable key in the open list: typed into the search field of a long list (`onfilter` then
 	 * filters, and the field takes focus), else the type-ahead entry among the `shown` ones, or null.
 	 */

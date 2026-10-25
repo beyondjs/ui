@@ -39,6 +39,10 @@ export interface ChoiceMenuOptions {
 	name?: string | null;
 	onchange?: ((value: string) => void) | null;
 	labels?: Copy;
+	/** Waits for an earlier choice (0.34.0, D183): quiet and still reachable, a press only going to `place()` and opening nothing */
+	waiting?: boolean;
+	/** Where a press puts the person while it waits; without it a press does nothing */
+	place?: (() => HTMLElement | null | undefined) | null;
 }
 export class ChoiceMenu extends Component {
 	/** The copy in English and Spanish (0.7.0). */
@@ -53,9 +57,11 @@ export class ChoiceMenu extends Component {
 	readonly chosen: ChoiceMenuOption | null;
 	value: string | null;
 	set disabled(disabled: boolean);
+	/** Waits quiet for an earlier choice (0.34.0, D183); becoming waiting closes an open list without moving focus. */
+	waiting: boolean;
 	set options(options: Array<ChoiceMenuOption | null | false>);
 	set actions(actions: Array<ChoiceMenuAction | null | false>);
-	/** Whether it opened (0.15.0): false when disabled, stated or its button is not drawn. */
+	/** Whether it opened (0.15.0): false when disabled, waiting (0.34.0), stated or its button is not drawn. */
 	open(): boolean;
 	close(refocus?: boolean): void;
 }

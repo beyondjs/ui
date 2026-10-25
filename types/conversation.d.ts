@@ -157,8 +157,8 @@ export interface ComposerOptions extends ComposerEdges {
 	/** The ways to send ("Send" by default). */
 	actions?: ComposerAction[] | null;
 	stop?: ComposerStop | null;
-	/** Sending is unavailable, with the reason said beside the action (D44). */
-	disabled?: { reason?: string | null } | null;
+	/** Sending is unavailable, with the reason said beside the action (D44), and where a press on Send puts the person (`place`, 0.34.0, D183). */
+	disabled?: { reason?: string | null; place?: (() => HTMLElement | null | undefined) | null } | null;
 	/** The product's own work: nothing is sent meanwhile. */
 	busy?: boolean;
 	/** `'enter'` (default): Enter sends on a hardware keyboard; `'mod'`: only ⌘/Ctrl+Enter. */
@@ -211,7 +211,7 @@ export class Composer extends Component {
 	set extras(nodes: Part[]);
 	set actions(list: ComposerAction[] | null);
 	set stop(value: ComposerStop | null);
-	disabled: { reason?: string | null } | null;
+	disabled: { reason?: string | null; place?: (() => HTMLElement | null | undefined) | null } | null;
 	busy: boolean;
 	/** Whether a send is in flight. */
 	readonly sending: boolean;

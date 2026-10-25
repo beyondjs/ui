@@ -11,7 +11,7 @@
  * @property {Array<Node|{element: Node}>} [extras] the toolbar's end, before the actions
  * @property {Array<{id: string, label: string, primary?: boolean, words?: boolean}>|null} [actions] the ways to send ("Send" by default); the primary is its glyph alone unless `words` (0.26.0)
  * @property {{label: string, run: () => unknown, busy?: boolean}|null} [stop] the stop action while work runs
- * @property {{reason?: string|null}|null} [disabled] sending is unavailable, and why
+ * @property {{reason?: string|null, place?: (() => HTMLElement|null|undefined)|null}|null} [disabled] sending is unavailable, why, and where a press on Send puts the person (`place`, 0.34.0)
  * @property {boolean} [busy] the product's own work: nothing is sent meanwhile
  * @property {'enter'|'mod'} [submit] whether Enter sends on a hardware keyboard (default `'enter'`)
  * @property {string} [value] the text, such as a kept draft

@@ -27,21 +27,24 @@ function relay(actions, latest, key) {
 }
 const shape = actions => JSON.stringify((actions ?? []).filter(Boolean).map(({ onSelect, ...rest }) => rest));
 
-/** One choice among a few things that have a state (CNT-94). Actions: `{ label, onSelect, disabled?, reason? }`. */
+/**
+ * One choice among a few things that have a state (CNT-94). Actions: `{ label, onSelect, disabled?, reason? }`.
+ * `waiting` (0.34.0, D183) waits for an earlier choice: quiet, a press only going to `place()`, read from the latest props.
+ */
 export function ChoiceMenu(props) {
 	return useChoice(Menu, props);
 }
 
-/** A compact choice (0.11.0): a muted label, the value and a state in words; `state` (`[label, tone]`) is its own. */
+/** A compact choice (0.11.0): a muted label, the value and a state in words; `state` (`[label, tone]`) is its own; `waiting` and `place` as `ChoiceMenu`'s. */
 export function ChoiceChip(props) {
 	return useChoice(Chip, props);
 }
 
 /** The React form of a `ChoiceMenu` or a `ChoiceChip`, driven by its DOM class. */
-function useChoice(Class, { label, options, value = null, placeholder = null, actions = [], disabled = false, align = 'start', placement = 'auto', search = 'auto', statement = true, name = null, onChange = null, labels, state = null, glyph = null }) {
-	const latest = useLatest({ onChange, actions });
+function useChoice(Class, { label, options, value = null, placeholder = null, actions = [], disabled = false, align = 'start', placement = 'auto', search = 'auto', statement = true, name = null, onChange = null, labels, state = null, glyph = null, waiting = false, place = null }) {
+	const latest = useLatest({ onChange, actions, place });
 	const chip = Class === Chip ? { glyph } : {};
-	const [host, menu] = useInstance(() => new Class({ label, options: [], placeholder, align, placement, search, statement, name, labels, ...chip, onchange: chosen => latest.current.onChange?.(chosen) }), [label, placeholder, align, placement, String(search), statement, name, labels, glyph]);
+	const [host, menu] = useInstance(() => new Class({ label, options: [], placeholder, align, placement, search, statement, name, labels, ...chip, waiting, place: () => latest.current.place?.() ?? null, onchange: chosen => latest.current.onChange?.(chosen) }), [label, placeholder, align, placement, String(search), statement, name, labels, glyph]);
 	useSync(menu, current => Class === Chip && (current.state = state), [JSON.stringify(state)]);
 	useSync(menu, current => {
 		current.actions = relay(actions, latest, 'actions');
@@ -51,6 +54,7 @@ function useChoice(Class, { label, options, value = null, placeholder = null, ac
 		else if (current.stated && current.value !== value) latest.current.onChange?.(current.value);
 	}, [JSON.stringify(options), value, shape(actions)]);
 	useSync(menu, current => (current.disabled = disabled), [disabled]);
+	useSync(menu, current => (current.waiting = waiting), [Boolean(waiting)]);
 	return h('div', { ref: host, className: 'bui-host' });
 }
 
