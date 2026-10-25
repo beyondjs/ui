@@ -1,5 +1,5 @@
 /**
- * What a person sees of every row of tabs on each frame, from the page's first (0.33.0, D179). `install(context)`
+ * What a person sees of every row of tabs on each frame, from the page's first (0.35.0, D179). `install(context)`
  * runs before any page script: on every animation frame it creates a fresh `ResizeObserver`, whose first callback
  * comes last in that frame's rendering, after the package's own observers have scrolled their rows and before the
  * frame is painted; there it reads each row (`.bui-productnav`): the list's box, its current tab's box and words,

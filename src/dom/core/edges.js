@@ -9,7 +9,7 @@ import { RowClearance } from './clearance.js';
  * is reached with Tab and scrolled into view. The holder says which ends hold more in `data-more`
  * (`start`, `end` or both), updated on scroll, on a change of size and once fonts load.
  *
- * Since 0.33.0 (D179) it also keeps one part of the row whole in view (`reveal`, ProductNav's current
+ * Since 0.35.0 (D179) it also keeps one part of the row whole in view (`reveal`, ProductNav's current
  * tab): clear of both ends, the row's padding and the cues as they are drawn, so no cue ever covers it. It
  * scrolls the row at once and again whenever the row or one of its children changes size (a web font that
  * loads, a narrower window), until the person moves the row themselves.
@@ -72,7 +72,7 @@ export class ScrollEdges {
 	/**
 	 * Keeps `part` (one of the row's children, or inside one) whole and clear of both ends: scrolls the row
 	 * by whole pixels, never the page, now if the row is in the document and again whenever the row or one
-	 * of its children changes size, until the person moves the row (0.33.0). `null` keeps nothing.
+	 * of its children changes size, until the person moves the row (0.35.0). `null` keeps nothing.
 	 *
 	 * @param {Element|null} part
 	 */

@@ -2,7 +2,7 @@ import { expect } from '../support/browser.mjs';
 import { RowFrames } from '../support/rows.mjs';
 
 /**
- * The current tab of every row of tabs shows whole (0.33.0, D179), on the `clear.html` pages: a machine's
+ * The current tab of every row of tabs shows whole (0.35.0, D179), on the `clear.html` pages: a machine's
  * Settings, whose page tabs and Settings tabs are given before the page is in the document as a product appends
  * them, and with `?nav=row` the product's own ProductNav under the bar. Every frame from the first paint, read
  * at the end of its rendering (`RowFrames`), through the web fonts' load and after it: each row's current tab
@@ -47,8 +47,8 @@ export const checks = [
 				expect(last, `${at}: the fonts never loaded within the recorder's bound (${drawn.length} frames drew the rows)`);
 				expect(first.rows.length === rows, `${at}: ${rows} rows of tabs, found ${first.rows.map(row => row.name).join(', ')}`);
 				const cut = RowFrames.cut(drawn);
-				const frames = new Set(cut.map(item => item.at)).size;
-				expect(!cut.length, `${at}: a current tab was cut on ${frames} of ${drawn.length} frames: ${cut.slice(0, 4).map(item => item.text).join('; ')}`);
+				const struck = new Set(cut.map(item => item.at)).size;
+				expect(!cut.length, `${at}: a current tab was cut on ${struck} of ${drawn.length} frames: ${cut.slice(0, 4).map(item => item.text).join('; ')}`);
 				// A phone's row of Settings holds more than it shows, so a cue is there to clear on the first paint and after the fonts
 				const settings = sample => sample.rows.find(row => /Settings|Ajustes/.test(row.name)) ?? sample.rows.at(-1);
 				if (more) expect(settings(first).more && settings(last).more, `${at}: the Settings row says it holds more: "${settings(first).more}" then "${settings(last).more}"`);

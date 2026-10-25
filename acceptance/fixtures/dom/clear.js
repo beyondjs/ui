@@ -1,4 +1,4 @@
-// The clear page of the plain DOM consumer (0.33.0): the family bar beside the Sidebar (merged with the bar
+// The clear page of the plain DOM consumer (0.35.0): the family bar beside the Sidebar (merged with the bar
 // with `?merged=1`) or over a ProductNav (`?nav=row`), and a machine's Settings whose two rows of tabs hold
 // more than a phone shows, with long sections an address points at. The rows are given their tabs before the
 // page is in the document and are never mounted by themselves, as a product's header and area append them.

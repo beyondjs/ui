@@ -121,7 +121,7 @@ html:has(.bui-sidebar[data-mode='drawer']):has(.bui-page-compact[data-subject]) 
 	gap: var(--space-2);
 }
 
-/* Every page with the family bar lands what it scrolls to below the bar (0.33.0): an address's target, a
+/* Every page with the family bar lands what it scrolls to below the bar (0.35.0): an address's target, a
    heading focused by code, scrollIntoView; below the sidebar's cut, below its product row too, unless the
    sidebar is merged with the bar and draws none. Weightless (:where), so the rules above, which add the
    compact line's height where one is drawn, always win over these. */
