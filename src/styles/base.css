@@ -7,6 +7,11 @@
 	--bui-control: var(--comfortable-control);
 	--bui-row: var(--comfortable-row);
 	--bui-target: 32px;
+	/* What a borderless control's surface hangs past its words (0.37.0, D188) */
+	--bui-quiet-hang: var(--space-2);
+	/* Where a state's words start after its mark (`Status`: a 9 px mark and a 6 px gap), so what wraps or follows
+	   under a line led by a mark starts under its words (0.37.0, D188) */
+	--bui-status-axis: 15px;
 }
 :root[data-density='compact'] {
 	--bui-control: var(--compact-control);

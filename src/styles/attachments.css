@@ -102,6 +102,10 @@
 	padding-block: 0;
 	font-size: var(--text-small);
 }
+/* Retry is one of its chip's controls: it keeps its padding, its words clear of the file's name (D188) */
+.bui-button-quiet.bui-composer-file-retry {
+	margin-inline: 0;
+}
 .bui-composer-file-remove {
 	flex: none;
 }

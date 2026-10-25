@@ -195,6 +195,11 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 
 - **Unit.** `tests/list-rules.test.mjs` holds the end line's keys: none on a list of one row or a last page of one row, and shown on one row a search reached. The [release record](reviews/2026-10-24/release-0.31.1.md) lists the archive and the runs.
 
+## UI 0.37.0: a borderless control placed by what it draws (D188)
+
+- **Unit.** `tests/hanging.test.mjs` holds D188 in the built stylesheet: the one token `--bui-quiet-hang` on the spacing scale; a quiet button with words hanging its padding by it, its 1px border counted, and keeping it beside another control; a glyph alone left to its own geometry; an `ActionLine` hanging its actions once; a composer's box narrowing the hang to stay inside its border, its band's action on its inset and its sentence twice the hang from it; `CopyValue` and a large file's Show twice the hang from their text; the toolbars that keep their quiet controls' padding; and no stylesheet of the package hanging a quiet control by a number of its own. `tests/quiet.test.mjs` still holds an action line's rules for every kind of action.
+- **Browser.** `acceptance/checks/hanging.mjs` measures the `hanging.html` page of the `dom` consumer at 1280 and 390 px: a column's quiet actions, small and not, and an action line's first action on the column's text edge within 0.5 px; Cancel's surface at least 4 px from a bordered Save and its words at least 12 px from it; an action after a sentence 16 px from it with its surface clear; a callout led by a quiet action on its title's edge; a composer band's action ending on the box's inset with its surface inside the border; a product's own line whose action wraps under it, its words on the state mark's edge; Copy 16 px after its value; and no two line starts of one case 0.5 to 4 px apart. Run `npm run acceptance -- hanging`, and the whole run in Chrome, Firefox and WebKit, since the change reaches every page that draws a quiet control.
+
 ## UI 0.33.0: the outage said once closed (D163), a change's outage (D186) and the offline line
 
 - **Unit.**

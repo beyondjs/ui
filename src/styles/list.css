@@ -257,7 +257,8 @@ span.bui-row-title {
 .bui-copy-value {
 	display: inline-flex;
 	align-items: center;
-	gap: var(--space-1);
+	/* Copy's words stand twice its hang after the value, its surface clear of it (D188) */
+	gap: calc(2 * var(--bui-quiet-hang));
 	max-width: 100%;
 	min-width: 0;
 }

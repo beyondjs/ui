@@ -17,6 +17,8 @@
 	color: var(--color-text);
 }
 .bui-composer-box {
+	/* A quiet control's surface stays one step inside the box's border at either inset (D188) */
+	--bui-quiet-hang: calc(var(--bui-composer-inset) - var(--space-1));
 	position: relative;
 	display: grid;
 	min-width: 0;
@@ -35,9 +37,11 @@
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 0 var(--space-2);
+	/* Its sentence and its action read apart: the action's words stand twice its hang away (D188) */
+	gap: 0 calc(2 * var(--bui-quiet-hang));
 	min-width: 0;
-	padding: var(--space-1) var(--space-2) var(--space-1) var(--bui-composer-inset);
+	/* Its action's words end on the inset too: the action's surface hangs past them (D188) */
+	padding: var(--space-1) var(--bui-composer-inset);
 	border-bottom: 1px solid var(--color-border);
 	border-start-start-radius: calc(var(--bui-composer-radius) - 1px);
 	border-start-end-radius: calc(var(--bui-composer-radius) - 1px);

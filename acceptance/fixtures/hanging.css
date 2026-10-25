@@ -1,0 +1,46 @@
+/* The hanging page's layout (0.37.0, D188): one column of cases, each at most 460 px wide so a composer's
+   product line wraps its action, as a narrow composer does. Tokens only. */
+body {
+	margin: 0;
+	background: var(--color-page);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+}
+.hanging-page {
+	display: grid;
+	gap: var(--space-6);
+	padding: var(--space-6);
+}
+.hanging-case {
+	width: min(100%, 460px);
+}
+.hanging-column {
+	display: grid;
+	gap: var(--space-1);
+	padding: var(--space-4) var(--space-6);
+	border: 1px solid var(--color-border);
+}
+.hanging-column > p {
+	margin: 0;
+	font-size: var(--text-small);
+}
+.hanging-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+}
+/* A sentence and its quiet action, as a product writes one: the action's words twice its hang away */
+.hanging-sentence {
+	gap: var(--space-1) calc(2 * var(--bui-quiet-hang));
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
+}
+.hanging-line {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: var(--space-1) calc(2 * var(--bui-quiet-hang));
+}
+.hanging-fact {
+	margin: 0;
+}

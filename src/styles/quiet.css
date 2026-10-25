@@ -11,17 +11,20 @@
 	font-weight: var(--weight-regular);
 	line-height: var(--leading-small);
 }
+/* The line hangs its actions' padding on every row it wraps to, so each row's first words sit on the edge
+   (D188); its actions keep their padding between them, so they never hang a second time. */
 .bui-action-line-actions {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: var(--space-1);
 	min-width: 0;
-	margin-inline-start: calc(-1 * var(--space-2));
+	margin-inline-start: calc(-1 * var(--bui-quiet-hang));
 }
 .bui-action-line-actions :is(.bui-button, a, .bui-link-button, .bui-disclosure-button) {
 	min-height: var(--bui-target);
-	padding: 0 var(--space-2);
+	margin-inline: 0;
+	padding: 0 var(--bui-quiet-hang);
 	border-color: transparent;
 	border-radius: var(--radius-control);
 	background: transparent;
@@ -29,6 +32,10 @@
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
 	text-decoration: none;
+}
+/* A bordered action's words keep the line's edge: its 1px border is part of the hang */
+.bui-action-line-actions :is(.bui-button, .bui-disclosure-button):not(.bui-button-bare) {
+	padding-inline: calc(var(--bui-quiet-hang) - 1px);
 }
 .bui-action-line-actions :is(.bui-button, a, .bui-link-button, .bui-disclosure-button):not(:disabled, [aria-disabled='true']):is(:hover, :focus-visible, [aria-expanded='true']) {
 	background: var(--overlay-lift);

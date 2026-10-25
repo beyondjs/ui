@@ -60,7 +60,8 @@
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: var(--space-1) var(--space-3);
+	/* Show stands twice its hang after the line it opens (D188) */
+	gap: var(--space-1) calc(2 * var(--bui-quiet-hang));
 }
 
 /* The files to jump to: one row per file, its path whole. */
@@ -199,6 +200,10 @@
 .bui-diff-head > .bui-copy-button {
 	flex: none;
 	align-self: center;
+}
+/* A control of the head's own row keeps its padding: the head's 8 px padding leaves its surface no room (D188) */
+.bui-diff-head > .bui-copy-button .bui-button-quiet {
+	margin-inline: 0;
 }
 .bui-diff-body {
 	min-width: 0;

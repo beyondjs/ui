@@ -28,6 +28,10 @@
 	overflow-wrap: anywhere;
 	text-align: start;
 }
+/* The tools are a row of controls, so their quiet ones keep their padding beside each other (D188) */
+.bui-button-quiet:is(.bui-list-query, .bui-list-restriction) {
+	margin-inline: 0;
+}
 .bui-list-restriction > span { min-width: 0; }
 .bui-list-restriction > svg { flex: 0 0 auto; }
 .bui-list-filters .bui-disclosure-panel,
