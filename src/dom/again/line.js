@@ -4,15 +4,16 @@ import { Labels } from '../core/labels.js';
 import { TimeWords } from '../time/words.js';
 
 const copy = Object.freeze({
-	en: Object.freeze({ tried: 'Last tried {time} · trying again by itself', trying: 'Trying again…' }),
-	es: Object.freeze({ tried: 'Último intento {time} · se vuelve a intentar por sí solo', trying: 'Intentándolo de nuevo…' })
+	en: Object.freeze({ tried: 'Last tried {time} · trying again by itself', trying: 'Trying again…', away: 'Last tried {time} · trying again as soon as you’re back online' }),
+	es: Object.freeze({ tried: 'Último intento {time} · se vuelve a intentar por sí solo', trying: 'Intentándolo de nuevo…', away: 'Último intento {time} · se vuelve a intentar en cuanto vuelvas a tener conexión' })
 });
 
 /**
  * The line an outage says under its words while `Again` reads again (D132, 0.17.1): "Last tried 12:04 ·
  * trying again by itself", and "Trying again…" while a try runs. The time is the time of day (with the
- * day when it was another day). It is hidden once the waiting ends, and never announces itself: what
- * replaces the outage when the service answers is what a person hears.
+ * day when it was another day). Offline (0.33.0) it says "Last tried 12:04 · trying again as soon as you're
+ * back online", as the document's opening does. It is hidden once the waiting ends, and never announces
+ * itself: what replaces the outage when the service answers is what a person hears.
  */
 export class AgainLine extends Component {
 	/** The copy in English and Spanish. */
@@ -55,10 +56,10 @@ export class AgainLine extends Component {
 	}
 
 	/**
-	 * The words for `moments` (`{ active, trying, last }`), or '' when nothing is waiting: what React's
-	 * `AgainLine` draws too.
+	 * The words for `moments` (`{ active, trying, last, offline }`), or '' when nothing is waiting: what
+	 * React's `AgainLine` draws too.
 	 *
-	 * @param {{active: boolean, trying: boolean, last: number|null}} moments
+	 * @param {{active: boolean, trying: boolean, last: number|null, offline?: boolean}} moments
 	 * @param {{labels?: object, locale?: string, now?: number}} [options]
 	 */
 	static say(moments, { labels = {}, locale = undefined, now = Date.now() } = {}) {
@@ -66,15 +67,15 @@ export class AgainLine extends Component {
 		return AgainLine.#say(moments, words, new TimeWords(words, locale), now);
 	}
 
-	static #say({ active, trying, last }, labels, words, now) {
+	static #say({ active, trying, last, offline = false }, labels, words, now) {
 		if (trying) return labels.text('trying');
 		if (!active || last === null) return '';
-		return labels.text('tried', { time: words.at(last, now) });
+		return labels.text(offline ? 'away' : 'tried', { time: words.at(last, now) });
 	}
 
 	#draw(moments) {
 		const text = AgainLine.#say(moments, this.#labels, this.#words, this.#clock());
-		this.#element.dataset.again = moments.trying ? 'trying' : 'waiting';
+		this.#element.dataset.again = moments.trying ? 'trying' : moments.offline ? 'offline' : 'waiting';
 		this.#element.hidden = !text;
 		if (this.#element.textContent !== text) this.#element.textContent = text;
 	}

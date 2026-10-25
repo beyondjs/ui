@@ -8,7 +8,7 @@ import { Loader, local } from './loader.js';
 import { Table } from './table.js';
 import { CollectionRows } from './rows.js';
 import { ColumnFit } from './columns.js';
-import { CollectionOutage } from './outage.js';
+import { OutageRead } from '../again/read.js';
 import { defaults, spanish } from './labels.js';
 
 /**
@@ -77,7 +77,7 @@ export class Collection extends Component {
 		const { label, source, search = true, filters = [], state = {}, labels = {} } = options;
 		this.#options = options;
 		this.#labels = new Labels(defaults, labels);
-		this.#outage = new CollectionOutage({ recovery: options.recovery ?? null, outage: options.outage ?? null, details: options.details ?? null, title: typeof label === 'string' ? label : this.#labels.text('outage'), words: this.#labels.text('outage') });
+		this.#outage = new OutageRead({ recovery: options.recovery ?? null, outage: options.outage ?? null, details: options.details ?? null, title: typeof label === 'string' ? label : this.#labels.text('outage'), words: this.#labels.text('outage') });
 		this.#loader = new Loader(source);
 		this.#state = { query: state.query ?? '', filters: { ...(state.filters ?? {}) }, page: Math.max(1, Number(state.page) || 1) };
 		this.#tools = new CollectionTools({ label, search, filters, state: this.#state, labels, compact: options.tools !== 'expanded', delay: options.delay ?? 250, onchange: state => this.#change(state) });

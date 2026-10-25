@@ -50,15 +50,15 @@ export class Session extends Component {
 	 * its hand-off `start(mode)` for `silent`, `window` and `tab`; who is signed in (`person`,
 	 * `expires`); "Use another account" (`other`), Beyond Accounts' address for a suspended account
 	 * (`accounts`), a host that asks the person itself (`delegate`, the Desktop), the product's own
-	 * sign-in behind Continue (`signin`, an installed shell; since 0.8.2), and `onrenewed` / `onchanged`.
+	 * sign-in behind Continue (`signin`, 0.8.2), `onrenewed` / `onchanged`, and `source` (0.33.0), who its read reaches.
 	 */
-	constructor({ product, read, start, person = null, expires = null, other = null, accounts = null, delegate = null, signin = null, onrenewed = null, onchanged = null, silent = true, pause = 60_000, bound = 8_000, wait = 10_000, interval = 2_000, document = globalThis.document, labels = {} }) {
+	constructor({ product, read, start, person = null, expires = null, other = null, accounts = null, delegate = null, signin = null, onrenewed = null, onchanged = null, silent = true, pause = 60_000, bound = 8_000, wait = 10_000, interval = 2_000, document = globalThis.document, source = 'accounts', labels = {} }) {
 		super();
 		this.#element = document.createElement('span');
 		this.#labels = new Labels(words.en, labels);
 		this.#person = person;
 		this.#options = { product, start, delegate, signin, onrenewed, onchanged, silent, pause, document };
-		this.#reader = new Reader(read, bound);
+		this.#reader = new Reader(read, bound, source);
 		this.#retry = new Retry(() => this.#again());
 		// A host that did not answer is asked again by itself, on the same steps as Beyond Accounts
 		this.#host = new Retry(() => void this.#hand());
@@ -70,7 +70,7 @@ export class Session extends Component {
 			tab: () => this.#tab(),
 			retry: () => this.#again()
 		};
-		this.#notice = new SessionNotice({ labels: this.#labels, accounts, hooks });
+		this.#notice = new SessionNotice({ labels: this.#labels, accounts, hooks, view: document.defaultView });
 		this.#watch = new Watch({ document, check: () => void this.check() });
 		this.#watch.expires = expires;
 		this.#silent = new Silent({ document, bound: wait });
@@ -165,14 +165,15 @@ export class Session extends Component {
 		const answer = await this.#reader.read();
 		if (this.destroyed) return;
 		if (answer.state === 'signed') return this.#renewed(answer, false);
-		if (answer.state === 'unavailable' || said === 'unavailable') return this.#ask('unavailable');
+		if (answer.state === 'unavailable' || said === 'unavailable') return this.#ask('unavailable', said === 'unavailable' ? 'accounts' : answer.source);
 		// Beyond Accounts' word on the Beyond session outranks the product's on its own
 		const kind = said ?? answer.reason ?? reason;
 		this.#ask(kind === 'suspended' || kind === 'revoked' ? kind : 'expired');
 	}
 
-	#ask(kind) {
+	#ask(kind, source = null) {
 		this.#kind = kind;
+		this.#notice.source = source;
 		if (kind === 'suspended') this.#held.settle(false);
 		// Inside a host (the Desktop) the host is the one voice for every kind: a frame never draws a dialog
 		if (this.#options.delegate) return void this.#hand();
@@ -190,7 +191,7 @@ export class Session extends Component {
 	async #hand() {
 		if (this.destroyed || this.#state === 'ended' || this.#state === 'signed') return;
 		this.#go('asking');
-		const request = { reason: this.#kind, person: this.#person, address: this.#options.start('window') };
+		const request = { reason: this.#kind, source: this.#notice.source, person: this.#person, address: this.#options.start('window') };
 		const done = await Promise.resolve().then(() => this.#options.delegate(request)).catch(() => null);
 		if (this.destroyed || this.#state !== 'asking') return;
 		if (done === false) return this.#end();

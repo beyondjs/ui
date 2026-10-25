@@ -1,6 +1,7 @@
 import { Dialog } from '../dialog.js';
 import { el } from '../core/element.js';
 import { glyph } from '../core/icons.js';
+import { names } from '../family/labels.js';
 
 /**
  * The one dialog a session that ended shows, in every product alike.
@@ -11,7 +12,10 @@ import { glyph } from '../core/icons.js';
  *   was ended on purpose, perhaps on a shared computer), with the same actions.
  * - `suspended`: "Your Beyond account is suspended", opaque, with a link to Beyond Accounts and "Use
  *   another account", and no sign-in.
- * - `unavailable`: "Beyond Accounts is not answering", "This page tries again by itself", **Try again**.
+ * - `unavailable`: who did not answer ("Beyond Accounts did not answer", or the product's `source` since
+ *   0.33.0), "This page retries automatically", **Try again**. Offline it says "You're offline", that the
+ *   session is renewed once back online, and offers nothing, since nothing can answer; back online it tries
+ *   again at once.
  *
  * None of them can be dismissed (no ×, Escape, nor a press outside; D63 as amended on 2026-10-07): a
  * product holds nothing a person can use without a session, so each offers a way on instead. While the
@@ -30,6 +34,13 @@ export class SessionNotice {
 	#phase = 'idle';
 	#person = null;
 	#accounts;
+	#source = null;
+	#view;
+	#network = () => {
+		if (this.#kind !== 'unavailable' || !this.#dialog) return;
+		this.#draw();
+		if (!this.#offline) this.#hooks.retry();
+	};
 	#said = `bui-session-said-${(SessionNotice.#count += 1)}`;
 
 	/**
@@ -37,11 +48,34 @@ export class SessionNotice {
 	 * @param {import('../core/labels.js').Labels} options.labels
 	 * @param {string|null} [options.accounts] Beyond Accounts' address, offered to a suspended account
 	 * @param {{continue: () => void, other: (() => void)|null, reopen: () => void, cancel: () => void, tab: () => void, retry: () => void}} options.hooks
+	 * @param {Window|null} [options.view] the window whose network it hears (0.33.0)
 	 */
-	constructor({ labels, accounts = null, hooks }) {
+	constructor({ labels, accounts = null, hooks, view = null }) {
 		this.#labels = labels;
 		this.#accounts = accounts;
 		this.#hooks = hooks;
+		this.#view = view;
+		view?.addEventListener('online', this.#network);
+		view?.addEventListener('offline', this.#network);
+	}
+
+	/** Who did not answer, as a product id (`accounts`, `projects`) or a name, for the `unavailable` kind (0.33.0). */
+	get source() {
+		return this.#source;
+	}
+
+	set source(value) {
+		this.#source = value ?? null;
+	}
+
+	/** The name of who did not answer: Beyond Accounts and Beyond Projects by their full names, the rest as the family's bar names them. */
+	get #product() {
+		const id = this.#source ?? 'accounts';
+		return ['accounts', 'projects'].includes(id) ? `Beyond ${names[id]}` : (names[id] ?? String(id));
+	}
+
+	get #offline() {
+		return this.#view?.navigator?.onLine === false;
 	}
 
 	get shown() {
@@ -89,6 +123,8 @@ export class SessionNotice {
 	}
 
 	destroy() {
+		this.#view?.removeEventListener('online', this.#network);
+		this.#view?.removeEventListener('offline', this.#network);
 		this.#dialog?.destroy();
 		this.#dialog = null;
 	}
@@ -111,8 +147,9 @@ export class SessionNotice {
 		const dialog = this.#dialog;
 		dialog.element.dataset.kind = kind;
 		dialog.element.dataset.phase = this.#phase;
-		dialog.title = text(kind === 'expired' ? 'title' : kind);
-		const said = { expired: 'kept', revoked: 'revoked_body', suspended: 'suspended_body', unavailable: 'unavailable_body' }[kind];
+		const away = kind === 'unavailable' && this.#offline;
+		dialog.title = away ? text('offline') : text(kind === 'expired' ? 'title' : kind, { product: this.#product });
+		const said = away ? 'offline_body' : { expired: 'kept', revoked: 'revoked_body', suspended: 'suspended_body', unavailable: 'unavailable_body' }[kind];
 		const line = this.#phase === 'waiting' ? text('waiting') : this.#phase === 'blocked' ? text('blocked') : text(said);
 		const status = el('p', { id: this.#said, class: 'bui-session-said', role: kind === 'unavailable' || this.#phase !== 'idle' ? 'status' : null, text: line });
 		const focused = dialog.shown && dialog.element.contains(dialog.element.ownerDocument.activeElement);
@@ -131,6 +168,7 @@ export class SessionNotice {
 			return [hooks.other ? button('other', () => hooks.other(), 'quiet') : null, accounts].filter(Boolean);
 		}
 		if (this.#kind === 'unavailable') {
+			if (this.#offline) return [];
 			const retry = button(this.#phase === 'retrying' ? 'retrying' : 'retry', () => hooks.retry(), 'primary');
 			retry.toggleAttribute('aria-disabled', this.#phase === 'retrying');
 			return [retry];

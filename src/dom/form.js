@@ -1,10 +1,10 @@
 import { Listeners } from './core/component.js';
 import { el } from './core/element.js';
 import { Labels } from './core/labels.js';
-import { callout } from './feedback.js';
 import { Required } from './core/required.js';
+import { ChangeOutcome } from './outcome.js';
 
-const defaults = { failure: 'That did not work. Try again.' };
+const defaults = { failure: 'That did not work. Try again.', ...ChangeOutcome.labels.en };
 
 /**
  * Submission behavior for a focused create or edit form the consumer owns.
@@ -20,10 +20,15 @@ const defaults = { failure: 'That did not work. Try again.' };
  * empty, or a part the product marks `data-missing`), the submit buttons are quiet (`aria-disabled`,
  * still reachable, a dialog footer's that name the form included), and a submission puts the caret in
  * the first part that waits and says nothing. Only a value that is wrong is said, as before.
+ *
+ * A change that got no answer is no failure of the person's (D186, 0.33.0): `explain(error)` may return a
+ * `ChangeOutcome` (`{ outcome: 'unavailable', cause }` or `{ outcome: 'unknown', cause?, check?, details? }`),
+ * said in the warning tone with "Nothing was changed." or "Check before trying again.", or its own words with
+ * a tone (`{ text, tone: 'warning' }`, polite); a string stays danger, as an alert.
  */
 export class FocusedForm {
 	/** The copy in English and Spanish (0.7.2). */
-	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ failure: 'No funcionó. Vuelve a intentarlo.' }) });
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ failure: 'No funcionó. Vuelve a intentarlo.', ...ChangeOutcome.labels.es }) });
 
 	#form;
 	#fields;
@@ -43,7 +48,7 @@ export class FocusedForm {
 	 * @param {object} options
 	 * @param {(values: Record<string,string>, data: FormData) => Promise<unknown>} options.submit
 	 * @param {Array<{check(): boolean, focus(): void}>} [options.fields] fields validated before submitting
-	 * @param {(error: unknown) => string} [options.explain] message for a failure
+	 * @param {(error: unknown) => string|object} [options.explain] message for a failure, a `ChangeOutcome` or `{ text, tone }` (0.33.0)
 	 * @param {(busy: boolean) => void} [options.onbusy] reports the busy state (the React adapter renders from it)
 	 * @param {{busy?: string, failure?: string}} [options.labels] `busy` replaces the submit label while working
 	 */
@@ -81,9 +86,9 @@ export class FocusedForm {
 		return this.#form;
 	}
 
-	/** Shows a failure message, or clears it with null. */
+	/** Shows a failure message, a change's outcome or `{ text, tone }` (`ChangeOutcome.answer`, 0.33.0), or clears it with null. */
 	set problem(message) {
-		this.#problem.replaceChildren(...(message ? [callout({ tone: 'danger', title: message, live: true })] : []));
+		this.#problem.replaceChildren(...(message ? [ChangeOutcome.answer(message, this.#labels)] : []));
 	}
 
 	destroy() {

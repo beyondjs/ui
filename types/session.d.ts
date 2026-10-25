@@ -9,7 +9,7 @@ export interface SessionPerson {
 	email?: string | null;
 }
 /** The product's read of its own session. A rejection is an unavailable answer, never a sign-out. */
-export type SessionAnswer = { state: 'signed'; person?: SessionPerson | null; expires?: string | number | null } | { state: 'ended'; reason?: 'expired' | 'revoked' | 'suspended' | string | null };
+export type SessionAnswer = { state: 'signed'; person?: SessionPerson | null; expires?: string | number | null } | { state: 'ended'; reason?: 'expired' | 'revoked' | 'suspended' | string | null } | { state: 'unavailable'; /** who did not answer (0.33.0) */ source?: string | null };
 export type SessionState = 'signed' | 'renewing' | 'asking' | 'ended';
 export type SessionKind = 'expired' | 'revoked' | 'suspended' | 'unavailable';
 /** `read` sends it again once renewed; `write` once renewed while it waited; `false` never. */
@@ -33,7 +33,7 @@ export interface SessionOptions {
 	/** Beyond Accounts' address, offered to a suspended account. */
 	accounts?: string | null;
 	/** A host that asks the person itself (the Beyond Desktop): true once signed in, false when the window is closing; a rejection is asked again by itself. */
-	delegate?: ((request: { reason: SessionKind | null; person: SessionPerson | null; address: string | null }) => Promise<boolean>) | null;
+	delegate?: ((request: { reason: SessionKind | null; /** who did not answer, when `unavailable` (0.33.0) */ source?: string | null; person: SessionPerson | null; address: string | null }) => Promise<boolean>) | null;
 	/** The product's own sign-in behind Continue, resolving true once done (0.8.2: an installed shell signing in through the system browser). */
 	signin?: (() => Promise<boolean>) | null;
 	onrenewed?: ((person: SessionPerson | null) => void) | null;
@@ -49,6 +49,12 @@ export interface SessionOptions {
 	/** How often the session is read while the sign-in window is open, in ms (2000). */
 	interval?: number;
 	document?: Document;
+	/**
+	 * Who the product's `read()` reaches (0.33.0): a product id (`accounts`, `projects`, `conduict`…) or a name,
+	 * said as who did not answer when the read rejects or times out ("Beyond Projects did not answer"). A read's
+	 * own `{ state: 'unavailable', source }` or a rejection's `error.source` names it instead. Default `accounts`.
+	 */
+	source?: string;
 	labels?: Copy;
 }
 /** A session that ended: renewed without being seen, or one dialog, the same in every product. */
@@ -59,7 +65,7 @@ export class Session extends Component {
 	readonly state: SessionState;
 	readonly person: SessionPerson | null;
 	readonly kind: SessionKind | null;
-	readonly notice: { readonly shown: boolean; readonly kind: SessionKind | null; readonly phase: string; readonly element: HTMLDialogElement | null };
+	readonly notice: { readonly shown: boolean; readonly kind: SessionKind | null; readonly phase: string; readonly element: HTMLDialogElement | null; /** who did not answer (0.33.0) */ readonly source: string | null };
 	text(key: string, values?: Record<string, unknown>): string;
 	lost(lost?: { reason?: string | null; replay?: SessionReplay }): Promise<boolean>;
 	/** Looks at the session now and resolves with the state after looking: a live transport speaks only while `signed`. */

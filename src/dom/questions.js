@@ -3,12 +3,12 @@ import { Button } from './button.js';
 import { Field } from './field.js';
 import { el, content } from './core/element.js';
 import { Labels } from './core/labels.js';
-import { callout } from './feedback.js';
 import { consequence } from './consequence.js';
 import { Required } from './core/required.js';
+import { ChangeOutcome } from './outcome.js';
 
-const defaults = { accept: 'Confirm', cancel: 'Cancel', ok: 'OK', close: 'Close', failure: 'That did not work. Try again or cancel.', ...consequence.labels.en, optional: '(optional)', invalid: 'Check this value.' };
-const spanish = { accept: 'Confirmar', cancel: 'Cancelar', ok: 'Aceptar', close: 'Cerrar', failure: 'No funcionó. Vuelve a intentarlo o cancela.', ...consequence.labels.es, optional: '(opcional)', invalid: 'Revisa este valor.' };
+const defaults = { accept: 'Confirm', cancel: 'Cancel', ok: 'OK', close: 'Close', failure: 'That did not work. Try again or cancel.', ...consequence.labels.en, ...ChangeOutcome.labels.en, optional: '(optional)', invalid: 'Check this value.' };
+const spanish = { accept: 'Confirmar', cancel: 'Cancelar', ok: 'Aceptar', close: 'Cerrar', failure: 'No funcionó. Vuelve a intentarlo o cancela.', ...consequence.labels.es, ...ChangeOutcome.labels.es, optional: '(opcional)', invalid: 'Revisa este valor.' };
 
 /**
  * One in-app question: the dialog behind `confirm`, `prompt` and `alert`.
@@ -19,7 +19,10 @@ const spanish = { accept: 'Confirmar', cancel: 'Cancelar', ok: 'Aceptar', close:
  * person can retry or cancel, and the promise resolves only once the work succeeded or they cancel.
  * `Question.labels` (also `confirm.labels`, `prompt.labels`, `alert.labels`) holds the copy in English
  * and Spanish (0.7.1); a prompt's field takes `optional` and `invalid` from the same labels. The
- * accept button should still be the action's own verb, given as `accept`.
+ * accept button should still be the action's own verb, given as `accept`. Since 0.33.0 (D186) `explain`
+ * may return a `ChangeOutcome`: a change answered unavailable or with no answer is said in the warning
+ * tone ("Nothing was changed.", or "Check before trying again."), never as the danger of a failure, and
+ * `{ text, tone: 'warning' }` says a product's own words politely; a string stays danger, as an alert.
  */
 export class Question {
 	/** The copy in English and Spanish (0.7.1). */
@@ -32,7 +35,7 @@ export class Question {
 	#required = null;
 	#accept;
 	#cancel;
-	#problem = el('div', { class: 'bui-question-problem', role: 'alert' });
+	#problem = el('div', { class: 'bui-question-problem' });
 
 	constructor(kind, options) {
 		this.#options = options;
@@ -102,7 +105,7 @@ export class Question {
 			this.#dialog.close({ value });
 		} catch (error) {
 			const message = this.#options.explain?.(error) ?? this.#labels.text('failure');
-			this.#problem.replaceChildren(callout({ tone: 'danger', title: message }));
+			this.#problem.replaceChildren(ChangeOutcome.answer(message, this.#labels));
 		} finally {
 			if (!this.#dialog.destroyed) {
 				this.#dialog.busy = false;

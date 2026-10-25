@@ -48,7 +48,7 @@ export { useInstance } from './hooks.js';
 export { Diff } from './diff.js';
 export { Highlighter } from '../dom/code/highlighter.js';
 export { ActionLine } from './actions.js';
-export { ListRow, Checklist, EmptyState, CopyValue, CommandCard } from './patterns.js';
+export { ListRow, Checklist, EmptyState, CopyValue, CommandCard, ChangeOutcome } from './patterns.js';
 export { DataTable } from './table.js';
 export { CommandPalette, ChoiceCards } from './command.js';
 export { Primaries } from '../dom/core/primaries.js';

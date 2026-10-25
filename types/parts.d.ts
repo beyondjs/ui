@@ -58,6 +58,10 @@ export interface PickerOptions {
 	onrecognize?: ((found: PickerFound | null) => void) | null;
 	explain?: ((error: unknown) => string | null) | null;
 	onchange?: ((selected: PickerChoice[]) => void) | null;
+	/** 0.33.0 (D163): the page's notice; a failure `outage` names joins it and the picker says "Not available right now" in place */
+	recovery?: import('./again.js').Recovery | null;
+	outage?: ((error: unknown) => boolean) | null;
+	details?: ((error: unknown) => import('./operations.js').DetailsRecord | null) | null;
 	labels?: Copy;
 }
 export class Picker extends Component {
@@ -207,6 +211,7 @@ export interface NotificationInboxOptions {
 	adapter: NotificationAdapter;
 	onopen?: ((destination: string, item: Notice) => void) | null;
 	products?: Record<string, string>;
+	/** The language of times and, since 0.33.0, of its outage's page form (`es…` for Spanish) */
 	locale?: string;
 	limit?: number;
 	state?: Partial<InboxState>;

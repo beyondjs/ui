@@ -87,7 +87,7 @@ export class Checklist extends Component {
 export class EmptyState extends Component {
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	/** `outage` (0.24.0, D163): a read that did not answer, "Not available right now" by default, never with an action. */
-	constructor(options: { kind?: 'empty' | 'match' | 'context' | 'outage'; title?: string | Node; text?: string | Node | null; action?: Node | { label: string; href?: string | null; run?: ((event: Event) => void) | null } | null; clear?: (() => void) | null; checklist?: ChecklistOptions | Checklist | null; glyph?: string | null; /** false inside a region framed already (0.24.0) */ frame?: boolean; labels?: Copy });
+	constructor(options: { kind?: 'empty' | 'match' | 'context' | 'outage'; title?: string | Node; text?: string | Node | null; action?: Node | { label: string; href?: string | null; run?: ((event: Event) => void) | null } | null; clear?: (() => void) | null; checklist?: ChecklistOptions | Checklist | null; glyph?: string | null; /** false inside a region framed already (0.24.0) */ frame?: boolean; /** an outage's place as phrasing content, for a table's cell (0.33.0) */ inline?: boolean; labels?: Copy });
 	readonly checklist: Checklist | null;
 }
 

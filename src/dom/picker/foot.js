@@ -44,6 +44,12 @@ export class PickerFoot {
 		this.#status.classList.toggle('bui-picker-problem', problem);
 	}
 
+	/** Says an outage's place (`EmptyState`'s inline outage, 0.33.0): no failure of its own and no Try again. */
+	place(node) {
+		this.#status.replaceChildren(node);
+		this.#status.classList.remove('bui-picker-problem');
+	}
+
 	/**
 	 * The status of a search in words: loading, a failure (the product's `explain`, else "didn't answer
 	 * in time" for a source past its bound), nothing to choose, no matches, or how many are shown.

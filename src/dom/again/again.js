@@ -11,8 +11,13 @@
  * whose answer did not arrive has an unknown outcome and is never sent again by itself.
  *
  * The read that found the outage counts as the first try, so `start()` already knows when it last tried.
- * It knows no DOM: timers, the clock and the window's and document's events are injected (`timers`,
- * `now`, `events`, `page`), so it is tested without time and runs wherever the page does.
+ * While the browser is offline (`navigator.onLine === false`, 0.33.0) a try that falls due waits too, since
+ * nothing can answer: it tries at once when the browser is online again, and its listeners hear `offline`
+ * change both ways, so a line says the person is offline instead of naming who did not answer.
+ *
+ * It knows no DOM: timers, the clock, the window's and document's events and the network's state are
+ * injected (`timers`, `now`, `events`, `page`, `network`), so it is tested without time and runs wherever
+ * the page does.
  */
 export class Again {
 	/** The waits between tries, in milliseconds; the last repeats. */
@@ -24,6 +29,7 @@ export class Again {
 	#clock;
 	#events;
 	#page;
+	#network;
 	#attempt = 0;
 	#timer = null;
 	#running = null;
@@ -32,7 +38,11 @@ export class Again {
 	#last = null;
 	#next = null;
 	#listeners = new Set();
-	#online = () => void this.now();
+	#online = () => {
+		this.#tell();
+		void this.now();
+	};
+	#offline = () => this.#tell();
 	#shown = () => {
 		if (this.#page?.visibilityState !== 'hidden') void this.now();
 	};
@@ -45,8 +55,9 @@ export class Again {
 	 * @param {{setTimeout: Function, clearTimeout: Function}} [options.timers] the timers (the global ones)
 	 * @param {EventTarget|null} [options.events] what says `online` (the window)
 	 * @param {Document|null} [options.page] what says `visibilitychange` (the document)
+	 * @param {{onLine?: boolean}|null} [options.network] what says whether the browser is online (the navigator, 0.33.0)
 	 */
-	constructor({ run, steps = Again.steps, now = () => Date.now(), timers = globalThis, events = globalThis.window ?? null, page = globalThis.document ?? null }) {
+	constructor({ run, steps = Again.steps, now = () => Date.now(), timers = globalThis, events = globalThis.window ?? null, page = globalThis.document ?? null, network = globalThis.navigator ?? null }) {
 		if (typeof run !== 'function') throw new TypeError('Again reads with a function');
 		this.#run = run;
 		this.#steps = steps.length ? steps : Again.steps;
@@ -54,6 +65,7 @@ export class Again {
 		this.#timers = timers;
 		this.#events = events;
 		this.#page = page;
+		this.#network = network;
 	}
 
 	/** Whether it is waiting for an answer. */
@@ -76,9 +88,14 @@ export class Again {
 		return this.#next;
 	}
 
-	/** `{ active, trying, last, next }`, as its listeners receive it. */
+	/** Whether the browser says it is offline (0.33.0): nothing can answer until it is online again. */
+	get offline() {
+		return this.#network?.onLine === false;
+	}
+
+	/** `{ active, trying, last, next, offline }`, as its listeners receive it. */
 	get moments() {
-		return { active: this.#active, trying: this.trying, last: this.#last, next: this.#next };
+		return { active: this.#active, trying: this.trying, last: this.#last, next: this.#next, offline: this.offline };
 	}
 
 	/** Calls `listener(moments)` when a try starts or ends, when one is scheduled and when it stops. Returns the release. */
@@ -95,6 +112,7 @@ export class Again {
 		this.#attempt = 0;
 		this.#last = this.#clock();
 		this.#events?.addEventListener?.('online', this.#online);
+		this.#events?.addEventListener?.('offline', this.#offline);
 		this.#page?.addEventListener?.('visibilitychange', this.#shown);
 		this.#schedule();
 	}
@@ -117,6 +135,7 @@ export class Again {
 		this.#active = false;
 		this.#cancel();
 		this.#events?.removeEventListener?.('online', this.#online);
+		this.#events?.removeEventListener?.('offline', this.#offline);
 		this.#page?.removeEventListener?.('visibilitychange', this.#shown);
 		this.#tell();
 	}
@@ -146,8 +165,8 @@ export class Again {
 		this.#next = this.#clock() + wait;
 		this.#timer = this.#timers.setTimeout(() => {
 			this.#timer = null;
-			// Shown again, it tries at once (`visibilitychange`)
-			if (this.#page?.visibilityState === 'hidden') {
+			// Shown again, or online again, it tries at once (`visibilitychange`, `online`)
+			if (this.#page?.visibilityState === 'hidden' || this.offline) {
 				this.#next = null;
 				return this.#tell();
 			}

@@ -1,4 +1,6 @@
 import { RetryAction } from '../again/action.js';
+import { Recovery } from '../again/recovery.js';
+import { TechnicalDetails } from '../operations/details.js';
 import { Component } from '../core/component.js';
 import { el, fill } from '../core/element.js';
 import { glyph } from '../core/icons.js';
@@ -9,7 +11,7 @@ import { callout, loading } from '../feedback.js';
 import { Cause, defaults, copies } from './labels.js';
 import { Age } from '../time/age.js';
 import { Feed } from './feed.js';
-import { Recovery } from './recovery.js';
+import { Recovery as Relay } from './recovery.js';
 import { NoticeList } from './list.js';
 import { Actions } from './actions.js';
 
@@ -21,6 +23,11 @@ import { Actions } from './actions.js';
  * unread; "Mark all as read" covers what is listed up to when it was loaded, in the product filter
  * shown. Loading, empty, failure with retry, unavailable and partial results are stated. The filter
  * is the inbox's `state`; `onstate` reports changes so the product can keep them in its address.
+ *
+ * Since 0.33.0 (D163) an outage of its relay (Beyond Projects or Beyond Accounts did not answer, or the
+ * browser is offline) is the page's body, as `Recovery`'s page form (`whole`): who did not answer, when it
+ * last tried and one Try again, its read in the line's Technical details, and no filter that cannot work.
+ * It reads again by itself and gives the page back once the relay answers. `locale` picks its language.
  */
 export class NotificationInbox extends Component {
 	/** The copy in English and Spanish (0.7.2). */
@@ -30,6 +37,7 @@ export class NotificationInbox extends Component {
 	#labels;
 	#feed;
 	#recovery;
+	#lang;
 	#list;
 	#body;
 	#status;
@@ -39,6 +47,7 @@ export class NotificationInbox extends Component {
 	#product;
 	#options;
 	#state;
+	#tools;
 	#stamp = null;
 
 	/**
@@ -57,10 +66,8 @@ export class NotificationInbox extends Component {
 		this.#labels = new Labels(defaults, labels);
 		this.#state = { state: state.state === 'all' ? 'all' : 'unread', product: state.product ?? '' };
 		this.#feed = new Feed(adapter);
-		this.#recovery = new Recovery({ locale, labels, run: async () => {
-			await this.load();
-			return !Recovery.outage(this.#feed);
-		} });
+		this.#lang = String(locale ?? '').toLowerCase().startsWith('es') ? 'es' : 'en';
+		this.#recovery = new Recovery({ title: '', whole: true, locale, labels: { ...Recovery.labels[this.#lang], ...labels } });
 		const go = onopen ?? (destination => this.#element.ownerDocument.defaultView.location.assign(destination));
 		const actions = new Actions({ adapter, feed: this.#feed, onopen: go, changed: () => this.#draw(), say: key => this.#say(this.#labels.text(key)) });
 		this.#list = new NoticeList({ labels: this.#labels, age: new Age({ locale }), products, actions, grouped: true, days: true });
@@ -79,11 +86,11 @@ export class NotificationInbox extends Component {
 		this.#body = el('div', { class: 'bui-inbox-body' });
 		this.#more = el('button', { type: 'button', class: 'bui-button bui-button-quiet', hidden: true, onclick: () => this.#page() }, [this.#labels.text('more')]);
 		this.#element = el('section', { class: 'bui-inbox', 'aria-label': this.#labels.text('title') }, [
-			el('div', { class: 'bui-inbox-tools' }, [
+			(this.#tools = el('div', { class: 'bui-inbox-tools' }, [
 				el('div', { class: 'bui-toggles', role: 'group', 'aria-label': this.#labels.text('show') }, this.#buttons),
 				Object.keys(products).length ? el('div', { class: 'bui-inbox-product' }, [el('label', { for: `${id}-product`, class: 'bui-field-label', text: this.#labels.text('product') }), this.#product.element]) : null,
 				this.#everything
-			]),
+			])),
 			this.#status,
 			this.#body,
 			this.#more
@@ -155,15 +162,19 @@ export class NotificationInbox extends Component {
 	#draw() {
 		const feed = this.#feed;
 		const words = this.#labels;
-		this.#recovery.update(feed);
 		this.#buttons.forEach((button, index) => button.setAttribute('aria-pressed', String(['unread', 'all'][index] === this.#state.state)));
 		this.#body.setAttribute('aria-busy', String(feed.state === 'loading' || feed.state === 'more'));
+		// The notice's own tries keep the page as it is; an answer gives it back
+		if (feed.state === 'loading' && this.#recovery.size) return;
+		if (this.#outage()) return this.#unavailable();
+		this.#recovery.delete('inbox');
+		this.#tools.hidden = false;
 		this.#more.hidden = !(feed.state === 'ready' && feed.more) && feed.state !== 'more';
 		this.#more.toggleAttribute('data-busy', feed.state === 'more');
 		this.#everything.hidden = !(feed.state === 'ready' && feed.items.some(item => !item.read));
 		if (feed.state === 'more') return;
 		if (feed.state === 'loading') return fill(this.#body, [loading(words.text('loading'))]);
-		if (feed.state === 'unavailable') return fill(this.#body, [callout({ tone: Recovery.outage(feed) ? 'warning' : 'info', title: Cause.text(words, feed.reason), body: Recovery.outage(feed) ? this.#recovery.element : null, actions: [new RetryAction({ labels: { retry: words.text('retry') }, run: () => this.#retry() }).element] })]);
+		if (feed.state === 'unavailable') return fill(this.#body, [callout({ tone: 'info', title: Cause.text(words, feed.reason), actions: [new RetryAction({ labels: { retry: words.text('retry') }, run: () => this.#retry() }).element] })]);
 		if (feed.state === 'failed') {
 			const retry = new RetryAction({ labels: { retry: words.text('retry') }, run: () => this.#retry() }).element;
 			return fill(this.#body, [callout({ tone: 'danger', title: words.text('failure'), actions: [retry] })]);
@@ -173,6 +184,24 @@ export class NotificationInbox extends Component {
 		const partial = this.#list.partial(feed.missing);
 		const empty = el('div', { class: 'bui-empty' }, [el('p', { class: 'bui-empty-title', text: words.text(this.#state.state === 'unread' ? 'caught' : 'empty') })]);
 		NoticeList.keep(this.#body, () => fill(this.#body, [partial, items.length ? this.#list.render(items) : empty]));
+	}
+
+	/** An outage of the relay, or a read that failed while the browser is offline (0.33.0). */
+	#outage() {
+		return Relay.outage(this.#feed) || (this.#feed.state === 'failed' && globalThis.navigator?.onLine === false);
+	}
+
+	/** The page's body is the outage itself: who did not answer, its read in Technical details, nothing that cannot work. */
+	#unavailable() {
+		const words = this.#labels;
+		const reason = this.#feed.reason;
+		this.#recovery.title = Cause.codes.includes(reason) && reason.endsWith('_unavailable') ? words.text(reason) : words.text('unavailable');
+		const details = this.#feed.details && { ...this.#feed.details, labels: TechnicalDetails.labels[this.#lang] };
+		this.#recovery.set('inbox', { title: words.text('title'), details, run: async () => (await this.load(), false) });
+		this.#tools.hidden = true;
+		this.#everything.hidden = true;
+		this.#more.hidden = true;
+		fill(this.#body, [this.#recovery.element]);
 	}
 
 	async #retry() {

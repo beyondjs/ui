@@ -1,6 +1,8 @@
 /**
  * The copy of `Session` in English and Spanish (`Session.labels`). `{name}` is the first name of the
- * person who was signed in; without one, `signin` is offered instead of `continue`.
+ * person who was signed in; without one, `signin` is offered instead of `continue`. `{product}` is who did
+ * not answer, by its name in the family's catalog of causes (0.33.0: Beyond Accounts unless the product
+ * names another), and offline the dialog says `offline` instead.
  */
 export const words = Object.freeze({
 	en: Object.freeze({
@@ -20,8 +22,10 @@ export const words = Object.freeze({
 		suspended: 'Your Beyond account is suspended',
 		suspended_body: 'Signing in again does not change this.',
 		accounts: 'Open Beyond Accounts',
-		unavailable: 'Beyond Accounts is not answering',
+		unavailable: '{product} did not answer',
 		unavailable_body: 'Your session could not be renewed. This page retries automatically. Your work stays here.',
+		offline: 'You’re offline',
+		offline_body: 'Your session is renewed as soon as you’re back online. Your work stays here.',
 		retry: 'Try again',
 		retrying: 'Trying again…',
 		unsent: 'Not sent while you were signed out. Try it again.'
@@ -43,8 +47,10 @@ export const words = Object.freeze({
 		suspended: 'Tu cuenta de Beyond está suspendida',
 		suspended_body: 'Volver a iniciar sesión no lo cambia.',
 		accounts: 'Abrir Beyond Accounts',
-		unavailable: 'Beyond Accounts no responde',
+		unavailable: '{product} no respondió',
 		unavailable_body: 'No se pudo renovar tu sesión. Esta página reintenta automáticamente. Tu trabajo sigue aquí.',
+		offline: 'Estás sin conexión',
+		offline_body: 'Tu sesión se renueva en cuanto vuelvas a tener conexión. Tu trabajo sigue aquí.',
 		retry: 'Intentar de nuevo',
 		retrying: 'Intentando de nuevo…',
 		unsent: 'No se envió mientras no tenías sesión. Vuelve a intentarlo.'

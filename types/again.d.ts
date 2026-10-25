@@ -11,6 +11,8 @@ export interface AgainMoments {
 	readonly last: number | null;
 	/** When it tries next, in milliseconds */
 	readonly next: number | null;
+	/** Whether the browser says it is offline (0.33.0): a try that falls due waits for `online` */
+	readonly offline?: boolean;
 }
 
 export interface AgainOptions {
@@ -24,6 +26,8 @@ export interface AgainOptions {
 	events?: EventTarget | null;
 	/** What says `visibilitychange` (the document). */
 	page?: (EventTarget & { visibilityState?: string }) | null;
+	/** What says whether the browser is online (the navigator, 0.33.0). */
+	network?: { onLine?: boolean } | null;
 }
 
 /** An outage read again by itself: 5, 15, 30 and 60 s, then every 60 s, at once on `online` and when the page is shown again; one try at a time. */
@@ -34,6 +38,8 @@ export class Again {
 	readonly trying: boolean;
 	readonly last: number | null;
 	readonly next: number | null;
+	/** Whether the browser says it is offline (0.33.0). */
+	readonly offline: boolean;
 	readonly moments: AgainMoments;
 	listen(listener: (moments: AgainMoments) => void): () => void;
 	/** Starts waiting; the failed read that found the outage is the first try. */
@@ -43,12 +49,12 @@ export class Again {
 	stop(): void;
 }
 
-/** "Last tried 12:04 · trying again by itself", or "Trying again…" while a try runs. */
+/** "Last tried 12:04 · trying again by itself", "Trying again…" while a try runs, and offline "… · trying again as soon as you're back online" (0.33.0). */
 export class AgainLine extends Component {
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: { again: Again; locale?: string; labels?: Copy; now?: () => number });
 	readonly text: string;
-	static say(moments: Pick<AgainMoments, 'active' | 'trying' | 'last'>, options?: { labels?: Copy; locale?: string; now?: number }): string;
+	static say(moments: Pick<AgainMoments, 'active' | 'trying' | 'last' | 'offline'>, options?: { labels?: Copy; locale?: string; now?: number }): string;
 }
 
 /** Labelled, secondary refresh action for a safe read or transport reconnect. */
@@ -73,12 +79,19 @@ export interface RecoveryEntry {
  * One outage said once (0.24.0, D163): a line with who did not answer, when it last tried and one Try again,
  * listing nothing; its reads' evidence under one Technical details. `whole`: the page's body in
  * `Unavailable`'s form when nothing on the page could be read. Independent instances never merge.
+ * Offline (0.33.0) it says "You're offline" with no Try again, once for the page (the first notice), unless `local`.
  */
 export class Recovery extends Component {
-	constructor(options: { title: string; labels?: Copy; locale?: string; again?: Omit<AgainOptions, 'run'>; focus?: (() => HTMLElement | null) | null; whole?: boolean; level?: 2 | 3 | 4 | 5 | 6 });
+	/** Try again, the last-tried line and the offline cause in English and Spanish (0.33.0). */
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
+	constructor(options: { title: string; labels?: Copy; locale?: string; again?: Omit<AgainOptions, 'run'>; focus?: (() => HTMLElement | null) | null; whole?: boolean; level?: 2 | 3 | 4 | 5 | 6; /** what did not answer runs on this computer: named even offline (0.33.0) */ local?: boolean });
 	readonly size: number;
-	/** Who did not answer. */
+	/** Who did not answer, as the product named it; offline the line says "You're offline" instead. */
 	title: string;
+	/** What did not answer runs on this computer (0.33.0). */
+	readonly local: boolean;
+	/** Whether the line says the person is offline now (0.33.0). */
+	readonly offline: boolean;
 	/** The page's body rather than a line above the page's regions. */
 	whole: boolean;
 	set(key: unknown, entry: RecoveryEntry): void;
@@ -95,3 +108,26 @@ export class LastUpdate extends Component {
 	time: number | null;
 	static say(time: import('./operations.js').Moment | null, options?: { labels?: Copy; locale?: string; now?: number }): string;
 }
+
+/** A change that did not get its answer (D186, 0.33.0): answered unavailable (nothing was changed) or with no answer (it may have been made). */
+export interface ChangeOutcomeRecord {
+	outcome: 'unavailable' | 'unknown';
+	/** Who did not answer, from the family's catalog ("Beyond Projects did not answer") */
+	cause?: string | null;
+	/** The way to check an unknown outcome: a node, a link or an action that reads it again */
+	check?: Node | { label: string; href?: string | null; run?: ((event: Event) => void) | null } | null;
+	/** Its request under Technical details */
+	details?: import('./operations.js').DetailsRecord | null;
+}
+
+/** A change's outcome said in the warning tone at the operation (D186, 0.33.0); `FocusedForm`, `confirm` and `prompt` draw what `explain` returns this way. */
+export class ChangeOutcome {
+	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
+	static is(value: unknown): value is ChangeOutcomeRecord;
+	static draw(outcome: ChangeOutcomeRecord, labels?: Copy): HTMLElement;
+	/** What `explain` returned, drawn: an outcome, `{ text, tone }` in its tone, or a string in danger. */
+	static answer(value: string | ExplainAnswer, labels?: Copy): HTMLElement;
+}
+
+/** What a form's or a question's `explain(error)` may return (0.33.0): a change's outcome, or words with their tone. */
+export type ExplainAnswer = ChangeOutcomeRecord | { text: string; tone?: 'warning' | 'danger' };

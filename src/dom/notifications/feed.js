@@ -31,6 +31,7 @@ export class Feed {
 	#error = null;
 	#request = null;
 	#reason = null;
+	#details = null;
 
 	constructor(adapter) {
 		this.#adapter = adapter;
@@ -52,6 +53,14 @@ export class Feed {
 
 	get error() {
 		return this.#error;
+	}
+
+	/**
+	 * The evidence of the last read that did not answer (0.33.0), `{ request, time, text }`, for an outage's
+	 * Technical details: the relay's `request` and `reason`, or the adapter's error; null after an answer.
+	 */
+	get details() {
+		return this.#details;
 	}
 
 	/** Products whose notifications are hidden because they could not be reached. */
@@ -102,6 +111,7 @@ export class Feed {
 		this.#state = 'idle';
 		this.#error = null;
 		this.#reason = null;
+		this.#details = null;
 	}
 
 	async #run(request, append) {
@@ -111,6 +121,7 @@ export class Feed {
 		this.#state = append ? 'more' : 'loading';
 		this.#error = null;
 		this.#reason = null;
+		this.#details = null;
 		try {
 			const before = append ? Feed.matters(this.#items) : 0;
 			let answer = await this.#adapter.list(request);
@@ -119,6 +130,7 @@ export class Feed {
 				this.#items = [];
 				this.#state = 'unavailable';
 				this.#reason = answer.reason ?? null;
+				this.#details = { request: answer.request ?? null, time: new Date().toISOString(), text: answer.reason ?? '' };
 				return true;
 			}
 			let items = append ? [...this.#items, ...(answer?.items ?? [])] : [...(answer?.items ?? [])];
@@ -136,6 +148,7 @@ export class Feed {
 		} catch (error) {
 			if (sequence !== this.#sequence) return false;
 			this.#error = error;
+			this.#details = { request: error?.request ?? null, time: new Date().toISOString(), text: error?.message ?? String(error ?? '') };
 			this.#state = 'failed';
 		}
 		return true;

@@ -24,8 +24,9 @@ test('the inbox says why notifications are unavailable when the relay names a kn
 	notices.absent = true;
 	notices.reason = 'projects_unavailable';
 	const inbox = new ui.NotificationInbox({ adapter: notices.adapter, products }).mount(document.body);
-	await page.until(() => /unavailable/.test(inbox.element.textContent));
-	assert.match(inbox.element.textContent, /Notifications are unavailable: Beyond Projects did not answer\./);
+	await page.until(() => inbox.element.querySelector('.bui-recovery:not([hidden])'));
+	// An outage is the page's body since 0.33.0 (D163): who did not answer, from the family's catalog
+	assert.equal(inbox.element.querySelector('.bui-recovery-title').textContent, 'Beyond Projects did not answer');
 	notices.reason = 'session_rejected';
 	await inbox.load();
 	assert.match(inbox.element.textContent, /: Beyond Projects could not confirm your access to them yet\./);

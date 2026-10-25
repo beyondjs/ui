@@ -22,9 +22,9 @@ export interface RecoveryRead {
 	automatic?: boolean;
 }
 /** One outage's notice, made once for a page so a `Collection` can join it; null until mounted (0.24.0). */
-export function useRecovery(options?: { title?: string; labels?: Copy; locale?: string; again?: Omit<import('./again.js').AgainOptions, 'run'>; level?: 2 | 3 | 4 | 5 | 6; focus?: (() => HTMLElement | null) | null } | null): import('./again.js').Recovery | null;
+export function useRecovery(options?: { title?: string; labels?: Copy; locale?: string; again?: Omit<import('./again.js').AgainOptions, 'run'>; level?: 2 | 3 | 4 | 5 | 6; focus?: (() => HTMLElement | null) | null; local?: boolean } | null): import('./again.js').Recovery | null;
 /** The page's one notice for one outage: one line, listing nothing; `whole` when nothing on the page could be read (0.24.0, D163). */
-export function Recovery(props: { notice?: import('./again.js').Recovery | null; title?: string; reads?: RecoveryRead[]; whole?: boolean; labels?: Copy; locale?: string; again?: Omit<import('./again.js').AgainOptions, 'run'>; level?: 2 | 3 | 4 | 5 | 6; focus?: (() => HTMLElement | null) | null }): ReactElement;
+export function Recovery(props: { notice?: import('./again.js').Recovery | null; title?: string; reads?: RecoveryRead[]; whole?: boolean; labels?: Copy; locale?: string; again?: Omit<import('./again.js').AgainOptions, 'run'>; level?: 2 | 3 | 4 | 5 | 6; focus?: (() => HTMLElement | null) | null; local?: boolean }): ReactElement;
 /** "Last updated 12:04" over content kept from an earlier read (0.24.0). */
 export function LastUpdate(props: { time?: Moment | null; locale?: string; labels?: Copy }): ReactElement;
 export namespace LastUpdate { const labels: Copies; }

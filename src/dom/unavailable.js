@@ -9,7 +9,7 @@ import { RetryAction } from './again/action.js';
 import { Again } from './again/again.js';
 import { AgainLine } from './again/line.js';
 
-const defaults = { owner: 'Who can change this: ', retry: 'Try again', ...AgainLine.labels.en };
+const defaults = { owner: 'Who can change this: ', retry: 'Try again', ...AgainLine.labels.en, offline: 'You’re offline' };
 
 /**
  * The icon of each kind: a lock for access, a plug for a missing association, information for a
@@ -34,11 +34,13 @@ export const glyphs = { access: 'lock', association: 'plug', capability: 'info',
  * "Try again" when the product passes no `action` of its own (a product's own Try again calls
  * `unavailable.again.now()`). The read that found the outage is the first try; when the read answers the
  * waiting ends, and the product draws what it answered. A refusal is never tried again: `again` is
- * ignored for every other kind.
+ * ignored for every other kind. Offline (0.33.0) its reason says "You're offline" in place of who did not
+ * answer and its own Try again waits hidden, since nothing can answer; it tries again once the browser
+ * is online, as `Recovery` does.
  */
 export class Unavailable extends Component {
 	/** The copy in English and Spanish (0.7.1). */
-	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ owner: 'Quién puede cambiarlo: ', retry: 'Reintentar', ...AgainLine.labels.es }) });
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ owner: 'Quién puede cambiarlo: ', retry: 'Reintentar', ...AgainLine.labels.es, offline: 'Estás sin conexión' }) });
 
 	#element;
 	#details = null;
@@ -46,6 +48,7 @@ export class Unavailable extends Component {
 	#line = null;
 	#action = null;
 	#release = null;
+	#reason = null;
 
 	/**
 	 * @param {object} options
@@ -73,14 +76,17 @@ export class Unavailable extends Component {
 			if (!action) {
 				this.#action = new RetryAction({ labels: { retry: text.text('retry') }, run: () => this.#again.now() });
 				action = this.#action.element;
-				this.#release = this.#again.listen(state => { this.#action.busy = state.trying; });
 			}
+			const said = el('span', {}, [content(reason)]);
+			this.#reason = { said, away: el('span', { hidden: true, text: text.text('offline') }) };
+			reason = [said, this.#reason.away];
+			this.#release = this.#again.listen(state => this.#show(state));
 		}
 		this.#element = el('section', { class: `bui-unavailable bui-unavailable-${type}`, 'data-unavailable': type, 'aria-labelledby': id }, [
 			el('span', { class: 'bui-unavailable-icon' }, [glyph(glyphs[type])]),
 			el('div', { class: 'bui-unavailable-body' }, [
 				el(`h${Unavailable.level(level)}`, { id, class: 'bui-unavailable-title' }, [content(title)]),
-				el('p', { class: 'bui-unavailable-reason' }, [content(reason)]),
+				el('p', { class: 'bui-unavailable-reason' }, [].concat(reason).map(content)),
 				owner ? el('p', { class: 'bui-unavailable-owner' }, [el('span', { class: 'bui-unavailable-label', text: text.text('owner') }), content(owner)]) : null,
 				code ? el('p', { class: 'bui-unavailable-code' }, [badge(code, 'neutral')]) : null,
 				this.#line?.element ?? null,
@@ -89,6 +95,7 @@ export class Unavailable extends Component {
 			])
 		]);
 		this.#again?.start();
+		if (this.#again) this.#show(this.#again.moments);
 	}
 
 	get element() {
@@ -112,6 +119,16 @@ export class Unavailable extends Component {
 		this.#line?.destroy();
 		this.#details?.destroy();
 		super.destroy();
+	}
+
+	/** An outage's line while it waits: its own Try again busy while a try runs, and offline the person's cause */
+	#show({ trying, offline }) {
+		if (this.#action) {
+			this.#action.busy = trying;
+			this.#action.element.hidden = offline;
+		}
+		this.#reason.said.hidden = offline;
+		this.#reason.away.hidden = !offline;
 	}
 
 	/** A heading level from 2 to 6; anything else is 2. */

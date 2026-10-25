@@ -111,7 +111,7 @@ export function useConfirm(labels?: Copy): {
 };
 export function FocusedForm(props: Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit' | 'children'> & {
 	onSubmit: (values: Record<string, string>, data: FormData) => Promise<unknown>;
-	explain?: (error: unknown) => string;
+	explain?: (error: unknown) => string | import('./again.js').ExplainAnswer;
 	onSuccess?: (result: unknown) => void;
 	labels?: { failure?: string };
 	children?: ReactNode | ((busy: boolean) => ReactNode);
@@ -151,6 +151,7 @@ export interface PickerProps {
 	recognize?: ((text: string) => PickerRecognized | null) | null;
 	onRecognize?: ((found: PickerFound | null) => void) | null;
 	explain?: ((error: unknown) => string | null) | null;
+	/** 0.33.0 (D163): the page's notice from `useRecovery`, joined as `Collection`'s */ recovery?: import('./again.js').Recovery | null; outage?: ((error: unknown) => boolean) | null; details?: ((error: unknown) => DetailsRecord | null) | null;
 	labels?: Copy;
 }
 export const Picker: ForwardRefExoticComponent<PickerProps & RefAttributes<PickerHandle>> & { labels: Copies };
@@ -201,7 +202,7 @@ export function Unavailable(props: { title: ReactNode; reason: ReactNode; owner?
 /** An outage read again by itself while `failing` holds (0.17.1, D132). */
 export function useAgain(failing: boolean, run: () => Promise<unknown>, options?: Omit<import('./again.js').AgainOptions, 'run'>): import('./again.js').AgainMoments & { now: () => Promise<boolean> };
 /** "Last tried 12:04 · trying again by itself" for `moments`, or nothing (0.17.1). */
-export function AgainLine(props: { moments: Pick<import('./again.js').AgainMoments, 'active' | 'trying' | 'last'>; locale?: string; labels?: Copy }): ReactElement | null;
+export function AgainLine(props: { moments: Pick<import('./again.js').AgainMoments, 'active' | 'trying' | 'last' | 'offline'>; locale?: string; labels?: Copy }): ReactElement | null;
 export namespace AgainLine { const labels: Copies; }
 export { Again } from './again.js';
 export type { AgainMoments, AgainOptions } from './again.js';

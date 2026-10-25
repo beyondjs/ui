@@ -51,6 +51,7 @@ export { Recovery } from './again/recovery.js';
 export { LastUpdate } from './again/update.js';
 export { Again } from './again/again.js';
 export { AgainLine } from './again/line.js';
+export { ChangeOutcome } from './outcome.js';
 export { availability } from './availability.js';
 export { Preferences } from './preferences/preferences.js';
 export { PreferencesDialog } from './preferences/dialog.js';

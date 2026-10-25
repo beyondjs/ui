@@ -18,7 +18,9 @@ const marks = { empty: 'box', match: 'search', context: 'folder', outage: 'globe
  * default, with the outage's mark and no action of its own, since who did not answer and the one Try
  * again are said once by the page's `Recovery`. It is never drawn as empty: a failed read is unavailable.
  * Since 0.24.1 it is one quiet line, the mark beside its words, with no box unless `frame` asks for one:
- * several places of one outage never read as a stack of boxes.
+ * several places of one outage never read as a stack of boxes. Since 0.33.0 `inline` draws that line as
+ * phrasing content (`span`s) for a table's cell or a row's value, where a block cannot go: the outage's
+ * mark and "Not available right now" on one muted line of the cell's size.
  */
 export class EmptyState extends Component {
 	/** The copy in English and Spanish. */
@@ -38,12 +40,17 @@ export class EmptyState extends Component {
 	 * @param {string|null} [options.glyph] another mark from the catalog
 	 * @param {boolean|null} [options.frame] false inside a region that is framed already, as `waiting`'s (0.24.0); an
 	 * outage is unframed unless it is true (0.24.1)
+	 * @param {boolean} [options.inline] an outage's place in a cell or a row's value, as phrasing content (0.33.0)
 	 */
-	constructor({ kind = 'empty', title = null, text = null, action = null, clear = null, checklist = null, glyph: mark = null, frame = null, labels = {} }) {
+	constructor({ kind = 'empty', title = null, text = null, action = null, clear = null, checklist = null, glyph: mark = null, frame = null, inline = false, labels = {} }) {
 		super();
 		const type = Object.hasOwn(marks, kind) ? kind : 'empty';
 		const words = new Labels(defaults, labels);
 		const outage = type === 'outage';
+		if (outage && inline) {
+			this.#element = el('span', { class: 'bui-empty-inline', 'data-kind': type }, [el('span', { class: 'bui-empty-mark', 'aria-hidden': 'true' }, [glyph(mark ?? marks[type])]), el('span', { class: 'bui-empty-said' }, [content(title ?? words.text('outage'))])]);
+			return;
+		}
 		frame ??= !outage;
 		this.#checklist = outage ? null : checklist instanceof Checklist ? checklist : checklist ? new Checklist(checklist) : null;
 		const actions = outage ? [] : [EmptyState.#action(action), type === 'match' && clear ? el('button', { type: 'button', class: 'bui-button bui-button-quiet bui-button-small', onclick: () => clear() }, [el('span', { text: words.text('clear') })]) : null].filter(Boolean);

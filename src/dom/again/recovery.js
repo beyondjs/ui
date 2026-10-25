@@ -1,11 +1,18 @@
 import { Component } from '../core/component.js';
 import { Ids } from '../core/ids.js';
+import { Labels } from '../core/labels.js';
 import { el } from '../core/element.js';
 import { glyph } from '../core/icons.js';
 import { TechnicalDetails } from '../operations/details.js';
 import { Again } from './again.js';
 import { AgainLine } from './line.js';
 import { RetryAction } from './action.js';
+import { OfflineVoice } from './voice.js';
+
+const copy = Object.freeze({
+	en: Object.freeze({ ...RetryAction.labels.en, ...AgainLine.labels.en, offline: 'You’re offline' }),
+	es: Object.freeze({ ...RetryAction.labels.es, ...AgainLine.labels.es, offline: 'Estás sin conexión' })
+});
 
 /**
  * One outage of one explicitly identified dependency and context, said once (D163, 0.24.0): a line in
@@ -16,14 +23,26 @@ import { RetryAction } from './action.js';
  * product sets `whole`, and the notice is the page's body in `Unavailable`'s form instead of a line above
  * empty regions.
  *
+ * While the browser is offline (`navigator.onLine === false`, 0.33.0) the line names no product: it says
+ * "You're offline", when it last tried and that it tries again as soon as the person is back online, with
+ * no Try again, since nothing can answer; what was read stays under its "Last updated". Offline is one
+ * cause for the whole page, so only the first such notice says it (`OfflineVoice`). A notice whose
+ * dependency runs on this computer (a development service on loopback) sets `local`, and keeps naming it.
+ *
  * Products create separate instances for independent failures. Entries are failed reads or lost
  * transports, never writes. Each symptom stays until its owner confirms an answer, including a refusal,
  * or removes it.
  */
 export class Recovery extends Component {
+	/** The copy in English and Spanish: Try again, the last-tried line and the offline cause (0.33.0). */
+	static labels = copy;
+
 	#element;
 	#title;
+	#cause;
 	#words;
+	#local;
+	#offline = false;
 	#status;
 	#details = null;
 	#evidence = '';
@@ -48,10 +67,14 @@ export class Recovery extends Component {
 	 * @param {(() => HTMLElement|null)|null} [options.focus] where focus goes when the last symptom ends
 	 * @param {boolean} [options.whole] the page's body itself, when nothing on it could be read
 	 * @param {2|3|4|5|6} [options.level] the heading level of the page form (2)
+	 * @param {boolean} [options.local] what did not answer runs on this computer, so being offline does not explain it (0.33.0)
 	 */
-	constructor({ title, labels = {}, locale = undefined, again = {}, focus = null, whole = false, level = 2 }) {
+	constructor({ title, labels = {}, locale = undefined, again = {}, focus = null, whole = false, level = 2, local = false }) {
 		super();
 		this.#labels = labels;
+		this.#words = new Labels(copy.en, labels);
+		this.#cause = String(title ?? '');
+		this.#local = Boolean(local);
 		this.#locale = locale;
 		this.#level = [2, 3, 4, 5, 6].includes(Number(level)) ? Number(level) : 2;
 		this.#focus = focus;
@@ -59,19 +82,23 @@ export class Recovery extends Component {
 		this.#line = new AgainLine({ again: this.#again, labels, locale, now: again.now });
 		this.#action = new RetryAction({ labels, run: () => this.now() });
 		const id = Ids.next('bui-recovery');
-		this.#title = el('p', { id, class: 'bui-recovery-title', text: title });
-		this.#words = el('div', { class: 'bui-recovery-words' }, [this.#title, this.#line.element]);
+		this.#title = el('p', { id, class: 'bui-recovery-title', text: this.#cause });
 		this.#status = el('p', { class: 'bui-hidden', role: 'status' });
 		this.#element = el('section', { class: 'bui-recovery', 'data-recovery': 'line', 'aria-labelledby': id, hidden: true }, [
 			el('span', { class: 'bui-recovery-mark', 'aria-hidden': 'true' }, [glyph('globe')]),
-			this.#words,
+			el('div', { class: 'bui-recovery-words' }, [this.#title, this.#line.element]),
 			el('div', { class: 'bui-recovery-actions' }, [this.#action.element]),
 			this.#status
 		]);
 		this.whole = whole;
 		this.#release = this.#again.listen(state => {
 			this.#action.busy = state.trying || this.#running !== null;
+			if (state.offline === this.#offline) return;
+			this.#offline = state.offline;
+			this.#show();
+			OfflineVoice.tell(this);
 		});
+		OfflineVoice.join(this, () => this.#show());
 	}
 
 	get element() {
@@ -83,16 +110,26 @@ export class Recovery extends Component {
 		return this.#entries.size;
 	}
 
-	/** Who did not answer. */
+	/** Who did not answer, as the product named it; offline the line says "You're offline" instead. */
 	get title() {
-		return this.#title.textContent;
+		return this.#cause;
 	}
 
 	set title(value) {
 		const text = String(value ?? '');
-		if (this.#title.textContent === text) return;
-		this.#title.textContent = text;
-		this.#draw();
+		if (this.#cause === text) return;
+		this.#cause = text;
+		this.#show();
+	}
+
+	/** Whether what did not answer runs on this computer, so the line names it even offline (0.33.0). */
+	get local() {
+		return this.#local;
+	}
+
+	/** Whether the line says the person is offline now (0.33.0). */
+	get offline() {
+		return this.#offline && !this.#local;
 	}
 
 	/** Whether it is the page's body (`Unavailable`'s form) rather than a line above the page's regions. */
@@ -121,6 +158,7 @@ export class Recovery extends Component {
 		if (this.destroyed) return;
 		if (typeof run !== 'function') throw new TypeError('Recovery needs a bounded read');
 		this.#entries.set(key, { title, details, run, automatic });
+		this.#offline = this.#again.offline;
 		this.#draw();
 		if ([...this.#entries.values()].some(entry => entry.automatic)) this.#again.start();
 		else this.#again.stop();
@@ -172,11 +210,25 @@ export class Recovery extends Component {
 		return this.#running;
 	}
 
-	/** Shown while a symptom stays; said once when it appears; its evidence patched in place. */
-	#draw() {
-		this.#element.hidden = !this.#entries.size;
-		const said = this.#entries.size ? this.#title.textContent : '';
+	/**
+	 * Shown while a symptom stays, said once when it appears: who did not answer, or offline that the person
+	 * is offline, by the first notice of the page alone and with no Try again, since nothing can answer
+	 */
+	#show() {
+		const away = this.offline;
+		const text = away ? this.#words.text('offline') : this.#cause;
+		if (this.#title.textContent !== text) this.#title.textContent = text;
+		this.#element.hidden = !this.#entries.size || (away && !OfflineVoice.speaks(this));
+		this.#element.toggleAttribute('data-offline', away);
+		this.#action.element.hidden = away;
+		const said = this.#element.hidden ? '' : text;
 		if (this.#status.textContent !== said) this.#status.textContent = said;
+	}
+
+	/** Its symptoms drawn: the line shown or hidden, and its evidence patched in place. */
+	#draw() {
+		this.#show();
+		if (this.offline) OfflineVoice.tell(this);
 		const rows = [...this.#entries.values()]
 			.filter(entry => entry.details)
 			.map(({ title, details }) => ({ label: title, text: details.text ?? '', request: details.request ?? null, time: details.time ?? null }));
@@ -197,6 +249,7 @@ export class Recovery extends Component {
 
 	destroy() {
 		this.#entries.clear();
+		OfflineVoice.leave(this);
 		this.#release();
 		this.#again.stop();
 		this.#line.destroy();

@@ -195,6 +195,22 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 
 - **Unit.** `tests/list-rules.test.mjs` holds the end line's keys: none on a list of one row or a last page of one row, and shown on one row a search reached. The [release record](reviews/2026-10-24/release-0.31.1.md) lists the archive and the runs.
 
+## UI 0.33.0: the outage said once closed (D163), a change's outage (D186) and the offline line
+
+- **Unit.**
+  - `tests/offline.test.mjs`: `Again` waiting offline and trying on `online`; the offline line in English and Spanish, with no Try again; one notice speaking for the page, the next speaking once the first leaves; `local` keeping its cause; `Unavailable`'s outage offline; and `Session` naming its `source` and saying offline, then reading again on `online`.
+  - `tests/joined.test.mjs`: a `Picker` joining and leaving a notice, keeping its own words for another failure and leaving with a gate; `EmptyState`'s `inline` in a `DataTable` cell; and React's `Picker` under StrictMode failing before `useRecovery`'s notice exists.
+  - `tests/outcome.test.mjs`: `ChangeOutcome` in English and Spanish, a form's `explain` as an outcome, as `{ text, tone }` and as a string, `confirm`'s work answered unavailable, and React's `ChangeOutcome`.
+  - `tests/notifications-outage.test.mjs`: the inbox's page form and its offline line. `tests/session.test.mjs` and `tests/wording.test.mjs` take the catalog's words.
+- **Declarations.** `tests/fixtures/types/offline.ts` and `offline.tsx`.
+- **Browser.** `acceptance/checks/closing.mjs`, on the `closing.html` pages of the `dom`, `react19` and `react18` consumers:
+  - a cell's and a picker's place inline, beside one line, at 1440, 390 and 320 px in both themes;
+  - a change answered unavailable in the warning tone, politely;
+  - the inbox's page form, given back once the relay answers;
+  - offline through the browser's own emulation (`context.setOffline`).
+
+  Run `npm run acceptance -- "outage close"` in each engine. The [release record](reviews/2026-10-25/release-0.33.0.md) lists the runs.
+
 ## UI 0.32.1: the review's corrections to the family's waits (D183)
 
 - **Unit.** `tests/waits.test.mjs` holds each correction over happy-dom:

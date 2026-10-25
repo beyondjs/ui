@@ -10,3 +10,16 @@ body {
 	padding: 0;
 	list-style: none;
 }
+/* The 0.33.0 fixture's rename form: a field and its submit on one row where they fit. */
+.closing-form {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: end;
+	gap: var(--space-2);
+}
+.closing-form > .bui-field-label {
+	flex-basis: 100%;
+}
+.closing-form > .bui-form-problem {
+	flex-basis: 100%;
+}

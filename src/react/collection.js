@@ -3,8 +3,9 @@ import ReactDOM from 'react-dom';
 import { Collection as List } from '../dom/collection/collection.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 import { useTools } from './collection-tools.js';
+import { HeldNotice } from './held.js';
 
-const { useRef, useState } = React;
+const { useEffect, useRef, useState } = React;
 
 /**
  * The compact collection, driven by the DOM `Collection` class. A column may give `render(row)`
@@ -18,6 +19,8 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 	const cells = useRef([]);
 	const [portals, setPortals] = useState([]);
 	const latest = useLatest({ source, onOpen, onState, explain, columns, link, row, group, end, recovery, outage, details });
+	const [waiting] = useState(() => new HeldNotice(latest));
+	useEffect(() => waiting.flush(), [waiting, recovery]);
 	const [host, list] = useInstance(
 		() =>
 			new List({
@@ -40,9 +43,9 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 				onopen: onOpen ? (row, event) => latest.current.onOpen?.(row, event) : null,
 				onstate: next => latest.current.onState?.(next),
 				explain: error => latest.current.explain?.(error),
-				// The page's notice is read when a failure happens: it may be made after the list (`useRecovery`)
-				recovery: { set: (key, entry) => latest.current.recovery?.set(key, entry), delete: key => latest.current.recovery?.delete(key) },
-				outage: error => Boolean(latest.current.recovery && latest.current.outage?.(error)),
+				// The page's notice may be made after the list (`useRecovery`): what fails first waits for it (0.33.0)
+				recovery: waiting,
+				outage: error => Boolean(latest.current.outage?.(error)),
 				details: error => latest.current.details?.(error) ?? null,
 				columns: columns.map((column, index) => ({ ...column, render: undefined, value: row => cell(row, index) })),
 				onrender: () => setPortals(cells.current.splice(0))

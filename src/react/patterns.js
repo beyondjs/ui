@@ -1,10 +1,11 @@
-import { Fragment } from 'react';
+import { Fragment, useLayoutEffect, useRef } from 'react';
 import { ListRow as Row } from '../dom/list/row.js';
 import { RowContent } from './row-content.js';
 import { CopyValue as Value } from '../dom/list/value.js';
 import { Checklist as Steps } from '../dom/checklist/checklist.js';
 import { EmptyState as Empty } from '../dom/checklist/empty.js';
 import { CommandCard as Card } from '../dom/command/card.js';
+import { ChangeOutcome as Outcome } from '../dom/outcome.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 
 /**
@@ -42,12 +43,13 @@ export function Checklist({ title = null, steps = [], level = 3, labels }) {
  * A place with nothing to show yet: its kind, title, one sentence, one action and a first run's steps. `frame`
  * left unset takes the DOM component's default (0.25.1): a box for every kind but an outage, one quiet line.
  */
-export function EmptyState({ kind = 'empty', title, text = null, action = null, onClear = null, checklist = null, glyph = null, frame = null, labels }) {
+export function EmptyState({ kind = 'empty', title, text = null, action = null, onClear = null, checklist = null, glyph = null, frame = null, inline = false, labels }) {
 	const latest = useLatest({ action, onClear, checklist });
 	const given = action ? { label: action.label, href: action.href ?? null, run: action.href ? null : event => latest.current.action?.onSelect?.(event) } : null;
 	const steps = checklist ? { ...checklist, steps: actions(checklist.steps ?? [], { current: { steps: checklist.steps ?? [] } }) } : null;
-	const [host] = useInstance(() => new Empty({ kind, title, text, glyph, frame, labels, action: given, clear: onClear ? () => latest.current.onClear?.() : null, checklist: steps }), [kind, title, text, glyph, frame, labels, action?.label, action?.href, Boolean(onClear), JSON.stringify(checklist)]);
-	return h('div', { ref: host, className: 'bui-host' });
+	const [host] = useInstance(() => new Empty({ kind, title, text, glyph, frame, inline, labels, action: given, clear: onClear ? () => latest.current.onClear?.() : null, checklist: steps }), [kind, title, text, glyph, frame, inline, labels, action?.label, action?.href, Boolean(onClear), JSON.stringify(checklist)]);
+	// An outage's place in a cell is phrasing content, hosted where a block cannot go (0.33.0)
+	return h(inline ? 'span' : 'div', { ref: host, className: 'bui-host' });
 }
 
 /** A request waiting for the person's answer; `onAllow` and `onDeny` (or, with `decisions`, `onDecide`, 0.16.0) may return a promise. */
@@ -57,6 +59,24 @@ export function CommandCard({ title, command, detail = null, scope = null, state
 	const [host, card] = useInstance(() => new Card({ title, command, detail, scope, state, labels, decisions, editable, ondecide: decide, allow: answer => latest.current.onAllow?.(answer), deny: answer => latest.current.onDeny?.(answer) }), [title, command, detail, scope?.label, labels, JSON.stringify(decisions), editable, Boolean(onDecide)]);
 	useSync(card, current => (current.state = state), [state]);
 	useSync(card, current => focus && current.focus(), [focus]);
+	return h('div', { ref: host, className: 'bui-host' });
+}
+
+/**
+ * A change that did not get its answer (D186, 0.33.0), drawn by the DOM `ChangeOutcome` in the warning tone:
+ * `outcome` (`unavailable` or `unknown`), `cause`, `check` (`{ label, href }` or `{ label, onSelect }`, read
+ * from the latest props) and `details`.
+ */
+export function ChangeOutcome({ outcome, cause = null, check = null, details = null, labels }) {
+	const latest = useLatest({ check });
+	const host = useRef(null);
+	useLayoutEffect(() => {
+		const way = check ? { label: check.label, href: check.href ?? null, run: check.href ? null : event => latest.current.check?.onSelect?.(event) } : null;
+		const node = Outcome.draw({ outcome, cause, check: way, details }, labels);
+		host.current?.append(node);
+		return () => node.remove();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [outcome, cause, check?.label, check?.href, JSON.stringify(details), labels]);
 	return h('div', { ref: host, className: 'bui-host' });
 }
 
@@ -70,3 +90,4 @@ CopyValue.labels = Value.labels;
 Checklist.labels = Steps.labels;
 EmptyState.labels = Empty.labels;
 CommandCard.labels = Card.labels;
+ChangeOutcome.labels = Outcome.labels;

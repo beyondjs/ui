@@ -191,7 +191,8 @@ export interface QuestionOptions {
 	/** Which button starts focused: Cancel for a danger, Accept otherwise, unless set */
 	focus?: 'cancel' | 'accept';
 	work?: (value: unknown) => Promise<unknown>;
-	explain?: (error: unknown) => string;
+	/** The words of a failure, or a change's outcome said in the warning tone (0.33.0, D186) */
+	explain?: (error: unknown) => string | import('./again.js').ExplainAnswer;
 	restore?: HTMLElement | null;
 	labels?: Copy;
 }
@@ -221,7 +222,7 @@ export namespace alert { const labels: { readonly en: Readonly<Copy>; readonly e
 export class FocusedForm {
 	/** The copy in English and Spanish (0.7.2). */
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
-	constructor(form: HTMLFormElement, options: { submit: (values: Record<string, string>, data: FormData) => Promise<unknown>; fields?: Array<{ check(): boolean; focus(): void; readonly missing?: boolean }>; explain?: ((error: unknown) => string) | null; onsuccess?: ((result: unknown) => void) | null; onbusy?: ((busy: boolean) => void) | null; labels?: Copy });
+	constructor(form: HTMLFormElement, options: { submit: (values: Record<string, string>, data: FormData) => Promise<unknown>; fields?: Array<{ check(): boolean; focus(): void; readonly missing?: boolean }>; explain?: ((error: unknown) => string | import('./again.js').ExplainAnswer) | null; onsuccess?: ((result: unknown) => void) | null; onbusy?: ((busy: boolean) => void) | null; labels?: Copy });
 	readonly busy: boolean;
 	readonly form: HTMLFormElement;
 	/** Whether a required field is still empty: the submit buttons are quiet meanwhile (0.32.0, D183). */

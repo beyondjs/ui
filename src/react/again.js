@@ -35,7 +35,7 @@ export function useAgain(failing, run, options = {}) {
 export function AgainLine({ moments, locale = undefined, labels = {} }) {
 	const text = Line.say(moments, { labels, locale });
 	if (!text) return null;
-	return h('p', { className: 'bui-again', 'data-again': moments.trying ? 'trying' : 'waiting' }, text);
+	return h('p', { className: 'bui-again', 'data-again': moments.trying ? 'trying' : moments.offline ? 'offline' : 'waiting' }, text);
 }
 
 AgainLine.labels = Line.labels;
@@ -53,12 +53,12 @@ RetryAction.labels = Action.labels;
  * until mounted, and when `options` is null. `title` follows the props; the rest makes a new notice.
  */
 export function useRecovery(options = {}) {
-	const { title = '', labels, locale, again, level = 2, focus = null } = options ?? {};
+	const { title = '', labels, locale, again, level = 2, focus = null, local = false } = options ?? {};
 	const latest = useLatest({ focus });
 	const [notice, setNotice] = useState(null);
 	useLayoutEffect(() => {
 		if (!options) return undefined;
-		const made = new Notice({ title, labels, locale, again, level, focus: () => latest.current.focus?.() ?? null });
+		const made = new Notice({ title, labels, locale, again, level, local, focus: () => latest.current.focus?.() ?? null });
 		setNotice(made);
 		return () => {
 			made.destroy();
@@ -66,7 +66,7 @@ export function useRecovery(options = {}) {
 		};
 		// A new notice only for its words, language and level; the title is applied below
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [options === null, labels, locale, level]);
+	}, [options === null, labels, locale, level, local]);
 	useSync(living(notice), current => (current.title = title), [title]);
 	return living(notice);
 }
@@ -79,8 +79,8 @@ export function useRecovery(options = {}) {
  * read from the latest props, is its read again). `whole` draws it as the page's body when nothing on
  * the page could be read. `notice` draws one made by `useRecovery`, shared with a `Collection`.
  */
-export function Recovery({ notice = null, title, reads = [], whole = false, labels, locale = undefined, again, level = 2, focus = null }) {
-	const own = useRecovery(notice ? null : { title, labels, locale, again, level, focus });
+export function Recovery({ notice = null, title, reads = [], whole = false, labels, locale = undefined, again, level = 2, focus = null, local = false }) {
+	const own = useRecovery(notice ? null : { title, labels, locale, again, level, focus, local });
 	const current = notice ?? own;
 	const host = useRef(null);
 	const latest = useLatest(reads);

@@ -4,8 +4,8 @@ import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { Hint } from '../core/hint.js';
 import { Labels } from '../core/labels.js';
-import { Select } from '../select.js';
 import { Unavailable } from '../unavailable.js';
+import { OutageRead } from '../again/read.js';
 import { Search } from './search.js';
 import { Selection } from './selection.js';
 import { ResultList } from './list.js';
@@ -13,6 +13,7 @@ import { PickerFoot } from './foot.js';
 import { PickerChosen } from './chosen.js';
 import { PickerAccounts } from './accounts.js';
 import { Recognizer } from './recognizer.js';
+import { PickerFilters } from './filters.js';
 import { labels as copy } from './labels.js';
 
 /**
@@ -33,6 +34,10 @@ import { labels as copy } from './labels.js';
  * turns a pasted address into a search or a direct choice; and the "Can't find it?" footer
  * (`footer`), shown in every state. Authorization stays with the product: the source returns what the
  * person may see, and the product revalidates the choice when it is committed (`mark`).
+ *
+ * Since 0.33.0 (D163) a search that did not answer joins the page's `Recovery` (`recovery`, `outage`,
+ * `details`), as a `Collection` does: the line under the list says "Not available right now", with no Try
+ * again; the page's line searches again until it answers. Any other failure keeps the picker's own words.
  */
 export class Picker extends Component {
 	/** The copy in English and Spanish. */
@@ -55,7 +60,8 @@ export class Picker extends Component {
 	#onchange;
 	#onrecognize;
 	#explain;
-	#filters = [];
+	#filters;
+	#outage;
 	#delay;
 	#pending = null;
 	#tip;
@@ -72,8 +78,11 @@ export class Picker extends Component {
 	 * @param {((found: object|null) => void)|null} [options.onrecognize] what was recognized and its outcome
 	 * @param {((error: unknown) => string|null)|null} [options.explain] the words of a failure
 	 * @param {number} [options.bound] milliseconds a source may take (20000)
+	 * @param {import('../again/recovery.js').Recovery|null} [options.recovery] the page's notice for its search's cause (0.33.0)
+	 * @param {((error: unknown) => boolean)|null} [options.outage] which failures are that cause's outage (0.33.0)
+	 * @param {((error: unknown) => object|null)|null} [options.details] a failure's evidence for the notice (0.33.0)
 	 */
-	constructor({ label, source, multiple = true, selected = [], filters = [], name = null, hint = null, limit = 20, delay = 250, bound = 20000, all = false, accounts = null, gate = null, footer = null, recognize = null, onrecognize = null, explain = null, onchange = null, labels = {} }) {
+	constructor({ label, source, multiple = true, selected = [], filters = [], name = null, hint = null, limit = 20, delay = 250, bound = 20000, all = false, accounts = null, gate = null, footer = null, recognize = null, onrecognize = null, explain = null, onchange = null, recovery = null, outage = null, details = null, labels = {} }) {
 		super();
 		this.#labels = new Labels(copy.en, labels);
 		this.#onchange = onchange;
@@ -82,8 +91,10 @@ export class Picker extends Component {
 		this.#delay = delay;
 		this.#selection = new Selection(selected, multiple);
 		this.#recognizer = new Recognizer(recognize);
+		this.#filters = new PickerFilters(filters, () => this.refresh());
+		this.#outage = new OutageRead({ recovery, outage, details, title: typeof label === 'string' ? label : this.#labels.text('outage'), words: this.#labels.text('outage'), inline: true });
 		const id = Ids.next('bui-picker');
-		this.#input = el('input', { id: `${id}-input`, type: 'search', class: 'bui-input bui-picker-input', 'data-bui-caret': '', role: 'combobox', autocomplete: 'off', 'aria-autocomplete': 'list', 'aria-expanded': 'true', 'aria-controls': `${id}-list`, 'aria-describedby': [hint ? `${id}-hint` : null, `${id}-count`, `${id}-status`].filter(Boolean).join(' '), placeholder: this.#labels.text('placeholder'), oninput: () => this.#typed(), onpaste: () => this.#pasted(), onkeydown: event => this.#keys(event) });
+		this.#input = el('input', { id: `${id}-input`, type: 'search', class: 'bui-input bui-picker-input', 'data-bui-caret': '', role: 'combobox', autocomplete: 'off', 'aria-autocomplete': 'list', 'aria-expanded': 'true', 'aria-controls': `${id}-list`, 'aria-describedby': [hint ? `${id}-hint` : null, `${id}-count`, `${id}-status`].filter(Boolean).join(' '), placeholder: this.#labels.text('placeholder'), oninput: () => this.#typed(), onpaste: () => this.#typed(0), onkeydown: event => this.#keys(event) });
 		this.#chosen = new PickerChosen({ id: `${id}-count`, selection: this.#selection, labels: this.#labels, name, input: this.#input, tip: null, onremove: key => (this.remove(key), this.#list.mark(item => this.#selection.has(item))) });
 		this.#list = new ResultList({ id: `${id}-list`, label, multiple, input: this.#input, onchoose: index => this.#choose(this.#list.item(index)) });
 		this.#foot = new PickerFoot({ id: `${id}-status`, labels: this.#labels, input: this.#input, all: multiple && all, on: { retry: () => this.#search.retry(), more: () => this.#search.page(), all: () => this.#choose(...this.#open()) } });
@@ -94,7 +105,7 @@ export class Picker extends Component {
 		this.#escape = el('div', { class: 'bui-picker-escape', hidden: true }, [el('p', { class: 'bui-picker-escape-title', text: this.#labels.text('escape') }), this.#slot]);
 		this.#working = el('div', { class: 'bui-picker-work' }, [
 			this.#chosen.element,
-			el('div', { class: 'bui-picker-bar' }, [el('span', { class: 'bui-picker-search' }, [glyph('search'), this.#input]), ...this.#filter(filters)]),
+			el('div', { class: 'bui-picker-bar' }, [el('span', { class: 'bui-picker-search' }, [glyph('search'), this.#input]), ...this.#filters.elements]),
 			this.#list.element,
 			this.#foot.element
 		]);
@@ -167,6 +178,7 @@ export class Picker extends Component {
 			return;
 		}
 		this.#search.cancel();
+		this.#outage.release();
 		new Unavailable({ kind: 'association', level: 3, ...options }).mount(this.#gate);
 		this.#gate.hidden = false;
 		this.#working.hidden = true;
@@ -189,7 +201,7 @@ export class Picker extends Component {
 	refresh() {
 		if (this.#gated) return Promise.resolve();
 		const query = this.#recognizer.read(this.#input.value);
-		return this.#search.find(query, this.#values(), this.account);
+		return this.#search.find(query, this.#filters.values, this.account);
 	}
 
 	focus() {
@@ -200,7 +212,8 @@ export class Picker extends Component {
 		this.#search.cancel();
 		this.#tip.destroy();
 		this.#accounts?.destroy();
-		for (const filter of this.#filters) filter.select.destroy();
+		this.#outage.release();
+		this.#filters.destroy();
 		super.destroy();
 	}
 
@@ -208,28 +221,10 @@ export class Picker extends Component {
 		return !this.#gate.hidden;
 	}
 
-	#filter(filters) {
-		this.#filters = filters.map(filter => ({ name: filter.name, select: new Select({ options: filter.options, value: filter.value ?? null, onchange: () => this.refresh() }) }));
-		return filters.map((filter, index) => {
-			const select = this.#filters[index].select;
-			select.control.setAttribute('aria-label', filter.label);
-			return select.element;
-		});
-	}
-
-	#values() {
-		return Object.fromEntries(this.#filters.map(filter => [filter.name, filter.select.value]));
-	}
-
-	#typed() {
+	// Typing searches after the delay; a paste at once, so the address it carries is recognized without waiting
+	#typed(wait = this.#delay) {
 		this.#pending?.();
-		this.#pending = this.later(() => this.refresh(), this.#delay);
-	}
-
-	// A paste is read at once: the address it carries is recognized without waiting for the typing delay.
-	#pasted() {
-		this.#pending?.();
-		this.#pending = this.later(() => this.refresh(), 0);
+		this.#pending = this.later(() => this.refresh(), wait);
 	}
 
 	#keys(event) {
@@ -273,10 +268,15 @@ export class Picker extends Component {
 		const busy = search.state === 'loading' || search.state === 'more';
 		this.#list.element.setAttribute('aria-busy', String(busy));
 		if (search.state !== 'more') this.#list.render(search.items, id => this.#selection.has(id), this.#labels, search.suggested);
-		this.#foot.show({ failed: search.state === 'failed', more: search.state === 'ready' && search.more, busy: search.state === 'more' });
+		// The notice's own tries keep the outage's place; an answer leaves the notice
+		if (search.state === 'loading' && this.#outage.active) return;
+		const outage = search.state === 'failed' && this.#outage.takes(search.error);
+		if (search.state === 'ready') this.#outage.release();
+		this.#foot.show({ failed: search.state === 'failed' && !outage, more: search.state === 'ready' && search.more, busy: search.state === 'more' });
 		this.#draw();
+		if (outage) return this.#foot.place(this.#outage.draw(search.error, async () => (await this.#search.retry(), false)));
 		const found = search.state === 'ready' ? this.#recognized() : null;
-		this.#foot.say(found ?? this.#foot.describe(search, Object.values(this.#values()).some(Boolean), this.#explain), search.state === 'failed');
+		this.#foot.say(found ?? this.#foot.describe(search, this.#filters.narrowed, this.#explain), search.state === 'failed');
 	}
 
 	/** Chooses what a pasted address named when the list holds it, and says what happened; null when nothing was recognized. */

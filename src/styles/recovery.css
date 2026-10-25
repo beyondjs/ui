@@ -138,6 +138,30 @@
 .bui-empty-outage .bui-empty-body {
 	grid-column: 2;
 }
+/* An outage's place in a table's cell or a row's value (0.33.0): the same mark and words as phrasing content,
+   on one line of the cell's size, so a list of rows keeps its rhythm. */
+.bui-empty-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-1);
+	max-width: 100%;
+	color: var(--color-text-muted);
+	font-weight: var(--weight-regular);
+	vertical-align: middle;
+}
+.bui-empty-inline .bui-empty-mark {
+	display: inline-flex;
+	flex: none;
+	color: var(--color-warning);
+}
+.bui-empty-inline .bui-empty-mark > .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-empty-inline .bui-empty-said {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
 /* An empty or unavailable place inside a region that is framed already: no box inside a box (0.24.0). */
 .bui-empty-unframed {
 	padding: var(--space-3) 0;
