@@ -30,6 +30,10 @@ Evidence baseline: this branch (`claude/settled-close-20261025`), made in a work
   - a touch screen's 44 px field held its words 15.6 px from its top and bottom against 12 px at its sides, and compact density's 30 px about 9 px: a single-line control's sides (a text field, a select, a choice's button) and its chevron now take the room its height leaves above its capitals there (`--bui-line-inset`), the comfortable 36 px control keeping its 12 px. The check holds such a control's sides to its own top (`even`);
   - Recovery's wide form held its wrapping title's capitals 22.1 px from its border against 16 px: its words now take off their half-leading on both sides above 480 px, which keeps one line centred on Try again. This is Recovery's inset rule alone, committed separately ("Keep one inset in Recovery's wide form…") with the coordinator's agreement, since Recovery is 0.33.0's.
 - The first run's compact density was never applied (an init script runs before the root exists); the check now sets it as soon as the root exists.
+- Found in Chrome 155's fourth run, with a coarse pointer:
+  - an action menu's entries held their words at the top of their 44 px targets, ending the menu 26.3 px under its last baseline against 16 px above its first capitals. Each entry now centres its words, and the target's height decides the menu's inset (about 21 px with the menu's 4 px), which its sides keep; the check holds those sides to the menu's top there (`touch: { inset: 'even' }`);
+  - a notification row's last line of 44 px targets ("2 updates", "Mark as read") grows the row, so its words end about 21 px from its bottom against 8 px above. Hanging the targets past its edge would cover the next row's, so it waits for a design decision (`family-touch-notification-rows`), measured for the record; the notification panel's taller rows scroll it by design.
+- Found against 0.33.0 after the rebase: offline, `Recovery`'s line has no Try again, so beside nothing the 18 px mark set the line and held the words' capitals about 3.5 px past the inset in the wide form. The mark now takes off what it adds past the words' capitals there, and the check measures the line offline (`context.setOffline`). Under 480 px, the hidden Try again's empty row keeps its gap, so the words stand 16 px above their details against 8 px; that is Recovery's layout, not an inset, and is left to its owner.
 
 ### The compact search's one accessible name (`family-journeys-compact-search-labels`)
 
@@ -43,6 +47,16 @@ Evidence baseline: this branch (`claude/settled-close-20261025`), made in a work
 
 - `ComposerChip` (DOM and React) is a chip that acts: a button in the chips' geometry (D165, one target tall, the quiet edge, round) with a muted `label`, a `value`, an optional `glyph`, `name` for its accessible name and `onclick`. It draws no chevron. Its whole face is its family tooltip only while a shortened toolbar sets its label aside; its value is never cut, since an action is named whole (D179). `label`, `value` and `name` are setters that keep its focus. It carries no copy of its own.
 - Found while building it: the composer's tray hid a `ChoiceChip`'s label (its value alone, D165) but had no tooltip, so the label was said only to assistive technology. The toolbar's tooltip now covers the box, the tray's chips with the settings', and the box carries it into the taller editor.
+
+### A button's own wait in a form (item 10, found by the Packages interface)
+
+- The case: `Required` quieted Save and kept it among the buttons it quieted; the product then set the package `Button`'s `waiting` for its own condition; once the form held everything, `Required` freed it, and the product's wait was lost. The Packages interface worked around it with a React `key` per state.
+- A package `Button` now marks its own wait with `data-bui-waiting`, in the DOM and in React. `Required` and `Quiet` never free a control that carries it or `data-busy` (`Required.held(control)`), and read it again when either ends: `Required` through its observer of the form's structure, `Quiet` through one of its control's two attributes. A part that still waits then quiets it again.
+
+### A React `DataTable` cell that renders nothing (item 11, found by the Packages interface)
+
+- A React cell's holder is filled after the table draws it, so the table never took it for empty: in the narrow layout its label and separator stayed, and a line whose first secondary cell rendered nothing began with "· ".
+- React's `DataTable` marks a cell `data-empty` when what it rendered holds no text and no element, and reads it again whenever that content changes (one observer of its holders), so the narrow line leaves out its label and separator. The DOM table already read its own values so; `DataTable`'s 0.33.0 outage place is unchanged.
 
 ### The mark of an arrival (item 9, asked by the coordinator for the products' tests)
 
