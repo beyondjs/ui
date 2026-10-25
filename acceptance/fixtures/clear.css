@@ -1,0 +1,21 @@
+/* The clear fixture's page only (0.33.0): no container of its own, so every measure is the package's. */
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+	font-size: var(--text-body);
+	line-height: var(--leading-body);
+}
+main {
+	display: flex;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+/* Each part runs past a window, so an address can bring any of them to the top */
+.clear-part {
+	min-height: 110vh;
+}
