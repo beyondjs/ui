@@ -42,6 +42,8 @@ export class Required {
 	focus(): boolean;
 	/** Stops a submission while a part waits, the caret put there; true when it stopped it. */
 	hold(event: Event): boolean;
+	/** Reports the first wrong control with the browser's own message when nothing waits before it, stopping the submission; true when it did (0.34.0). */
+	report(event: Event): boolean;
 	destroy(): void;
 }
 

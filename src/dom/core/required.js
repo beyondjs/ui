@@ -160,6 +160,23 @@ export class Required {
 		return true;
 	}
 
+	/**
+	 * Says the browser's own message for a wrong value (0.34.0): when the first part that needs something
+	 * is a control failing its own constraints (a type, a pattern, a range, a product's custom validity),
+	 * it stops the submission and reports that control (`reportValidity()`), which takes the focus; true
+	 * when it did. A part that waits before it is left to `hold`, which says nothing. `FocusedForm` without
+	 * fields and React's `Form` with `report` use it.
+	 */
+	report(event) {
+		const wrong = this.wrong;
+		const first = this.first;
+		const waiting = first?.nodeType === 1 ? first : (first?.element ?? null);
+		if (!wrong || (waiting && Required.before(waiting, wrong))) return false;
+		event.preventDefault();
+		wrong.reportValidity();
+		return true;
+	}
+
 	/** Releases the form's listeners and frees the buttons it quieted. */
 	destroy() {
 		this.#listeners.release();

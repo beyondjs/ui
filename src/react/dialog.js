@@ -85,8 +85,13 @@ export function useConfirm(labels = {}) {
  * runs, where the product says what is wrong in a value, in its field; the browser's own validation is
  * off. A form drawn inside its tree, such as a dialog's through a portal, submits only itself. The ref is
  * the form element.
+ *
+ * `report` (0.34.0, off by default) is for a product that does not say wrong values itself: a control
+ * that breaks its own constraints (a type, a pattern, a range), when nothing waits before it, says the
+ * browser's own message and takes the focus (`Required.report`), and `onSubmit` does not run, as
+ * `FocusedForm` without fields does.
  */
-export const Form = forwardRef(function Form({ onSubmit, children, ...rest }, ref) {
+export const Form = forwardRef(function Form({ onSubmit, report = false, children, ...rest }, ref) {
 	const form = useRef(null);
 	const required = useRef(null);
 	useImperativeHandle(ref, () => form.current, []);
@@ -102,6 +107,8 @@ export const Form = forwardRef(function Form({ onSubmit, children, ...rest }, re
 	const submit = event => {
 		// A form inside this one's React tree sends its submission up that tree, never as this one's
 		if (event.target !== event.currentTarget) return;
+		// A wrong value that comes first says the browser's own message only when the product asked for it
+		if (report && required.current?.report(event)) return;
 		if (required.current?.hold(event)) return;
 		onSubmit?.(event);
 	};

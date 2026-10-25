@@ -108,14 +108,7 @@ export class FocusedForm {
 		}
 		// Without Field objects the first part that needs something gets the caret: one that waits says
 		// nothing (D183), a wrong control says the browser's own constraint message
-		if (!this.#fields.length) {
-			const waiting = this.#required.first;
-			const wrong = this.#required.wrong;
-			if (wrong && !(waiting && Required.before(waiting, wrong))) {
-				wrong.reportValidity();
-				return;
-			}
-		}
+		if (!this.#fields.length && this.#required.report(event)) return;
 		if (this.#required.hold(event)) return;
 		const data = new FormData(this.#form);
 		const values = Object.fromEntries([...data].map(([key, value]) => [key, typeof value === 'string' ? value : value.name]));

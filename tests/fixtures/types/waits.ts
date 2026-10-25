@@ -1,5 +1,5 @@
-/** Declarations of 0.34.0's waits (D183): a chooser that waits for an earlier choice and a held Send's place. */
-import { ChoiceMenu, ChoiceChip, Composer } from '@beyond-js/ui';
+/** Declarations of 0.34.0's waits (D183): a chooser that waits for an earlier choice, a held Send's place and `Required.report`. */
+import { ChoiceMenu, ChoiceChip, Composer, Required } from '@beyond-js/ui';
 
 const repository = new ChoiceChip({ label: 'Repository', options: [{ value: 'web', label: 'acme/web' }] });
 const branch = new ChoiceChip({ label: 'Branch', options: [{ value: 'main', label: 'main' }], waiting: true, place: () => repository.control });
@@ -14,3 +14,6 @@ new ChoiceMenu({ label: 'Branch', options: [], place: repository.control });
 // @ts-expect-error waiting is a yes or no
 menu.waiting = 'soon';
 void [waits, place];
+// React Form's `report` reads the same rule (0.34.0)
+const reported: boolean = new Required(document.createElement('form')).report(new Event('submit', { cancelable: true }));
+void reported;
