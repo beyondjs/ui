@@ -120,3 +120,23 @@ html:has(.bui-sidebar[data-mode='drawer']):has(.bui-page-compact[data-subject]) 
 	align-items: center;
 	gap: var(--space-2);
 }
+
+/* Every page with the family bar lands what it scrolls to below the bar (0.33.0): an address's target, a
+   heading focused by code, scrollIntoView; below the sidebar's cut, below its product row too, unless the
+   sidebar is merged with the bar and draws none. Weightless (:where), so the rules above, which add the
+   compact line's height where one is drawn, always win over these. */
+html:where(:has(.bui-family)) {
+	scroll-padding-top: calc(var(--layout-family) + var(--space-2));
+}
+html:where(:has(.bui-family):has(.bui-sidebar[data-mode='drawer']:not([data-merged]))) {
+	scroll-padding-top: calc(var(--layout-family) + var(--bui-sidebar-row, 44px) + var(--space-2));
+}
+/* A control on those sticky lines never moves the page when it takes focus (by Tab, or back from its menu):
+   Chrome and WebKit read a sticky control under the document's scroll padding as out of view and scroll the
+   page, though the control never moves. Its scroll area is set down past the tallest padding (the bar, the
+   row, the compact line's taller form and the room), where it is always in view. A menu's or a dialog's
+   entries keep their own: they scroll inside their panel. */
+:where(.bui-family, .bui-sidebar-row, .bui-page-compact-line) :where(a, button, input, select, textarea, summary, [tabindex]):not(:where(.bui-disclosure-panel, [data-bui-floating], dialog), :where(.bui-disclosure-panel, [data-bui-floating], dialog) *) {
+	scroll-margin-top: calc(-1 * (var(--layout-family) + var(--bui-sidebar-row, 44px) + var(--bui-page-compact-tall) + var(--space-2)));
+	scroll-margin-bottom: calc(var(--layout-family) + var(--bui-sidebar-row, 44px) + var(--bui-page-compact-tall) + var(--space-2));
+}
