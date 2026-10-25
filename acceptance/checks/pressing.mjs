@@ -3,13 +3,15 @@ import { press, settle } from '../support/press.mjs';
 import { words } from '../fixtures/data/pressing.js';
 
 /**
- * Where a press puts the person (0.34.0, D183), in a real engine, on the `pressing.html` pages: a branch chip
- * that waits for the repository chip is quiet and reachable, and a click, Enter, Space or ArrowDown only
- * puts focus on the repository chip, opening nothing; the held Send's press goes there too, sending
- * nothing, while Enter in the field keeps focus there; the line comments that go with the message are a
- * `ComposerChip` in the tray, one target tall with its label muted beside its value, whole there and its
- * face in the tooltip only once a shortened toolbar sets its label aside; and React's `Form` with `report`
- * says the browser's own message for a wrong email, runs no `onSubmit` and leaves the email focused.
+ * Where a press puts the person (0.34.0, D183), in a real engine, on the `pressing.html` pages:
+ * - a branch chip that waits for the repository chip is quiet and reachable, and a click, Enter, Space or
+ *   ArrowDown only puts focus on the repository chip, opening nothing; a tray chip's whole face is its tooltip;
+ * - the held Send's press goes there too, sending nothing, while Enter in the field keeps focus there;
+ * - the line comments that go with the message are a `ComposerChip` in the tray, one target tall with its
+ *   label muted beside its value, whole there, and its face in the tooltip only once a shortened toolbar sets
+ *   its label aside;
+ * - React's `Form` with `report` says the browser's own message for a wrong email, runs no `onSubmit` and
+ *   leaves the email focused.
  */
 const copy = consumer => words[consumer.name === 'dom' ? 'en' : 'es'];
 const open = (browser, consumer, options = {}) => browser.open(consumer, { file: 'pressing.html', viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce', ...options });
@@ -56,6 +58,12 @@ export const checks = [
 			expect((await page.locator('.bui-composer').evaluate(node => node.textContent)) === said, 'and nothing is said');
 			await choose(page);
 			expect(!(await branch.getAttribute('aria-disabled')), 'a repository makes it able');
+			// A tray chip shows its value alone: its whole face is its tooltip, as a setting's is (0.34.0)
+			await branch.focus();
+			await page.keyboard.press('Shift+Tab');
+			await page.locator('.bui-hint:not([hidden])').waitFor();
+			const tip = await page.locator('.bui-hint:not([hidden])').textContent();
+			expect(tip === `${copy(consumer).repository}: acme/web`, `the repository chip's whole face in the tooltip: ${tip}`);
 			await press(page, branch);
 			await settle(page);
 			expect((await state(page)).open, 'a press opens it now');

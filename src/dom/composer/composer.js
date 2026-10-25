@@ -65,7 +65,7 @@ export class Composer extends Component {
 		this.#marks = new ComposerMarks(this.#element, () => !this.#field.value.trim() && !this.#context?.sendable, empty => ((this.#actions.empty = empty), (this.#field.hint = this.#context?.hint)));
 		const control = this.#field.control;
 		this.#context = new ComposerContext({ root: this.#element, box, field: control, labels: this.#labels, locale, attach, onsuggest, suggest, commands, recall, dictation, refocus: () => this.focus(), oninsert: (text, caret) => this.#write(text, caret) });
-		this.#toolbar = new ComposerToolbar({ root: this.#element, controls: this.#context.controls, actions: this.#actions.element, labels: this.#labels, compact });
+		this.#toolbar = new ComposerToolbar({ root: this.#element, box, controls: this.#context.controls, actions: this.#actions.element, labels: this.#labels, compact });
 		this.#expand = new ComposerExpand({ root: this.#element, box, field: control, labels: this.#labels });
 		const voice = this.#context.dictation;
 		if (voice) this.#actions.voice = voice.button;

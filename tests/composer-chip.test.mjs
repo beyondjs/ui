@@ -97,6 +97,25 @@ test('a composer\'s tray holds it while it has something to say, and takes it aw
 	chip.destroy();
 });
 
+test('the tray\'s choice chips, which show their value alone, say their whole face in the family tooltip, as the settings\' do, and a chip that acts keeps its own', () => {
+	const repository = new ui.ChoiceChip({ label: 'Repository', options: [{ value: 'web', label: 'acme/web' }], value: 'web', statement: false });
+	const chip = comments();
+	const composer = new ui.Composer({ label: 'Message', onsubmit: () => Promise.resolve(), tray: [repository, chip] }).mount(document.body);
+	page.key(document.body, 'Tab');
+	repository.control.focus();
+	assert.equal(shown(), 'Repository: acme/web', 'its label is in its name and its tooltip');
+	repository.control.blur();
+	set(chip.element.querySelector('.bui-composer-chip-label'), 92);
+	chip.element.focus();
+	assert.equal(shown(), null, 'the chip that acts shows its face whole, so no tooltip, and never a second one');
+	const box = composer.element.querySelector('.bui-composer-box');
+	assert.ok(box.hasAttribute('data-bui-hints') && chip.element.hasAttribute('data-bui-hints'), 'the box\'s tooltip and the chip\'s own');
+	composer.destroy();
+	assert.equal(box.hasAttribute('data-bui-hints'), false, 'the box is left as it was');
+	repository.destroy();
+	chip.destroy();
+});
+
 test('the stylesheet draws it in the chips\' geometry, sets its label aside in a shortened toolbar and never cuts its value', () => {
 	const sheet = readFileSync(new URL('../src/styles/composing.css', import.meta.url), 'utf8');
 	const rule = /\.bui-composer-chip \{([^}]*)\}/.exec(sheet)?.[1] ?? '';
