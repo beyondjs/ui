@@ -11,12 +11,24 @@ import { pages } from './insets-boxes.mjs';
  * pixel; a free side (room a short line or a product's last row leaves) never comes closer than the inset.
  * Boxes that keep their unevenness until a design decision are measured for the record only. With
  * `BEYOND_UI_INSETS` naming a file outside the repository, every measurement is appended to it as a JSON line.
+ * Since 0.34.0 every box is measured again at compact density (`data-density="compact"` on the root) and
+ * with a coarse pointer (touch emulated), in the plain DOM consumer, whose markup the React one shares.
  */
 const sides = ['top', 'bottom', 'left', 'right'];
 
-async function view(browser, consumer, page, width, scheme) {
-	const opened = await browser.open(consumer, { file: page.file ?? undefined, query: page.query ?? '', viewport: { width, height: 900 }, colorScheme: scheme, prepare: context => Insets.install(context) });
+/** The ways a page is drawn: as it comes, at compact density, and with a coarse pointer (0.34.0). */
+const modes = {
+	comfortable: { options: {}, prepare: () => undefined },
+	compact: { options: {}, prepare: context => context.addInitScript(() => (document.documentElement.dataset.density = 'compact')) },
+	coarse: { options: { hasTouch: true, isMobile: true }, prepare: () => undefined }
+};
+
+async function view(browser, consumer, page, width, scheme, mode) {
+	const { options, prepare } = modes[mode];
+	const opened = await browser.open(consumer, { file: page.file ?? undefined, query: page.query ?? '', viewport: { width, height: 900 }, colorScheme: scheme, ...options, prepare: async context => (await Insets.install(context), await prepare(context)) });
 	await opened.page.evaluate(() => document.fonts.ready);
+	const drawn = await opened.page.evaluate(() => ({ density: document.documentElement.dataset.density ?? null, coarse: matchMedia('(pointer: coarse)').matches }));
+	expect(drawn.density === (mode === 'compact' ? 'compact' : null) && drawn.coarse === (mode === 'coarse'), `${mode}: the page is drawn so: ${JSON.stringify(drawn)}`);
 	return opened;
 }
 
@@ -63,13 +75,13 @@ function hold(found, box, value, at) {
 	}
 }
 
-async function measure(browser, consumer, list) {
+async function measure(browser, consumer, list, mode = 'comfortable') {
 	for (const page of list) {
 		if (page.consumers && !page.consumers.includes(consumer.name)) continue;
 		for (const scheme of ['light', 'dark']) {
 			for (const width of page.widths ?? [1440, 390]) {
-				const at = `${browser.engine} ${width}px ${scheme}`;
-				const opened = await view(browser, consumer, page, width, scheme);
+				const at = `${browser.engine} ${width}px ${scheme}${mode === 'comfortable' ? '' : ` ${mode}`}`;
+				const opened = await view(browser, consumer, page, width, scheme, mode);
 				for (const step of page.steps) {
 					await step.open?.(opened.page, consumer);
 					for (const box of step.boxes) {
@@ -77,7 +89,7 @@ async function measure(browser, consumer, list) {
 						await still(opened.page, box);
 						const found = await Insets.measure(opened.page, box);
 						const value = await inset(opened.page, box);
-						if (process.env.BEYOND_UI_INSETS) appendFileSync(process.env.BEYOND_UI_INSETS, `${JSON.stringify({ engine: browser.engine, consumer: consumer.name, width, scheme, box: box.name, inset: value, held: box.sides ?? sides, ...found })}\n`);
+						if (process.env.BEYOND_UI_INSETS) appendFileSync(process.env.BEYOND_UI_INSETS, `${JSON.stringify({ engine: browser.engine, consumer: consumer.name, mode, width, scheme, box: box.name, inset: value, held: box.sides ?? sides, ...found })}\n`);
 						hold(found, box, value, at);
 					}
 				}
@@ -102,5 +114,11 @@ export const checks = [
 		name: 'insets (D184): a dialog and its field, a confirmation, a side sheet\'s head, menus, toasts, help, tooltips, notification rows, the command palette and a turn\'s preview keep one inset, at 1440 and 390 px in both themes',
 		consumers: ['dom', 'react19'],
 		run: (browser, consumer) => measure(browser, consumer, pages.overlays)
-	}
+	},
+	// Compact density and a coarse pointer change the controls' and targets' heights: every box again (0.34.0)
+	...['compact', 'coarse'].flatMap(mode => ['notices', 'cards', 'overlays'].map(group => ({
+		name: `insets (D184) ${mode === 'compact' ? 'at compact density' : 'with a coarse pointer'}: the ${group} keep one inset, at 1440 and 390 px in both themes (0.34.0)`,
+		consumers: ['dom'],
+		run: (browser, consumer) => measure(browser, consumer, pages[group], mode)
+	})))
 ];

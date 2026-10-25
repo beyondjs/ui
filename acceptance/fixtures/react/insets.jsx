@@ -1,16 +1,19 @@
 // The insets page of the React consumers (D184), in Spanish through the components' `labels.es`: the boxes
-// no other fixture page draws, each in a block of its own named by its id, as the DOM page draws them, and
-// a toast with a detail shown by window.fixture.toast().
+// no other fixture page draws, each in a block of its own named by its id, as the DOM page draws them (since
+// 0.34.0 an editable CommandCard and an outage's line whose words wrap beside Try again), and a toast with a
+// detail shown by window.fixture.toast().
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Callout, Button, EmptyState, Checklist, Section, Field, Unavailable, TechnicalDetails, useToaster } from '@beyond-js/ui/react';
+import { Callout, Button, EmptyState, Checklist, Section, Field, Unavailable, TechnicalDetails, CommandCard, Recovery, RetryAction, AgainLine, useToaster } from '@beyond-js/ui/react';
 import { words } from '../data/insets.js';
 
 const copy = words.es;
 const time = Date.now() - 60_000;
+const reads = [{ key: 'project', title: copy.recovery.read, details: { request: 'req_insets_7Hq2', time, text: copy.recovery.said }, run: async () => false }];
+const outage = { ...RetryAction.labels.es, ...AgainLine.labels.es, ...TechnicalDetails.labels.es };
 
 function App() {
 	const toaster = useToaster(useToaster.labels.es);
@@ -44,6 +47,12 @@ function App() {
 			</div>
 			<div id="refusal">
 				<Unavailable title={copy.refusal.title} reason={copy.refusal.reason} owner={copy.refusal.owner} labels={Unavailable.labels.es} />
+			</div>
+			<div id="command-edit">
+				<CommandCard title={copy.command.title} command={copy.command.text} editable onAllow={() => undefined} onDeny={() => undefined} labels={CommandCard.labels.es} />
+			</div>
+			<div id="recovery-wide">
+				<Recovery title={copy.recovery.cause} reads={reads} labels={outage} locale="es" />
 			</div>
 		</main>
 	);

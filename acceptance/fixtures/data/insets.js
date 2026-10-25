@@ -1,5 +1,6 @@
 // The fictional words of the insets fixtures (D184): boxes no other page draws, each long enough to wrap so
-// its content reaches the box's end. English for the DOM page, Spanish for the React pages.
+// its content reaches the box's end. English for the DOM page, Spanish for the React pages. Since 0.34.0 an
+// editable request's command and an outage whose words wrap beside Try again.
 export const words = {
 	en: {
 		info: { title: 'Machines sleep after 30 minutes without work', body: 'A machine that sleeps keeps its disk and wakes up when a conversation needs it, so nothing you started is lost while it waits.', action: 'Change the idle time', other: 'Keep it awake' },
@@ -10,7 +11,9 @@ export const words = {
 		section: { title: 'About', text: 'This machine runs the conversations of Storefront and keeps a copy of each repository the project grants it, read and pushed only through its Git gateway.' },
 		notes: { label: 'Notes', value: 'Wake it before the release review.\nIt keeps the build cache warm.' },
 		refusal: { title: 'Workspace is not open to you yet', reason: 'Development environments open by invitation, one organization at a time.', owner: 'An owner of Northwind Studio' },
-		toast: { title: 'Machine renamed', detail: 'Its conversations keep their history and their copies.' }
+		toast: { title: 'Machine renamed', detail: 'Its conversations keep their history and their copies.' },
+		command: { title: 'Claude Code asks to run a command', text: 'npm run build && npm test -- --coverage' },
+		recovery: { cause: 'Beyond Accounts did not answer', read: 'The project', said: 'Beyond Accounts is unavailable (UNAVAILABLE)' }
 	},
 	es: {
 		info: { title: 'Las máquinas se duermen tras 30 minutos sin trabajo', body: 'Una máquina que duerme conserva su disco y se despierta cuando una conversación la necesita, así que no se pierde nada de lo que empezaste mientras espera.', action: 'Cambiar el tiempo de espera', other: 'Mantenerla despierta' },
@@ -21,6 +24,8 @@ export const words = {
 		section: { title: 'Acerca de', text: 'Esta máquina ejecuta las conversaciones de Storefront y conserva una copia de cada repositorio que el proyecto le concede, leído y enviado solo a través de su pasarela de Git.' },
 		notes: { label: 'Notas', value: 'Despiértala antes de la revisión de la versión.\nMantiene caliente la caché de compilación.' },
 		refusal: { title: 'Workspace aún no está abierto para ti', reason: 'Los entornos de desarrollo se abren por invitación, una organización cada vez.', owner: 'Quien administra Northwind Studio' },
-		toast: { title: 'Máquina renombrada', detail: 'Sus conversaciones conservan su historial y sus copias.' }
+		toast: { title: 'Máquina renombrada', detail: 'Sus conversaciones conservan su historial y sus copias.' },
+		command: { title: 'Claude Code pide ejecutar un comando', text: 'npm run build && npm test -- --coverage' },
+		recovery: { cause: 'Beyond Accounts no respondió', read: 'El proyecto', said: 'Beyond Accounts no está disponible (UNAVAILABLE)' }
 	}
 };

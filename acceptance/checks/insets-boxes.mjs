@@ -32,7 +32,8 @@ export const pages = {
 					{ name: 'checklist', box: '#checklist .bui-checklist', inset: '--bui-checklist-inset', free: ['bottom'] },
 					{ name: 'raised section', box: '#section .bui-section', inset: '--bui-raised-inset' },
 					{ name: 'textarea', box: '#notes textarea', field: true, inset: '--bui-text-inset', free: ['bottom'] },
-					{ name: 'Unavailable ending in text', box: '#refusal .bui-unavailable', inset: '--bui-unavailable-inset' }
+					{ name: 'Unavailable ending in text', box: '#refusal .bui-unavailable', inset: '--bui-unavailable-inset' },
+					{ name: 'Recovery whose words wrap beside Try again', box: '#recovery-wide .bui-recovery', inset: '--bui-recovery-inset' }
 				] },
 				{ open: page => page.locator('#callout-details summary').click(), boxes: [{ name: 'callout ending in open technical details', box: '#callout-details .bui-callout', inset: '--bui-callout-inset' }] },
 				{ open: async page => (await page.evaluate(() => window.fixture.toast()), page.waitForSelector('.bui-toast')), boxes: [{ name: 'toast with a detail', box: '.bui-toast', inset: '--bui-toast-inset' }] }
@@ -47,6 +48,7 @@ export const pages = {
 		{ file: 'recovery.html', query: '?whole=1', steps: [{ boxes: [{ name: 'Recovery as the page', box: '.bui-recovery', inset: '--bui-recovery-inset' }] }] }
 	],
 	cards: [
+		{ file: 'insets.html', steps: [{ boxes: [{ name: 'an editable CommandCard', box: '#command-edit .bui-command', inset: '--bui-command-inset' }, { name: 'its command field', box: '#command-edit textarea', field: true, inset: '--bui-code-inset', free: ['bottom'] }] }] },
 		{ file: 'audit.html', steps: [
 			{ boxes: [{ name: 'CommandCard', box: '.bui-command', inset: '--bui-command-inset' }, { name: 'CommandCard code', box: '.bui-command-code', inset: '--bui-code-inset' }, { name: 'ChoiceChip', box: '#chip .bui-choice-button', inset: 8, sides: record }] },
 			{ open: page => page.locator('#chip .bui-choice-button').click(), boxes: [{ name: 'a choice menu with one chosen', box: '.bui-choice-list:not([hidden])', flat: ['.bui-menu-item'], inset: '--bui-menu-inset' }] }
@@ -57,7 +59,8 @@ export const pages = {
 			{ boxes: [{ name: 'Select', box: '.bui-select-control', field: true, extra: [':scope > .bui-icon'], inset: '--bui-select-inset' }, { name: 'awaited card', box: '.bui-awaited', inset: '--bui-awaited-inset' }] },
 			{ open: page => page.locator('main details > summary').first().click(), boxes: [{ name: 'technical details', box: 'main > details .bui-details-body, main > .bui-host > details .bui-details-body', inset: '--bui-text-inset' }] }
 		] },
-		{ file: 'conversation.html', steps: [{ open: page => page.locator('.bui-rail > .bui-activity > .bui-activity-head, .bui-rail > .bui-host > .bui-activity > .bui-activity-head').first().click(), boxes: [{ name: 'activity exchange', box: '.bui-rail .bui-activity-exchange', inset: 12, sides: record }] }] }
+		{ file: 'conversation.html', steps: [{ open: page => page.locator('.bui-rail > .bui-activity > .bui-activity-head, .bui-rail > .bui-host > .bui-activity > .bui-activity-head').first().click(), boxes: [{ name: 'activity exchange', box: '.bui-rail .bui-activity-exchange', inset: 12, sides: record }] }] },
+		{ file: 'pressing.html', steps: [{ boxes: [{ name: 'ComposerChip', box: '.bui-composer-tray .bui-composer-chip', inset: 12, sides: record }] }] }
 	],
 	overlays: [
 		{ file: null, steps: [

@@ -1,5 +1,6 @@
 import { expect } from '../support/browser.mjs';
 import { words } from '../support/words.mjs';
+import { press, settle } from '../support/press.mjs';
 import { copy } from '../fixtures/data/turns.js';
 
 /**
@@ -9,25 +10,6 @@ import { copy } from '../fixtures/data/turns.js';
  * a footer that names it wait the same way; and a composer's files wait for words on the turns page, Send
  * quiet and the field saying what they wait for. The prompt's own case is `keyboard.mjs`'s.
  */
-const settle = page => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 30)))));
-
-/**
- * Presses a control where it rests, as a person does. A quiet control takes none of Playwright's
- * actionability checks, its wait for a still element included, and the main page still moves while its
- * inbox and picker load: a press then lands on whatever moved under the pointer.
- */
-async function press(page, locator) {
-	await locator.scrollIntoViewIfNeeded();
-	let last = null;
-	for (let tries = 0; tries < 40; tries += 1) {
-		const box = await locator.boundingBox();
-		if (box && last && Math.abs(box.x - last.x) < 0.5 && Math.abs(box.y - last.y) < 0.5) return page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-		last = box;
-		await settle(page);
-	}
-	throw new Error('the control kept moving');
-}
-
 export const checks = [
 	{
 		name: 'focused form: while the required title is empty its submit is quiet and a press puts the caret in the title, saying nothing; a title makes it able (D183)',

@@ -17,6 +17,10 @@ body {
 	max-width: var(--layout-form);
 	padding: var(--space-6) var(--space-4);
 }
+/* An outage's line in a narrow block (0.34.0): its words wrap beside Try again in its wide form */
+#recovery-wide {
+	max-width: 26rem;
+}
 /* A product's own paragraphs inside a box, without the browser's margins, as a product's reset draws them */
 .insets-page p {
 	margin: 0;
