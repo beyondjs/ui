@@ -44,6 +44,11 @@ Evidence baseline: UI `7568947` (0.32.1) on `feature/next` plus this branch (`cl
 - `ComposerChip` (DOM and React) is a chip that acts: a button in the chips' geometry (D165, one target tall, the quiet edge, round) with a muted `label`, a `value`, an optional `glyph`, `name` for its accessible name and `onclick`. It draws no chevron. Its whole face is its family tooltip only while a shortened toolbar sets its label aside; its value is never cut, since an action is named whole (D179). `label`, `value` and `name` are setters that keep its focus. It carries no copy of its own.
 - Found while building it: the composer's tray hid a `ChoiceChip`'s label (its value alone, D165) but had no tooltip, so the label was said only to assistive technology. The toolbar's tooltip now covers the box, the tray's chips with the settings', and the box carries it into the taller editor.
 
+### The mark of an arrival (item 9, asked by the coordinator for the products' tests)
+
+- The document element carries `data-bui-opened` once the opening has handed over and the identity has landed on the bar (the bar's `data-bui-landing` gone), at once without an opening to run, and when the opening steps aside for a development server's error overlay. An opening whose recovery is shown never sets it, and nothing removes it. `OpeningExit.mark` names it and `OpeningExit.opened()` sets it; the exit's `landed` resolves once the landing mark has gone.
+- An attribute, not an event: a test reads it at any time, with a selector or a wait, where an event is lost to a listener added after it. Products' tests wait for `html[data-bui-opened]` instead of the opening's own parts.
+
 ## What the independent review of `fef34b2` found, and its corrections
 
 The coordinator had `fef34b2` (the first candidate) reviewed independently; each finding below is corrected, with the coordinator's decision where one was needed.

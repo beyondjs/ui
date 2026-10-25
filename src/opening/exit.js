@@ -14,18 +14,31 @@
  *
  * Since 0.34.0 the focus a product asked for while covered lands as it shows (`OpeningFocus`): where the
  * person's focus is not in the product already, the last target asked for that still takes the focus gets
- * it, and a person in the opening's recovery, which leaves, gets it over the generic destination.
+ * it, and a person in the opening's recovery, which leaves, gets it over the generic destination. And the
+ * document carries one public mark once the product has arrived (`OpeningExit.opened()`).
  */
 export class OpeningExit {
 	static duration = 360;
 	static fade = 200;
 	static bound = 700;
 	static ease = 'cubic-bezier(0.2, 0.7, 0.3, 1)';
+	/** The document element's attribute that says the product has arrived (0.34.0), for tests and tools to wait for */
+	static mark = 'data-bui-opened';
+
+	/**
+	 * Marks the document opened: once the hand-over ended and the identity landed, or when there was no
+	 * opening to run or it stepped aside. It is the one public mark of an arrival; the opening's own parts
+	 * and the bar's landing mark are internals that may change.
+	 */
+	static opened() {
+		document.documentElement.setAttribute(OpeningExit.mark, '');
+	}
 
 	#element;
 	#root;
 	#focus;
 	#bar = null;
+	#landed = Promise.resolve();
 
 	/**
 	 * @param {HTMLElement} element The presentation (`#bui-opening`)
@@ -41,6 +54,11 @@ export class OpeningExit {
 	/** Whether this browser and this person's settings allow the motion */
 	get moving() {
 		return typeof this.#element.animate === 'function' && !globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+	}
+
+	/** Resolves once the identity has landed and the bar's landing mark has gone, at once without a flight */
+	get landed() {
+		return this.#landed;
 	}
 
 	/** Runs the hand-over and resolves once the presentation can be removed */
@@ -96,9 +114,10 @@ export class OpeningExit {
 		const bar = this.#bar;
 		if (!bar) return;
 		bar.dataset.buiLanding = 'landed';
-		setTimeout(() => {
+		this.#landed = new Promise(resolve => setTimeout(() => {
 			if (bar.dataset.buiLanding === 'landed') delete bar.dataset.buiLanding;
-		}, OpeningExit.fade * 2);
+			resolve();
+		}, OpeningExit.fade * 2));
 	}
 
 	/**

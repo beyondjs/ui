@@ -36,6 +36,7 @@ class OpeningAcceptance {
 			await this.#usual();
 			await this.#restored();
 			await this.#handover();
+			await this.#bare();
 			const helpers = { open: options => this.#open(options), steps: page => this.#steps(page) };
 			for (const check of [...new OpeningArrival(helpers).checks, ...new OpeningFailures(helpers).checks, ...new OpeningFocusing(helpers).checks]) {
 				await check();
@@ -60,8 +61,10 @@ class OpeningAcceptance {
 		if (name.startsWith('fonts/')) return send(types[name.split('.').pop()] ?? 'text/css', readFileSync(new URL(`../${name}`, import.meta.url)));
 		response.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; require-trusted-types-for 'script'; trusted-types 'none'");
 		const html = this.#document.render(readFileSync(new URL('./fixtures/opening/index.html', import.meta.url), 'utf8'));
-		// `/earlier`: the markup before 0.21.0 with this version's controller and stylesheet
-		send('text/html', name === 'earlier' ? html.replace(/<div id="bui-opening"[\s\S]*?<\/noscript>\n<\/div><\/div>/, readFileSync(new URL('./fixtures/opening/earlier.html', import.meta.url), 'utf8').trim()) : html);
+		// `/earlier`: the markup before 0.21.0 with this version's controller and stylesheet; `/bare` (0.34.0): no
+		// opening's markup at all, its controller still loaded
+		const opening = /<div id="bui-opening"[\s\S]*?<\/noscript>\n<\/div><\/div>/;
+		send('text/html', name === 'earlier' ? html.replace(opening, readFileSync(new URL('./fixtures/opening/earlier.html', import.meta.url), 'utf8').trim()) : name === 'bare' ? html.replace(opening, '') : html);
 	}
 
 	/**
@@ -205,13 +208,27 @@ class OpeningAcceptance {
 			await page.waitForFunction(() => document.querySelector('[data-opening-status]').textContent === 'Confirmando tu sesión');
 			release();
 			await page.waitForFunction(() => document.getElementById('bui-opening')?.dataset.state === 'leaving');
-			const leaving = await page.evaluate(() => ({ pointer: getComputedStyle(document.getElementById('bui-opening')).pointerEvents, app: getComputedStyle(document.getElementById('root')).visibility, target: getComputedStyle(document.querySelector('.bui-family .bui-lockup-mark')).visibility, landing: document.querySelector('.bui-family').dataset.buiLanding }));
-			assert.deepEqual(leaving, { pointer: 'none', app: 'visible', target: 'hidden', landing: 'flight' }, 'the product shows and takes the pointer at once; its wordmark waits under the moving one');
+			const leaving = await page.evaluate(() => ({ pointer: getComputedStyle(document.getElementById('bui-opening')).pointerEvents, app: getComputedStyle(document.getElementById('root')).visibility, target: getComputedStyle(document.querySelector('.bui-family .bui-lockup-mark')).visibility, landing: document.querySelector('.bui-family').dataset.buiLanding, opened: document.documentElement.hasAttribute('data-bui-opened') }));
+			assert.deepEqual(leaving, { pointer: 'none', app: 'visible', target: 'hidden', landing: 'flight', opened: false }, 'the product shows and takes the pointer at once; its wordmark waits under the moving one, and it has not arrived yet');
 			const started = Date.now();
 			await page.locator('#bui-opening').waitFor({ state: 'detached', timeout: 2000 });
 			assert.ok(Date.now() - started < 1000, 'the hand-over is bounded');
 			assert.equal(await page.locator('.bui-family .bui-lockup-mark').evaluate(node => getComputedStyle(node).visibility), 'visible');
 			assert.ok(JSON.parse(await page.evaluate(() => localStorage.getItem('opening-fixture.opening'))).session.length === 1, 'a clean opening is measured');
+			// The one public mark of an arrival (0.34.0): once the identity has landed, its bar's mark gone
+			await page.waitForFunction(() => document.documentElement.hasAttribute('data-bui-opened'), null, { timeout: 2000 });
+			assert.equal(await page.evaluate(() => 'buiLanding' in document.querySelector('.bui-family').dataset), false, 'the mark comes once the identity has landed');
+			this.#count++;
+		} finally { await context.close(); }
+	}
+
+	/** A document with no opening to run says at once that the product has arrived (0.34.0) */
+	async #bare() {
+		const { context, page, release } = await this.#open({ path: '/bare' });
+		try {
+			await page.waitForFunction(() => document.documentElement.hasAttribute('data-bui-opened'), null, { timeout: 5000 });
+			assert.equal(await page.locator('#bui-opening').count(), 0, 'no opening was drawn');
+			release();
 			this.#count++;
 		} finally { await context.close(); }
 	}
