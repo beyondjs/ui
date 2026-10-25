@@ -1,6 +1,6 @@
 # Local UI 0.34.0: focus says what the keys do there (D187)
 
-Evidence baseline: UI `7568947` (0.32.1) on `feature/next` plus this change, made in a worktree on 2026-10-25 for the suite's round `lit` (branch `claude/lit-20261025`). It is numbered right after 0.33.0, the day.s other two rounds following it as 0.35.0 and 0.36.0, and rebased onto 0.33.0 before release. Token set 0.8.0. Implementation is not the owner's acceptance.
+Evidence baseline: UI `ac91ee2` (0.33.0) on `feature/next` plus this change, made in a worktree on 2026-10-25 for the suite's round `lit` (branch `claude/lit-20261025`) on top of 0.32.1 and rebased onto 0.33.0 before release. It is numbered right after 0.33.0: the owner asked for the round to be integrated that night, and the day's two other rounds, agreed before it, follow it as 0.35.0 and 0.36.0. Token set 0.8.0. Implementation is not the owner's acceptance.
 
 ## Why
 
@@ -43,7 +43,11 @@ A and C read as the error state beside a field with a wrong value, in both theme
 - **Unit suite:** `npm test`, 881 of 881 at the round's first commit; after the renumbering and the later changes, the touched files (`edges`, `foundations`, `tokens`, `sources`) 30 of 30. Updated: `tokens.test.mjs` (token set 0.8.0, `approval.focus`, the role's pairs), `edges.test.mjs` (the composer's lit edge, never the coral border, the coral caret), `foundations.test.mjs` (a focused box's halo is a mark, never elevation).
 - **Browser acceptance, Chrome 155, the whole run** of the first commit (`741aa74`, started before the machine's test queue existed): 398 of 407. Of the nine failures, seven were the change's, each corrected and run again through the queue: `family.mjs`'s keyboard check read the bar's ring mid-settle (3); `editing.mjs` still held 0.32.1's coral border (2); and `turning.mjs`'s "the composer keeps its keys" (2) found the bottom scroll padding moving the thread when the composer's own field took the focus (330 px in Chrome, 61 px in WebKit, measured on a 40-turn thread), now kept only while the focus is outside the dock. The other two, the notification panel's slow-answer timing and Dictate's 5 s waits, passed again on their own: the machine was paging.
 - **Browser acceptance, the focus checks** (`node acceptance/run.mjs "focus, "`, 17 checks: the 7 of `focusing.mjs` and 10 that name focus) through the queue: all pass in Chrome 155, Firefox 155 and WebKit 26.6 after two corrections to the checks themselves (WebKit moves through links and buttons with Option+Tab, as Safari does; a helper's name shadowed). The checks that failed in the whole run pass again in Chrome.
-- To be completed at the release: the whole run in each engine from the archive rebased onto 0.35.0.
+- **After the rebase onto 0.33.0,** through the queue:
+  - `npm test`: 898 of 898, and `npm run types` compiles.
+  - Browser acceptance from the packed archive below (`BEYOND_UI_TARBALL`), filtered to every check that names focus, the keyboard, Tab or the dock, 0.33.0's outage close, the editor's Expand, the thread's turns and the composer's quiet Send: 140 of 140 in Chrome, 140 of 140 in Firefox and 140 of 140 in WebKit.
+  - The whole acceptance of every check was not run again on the rebased archive; the whole run above is the first commit's, in Chrome.
+- **The archive:** `dist-pack/beyond-ui-0.34.0.tgz`, packed at `7933de6`, integrity `sha512-WklhrDoC0PhiZGcTmjzQYq65vzc4kDzDincCk8mzj7lNZ8NX5BJ2+MhpVODjmtCUDMV9pAjPxRsqVPRM+j0LlQ==`. The products vendor it in the same round.
 
 ## Limits
 
@@ -53,4 +57,4 @@ Package evidence only. Each product vendors 0.34.0 in its own repository in the 
 
 ## Family reference synchronization
 
-The family reference records D187 and vendors 0.34.0 in its round `lit`, after the day's earlier reference rounds.
+Synchronization blocked on order: the family reference records D187 and vendors the package in its round `lit` (reference 0.57.0), made on top of the round `answered`'s 0.56.0, which is not on the suite's `feature/next` yet. The suite's pending `branding-reference-round-lit.md` holds the steps and D187's canonical text.
