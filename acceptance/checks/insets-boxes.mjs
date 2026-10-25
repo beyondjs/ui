@@ -67,7 +67,11 @@ export const pages = {
 			{ boxes: [{ name: 'Unavailable for access, with its action', box: '.bui-unavailable', inset: '--bui-unavailable-inset' }] },
 			{ open: page => page.locator('.bui-family [data-part="product"] .bui-navmenu-button').click(), boxes: [{ name: 'family bar menu panel', box: '.bui-family [data-part="product"] .bui-navmenu-panel:not([hidden])', flat: ['.bui-navmenu-item', 'a', 'button'], inset: 16, sides: record }] }
 		] },
-		{ file: 'recovery.html', steps: [{ boxes: [{ name: 'Recovery line', box: '.bui-recovery', inset: '--bui-recovery-inset' }] }] },
+		{ file: 'recovery.html', steps: [
+			{ boxes: [{ name: 'Recovery line', box: '.bui-recovery', inset: '--bui-recovery-inset' }] },
+			// Offline (0.33.0) the line says so with no Try again: its words alone set it (0.35.0)
+			{ open: async page => (await page.context().setOffline(true), page.waitForSelector('.bui-recovery[data-offline]:not([hidden])')), boxes: [{ name: 'Recovery offline, with no Try again', box: '.bui-recovery[data-offline]', inset: '--bui-recovery-inset' }] }
+		] },
 		{ file: 'recovery.html', query: '?whole=1', steps: [{ boxes: [{ name: 'Recovery as the page', box: '.bui-recovery', inset: '--bui-recovery-inset' }] }] }
 	],
 	cards: [

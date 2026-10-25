@@ -125,6 +125,12 @@
 		.bui-recovery:not([data-recovery='page']) > .bui-recovery-words {
 			margin-block: calc((1cap - 1lh) / 2);
 		}
+		/* Offline the line has no Try again (0.33.0): its words set it, the mark centred on their capitals
+		   without growing it (0.35.0) */
+		.bui-recovery[data-offline]:not([data-recovery='page']) > .bui-recovery-mark {
+			margin-block: calc((1cap - 18px) / 2);
+			font-size: var(--text-body);
+		}
 	}
 	@media (max-width: 480px) {
 		.bui-recovery:not([data-recovery='page']) .bui-recovery-title {
