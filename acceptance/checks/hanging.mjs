@@ -49,7 +49,9 @@ const measures = () => {
 			if (!node.getClientRects().length || node.closest('[hidden]')) continue;
 			if (node.matches('p') && node.querySelector('.bui-button, .bui-status')) continue;
 			const dot = node.matches('.bui-status') ? node.querySelector('.bui-status-dot') : null;
-			const at = dot ? dot.getBoundingClientRect() : words(node);
+			// A control that draws its box (a bordered or filled button, a glyph alone in its round edge) by its box
+			const drawn = node.matches('.bui-button:is(:not(.bui-button-quiet), .bui-button-bare)');
+			const at = dot ? dot.getBoundingClientRect() : drawn ? node.getBoundingClientRect() : words(node);
 			if (at) items.push({ name: `${node.className || node.localName} "${node.textContent.trim().slice(0, 24)}"`, left: round(at.left), top: at.top, bottom: at.bottom });
 		}
 		const line = (a, b) => a.top < b.bottom - 2 && b.top < a.bottom - 2;
