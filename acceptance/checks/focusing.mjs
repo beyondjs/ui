@@ -33,10 +33,13 @@ const drawn = (page, selector = null) =>
 		return { active: document.activeElement === node || node.contains(document.activeElement), outline: style.outlineStyle, width: style.outlineWidth, offset: style.outlineOffset, outlineColor: style.outlineColor, border: style.borderTopColor, start: style.borderInlineStartColor, shadow: style.boxShadow, caret: style.caretColor, background: style.backgroundColor };
 	}, selector);
 
-/** Tab presses until `selector` has the focus, at most `limit` of them. */
-async function tab(page, selector, limit = 20) {
+/** The key that moves through every element: WebKit's Tab skips links and buttons, as Safari's does, so Option+Tab there. */
+const next = browser => (browser.engine === 'webkit' ? 'Alt+Tab' : 'Tab');
+
+/** Presses of `next` until `selector` has the focus, at most `limit` of them. */
+async function tab(browser, page, selector, limit = 20) {
 	for (let step = 0; step < limit; step += 1) {
-		await page.keyboard.press('Tab');
+		await page.keyboard.press(next(browser));
 		if (await page.evaluate(query => document.activeElement?.matches(query), selector)) return;
 	}
 	throw new Error(`Tab never reached ${selector}`);
@@ -50,7 +53,7 @@ export const checks = [
 			const { page } = await open(browser, consumer);
 			const coral = await role(page, '--color-focus');
 			await page.locator('#before').focus();
-			await page.keyboard.press('Tab');
+			await page.keyboard.press(next(browser));
 			const settling = await page.evaluate(() => document.activeElement.getAnimations().map(animation => animation.animationName));
 			expect(settling.includes('bui-ring'), `the ring settles: ${JSON.stringify(settling)}`);
 			const ring = await drawn(page);
@@ -61,7 +64,7 @@ export const checks = [
 			expect(pressed.outline === 'none', `a press draws none: ${JSON.stringify(pressed)}`);
 			const still = await open(browser, consumer, { reducedMotion: 'reduce' });
 			await still.page.locator('#before').focus();
-			await still.page.keyboard.press('Tab');
+			await still.page.keyboard.press(next(browser));
 			const at = await still.page.evaluate(() => ({ moving: document.activeElement.getAnimations().length, offset: getComputedStyle(document.activeElement).outlineOffset }));
 			expect(at.moving === 0 && at.offset === '2px', `under reduced motion the ring appears at once: ${JSON.stringify(at)}`);
 		}
@@ -77,10 +80,10 @@ export const checks = [
 				await field.click();
 				const lit = await drawn(page);
 				expect(lit.border === edge && lit.outline === 'none' && /3px/.test(lit.shadow) && lit.caret === coral, `${scheme}: a press lights the edge, no ring, a coral caret: ${JSON.stringify({ ...lit, edge, coral })}`);
-				await page.keyboard.press('Tab');
+				await page.keyboard.press(next(browser));
 				const wrong = await drawn(page);
 				expect(wrong.border === danger && /3px/.test(wrong.shadow) && wrong.outline === 'none', `${scheme}: a wrong value keeps the danger's edge: ${JSON.stringify({ ...wrong, danger })}`);
-				await page.keyboard.press('Tab');
+				await page.keyboard.press(next(browser));
 				const select = await drawn(page);
 				expect(select.border === edge && select.outline === 'none', `${scheme}: a select from the keyboard lights its edge: ${JSON.stringify(select)}`);
 			}
@@ -114,7 +117,7 @@ export const checks = [
 			expect(reached, 'a press in the box\'s empty room puts the caret in the field');
 			const lit = await drawn(page, '.bui-composer-box');
 			expect(lit.border === edge && lit.outline === 'none' && /3px/.test(lit.shadow), `the box lights its edge: ${JSON.stringify({ ...lit, edge })}`);
-			await page.keyboard.press('Tab');
+			await page.keyboard.press(next(browser));
 			const resting = await drawn(page, '.bui-composer-box');
 			const control = await drawn(page);
 			expect(resting.border === rest && resting.shadow === 'none', `the box rests while a control has the focus: ${JSON.stringify(resting)}`);
@@ -129,7 +132,7 @@ export const checks = [
 		consumers: ['dom'],
 		async run(browser, consumer) {
 			const { page } = await open(browser, consumer);
-			await tab(page, '#rows .bui-row-title');
+			await tab(browser, page, '#rows .bui-row-title');
 			await page.keyboard.press('ArrowDown');
 			const row = await page.evaluate(() => {
 				const node = document.activeElement.closest('.bui-row');
@@ -144,18 +147,18 @@ export const checks = [
 		consumers: ['dom'],
 		async run(browser, consumer) {
 			const { page } = await open(browser, consumer);
-			await tab(page, '#details');
+			await tab(browser, page, '#details');
 			await page.keyboard.press('Enter');
 			await page.waitForSelector('dialog.bui-sheet[open]');
 			const title = await drawn(page);
 			const named = await page.evaluate(() => document.activeElement.classList.contains('bui-sheet-title'));
 			expect(named && title.outline === 'none' && title.shadow === 'none', `the sheet's title draws nothing: ${JSON.stringify(title)}`);
-			await page.keyboard.press('Tab');
+			await page.keyboard.press(next(browser));
 			const next = await drawn(page);
 			expect(next.outline === 'solid', `the next Tab rings the next control: ${JSON.stringify(next)}`);
 			await page.keyboard.press('Escape');
 			await page.waitForFunction(() => !document.querySelector('dialog.bui-sheet[open]'));
-			await tab(page, '#read');
+			await tab(browser, page, '#read');
 			await page.keyboard.press('Enter');
 			const heading = await drawn(page);
 			const reading = await page.evaluate(() => document.activeElement.id);
@@ -189,7 +192,7 @@ export const checks = [
 				await page.evaluate(() => (window.scrollTo(0, 0), document.querySelector('.fixture-link').focus({ preventScroll: true })));
 				const seen = [];
 				for (let step = 0; step < presses; step += 1) {
-					await page.keyboard.press('Tab');
+					await page.keyboard.press(next(browser));
 					seen.push(await clear());
 				}
 				return seen;
