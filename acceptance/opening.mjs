@@ -6,12 +6,14 @@ import { chromium, firefox, webkit } from 'playwright-core';
 import { OpeningDocument } from '@beyond-js/ui/opening';
 import { OpeningFailures } from './opening-failures.mjs';
 import { OpeningArrival } from './opening-arrival.mjs';
+import { OpeningFocusing } from './opening-focusing.mjs';
 
 /**
  * Checks the opening under strict CSP, against a fictional delayed application (0.21.0, 0.25.0): the
  * identity that never moves, the steps said with their times, a late opening, the measured usual, a page
  * restored from the cache and the hand-over into the product's bar; `OpeningArrival` holds how a product
- * arrives once, complete (0.31.0), and `OpeningFailures` what it says and offers when it cannot simply wait.
+ * arrives once, complete (0.31.0), `OpeningFailures` what it says and offers when it cannot simply wait, and
+ * `OpeningFocusing` where a focus asked for while covered lands (0.34.0).
  */
 class OpeningAcceptance {
 	#document = new OpeningDocument({ product: 'Projects', key: 'opening-fixture', device: true, logo: new URL('./fixtures/brand/wordmark.svg', import.meta.url) });
@@ -35,7 +37,7 @@ class OpeningAcceptance {
 			await this.#restored();
 			await this.#handover();
 			const helpers = { open: options => this.#open(options), steps: page => this.#steps(page) };
-			for (const check of [...new OpeningArrival(helpers).checks, ...new OpeningFailures(helpers).checks]) {
+			for (const check of [...new OpeningArrival(helpers).checks, ...new OpeningFailures(helpers).checks, ...new OpeningFocusing(helpers).checks]) {
 				await check();
 				this.#count++;
 			}

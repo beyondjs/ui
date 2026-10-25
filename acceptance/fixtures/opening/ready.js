@@ -6,6 +6,10 @@
  * bar still loading and a region waiting for its first read (`/content`); when that read answers, the
  * region holds its content and the bar has loaded. `?redraw` draws the bar's brand again while the
  * identity lands on it, as a bar that loads during the hand-over does.
+ *
+ * `?focus=title` or `?focus=button` (0.34.0): right after drawing its structure the page focuses its
+ * title (`tabindex="-1"`) or its Approve button, as a router's arrival does, while the opening still
+ * covers it.
  */
 const root = document.getElementById('root');
 const query = new URLSearchParams(location.search);
@@ -46,6 +50,13 @@ mark.src = '/wordmark.svg';
 mark.alt = '';
 const title = document.createElement('h1');
 title.textContent = response.ok ? 'Your projects' : 'The service is unavailable';
+const focus = query.get('focus');
+const approve = focus === 'button' ? Object.assign(document.createElement('button'), { type: 'button', textContent: 'Approve' }) : null;
+/** The arrival's focus, asked for at the structure's first paint, while the opening covers it */
+function land() {
+	if (focus === 'title') title.tabIndex = -1;
+	(focus === 'title' ? title : approve)?.focus();
+}
 
 if (query.has('regions')) {
 	bar.dataset.state = 'loading';
@@ -58,7 +69,8 @@ if (query.has('regions')) {
 	status.setAttribute('role', 'status');
 	wait.append(status, Object.assign(document.createElement('div'), { className: 'bui-skeleton' }));
 	region.append(heading, wait);
-	root.replaceChildren(bar, title, region);
+	root.replaceChildren(...[bar, title, approve, region].filter(Boolean));
+	land();
 	if (query.has('redraw')) {
 		// Once the hand-over starts, the bar draws its brand again, as one whose read ends meanwhile does
 		new MutationObserver((changes, observer) => {
@@ -78,5 +90,6 @@ if (query.has('regions')) {
 	bar.append(mark, Object.assign(document.createElement('span'), { className: 'bui-lockup-name', textContent: 'Projects' }));
 	const line = document.createElement('p');
 	line.textContent = response.ok ? 'Two projects' : 'Try again in a moment';
-	root.replaceChildren(bar, title, line);
+	root.replaceChildren(...[bar, title, approve, line].filter(Boolean));
+	land();
 }

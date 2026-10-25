@@ -1,6 +1,7 @@
 import { Preferences } from '../dom/preferences/preferences.js';
 import { OpeningExit } from './exit.js';
 import { OpeningFault } from './fault.js';
+import { OpeningFocus } from './focus.js';
 import { OpeningFonts } from './fonts.js';
 import { OpeningFrame } from './frame.js';
 import { OpeningRecovery } from './recovery.js';
@@ -24,7 +25,8 @@ import { OpeningWords, steps } from './words.js';
  * it (`arriving`) until its first screen is complete, within a budget (`OpeningScreen`, 0.31.0), then hands
  * over: the identity settles into the family bar and the rest fades, the product usable from the first
  * frame. A page restored from the back-forward cache before it opened is opened again, and a
- * development server's error overlay is never covered.
+ * development server's error overlay is never covered. Since 0.34.0 a focus the product asks for while
+ * covered lands when it shows (`OpeningFocus`).
  */
 class OpeningRuntime {
 	/** Milliseconds from the navigation's start before the steps are said: a quick opening says none */
@@ -44,6 +46,7 @@ class OpeningRuntime {
 	#observer;
 	#language;
 	#screen = new OpeningScreen();
+	#focus = null;
 	#timers = [];
 	#stall = 0;
 	#started = false;
@@ -71,6 +74,8 @@ class OpeningRuntime {
 	#start() {
 		this.#element = document.getElementById('bui-opening');
 		if (!this.#element) return this.#release();
+		// From now until the hand-over, a focus the product asks for while hidden is kept for its arrival
+		this.#focus = new OpeningFocus(this.#element);
 		this.#words = new OpeningWords(this.#specs.product);
 		const frame = new OpeningFrame(this.#element, this.#words);
 		const { stage, status, list } = frame.draw();
@@ -82,7 +87,7 @@ class OpeningRuntime {
 		this.#steps = new OpeningSteps({ list, words: this.#words, usual: this.#usual });
 		this.#recovery = new OpeningRecovery({ parent: stage, words: this.#words, development: Boolean(this.#specs.development) || frame.outdated });
 		this.#recovery.keep({ version: `@beyond-js/ui ${OpeningFrame.version}` });
-		if (frame.outdated) this.#outdated(frame);
+		if (frame.outdated) this.#recovery.outdated(frame.drawn, OpeningFrame.version);
 		this.#steps.begin('interface', '', 0);
 		this.#observer = new MutationObserver(() => this.#check());
 		this.#observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['hidden', 'data-state', 'data-bui-opening-wait'] });
@@ -95,17 +100,6 @@ class OpeningRuntime {
 		addEventListener('pageshow', this.#restored);
 		if (navigator.onLine === false) this.#offline();
 		this.#check();
-	}
-
-	/**
-	 * A document drawn by another version of the package: its development server has not restarted since
-	 * the package changed under it. The page is drawn again in this version's form, and anything that
-	 * goes wrong says that cause, the one established here.
-	 */
-	#outdated(frame) {
-		this.#recovery.cause = 'outdated';
-		this.#recovery.keep({ page: frame.drawn ? `@beyond-js/ui ${frame.drawn}` : this.#words.text('earlier') });
-		console.warn(`[@beyond-js/ui] This page was drawn by ${frame.drawn ? `@beyond-js/ui ${frame.drawn}` : 'an earlier @beyond-js/ui'}, and its opening is ${OpeningFrame.version}: stop the development server and start it again to serve what is installed.`);
 	}
 
 	/** Follows the product: its root drawn, the step its waiting element names, or a useful screen */
@@ -268,7 +262,7 @@ class OpeningRuntime {
 		this.#steps.end();
 		// Only an opening that went as expected is measured
 		if (!this.#recovery.state) this.#usual.keep(this.#steps.durations);
-		await new OpeningExit(this.#element, root).run();
+		await new OpeningExit(this.#element, root, this.#focus).run();
 		this.#element.remove();
 		// One set of faces from now on: the application's own, once the ones in use have loaded (0.17.1)
 		new OpeningFonts(document.querySelector('link[data-bui-opening]')?.sheet ?? null).release().catch(() => false);
@@ -285,6 +279,7 @@ class OpeningRuntime {
 		for (const timer of this.#timers) clearTimeout(timer);
 		clearTimeout(this.#stall);
 		this.#screen.reset();
+		this.#focus?.release();
 		this.#steps?.end();
 		this.#observer?.disconnect();
 		this.#language?.disconnect();

@@ -87,6 +87,18 @@ export class OpeningRecovery {
 		this.#cause = key;
 	}
 
+	/**
+	 * A document drawn by another version of the package (`drawn`, empty when it said none): its development
+	 * server has not restarted since the package changed under it. The page is drawn again in this version's
+	 * form (`OpeningFrame`), anything that goes wrong says that cause, the one established, and the page's
+	 * version is kept for the details (0.25.0).
+	 */
+	outdated(drawn, version) {
+		this.cause = 'outdated';
+		this.keep({ page: drawn ? `@beyond-js/ui ${drawn}` : this.#words.text('earlier') });
+		console.warn(`[@beyond-js/ui] This page was drawn by ${drawn ? `@beyond-js/ui ${drawn}` : 'an earlier @beyond-js/ui'}, and its opening is ${version}: stop the development server and start it again to serve what is installed.`);
+	}
+
 	/** Shows a state with its facts, each kept until replaced; returns the sentence the page's one status announces */
 	show(state, facts = {}) {
 		this.keep(facts);

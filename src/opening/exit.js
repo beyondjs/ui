@@ -11,6 +11,10 @@
  * which do not move, wait unseen, so nothing of the bar shows through the identity, even a bar drawn again
  * meanwhile. On landing (`landed`) the bar's wordmark and name show where the moving ones arrive and the
  * separator and the chevron fade in; the mark then goes.
+ *
+ * Since 0.34.0 the focus a product asked for while covered lands as it shows (`OpeningFocus`): where the
+ * person's focus is not in the product already, the last target asked for that still takes the focus gets
+ * it, and a person in the opening's recovery, which leaves, gets it over the generic destination.
  */
 export class OpeningExit {
 	static duration = 360;
@@ -20,15 +24,18 @@ export class OpeningExit {
 
 	#element;
 	#root;
+	#focus;
 	#bar = null;
 
 	/**
 	 * @param {HTMLElement} element The presentation (`#bui-opening`)
 	 * @param {Element} root The product's root, where its family bar is
+	 * @param {import('./focus.js').OpeningFocus|null} [focus] What the product asked to focus while covered (0.34.0)
 	 */
-	constructor(element, root) {
+	constructor(element, root, focus = null) {
 		this.#element = element;
 		this.#root = root;
+		this.#focus = focus;
 	}
 
 	/** Whether this browser and this person's settings allow the motion */
@@ -38,9 +45,14 @@ export class OpeningExit {
 
 	/** Runs the hand-over and resolves once the presentation can be removed */
 	async run() {
-		const focused = this.#element.contains(document.activeElement);
+		const active = document.activeElement;
+		const focused = this.#element.contains(active);
 		this.#element.dataset.state = 'leaving';
-		if (focused) this.#keep();
+		// The product shows: the platform's focus is its own again, and what the product asked to focus while
+		// covered lands, unless the person's focus is in the product already
+		this.#focus?.release();
+		const free = focused || !active || active === document.body || active === document.documentElement;
+		if (!(free && this.#focus?.land()) && focused) this.#keep();
 		if (!this.moving) return;
 		const motions = [...this.#flights(), ...this.#fades()];
 		try {
@@ -50,7 +62,7 @@ export class OpeningExit {
 		}
 	}
 
-	/** A person who reached recovery keeps a keyboard destination when the page arrives late */
+	/** A person who reached recovery keeps a keyboard destination when the page arrives late and asked for none */
 	#keep() {
 		const destination = this.#root.querySelector('h1, main, button, a[href]') ?? this.#root;
 		if (!destination.hasAttribute('tabindex')) destination.setAttribute('tabindex', '-1');
