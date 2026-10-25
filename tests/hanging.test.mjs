@@ -42,6 +42,13 @@ test('a quiet button hangs its padding past its words, its border counted, and k
 	}
 });
 
+test('on a touch screen a quiet button keeps its 44 px target, growing toward its end', () => {
+	const coarse = sheet.match(/@media \(pointer: coarse\)\s*\{\s*\.bui-button-quiet:not\(\.bui-button-bare\)\s*\{([^}]*)\}/);
+	assert.ok(coarse, 'a rule for touch screens');
+	assert.match(coarse[1], /min-width: var\(--bui-target\)/);
+	assert.match(coarse[1], /justify-content: flex-start/, 'its words stay where they start');
+});
+
 test('an action line hangs its actions once, on every row it wraps to, their borders counted', () => {
 	assert.match(declarations('.bui-action-line-actions'), /margin-inline-start: calc\(-1 \* var\(--bui-quiet-hang\)\)/);
 	const actions = declarations('.bui-action-line-actions :is(.bui-button, a, .bui-link-button, .bui-disclosure-button)');

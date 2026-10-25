@@ -59,6 +59,14 @@
 p > .bui-button-quiet:not(.bui-button-bare) {
 	margin-inline: 0;
 }
+/* On a touch screen its target keeps 44 px: a short word's box grows toward its end, its words staying where they
+   start (D188) */
+@media (pointer: coarse) {
+	.bui-button-quiet:not(.bui-button-bare) {
+		min-width: var(--bui-target);
+		justify-content: flex-start;
+	}
+}
 /* In one of the package's rows of actions a quiet control hangs only at the row's ends; between its neighbours,
    whatever they hold, it keeps its padding (D188) */
 :is(.bui-page-actions, .bui-page-compact-actions, .bui-section-actions, .bui-callout-actions, .bui-empty-actions, .bui-unavailable-actions, .bui-recovery-actions, .bui-dialog-actions, .bui-sheet-actions, .bui-awaited-actions, .bui-command-actions, .bui-command-note-actions, .bui-refs-actions, .bui-details-actions, .bui-copy-actions, .bui-diff-actions, .bui-provider-actions, .bui-statusrow-actions, .bui-activity-actions, .bui-dictation-actions) > .bui-button-quiet:not(.bui-button-bare):not(:first-child) {
