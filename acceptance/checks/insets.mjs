@@ -19,7 +19,11 @@ const sides = ['top', 'bottom', 'left', 'right'];
 /** The ways a page is drawn: as it comes, at compact density, and with a coarse pointer (0.34.0). */
 const modes = {
 	comfortable: { options: {}, prepare: () => undefined },
-	compact: { options: {}, prepare: context => context.addInitScript(() => (document.documentElement.dataset.density = 'compact')) },
+	// Set as soon as the root element exists: an init script runs before the parser makes it
+	compact: { options: {}, prepare: context => context.addInitScript(() => {
+		const set = () => document.documentElement && (document.documentElement.dataset.density = 'compact');
+		if (!set()) new MutationObserver((changes, observer) => set() && observer.disconnect()).observe(document, { childList: true });
+	}) },
 	coarse: { options: { hasTouch: true, isMobile: true }, prepare: () => undefined }
 };
 
@@ -64,18 +68,23 @@ const inset = (page, box) =>
 		? box.inset
 		: page.evaluate(({ selector, nth, name }) => parseFloat(getComputedStyle(document.querySelectorAll(selector)[nth]).getPropertyValue(name)), { selector: box.box, nth: box.nth ?? 0, name: box.inset });
 
+/** What a box breaks: none when it is drawn with content and keeps its inset within a pixel. */
 function hold(found, box, value, at) {
 	const said = `${at} ${box.name}: ${JSON.stringify({ ...found, inset: value })}`;
-	expect(!found.missing && !found.empty, `${said}: the box is drawn with content`);
-	expect(box.scrolls || found.scrolls <= 1, `${said}: nothing in it scrolls by what an inset trimmed (${found.scrolls} px)`);
+	if (found.missing || found.empty) return [`${said}: the box is drawn with content`];
+	const broken = [];
+	if (!box.scrolls && found.scrolls > 1) broken.push(`${said}: nothing in it scrolls by what an inset trimmed (${found.scrolls} px)`);
 	for (const side of box.sides ?? sides) {
 		const free = box.free?.includes(side) || (side === 'right' && found.free);
-		if (free) expect(found[side] >= value - 1, `${said}: its ${side} never comes closer than its inset`);
-		else expect(Math.abs(found[side] - value) <= 1, `${said}: its ${side} keeps its inset within a pixel`);
+		if (free && found[side] < value - 1) broken.push(`${said}: its ${side} never comes closer than its inset`);
+		else if (!free && Math.abs(found[side] - value) > 1) broken.push(`${said}: its ${side} keeps its inset within a pixel`);
 	}
+	return broken;
 }
 
+/** Measures every box of the pages in a mode, and fails once with every box that broke, so one run says them all. */
 async function measure(browser, consumer, list, mode = 'comfortable') {
+	const broken = [];
 	for (const page of list) {
 		if (page.consumers && !page.consumers.includes(consumer.name)) continue;
 		for (const scheme of ['light', 'dark']) {
@@ -88,15 +97,18 @@ async function measure(browser, consumer, list, mode = 'comfortable') {
 						await opened.page.locator(box.box).nth(box.nth ?? 0).waitFor({ state: 'visible', timeout: 5000 });
 						await still(opened.page, box);
 						const found = await Insets.measure(opened.page, box);
-						const value = await inset(opened.page, box);
-						if (process.env.BEYOND_UI_INSETS) appendFileSync(process.env.BEYOND_UI_INSETS, `${JSON.stringify({ engine: browser.engine, consumer: consumer.name, mode, width, scheme, box: box.name, inset: value, held: box.sides ?? sides, ...found })}\n`);
-						hold(found, box, value, at);
+						// A single-line control's height decides the room above its capitals: its sides keep that room (0.34.0)
+						const value = box.inset === 'even' ? found.top : await inset(opened.page, box);
+						const failed = hold(found, box, value, at);
+						if (process.env.BEYOND_UI_INSETS) appendFileSync(process.env.BEYOND_UI_INSETS, `${JSON.stringify({ engine: browser.engine, consumer: consumer.name, mode, width, scheme, box: box.name, inset: value, held: box.sides ?? sides, failed: failed.length, ...found })}\n`);
+						broken.push(...failed);
 					}
 				}
 				await opened.context.close();
 			}
 		}
 	}
+	expect(!broken.length, `${broken.length} sides broke: ${broken.join(' | ')}`);
 }
 
 export const checks = [

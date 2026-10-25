@@ -13,7 +13,8 @@ export const words = {
 		refusal: { title: 'Workspace is not open to you yet', reason: 'Development environments open by invitation, one organization at a time.', owner: 'An owner of Northwind Studio' },
 		toast: { title: 'Machine renamed', detail: 'Its conversations keep their history and their copies.' },
 		command: { title: 'Claude Code asks to run a command', text: 'npm run build && npm test -- --coverage' },
-		recovery: { cause: 'Beyond Accounts did not answer', read: 'The project', said: 'Beyond Accounts is unavailable (UNAVAILABLE)' }
+		recovery: { cause: 'Beyond Accounts did not answer', read: 'The project', said: 'Beyond Accounts is unavailable (UNAVAILABLE)' },
+		copy: { label: 'Run this on the machine', command: 'npm run dev -- --port 4317' }
 	},
 	es: {
 		info: { title: 'Las máquinas se duermen tras 30 minutos sin trabajo', body: 'Una máquina que duerme conserva su disco y se despierta cuando una conversación la necesita, así que no se pierde nada de lo que empezaste mientras espera.', action: 'Cambiar el tiempo de espera', other: 'Mantenerla despierta' },
@@ -26,6 +27,7 @@ export const words = {
 		refusal: { title: 'Workspace aún no está abierto para ti', reason: 'Los entornos de desarrollo se abren por invitación, una organización cada vez.', owner: 'Quien administra Northwind Studio' },
 		toast: { title: 'Máquina renombrada', detail: 'Sus conversaciones conservan su historial y sus copias.' },
 		command: { title: 'Claude Code pide ejecutar un comando', text: 'npm run build && npm test -- --coverage' },
-		recovery: { cause: 'Beyond Accounts no respondió', read: 'El proyecto', said: 'Beyond Accounts no está disponible (UNAVAILABLE)' }
+		recovery: { cause: 'Beyond Accounts no respondió', read: 'El proyecto', said: 'Beyond Accounts no está disponible (UNAVAILABLE)' },
+		copy: { label: 'Ejecuta esto en la máquina', command: 'npm run dev -- --port 4317' }
 	}
 };

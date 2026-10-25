@@ -1,13 +1,13 @@
 // The insets page of the plain DOM consumer (D184): the boxes no other fixture page draws, each in a block of
 // its own named by its id, so the insets check measures one box at a time: callouts ending in actions, in
 // text and in technical details, a framed empty state, a checklist, a raised section, a textarea and a
-// refusal with no action; since 0.34.0 a request whose command may be corrected (an editable CommandCard)
-// and an outage's line in a narrow block, its words wrapping beside Try again. window.fixture shows a toast
-// with a detail and tears them down.
+// refusal with no action; since 0.34.0 a request whose command may be corrected (an editable CommandCard),
+// an outage's line in a narrow block, its words wrapping beside Try again, and a command to copy
+// (CopyMessage's command form). window.fixture shows a toast with a detail and tears them down.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { callout, Button, EmptyState, Checklist, Section, Field, Unavailable, Toaster, CommandCard, Recovery, el } from '@beyond-js/ui';
+import { callout, Button, EmptyState, Checklist, Section, Field, Unavailable, Toaster, CommandCard, Recovery, CopyMessage, el } from '@beyond-js/ui';
 import { words } from '../data/insets.js';
 
 const copy = words.en;
@@ -34,13 +34,15 @@ place('command-edit', command.element);
 const recovery = new Recovery({ title: copy.recovery.cause });
 recovery.set('project', { title: copy.recovery.read, details: { request: 'req_insets_7Hq2', time, text: copy.recovery.said }, run: async () => false });
 place('recovery-wide', recovery.element);
+const copied = new CopyMessage({ text: copy.copy.command, kind: 'command', label: copy.copy.label });
+place('copy-command', copied.element);
 
 const toaster = new Toaster().mount(document.body);
 
 window.fixture = {
 	toast: () => toaster.show(copy.toast.title, { detail: copy.toast.detail, duration: 600_000 }),
 	destroy() {
-		for (const component of [toaster, recovery, command, refusal, notes, section, checklist, empty, ...buttons]) component.destroy();
+		for (const component of [toaster, copied, recovery, command, refusal, notes, section, checklist, empty, ...buttons]) component.destroy();
 		main.remove();
 	},
 	ready: true

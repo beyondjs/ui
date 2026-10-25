@@ -150,3 +150,14 @@ test("a side sheet's actions stand one inset from its bottom and divider, and a 
 	// The browser's own style gives <code> its default monospace (Courier in Chrome): the box's face is inherited
 	assert.match(sheet, /:is\(\.bui-command-code,\s*\.bui-copy-command,\s*\.bui-activity-code\)\s*>\s*code\s*\{\s*font:\s*inherit/);
 });
+
+test('an editable command keeps its first line one inset from its top, and a single-line control at compact density and on a touch screen keeps its sides to the room above its capitals (0.34.0)', () => {
+	assert.match(units, rule(units, '.bui-command-edit', 'padding-block-start: calc(var(--bui-code-inset) - (1lh - 1cap) / 2)'), 'the textarea, which trims nothing, takes off its own half-leading');
+	const lines = blocks('@supports (padding-top: calc(1cap))');
+	assert.match(lines, /:root\[data-density='compact'\] :is\(input\.bui-input, \.bui-select, \.bui-choice-button\)\s*\{\s*--bui-line-inset:\s*calc\(\(var\(--bui-control\) - 2px - 1cap\) \/ 2\)/, 'compact density');
+	assert.match(lines, /@media \(pointer: coarse\)\s*\{\s*:is\(input\.bui-input, \.bui-select, \.bui-choice-button\)\s*\{\s*--bui-line-inset:/, 'a touch screen');
+	for (const [selector, declaration] of [['input.bui-input', 'padding-inline: var(--bui-line-inset, var(--space-3))'], ['.bui-select', '--bui-select-inset: var(--bui-line-inset, var(--space-3))'], ['.bui-select > .bui-select-control', 'padding-inline: var(--bui-select-inset) calc(var(--bui-select-inset) + 22px)'], ['.bui-choice-button', '--bui-choice-inset: var(--bui-line-inset, var(--space-3))']]) {
+		assert.match(lines, rule(lines, selector, declaration), `${selector}: ${declaration}, 12 px where the control is the comfortable 36 px`);
+	}
+	assert.doesNotMatch(sheet.replace(/@supports \(padding-top: calc\(1cap\)\)\s*\{[\s\S]*?\n\}/g, ''), /--bui-line-inset:/, 'without cap the controls keep their 12 px');
+});

@@ -1,13 +1,13 @@
 // The insets page of the React consumers (D184), in Spanish through the components' `labels.es`: the boxes
 // no other fixture page draws, each in a block of its own named by its id, as the DOM page draws them (since
-// 0.34.0 an editable CommandCard and an outage's line whose words wrap beside Try again), and a toast with a
-// detail shown by window.fixture.toast().
+// 0.34.0 an editable CommandCard, an outage's line whose words wrap beside Try again and a command to copy),
+// and a toast with a detail shown by window.fixture.toast().
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Callout, Button, EmptyState, Checklist, Section, Field, Unavailable, TechnicalDetails, CommandCard, Recovery, RetryAction, AgainLine, useToaster } from '@beyond-js/ui/react';
+import { Callout, Button, EmptyState, Checklist, Section, Field, Unavailable, TechnicalDetails, CommandCard, Recovery, RetryAction, AgainLine, CopyMessage, useToaster } from '@beyond-js/ui/react';
 import { words } from '../data/insets.js';
 
 const copy = words.es;
@@ -53,6 +53,9 @@ function App() {
 			</div>
 			<div id="recovery-wide">
 				<Recovery title={copy.recovery.cause} reads={reads} labels={outage} locale="es" />
+			</div>
+			<div id="copy-command">
+				<CopyMessage text={copy.copy.command} kind="command" label={copy.copy.label} labels={CopyMessage.labels.es} />
 			</div>
 		</main>
 	);

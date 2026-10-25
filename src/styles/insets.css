@@ -150,6 +150,11 @@
 	.bui-card-choice {
 		padding-block: var(--bui-card-inset) calc(var(--bui-card-inset) - (1lh - 1cap) / 2);
 	}
+	/* A command the person may correct (an editable CommandCard's textarea, which trims nothing): its first
+	   line's capitals one inset from its top, in the code's face (0.34.0) */
+	.bui-command-edit {
+		padding-block-start: calc(var(--bui-code-inset) - (1lh - 1cap) / 2);
+	}
 	.bui-card-head {
 		margin-block-start: calc((1cap - 1lh) / 2);
 		font-size: var(--text-body);
@@ -208,6 +213,41 @@
 	}
 	.bui-consequence > :last-child > dd {
 		text-box: trim-end cap alphabetic;
+	}
+}
+
+/* A single-line control keeps its words one inset from every side (0.34.0): at compact density (30 px) and on a
+   touch screen (44 px) its sides take the room its height leaves above its capitals, as the comfortable 36 px
+   control's 12 px are, and a select's or a choice's chevron ends on it. Without `cap` they keep 12 px. */
+@supports (padding-top: calc(1cap)) {
+	:root[data-density='compact'] :is(input.bui-input, .bui-select, .bui-choice-button) {
+		--bui-line-inset: calc((var(--bui-control) - 2px - 1cap) / 2);
+	}
+	@media (pointer: coarse) {
+		:is(input.bui-input, .bui-select, .bui-choice-button) {
+			--bui-line-inset: calc((var(--bui-control) - 2px - 1cap) / 2);
+		}
+	}
+	input.bui-input {
+		padding-inline: var(--bui-line-inset, var(--space-3));
+	}
+	/* The chevron reads the inset in the control's own face */
+	:root[data-density='compact'] .bui-select {
+		font-size: var(--text-body);
+	}
+	@media (pointer: coarse) {
+		.bui-select {
+			font-size: var(--text-body);
+		}
+	}
+	.bui-select {
+		--bui-select-inset: var(--bui-line-inset, var(--space-3));
+	}
+	.bui-select > .bui-select-control {
+		padding-inline: var(--bui-select-inset) calc(var(--bui-select-inset) + 22px);
+	}
+	.bui-choice-button {
+		--bui-choice-inset: var(--bui-line-inset, var(--space-3));
 	}
 }
 

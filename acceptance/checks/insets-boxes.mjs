@@ -1,8 +1,9 @@
 /**
  * The boxes the insets check measures (D184), page by page: each `step` opens what it needs on the page
  * already loaded and names the boxes it then measures. A box's `inset` is its custom property (read on the box)
- * or the number its padding already keeps; `sides` lists what is held to that inset within a pixel (all four
- * unless said), `free` the sides that may hold free room but never come closer (a textarea taller than its
+ * or the number its padding already keeps, or `even` for a single-line control, whose height decides the room
+ * above its capitals and whose sides keep that room (0.34.0); `sides` lists what is held to that inset within a
+ * pixel (all four unless said), `free` the sides that may hold free room but never come closer (a textarea taller than its
  * words, a last row that is the product's own); an empty `sides` measures a box for the record only, a box
  * that cannot keep one inset without a design decision. A right side a short line does not reach is free room
  * by itself (the measurement's `free`).
@@ -18,6 +19,15 @@ const palette = async page => {
 	await page.waitForSelector('.bui-palette-group[data-source="machines"] [role="option"]');
 };
 const record = [];
+/** A command's CopyMessage (0.34.0): only its code box takes the code's face and lines; its holder, Copy and result keep the interface's. */
+const holder = async page => {
+	const faces = await page.locator('#copy-command .bui-copy').evaluate(node => {
+		const style = element => getComputedStyle(element);
+		const box = node.querySelector('.bui-copy-text');
+		return { holder: style(node).fontFamily, copy: style(node.querySelector('.bui-button')).fontFamily, box: style(box).fontFamily, lines: style(node).whiteSpace, scroll: style(node).overflowX };
+	});
+	if (faces.holder === faces.box || faces.copy === faces.box || faces.lines === 'pre' || faces.scroll !== 'visible') throw new Error(`a command's holder takes its code box's face or lines: ${JSON.stringify(faces)}`);
+};
 
 export const pages = {
 	notices: [
@@ -36,7 +46,8 @@ export const pages = {
 					{ name: 'Recovery whose words wrap beside Try again', box: '#recovery-wide .bui-recovery', inset: '--bui-recovery-inset' }
 				] },
 				{ open: page => page.locator('#callout-details summary').click(), boxes: [{ name: 'callout ending in open technical details', box: '#callout-details .bui-callout', inset: '--bui-callout-inset' }] },
-				{ open: async page => (await page.evaluate(() => window.fixture.toast()), page.waitForSelector('.bui-toast')), boxes: [{ name: 'toast with a detail', box: '.bui-toast', inset: '--bui-toast-inset' }] }
+				{ open: async page => (await page.evaluate(() => window.fixture.toast()), page.waitForSelector('.bui-toast')), boxes: [{ name: 'toast with a detail', box: '.bui-toast', inset: '--bui-toast-inset' }] },
+				{ open: holder, boxes: [{ name: 'CopyMessage of a command', box: '#copy-command .bui-copy-text', inset: '--bui-text-inset' }] }
 			]
 		},
 		{ file: 'hold.html', steps: [{ boxes: [{ name: 'Unavailable for an outage, with Try again', box: '.bui-unavailable', inset: '--bui-unavailable-inset' }] }] },
@@ -56,7 +67,7 @@ export const pages = {
 		{ file: 'wave.html', steps: [{ boxes: [{ name: 'the tallest choice card', box: '.bui-card-choice', nth: 2, inset: '--bui-card-inset' }, { name: 'the chosen choice card', box: '.bui-card-choice', nth: 0, inset: '--bui-card-inset', free: ['bottom'] }] }] },
 		{ file: 'layout.html', query: '?raised=1', steps: [{ boxes: [{ name: 'raised side panel', box: '.bui-page-aside[data-raised]', inset: '--bui-panel-inset', free: ['bottom'] }] }] },
 		{ file: 'operations.html', steps: [
-			{ boxes: [{ name: 'Select', box: '.bui-select-control', field: true, extra: [':scope > .bui-icon'], inset: '--bui-select-inset' }, { name: 'awaited card', box: '.bui-awaited', inset: '--bui-awaited-inset' }] },
+			{ boxes: [{ name: 'Select', box: '.bui-select-control', field: true, extra: [':scope > .bui-icon'], inset: 'even' }, { name: 'awaited card', box: '.bui-awaited', inset: '--bui-awaited-inset' }] },
 			{ open: page => page.locator('main details > summary').first().click(), boxes: [{ name: 'technical details', box: 'main > details .bui-details-body, main > .bui-host > details .bui-details-body', inset: '--bui-text-inset' }] }
 		] },
 		{ file: 'conversation.html', steps: [{ open: page => page.locator('.bui-rail > .bui-activity > .bui-activity-head, .bui-rail > .bui-host > .bui-activity > .bui-activity-head').first().click(), boxes: [{ name: 'activity exchange', box: '.bui-rail .bui-activity-exchange', inset: 12, sides: record }] }] },
@@ -64,8 +75,8 @@ export const pages = {
 	],
 	overlays: [
 		{ file: null, steps: [
-			{ boxes: [{ name: 'a form field', box: '#form input', field: true, inset: 12 }] },
-			{ open: (page, consumer) => page.getByRole('button', { name: es(consumer) ? 'Abrir diálogo' : 'Open dialog' }).click(), boxes: [{ name: 'Dialog', box: 'dialog.bui-dialog[open]', inset: '--bui-dialog-inset' }, { name: 'a dialog\'s field', box: 'dialog.bui-dialog[open] input', field: true, inset: 12 }] },
+			{ boxes: [{ name: 'a form field', box: '#form input', field: true, inset: 'even' }] },
+			{ open: (page, consumer) => page.getByRole('button', { name: es(consumer) ? 'Abrir diálogo' : 'Open dialog' }).click(), boxes: [{ name: 'Dialog', box: 'dialog.bui-dialog[open]', inset: '--bui-dialog-inset' }, { name: 'a dialog\'s field', box: 'dialog.bui-dialog[open] input', field: true, inset: 'even' }] },
 			{ open: async (page, consumer) => (await closed(page), page.getByRole('button', { name: es(consumer) ? 'Más acciones' : 'More actions' }).click()), boxes: [{ name: 'ActionMenu at rest', box: '.bui-menu:not([hidden])', flat: ['.bui-menu-item'], inset: '--bui-menu-inset' }] },
 			{ open: (page, consumer) => page.getByRole('menuitem', { name: es(consumer) ? 'Aviso' : 'Toast' }).click(), boxes: [{ name: 'toast', box: '.bui-toast', inset: '--bui-toast-inset' }] },
 			{ open: (page, consumer) => page.getByRole('button', { name: es(consumer) ? 'Ayuda: Identificador del proyecto' : 'Help: Project identifier' }).click(), boxes: [{ name: 'help', box: '#helping .bui-help-panel', inset: '--bui-text-inset' }] },
@@ -81,7 +92,7 @@ export const pages = {
 		{ file: 'thread.html', widths: [1440], steps: [{ open: page => page.locator('#own .bui-icon-button').focus(), boxes: [{ name: 'Hint', box: '.bui-hint:not([hidden])', inset: 8 }] }] },
 		{ file: 'turns.html', widths: [1440], steps: [{ open: async page => (await page.locator('.bui-turns-mark').nth(6).hover(), page.locator('.bui-turns-preview').waitFor({ state: 'visible' })), boxes: [{ name: 'a turn\'s preview', box: '.bui-turns-preview', inset: '--bui-preview-inset' }] }] },
 		{ file: 'index.html', consumers: ['dom'], steps: [
-			{ boxes: [{ name: 'ChoiceMenu', box: '#picking .bui-choice-button', inset: '--bui-choice-inset' }] },
+			{ boxes: [{ name: 'ChoiceMenu', box: '#picking .bui-choice-button', inset: 'even' }] },
 			{ open: page => page.locator('#picking .bui-choice-button').first().click(), boxes: [{ name: 'a choice menu with nothing chosen', box: '.bui-choice-list:not([hidden])', flat: ['.bui-menu-item'], inset: '--bui-menu-inset', sides: record }] }
 		] }
 	]
