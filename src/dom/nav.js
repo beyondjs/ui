@@ -13,7 +13,7 @@ const defaults = { nav: 'Product' };
  * tab's focus ring is drawn inside it so the scrolling row never clips it. The current tab carries
  * `aria-current="page"`. It is not sticky unless `sticky` asks for it, in which case it stays under
  * the family bar. Since 0.15.0 (X-15, PKG-19) an end that holds more tabs than it shows says so with a
- * fade and a chevron that scrolls the row (`ScrollEdges`). Since 0.35.0 (D179) the current tab shows
+ * fade and a chevron that scrolls the row (`ScrollEdges`). Since 0.36.0 (D179) the current tab shows
  * whole, never under that fade and chevron or the row's padding, from the first frame and again once
  * fonts load or the row changes size, until the person moves the row.
  */
@@ -70,7 +70,7 @@ export class ProductNav extends Component {
 
 	/**
 	 * Keeps the current tab whole in view, clear of both ends of the row: its padding and the cues that say
-	 * an end holds more, as they are drawn (0.35.0, D179). The row scrolls by whole pixels and never the
+	 * an end holds more, as they are drawn (0.36.0, D179). The row scrolls by whole pixels and never the
 	 * page, now and again whenever the row or its tabs change size, since a web font that loads changes
 	 * the tabs' widths (`ScrollEdges.reveal`).
 	 */

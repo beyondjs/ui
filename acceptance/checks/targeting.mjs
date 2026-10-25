@@ -1,7 +1,7 @@
 import { expect } from '../support/browser.mjs';
 
 /**
- * What a page scrolls to lands below its sticky lines (0.35.0), on the `clear.html` pages: the family bar, below
+ * What a page scrolls to lands below its sticky lines (0.36.0), on the `clear.html` pages: the family bar, below
  * the Sidebar's cut its product row unless the Sidebar is merged with the bar (`?merged=1`), and the header's
  * compact line where one is drawn (`?compact=1`). An address's target (a fragment navigated to), a part brought
  * into view from its start (`scrollIntoView`) and a section's heading focused by code, from under the bar and

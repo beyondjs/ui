@@ -5,7 +5,7 @@ import { RowStage } from './support/row.mjs';
 import { RowClearance } from '../src/dom/core/clearance.js';
 
 /**
- * A row of tabs keeps its current tab whole (0.35.0, D179): where the row rests for a part to show clear of
+ * A row of tabs keeps its current tab whole (0.36.0, D179): where the row rests for a part to show clear of
  * its padding and of the cues that say an end holds more, and ProductNav and Tabs resting there by whole
  * pixels at once, again after a change of size or the fonts, and never against the person's own move.
  * happy-dom has no layout, so `RowStage` lays the row out; the browser acceptance measures real engines.

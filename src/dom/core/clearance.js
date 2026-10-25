@@ -1,6 +1,6 @@
 /**
  * Where a row that scrolls sideways must rest for one of its parts to show whole, clear of what covers the
- * row's two ends (0.35.0, D179): the row's own padding, and the cue `ScrollEdges` draws at an end while that
+ * row's two ends (0.36.0, D179): the row's own padding, and the cue `ScrollEdges` draws at an end while that
  * end holds more (its fade and chevron). Only the arithmetic, so it is tested without a layout: offsets and
  * spans are pixels from the left edge of the row's scrolled content, which holds in either direction.
  *

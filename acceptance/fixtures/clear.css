@@ -1,4 +1,4 @@
-/* The clear fixture's page only (0.35.0): no container of its own, so every measure is the package's. */
+/* The clear fixture's page only (0.36.0): no container of its own, so every measure is the package's. */
 * {
 	box-sizing: border-box;
 }

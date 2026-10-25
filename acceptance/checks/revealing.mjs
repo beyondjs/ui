@@ -2,7 +2,7 @@ import { expect } from '../support/browser.mjs';
 import { RowFrames } from '../support/rows.mjs';
 
 /**
- * The current tab of every row of tabs shows whole (0.35.0, D179), on the `clear.html` pages: a machine's
+ * The current tab of every row of tabs shows whole (0.36.0, D179), on the `clear.html` pages: a machine's
  * Settings, whose page tabs and Settings tabs are given before the page is in the document as a product appends
  * them, and with `?nav=row` the product's own ProductNav under the bar. Every frame from the first paint, read
  * at the end of its rendering (`RowFrames`), through the web fonts' load and after it: each row's current tab

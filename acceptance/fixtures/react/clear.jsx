@@ -1,4 +1,4 @@
-// The clear page of the React consumers, in Spanish under StrictMode (0.35.0): the family bar beside the
+// The clear page of the React consumers, in Spanish under StrictMode (0.36.0): the family bar beside the
 // Sidebar (merged with the bar with `?merged=1`) or over a ProductNav (`?nav=row`), and a machine's Settings
 // whose two rows of tabs hold more than a phone shows, with long sections an address points at.
 import '@beyond-js/ui/tokens.css';

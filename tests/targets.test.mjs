@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 /**
- * What a page scrolls to lands below its sticky lines on every page with the family bar (0.35.0): an
+ * What a page scrolls to lands below its sticky lines on every page with the family bar (0.36.0): an
  * address's target, a heading focused by code, scrollIntoView. The document's `scroll-padding-top` holds the
  * bar and, below the sidebar's cut, its product row unless the bar holds the sidebar; the compact line's
  * rules add its height where one is drawn; and the sticky lines' own controls keep their scroll area below

@@ -1,4 +1,4 @@
-// The clear fixture's page, shared by the DOM and React consumers (0.35.0): a machine's Settings whose two rows
+// The clear fixture's page, shared by the DOM and React consumers (0.36.0): a machine's Settings whose two rows
 // of tabs hold more than a phone shows, under the family bar beside the Sidebar, with long sections an address
 // points at (`#inbound`, `#outbound`, `#docker`). `?at=` chooses the current Settings tab (`network` by default),
 // `?compact=1` gives the header its compact line with one action, `?merged=1` merges the Sidebar with the bar, as Conduict does on
