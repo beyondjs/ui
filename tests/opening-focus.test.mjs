@@ -145,3 +145,26 @@ test('a person in recovery with nothing asked keeps the generic destination; a f
 	await new OpeningExit(view.presentation, view.root).run();
 	assert.ok(document.activeElement === view.title, 'an exit without a recorder keeps its 0.21.0 form');
 });
+
+test('land stops at the first call that moved the focus, a target that hands its focus on included, and never focuses earlier targets after it', () => {
+	const { presentation, title, approve } = scene();
+	const field = presentation.ownerDocument.body.appendChild(document.createElement('input'));
+	const focus = new OpeningFocus(presentation, window);
+	title.focus();
+	approve.focus();
+	document.activeElement.blur();
+	// A target that sends its focus on when it takes it, as a composite widget hands it to its active part
+	approve.addEventListener('focus', () => field.focus());
+	const seen = [];
+	title.addEventListener('focus', () => seen.push('title'));
+	assert.equal(focus.land(), true);
+	assert.ok(document.activeElement === field, 'where the last target sent it');
+	assert.deepEqual(seen, [], 'the earlier title was never focused after it');
+	page.reset();
+	const again = scene();
+	const holder = new OpeningFocus(again.presentation, window);
+	again.approve.focus();
+	native.html.call(again.approve);
+	assert.equal(holder.land(), true, 'focus already on the target stops it at once');
+	assert.ok(document.activeElement === again.approve);
+});

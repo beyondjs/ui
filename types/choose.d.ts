@@ -82,7 +82,7 @@ export interface RefChooserOptions {
 	name?: string | null;
 	onchange?: ((value: string) => void) | null;
 	labels?: Copy;
-	/** Waits for an earlier choice, such as a repository (0.34.0, D183): its menu and its visible escape quiet, a press only going to `place()` */
+	/** Waits for an earlier choice, such as a repository (0.34.0, D183): its quiet menu drawn whatever its refs' state, a press only going to `place()` */
 	waiting?: boolean;
 	place?: (() => HTMLElement | null | undefined) | null;
 }
@@ -97,7 +97,7 @@ export class RefChooser extends Component {
 	set unavailable(unavailable: { text?: string | null; retry?: (() => void) | null } | null);
 	/** Waits quiet for an earlier choice (0.34.0, D183); an open escape field closes. */
 	waiting: boolean;
-	/** Opens the escape's field. */
+	/** Opens the escape's field; nothing while it waits (0.34.0). */
 	other(): void;
 	focus(): void;
 }

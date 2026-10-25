@@ -96,6 +96,10 @@
 	text-align: start;
 	cursor: pointer;
 }
+/* The chip's holder keeps the button and its description, taking no box of its own */
+.bui-composer-chip-holder {
+	display: contents;
+}
 .bui-composer-chip:hover,
 .bui-composer-chip[aria-expanded='true'] {
 	border-color: var(--color-border-strong);

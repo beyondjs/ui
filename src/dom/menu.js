@@ -12,7 +12,9 @@ import { Leaving } from './core/leaving.js';
  * The button opens the menu and focuses its first item (ArrowUp opens on the last). Arrow keys, Home
  * and End move between items, Escape closes and returns focus to the button, Tab closes and moves
  * on, and a press outside closes. A disabled item stays reachable so its reason can be read, but it
- * does nothing. Choosing an item closes the menu, returns focus and runs the item.
+ * does nothing. Choosing an item closes the menu, returns focus and runs the item. Since 0.34.0 (D183) an
+ * item may wait (`waiting`) for a step not yet taken: it looks quiet, as a disabled one, and a press still
+ * closes the menu and runs it, so its `run` puts the person where they can act.
  *
  * The list is placed by `Floating` (0.15.0): in the top layer, so no scroller clips it, on its
  * preferred side (`placement: 'auto'` and `'below'` prefer below, `'above'` above) and flipped when that
@@ -22,7 +24,7 @@ import { Leaving } from './core/leaving.js';
  * Moving focus into it, within it and back to the button never scrolls the page or a scroll container
  * around the menu.
  *
- * Items: `{ label, run?, href?, disabled?, reason?, tone? }`; `tone: 'danger'` marks destructive ones.
+ * Items: `{ label, run?, href?, disabled?, reason?, tone?, waiting? }`; `tone: 'danger'` marks destructive ones.
  *
  * Since 0.14.0 (D95) a closed menu leaves as it came: the list is hidden at once and an inert picture of
  * it eases out (`Leaving`), none under reduced motion.
@@ -129,17 +131,18 @@ export class ActionMenu extends Component {
 		if (refocus) this.#button.focus({ preventScroll: true });
 	}
 
-	#item({ label, run = null, href = null, disabled = false, reason = null, tone = null }) {
+	#item({ label, run = null, href = null, disabled = false, reason = null, tone = null, waiting = false }) {
 		const note = reason ? Ids.next('bui-reason') : null;
 		const props = {
 			role: 'menuitem',
 			tabindex: '-1',
 			class: `bui-menu-item${tone ? ` bui-menu-item-${tone}` : ''}`,
-			'aria-disabled': disabled ? 'true' : null,
+			'aria-disabled': disabled || waiting ? 'true' : null,
 			'aria-describedby': note
 		};
 		const children = [el('span', {}, [content(label)]), reason ? el('span', { id: note, class: 'bui-menu-reason', text: reason }) : null];
-		const node = href && !disabled ? el('a', { ...props, href }, children) : el('button', { ...props, type: 'button' }, children);
+		// An item that waits is never a link: its press only puts the person where they can act
+		const node = href && !disabled && !waiting ? el('a', { ...props, href }, children) : el('button', { ...props, type: 'button' }, children);
 		node.addEventListener('click', event => {
 			if (disabled) {
 				event.preventDefault();

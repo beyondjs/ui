@@ -24,9 +24,10 @@ import { labels as copy } from './labels.js';
  * Refs: `{ name, default?, note? }`. `onchange(value)` runs for each new choice; setting `value`,
  * `refs`, `loading` or `unavailable` redraws without calling it.
  *
- * Since 0.34.0 (D183) it may wait for an earlier choice, such as a repository (`waiting`, `place`): its menu
- * waits as `ChoiceMenu`'s does, and its visible escape is quiet too, a press on either only going to
- * `place()`. An escape field already open closes.
+ * Since 0.34.0 (D183) it may wait for an earlier choice, such as a repository (`waiting`, `place`): whatever
+ * its refs, loading or unavailable say, it draws its quiet menu with its placeholder, which waits as
+ * `ChoiceMenu`'s does, a press only going to `place()`. An escape field already open closes, and `other()`
+ * opens nothing; a person whose focus was in it, or in the menu's list, is put back on the quiet button.
  */
 export class RefChooser extends Component {
 	/** The copy in English and Spanish. */
@@ -46,9 +47,6 @@ export class RefChooser extends Component {
 	#onchange;
 	#name;
 	#waiting;
-	#place;
-	/** The escape drawn as a visible action, while drawn */
-	#exit = null;
 
 	/**
 	 * @param {object} options
@@ -76,7 +74,6 @@ export class RefChooser extends Component {
 		this.#onchange = onchange;
 		this.#name = name;
 		this.#waiting = Boolean(waiting);
-		this.#place = place;
 		const id = Ids.next('bui-refs');
 		this.#menu = new ChoiceMenu({ label: this.#label, options: [], name, search: 'auto', statement: !escape, waiting: this.#waiting, place, labels: { placeholder: this.#labels.text('placeholder'), search: this.#labels.text('search'), none: ({ query }) => this.#labels.text('none', { query }) }, onchange: chosen => this.#chosen(chosen) });
 		this.#menu.control.id = `${id}-button`;
@@ -111,12 +108,19 @@ export class RefChooser extends Component {
 		return this.#waiting;
 	}
 
-	/** Waits quiet for an earlier choice, a press on the menu or the escape only going to `place` (true), or acts (false) (0.34.0). */
+	/** Waits quiet for an earlier choice, its menu drawn quiet, a press only going to `place` (true), or acts (false) (0.34.0). */
 	set waiting(value) {
+		const active = this.#element.ownerDocument.activeElement;
+		// A person in the escape field or on the escape keeps a place: the quiet button, never the page's body
+		const inside = active !== this.#menu.control && this.#element.contains(active);
+		const held = active === this.#menu.control;
 		this.#waiting = Boolean(value);
 		this.#menu.waiting = this.#waiting;
 		if (this.#waiting && this.#other.shown) this.#other.hide();
-		this.#quiet();
+		this.#draw();
+		if (this.#waiting && inside) this.#menu.control.focus({ preventScroll: true });
+		// The wait over, a state without the menu (no refs, loading, unreadable) gives the quiet button's focus to its first control
+		else if (held && !this.#menu.control.isConnected) this.#body.querySelector('button')?.focus({ preventScroll: true });
 	}
 
 	/** Replaces the refs (a late or refreshed list): loading and unavailable end. */
@@ -139,8 +143,9 @@ export class RefChooser extends Component {
 		this.#draw();
 	}
 
-	/** Opens the escape field. */
+	/** Opens the escape field; nothing while the chooser waits for an earlier choice (0.34.0). */
 	other() {
+		if (this.#waiting) return;
 		this.#menu.close(false);
 		this.#other.show(this.#custom() ? this.#value : '');
 	}
@@ -155,6 +160,8 @@ export class RefChooser extends Component {
 	}
 
 	#draw() {
+		// Waiting for an earlier choice is none of the refs' states: the quiet menu, with its placeholder (0.34.0)
+		if (this.#waiting) return this.#chooser([]);
 		const escape = this.#escape ? this.#link() : null;
 		if (this.#loading) return fill(this.#body, [...this.#kept(), el('p', { class: 'bui-hidden', role: 'status', text: this.#labels.text('loading') }), skeleton(1)]);
 		if (this.#unavailable) {
@@ -162,7 +169,12 @@ export class RefChooser extends Component {
 			return fill(this.#body, [...this.#kept(), el('p', { class: 'bui-refs-problem', role: 'status', text: this.#unavailable.text ?? this.#labels.text('unavailable') }), el('div', { class: 'bui-refs-actions' }, [retry, escape])]);
 		}
 		if (!this.#refs.length && !this.#custom()) return fill(this.#body, [el('p', { class: 'bui-refs-empty', role: 'status', text: this.#labels.text('empty') }), escape]);
-		this.#menu.options = this.#options();
+		this.#chooser(this.#options());
+	}
+
+	/** The menu with `options`, its escape after them, in the body. */
+	#chooser(options) {
+		this.#menu.options = options;
 		this.#menu.actions = this.#escape ? [{ label: this.#labels.text('escape'), run: () => this.other() }] : [];
 		this.#menu.value = this.#value;
 		if (this.#menu.element.parentNode !== this.#body) fill(this.#body, [this.#menu.element]);
@@ -195,15 +207,7 @@ export class RefChooser extends Component {
 	 */
 	#link() {
 		const text = this.#labels.text('escape').replace(/\s*(…|\.\.\.)$/, '');
-		this.#exit = el('button', { type: 'button', class: 'bui-link-button bui-refs-escape', onclick: () => (this.#waiting ? this.#place?.()?.focus() : this.other()) }, [text]);
-		this.#quiet();
-		return this.#exit;
-	}
-
-	/** The visible escape waits with the chooser: quiet and reachable, its press only going to `place` (0.34.0, D183). */
-	#quiet() {
-		if (this.#waiting) this.#exit?.setAttribute('aria-disabled', 'true');
-		else this.#exit?.removeAttribute('aria-disabled');
+		return el('button', { type: 'button', class: 'bui-link-button bui-refs-escape', onclick: () => this.other() }, [text]);
 	}
 
 	#chosen(value) {

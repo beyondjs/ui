@@ -120,14 +120,14 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 
 /**
  * A chip that acts (0.34.0), for what goes with a message in a composer's `tray`, driven by the DOM
- * `ComposerChip`: `label` (muted, "Line comments") and `value` ("2") as text, an optional `glyph`, `name`
- * (its accessible name when it differs from its face) and `onClick`, read from the latest props. A change of
- * `glyph` makes a new chip; the others are set in place, keeping its focus.
+ * `ComposerChip`: `label` (muted, "Line comments") and `value` ("2") as text, an optional `glyph`,
+ * `description` (what it is for, read after its face, which is its name) and `onClick`, read from the latest
+ * props. A change of `glyph` makes a new chip; the others are set in place, keeping its focus.
  */
-export function ComposerChip({ label = null, value = null, glyph = null, name = null, onClick = null }) {
+export function ComposerChip({ label = null, value = null, glyph = null, description = null, onClick = null }) {
 	const latest = useLatest(onClick);
-	const [host, chip] = useInstance(() => new Chip({ label, value, glyph, name, onclick: event => latest.current?.(event) }), [glyph]);
-	useSync(chip, current => Object.assign(current, { label, value, name }), [label, value, name]);
+	const [host, chip] = useInstance(() => new Chip({ label, value, glyph, description, onclick: event => latest.current?.(event) }), [glyph]);
+	useSync(chip, current => Object.assign(current, { label, value, description }), [label, value, description]);
 	return h('span', { ref: host, className: 'bui-host' });
 }
 

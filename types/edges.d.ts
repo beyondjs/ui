@@ -109,22 +109,26 @@ export interface ComposerChipOptions {
 	value?: string | number | Node | null;
 	/** An icon of the catalog, before its words */
 	glyph?: IconName | null;
-	/** Its accessible name when it differs from its face ("2 line comments go with your message: open them") */
-	name?: string | null;
+	/** What it is for, read after its face, which is always its name ("They go with your next message. Opens them in the conversation's changes.") */
+	description?: Content | null;
 	/** What a press does, such as opening what it counts */
 	onclick?: ((event: MouseEvent) => void) | null;
 }
 /**
  * A chip that acts, for what goes with a message in a composer's tray (0.34.0): a button in the chips'
- * geometry (D165) with its muted label and its value, no chevron; its whole face is its tooltip only while
- * a toolbar that shortens it sets its label aside, and its value is never cut (D179).
+ * geometry (D165) with its muted label and its value, no chevron, its face its accessible name and its
+ * `description` read after it; its whole face is its tooltip only while a toolbar that shortens it sets its
+ * label aside, and its value is never cut (D179).
  */
 export class ComposerChip extends Component {
 	constructor(options?: ComposerChipOptions);
-	readonly element: HTMLButtonElement;
+	/** The button and its description, in a holder that takes no box of its own. */
+	readonly element: HTMLElement;
+	/** The button. */
+	readonly control: HTMLButtonElement;
 	label: Content | null;
 	value: string | number | Node | null;
-	name: string | null;
+	description: Content | null;
 }
 
 // Only the declarations marked `export` are public.

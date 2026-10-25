@@ -5,8 +5,8 @@
  * Since 0.34.0 (D183) a choice may wait for an earlier one, such as a branch until a repository is chosen.
  * While it waits the button is quiet (`aria-disabled`, the family's quiet look) and still reachable by Tab,
  * and a press only puts the person at `place()`, saying nothing: the list does not open. Without `place`
- * a press while it waits does nothing. Becoming waiting closes an open list without moving focus. Native
- * `disabled` stays the choice's that can never be made.
+ * a press while it waits does nothing. Becoming waiting closes an open list, focus that was in it going
+ * back to the quiet button. Native `disabled` stays the choice's that can never be made.
  */
 export class ChoicePress {
 	#button;
@@ -32,12 +32,16 @@ export class ChoicePress {
 		return this.#waiting;
 	}
 
-	/** Waits quiet for an earlier choice (true), or acts (false); becoming waiting closes an open list without moving focus. */
+	/**
+	 * Waits quiet for an earlier choice (true), or acts (false). Becoming waiting closes an open list; a person
+	 * whose focus was in it is put back on the quiet button, never on the page's body.
+	 */
 	set waiting(value) {
 		this.#waiting = Boolean(value);
 		if (!this.#waiting) return void this.#button.removeAttribute('aria-disabled');
 		this.#button.setAttribute('aria-disabled', 'true');
-		this.#menu.close(false);
+		const active = this.#button.ownerDocument.activeElement;
+		this.#menu.close(active !== this.#button && Boolean(this.#button.parentElement?.contains(active)));
 	}
 
 	/** A click, or Enter or Space on the button: opens or closes the list, or, while it waits, only goes to `place`. */

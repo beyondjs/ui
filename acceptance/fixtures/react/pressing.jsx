@@ -28,7 +28,7 @@ function Pressing() {
 		<span ref={holder} className="pressing-tray">
 			<ChoiceChip label={copy.repository} options={copy.repositories} value={chosen} onChange={choose} labels={labels.choice} />
 			<ChoiceChip label={copy.branch} options={copy.branches} waiting={!chosen} place={place} onChange={value => log.push(`branch:${value}`)} labels={labels.choice} />
-			<ComposerChip label={copy.comments} value={2} glyph="chat" name={copy.said(2)} onClick={() => log.push('comments:open')} />
+			<ComposerChip label={copy.comments} value={2} glyph="chat" description={copy.description} onClick={() => log.push('comments:open')} />
 		</span>
 	);
 	const composer = <Composer label={copy.label} placeholder={copy.placeholder} value={copy.draft} tray={tray} disabled={chosen ? null : { reason: copy.held, place }} labels={labels.composer} onSubmit={message => log.push(`send:${message.text}`)} />;

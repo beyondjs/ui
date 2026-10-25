@@ -14,7 +14,7 @@ export const words = {
 		branches: [{ value: 'main', label: 'main', status: ['Default', 'neutral'] }, { value: 'fix', label: 'fix/redirect' }],
 		held: 'Choose a repository first.',
 		comments: 'Line comments',
-		said: count => `${count} line comments go with your message: open them`,
+		description: "They go with your next message. Opens them in the conversation's changes.",
 		instructions: 'Instructions'
 	},
 	es: {
@@ -28,7 +28,7 @@ export const words = {
 		branches: [{ value: 'main', label: 'main', status: ['Predeterminada', 'neutral'] }, { value: 'fix', label: 'fix/redirect' }],
 		held: 'Elige primero un repositorio.',
 		comments: 'Comentarios de línea',
-		said: count => `${count} comentarios de línea van con tu mensaje: ábrelos`,
+		description: 'Van con tu próximo mensaje. Los abre en los cambios de la conversación.',
 		instructions: 'Instrucciones',
 		invite: { name: 'Nombre', email: 'Correo', send: 'Invitar' }
 	}

@@ -50,7 +50,7 @@ export function Disclosure({ label, name = null, align = 'start', placement = 'a
 }
 
 /**
- * A menu button of actions. Items: `{ label, onSelect?, href?, disabled?, reason?, tone? }`;
+ * A menu button of actions. Items: `{ label, onSelect?, href?, disabled?, reason?, tone?, waiting? }`;
  * `placement` is `auto` (below, or above without room below), `below` or `above`.
  */
 export function ActionMenu({ label = null, name = null, items, align = 'end', glyph = 'more', placement = 'auto' }) {

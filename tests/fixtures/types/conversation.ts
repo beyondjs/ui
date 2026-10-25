@@ -56,10 +56,12 @@ const mode: 'beside' | 'sheet' | null = panel?.mode ?? null;
 void new Steps({ label: 'Plan', steps: [], announce: false });
 void [sent, sending, state, finished, release, mode];
 // 0.34.0: a chip that acts in the tray, its label, value and name set in place
-const comments = new ComposerChip({ label: 'Line comments', value: 2, glyph: 'file', name: '2 line comments go with your message: open them', onclick: () => undefined });
+const comments = new ComposerChip({ label: 'Line comments', value: 2, glyph: 'chat', description: 'They go with your next message. Opens them in the conversation\'s changes.', onclick: () => undefined });
 comments.value = 3;
-comments.name = null;
-const button: HTMLButtonElement = comments.element;
+comments.description = null;
+const button: HTMLButtonElement = comments.control;
+// @ts-expect-error its face is its name: there is no name of its own
+new ComposerChip({ name: 'Line comments' });
 // @ts-expect-error a chip's glyph is one of the catalog
 new ComposerChip({ glyph: 'comment-bubble' });
 void button;

@@ -76,7 +76,7 @@ export interface ComposerProps {
 /** A message box driven by the DOM `Composer` (0.10.0). */
 export const Composer: ForwardRefExoticComponent<ComposerProps & RefAttributes<ComposerHandle>> & { labels: Copies };
 /** A chip that acts in a composer's tray (0.34.0), driven by the DOM `ComposerChip`; `onClick` is read from the latest props and a new `glyph` makes a new chip. */
-export function ComposerChip(props: { label?: string | null; value?: string | number | null; glyph?: IconName | null; name?: string | null; onClick?: ((event: MouseEvent) => void) | null }): ReactElement;
+export function ComposerChip(props: { label?: string | null; value?: string | number | null; glyph?: IconName | null; /** What it is for, read after its face, which is its name */ description?: string | null; onClick?: ((event: MouseEvent) => void) | null }): ReactElement;
 
 export interface LiveTextHandle {
 	append(piece: string): void;

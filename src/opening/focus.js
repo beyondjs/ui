@@ -44,14 +44,18 @@ export class OpeningFocus {
 
 	/**
 	 * Releases the platform's `focus()`, then gives the focus to the last target kept that is still in the
-	 * page and takes it, with its options; true when one did.
+	 * page and takes it, with its options; true when one did. It stops at the first call that moved the
+	 * focus, wherever the target sent it (a target that hands its focus to another), or that left it inside
+	 * the target, so it never focuses several targets in a row.
 	 */
 	land() {
 		this.release();
+		const document = this.#element.ownerDocument;
 		for (const { target, options } of [...this.#asked].reverse()) {
 			if (!target.isConnected) continue;
+			const before = document.activeElement;
 			target.focus(options);
-			if (target.getRootNode().activeElement === target) return true;
+			if (document.activeElement !== before || target.contains(document.activeElement)) return true;
 		}
 		return false;
 	}

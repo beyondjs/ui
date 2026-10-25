@@ -38,6 +38,8 @@ export interface MenuItem {
 	disabled?: boolean;
 	reason?: string | null;
 	tone?: 'danger' | null;
+	/** Waits for a step not yet taken (0.34.0, D183): quiet as a disabled item, a press still closing the menu and running it */
+	waiting?: boolean;
 }
 export class ActionMenu extends Component {
 	constructor(options: { label?: Content | null; name?: string | null; items: Array<MenuItem | null | false>; align?: 'start' | 'end'; glyph?: string | null; placement?: 'auto' | 'below' | 'above' });

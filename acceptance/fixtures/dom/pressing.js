@@ -18,7 +18,7 @@ console.warn = (message, ...rest) => (warnings.push(String(message)), warn(messa
 const main = document.getElementById('root').appendChild(el('main', { id: 'main' }));
 const repository = new ChoiceChip({ label: copy.repository, options: copy.repositories, onchange: value => choose(value) });
 const branch = new ChoiceChip({ label: copy.branch, options: copy.branches, waiting: true, place: () => repository.control, onchange: value => log.push(`branch:${value}`) });
-const comments = new ComposerChip({ label: copy.comments, value: 2, glyph: 'chat', name: copy.said(2), onclick: () => log.push('comments:open') });
+const comments = new ComposerChip({ label: copy.comments, value: 2, glyph: 'chat', description: copy.description, onclick: () => log.push('comments:open') });
 const instructions = new ComposerChip({ label: copy.instructions, value: 1, glyph: 'book', onclick: () => log.push('instructions:open') });
 const composer = new Composer({
 	label: copy.label,

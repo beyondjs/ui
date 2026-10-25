@@ -30,7 +30,10 @@ test('a chip that waits is quiet and reachable, and a click, Enter, Space or an 
 	assert.equal(button.getAttribute('aria-disabled'), 'true', 'quiet');
 	assert.equal(button.disabled, false, 'still reachable by Tab, never natively disabled');
 	const before = document.body.textContent;
-	for (const press of [() => button.click(), () => page.key(button, 'ArrowDown'), () => page.key(button, 'ArrowUp')]) {
+	// Enter's keydown and Space's keyup reach a button as its click, the platform's activation, which happy-dom
+	// does not make: the test makes that click after the key (the browser check presses the real keys)
+	const activate = key => () => (assert.equal(page.key(button, key).defaultPrevented, false, `${key} is the platform's`), button.click());
+	for (const press of [() => button.click(), activate('Enter'), activate(' '), () => page.key(button, 'ArrowDown'), () => page.key(button, 'ArrowUp')]) {
 		button.focus();
 		press();
 		assert.equal(branch.expanded, false, 'its list does not open');
@@ -65,17 +68,21 @@ test('without place a press while it waits does nothing; leaving the wait opens 
 	menu.destroy();
 });
 
-test('becoming waiting while open closes the list without moving focus back to the button', () => {
+test('becoming waiting while open closes the list, a person in it put back on the quiet button, never on the body', () => {
 	const { repository, branch } = scene({ waiting: false });
 	branch.control.click();
 	assert.equal(branch.expanded, true);
-	const option = document.activeElement;
-	assert.equal(option.getAttribute('role'), 'menuitemradio');
+	assert.equal(document.activeElement.getAttribute('role'), 'menuitemradio');
 	branch.waiting = true;
 	assert.equal(branch.expanded, false, 'the list closes');
 	assert.equal(branch.element.querySelector('.bui-choice-list').hidden, true);
-	assert.ok(document.activeElement !== branch.control, 'no refocus');
+	assert.ok(document.activeElement === branch.control, 'focus that was in the list goes back to the quiet button');
 	assert.equal(branch.control.getAttribute('aria-expanded'), 'false');
+	branch.waiting = false;
+	branch.control.click();
+	repository.control.focus();
+	branch.waiting = true;
+	assert.ok(document.activeElement === repository.control, 'focus outside the list is left where it is');
 	branch.waiting = true;
 	assert.equal(branch.expanded, false, 'waiting again changes nothing');
 	repository.destroy();
@@ -161,29 +168,84 @@ test('a held Send without place is as before: a press does nothing and sends not
 	box.destroy();
 });
 
-test('a ref chooser waits for its repository: its menu and its visible escape are quiet, a press on either only going to place; an open escape field closes', () => {
+test('a ref chooser that waits draws its quiet menu with its placeholder, whatever its refs, loading or unavailable say, a press going to place', () => {
 	const repository = new ui.ChoiceChip({ label: 'Repository', options: [{ value: 'web', label: 'acme/web' }], statement: false }).mount(document.body);
-	const refs = new ui.RefChooser({ refs: [{ name: 'main', default: true }, { name: 'fix/redirect' }], layout: 'inline', waiting: true, place: () => repository.control }).mount(document.body);
-	assert.equal(refs.waiting, true);
-	assert.equal(refs.control.getAttribute('aria-disabled'), 'true');
-	refs.control.click();
-	assert.ok(document.activeElement === repository.control, 'its menu opens nothing');
-	assert.equal(refs.element.querySelector('.bui-choice-list').hidden, true);
-	refs.unavailable = { text: 'Couldn\'t read the branches.' };
-	const escape = refs.element.querySelector('.bui-refs-escape');
-	assert.equal(escape.getAttribute('aria-disabled'), 'true', 'its visible escape waits with it');
-	escape.focus();
-	escape.click();
-	assert.ok(document.activeElement === repository.control, 'a press on the escape goes to the repository too');
-	assert.equal(refs.element.querySelector('.bui-refs-other').hidden, true, 'its field stays closed');
+	for (const state of [{ refs: [] }, { refs: [], loading: true }, { refs: [], unavailable: { text: 'Couldn\'t read the branches.', retry: () => undefined } }, { refs: [{ name: 'main', default: true }] }]) {
+		const refs = new ui.RefChooser({ ...state, layout: 'inline', waiting: true, place: () => repository.control }).mount(document.body);
+		const said = refs.element.textContent;
+		assert.ok(refs.control.isConnected, `${JSON.stringify(state)}: the quiet menu is drawn`);
+		assert.equal(refs.control.getAttribute('aria-disabled'), 'true');
+		assert.doesNotMatch(said, /No branches|Loading|Couldn.t read|Try again/, `${JSON.stringify(state)}: no state of the refs is said while it waits`);
+		assert.equal(refs.element.querySelectorAll('.bui-refs-escape, .bui-skeleton').length, 0, 'nothing else drawn');
+		assert.match(refs.control.textContent, /Choose a branch|Branch/, 'its placeholder');
+		refs.control.click();
+		assert.ok(document.activeElement === repository.control, 'a press goes to the repository');
+		refs.other();
+		assert.equal(refs.element.querySelector('.bui-refs-other').hidden, true, 'other() opens nothing while it waits');
+		refs.destroy();
+	}
+	repository.destroy();
+});
+
+test('a ref chooser\'s wait ends into its refs\' state; waiting again closes an open escape field, the person put back on the quiet button', () => {
+	const repository = new ui.ChoiceChip({ label: 'Repository', options: [{ value: 'web', label: 'acme/web' }], statement: false }).mount(document.body);
+	const refs = new ui.RefChooser({ refs: [], unavailable: { text: 'Couldn\'t read the branches.' }, layout: 'inline', waiting: true, place: () => repository.control }).mount(document.body);
+	refs.control.focus();
 	refs.waiting = false;
-	assert.equal(escape.hasAttribute('aria-disabled'), false, 'able once the repository is chosen');
+	assert.match(refs.element.textContent, /Couldn't read the branches/, 'the wait over, the refs\' state is said');
+	const escape = refs.element.querySelector('.bui-refs-escape');
+	assert.ok(document.activeElement === escape, 'the quiet button\'s focus goes to the first control there, never the body');
 	escape.click();
-	assert.equal(refs.element.querySelector('.bui-refs-other').hidden, false, 'the escape opens its field');
+	const field = refs.element.querySelector('.bui-refs-other');
+	assert.equal(field.hidden, false, 'the escape opens its field');
+	field.querySelector('input').focus();
 	refs.waiting = true;
-	assert.equal(refs.element.querySelector('.bui-refs-other').hidden, true, 'waiting again closes it');
-	refs.refs = [{ name: 'main', default: true }];
-	assert.equal(refs.control.getAttribute('aria-disabled'), 'true', 'new refs keep the wait');
+	assert.equal(field.hidden, true, 'waiting again closes it');
+	assert.ok(document.activeElement === refs.control, 'and puts the person back on the quiet button');
 	refs.destroy();
 	repository.destroy();
+});
+
+test('the other ways to send wait with a held Send: quiet, the reason said once beside Send, a press closing the menu and going to place', () => {
+	const machine = new ui.ChoiceChip({ label: 'Machine', options: [{ value: 'lab', label: 'lab' }], statement: false }).mount(document.body);
+	const { box, sent } = composer({ value: 'Deploy it', actions: [{ id: 'start', label: 'Start and send', primary: true }, { id: 'wait', label: 'Send without starting' }], disabled: { reason: 'Choose a machine first.', place: () => machine.control } });
+	const split = box.element.querySelector('.bui-composer-send .bui-menu-button');
+	split.click();
+	const item = box.element.querySelector('.bui-composer-send [role="menuitem"]');
+	assert.equal(item.getAttribute('aria-disabled'), 'true', 'quiet, as Send is');
+	assert.equal(box.element.querySelectorAll('.bui-composer-send .bui-menu-reason').length, 0, 'the reason is said once, beside Send (D101)');
+	assert.equal(box.element.querySelector('.bui-composer-reason').textContent, 'Choose a machine first.');
+	item.click();
+	assert.equal(box.element.querySelector('.bui-composer-send .bui-menu').hidden, true, 'the press closes the menu');
+	assert.ok(document.activeElement === machine.control, 'and goes where sending waits');
+	assert.equal(sent.length, 0);
+	box.disabled = { reason: 'Only an owner or admin can start web.' };
+	split.click();
+	const held = box.element.querySelector('.bui-composer-send [role="menuitem"]');
+	assert.equal(held.getAttribute('aria-disabled'), 'true');
+	assert.equal(box.element.querySelectorAll('.bui-composer-send .bui-menu-reason').length, 0, 'no reason under it either');
+	held.click();
+	assert.equal(sent.length, 0, 'without a place a press does nothing');
+	box.disabled = null;
+	split.click();
+	box.element.querySelector('.bui-composer-send [role="menuitem"]').click();
+	assert.deepEqual(sent.map(message => message.action), ['wait'], 'once nothing holds it, it sends');
+	box.destroy();
+	machine.destroy();
+});
+
+test('an ActionMenu item that waits looks quiet and still answers a press, which closes the menu and runs it; a disabled one does nothing', () => {
+	const ran = [];
+	const menu = new ui.ActionMenu({ label: 'More', items: [{ label: 'Send without starting', waiting: true, run: () => ran.push('waiting') }, { label: 'Archive', disabled: true, run: () => ran.push('disabled') }] }).mount(document.body);
+	menu.element.querySelector('button').click();
+	const [waiting, disabled] = menu.element.querySelectorAll('[role="menuitem"]');
+	assert.equal(waiting.getAttribute('aria-disabled'), 'true');
+	assert.equal(waiting.tagName, 'BUTTON', 'never a link');
+	disabled.click();
+	assert.deepEqual(ran, []);
+	assert.equal(menu.expanded, true, 'a disabled item keeps the menu');
+	waiting.click();
+	assert.deepEqual(ran, ['waiting']);
+	assert.equal(menu.expanded, false, 'the press closed it');
+	menu.destroy();
 });

@@ -236,10 +236,7 @@
 			--bui-line-inset: calc((var(--bui-control) - 2px - 1cap) / 2);
 		}
 	}
-	input.bui-input {
-		padding-inline: var(--bui-line-inset, var(--space-3));
-	}
-	/* The chevron reads the inset in the control's own face */
+	/* The fields' and selects' own sides read it in forms.css; the chevron reads it in the control's own face */
 	:root[data-density='compact'] .bui-select {
 		font-size: var(--text-body);
 	}
@@ -250,9 +247,6 @@
 	}
 	.bui-select {
 		--bui-select-inset: var(--bui-line-inset, var(--space-3));
-	}
-	.bui-select > .bui-select-control {
-		padding-inline: var(--bui-select-inset) calc(var(--bui-select-inset) + 22px);
 	}
 	.bui-choice-button {
 		--bui-choice-inset: var(--bui-line-inset, var(--space-3));

@@ -44,6 +44,18 @@ Evidence baseline: UI `7568947` (0.32.1) on `feature/next` plus this branch (`cl
 - `ComposerChip` (DOM and React) is a chip that acts: a button in the chips' geometry (D165, one target tall, the quiet edge, round) with a muted `label`, a `value`, an optional `glyph`, `name` for its accessible name and `onclick`. It draws no chevron. Its whole face is its family tooltip only while a shortened toolbar sets its label aside; its value is never cut, since an action is named whole (D179). `label`, `value` and `name` are setters that keep its focus. It carries no copy of its own.
 - Found while building it: the composer's tray hid a `ChoiceChip`'s label (its value alone, D165) but had no tooltip, so the label was said only to assistive technology. The toolbar's tooltip now covers the box, the tray's chips with the settings', and the box carries it into the taller editor.
 
+## What the independent review of `fef34b2` found, and its corrections
+
+The coordinator had `fef34b2` (the first candidate) reviewed independently; each finding below is corrected, with the coordinator's decision where one was needed.
+
+- **The sidebar's search wrote under its glyph** (a regression of `807c64d`): the late `input.bui-input { padding-inline }` rule (0,1,1) beat `.bui-sidebar-query`'s (0,1,0). The fields' and selects' base rules in `forms.css` now read `--bui-line-inset` themselves, early in the cascade, and the late rules are gone, so every field's own padding keeps its place; the inset check asserts that the sidebar's search starts its words after its glyph. Every padding rule that reaches a `.bui-input` was checked again: the picker's and the choice menu's search fields (0,2,0) and the palette's field were never affected.
+- **A waiting `RefChooser` with no refs said "No branches to choose from."**, "Loading branches…" or "Couldn't read the branches." with an able Try again. While it waits it now draws its quiet menu with its placeholder whatever its refs, `loading` or `unavailable` say, so its visible escape is never drawn while it waits and needs no wait of its own (that code, and the quiet link button's rule added with it, are gone).
+- **`ComposerChip`'s `name` failed WCAG 2.5.3, Label in Name.** Decision: its face is always its accessible name; `description` replaces `name`, read through `aria-describedby` from a visually hidden element beside the button. `element` is now a holder (`display: contents`) with the button and its description; `control` is the button.
+- **`land()` could focus several targets in a row**, overriding a target that hands its focus on: it now stops at the first call that moved the focus, or that left it inside the target.
+- **The split menu's other ways to send ignored `place` and repeated the reason under each item.** While Send is held they are quiet (an `ActionMenu` item's new `waiting`): with `place`, a press closes the menu and goes there; the reason is said once, beside Send (D101).
+- **Focus dropped to the body** when a choice started waiting while its list or the escape field held it: it goes back to the quiet button; once a ref chooser's wait ends into a state without its menu, the button's focus goes to that state's first control.
+- **Cleanups:** `RefChooser.other()` opens nothing while it waits; the opening creates its focus recorder last in `#start()`, so a throw earlier never leaves `focus()` wrapped; the waiting chip's unit test presses Enter and Space as the platform's activation.
+
 ## Executed checks
 
 To be completed from the runs.

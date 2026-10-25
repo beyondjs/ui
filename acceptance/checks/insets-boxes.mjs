@@ -19,6 +19,14 @@ const palette = async page => {
 	await page.waitForSelector('.bui-palette-group[data-source="machines"] [role="option"]');
 };
 const record = [];
+/** The sidebar's search (0.34.0): its words start after its glyph, never under it, whatever the field's own sides. */
+const query = async page => {
+	const placed = await page.locator('.bui-sidebar-panel .bui-sidebar-query').first().evaluate(field => {
+		const style = getComputedStyle(field);
+		return { glyph: field.parentElement.querySelector(':scope > .bui-icon').getBoundingClientRect().right, words: field.getBoundingClientRect().left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft) };
+	});
+	if (placed.words < placed.glyph + 4) throw new Error(`the sidebar's search writes under its glyph: ${JSON.stringify(placed)}`);
+};
 /** A command's CopyMessage (0.34.0): only its code box takes the code's face and lines; its holder, Copy and result keep the interface's. */
 const holder = async page => {
 	const faces = await page.locator('#copy-command .bui-copy').evaluate(node => {
@@ -71,7 +79,8 @@ export const pages = {
 			{ open: page => page.locator('main details > summary').first().click(), boxes: [{ name: 'technical details', box: 'main > details .bui-details-body, main > .bui-host > details .bui-details-body', inset: '--bui-text-inset' }] }
 		] },
 		{ file: 'conversation.html', steps: [{ open: page => page.locator('.bui-rail > .bui-activity > .bui-activity-head, .bui-rail > .bui-host > .bui-activity > .bui-activity-head').first().click(), boxes: [{ name: 'activity exchange', box: '.bui-rail .bui-activity-exchange', inset: 12, sides: record }] }] },
-		{ file: 'pressing.html', steps: [{ boxes: [{ name: 'ComposerChip', box: '.bui-composer-tray .bui-composer-chip', inset: 12, sides: record }] }] }
+		{ file: 'pressing.html', steps: [{ boxes: [{ name: 'ComposerChip', box: '.bui-composer-tray .bui-composer-chip', inset: 12, sides: record }] }] },
+		{ file: 'conversation.html', widths: [1440], steps: [{ open: query, boxes: [{ name: 'the sidebar\'s search field', box: '.bui-sidebar-panel .bui-sidebar-query', field: true, inset: 'even', sides: record }] }] }
 	],
 	overlays: [
 		{ file: null, steps: [

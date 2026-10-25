@@ -74,8 +74,6 @@ class OpeningRuntime {
 	#start() {
 		this.#element = document.getElementById('bui-opening');
 		if (!this.#element) return this.#release();
-		// From now until the hand-over, a focus the product asks for while hidden is kept for its arrival
-		this.#focus = new OpeningFocus(this.#element);
 		this.#words = new OpeningWords(this.#specs.product);
 		const frame = new OpeningFrame(this.#element, this.#words);
 		const { stage, status, list } = frame.draw();
@@ -99,6 +97,9 @@ class OpeningRuntime {
 		addEventListener('online', this.#online);
 		addEventListener('pageshow', this.#restored);
 		if (navigator.onLine === false) this.#offline();
+		// Last, so nothing that throws above leaves the platform's focus() wrapped: from now until the hand-over,
+		// a focus the product asks for while hidden is kept for its arrival
+		this.#focus = new OpeningFocus(this.#element);
 		this.#check();
 	}
 

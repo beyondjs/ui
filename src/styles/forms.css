@@ -38,13 +38,16 @@
 	display: none;
 }
 
+/* A single-line control's sides: 12 px, or since 0.34.0 the room its height leaves above its capitals where it
+   is not the comfortable 36 px (`--bui-line-inset`, set in insets.css at compact density and on a touch screen).
+   The base rules read it, so a field's own padding (a search's glyph) keeps its place in the cascade. */
 .bui-input,
 .bui-select-control {
 	box-sizing: border-box;
 	width: 100%;
 	min-width: 0;
 	min-height: var(--bui-control);
-	padding: 0 var(--space-3);
+	padding: 0 var(--bui-line-inset, var(--space-3));
 	border: 1px solid var(--color-border-control);
 	border-radius: var(--radius-control);
 	background: var(--color-surface);
@@ -73,7 +76,7 @@
 }
 .bui-select-control {
 	appearance: none;
-	padding-right: calc(var(--space-3) + 22px);
+	padding-right: calc(var(--bui-line-inset, var(--space-3)) + 22px);
 	cursor: pointer;
 }
 .bui-select > .bui-icon {

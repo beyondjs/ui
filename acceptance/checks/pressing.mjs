@@ -104,7 +104,11 @@ export const checks = [
 				const at = `${width}px ${colorScheme}`;
 				const { page, context } = await open(browser, consumer, { viewport: { width, height: 844 }, colorScheme });
 				await page.evaluate(() => document.fonts.ready);
-				const chip = page.getByRole('button', { name: copy(consumer).said(2) });
+				// Its face is its name (WCAG 2.5.3), and its description is read after it
+				const chip = page.getByRole('button', { name: new RegExp(`^${copy(consumer).comments}\\s*2$`) });
+				expect((await chip.getAttribute('aria-label')) === null, `${at}: its face is its name`);
+				const described = await chip.evaluate(node => document.getElementById(node.getAttribute('aria-describedby'))?.textContent ?? null);
+				expect(described === copy(consumer).description, `${at}: its description is read after its name: ${described}`);
 				const shape = await chip.evaluate(node => {
 					const label = node.querySelector('.bui-composer-chip-label');
 					const value = node.querySelector('.bui-composer-chip-value');

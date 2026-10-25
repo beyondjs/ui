@@ -186,12 +186,16 @@ export class ComposerActions {
 		else if (!this.#busy) button.removeAttribute('aria-disabled');
 	}
 
+	/**
+	 * The other ways to send wait with Send: with nothing to send or while sending is held they are quiet, and
+	 * the reason is said once, beside Send, never under each (D101). Held with a `place` (0.34.0, D183), a
+	 * press on one closes the menu and goes there, as a press on Send does; without one it does nothing.
+	 */
 	#items() {
 		if (!this.#menu) return;
-		const reason = this.#disabled?.reason ?? null;
-		// With nothing to send the other ways to send can't act either; there is no reason to read (D183)
-		const quiet = this.#empty;
-		this.#menu.items = this.#others.map(action => ({ label: action.label, run: () => this.#run(action.id), disabled: Boolean(this.#disabled) || quiet, reason }));
+		const quiet = Boolean(this.#disabled) || this.#empty;
+		const place = Boolean(this.#disabled?.place);
+		this.#menu.items = this.#others.map(action => ({ label: action.label, run: () => this.#run(action.id), disabled: quiet && !place, waiting: quiet && place }));
 	}
 
 	/** Runs the stop action once at a time; its button stays busy while it works or the product says so. */

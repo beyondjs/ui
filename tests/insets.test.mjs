@@ -156,9 +156,14 @@ test('an editable command keeps its first line one inset from its top, and a sin
 	const lines = blocks('@supports (padding-top: calc(1cap))');
 	assert.match(lines, /:root\[data-density='compact'\] :is\(input\.bui-input, \.bui-select, \.bui-choice-button\)\s*\{\s*--bui-line-inset:\s*calc\(\(var\(--bui-control\) - 2px - 1cap\) \/ 2\)/, 'compact density');
 	assert.match(lines, /@media \(pointer: coarse\)\s*\{\s*:is\(input\.bui-input, \.bui-select, \.bui-choice-button\)\s*\{\s*--bui-line-inset:/, 'a touch screen');
-	for (const [selector, declaration] of [['input.bui-input', 'padding-inline: var(--bui-line-inset, var(--space-3))'], ['.bui-select', '--bui-select-inset: var(--bui-line-inset, var(--space-3))'], ['.bui-select > .bui-select-control', 'padding-inline: var(--bui-select-inset) calc(var(--bui-select-inset) + 22px)'], ['.bui-choice-button', '--bui-choice-inset: var(--bui-line-inset, var(--space-3))']]) {
+	for (const [selector, declaration] of [['.bui-select', '--bui-select-inset: var(--bui-line-inset, var(--space-3))'], ['.bui-choice-button', '--bui-choice-inset: var(--bui-line-inset, var(--space-3))']]) {
 		assert.match(lines, rule(lines, selector, declaration), `${selector}: ${declaration}, 12 px where the control is the comfortable 36 px`);
 	}
+	// The fields' and selects' base rules read it, early in the cascade, so a field's own padding still wins (a search's glyph)
+	assert.match(sheet, /\.bui-input,\s*\.bui-select-control\s*\{[^}]*padding:\s*0 var\(--bui-line-inset, var\(--space-3\)\)/);
+	assert.match(sheet, /\.bui-select-control\s*\{[^}]*padding-right:\s*calc\(var\(--bui-line-inset, var\(--space-3\)\) \+ 22px\)/);
+	assert.doesNotMatch(lines, /input\.bui-input\s*\{[^}]*padding|\.bui-select > \.bui-select-control\s*\{[^}]*padding/, 'no late padding of its own, which would beat a field\'s');
+	assert.match(sheet, /\.bui-sidebar-query\s*\{[^}]*padding-inline-start:\s*calc\(var\(--space-2\) \* 2 \+ 16px\)/, 'the sidebar\'s search keeps its words after its glyph');
 	assert.doesNotMatch(sheet.replace(/@supports \(padding-top: calc\(1cap\)\)\s*\{[\s\S]*?\n\}/g, ''), /--bui-line-inset:/, 'without cap the controls keep their 12 px');
 });
 
