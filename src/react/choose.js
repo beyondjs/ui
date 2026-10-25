@@ -84,7 +84,7 @@ export function ProjectPicker({ projects = [], product, value = null, label = nu
  */
 export const SecretField = forwardRef(function SecretField({ label, connect = null, credential = 'token', stored = false, hint = null, name = null, required = false, labels }, ref) {
 	const latest = useLatest(connect);
-	const [host, field] = useInstance(() => new Secret({ label, credential, stored, hint, name, required, labels, connect: connect ? { label: connect.label, href: connect.href ?? null, run: () => latest.current?.onSelect?.() } : null }), [label, credential, hint, name, required, labels, connect?.label, connect?.href]);
+	const [host, field] = useInstance(() => new Secret({ label, credential, stored, hint, name, required, labels, connect: connect ? { label: connect.label, href: connect.href ?? null, run: () => latest.current?.onSelect?.() } : null }), [label, credential, hint, name, required, JSON.stringify(labels ?? null), connect?.label, connect?.href]);
 	useSync(field, current => {
 		if (current.stored !== stored) current.stored = stored;
 	}, [stored]);

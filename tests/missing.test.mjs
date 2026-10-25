@@ -140,7 +140,9 @@ test('a required secret still to give keeps the form quiet, and a press opens it
 	assert.equal(form.querySelectorAll('.bui-field-error:not([hidden]), .bui-form-problem .bui-callout').length, 0, 'nothing is said');
 	assert.equal(sent.length, 0);
 	type(value.control, '   ');
-	assert.equal(value.missing, true, 'blanks are nothing');
+	assert.equal(value.missing, false, 'a secret\'s spaces are characters, as a password\'s');
+	type(value.control, '');
+	assert.equal(value.missing, true);
 	type(value.control, 's3cret');
 	assert.equal(submit.hasAttribute('aria-disabled'), false, 'a value makes it able');
 	behavior.destroy();

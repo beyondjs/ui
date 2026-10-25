@@ -190,7 +190,11 @@ export class Insets {
 				const start = found.reduce((a, b) => (a.left <= b.left ? a : b));
 				const finish = found.reduce((a, b) => (a.right >= b.right ? a : b));
 				const said = (item, side) => (item.kind === 'text' ? `${side} of "${item.what}"` : item.what);
+				// A trim inside a scroller turns what it took off into overflow: the box, or a holder inside it, would scroll
+				const scrollers = [node, ...node.querySelectorAll('*')].filter(item => /auto|scroll/.test(getComputedStyle(item).overflowY));
+				const scrolls = scrollers.reduce((most, item) => Math.max(most, item.scrollHeight - item.clientHeight), 0);
 				return {
+					scrolls,
 					top: round((high.caps ?? high.top) - inner.top),
 					bottom: round(inner.bottom - (low.baseline ?? low.bottom)),
 					left: round(start.left - inner.left),

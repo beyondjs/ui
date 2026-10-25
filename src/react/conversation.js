@@ -49,7 +49,7 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 	const voice = dictation ? { labels: dictation.labels, cap: dictation.cap, bound: dictation.bound, minimum: dictation.minimum, transcribe: (blob, options) => latest.current.dictation?.transcribe?.(blob, options), explain: dictation.explain ? error => latest.current.dictation?.explain?.(error) : undefined } : null;
 	const line = new StatusLine(status, slots, latest);
 	const halt = () => (stop?.label ? { label: stop.label, busy: Boolean(stop.busy), run: () => latest.current.stop?.onSelect?.() } : null);
-	const intake = attach ? { label: attach.label ?? null, accept: attach.accept ?? null, multiple: attach.multiple !== false, onfiles: (files, via) => latest.current.attach?.onFiles?.(files, via), onremove: item => latest.current.attach?.onRemove?.(item), onretry: attach.onRetry ? item => latest.current.attach?.onRetry?.(item) : null, words: attach.words ?? null } : null;
+	const intake = attach ? { label: attach.label ?? null, accept: attach.accept ?? null, multiple: attach.multiple !== false, onfiles: (files, via) => latest.current.attach?.onFiles?.(files, via), onremove: item => latest.current.attach?.onRemove?.(item), onretry: attach.onRetry ? item => latest.current.attach?.onRetry?.(item) : null, words: () => latest.current.attach?.words ?? null } : null;
 	const [host, box] = useInstance(
 		() =>
 			new Box({
@@ -86,7 +86,7 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 				onchange: text => latest.current.onChange?.(text),
 				explain: explain === undefined ? undefined : error => latest.current.explain?.(error) ?? null
 			}),
-		[label, submit, min, max, name, labels, locale, compact !== false, explain === undefined, Boolean(attach), Boolean(attach?.onRetry), attach?.words ?? null, Boolean(onSuggest), JSON.stringify(suggest ?? null), Boolean(commands), Boolean(recall), Boolean(dictation), dictation?.cap, dictation?.bound, dictation?.minimum, Boolean(dictation?.explain)]
+		[label, submit, min, max, name, labels, locale, compact !== false, explain === undefined, Boolean(attach), Boolean(attach?.onRetry), Boolean(onSuggest), JSON.stringify(suggest ?? null), Boolean(commands), Boolean(recall), Boolean(dictation), dictation?.cap, dictation?.bound, dictation?.minimum, Boolean(dictation?.explain)]
 	);
 	// The adapter places the element itself, so the field's height is fitted once it is in the page
 	useSync(box, current => current.fit(), []);
@@ -95,7 +95,8 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 	useSync(box, current => (current.tools = tools ? [slots.tools] : []), [Boolean(tools)]);
 	useSync(box, current => (current.extras = extras ? [slots.extras] : []), [Boolean(extras)]);
 	useSync(box, current => (current.settings = settings ? [slots.settings] : []), [Boolean(settings)]);
-	useSync(box, current => (current.attachments = attachments ?? []), [attachments]);
+	// What files wait for is read at each draw: a change of `attach.words` draws again, keeping the draft
+	useSync(box, current => (current.attachments = attachments ?? []), [attachments, attach?.words ?? null]);
 	useSync(box, current => (current.actions = actions), [JSON.stringify(actions)]);
 	useSync(box, current => (current.stop = halt()), [stop?.label ?? null, Boolean(stop?.busy)]);
 	useSync(box, current => (current.disabled = disabled), [JSON.stringify(disabled ?? null)]);

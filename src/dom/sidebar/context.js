@@ -21,9 +21,12 @@ export class SidebarContext {
 		const previous = this.#visible;
 		const animate = wide && enabled && previous !== null;
 		this.#visible = visible;
+		// The width changes with both: told once, after both are drawn, so a listener that measures at once reads it
 		const paint = () => {
-			Relayout.hide(this.#panel, !visible, this.#host);
+			const marked = this.#host.hasAttribute('data-panel') !== Boolean(shown);
 			this.#host.toggleAttribute('data-panel', shown);
+			if (this.#panel.hidden !== !visible) Relayout.hide(this.#panel, !visible, this.#host);
+			else if (marked) Relayout.tell(this.#host);
 		};
 		if (visible === previous && animate) {
 			if (!this.#motion.leaving) paint();

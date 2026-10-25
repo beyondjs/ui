@@ -195,6 +195,30 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 
 - **Unit.** `tests/list-rules.test.mjs` holds the end line's keys: none on a list of one row or a last page of one row, and shown on one row a search reached. The [release record](reviews/2026-10-24/release-0.31.1.md) lists the archive and the runs.
 
+## UI 0.32.1: the review's corrections to the family's waits (D183)
+
+- **Unit.** `tests/waits.test.mjs` holds each correction over happy-dom:
+  - a `FocusedForm` with fields waiting for a marked part;
+  - a product's own quiet state kept by the form, after a send and after `destroy()`;
+  - a required control that names the form from outside waiting, and one inside that names another not counted;
+  - a late suggestion told to the form;
+  - text the browser could not read held with its own message;
+  - a link that waits not navigating;
+  - a marked part's caret on its `data-bui-caret` control and never on a disabled one, with a `Picker`'s search carrying it;
+  - `SecretField` telling its form with `Required.change`, never an `input` event;
+  - the form read again in the next frame after its structure changes;
+  - a password's spaces counted as characters.
+
+  `tests/react-form.test.mjs` adds three React cases: a suggestion written into a React `Field` making the submit able, a change of the composer's `attach.words` keeping the box and its draft, and equal `SecretField` labels in a new object keeping the field. `tests/relayout.test.mjs` holds the Sidebar telling once, after both of its changes.
+- **Browser.** `acceptance/checks/missing.mjs` adds a check (`dom`, the choosing page's `waits` fixture) of what only a real engine says:
+  - a required choice whose option has an empty value but is not its placeholder;
+  - a footer box that names the form, heard from outside it;
+  - letters typed into a number field, never sent as empty;
+  - a link that waits, not navigating;
+  - a closed shadow root's quiet control.
+
+  It fails on 0.32.0's archive. `acceptance/checks/insets.mjs` also fails a box in which anything scrolls by what an inset trimmed. Run `npm run acceptance -- "D183"` and `node acceptance/run.mjs insets` in each engine.
+
 ## UI 0.32.0: nothing still to write is a failure (D183), one inset (D184) and a composer settled in the frame its width changes
 
 ### Nothing still to write is a failure (D183)

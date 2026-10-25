@@ -4,7 +4,7 @@
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine, Field, FocusedForm, Quiet, confirm, el } from '@beyond-js/ui';
+import { SideSheet, Picker, RefChooser, ProjectPicker, SecretField, StatusRow, CopyMessage, ProviderWindow, ListDetail, Collection, Button, Choices, AwaitedLine, Field, FocusedForm, Quiet, Required, confirm, el } from '@beyond-js/ui';
 import { shape, accounts, source, recognize, branches, projects, repositories, columns } from '../data/choosing.js';
 
 const log = [];
@@ -63,5 +63,32 @@ const quiet = () => {
 	shadow.append(inner, button);
 	new Quiet(button, { waiting: () => true, place: () => inner });
 };
+// 0.32.1 (D183): what only a real engine says, a form with a choice, a number and a footer box that names it
+const waits = () => {
+	const holder = section('waiting');
+	const form = el('form', { id: 'waits-form' }, [
+		el('label', {}, ['Region ', el('select', { required: true, name: 'region' }, [el('option', { value: '', text: 'Choose a region' }), el('option', { value: '', text: 'None' }), el('option', { value: 'eu', text: 'Europe' })])]),
+		el('label', {}, ['Copies ', el('input', { type: 'number', name: 'copies' })])
+	]);
+	const agree = el('input', { type: 'checkbox', required: true, form: 'waits-form', 'aria-label': 'I agree' });
+	const send = el('button', { type: 'submit', form: 'waits-form', text: 'Send' });
+	holder.append(form, el('div', { class: 'fixture-footer' }, [agree, send]));
+	const required = new Required(form);
+	form.addEventListener('submit', event => {
+		if (required.hold(event)) return;
+		event.preventDefault();
+		log.push('waits:submit');
+	});
+	const search = el('input', { type: 'search', 'aria-label': 'Search releases' });
+	const open = new Button({ label: 'Open the release', href: '#release', waiting: true, place: () => search, onclick: () => log.push('waits:open') });
+	const host = el('div', { id: 'closed-host' });
+	holder.append(search, open.element, host);
+	const root = host.attachShadow({ mode: 'closed' });
+	const inner = el('input', { type: 'search', 'aria-label': 'Search inside' });
+	const button = el('button', { type: 'button', text: 'Add inside', onclick: () => log.push('waits:inside') });
+	root.append(inner, button);
+	new Quiet(button, { waiting: () => true, place: () => inner });
+	window.fixture.closed = { root, button };
+};
 if (shape.sheet) sheet.open();
-window.fixture = { log, stall: false, sheet, open: value => value ? sheet.open() : sheet.close(), opener: opener.element, secret, quiet, ready: true };
+window.fixture = { log, stall: false, sheet, open: value => value ? sheet.open() : sheet.close(), opener: opener.element, secret, quiet, waits, ready: true };

@@ -55,6 +55,7 @@ const inset = (page, box) =>
 function hold(found, box, value, at) {
 	const said = `${at} ${box.name}: ${JSON.stringify({ ...found, inset: value })}`;
 	expect(!found.missing && !found.empty, `${said}: the box is drawn with content`);
+	expect(box.scrolls || found.scrolls <= 1, `${said}: nothing in it scrolls by what an inset trimmed (${found.scrolls} px)`);
 	for (const side of box.sides ?? sides) {
 		const free = box.free?.includes(side) || (side === 'right' && found.free);
 		if (free) expect(found[side] >= value - 1, `${said}: its ${side} never comes closer than its inset`);

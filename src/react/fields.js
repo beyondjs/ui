@@ -5,6 +5,7 @@ import { Select as Choice } from '../dom/select.js';
 import { Field as Labelled } from '../dom/field.js';
 import { single } from '../dom/core/statement.js';
 import { Suggestion } from '../dom/core/suggestion.js';
+import { Required } from '../dom/core/required.js';
 
 const { cloneElement, isValidElement, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } = React;
 
@@ -21,6 +22,16 @@ const { cloneElement, isValidElement, useCallback, useEffect, useId, useLayoutEf
  */
 export function Field({ label, hint = null, error = null, optional = false, suggested = false, labels = {}, children }) {
 	const id = useId();
+	const host = useRef(null);
+	const seen = useRef(null);
+	// A value written without a typed one (a suggestion offered, followed or taken back) is told to its form (0.32.0, D183)
+	useLayoutEffect(() => {
+		const control = host.current?.querySelector('input, select, textarea');
+		if (!control || control.value === seen.current) return;
+		const told = seen.current !== null;
+		seen.current = control.value;
+		if (told) Required.tell(control);
+	});
 	const described = [hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(Boolean).join(' ') || undefined;
 	const control = isValidElement(children)
 		? cloneElement(children, {
@@ -33,7 +44,7 @@ export function Field({ label, hint = null, error = null, optional = false, sugg
 	const target = isValidElement(children) ? (children.props.id ?? id) : undefined;
 	return h(
 		'div',
-		{ className: `bui-field${error ? ' bui-field-invalid' : ''}` },
+		{ ref: host, className: `bui-field${error ? ' bui-field-invalid' : ''}` },
 		h('label', { htmlFor: target, className: 'bui-field-label' }, label, optional ? h('span', { className: 'bui-field-optional' }, ` ${labels.optional ?? '(optional)'}`) : null, suggested ? [' ', h('span', { key: 'suggested', className: 'bui-field-suggested' }, labels.suggested ?? 'Suggested')] : null),
 		hint ? h('p', { id: `${id}-hint`, className: 'bui-field-hint' }, hint) : null,
 		control,

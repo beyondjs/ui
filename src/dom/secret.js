@@ -110,10 +110,10 @@ export class SecretField extends Component {
 		this.#tell();
 	}
 
-	/** Whether a required secret is still to give: nothing stored to keep and nothing pasted (D183). */
+	/** Whether a required secret is still to give: nothing stored to keep and nothing pasted (D183); a space is a character. */
 	get missing() {
 		if (!this.#options.required || (this.#stored && !this.#replacing)) return false;
-		return !(this.value ?? '').trim();
+		return !this.value;
 	}
 
 	/** False while the secret is missing, saying nothing of it, so a form waits for it. */
@@ -177,9 +177,9 @@ export class SecretField extends Component {
 		this.#element.toggleAttribute('data-missing', this.missing);
 	}
 
-	/** What a form waits for changed without a typed value: it reads it again on an input event, as for one. */
+	/** What a form waits for changed without a typed value: it says so (`Required.change`), and the form reads it again. */
 	#tell() {
 		this.#mark();
-		this.#element.dispatchEvent(new this.#element.ownerDocument.defaultView.Event('input', { bubbles: true }));
+		Required.tell(this.#element);
 	}
 }

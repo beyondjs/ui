@@ -105,14 +105,14 @@ export class Field extends Component {
 		// A first suggestion arriving late keeps what the person already typed (0.7.4)
 		if (!this.#suggestion) return this.#follow(value, this.#control.value);
 		const shown = this.#suggestion.offer(value);
-		if (shown !== null) this.#control.value = shown;
+		if (shown !== null) this.#write(shown);
 		this.#marked();
 	}
 
 	/** Follows the suggestion again, replacing the person's value. */
 	follow() {
 		if (!this.#suggestion) return;
-		this.#control.value = this.#suggestion.follow();
+		this.#write(this.#suggestion.follow());
 		this.#marked();
 	}
 
@@ -120,7 +120,7 @@ export class Field extends Component {
 		this.#suggestion = new Suggestion(suggest);
 		this.#mark = el('span', { class: 'bui-field-suggested', text: this.#labels.text('suggested') });
 		this.#element.querySelector('.bui-field-label').append(' ', this.#mark);
-		if (value === null || value === undefined || value === '') this.#control.value = suggest ?? '';
+		if (value === null || value === undefined || value === '') this.#write(suggest ?? '');
 		else this.#suggestion.typed(value);
 		this.#control.addEventListener('input', () => {
 			this.#suggestion.typed(this.#control.value);
@@ -128,7 +128,7 @@ export class Field extends Component {
 		});
 		this.#control.addEventListener('blur', () => {
 			const back = this.#suggestion.left(this.#control.value);
-			if (back !== null) this.#control.value = back;
+			if (back !== null) this.#write(back);
 			this.#marked();
 		});
 		this.#marked();
@@ -136,6 +136,12 @@ export class Field extends Component {
 
 	#marked() {
 		this.#mark.hidden = !this.#suggestion.shown;
+	}
+
+	/** Writes a value the person did not type, and says so to the form (`Required.change`), which reads it again. */
+	#write(value) {
+		this.#control.value = value;
+		Required.tell(this.#control);
 	}
 
 	get element() {

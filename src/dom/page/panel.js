@@ -243,8 +243,8 @@ export class PagePanel extends Component {
 		this.#controls.clear();
 		this.#sheet.destroy();
 		this.#head?.destroy();
-		delete this.#page.dataset.panel;
-		this.#page.removeAttribute('data-panel-wide');
+		// The columns change once the panel is gone: the composer beside is told, as when it hides
+		for (const name of ['data-panel', 'data-panel-wide']) Relayout.mark(this.#page, name, false);
 		super.destroy();
 	}
 

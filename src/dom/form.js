@@ -35,6 +35,7 @@ export class FocusedForm {
 	#problem;
 	#busy = false;
 	#saved = new Map();
+	#held = new Set();
 	#onbusy;
 
 	/**
@@ -104,13 +105,13 @@ export class FocusedForm {
 		// nothing (D183), a wrong control says the browser's own constraint message
 		if (!this.#fields.length) {
 			const waiting = this.#required.first;
-			const wrong = this.#controls().find(control => !Required.empty(control) && !control.validity.valid);
-			if (wrong && !(waiting && waiting.compareDocumentPosition(wrong) & 4)) {
+			const wrong = this.#required.wrong;
+			if (wrong && !(waiting && Required.before(waiting, wrong))) {
 				wrong.reportValidity();
 				return;
 			}
-			if (this.#required.hold(event)) return;
 		}
+		if (this.#required.hold(event)) return;
 		const data = new FormData(this.#form);
 		const values = Object.fromEntries([...data].map(([key, value]) => [key, typeof value === 'string' ? value : value.name]));
 		this.problem = null;
@@ -132,8 +133,11 @@ export class FocusedForm {
 		this.#form.setAttribute('aria-busy', String(busy));
 		for (const button of this.#buttons()) {
 			button.toggleAttribute('data-busy', busy);
-			if (busy) button.setAttribute('aria-disabled', 'true');
-			else button.removeAttribute('aria-disabled');
+			// The work frees only what it quieted: a button already quiet, by the product or `Required`, stays so
+			if (busy && !button.hasAttribute('aria-disabled')) {
+				button.setAttribute('aria-disabled', 'true');
+				this.#held.add(button);
+			} else if (!busy && this.#held.delete(button)) button.removeAttribute('aria-disabled');
 			this.#swap(button, busy);
 		}
 		if (!busy) this.settle();
@@ -143,10 +147,6 @@ export class FocusedForm {
 		return this.#required.buttons;
 	}
 
-	/** The form's own controls that take part in validation. */
-	#controls() {
-		return [...this.#form.elements].filter(control => control.willValidate);
-	}
 
 	// Replaces a submit button's text with the busy label while working, and restores it afterwards.
 	// A package button keeps its structure: only its text span changes.

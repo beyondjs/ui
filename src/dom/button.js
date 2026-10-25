@@ -20,7 +20,8 @@ const defaults = { busy: '{label}…' };
  *
  * Since 0.32.0 (D183) a button may be `waiting` for a step not yet taken, such as Add while nothing is
  * chosen: it is quiet (`aria-disabled`) and still reachable, and a press only puts the person at
- * `place()`, its own action never running. A form's submit waits through `Required` instead.
+ * `place()`, its own action never running; a link that waits does not navigate. A form's submit waits
+ * through `Required` instead.
  */
 export class Button extends Component {
 	#element;
@@ -79,6 +80,8 @@ export class Button extends Component {
 			href && !disabled
 				? el('a', { ...props, href })
 				: el('button', { ...props, type, disabled, onclick: event => this.#press(event, onclick) });
+		// A link that waits or works holds its press before any handler, as a button does, and does not navigate
+		if (href && !disabled) this.#element.addEventListener('click', event => this.#hold(event), { capture: true });
 		if (href && !disabled && onclick) this.#element.addEventListener('click', onclick);
 		this.#bare = Boolean(bare && glyph);
 		this.#place = place;
@@ -170,14 +173,16 @@ export class Button extends Component {
 	}
 
 	#press(event, handler) {
-		if (this.#busy || this.#waiting) {
-			event.preventDefault();
-			event.stopImmediatePropagation();
-			// A step not yet taken: the press only puts the person where they can act, saying nothing
-			if (!this.#busy) this.#place?.()?.focus();
-			return;
-		}
-		handler?.(event);
+		if (!this.#hold(event)) handler?.(event);
+	}
+
+	/** Holds a press while busy or waiting; while waiting it only puts the person at `place()`, saying nothing. */
+	#hold(event) {
+		if (!this.#busy && !this.#waiting) return false;
+		event.preventDefault();
+		event.stopImmediatePropagation();
+		if (!this.#busy) this.#place?.()?.focus();
+		return true;
 	}
 
 	#quiet() {

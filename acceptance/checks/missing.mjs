@@ -150,6 +150,47 @@ export const checks = [
 		}
 	},
 	{
+		name: 'Required in a real engine: a choice of an empty value, a footer box that names the form, text a number cannot read, a link and a closed shadow root that wait (0.32.1, D183)',
+		consumers: ['dom'],
+		async run(browser, consumer) {
+			const { page, context } = await browser.open(consumer, { file: 'choosing.html', viewport: { width: 1440, height: 900 } });
+			await page.waitForFunction(() => window.fixture?.ready);
+			await page.evaluate(() => window.fixture.waits());
+			const holder = page.locator('#waiting');
+			const send = holder.getByRole('button', { name: 'Send' });
+			const log = () => page.evaluate(() => window.fixture.log.filter(entry => entry.startsWith('waits:')));
+			const caret = () => page.evaluate(() => document.activeElement?.getAttribute('aria-label') ?? document.activeElement?.getAttribute('name') ?? document.activeElement?.tagName);
+			expect((await send.getAttribute('aria-disabled')) === 'true', 'a region and the box still to give');
+			await holder.locator('select').selectOption({ label: 'None' });
+			await press(page, send);
+			await settle(page);
+			expect((await caret()) === 'I agree' && !(await log()).length, `an empty value that is not the placeholder is a choice; the footer box, named by the form, waits: ${await caret()}`);
+			await holder.getByLabel('I agree').check();
+			expect(!(await send.getAttribute('aria-disabled')), 'nothing waits');
+			await holder.locator('input[name="copies"]').pressSequentially('1e');
+			await press(page, send);
+			await settle(page);
+			expect((await caret()) === 'copies' && !(await log()).length, `text the number cannot read is never sent as empty: ${await caret()} ${JSON.stringify(await log())}`);
+			await holder.locator('input[name="copies"]').fill('3');
+			await press(page, send);
+			await page.waitForFunction(() => window.fixture.log.includes('waits:submit'));
+			const before = await page.evaluate(() => location.hash);
+			await press(page, holder.getByRole('link', { name: 'Open the release' }));
+			await settle(page);
+			const link = await page.evaluate(() => ({ hash: location.hash, opened: window.fixture.log.includes('waits:open'), caret: document.activeElement?.getAttribute('aria-label') }));
+			expect(link.hash === before && !link.opened && link.caret === 'Search releases', `a link that waits does not navigate: ${JSON.stringify(link)}`);
+			const box = await page.evaluate(() => {
+				const rect = window.fixture.closed.button.getBoundingClientRect();
+				return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+			});
+			await page.mouse.click(box.x, box.y);
+			await settle(page);
+			const closed = await page.evaluate(() => ({ acted: window.fixture.log.includes('waits:inside'), caret: window.fixture.closed.root.activeElement?.getAttribute('aria-label') ?? null }));
+			expect(!closed.acted && closed.caret === 'Search inside', `inside a closed shadow root too: ${JSON.stringify(closed)}`);
+			await context.close();
+		}
+	},
+	{
 		name: 'React Form: a footer that names the form waits for a marked choice and a required note, a press goes to each in turn, then it submits (0.32.0, D183)',
 		consumers: ['react19'],
 		async run(browser, consumer) {

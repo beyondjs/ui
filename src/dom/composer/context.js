@@ -21,7 +21,7 @@ export class ComposerContext {
 	#commands = null;
 	#recall = null;
 	#dictation = null;
-	#words = null;
+	#words;
 
 	/**
 	 * @param {object} options
@@ -41,7 +41,8 @@ export class ComposerContext {
 	 */
 	constructor({ root, box, field, labels, locale, attach, onsuggest, suggest, commands = null, recall = null, dictation = null, refocus, oninsert }) {
 		this.#files = new ComposerFiles({ labels, locale, refocus, callbacks: { onremove: item => attach?.onremove?.(item), onretry: attach?.onretry ? item => attach.onretry(item) : null } });
-		if (typeof attach?.words === 'string' && attach.words.trim()) this.#words = attach.words.trim();
+		// A string, or a function read at each draw, so a product may change what files wait for (as per AI engine)
+		this.#words = typeof attach?.words === 'function' ? attach.words : () => attach?.words ?? null;
 		if (attach) this.#intake = new ComposerIntake({ root, box, field, labels, attach });
 		this.#add = new ComposerAdd({ labels, pick: this.#intake ? () => this.#intake.pick() : null, attach: attach?.label ?? null });
 		if (onsuggest) {
@@ -67,12 +68,18 @@ export class ComposerContext {
 	 * words (0.32.0, D183), so Send stays quiet until there are words.
 	 */
 	get sendable() {
-		return this.#files.ready && !this.#words;
+		return this.#files.ready && !this.#said();
 	}
 
 	/** What the field says while ready files wait for words (`attach.words`), or null. */
 	get hint() {
-		return this.#words && this.#files.ready ? this.#words : null;
+		return this.#files.ready ? this.#said() : null;
+	}
+
+	/** The words ready files wait for, trimmed, or null when they wait for none. */
+	#said() {
+		const words = this.#words();
+		return typeof words === 'string' && words.trim() ? words.trim() : null;
 	}
 
 	/** The **+** and its file input, for the toolbar's start (the + is not drawn with nothing to add). */

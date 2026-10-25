@@ -64,8 +64,8 @@ export interface ComposerAttach {
 	onretry?: ((item: ComposerAttachment) => void) | null;
 	/** The product's work surface (a thread with its dock) where a drop of files attaches too, with one target drawn over it (0.11.2). */
 	zone?: Element | null;
-	/** What ready files wait for, said in the field: files alone are then nothing to send (0.32.0, D183). */
-	words?: string | null;
+	/** What ready files wait for, said in the field: files alone are then nothing to send (0.32.0, D183); a function is read at each draw (0.32.1). */
+	words?: string | (() => string | null) | null;
 }
 /** One suggestion after the trigger (0.11.0): `value` replaces the token. */
 export interface ComposerSuggestion {

@@ -116,3 +116,44 @@ test('a React Button waiting for a step not yet taken is quiet and reachable, an
 	await act(async () => add.click());
 	assert.equal(added, 1);
 });
+
+test('a suggestion written into a React Field, a change of the composer\'s words and a new labels object each keep the form right', async () => {
+	let offer = null;
+	function Probe() {
+		const [suggestion, setSuggestion] = React.useState('');
+		offer = setSuggestion;
+		const name = ui.useSuggestion(suggestion);
+		return h(ui.Form, { onSubmit: event => event.preventDefault() }, h(ui.Field, { label: 'Name', suggested: name.suggested }, h('input', { name: 'name', required: true, value: name.value, onChange: name.onChange, onBlur: name.onBlur })), h('button', { type: 'submit' }, 'Create'));
+	}
+	await render(h(Probe));
+	const create = host.querySelector('button');
+	assert.equal(create.getAttribute('aria-disabled'), 'true');
+	await act(async () => offer('storefront'));
+	assert.equal(host.querySelector('input').value, 'storefront');
+	assert.equal(create.hasAttribute('aria-disabled'), false, 'the suggestion was told to the form');
+	await act(() => root.unmount());
+	root = createRoot(host);
+	const attachments = [{ key: 'a', name: 'trace.png', state: 'ready' }];
+	const box = words => h(ui.Composer, { label: 'Message', onSubmit: () => Promise.resolve(), attach: { onFiles: () => undefined, words }, attachments });
+	await render(box('Say what to do with the attached files'));
+	const field = host.querySelector('.bui-composer-field');
+	await act(async () => {
+		field.value = 'draft';
+		field.dispatchEvent(new Event('input', { bubbles: true }));
+	});
+	await render(box('Di qué hacer con los archivos adjuntos'));
+	assert.ok(host.querySelector('.bui-composer-field') === field, 'a change of words keeps the box');
+	assert.equal(field.value, 'draft', 'and the draft');
+	await act(async () => {
+		field.value = '';
+		field.dispatchEvent(new Event('input', { bubbles: true }));
+	});
+	assert.equal(field.getAttribute('placeholder'), 'Di qué hacer con los archivos adjuntos', 'the new words are said');
+	await act(() => root.unmount());
+	root = createRoot(host);
+	const secret = labels => h(ui.SecretField, { label: 'Value', credential: 'value', required: true, labels });
+	await render(secret({ paste: 'Enter the value' }));
+	const fieldset = host.querySelector('fieldset');
+	await render(secret({ paste: 'Enter the value' }));
+	assert.ok(host.querySelector('fieldset') === fieldset, 'equal labels in a new object keep the secret field and what was pasted');
+});

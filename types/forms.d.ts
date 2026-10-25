@@ -3,6 +3,8 @@
 /** A part that says itself whether it waits, such as a `Field` or a required `SecretField`. */
 export interface Waited {
 	readonly missing?: boolean;
+	/** Where it stands in the page, so the first part that waits is read in the page's order (0.32.1). */
+	readonly element?: Element;
 	focus(): void;
 }
 
@@ -17,9 +19,19 @@ export interface Waited {
 export class Required {
 	/** The event a marked part answers with `preventDefault()` when it puts the caret where it is given itself (`bui-focus`). */
 	static readonly ask: 'bui-focus';
+	/** The bubbling event by which a part says what it holds changed without a typed value (0.32.1). */
+	static readonly change: 'bui-change';
+	/** Sends `Required.change` from `node`, so a form reads it again (0.32.1). */
+	static tell(node: EventTarget | null | undefined): void;
+	/** Whether `a` comes before `b` in the page (0.32.1). */
+	static before(a: Node, b: Node): boolean;
 	/** Whether a required control has nothing in it yet; a control the browser does not validate never waits. */
 	static empty(control: Element | { required?: boolean; willValidate?: boolean; validity?: Partial<ValidityState>; type?: string; value?: string } | null | undefined): boolean;
 	constructor(form: HTMLFormElement, options?: { fields?: Waited[] });
+	/** The first control failing its own constraints rather than waiting, or null (0.32.1). */
+	readonly wrong: Element | null;
+	/** The first control holding text the browser could not read as its kind, or null (0.32.1). */
+	readonly unread: Element | null;
 	/** The first part that waits, in the page's order, or null. */
 	readonly first: Element | Waited | null;
 	readonly missing: boolean;

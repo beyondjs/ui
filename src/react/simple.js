@@ -40,29 +40,18 @@ export function Button({ label, children, variant = 'secondary', glyph = null, h
 	const text = label ?? children;
 	const shown = busy && typeof text === 'string' ? (labels.busy ?? '{label}…').replace('{label}', text) : text;
 	const inner = [busy ? h('span', { key: 'mark', className: 'bui-spinner', 'aria-hidden': 'true' }) : glyph ? h(Mark, { key: 'mark', name: glyph }) : null, h('span', { key: 'text' }, shown)];
-	if (href && !disabled) return h('a', { ...rest, className, href, onClick, 'aria-label': name }, inner);
-	return h(
-		'button',
-		{
-			...rest,
-			className,
-			type,
-			disabled,
-			'aria-label': name,
-			'aria-disabled': busy || waiting ? 'true' : undefined,
-			'data-busy': busy ? '' : undefined,
-			onClick: event => {
-				if (busy || waiting) {
-					event.preventDefault();
-					// A step not yet taken (0.32.0, D183): the press only puts the person where they can act
-					if (!busy) place?.()?.focus();
-					return;
-				}
-				onClick?.(event);
-			}
-		},
-		inner
-	);
+	const press = event => {
+		if (busy || waiting) {
+			event.preventDefault();
+			// A step not yet taken (0.32.0, D183): the press only puts the person where they can act; a link does not navigate
+			if (!busy) place?.()?.focus();
+			return;
+		}
+		onClick?.(event);
+	};
+	const quiet = busy || waiting ? 'true' : undefined;
+	if (href && !disabled) return h('a', { ...rest, className, href, onClick: press, 'aria-label': name, 'aria-disabled': quiet }, inner);
+	return h('button', { ...rest, className, type, disabled, 'aria-label': name, 'aria-disabled': quiet, 'data-busy': busy ? '' : undefined, onClick: press }, inner);
 }
 
 /**
