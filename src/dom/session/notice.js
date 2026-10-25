@@ -1,7 +1,7 @@
 import { Dialog } from '../dialog.js';
 import { el } from '../core/element.js';
 import { glyph } from '../core/icons.js';
-import { names } from '../family/labels.js';
+import { CauseName } from '../family/cause.js';
 
 /**
  * The one dialog a session that ended shows, in every product alike.
@@ -68,10 +68,9 @@ export class SessionNotice {
 		this.#source = value ?? null;
 	}
 
-	/** The name of who did not answer: Beyond Accounts and Beyond Projects by their full names, the rest as the family's bar names them. */
+	/** The name of who did not answer, from the family's catalog of causes (`CauseName`). */
 	get #product() {
-		const id = this.#source ?? 'accounts';
-		return ['accounts', 'projects'].includes(id) ? `Beyond ${names[id]}` : (names[id] ?? String(id));
+		return CauseName.of(this.#source ?? 'accounts');
 	}
 
 	get #offline() {

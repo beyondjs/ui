@@ -13,7 +13,8 @@ export const checks = [
 			const { page } = await browser.open(consumer, { query: '?notices=unavailable' });
 			await page.clock.install();
 			await page.reload();
-			await page.locator('#inbox .bui-callout-warning').waitFor();
+			// The inbox's outage is the page form since 0.33.0 (D163); the panel keeps its own warning
+			await page.locator('#inbox .bui-recovery[data-recovery="page"]:not([hidden]) .bui-again').waitFor();
 			await bell(page).click();
 			await panel(page).locator('.bui-callout-warning .bui-again').waitFor();
 			expect(await panel(page).getByRole('button', { name: words[consumer.language].retry }).count() === 1, 'manual recovery remains available');
@@ -21,7 +22,7 @@ export const checks = [
 			await page.clock.runFor(5000);
 			await page.locator('#inbox .bui-notice').first().waitFor();
 			await panel(page).locator('.bui-notice').first().waitFor();
-			expect(await page.locator('.bui-callout-warning').count() === 0, 'recovery removes the warning');
+			expect(await page.locator('.bui-callout-warning').count() === 0 && (await page.locator('#inbox .bui-recovery').count()) === 0, 'recovery removes the warning and gives the inbox back');
 			await page.keyboard.press('Escape');
 			expect(await panel(page).locator('.bui-notice').count() === 0, 'private text is cleared on close');
 		}

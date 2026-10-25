@@ -121,6 +121,13 @@ test('Session names who did not answer: the product’s source, its read’s own
 	await page.until(() => dialog()?.open);
 	assert.equal(dialog().querySelector('.bui-dialog-title').textContent, 'Conduict no respondió');
 	own.destroy();
+	for (const [source, name] of [['accounts', 'Beyond Accounts'], ['projects', 'Beyond Projects'], ['cdn', 'Beyond CDN'], ['snapshots', 'Beyond Snapshots'], ['delegate', 'Beyond Delegate'], ['conduict', 'Conduict'], ['home', 'Beyond Home'], ['The development service', 'The development service']])
+		assert.equal(ui.CauseName.of(source), name, 'the family’s catalog of causes');
+	const cdn = new SessionProduct().session({ silent: false, source: 'cdn', read: async () => Promise.reject(new Error('down')) });
+	void cdn.lost({});
+	await page.until(() => dialog()?.open);
+	assert.equal(dialog().querySelector('.bui-dialog-title').textContent, 'Beyond CDN did not answer');
+	cdn.destroy();
 });
 
 test('Session offline: the dialog says so, offers nothing that cannot work, and tries again back online', async t => {

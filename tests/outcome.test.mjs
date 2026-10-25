@@ -24,9 +24,28 @@ test('a change answered unavailable: who did not answer and "Nothing was changed
 	assert.ok(shown.classList.contains('bui-callout-warning'), 'never the danger tone');
 	assert.equal(shown.getAttribute('role'), 'status', 'a polite live region, never an alert');
 	assert.deepEqual(said(shown), ['Beyond Projects did not answer', 'Nothing was changed.']);
-	assert.equal(shown.querySelector('button, a'), null, 'the person’s own action tries again');
+	assert.equal(shown.querySelector('button, a'), null, 'without `again`, the person’s own action tries again');
 	assert.deepEqual(said(ChangeOutcome.draw({ outcome: 'unavailable' })), ['Nothing was changed.'], 'no sentence depends on a missing cause');
 	assert.deepEqual(said(ChangeOutcome.draw({ outcome: 'unavailable', cause: 'Beyond Projects no respondió' }, ChangeOutcome.labels.es)), ['Beyond Projects no respondió', 'No se cambió nada.']);
+});
+
+test('a change answered unavailable offers the person’s Try again, busy while it runs and one at a time; never for an unknown outcome', async () => {
+	let runs = 0;
+	let finish;
+	const shown = document.body.appendChild(ChangeOutcome.draw({ outcome: 'unavailable', cause: 'Beyond CDN did not answer', again: () => (runs += 1, new Promise(resolve => (finish = resolve))) }));
+	const button = shown.querySelector('.bui-callout-actions button');
+	assert.equal(button.textContent.trim(), 'Try again');
+	assert.ok(button.classList.contains('bui-button-secondary') && button.querySelector('.bui-icon'), 'the shared labelled Try again');
+	button.click();
+	button.click();
+	await page.until(() => runs === 1);
+	assert.equal(button.getAttribute('aria-disabled'), 'true', 'busy while it runs');
+	assert.equal(runs, 1, 'one at a time');
+	finish();
+	await page.until(() => button.getAttribute('aria-disabled') !== 'true');
+	const spanish = ChangeOutcome.draw({ outcome: 'unavailable', again: { run: async () => {} } }, ChangeOutcome.labels.es);
+	assert.equal(spanish.querySelector('.bui-callout-actions button').textContent.trim(), 'Reintentar');
+	assert.equal(ChangeOutcome.draw({ outcome: 'unknown', again: () => {} }).querySelector('button'), null, 'an unknown outcome is checked first, never tried again from here');
 });
 
 test('a change that got no answer: it may have been made, check before trying again, with the way to check and its request', () => {

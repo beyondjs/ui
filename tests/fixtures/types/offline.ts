@@ -1,4 +1,4 @@
-import { Recovery, Again, AgainLine, EmptyState, Picker, ChangeOutcome, FocusedForm, Session, NotificationInbox, type ChangeOutcomeRecord } from '@beyond-js/ui';
+import { Recovery, Again, AgainLine, EmptyState, Picker, ChangeOutcome, FocusedForm, Session, NotificationInbox, CauseName, type ChangeOutcomeRecord } from '@beyond-js/ui';
 
 // 0.33.0: offline said once, a picker joining the page's notice, a cell's outage, a change's outcome and who did not answer a session.
 const notice = new Recovery({ title: 'The development service did not answer', local: true, labels: Recovery.labels.es });
@@ -18,3 +18,5 @@ export { offline, away, line, cell, picker, drawn, form, source, inbox };
 // @ts-expect-error a change's outcome is unavailable or unknown, never a failure's words
 const wrong: ChangeOutcomeRecord = { outcome: 'failed' };
 ChangeOutcome.answer({ text: 'Renaming waits for the machine.', tone: 'warning' });
+const cdn: string = CauseName.of('cdn');
+ChangeOutcome.draw({ outcome: 'unavailable', cause: cdn, again: async () => undefined });

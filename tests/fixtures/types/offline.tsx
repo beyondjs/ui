@@ -9,6 +9,7 @@ export function Joined() {
 			<Picker label="Repositories" source={async () => ({ items: [] })} recovery={shared} outage={() => true} details={() => ({ request: 'req_1' })} />
 			<p><EmptyState kind="outage" inline /></p>
 			<ChangeOutcome outcome="unknown" cause="Conduict did not answer" check={{ label: 'Check the machine', onSelect: () => undefined }} labels={ChangeOutcome.labels.es} />
+			<ChangeOutcome outcome="unavailable" cause="Beyond CDN did not answer" onAgain={async () => undefined} />
 		</>
 	);
 }

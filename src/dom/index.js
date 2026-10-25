@@ -44,6 +44,7 @@ export { Header } from './header.js';
 export { lockup } from './lockup.js';
 export { FamilyBar } from './family/bar.js';
 export { names as productNames } from './family/labels.js';
+export { CauseName } from './family/cause.js';
 export { ProductNav } from './nav.js';
 export { Unavailable } from './unavailable.js';
 export { RetryAction } from './again/action.js';

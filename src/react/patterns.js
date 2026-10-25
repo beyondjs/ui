@@ -65,18 +65,19 @@ export function CommandCard({ title, command, detail = null, scope = null, state
 /**
  * A change that did not get its answer (D186, 0.33.0), drawn by the DOM `ChangeOutcome` in the warning tone:
  * `outcome` (`unavailable` or `unknown`), `cause`, `check` (`{ label, href }` or `{ label, onSelect }`, read
- * from the latest props) and `details`.
+ * from the latest props), `details`, and for a change answered unavailable `onAgain`, the person's Try again.
  */
-export function ChangeOutcome({ outcome, cause = null, check = null, details = null, labels }) {
-	const latest = useLatest({ check });
+export function ChangeOutcome({ outcome, cause = null, check = null, details = null, onAgain = null, labels }) {
+	const latest = useLatest({ check, onAgain });
 	const host = useRef(null);
 	useLayoutEffect(() => {
 		const way = check ? { label: check.label, href: check.href ?? null, run: check.href ? null : event => latest.current.check?.onSelect?.(event) } : null;
-		const node = Outcome.draw({ outcome, cause, check: way, details }, labels);
+		const again = onAgain ? () => latest.current.onAgain?.() : null;
+		const node = Outcome.draw({ outcome, cause, check: way, details, again }, labels);
 		host.current?.append(node);
 		return () => node.remove();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [outcome, cause, check?.label, check?.href, JSON.stringify(details), labels]);
+	}, [outcome, cause, check?.label, check?.href, JSON.stringify(details), Boolean(onAgain), labels]);
 	return h('div', { ref: host, className: 'bui-host' });
 }
 

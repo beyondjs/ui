@@ -112,7 +112,7 @@ await confirm({
 - `other` (the bar's "Sign out of Beyond", offered as "Use another account"), `accounts` (Beyond Accounts' account page), `onrenewed` (read the view again, reconnect live transports) and `onchanged`;
 - `delegate`, inside a window of Beyond Home's windowed host (`/windows/`), where the host asks for every kind (expired, revoked, suspended and Accounts not answering, since 0.9.2), so a frame never draws a dialog: `true` once signed in, `false` when the window is closing (the session then ends with nothing shown), and a rejection is asked again by itself after 5, 15, 30 and then every 60 s;
 - `signin` (0.8.2), the product's own sign-in behind Continue, for an installed shell that signs in through the system browser;
-- `source` (0.33.0), who the product's `read()` reaches (`projects`, `conduict` or a name; `accounts` by default), named when the read rejects or times out. A read's own `{ state: 'unavailable', source }` or a rejection's `error.source` names it instead. `session.notice.source` and the `delegate` request carry it.
+- `source` (0.33.0), who the product's `read()` reaches (`projects`, `conduict` or a name; `accounts` by default; named by `CauseName.of`, "Beyond CDN" for `cdn`), named when the read rejects or times out. A read's own `{ state: 'unavailable', source }` or a rejection's `error.source` names it instead. `session.notice.source` and the `delegate` request carry it.
 
 **The transport.** It sends every `UNAUTHENTICATED`, `SESSION_*` and `ACCOUNT_SUSPENDED` answer to `lost({ reason, replay })`, which resolves with whether to send the request again:
 

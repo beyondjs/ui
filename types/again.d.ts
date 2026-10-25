@@ -118,6 +118,13 @@ export interface ChangeOutcomeRecord {
 	check?: Node | { label: string; href?: string | null; run?: ((event: Event) => void) | null } | null;
 	/** Its request under Technical details */
 	details?: import('./operations.js').DetailsRecord | null;
+	/** The person's own Try again of a change answered unavailable, never of an unknown outcome (0.33.0) */
+	again?: (() => unknown) | { run: () => unknown } | null;
+}
+
+/** Who did not answer by its name in the family's catalog of causes (0.33.0): `CauseName.of('cdn')` is "Beyond CDN", `of('conduict')` "Conduict". */
+export class CauseName {
+	static of(source: string | null | undefined): string;
 }
 
 /** A change's outcome said in the warning tone at the operation (D186, 0.33.0); `FocusedForm`, `confirm` and `prompt` draw what `explain` returns this way. */

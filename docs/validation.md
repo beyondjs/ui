@@ -198,9 +198,9 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 ## UI 0.33.0: the outage said once closed (D163), a change's outage (D186) and the offline line
 
 - **Unit.**
-  - `tests/offline.test.mjs`: `Again` waiting offline and trying on `online`; the offline line in English and Spanish, with no Try again; one notice speaking for the page, the next speaking once the first leaves; `local` keeping its cause; `Unavailable`'s outage offline; and `Session` naming its `source` and saying offline, then reading again on `online`.
+  - `tests/offline.test.mjs`: `Again` waiting offline and trying on `online`; the offline line in English and Spanish, with no Try again; one notice speaking for the page, the next speaking once the first leaves; `local` keeping its cause; `Unavailable`'s outage offline; and `Session` naming its `source` by `CauseName` (Beyond CDN for `cdn`) and saying offline, then reading again on `online`.
   - `tests/joined.test.mjs`: a `Picker` joining and leaving a notice, keeping its own words for another failure and leaving with a gate; `EmptyState`'s `inline` in a `DataTable` cell; and React's `Picker` under StrictMode failing before `useRecovery`'s notice exists.
-  - `tests/outcome.test.mjs`: `ChangeOutcome` in English and Spanish, a form's `explain` as an outcome, as `{ text, tone }` and as a string, `confirm`'s work answered unavailable, and React's `ChangeOutcome`.
+  - `tests/outcome.test.mjs`: `ChangeOutcome` in English and Spanish, its Try again for a change answered unavailable (busy, one at a time, never for an unknown outcome), a form's `explain` as an outcome, as `{ text, tone }` and as a string, `confirm`'s work answered unavailable, and React's `ChangeOutcome`.
   - `tests/notifications-outage.test.mjs`: the inbox's page form and its offline line. `tests/session.test.mjs` and `tests/wording.test.mjs` take the catalog's words.
 - **Declarations.** `tests/fixtures/types/offline.ts` and `offline.tsx`.
 - **Browser.** `acceptance/checks/closing.mjs`, on the `closing.html` pages of the `dom`, `react19` and `react18` consumers:

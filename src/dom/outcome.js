@@ -1,10 +1,11 @@
 import { el, content } from './core/element.js';
 import { Labels } from './core/labels.js';
 import { callout } from './feedback.js';
+import { RetryAction } from './again/action.js';
 
 const copy = Object.freeze({
-	en: Object.freeze({ unchanged: 'Nothing was changed.', maybe: 'The change may have been made.', check: 'Check before trying again.' }),
-	es: Object.freeze({ unchanged: 'No se cambió nada.', maybe: 'Puede que el cambio se haya hecho.', check: 'Compruébalo antes de volver a intentarlo.' })
+	en: Object.freeze({ unchanged: 'Nothing was changed.', maybe: 'The change may have been made.', check: 'Check before trying again.', retry: RetryAction.labels.en.retry }),
+	es: Object.freeze({ unchanged: 'No se cambió nada.', maybe: 'Puede que el cambio se haya hecho.', check: 'Compruébalo antes de volver a intentarlo.', retry: RetryAction.labels.es.retry })
 });
 
 /**
@@ -13,12 +14,13 @@ const copy = Object.freeze({
  *
  * - `{ outcome: 'unavailable', cause }`: the service answered that it could not make it (a 503
  *   `UNAVAILABLE`), so who did not answer (`cause`, from the family's catalog: "Beyond Projects did not
- *   answer") and "Nothing was changed." The person's own action is the way to try again.
+ *   answer") and "Nothing was changed." With `again` (a function, or `{ run }`) it offers the person's own
+ *   Try again, labelled, busy while it runs and one at a time; never tried by itself.
  * - `{ outcome: 'unknown', cause?, check?, details? }`: no answer arrived (a timeout, a dropped
  *   connection), so the change may have been made: "The change may have been made.", who did not answer
  *   when known, "Check before trying again.", the way to check (`check`: a node, or `{ label, href }` /
  *   `{ label, run }`, such as a read again or the object's page) and the request under Technical details.
- *   It is never sent again by itself.
+ *   It is never sent again by itself, and offers no Try again: the person checks first.
  *
  * Anything else is not an outcome of this kind: a string stays in the danger tone, for refusals' errors
  * and failures that are not outages, and `{ text, tone: 'warning' }` says a product's own words in the
@@ -37,12 +39,12 @@ export class ChangeOutcome {
 	/**
 	 * The callout for an outcome (`ChangeOutcome.is`).
 	 *
-	 * @param {{outcome: 'unavailable'|'unknown', cause?: string|null, check?: Node|{label: string, href?: string, run?: () => void}|null, details?: object|null}} outcome
+	 * @param {{outcome: 'unavailable'|'unknown', cause?: string|null, check?: Node|{label: string, href?: string, run?: () => void}|null, details?: object|null, again?: (() => unknown)|{run: () => unknown}|null}} outcome
 	 * @param {object} [labels] the words (`ChangeOutcome.labels.es`)
 	 */
-	static draw({ outcome, cause = null, check = null, details = null }, labels = {}) {
+	static draw({ outcome, cause = null, check = null, details = null, again = null }, labels = {}) {
 		const words = labels instanceof Labels ? labels : new Labels(copy.en, labels);
-		if (outcome === 'unavailable') return callout({ tone: 'warning', title: cause ?? words.text('unchanged'), body: cause ? words.text('unchanged') : null, live: true, details });
+		if (outcome === 'unavailable') return callout({ tone: 'warning', title: cause ?? words.text('unchanged'), body: cause ? words.text('unchanged') : null, actions: [ChangeOutcome.#again(again, words)].filter(Boolean), live: true, details });
 		const body = [cause ? `${String(cause).replace(/\.$/, '')}. ` : '', words.text('check')].join('');
 		return callout({ tone: 'warning', title: words.text('maybe'), body, actions: [ChangeOutcome.#way(check)].filter(Boolean), live: true, details });
 	}
@@ -55,6 +57,13 @@ export class ChangeOutcome {
 		if (ChangeOutcome.is(value)) return ChangeOutcome.draw(value, labels);
 		const said = value && typeof value === 'object' && !value.nodeType ? value : { text: value, tone: 'danger' };
 		return callout({ tone: said.tone === 'warning' ? 'warning' : 'danger', title: said.text, live: true });
+	}
+
+	/** The person's own Try again of a change answered unavailable: the shared action, busy while it runs. */
+	static #again(again, words) {
+		const run = typeof again === 'function' ? again : again?.run;
+		if (typeof run !== 'function') return null;
+		return new RetryAction({ labels: { retry: words.text('retry') }, run }).element;
 	}
 
 	/** The way to check: the product's node, or a quiet link or button that reads it again. */
