@@ -154,8 +154,8 @@ export const checks = [
 			const named = await page.evaluate(() => document.activeElement.classList.contains('bui-sheet-title'));
 			expect(named && title.outline === 'none' && title.shadow === 'none', `the sheet's title draws nothing: ${JSON.stringify(title)}`);
 			await page.keyboard.press(next(browser));
-			const next = await drawn(page);
-			expect(next.outline === 'solid', `the next Tab rings the next control: ${JSON.stringify(next)}`);
+			const ringed = await drawn(page);
+			expect(ringed.outline === 'solid', `the next Tab rings the next control: ${JSON.stringify(ringed)}`);
 			await page.keyboard.press('Escape');
 			await page.waitForFunction(() => !document.querySelector('dialog.bui-sheet[open]'));
 			await tab(browser, page, '#read');
