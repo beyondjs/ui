@@ -161,3 +161,8 @@ test('an editable command keeps its first line one inset from its top, and a sin
 	}
 	assert.doesNotMatch(sheet.replace(/@supports \(padding-top: calc\(1cap\)\)\s*\{[\s\S]*?\n\}/g, ''), /--bui-line-inset:/, 'without cap the controls keep their 12 px');
 });
+
+test('the recovery line\'s words, wrapping beside Try again, take off their half-leading on both sides in its wide form only (0.34.0)', () => {
+	assert.match(units, /@media \(min-width: 481px\)\s*\{\s*\.bui-recovery:not\(\[data-recovery='page'\]\) > \.bui-recovery-words\s*\{\s*margin-block:\s*calc\(\(1cap - 1lh\) \/ 2\)/);
+	assert.doesNotMatch(sheet.replace(/@supports \(padding-top: calc\(1lh - 1cap\)\)\s*\{[\s\S]*?\n\}/g, ''), /\.bui-recovery-words\s*\{[^}]*margin-block:\s*calc\(\(1cap/, 'only where lh and cap exist');
+});

@@ -118,6 +118,14 @@
 	.bui-recovery:not([data-recovery='page']) {
 		padding-block: var(--bui-recovery-inset);
 	}
+	/* Beside Try again, words that wrap taller than it keep their capitals at the inset: they take off their
+	   half-leading on both sides, which keeps one line centred on Try again, Inter's capitals being mid-line
+	   (0.34.0) */
+	@media (min-width: 481px) {
+		.bui-recovery:not([data-recovery='page']) > .bui-recovery-words {
+			margin-block: calc((1cap - 1lh) / 2);
+		}
+	}
 	@media (max-width: 480px) {
 		.bui-recovery:not([data-recovery='page']) .bui-recovery-title {
 			margin-block-start: calc((1cap - 1lh) / 2);
