@@ -1,6 +1,6 @@
 // 0.10.0 in React: the conversation pieces, the Sidebar's entries and search, the Page's panel with PanelToggle.
 import { useRef } from 'react';
-import { Composer, LiveText, ActivityRow, ActivityGroup, Sidebar, Page, PageHeader, PanelToggle, Steps } from '@beyond-js/ui/react';
+import { Composer, ComposerChip, LiveText, ActivityRow, ActivityGroup, Sidebar, Page, PageHeader, PanelToggle, Steps } from '@beyond-js/ui/react';
 import type { ComposerHandle, LiveTextHandle, PagePanel } from '@beyond-js/ui/react';
 
 export function Conversation({ draft }: { draft: string }) {
@@ -27,3 +27,6 @@ export const wrong = <ActivityRow title={<b>x</b>} />;
 
 // Since 0.26.0 (D165): the + entries read from the latest props and the live state
 export const Live = () => <Composer label="Message" onSubmit={async () => undefined} add={[{ label: 'Mention a file', keys: '@', onSelect: () => undefined }]} live />;
+
+// Since 0.34.0: a chip that acts in the tray, its onClick read from the latest props
+export const Comments = () => <Composer label="Message" onSubmit={async () => undefined} tray={<ComposerChip label="Line comments" value={2} name="2 line comments go with your message: open them" onClick={() => undefined} />} />;

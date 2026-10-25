@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Composer as Box } from '../dom/composer/composer.js';
+import { ComposerChip as Chip } from '../dom/composer/chip.js';
 import { ComposerContext } from '../dom/composer/context.js';
 import { LiveText as Live } from '../dom/live/text.js';
 import { ActivityRow as Row } from '../dom/activity/row.js';
@@ -116,6 +117,19 @@ export const Composer = forwardRef(function Composer({ label, placeholder = null
 	const portal = (content, node) => (box && content ? ReactDOM.createPortal(content, node) : null);
 	return h(React.Fragment, null, h('div', { ref: host, className: 'bui-host' }), portal(tools, slots.tools), portal(extras, slots.extras), portal(settings, slots.settings), portal(line.node, slots.status), portal(line.action, slots.action), portal(tray, slots.tray));
 });
+
+/**
+ * A chip that acts (0.34.0), for what goes with a message in a composer's `tray`, driven by the DOM
+ * `ComposerChip`: `label` (muted, "Line comments") and `value` ("2") as text, an optional `glyph`, `name`
+ * (its accessible name when it differs from its face) and `onClick`, read from the latest props. A change of
+ * `glyph` makes a new chip; the others are set in place, keeping its focus.
+ */
+export function ComposerChip({ label = null, value = null, glyph = null, name = null, onClick = null }) {
+	const latest = useLatest(onClick);
+	const [host, chip] = useInstance(() => new Chip({ label, value, glyph, name, onclick: event => latest.current?.(event) }), [glyph]);
+	useSync(chip, current => Object.assign(current, { label, value, name }), [label, value, name]);
+	return h('span', { ref: host, className: 'bui-host' });
+}
 
 /**
  * A React state line as the DOM `Composer` takes it: text stays text, React content goes into a slot,

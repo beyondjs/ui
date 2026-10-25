@@ -38,7 +38,7 @@ export { PreferencesDialog } from '../dom/preferences/dialog.js';
 export { Page, PageHeader, Section, Arrival, Tabs, ListDetail, PanelToggle } from './page.js';
 export { PagePanel } from '../dom/page/panel.js';
 export { PageDock } from '../dom/page/dock.js';
-export { Composer, LiveText, ActivityRow, ActivityGroup } from './conversation.js';
+export { Composer, ComposerChip, LiveText, ActivityRow, ActivityGroup } from './conversation.js';
 export { ComposerDictation } from '../dom/composer/dictation/dictation.js';
 export { Rail, RailItem, RailMoment } from './rail.js';
 export { Lanes } from './lanes.js';

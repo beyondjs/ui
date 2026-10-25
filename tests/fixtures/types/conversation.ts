@@ -1,5 +1,5 @@
 // 0.10.0: a typed plain DOM consumer of the conversation pieces, the Sidebar's entries and search, the Page's panel and Steps without a region.
-import { Composer, LiveText, ActivityRow, ActivityGroup, Sidebar, Page, PagePanel, Steps, Clock, icon } from '@beyond-js/ui';
+import { Composer, ComposerChip, LiveText, ActivityRow, ActivityGroup, Sidebar, Page, PagePanel, Steps, Clock, icon } from '@beyond-js/ui';
 import type { ActivityState, ComposerMessage, SidebarEntries, SidebarSearchOptions } from '@beyond-js/ui';
 
 const composer = new Composer({
@@ -55,3 +55,11 @@ panel?.open();
 const mode: 'beside' | 'sheet' | null = panel?.mode ?? null;
 void new Steps({ label: 'Plan', steps: [], announce: false });
 void [sent, sending, state, finished, release, mode];
+// 0.34.0: a chip that acts in the tray, its label, value and name set in place
+const comments = new ComposerChip({ label: 'Line comments', value: 2, glyph: 'file', name: '2 line comments go with your message: open them', onclick: () => undefined });
+comments.value = 3;
+comments.name = null;
+const button: HTMLButtonElement = comments.element;
+// @ts-expect-error a chip's glyph is one of the catalog
+new ComposerChip({ glyph: 'comment-bubble' });
+void button;

@@ -73,6 +73,64 @@
 	border: 1px solid var(--color-border);
 	border-radius: var(--radius-round);
 }
+/* A chip that acts (ComposerChip, 0.34.0): what goes with a message, such as "Line comments 2", in the chips'
+   geometry: a pill one target tall with the same quiet edge, its muted label and its value, no chevron since
+   it opens no menu. It wraps rather than cuts; a toolbar that shortens its chips sets its label aside, its
+   whole face then its tooltip, and never cuts its value, since an action is named whole (D179). */
+.bui-composer-chip {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0 var(--space-1);
+	box-sizing: border-box;
+	max-width: 100%;
+	min-height: var(--bui-target);
+	padding: 0 var(--space-3);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-round);
+	background: transparent;
+	color: var(--color-text);
+	font: inherit;
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	text-align: start;
+	cursor: pointer;
+}
+.bui-composer-chip:hover,
+.bui-composer-chip[aria-expanded='true'] {
+	border-color: var(--color-border-strong);
+	background: var(--overlay-lift);
+}
+.bui-composer-chip:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+}
+.bui-composer-chip > .bui-icon {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	color: var(--color-text-muted);
+}
+.bui-composer-chip-label {
+	color: var(--color-text-muted);
+}
+.bui-composer-chip-value {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.bui-composer[data-compact] .bui-composer-settings .bui-composer-chip {
+	flex-wrap: nowrap;
+	white-space: nowrap;
+}
+.bui-composer[data-fit] .bui-composer-settings .bui-composer-chip-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
 /* Send (0.26.0): one filled round target with its glyph, the box's one primary; its words show only when
    they must be read first (a step, an action that is not a send), as a pill ending with the glyph. With
    nothing to send it reads quiet (the family's disabled surface) unless a step acts without a message,

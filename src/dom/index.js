@@ -75,6 +75,7 @@ export { AwaitedLine } from './operations/line.js';
 export { Freshness } from './operations/freshness.js';
 export { TechnicalDetails } from './operations/details.js';
 export { Composer } from './composer/composer.js';
+export { ComposerChip } from './composer/chip.js';
 export { ComposerDictation } from './composer/dictation/dictation.js';
 export { LiveText } from './live/text.js';
 export { ActivityRow } from './activity/row.js';
