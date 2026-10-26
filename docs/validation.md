@@ -199,6 +199,12 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
   - `node acceptance/run.mjs 'pinned panel|page: |insets (D184): CommandCard'`: the four `pinned panel` checks, the five `page:` checks and the insets cards, in the `dom` and `react19` consumers. Chrome 155: 20 of 20. Firefox 155: 20 of 20. WebKit 26.6: 20 of 20.
   - `npm test`: 903 of 903, React 18 included; `npm run types` compiles.
   - The first candidate kept the panel kept in view's `overscroll-behavior: contain` and failed in Chrome: the wheel over a pinned panel that fits did not scroll the page. A page of that rule alone measured it: in Chrome 155 a scroll container with nothing to scroll that contains its overscroll holds the wheel, where Firefox 155 and WebKit 26.6 scroll the page. The pinned rule leaves the overscroll to the browser.
+- **Executed after the rebase onto 0.37.0** (`69c065a`), through the machine's test queue:
+  - `npm test`: 980 of 980, and `npm run types` compiles.
+  - From the packed archive: the whole acceptance in Chrome 155, 445 of 445.
+  - `node acceptance/run.mjs 'pinned panel|page: |insets|hanging'` in Firefox 155 and in WebKit 26.6, 31 of 31 each.
+
+  See [the release evidence](reviews/2026-10-26/release-0.38.0.md).
 
 ## UI 0.31.0: a product arrives once (D185)
 
