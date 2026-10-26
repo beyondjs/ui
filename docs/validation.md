@@ -225,6 +225,13 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 
   Run `node acceptance/run.mjs "focus, "` in each engine.
 
+## UI 0.36.0: a row's current tab kept whole, and what a page scrolls to below the family bar
+
+- **Unit.** `tests/clearance.test.mjs`, 8 tests over happy-dom with a laid-out row (`RowStage`), holds where a row rests to show a part clear of its padding and of the cues that say an end holds more (Conduict's machine Settings at 390 px, where the pending found Network cut), and `ProductNav` and `Tabs` resting there by whole pixels: at once, again after a change of size or the fonts, and never against the person's own move. `tests/targets.test.mjs`, 3 tests, reads the built stylesheet, since happy-dom resolves no `:has()`. On every page with the family bar, the document's `scroll-padding-top` holds the bar and, below the sidebar's cut, its product row unless the bar holds the sidebar; the compact line's rules add its height. The sticky lines' own controls keep their scroll area below that padding.
+- **Browser, the rows of tabs.** `acceptance/checks/revealing.mjs` on the `clear.html` pages (`dom` in English, React in Spanish under StrictMode): every frame from the first paint, read at the end of its rendering (`RowFrames`), through the web fonts' load and after it, at 320, 390 and 1440 px. Each row's current tab sits inside the row and under no cue drawn, and a phone's row of Settings says it holds more.
+- **Browser, the targets.** `acceptance/checks/targeting.mjs`: an address's target, `scrollIntoView` and a heading focused by code land below the bar, the sidebar's row and the compact line, and the sticky controls take focus by code and by Tab and move nothing, at 320, 390 and 1440 px.
+- **Release.** The [release record](reviews/2026-10-26/release-0.36.0.md) lists the archive and the runs.
+
 ## UI 0.35.0: where a press puts the person, a focus asked for while covered, and the boxes no fixture drew
 
 - **Unit.**
