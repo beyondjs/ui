@@ -119,11 +119,13 @@
 		padding-block: var(--bui-recovery-inset);
 	}
 	/* Beside Try again, words that wrap taller than it keep their capitals at the inset: they take off their
-	   half-leading on both sides, which keeps one line centred on Try again, Inter's capitals being mid-line
-	   (0.35.0) */
+	   half-leading on both sides, which keeps one line centred on Try again, Inter's capitals being mid-line.
+	   Their lh and cap are the title's, whatever font the page around them sets (0.35.0) */
 	@media (min-width: 481px) {
 		.bui-recovery:not([data-recovery='page']) > .bui-recovery-words {
 			margin-block: calc((1cap - 1lh) / 2);
+			font-size: var(--text-body);
+			line-height: var(--leading-body);
 		}
 		/* Offline the line has no Try again (0.33.0): its words set it, the mark centred on their capitals
 		   without growing it (0.35.0) */

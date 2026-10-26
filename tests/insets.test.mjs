@@ -168,7 +168,7 @@ test('an editable command keeps its first line one inset from its top, and a sin
 });
 
 test('the recovery line\'s words, wrapping beside Try again, take off their half-leading on both sides in its wide form only (0.35.0)', () => {
-	assert.match(units, /@media \(min-width: 481px\)\s*\{\s*\.bui-recovery:not\(\[data-recovery='page'\]\) > \.bui-recovery-words\s*\{\s*margin-block:\s*calc\(\(1cap - 1lh\) \/ 2\)/);
+	assert.match(units, /@media \(min-width: 481px\)\s*\{\s*\.bui-recovery:not\(\[data-recovery='page'\]\) > \.bui-recovery-words\s*\{\s*margin-block:\s*calc\(\(1cap - 1lh\) \/ 2\);\s*font-size:\s*var\(--text-body\);\s*line-height:\s*var\(--leading-body\)/, 'its lh and cap are the title\'s, whatever the page sets (0.35.0)');
 	assert.match(units, /\.bui-recovery\[data-offline\]:not\(\[data-recovery='page'\]\) > \.bui-recovery-mark\s*\{\s*margin-block:\s*calc\(\(1cap - 18px\) \/ 2\);\s*font-size:\s*var\(--text-body\)/, 'offline, with no Try again, the mark does not grow the line (0.35.0)');
 	assert.doesNotMatch(sheet.replace(/@supports \(padding-top: calc\(1lh - 1cap\)\)\s*\{[\s\S]*?\n\}/g, ''), /\.bui-recovery-words\s*\{[^}]*margin-block:\s*calc\(\(1cap/, 'only where lh and cap exist');
 });
