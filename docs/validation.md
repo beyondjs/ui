@@ -199,11 +199,9 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 
 - **Unit.** `tests/hanging.test.mjs` holds D188 in the built stylesheet: the one token `--bui-quiet-hang` on the spacing scale; a quiet button with words hanging its padding by it, its 1px border counted, and keeping it beside another control; a glyph alone left to its own geometry; an `ActionLine` hanging its actions once; a composer's box narrowing the hang to stay inside its border, its band's action on its inset and its sentence twice the hang from it; `CopyValue` and a large file's Show twice the hang from their text; the toolbars that keep their quiet controls' padding; and no stylesheet of the package hanging a quiet control by a number of its own. `tests/quiet.test.mjs` still holds an action line's rules for every kind of action.
 - **Browser.** `acceptance/checks/hanging.mjs` measures the `hanging.html` page of the `dom` consumer at 1280 and 390 px: a column's quiet actions, small and not, and an action line's first action on the column's text edge within 0.5 px; Cancel's surface at least 4 px from a bordered Save and its words at least 12 px from it; an action after a sentence 16 px from it with its surface clear; a callout led by a quiet action on its title's edge; a composer band's action ending on the box's inset with its surface inside the border; a product's own line whose action wraps under it, its words on the state mark's edge; Copy 16 px after its value; and no two line starts of one case 0.5 to 4 px apart. Run `npm run acceptance -- hanging`, and the whole run in Chrome, Firefox and WebKit, since the change reaches every page that draws a quiet control.
-- **Executed on 2026-10-26, the candidate** (0.34.0 `b397dc4` plus this round, before its version and release):
-  - Chrome: 416 of 417; the one failure, a 38 px wide "Start" on a touch screen, was fixed by the 44 px target and then passed with `hanging` (3 of 3).
-  - Firefox: 417 of 417.
-  - WebKit: 417 of 417.
-  - The units the change touches: `hanging`, `quiet`, `foundations`, `insets`, `composing` and `list-tools`, 43 of 43.
+- **Executed on 2026-10-26.**
+  - The candidate (0.34.0 `b397dc4` plus this round), the whole run: Chrome 416 of 417, its one failure, a 38 px wide "Start" on a touch screen, fixed by the 44 px target and then passing with `hanging` (3 of 3); Firefox 417 of 417; WebKit 417 of 417.
+  - The release (`dae2384`, on 0.36.0), from its packed archive: `npm test` 975 of 975 and `npm run types`; the whole acceptance in Chrome, 437 of 437; in Firefox and WebKit the 104 checks of the insets, the hanging page, the presses, the settings chips, the current tab and the targets below the bar, the composer, callouts, Copy, action lines, empty states and dialogs, 104 of 104 in each. The [release record](reviews/2026-10-26/release-0.37.0.md) lists the runs.
 
 ## UI 0.33.0: the outage said once closed (D163), a change's outage (D186) and the offline line
 
