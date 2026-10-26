@@ -1,6 +1,7 @@
 // The page system of the plain DOM consumer: the family bar with "Language and appearance", the
 // Sidebar (or ProductNav) and one Page whose template, width, side panel and arrival line the address
-// chooses. window.fixture exposes the preferences and a teardown.
+// chooses; since 0.38.0 its side panel may be pinned, its main column long and its header compact.
+// window.fixture exposes the preferences and a teardown.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
@@ -15,7 +16,7 @@ const shell = root.appendChild(el('div', { class: shape.nav === 'sidebar' ? 'bui
 const nav = shape.nav === 'sidebar' ? new Sidebar({ product: 'Conduict', groups, context: { label: 'Project', name: 'Storefront' } }).mount(shell) : new ProductNav({ items: groups[0].items }).mount(shell);
 const main = shell.appendChild(el('main', { id: 'main' }));
 const tabs = new Tabs({ items: ['Overview', 'Conversations', 'Repositories', 'AI engines', 'Access', 'Runtime'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 })) });
-const header = new PageHeader({ title: words.title, crumbs: [{ label: 'Environments', href: '#/environments' }], kind: words.kind, status: status('Ready', 'success'), facts: words.facts, actions: [new Button({ label: 'Start a conversation', variant: 'primary' }), new Button({ label: 'Stop the environment' }), new Button({ label: 'More actions' })], tabs });
+const header = new PageHeader({ title: words.title, crumbs: [{ label: 'Environments', href: '#/environments' }], kind: words.kind, status: status('Ready', 'success'), facts: words.facts, actions: [new Button({ label: 'Start a conversation', variant: 'primary' }), new Button({ label: 'Stop the environment' }), new Button({ label: 'More actions' })], tabs, compact: shape.compact });
 const arrival = shape.arrival ? new Arrival({ product: 'Conduict', href: '#/back', ondismiss: () => {} }) : null;
 // The last row holds a list of its own, as a repository's copies are listed under it: it never reaches past the page
 const rows = words.rows.map((row, index) =>
@@ -33,8 +34,13 @@ const copy = () => el('li', {}, [
 	el('div', { class: 'bui-row-under' }, [new ActionLine({ actions: words.copy.actions.map(label => new Button({ label, variant: 'quiet', small: true })) }).element])
 ]);
 const raised = () => [new Section({ title: 'About', children: [el('ul', {}, words.facts2.map(fact => el('li', { text: fact })))] }).element, new Section({ title: 'Working copies', children: [el('ul', { class: 'bui-rows' }, [copy()])] }).element];
-const aside = shape.raised ? raised() : shape.aside ? [el('h2', { text: 'About' }), el('ul', {}, words.facts2.map(fact => el('li', { text: fact })))] : null;
-const page = new Page({ template: shape.template, width: shape.width, arrival, header, children: [repositories.element, access.element], aside, raised: shape.raised, label: 'About this environment' }).mount(main);
+// Start an application (0.38.0): the page's action first in the raised panel, beside a long list of components
+const start = words.start.en;
+const action = () => new Section({ title: start.title, children: [el('p', { text: start.text }), el('div', {}, [new Button({ label: start.action, variant: 'primary' }).element])] }).element;
+const components = new Section({ title: start.components, description: start.description, children: [el('ul', { class: 'bui-rows' }, words.components.map(({ name, meta }) => new ListRow({ title: name, meta, tag: 'li' }).element))] });
+const aside = shape.raised ? [...(shape.long ? [action()] : []), ...raised()] : shape.aside ? [el('h2', { text: 'About' }), el('ul', {}, words.facts2.map(fact => el('li', { text: fact })))] : null;
+const children = [repositories.element, access.element, ...(shape.long ? [components.element] : [])];
+const page = new Page({ template: shape.template, width: shape.width, arrival, header, children, aside, raised: shape.raised, pinned: shape.pinned, label: 'About this environment' }).mount(main);
 
 window.fixture = {
 	preferences,

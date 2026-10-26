@@ -88,6 +88,8 @@ export const pages = {
 		] },
 		{ file: 'wave.html', steps: [{ boxes: [{ name: 'the tallest choice card', box: '.bui-card-choice', nth: 2, inset: '--bui-card-inset' }, { name: 'the chosen choice card', box: '.bui-card-choice', nth: 0, inset: '--bui-card-inset', free: ['bottom'] }] }] },
 		{ file: 'layout.html', query: '?raised=1', steps: [{ boxes: [{ name: 'raised side panel', box: '.bui-page-aside[data-raised]', inset: '--bui-panel-inset', free: ['bottom'] }] }] },
+		// Pinned beside the main column at 1440 px, a scroller there, and flowing at 390 px (0.38.0, D189): the same inset
+		{ file: 'layout.html', query: '?raised=1&pinned=1&long=1', steps: [{ boxes: [{ name: 'pinned raised side panel', box: '.bui-page-aside[data-pinned]', inset: '--bui-panel-inset', free: ['bottom'] }] }] },
 		{ file: 'operations.html', steps: [
 			{ boxes: [{ name: 'Select', box: '.bui-select-control', field: true, extra: [':scope > .bui-icon'], inset: 'even' }, { name: 'awaited card', box: '.bui-awaited', inset: '--bui-awaited-inset' }] },
 			{ open: page => page.locator('main details > summary').first().click(), boxes: [{ name: 'technical details', box: 'main > details .bui-details-body, main > .bui-host > details .bui-details-body', inset: '--bui-text-inset' }] }

@@ -179,6 +179,27 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 - **Unit.** `tests/page.test.mjs` holds `raised`: flat by default, `data-raised` once raised, kept across an aside removed and given again, and never on a panel kept in view. `tests/react-page.test.mjs` renders React's `raised` with the DOM page's markup. `tests/fixtures/types/` compiles the option and the setter.
 - **Browser.** `acceptance/checks/layout.mjs`, on the `layout.html` pages with `?raised=1`, measures at 390, 1024 and 1440 px in both themes: the aside on the raised surface's own colour with a 1 px line and no shadow; its two regions divided by a line; a copy's mark on the panel's edge (the section heading's); its quiet actions in `.bui-row-under` starting under the row's name; no sideways scroll. Run `npm run acceptance -- "raised panel"`, then with `BEYOND_UI_BROWSER=firefox` and `BEYOND_UI_BROWSER=webkit`. See [the release evidence](reviews/2026-10-24/release-0.30.0.md).
 
+## UI 0.38.0: a raised panel pinned beside the main column (D189)
+
+- **Unit.** `tests/pinned.test.mjs` holds `Page`'s `pinned` over happy-dom:
+  - a raised panel marked `data-pinned` by the option and the setter, unpinned and pinned again;
+  - never a flat side panel, a page without one or a panel kept in view, even after their setters;
+  - the page's choice kept when set before `raised`, across `raised` taken off and given back, and across an aside removed and given;
+  - in the built stylesheet, the rule inside the 68rem container query that puts the panel beside the main column: sticky at `--bui-page-sticky`, its border box within the window with its own scroll and no `overscroll-behavior`, and below a compact line; no such rule at every width, and none for a raised panel without `pinned`.
+
+  `tests/react-page.test.mjs`, also on React 18, renders React's `pinned` with the DOM page's markup, never on a flat aside or a panel kept in view. `tests/fixtures/types/resource.ts` and `resource.tsx` compile the option, the setter and the prop, with their expected errors.
+- **Browser.** `acceptance/checks/pinning.mjs` runs on the `layout.html` pages made Start an application (`?raised=1&pinned=1&long=1`: sixteen components in the main column, the page's action first in the raised panel; `&compact=1` for a compact header), in the `dom` and `react19` consumers:
+  - at 1440 px in both themes and in a region just above 68rem: beside the main column and sticky. Its top is where the scroll puts it until it reaches the page's sticky edge, and stays there after. At every step its box, the main column and the document are unchanged, it never passes the main column's end and nothing in it scrolls;
+  - below a compact header's line, one gap under it. In a 420 px window its whole box stands from its edge to one gap above the window's end, the wheel over it scrolls it and its own scroll reaches its last action. The wheel over a panel that fits scrolls the page, and every focus ring Tab draws in it stays inside its scroll;
+  - in a region just under 68rem and at 390 px, below the main column, in the flow and scrolling with the page; at 1440 px a raised panel without `pinned`, and a flat one with it, in the flow beside it;
+  - pinned and unpinned drawn alike at 1440 and 390 px in both themes: the panel's own style, its box, every part's place in it and the main column.
+
+  The insets check's cards (`checks/insets.mjs`, `checks/insets-boxes.mjs`) measure the pinned raised panel too. Run `node acceptance/run.mjs 'pinned panel'`, then with `BEYOND_UI_BROWSER=firefox` and `BEYOND_UI_BROWSER=webkit`.
+- **Executed on 2026-10-26, the candidate** (0.34.0 `b397dc4` with this change, before its version and release):
+  - `node acceptance/run.mjs 'pinned panel|page: |insets (D184): CommandCard'`: the four `pinned panel` checks, the five `page:` checks and the insets cards, in the `dom` and `react19` consumers. Chrome 155: 20 of 20. Firefox 155: 20 of 20. WebKit 26.6: 20 of 20.
+  - `npm test`: 903 of 903, React 18 included; `npm run types` compiles.
+  - The first candidate kept the panel kept in view's `overscroll-behavior: contain` and failed in Chrome: the wheel over a pinned panel that fits did not scroll the page. A page of that rule alone measured it: in Chrome 155 a scroll container with nothing to scroll that contains its overscroll holds the wheel, where Firefox 155 and WebKit 26.6 scroll the page. The pinned rule leaves the overscroll to the browser.
+
 ## UI 0.31.0: a product arrives once (D185)
 
 - **Unit.** `tests/opening-screen.test.mjs` holds `OpeningScreen`: a structure with nothing waiting is complete at once and starts no budget; a region waiting for its first read holds the screen within the budget, counted from the first time it is asked; every shared wait counts (a placeholder, a collection's or table's placeholder rows, the family bar's read) and a loading line does not; a wait in a part that is not drawn holds nothing; a product that names a step again starts a new budget; the screen asks again once, when the budget runs out, and not after a reset. happy-dom draws nothing, so a part that is not drawn says so through `checkVisibility()` there. `tests/waiting.test.mjs` holds the waits' grace: seen past 300 ms, faded in only for a person who did not ask for less motion, opacity alone, never a shimmer.

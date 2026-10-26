@@ -1,5 +1,6 @@
 // The page system of the React consumers, in Spanish: the family bar with "Idioma y apariencia", the
-// Sidebar (or ProductNav) and one Page whose template, width, side panel and arrival line the address chooses.
+// Sidebar (or ProductNav) and one Page whose template, width, side panel and arrival line the address chooses;
+// since 0.38.0 its side panel may be pinned, its main column long and its header compact.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
@@ -15,10 +16,21 @@ const preferences = new Preferences({ key: 'beyond-layout', fallback: { appearan
 window.fixture = { preferences, ready: false };
 
 function View() {
-	const header = <PageHeader title={words.title} crumbs={[{ label: 'Entornos', href: '#/environments' }]} kind="Estándar" status={<Status label="Listo" tone="success" />} facts={words.facts} actions={<><Button label="Empezar una conversación" variant="primary" /><Button label="Detener el entorno" /><Button label="Más acciones" /></>} tabs={<Tabs items={['Resumen', 'Conversaciones', 'Repositorios', 'Motores de IA', 'Acceso', 'Ejecución'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 }))} />} />;
+	const header = <PageHeader title={words.title} crumbs={[{ label: 'Entornos', href: '#/environments' }]} kind="Estándar" status={<Status label="Listo" tone="success" />} facts={words.facts} actions={<><Button label="Empezar una conversación" variant="primary" /><Button label="Detener el entorno" /><Button label="Más acciones" /></>} tabs={<Tabs items={['Resumen', 'Conversaciones', 'Repositorios', 'Motores de IA', 'Acceso', 'Ejecución'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 }))} />} compact={shape.compact} />;
+	// Start an application (0.38.0): the page's action first in the raised panel, beside a long list of components
+	const start = words.start.es;
+	const action = shape.long ? (
+		<Section title={start.title}>
+			<p>{start.text}</p>
+			<div>
+				<Button label={start.action} variant="primary" />
+			</div>
+		</Section>
+	) : null;
 	// A resource page's raised panel (0.30.0): its regions, and a copy whose actions start under its name
 	const raised = (
 		<>
+			{action}
 			<Section title="Acerca de">
 				<ul>{words.facts2.map(fact => <li key={fact}>{fact}</li>)}</ul>
 			</Section>
@@ -46,7 +58,7 @@ function View() {
 			<div className={shape.nav === 'sidebar' ? 'bui-shell' : 'bui-stack'}>
 				{shape.nav === 'sidebar' ? <Sidebar product="Conduict" groups={groups} context={{ label: 'Proyecto', name: 'Storefront' }} /> : <ProductNav items={groups[0].items} />}
 				<main id="main">
-					<Page template={shape.template} width={shape.width} arrival={shape.arrival ? <Line product="Conduict" href="#/back" onDismiss={() => {}} labels={Words.labels.es} /> : null} header={header} aside={aside} raised={shape.raised} label="Acerca de este entorno">
+					<Page template={shape.template} width={shape.width} arrival={shape.arrival ? <Line product="Conduict" href="#/back" onDismiss={() => {}} labels={Words.labels.es} /> : null} header={header} aside={aside} raised={shape.raised} pinned={shape.pinned} label="Acerca de este entorno">
 						<Section title="Repositorios" description={words.description} actions={<Button label="Añadir un repositorio" />}>
 							<ul className="bui-rows">
 								{words.rows.map((row, index) =>
@@ -73,6 +85,11 @@ function View() {
 								</div>
 							</div>
 						</Section>
+						{shape.long ? (
+							<Section title={start.components} description={start.description}>
+								<ul className="bui-rows">{words.components.map(({ name, meta }) => <ListRow key={name} title={name} meta={meta} />)}</ul>
+							</Section>
+						) : null}
 					</Page>
 				</main>
 			</div>

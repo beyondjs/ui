@@ -24,9 +24,11 @@ const widths = Object.freeze(['fluid', 'standard', 'form', 'reading', 'thread'])
  * The arrival line and the header come first; `aside` is a resource page's side panel, beside the main
  * column once the region holds a form-width column and the panel (68rem), and below it otherwise; since
  * 0.30.0 `raised` draws it as a resource page's raised panel of its conditions (a surface of its own with
- * no shadow, C2, its regions divided by a line). `template` names the page's kind (overview, list,
- * detail, settings, task or tool) as `data-template`, for checks and for the tool template, which has
- * no gutter (D22's departures).
+ * no shadow, C2, its regions divided by a line). Since 0.38.0 (D189) `pinned` says that the raised panel
+ * holds the page's action: from the width where it sits beside the main column it stays pinned there,
+ * in view while that column scrolls, and below that width it flows below it as before; a flat side
+ * panel is never pinned. `template` names the page's kind (overview, list, detail, settings, task or
+ * tool) as `data-template`, for checks and for the tool template, which has no gutter (D22's departures).
  *
  * With `panel` (0.10.0) the aside is a panel kept in view instead (`PagePanel`, `page.panel`): beside
  * the main column and sticky from the region's `cut`, hideable there, and a side sheet below it that
@@ -58,6 +60,7 @@ export class Page extends Component {
 	#aside;
 	#panel = null;
 	#dock = null;
+	#pinned = false;
 	#primaries = null;
 	#hierarchy = null;
 	#ellipses = null;
@@ -72,13 +75,14 @@ export class Page extends Component {
 	 * @param {Node[]|null} [options.aside] the side panel's content; no panel without it
 	 * @param {string} [options.label] the side panel's accessible name
 	 * @param {boolean} [options.raised] the side panel raised on a surface of its own (0.30.0), as a resource page holds its conditions
+	 * @param {boolean} [options.pinned] the raised side panel holds the page's action, so it stays in view beside the main column (0.38.0, D189); only with `raised`
 	 * @param {{cut?: number|string, open?: boolean, onchange?: (shown: boolean) => void, title?: string|null, head?: boolean, wide?: boolean, labels?: {close?: string, hide?: string}}|null} [options.panel]
 	 *   the aside as a panel kept in view (0.10.0): beside and sticky from `cut`, a side sheet below it;
 	 *   since 0.11.0 with a head of its own (`head`) and a wide form (`wide`)
 	 * @param {Node|{element: Node}|Array<Node|{element: Node}>|null} [options.dock] what the thread template docks at the window's bottom, such as its composer (0.14.0)
 	 * @param {'start'|'center'} [options.lane] where the thread template's column sits (0.15.0)
 	 */
-	constructor({ template = 'detail', width = null, arrival = null, header = null, children = [], aside = null, label = null, raised = false, panel = null, dock = null, lane = 'start' } = {}) {
+	constructor({ template = 'detail', width = null, arrival = null, header = null, children = [], aside = null, label = null, raised = false, pinned = false, panel = null, dock = null, lane = 'start' } = {}) {
 		super();
 		if (!templates.includes(template)) throw new TypeError(`A page's template is one of ${templates.join(', ')}`);
 		width ??= template === 'thread' ? 'thread' : 'standard';
@@ -96,6 +100,7 @@ export class Page extends Component {
 		this.dock = dock;
 		this.aside = aside;
 		this.raised = raised;
+		this.pinned = pinned;
 		// One primary action per region, warned in a development build (0.16.0, DQ-09)
 		if (Primaries.enabled) this.#primaries = new Primaries({ root: this.#element });
 		// A heading outranks what it names, warned in a development build (0.19.0, D158)
@@ -160,6 +165,22 @@ export class Page extends Component {
 	set raised(raised) {
 		if (raised && !this.#panel) this.#aside.dataset.raised = '';
 		else delete this.#aside.dataset.raised;
+		this.#pin();
+	}
+
+	/**
+	 * Whether the raised side panel is pinned beside the main column (0.38.0, D189): it holds the page's
+	 * action, so from the width where it sits beside that column it stays in view while the column scrolls,
+	 * and below that width it flows below it. False while the side panel is not raised.
+	 */
+	get pinned() {
+		return 'pinned' in this.#aside.dataset;
+	}
+
+	/** The page's choice, kept: set before `raised`, it pins the panel once raised; `raised = false` unpins it until raised again. */
+	set pinned(pinned) {
+		this.#pinned = Boolean(pinned);
+		this.#pin();
 	}
 
 	/** The width tier of the main column. */
@@ -181,6 +202,12 @@ export class Page extends Component {
 		this.#panel?.destroy();
 		this.#dock?.destroy();
 		super.destroy();
+	}
+
+	/** Marks the side panel pinned only while the page asks for it and the panel is raised: a flat one never is. */
+	#pin() {
+		if (this.#pinned && this.raised) this.#aside.dataset.pinned = '';
+		else delete this.#aside.dataset.pinned;
 	}
 
 	static #node(part) {

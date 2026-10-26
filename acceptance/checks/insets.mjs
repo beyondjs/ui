@@ -121,7 +121,7 @@ export const checks = [
 		run: (browser, consumer) => measure(browser, consumer, pages.notices)
 	},
 	{
-		name: 'insets (D184): CommandCard and its code, choice cards and menus, the raised side panel, Select, the awaited card and technical details keep one inset, at 1440 and 390 px in both themes',
+		name: 'insets (D184): CommandCard and its code, choice cards and menus, the raised side panel (pinned or not, 0.38.0), Select, the awaited card and technical details keep one inset, at 1440 and 390 px in both themes',
 		consumers: ['dom', 'react19'],
 		run: (browser, consumer) => measure(browser, consumer, pages.cards)
 	},

@@ -52,6 +52,13 @@ const resource = new Page({ header, aside: [facts.element], raised: true });
 resource.raised = false;
 const flat: boolean = resource.raised;
 void flat;
+// A raised panel that holds the page's action, pinned beside the main column (0.38.0, D189)
+const start = new Page({ header, aside: [facts.element], raised: true, pinned: true });
+start.pinned = false;
+const pinned: boolean = start.pinned;
+void pinned;
+// @ts-expect-error pinned says yes or no, never an edge
+void new Page({ aside: [facts.element], raised: true, pinned: 'top' });
 // @ts-expect-error a width tier the family has
 void new Page({ width: 'chat' });
 

@@ -17,3 +17,25 @@
 .bui-page-aside[data-raised] .bui-section-title {
 	font-size: var(--text-body);
 }
+/* A raised panel pinned beside the main column (Page's `pinned`, 0.38.0, D189): it holds the page's action, so
+   from the region's width where it sits beside that column (68rem, page.css) it stays in view while the column
+   scrolls, at the page's sticky edge under the family bar, and below a compact header's line, as a panel kept
+   in view does. Its whole box, border and padding included whatever a product's own box-sizing, keeps within
+   the window with a scroll of its own. It never holds the wheel: in Chrome a scroll container that contains its
+   overscroll keeps the page still under the pointer even with nothing to scroll, and a pinned panel usually
+   fits, so the wheel over it goes on to the page once it has nothing left to scroll. Sticky positioning keeps
+   its place in the flow, so nothing moves when it starts to stay; below 68rem it flows below the main column,
+   as every raised panel does, and nothing else of the raised panel changes. */
+@container bui-page (min-width: 68rem) {
+	.bui-page-aside[data-raised][data-pinned] {
+		position: sticky;
+		top: var(--bui-page-sticky, calc(var(--layout-family) + var(--space-6)));
+		box-sizing: border-box;
+		max-height: calc(100dvh - var(--bui-page-sticky, calc(var(--layout-family) + var(--space-6))) - var(--space-6));
+		overflow-y: auto;
+	}
+	.bui-page:has(> .bui-page-frame > .bui-page-compact) .bui-page-aside[data-raised][data-pinned] {
+		top: calc(var(--bui-page-sticky, calc(var(--layout-family) + var(--space-6))) + var(--bui-page-compact));
+		max-height: calc(100dvh - var(--bui-page-sticky, calc(var(--layout-family) + var(--space-6))) - var(--bui-page-compact) - var(--space-6));
+	}
+}

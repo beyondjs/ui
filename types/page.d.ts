@@ -25,6 +25,8 @@ export interface PageOptions {
 	label?: string | null;
 	/** The side panel raised on a surface of its own, as a resource page holds its conditions (0.30.0); ignored with `panel`. */
 	raised?: boolean;
+	/** The raised side panel holds the page's action, so it is pinned beside the main column: in view while that column scrolls, from the width where it sits beside it (0.38.0, D189). Only with `raised`. */
+	pinned?: boolean;
 	/** The aside as a panel kept in view (0.10.0): beside and sticky from `cut`, a side sheet below it. */
 	panel?: PagePanelOptions | null;
 	/** What the thread template docks at the window's bottom, such as its composer (0.14.0, D94); other templates throw. */
@@ -106,6 +108,8 @@ export class Page extends Component {
 	aside: Node[] | null;
 	/** Whether the side panel is raised on a surface of its own (0.30.0). */
 	raised: boolean;
+	/** Whether the raised side panel is pinned beside the main column (0.38.0, D189); false while it is not raised. Setting it keeps the page's choice: the panel is pinned whenever it is raised. */
+	pinned: boolean;
 	width: PageWidth;
 	/** The thread template's dock, or null in any other template (0.14.0). */
 	get dock(): PageDock | null;

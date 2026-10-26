@@ -48,6 +48,24 @@ test('Page, PageHeader and Section render the DOM classes\' markup', async () =>
 	assert.throws(() => ui.Page({ width: 'wide' }), /width is one of/);
 });
 
+test('pinned (0.38.0, D189): a raised aside that holds the page\'s action, with the DOM page\'s markup; never a flat aside or a panel kept in view', async () => {
+	const view = props => h(ui.Page, { header: h(ui.PageHeader, { title: 'Start web' }), aside: h('p', null, 'Start application'), label: 'Start', ...props }, h('p', null, 'Components'));
+	const aside = () => host.querySelector('.bui-page-aside');
+	await render(view({ raised: true, pinned: true }));
+	const expected = new dom.Page({ header: new dom.PageHeader({ title: 'Start web' }), children: [dom.el('p', { text: 'Components' })], aside: [dom.el('p', { text: 'Start application' })], label: 'Start', raised: true, pinned: true });
+	for (const node of expected.element.querySelectorAll('[hidden]')) node.remove();
+	assert.deepEqual(shape(host.firstElementChild), shape(expected.element), 'the markup of the DOM page');
+	assert.equal(aside().dataset.pinned, '');
+	await render(view({ raised: true, pinned: false }));
+	assert.deepEqual([aside().dataset.raised, 'pinned' in aside().dataset], ['', false], 'unpinned, still raised');
+	await render(view({ raised: true, pinned: true }));
+	assert.equal(aside().dataset.pinned, '', 'pinned again');
+	await render(view({ pinned: true }));
+	assert.equal('pinned' in aside().dataset, false, 'a flat aside is never pinned');
+	await render(view({ raised: true, pinned: true, panel: { cut: '68rem' } }));
+	assert.equal(host.querySelector('[data-pinned]'), null, 'nor a panel kept in view');
+});
+
 test('Arrival and Tabs drive the DOM classes; the bar\'s preferences entry opens the dialog', async () => {
 	const seen = [];
 	let dismissed = 0;

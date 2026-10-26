@@ -26,3 +26,16 @@ export function Round({ wide }: { wide: boolean }) {
 		</Page>
 	);
 }
+
+// A raised panel that holds the page's action, pinned beside the main column (0.38.0, D189)
+export function Start() {
+	return (
+		<>
+			<Page header={<PageHeader title="Start web" />} aside={<button>Start application</button>} label="Start" raised pinned>
+				<p>Components</p>
+			</Page>
+			{/* @ts-expect-error pinned says yes or no, never an edge */}
+			<Page aside={<button>Start application</button>} raised pinned="top" />
+		</>
+	);
+}
