@@ -30,6 +30,9 @@ async function choose(page) {
 	await settle(page);
 }
 
+/** The keys that move through every control: WebKit's Tab skips buttons, as Safari's does, so Option+Tab there (0.35.0). */
+const keys = browser => (browser.engine === 'webkit' ? { next: 'Alt+Tab', back: 'Alt+Shift+Tab' } : { next: 'Tab', back: 'Shift+Tab' });
+
 export const checks = [
 	{
 		name: 'pressing: a branch chip that waits is quiet and reachable, and a click, Enter, Space or ArrowDown only puts focus on the repository chip, opening nothing; a repository lets it open (0.35.0, D183)',
@@ -42,7 +45,7 @@ export const checks = [
 			expect(!(await branch.evaluate(node => node.disabled)), 'never natively disabled');
 			const said = await page.locator('.bui-composer').evaluate(node => node.textContent);
 			await repository.focus();
-			await page.keyboard.press('Tab');
+			await page.keyboard.press(keys(browser).next);
 			expect((await state(page)).at === 1, 'Tab reaches it');
 			for (const key of ['Enter', 'Space', 'ArrowDown']) {
 				await branch.focus();
@@ -60,7 +63,7 @@ export const checks = [
 			expect(!(await branch.getAttribute('aria-disabled')), 'a repository makes it able');
 			// A tray chip shows its value alone: its whole face is its tooltip, as a setting's is (0.35.0)
 			await branch.focus();
-			await page.keyboard.press('Shift+Tab');
+			await page.keyboard.press(keys(browser).back);
 			await page.locator('.bui-hint:not([hidden])').waitFor();
 			const tip = await page.locator('.bui-hint:not([hidden])').textContent();
 			expect(tip === `${copy(consumer).repository}: acme/web`, `the repository chip's whole face in the tooltip: ${tip}`);
@@ -130,8 +133,8 @@ export const checks = [
 				expect(!(await overflow(page)), `${at}: no sideways scroll`);
 				if (width === 1440 && colorScheme === 'light') {
 					await chip.focus();
-					await page.keyboard.press('Shift+Tab');
-					await page.keyboard.press('Tab');
+					await page.keyboard.press(keys(browser).back);
+					await page.keyboard.press(keys(browser).next);
 					await settle(page);
 					expect((await page.locator('.bui-hint:not([hidden])').count()) === 0, 'whole, it shows no tooltip');
 					await page.keyboard.press('Enter');
@@ -142,7 +145,7 @@ export const checks = [
 						const instructions = page.locator('.bui-composer-settings .bui-composer-chip');
 						expect((await instructions.locator('.bui-composer-chip-label').evaluate(node => node.getBoundingClientRect().width)) <= 1.5, 'its label set aside');
 						await page.locator('.bui-composer-field').focus();
-						await page.keyboard.press('Tab');
+						await page.keyboard.press(keys(browser).next);
 						expect(await instructions.evaluate(node => document.activeElement === node), 'the settings\' chip after the field');
 						await page.locator('.bui-hint:not([hidden])').waitFor();
 						expect((await page.locator('.bui-hint:not([hidden])').textContent()) === `${words.en.instructions}: 1`, 'its whole face in the family tooltip');
