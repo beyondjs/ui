@@ -143,6 +143,11 @@
 .bui-copy-button[data-result='copied'] .bui-button {
 	color: var(--color-success);
 }
+/* A copyable value's Copy (0.37.0, D188): its words stand twice its hang after the value (list.css), and its
+   surface hangs toward the value, never past the end of the piece it belongs to. */
+.bui-copy-value > .bui-copy-button .bui-button-quiet {
+	margin-inline-end: 0;
+}
 
 .bui-provider {
 	display: grid;

@@ -263,3 +263,9 @@
 		inset-block-start: calc(var(--bui-composer-inset) - (1lh - 1cap) / 2);
 	}
 }
+/* A quiet control in the box (0.37.0, D188): its surface stays one step inside the box's border at either
+   inset. The state band gives its action's words twice that hang from its sentence and ends them on the
+   inset (composer.css). */
+.bui-composer-box {
+	--bui-quiet-hang: calc(var(--bui-composer-inset) - var(--space-1));
+}

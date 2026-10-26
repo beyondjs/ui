@@ -257,7 +257,6 @@ span.bui-row-title {
 .bui-copy-value {
 	display: inline-flex;
 	align-items: center;
-	/* Copy's words stand twice its hang after the value, its surface clear of it (D188) */
 	gap: calc(2 * var(--bui-quiet-hang));
 	max-width: 100%;
 	min-width: 0;
@@ -292,10 +291,6 @@ a.bui-copy-value-text:hover {
 .bui-copy-value > .bui-copy-button .bui-button {
 	white-space: nowrap;
 	overflow-wrap: normal;
-}
-/* A copyable value is one piece: Copy's surface hangs toward the value, never past the piece's end (D188) */
-.bui-copy-value > .bui-copy-button .bui-button-quiet {
-	margin-inline-end: 0;
 }
 /* React's host of a CopyValue is the row's flex item: it may shrink, so the value is cut instead of
    pushing the row past a phone's width. */
