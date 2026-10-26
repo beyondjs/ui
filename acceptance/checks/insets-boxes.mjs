@@ -23,6 +23,8 @@ const palette = async page => {
 	await page.waitForSelector('.bui-palette-group[data-source="machines"] [role="option"]');
 };
 const record = [];
+/** Points at a control, or, on a touch screen, where no pointer hovers, focuses it: what shows on either (0.35.0) */
+const point = async (page, control) => ((await page.evaluate(() => matchMedia('(pointer: coarse)').matches)) ? control.focus() : control.hover());
 /** The sidebar's search (0.35.0): its words start after its glyph, never under it, whatever the field's own sides. */
 const query = async page => {
 	const placed = await page.locator('.bui-sidebar-panel .bui-sidebar-query').first().evaluate(field => {
@@ -101,7 +103,7 @@ export const pages = {
 			{ open: async (page, consumer) => (await closed(page), page.getByRole('button', { name: es(consumer) ? 'Más acciones' : 'More actions' }).click()), boxes: [{ name: 'ActionMenu at rest', box: '.bui-menu:not([hidden])', flat: ['.bui-menu-item'], inset: '--bui-menu-inset', touch: { inset: 'even' } }] },
 			{ open: (page, consumer) => page.getByRole('menuitem', { name: es(consumer) ? 'Aviso' : 'Toast' }).click(), boxes: [{ name: 'toast', box: '.bui-toast', inset: '--bui-toast-inset' }] },
 			{ open: (page, consumer) => page.getByRole('button', { name: es(consumer) ? 'Ayuda: Identificador del proyecto' : 'Help: Project identifier' }).click(), boxes: [{ name: 'help', box: '#helping .bui-help-panel', inset: '--bui-text-inset' }] },
-			{ open: page => page.locator('#helping button').filter({ hasText: /Copy address|Copiar dirección/ }).hover(), boxes: [{ name: 'Tooltip', box: '[role="tooltip"]:not([hidden])', inset: 8 }] },
+			{ open: page => point(page, page.locator('#helping button').filter({ hasText: /Copy address|Copiar dirección/ })), boxes: [{ name: 'Tooltip', box: '[role="tooltip"]:not([hidden])', inset: 8 }] },
 			{ open: async page => (await page.locator('.bui-notify > button').click(), await page.waitForSelector('.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice'), page.locator('.bui-notify .bui-notice').first().hover()), boxes: [{ name: 'a notification row under the pointer', box: '.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice', inset: '--bui-notice-inset', touch: { sides: record } }, { name: 'notification panel', box: '.bui-notify .bui-disclosure-panel:not([hidden])', flat: ['.bui-notice', '.bui-notify-all'], inset: 16, sides: record, touch: { scrolls: true } }] }
 		] },
 		{ file: 'choosing.html', steps: [
@@ -111,7 +113,7 @@ export const pages = {
 		{ file: 'choosing.html', query: '?sheet=1', steps: [{ open: page => page.waitForFunction(() => document.querySelector('.bui-sheet')?.open && document.querySelector('.bui-sheet').getAnimations().every(animation => animation.playState === 'finished')), boxes: [{ name: 'SideSheet', box: '.bui-sheet[open]', inset: '--bui-sheet-inset', sides: ['top', 'left', 'right'] }] }] },
 		{ file: 'wave.html', steps: [{ open: palette, boxes: [{ name: 'CommandPalette', box: 'dialog.bui-palette[open]', flat: ['.bui-palette-option'], inset: '--bui-palette-inset' }] }] },
 		{ file: 'thread.html', widths: [1440], steps: [{ open: page => page.locator('#own .bui-icon-button').focus(), boxes: [{ name: 'Hint', box: '.bui-hint:not([hidden])', inset: 8 }] }] },
-		{ file: 'turns.html', widths: [1440], steps: [{ open: async page => (await page.locator('.bui-turns-mark').nth(6).hover(), page.locator('.bui-turns-preview').waitFor({ state: 'visible' })), boxes: [{ name: 'a turn\'s preview', box: '.bui-turns-preview', inset: '--bui-preview-inset' }] }] },
+		{ file: 'turns.html', widths: [1440], steps: [{ open: async page => (await point(page, page.locator('.bui-turns-mark').nth(6)), page.locator('.bui-turns-preview').waitFor({ state: 'visible' })), boxes: [{ name: 'a turn\'s preview', box: '.bui-turns-preview', inset: '--bui-preview-inset' }] }] },
 		{ file: 'index.html', consumers: ['dom'], steps: [
 			{ boxes: [{ name: 'ChoiceMenu', box: '#picking .bui-choice-button', inset: 'even' }] },
 			{ open: page => page.locator('#picking .bui-choice-button').first().click(), boxes: [{ name: 'a choice menu with nothing chosen', box: '.bui-choice-list:not([hidden])', flat: ['.bui-menu-item'], inset: '--bui-menu-inset', sides: record }] }
