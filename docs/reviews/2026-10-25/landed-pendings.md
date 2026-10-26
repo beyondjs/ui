@@ -90,8 +90,10 @@ The coordinator had the commits after the first review (the mark of an arrival, 
 
 ## Executed checks
 
-To be completed from the runs.
+The [release record](release-0.35.0.md) lists the archive and every run: the unit suite (956 of 956), the declarations, and the whole browser acceptance with the opening's checks from the packed archive in Chrome, Firefox and WebKit, with what each failure was and how it was run again.
 
 ## Not established
 
-To be completed.
+- The notification row's inset on a touch screen, measured for the record until a design decision (`family-touch-notification-rows`).
+- Recovery's narrow form offline keeps the hidden Try again's row gap, 16 px between the words and their details against 8 px; it is Recovery's layout, its owner's to decide.
+- Screen-reader output, the products' adoption of 0.35.0 and any hosted behavior: each is established apart.
