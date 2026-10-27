@@ -194,7 +194,8 @@ export class Button extends Component {
 	}
 
 	#render() {
-		const text = this.#busy && typeof this.#label === 'string' ? this.#labels.text('busy', { label: this.#label }) : this.#label;
+		// A label that already ends in an ellipsis keeps one while busy (0.44.0)
+		const text = this.#busy && typeof this.#label === 'string' ? this.#labels.text('busy', { label: this.#label.replace(/(?:…|\.\.\.)\s*$/u, '') }) : this.#label;
 		fill(this.#element, [
 			this.#busy ? el('span', { class: 'bui-spinner', 'aria-hidden': 'true' }) : this.#glyph ? glyph(this.#glyph) : null,
 			el('span', { class: this.#bare ? 'bui-hidden' : null }, [content(text)])
