@@ -66,7 +66,8 @@ export const spanish = {
 	projects_unavailable: 'Beyond Projects no respondió',
 	accounts_unavailable: 'Beyond Accounts no respondió',
 	silent: '{product} no respondió',
-	unlisted: 'Sus notificaciones no aparecen en la lista.',
+	// Spanish says one product's and several products' alike, in the shape of the English function
+	unlisted: () => 'Sus notificaciones no aparecen en la lista.',
 	view: 'Ver',
 	all: 'Ver todas las notificaciones',
 	everything: 'Marcar todas como leídas',

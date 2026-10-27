@@ -15,7 +15,7 @@ export const es = {
 		retry: 'Reintentar',
 		unavailable: 'Las notificaciones no están disponibles ahora.',
 		silent: '{product} no respondió',
-		unlisted: 'Sus notificaciones no aparecen en la lista.',
+		unlisted: () => 'Sus notificaciones no aparecen en la lista.',
 		all: 'Ver todas las notificaciones',
 		everything: 'Marcar todas como leídas',
 		mark: 'Marcar como leída',
