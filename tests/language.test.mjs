@@ -108,3 +108,12 @@ test('AgainLine, RetryAction, Recovery and the loading line follow the same rule
 	assert.equal(ui.waiting({ language: 'en' }).querySelector('.bui-waiting-label').textContent, 'Loading…', 'a language given wins');
 	assert.equal(new ui.EndLine().element.textContent, 'No hay más');
 });
+
+test('one Spanish retry word in every set of the package: Reintentar', () => {
+	const sets = Object.entries(ui).filter(([, value]) => value?.labels?.es && typeof value.labels.es === 'object');
+	const retries = sets.filter(([, value]) => typeof value.labels.es.retry === 'string').map(([name, value]) => [name, value.labels.es.retry]);
+	assert.ok(retries.length >= 8, `the sets that carry a retry: ${retries.map(([name]) => name).join(', ')}`);
+	for (const [name, word] of retries) assert.equal(word, 'Reintentar', name);
+	assert.equal(ui.Session.labels.es.retry, 'Reintentar');
+	assert.equal(ui.ComposerDictation.labels.es.retry, 'Reintentar');
+});
