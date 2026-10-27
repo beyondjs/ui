@@ -50,3 +50,10 @@ body {
 	color: var(--color-text-muted);
 	font-size: var(--text-small);
 }
+/* A product starts its card with its own line at the card's inset: the line takes off its half-leading above its
+   capitals, as the package's boxes do (D184) */
+@supports (margin-top: calc(1lh - 1cap)) {
+	.insets-card > .insets-updated:first-child {
+		margin-block-start: calc((1cap - 1lh) / 2);
+	}
+}
