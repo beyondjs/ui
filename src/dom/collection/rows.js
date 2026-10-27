@@ -3,6 +3,7 @@ import { Ids } from '../core/ids.js';
 import { ListRow } from '../list/row.js';
 import { RowKeys } from '../list/keys.js';
 import { Matches } from '../list/matches.js';
+import { Differ } from '../list/differ.js';
 
 /**
  * A collection's rows as a list (0.15.0, `presentation: 'list'`, DQ-12): one `ListRow` per row, the
@@ -14,6 +15,7 @@ import { Matches } from '../list/matches.js';
  * columns' (its state's `lead`, its `meta` line, its `menu`); `group(row)` gives `{ key, label }` and
  * groups consecutive rows under a label, each group a list named by it (`Recency` for a list ordered by
  * activity); the search's words are marked in a name given as text; and the arrow keys move between rows.
+ * Since 0.44.0 `row(row, { differ })` is given a `Differ` of the rows drawn, for the rule L3.
  */
 export class CollectionRows {
 	#element;
@@ -24,6 +26,7 @@ export class CollectionRows {
 		const primary = columns.find(column => column.primary) ?? columns[0];
 		const value = (row, column) => (column.value ? column.value(row) : row[column.key]);
 		const named = text => (typeof text === 'string' && query ? Matches.mark(text, query) : text);
+		const context = { differ: new Differ(rows) };
 		this.#rows = rows.map(row => {
 			const options = {
 				title: value(row, primary),
@@ -31,7 +34,7 @@ export class CollectionRows {
 				run: link && onopen ? event => CollectionRows.#open(event, row, onopen) : null,
 				meta: columns.filter(column => column !== primary && !column.end).map(column => value(row, column)),
 				facts: columns.filter(column => column !== primary && column.end).map(column => value(row, column)),
-				...(own?.(row) ?? {})
+				...(own?.(row, context) ?? {})
 			};
 			return new ListRow({ ...options, title: Array.isArray(named(options.title)) ? el('span', {}, named(options.title)) : options.title });
 		});

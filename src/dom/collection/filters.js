@@ -4,8 +4,13 @@ import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { Disclosure } from '../disclosure.js';
 import { Select } from '../select.js';
+import { Period } from './period.js';
 
-/** A disclosure of finite filters and persistent, individually removable restrictions. */
+/**
+ * A disclosure of finite filters and persistent, individually removable restrictions. A filter of
+ * `kind: 'period'` (0.44.0) offers periods (`Period`) instead of its own options, and a well-formed period
+ * the address holds outside them is offered with its own name rather than as unavailable.
+ */
 export class CollectionFilters extends Component {
 	#element;
 	#disclosure;
@@ -35,11 +40,18 @@ export class CollectionFilters extends Component {
 	get element() { return this.#element; }
 
 	#entry(filter, id) {
-		const options = [{ value: '', label: filter.all ?? this.#labels.text('all') }, ...filter.options];
+		const period = filter.kind === 'period' ? new Period(filter, this.#labels) : null;
+		const choices = period ? period.options : filter.options;
+		const options = [{ value: '', label: filter.all ?? this.#labels.text(period ? 'anytime' : 'all') }, ...choices];
 		const select = new Select({ id, options, statement: false, onchange: value => this.#change({ ...this.#state, [filter.name]: value }) });
 		const field = el('div', { class: 'bui-collection-filter' }, [el('label', { for: id, class: 'bui-field-label' }, [content(filter.label)]), select.element]);
 		const chip = el('button', { type: 'button', class: 'bui-button bui-button-quiet bui-list-restriction', hidden: true, onclick: () => this.#remove(filter.name) });
-		return { filter, select, field, chip, value: '' };
+		return { filter, select, field, chip, value: '', choices, period };
+	}
+
+	/** The option the filter offers for a value, or null */
+	static #offered(entry, value) {
+		return entry.choices.flatMap(option => option.options ?? [option]).find(option => String(option.value) === value) ?? null;
 	}
 
 	set state(state) {
@@ -48,11 +60,12 @@ export class CollectionFilters extends Component {
 		for (const entry of this.#entries) {
 			const { filter, select, chip } = entry;
 			const value = String(state[filter.name] ?? '');
-			const options = filter.options.flatMap(option => option.options ?? [option]);
-			const chosen = options.find(option => String(option.value) === value);
+			const offered = CollectionFilters.#offered(entry, value);
+			const chosen = offered ?? entry.period?.option(value) ?? null;
 			if (entry.value !== value) {
 				select.control.querySelector('[data-bui-unknown]')?.remove();
-				if (value && !chosen) select.control.append(el('option', { value, disabled: true, 'data-bui-unknown': '', text: this.#labels.text('unknown') }));
+				// A period outside the offered ones is a choice of its own; anything else stays visible as unavailable
+				if (value && !offered) select.control.append(el('option', { value, disabled: !chosen, 'data-bui-unknown': '', text: chosen?.label ?? this.#labels.text('unknown') }));
 				select.value = value;
 				entry.value = value;
 			}

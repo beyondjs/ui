@@ -1,8 +1,9 @@
 /** Types of the larger DOM components, re-exported by `@beyond-js/ui/dom`. */
 import type { Component, Disclosure, Content, Copy, SelectOption, Tone } from './dom.js';
 import type { NotificationAdapter, Notice } from './notifications.js';
-import type { CollectionFilter, CollectionTools, CollectionToolsConstructor, CollectionToolsMode } from './collection-tools.js';
-export type { CollectionFilter, CollectionTools, CollectionToolsConstructor, CollectionToolsMode, CollectionToolsOptions, CollectionToolsState } from './collection-tools.js';
+import type { CollectionAnyFilter, CollectionTools, CollectionToolsConstructor, CollectionToolsMode } from './collection-tools.js';
+export { Period } from './collection-tools.js';
+export type { CollectionAnyFilter, CollectionFilter, CollectionPeriodFilter, CollectionTools, CollectionToolsConstructor, CollectionToolsMode, CollectionToolsOptions, CollectionToolsState } from './collection-tools.js';
 
 /** A mark on a result with its reason, such as "Also in Website" or "Archived on GitHub" (0.7.0). */
 export interface PickerMark { label: string; tone?: Tone; reason?: string | null }
@@ -93,7 +94,7 @@ export interface CollectionOptions<Row> {
 	onopen?: ((row: Row, event: MouseEvent) => void) | null;
 	key?: (row: Row) => string;
 	search?: boolean;
-	filters?: CollectionFilter[];
+	filters?: CollectionAnyFilter[];
 	/** Compact by default; external leaves placement of `tools.element` to the caller. */
 	tools?: CollectionToolsMode;
 	state?: Partial<CollectionState>;
@@ -101,12 +102,13 @@ export interface CollectionOptions<Row> {
 	onrender?: (() => void) | null;
 	limit?: number;
 	delay?: number;
-	empty?: { title?: Content; body?: Content; action?: Node } | null;
+	/** Read on each draw; its one action a node or, since 0.44.0, `EmptyState`'s `{ label, href, run }` */
+	empty?: { title?: Content; body?: Content; action?: Node | { label: string; href?: string | null; run?: ((event: Event) => void) | null } | null } | null;
 	explain?: ((error: unknown) => string) | null;
 	/** `list` (0.15.0, DQ-12): rows as `ListRow`s, two short lines on a phone. */
 	presentation?: 'table' | 'list';
 	/** 0.21.1 (D162): the list presentation's own `ListRow` options for a row, over the columns' */
-	row?: ((row: Row) => Partial<import('./patterns.js').ListRowOptions>) | null;
+	row?: ((row: Row, context: { differ: Differ }) => Partial<import('./patterns.js').ListRowOptions>) | null;
 	/** 0.21.1 (D162): consecutive rows under a label (`Recency` for a list ordered by activity) */
 	group?: ((row: Row) => { key: string; label: string }) | null;
 	/** 0.21.1 (D162): the list's end line on its last page; true the family's words, a function of the rows' count the product's, false none */
@@ -135,6 +137,13 @@ export class Recency {
 	constructor(options?: { locale?: string; now?: () => number; labels?: Copy });
 	of(value: Date | number | string | null | undefined): { key: string; label: string };
 	group<Row>(moment: (row: Row) => Date | number | string | null | undefined): (row: Row) => { key: string; label: string };
+}
+/** Whether the rows in view differ in an attribute (0.44.0, D162 L3); empty values never count as a difference. */
+export class Differ {
+	constructor(rows: Iterable<unknown> | null | undefined);
+	/** True when the rows hold two values or more of what `pick` gives */
+	in<Row = any>(pick: (row: Row) => unknown): boolean;
+	static of<Row>(rows: Iterable<Row>, pick: (row: Row) => unknown): boolean;
 }
 /** The words a search matched, marked in a text (0.21.1, D162). */
 export class Matches {

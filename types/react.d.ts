@@ -159,29 +159,6 @@ export interface PickerProps {
 }
 export const Picker: ForwardRefExoticComponent<PickerProps & RefAttributes<PickerHandle>> & { labels: Copies };
 
-export interface ReactColumn<Row> { key: string; label: string; value?: (row: Row) => string | Node; render?: (row: Row) => ReactNode; numeric?: boolean; primary?: boolean; /** Hidden as the region narrows, the highest number first (0.7.0) */ priority?: number }
-export interface CollectionProps<Row> {
-	label: string;
-	columns: ReactColumn<Row>[];
-	source: (request: CollectionState & { limit: number; signal: AbortSignal }) => Promise<{ rows: Row[]; total?: number | null; more?: boolean | null }>;
-	link?: ((row: Row) => string) | null;
-	onOpen?: ((row: Row, event: MouseEvent) => void) | null;
-	search?: boolean;
-	filters?: Array<{ name: string; label: string; all?: string; options: SelectOption[] }>;
-	tools?: CollectionToolsMode;
-	/** With tools='external', a dedicated empty DOM container for this collection's toolbar. */
-	toolsTarget?: HTMLElement | null;
-	state?: Partial<CollectionState> | null;
-	onState?: ((state: CollectionState) => void) | null;
-	limit?: number;
-	empty?: { title?: string; body?: string } | null;
-	explain?: ((error: unknown) => string) | null;
-	labels?: Copy;
-	/** `list` (0.15.0): rows as `ListRow`s */ presentation?: 'table' | 'list';
-	/** 0.21.1 (D162): the list's own `ListRow` options for a row, its groups and its end line */ row?: ((row: Row) => Partial<import('./patterns.js').ListRowOptions>) | null; group?: ((row: Row) => { key: string; label: string }) | null; end?: boolean | string | ((list: { count: number }) => string);
-	/** 0.24.0 (D163): the page's notice from `useRecovery`; a failure `outage` names joins it and the list says "Not available right now" in place */ recovery?: import('./again.js').Recovery | null; outage?: ((error: unknown) => boolean) | null; details?: ((error: unknown) => DetailsRecord | null) | null;
-}
-export function Collection<Row = Record<string, unknown>>(props: CollectionProps<Row>): ReactElement;
 
 export interface HeaderProps {
 	brand: { label: string; href: string; lockup?: { src: string; name?: string } | null; logo?: Node | null; image?: { src: string; width?: number; height?: number } | null };
@@ -285,7 +262,7 @@ export type { Ref };
 
 // 0.7.2: the copy in English and Spanish on the React components, as on the DOM classes.
 export namespace FamilyBar { const labels: Copies; } export namespace Sidebar { const labels: Copies; } export namespace ProductNav { const labels: Copies; } export namespace Header { const labels: Copies; } export namespace Help { const labels: Copies; } export namespace NotificationInbox { const labels: Copies; }
-export namespace PageHeader { const labels: Copies; } export namespace Tabs { const labels: Copies; } export namespace FocusedForm { const labels: Copies; } export namespace Field { const labels: Copies; } export namespace Collection { const labels: Copies; }
+export namespace PageHeader { const labels: Copies; } export namespace Tabs { const labels: Copies; } export namespace FocusedForm { const labels: Copies; } export namespace Field { const labels: Copies; }
 export namespace Loading { const labels: { readonly en: string; readonly es: string }; const names: typeof import('./dom.js').loading.names; const text: typeof import('./dom.js').loading.text; /** 0.21.0 */ const step: typeof import('./dom.js').loading.step; /** 0.21.0 */ const steps: typeof import('./dom.js').loading.steps; }
 /** The consequence of a destructive or irreversible action (D17, 0.7.2), the DOM builder's markup. */
 export function Consequence(props: { parts: { affected?: ReactNode; lost?: ReactNode; kept?: ReactNode; costing?: ReactNode; recovery?: ReactNode } | null; labels?: Copy }): ReactElement | null;
@@ -297,4 +274,5 @@ export * from './react-shared.js';
 export * from './react-patterns.js';
 export * from './react-family.js';
 export * from './react-recovery.js';
+export * from './react-collection.js';
 import type { FamilyBarProps } from './react-family.js';

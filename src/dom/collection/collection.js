@@ -10,6 +10,7 @@ import { CollectionRows } from './rows.js';
 import { ColumnFit } from './columns.js';
 import { OutageRead } from '../again/read.js';
 import { EndLine } from '../list/end.js';
+import { EmptyAction } from '../checklist/action.js';
 import { defaults, spanish } from './labels.js';
 
 /**
@@ -62,9 +63,11 @@ export class Collection extends Component {
 	 * @param {{query?: string, filters?: object, page?: number}} [options.state] initial state, usually from the address
 	 * @param {'compact'|'expanded'|'external'} [options.tools] shared tools placement; expanded keeps search open
 	 * @param {(state: {query: string, filters: object, page: number}) => void} [options.onstate]
-	 * @param {{title: string, body?: string, action?: Node}} [options.empty] the empty collection
+	 * @param {{title: string, body?: string, action?: Node|{label: string, href?: string|null, run?: (event: Event) => void}}} [options.empty]
+	 * the empty collection, read on each draw; its one action a node or, since 0.44.0, `{ label, href, run }` (`EmptyState`'s)
 	 * @param {() => void} [options.onrender] runs after each redraw of the rows (the React adapter fills cells then)
-	 * @param {(row: object) => object} [options.row] the list presentation's own `ListRow` options for a row (0.21.1)
+	 * @param {(row: object, context: {differ: import('../list/differ.js').Differ}) => object} [options.row] the list
+	 * presentation's own `ListRow` options for a row (0.21.1), given a `Differ` of the page's rows (0.44.0, L3)
 	 * @param {(row: object) => {key: string, label: string}} [options.group] groups consecutive rows under a label (0.21.1, `Recency`)
 	 * @param {boolean|string|Node|((list: {count: number}) => string|Node)} [options.end] the list's end line on its
 	 * last page (0.21.1): true (default) says the family's words, a text, node or function of how many rows the
@@ -206,14 +209,17 @@ export class Collection extends Component {
 		if (this.#filtered()) {
 			return el('div', { class: 'bui-empty' }, [
 				el('p', { class: 'bui-empty-title', text: this.#labels.text('matches', { query: this.#state.query }) }),
-				el('button', { type: 'button', class: 'bui-button bui-button-secondary', onclick: () => this.#clear() }, [this.#labels.text('clear')])
+				el('div', { class: 'bui-empty-actions' }, [el('button', { type: 'button', class: 'bui-button bui-button-secondary', onclick: () => this.#clear() }, [this.#labels.text('clear')])])
 			]);
 		}
+		// Read on each draw, so a product's words and action follow its latest state; the action sits where
+		// `EmptyState`'s does, so the box keeps its one inset below it (0.44.0)
 		const empty = this.#options.empty ?? {};
+		const action = EmptyAction.draw(empty.action ?? null);
 		return el('div', { class: 'bui-empty' }, [
 			el('p', { class: 'bui-empty-title' }, [content(empty.title ?? this.#labels.text('empty'))]),
 			empty.body ? el('p', { class: 'bui-empty-body' }, [content(empty.body)]) : null,
-			empty.action ?? null
+			action ? el('div', { class: 'bui-empty-actions' }, [action]) : null
 		]);
 	}
 
