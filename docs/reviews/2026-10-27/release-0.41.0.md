@@ -5,7 +5,9 @@ Evidence baseline: UI `4062f48` (0.40.0, organizations told apart in the family 
 - `872f7cc`: the measurer;
 - `223452b`: the features;
 - `d85a5d1`: the release candidate;
-- the commit that carries this record: the D192 correction and the independent review's corrections, with the release's evidence.
+- `b2e3352` and `4ff9559`: the D192 correction and the independent review's corrections;
+- `0dd1fc8`: the delta review's corrections;
+- the commit that carries this record's last results.
 
 ## Why
 
@@ -47,7 +49,7 @@ Evidence baseline: UI `4062f48` (0.40.0, organizations told apart in the family 
 
 ## The independent review (2026-10-27) and its corrections
 
-All eight corrections are in the commit that carries this record, with tests:
+All eight corrections are in `b2e3352`, with tests:
 
 1. A thin background layer that repeats is a fill (`measure.css`'s `#repeated`, `measuring.mjs`).
 2. A clamp's hidden lines decide no side (`#clamped` measured as `#fits` at its top and bottom).
@@ -62,7 +64,7 @@ All eight corrections are in the commit that carries this record, with tests:
 
 ## The delta review (2026-10-27) and its corrections
 
-The delta review of `4ff9559` found two problems. Both are corrected in the commit that carries this paragraph, with tests:
+The delta review of `4ff9559` found two problems. Both are corrected in `0dd1fc8`, with tests:
 
 1. **The lanes regression.** `LaneRoom`'s key left out the facts column, each lane's facts and its depth. Token counts arriving after a lane started left the trace folded with every title cut at 51 of 141 widths. The key now holds them, and `lanes-room.test.mjs` changes only the facts, then only the depth.
 2. **The link colour.** The colour of links among the package's words outweighed a product's link class passed in. It now weighs as a base rule; `lead.test.mjs` and `leading.mjs` cover it with a product's class.
@@ -78,7 +80,7 @@ Through the machine's test queue, on 2026-10-27.
   - rows compared across scroll positions in `touching.mjs`;
   - a grouped narrow table's heading 1.1 px high.
 - **The candidate before the review** (`a203d79`): `npm test` 1016 of 1016, `npm run types`, and the whole acceptance 462 of 462 in each of Chrome 156, Firefox 155 and WebKit 26.6.
-- **The release** (0.41.0 at `b2e3352`; the commit that carries this record adds only this record's results and the sorting check's correction below, neither of them packed):
+- **The release candidate after the review** (0.41.0 at `b2e3352`; `4ff9559` adds only this record's results and the sorting check's correction below, neither of them packed):
   - `npm test`: 1019 of 1019, React 18 included; `npm run types` compiles.
   - From the packed archive, the whole acceptance:
     - Chrome 156: 464 of 464;
@@ -86,7 +88,12 @@ Through the machine's test queue, on 2026-10-27.
     - WebKit 26.6: 462 of 464.
   - WebKit's two failures were the new `sorting.mjs`: WebKit's Tab passes over buttons, as a Mac does without full keyboard access. The check now reads the buttons' Tab order there, and Tabs into the header from right before the table's body, after its search. It ran again from the same archive: 2 of 2 in each of Chrome, Firefox and WebKit.
   - The coarse-pointer insets of a notification row: 7.8 to 8 px at its top, 8 px at its sides, and the target's room below of 31 px (Chrome), 30.8 px (Firefox) and 30.9 px (WebKit).
-  - The archive: `beyond-js-ui-0.41.0.tgz`, sha256 `71abd3beafa1bcdc9edb0ef7302bad55d8af27461ba3e7003f6a9efda34642ad`, integrity `sha512-Ve5MPVcChESrVArNkD2q5xRZ+L2koP7S7NoqQ0YvXw1NZgG0u1f8TN/KgNrfWyIBdxvh2sZ5NIWcB/3zf2fjCQ==`. Products vendor it when each one adopts it.
+  - That archive (sha256 `71abd3be…42ad`) is superseded by the delta review's correction below.
+- **After the delta review** (0.41.0 at `0dd1fc8`, the archive products vendor):
+  - `npm test`: 1021 of 1021; `npm run types` compiles.
+  - From the packed archive, the affected checks: the lanes, the lead and its links, preferences, every insets check, the measurer, focus, prose, callouts and `Unavailable`. 152 of 152 in each of Chrome 156, Firefox 155 and WebKit 26.6.
+  - The rest of the package is unchanged since the whole runs above.
+  - The archive: `beyond-js-ui-0.41.0.tgz`, sha256 `a24405f1efd3907e8e96a606d6fc3d813dd7347b0ad163efe1b35b7217e1cf98`, integrity `sha512-SYHnx8f/7CUUwy+qdiZvyupVjWWYx9q10qQChKTJO6QhniBfEsm9RxibnMqK6M75ttIW/ITNEBLadvZ2Bcc0Wg==`. Products re-vendor it in place of the earlier 0.41.0 archive.
 
 ## Limits
 
