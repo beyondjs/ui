@@ -25,3 +25,16 @@ body {
 .insets-page p {
 	margin: 0;
 }
+/* A product's own card (0.41.0): a border and 20 px of padding, as CDN's backoffice draws its cards */
+.insets-card {
+	padding: var(--space-5);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-base);
+	background: var(--color-surface-raised);
+}
+/* The tables' boxes are wider than a form (0.41.0), so a table shows its wide form, with its header, at 1440 px
+   and its narrow form at 390 px */
+#table-raised,
+#table-card {
+	width: min(48rem, calc(100vw - 2 * var(--space-4)));
+}

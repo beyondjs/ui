@@ -20,9 +20,9 @@ const separator = () => el('span', { class: 'bui-hidden', text: ', ' });
  * description, while the mark and the trace are hidden from assistive technology.
  *
  * `update()` writes only what changed, so the button that may hold focus is never replaced; `place()`
- * writes the time and the bar against the block's axis and is all a tick does. A cut title (or kind) is
- * shown whole in a tooltip on hover and keyboard focus (D44); the trace's tooltip says when it started and
- * how long it ran.
+ * writes the time and the bar against the block's axis and is all a tick does. A cut title (or kind, or a
+ * kind the block folded, 0.41.0) is shown whole in a tooltip on hover and keyboard focus (D44); the trace's
+ * tooltip says when it started and how long it ran.
  */
 export class Lane {
 	static states = states;
@@ -106,7 +106,12 @@ export class Lane {
 		return this.times.live;
 	}
 
-	/** Whether its title, or its kind, is shown cut now. */
+	/** Whether its title is shown cut now: what the block's room folds its trace and kind for (0.41.0). */
+	get cramped() {
+		return Cut.text(this.#title);
+	}
+
+	/** Whether its title, or its kind, is shown cut now; a folded kind is cut (0.41.0). */
 	get cut() {
 		return Cut.text(this.#title) || (!this.#kind.hidden && Cut.text(this.#kind));
 	}

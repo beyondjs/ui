@@ -2,7 +2,8 @@
 // `?raised=1` (the aside as a resource page's raised panel, 0.30.0), `?arrival=1` and `?nav=tabs` (ProductNav instead of the Sidebar) choose what the page shows.
 // Since 0.38.0 (D189) `?pinned=1` asks for the side panel pinned beside the main column, `?long=1` makes the page
 // Start an application: a long main column of components and the page's action first in the side panel, and
-// `?compact=1` gives the header its compact line.
+// `?compact=1` gives the header its compact line. Since 0.41.0 (D191) `?lead=1` gives the header a lead sentence
+// under its facts line, long enough to wrap at the reading measure.
 const query = new URLSearchParams(location.search);
 
 export const shape = {
@@ -14,6 +15,7 @@ export const shape = {
 	long: query.get('long') === '1',
 	compact: query.get('compact') === '1',
 	arrival: query.get('arrival') === '1',
+	lead: query.get('lead') === '1',
 	nav: query.get('nav') ?? 'sidebar'
 };
 
@@ -23,6 +25,11 @@ export const words = {
 	description:
 		'Every repository this environment holds is cloned once and shared by its conversations, each on a branch of its own, so two conversations never edit the same files. A copy keeps its manual changes; nothing here pushes anywhere, and a removed repository keeps its worktrees until you delete them yourself.',
 	kind: 'Standard',
+	// A page's lead (0.41.0, D191): one short paragraph that would run past 80 characters in the header's width
+	lead: {
+		en: 'This machine runs the conversations of Storefront and keeps one working copy of each repository the project grants it. Its copies are read and pushed only through its Git gateway, and a copy keeps its changes while the machine sleeps.',
+		es: 'Esta máquina ejecuta las conversaciones de Storefront y guarda una copia de trabajo de cada repositorio que el proyecto le concede. Sus copias se leen y se suben solo a través de su pasarela de Git, y una copia conserva sus cambios mientras la máquina duerme.'
+	},
 	branch: 'main',
 	rows: ['acme/web', 'acme/docs', 'acme/api'],
 	nested: ['acme/api · main', 'acme/api · feature/cart'],

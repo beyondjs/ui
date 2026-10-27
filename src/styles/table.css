@@ -136,3 +136,25 @@
 		border-bottom: 0;
 	}
 }
+
+/* A table at the top of a framed box (0.41.0, D184: `framed`, `data-framed`): with no tools above it, its first
+   line's capitals stand at the box's inset. A wide table rises by its header row's room above the capitals (the
+   label's capitals, within half a pixel of the table's own), which its scroller clips with nothing drawn there; a
+   narrow one, which never scrolls sideways, lifts its first row's padding and half-leading, so that row's fill
+   hangs into the box's padding as its sides do. */
+@supports (padding-top: calc(1lh - 1cap)) {
+	.bui-data-table[data-framed]:not(:has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-table {
+		margin-block-start: calc((1cap - var(--bui-row)) / 2);
+	}
+	@container bui-data (max-width: 36rem) {
+		.bui-data-table[data-framed] > .bui-data-body {
+			overflow: visible;
+		}
+		.bui-data-table[data-framed]:not(:has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-table {
+			margin-block-start: 0;
+		}
+		.bui-data-table[data-framed]:not(:has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-data tbody > tr:first-child {
+			margin-block-start: calc(-1 * var(--space-2) - (1lh - 1cap) / 2);
+		}
+	}
+}

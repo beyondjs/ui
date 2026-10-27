@@ -55,6 +55,8 @@ export interface DataTableOptions<Row = any> {
 	onrender?: (() => void) | null;
 	/** Milliseconds after the last key before a search applies (200). */
 	delay?: number;
+	/** Drawn at the top of a framed box: with no tools above it, its first capitals at the box's inset (0.41.0, D184). */
+	framed?: boolean;
 	labels?: Copy;
 }
 
@@ -68,4 +70,6 @@ export class DataTable<Row = any> extends Component {
 	rows: Row[];
 	get status(): 'loading' | 'ready' | 'failed';
 	set status(status: 'loading' | 'ready' | { failed: string | null });
+	/** Whether it is drawn at the top of a framed box (0.41.0). */
+	framed: boolean;
 }

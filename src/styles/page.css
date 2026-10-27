@@ -141,6 +141,15 @@
 	font-weight: var(--weight-regular);
 	line-height: var(--leading-small);
 }
+/* A page's lead (0.41.0, D191): one sentence or a short paragraph under the facts line, in the body's role and
+   muted as the package's secondary prose, held at the reading measure (prose.css) whatever the header spans. */
+.bui-page-lead {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: var(--text-body);
+	font-weight: var(--weight-regular);
+	line-height: var(--leading-body);
+}
 .bui-page-tabs {
 	min-width: 0;
 	margin-top: var(--space-2);
@@ -221,6 +230,10 @@ h3.bui-section-title {
 	color: var(--color-text-muted);
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
+}
+/* "Change for all of Beyond" in the text's colour on any page, with or without a base link rule (0.41.0) */
+.bui-preferences-note a {
+	color: var(--color-link);
 }
 
 /* List and detail (LR-03, FAM-40): the detail beside the list on a wide region, its own page on a

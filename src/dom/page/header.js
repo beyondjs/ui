@@ -15,6 +15,10 @@ const defaults = { crumbs: 'Breadcrumb' };
  * title's line (one primary, the rest under an `ActionMenu`) and the page's tabs below. Another
  * object's state (the machine a copy runs on) is never the header's status or one of its facts.
  *
+ * Since 0.41.0 (D191) a page's lead sentence has its own place: `lead`, one sentence or a short paragraph
+ * under the facts line, in the body's role, muted and held at the reading measure, so it never runs the
+ * header's width. The facts line keeps only the object's properties (D160): a sentence goes in `lead`.
+ *
  * The H1 takes focus after a navigation (`focus()`; it has `tabindex="-1"`). Under a 640 px region the
  * status and the actions move under the title. Preferences, product switching, organization or
  * project selectors and return buttons never go in it: they belong to the profile menu, the family
@@ -41,6 +45,7 @@ export class PageHeader extends Component {
 	#kind;
 	#status;
 	#facts;
+	#lead;
 	#actions;
 	#crumbs;
 	#tabs;
@@ -57,13 +62,14 @@ export class PageHeader extends Component {
 	 * @param {Array<{label: string, href?: string|null}>} [options.crumbs] the levels above, the last one being the current page's parent
 	 * @param {string|Node|{element: Node}|null} [options.kind] the object's kind or variant beside the H1: words, or one control (0.19.1)
 	 * @param {Node|null} [options.status] one status (`status()` of this package)
-	 * @param {string|Node|Array<string|Node>|null} [options.facts] one muted line of facts
+	 * @param {string|Node|Array<string|Node>|null} [options.facts] one muted line of the object's properties
+	 * @param {string|Node|Array<string|Node>|null} [options.lead] the page's lead sentence, at the reading measure (0.41.0, D191)
 	 * @param {Node[]} [options.actions] the title line's actions: one primary button, then an `ActionMenu`
 	 * @param {Node|{element: Node}|null} [options.tabs] the page's `Tabs`
 	 * @param {{crumbs?: string}} [options.labels]
 	 * @param {boolean|{actions?: Array<Node|{element: Node}>}|null} [options.compact] the compact line on scroll (0.11.0)
 	 */
-	constructor({ title, crumbs = [], kind = null, status = null, facts = null, actions = [], tabs = null, labels = {}, compact = null }) {
+	constructor({ title, crumbs = [], kind = null, status = null, facts = null, lead = null, actions = [], tabs = null, labels = {}, compact = null }) {
 		super();
 		this.#labels = new Labels(defaults, labels);
 		const id = Ids.next('bui-page-title');
@@ -72,17 +78,19 @@ export class PageHeader extends Component {
 		this.#status = el('span', { class: 'bui-page-status' });
 		this.#actions = el('div', { class: 'bui-page-actions' });
 		this.#facts = el('p', { class: 'bui-page-facts' });
+		this.#lead = el('p', { class: 'bui-page-lead' });
 		this.#crumbs = el('nav', { class: 'bui-crumbs', 'aria-label': this.#labels.text('crumbs') });
 		this.#tabs = el('div', { class: 'bui-page-tabs' });
 		const line = el('div', { class: 'bui-page-title' }, [this.#heading, this.#kind, this.#status, this.#actions]);
 		// No name on the header: inside <main> it has the generic role, which takes none (ARIA 1.2), and the H1 already names the page
-		this.#element = el('header', { class: 'bui-page-header' }, [this.#crumbs, line, this.#facts, this.#tabs]);
+		this.#element = el('header', { class: 'bui-page-header' }, [this.#crumbs, line, this.#facts, this.#lead, this.#tabs]);
 		if (compact) this.#compact(line, compact);
 		this.title = title;
 		this.crumbs = crumbs;
 		this.kind = kind;
 		this.status = status;
 		this.facts = facts;
+		this.lead = lead;
 		this.actions = actions;
 		this.tabs = tabs;
 	}
@@ -138,6 +146,12 @@ export class PageHeader extends Component {
 	set facts(facts) {
 		fill(this.#facts, [].concat(facts ?? []).map(content));
 		this.#facts.hidden = !this.#facts.childNodes.length;
+	}
+
+	/** The page's lead sentence under the facts line (0.41.0, D191); none takes no room. */
+	set lead(lead) {
+		fill(this.#lead, [].concat(lead ?? []).map(content));
+		this.#lead.hidden = !this.#lead.childNodes.length;
 	}
 
 	set actions(actions) {

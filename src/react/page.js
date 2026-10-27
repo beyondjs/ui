@@ -121,14 +121,15 @@ function assign(ref, value) {
 
 /**
  * The page's one header: `crumbs` (`{ label, href? }`, the levels above, where the object lives), the
- * H1 `title`, its `kind` beside it (words or one control, 0.19.1), one `status`, a `facts` line, the
+ * H1 `title`, its `kind` beside it (words or one control, 0.19.1), one `status`, a `facts` line of the
+ * object's properties, the page's `lead` sentence at the reading measure (0.41.0, D191), the
  * title line's `actions` and the `tabs`. `headingRef` reaches the H1
  * for focus after a navigation. `compact` (`true` or `{ actions }`, 0.11.0) adds the sticky line that
  * shows the title and the status once the title has scrolled out, placed right before the header;
  * `subject` (`{ text, href }`, 0.29.0, D181) is what that line names in place of the title, such as the
  * message of the turn being read.
  */
-export function PageHeader({ title, crumbs = [], kind = null, status = null, facts = null, actions = null, tabs = null, headingRef = null, labels = {}, compact = null, subject = null }) {
+export function PageHeader({ title, crumbs = [], kind = null, status = null, facts = null, lead = null, actions = null, tabs = null, headingRef = null, labels = {}, compact = null, subject = null }) {
 	const id = `bui-page-title-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 	const levels = (crumbs ?? []).filter(Boolean);
 	const bar = useRef(null);
@@ -166,6 +167,7 @@ export function PageHeader({ title, crumbs = [], kind = null, status = null, fac
 			: null,
 		h('div', { ref: line, className: 'bui-page-title' }, h('h1', { id, className: 'bui-page-heading', tabIndex: -1, ref: headingRef }, title), kind ? h('span', { className: 'bui-page-kind' }, typeof kind === 'string' ? h('span', { className: 'bui-page-tag' }, kind) : kind) : null, status ? h('span', { className: 'bui-page-status' }, status) : null, actions ? h('div', { className: 'bui-page-actions' }, actions) : null),
 		facts ? h('p', { className: 'bui-page-facts' }, facts) : null,
+		lead ? h('p', { className: 'bui-page-lead' }, lead) : null,
 		tabs ? h('div', { className: 'bui-page-tabs' }, tabs) : null
 	);
 	return held ? h(React.Fragment, null, held, header) : header;

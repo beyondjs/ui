@@ -23,6 +23,10 @@ import { words } from './labels.js';
  * fits on one page shows no range and no pager. On a narrow region (a container query on the table's
  * own width) each row is two short lines: the primary cell, then the others in one muted line.
  *
+ * `framed` (0.41.0, D184) says the table is drawn at the top of a framed box (a raised section, a card): with no
+ * tools above it, its first line's capitals stand at the box's inset (the header's, or a narrow table's first
+ * row's), while its rows' fills hang into the box's padding as a list's rows hang into the gutter.
+ *
  * Columns: `{ key, label, value?(row), render?(row) → string|Node, sort?: boolean|((a, b) => number),
  * mono?, align?: 'start'|'end', primary? }`.
  */
@@ -62,6 +66,7 @@ export class DataTable extends Component {
 	 * @param {Node|{title: string|Node, text?: string|Node|null, action?: object|Node|null}|null} [options.empty] the table with no row
 	 * @param {(() => void)|null} [options.onretry] Try again after a failure
 	 * @param {(() => void)|null} [options.onrender] runs after each drawing of the rows (the React adapter fills cells then)
+	 * @param {boolean} [options.framed] drawn at the top of a framed box, its first capitals at the box's inset (0.41.0)
 	 */
 	constructor(options) {
 		super();
@@ -75,6 +80,7 @@ export class DataTable extends Component {
 		this.#tools.element.classList.add('bui-data-tools');
 		this.#pager = el('nav', { class: 'bui-pager', 'aria-label': this.#labels.text('pages', { label }) });
 		this.#element = el('section', { class: 'bui-data-table', 'aria-label': typeof label === 'string' ? label : null }, [options.tools === 'external' ? null : this.#tools.element, this.#said, this.#body, this.#pager]);
+		this.framed = options.framed ?? false;
 		this.rows = rows;
 	}
 
@@ -95,6 +101,15 @@ export class DataTable extends Component {
 		this.#state = DataTable.#clean(state, Boolean(this.#options.filters?.length));
 		this.#tools.state = this.#state;
 		this.#draw();
+	}
+
+	/** Whether it is drawn at the top of a framed box (0.41.0). */
+	get framed() {
+		return this.#element.hasAttribute('data-framed');
+	}
+
+	set framed(framed) {
+		this.#element.toggleAttribute('data-framed', Boolean(framed));
 	}
 
 	get rows() {

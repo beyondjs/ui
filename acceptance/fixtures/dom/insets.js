@@ -3,12 +3,13 @@
 // text and in technical details, a framed empty state, a checklist, a raised section, a textarea and a
 // refusal with no action; since 0.35.0 a request whose command may be corrected (an editable CommandCard),
 // an outage's line in a narrow block, its words wrapping beside Try again, a command to copy
-// (CopyMessage's command form) and a choice whose entries are one line each (a composer's Effort). window.fixture shows a toast with a detail and tears them down.
+// (CopyMessage's command form) and a choice whose entries are one line each (a composer's Effort); since 0.41.0 a
+// DataTable in a raised section and in a product's own card. window.fixture shows a toast with a detail and tears them down.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { callout, Button, EmptyState, Checklist, Section, Field, Unavailable, Toaster, CommandCard, Recovery, CopyMessage, ChoiceChip, el } from '@beyond-js/ui';
-import { words } from '../data/insets.js';
+import { callout, Button, EmptyState, Checklist, Section, Field, Unavailable, Toaster, CommandCard, Recovery, CopyMessage, ChoiceChip, DataTable, el } from '@beyond-js/ui';
+import { words, jobs } from '../data/insets.js';
 
 const copy = words.en;
 const main = document.getElementById('root').appendChild(el('main', { class: 'insets-page' }));
@@ -38,13 +39,18 @@ const copied = new CopyMessage({ text: copy.copy.command, kind: 'command', label
 place('copy-command', copied.element);
 const effort = new ChoiceChip({ label: copy.effort.label, options: copy.effort.options, value: 'medium' });
 place('effort', effort.element);
+// A DataTable in a framed box (0.41.0): a raised section of the package's, and a product's own card
+const tables = [false, true].map(framed => new DataTable({ ...jobs(copy), search: false, framed }));
+const raised = new Section({ title: copy.jobs.label, raised: true, children: [tables[0].element] });
+place('table-raised', raised.element);
+place('table-card', el('div', { class: 'insets-card' }, [tables[1].element]));
 
 const toaster = new Toaster().mount(document.body);
 
 window.fixture = {
 	toast: () => toaster.show(copy.toast.title, { detail: copy.toast.detail, duration: 600_000 }),
 	destroy() {
-		for (const component of [toaster, effort, copied, recovery, command, refusal, notes, section, checklist, empty, ...buttons]) component.destroy();
+		for (const component of [toaster, ...tables, raised, effort, copied, recovery, command, refusal, notes, section, checklist, empty, ...buttons]) component.destroy();
 		main.remove();
 	},
 	ready: true

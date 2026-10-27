@@ -222,6 +222,29 @@
 .bui-lanes-lane[data-through='2']:dir(rtl)::after {
 	background: var(--bui-lanes-guide) no-repeat left 0 top 0 / 1px 100%;
 }
+/* A title's room first (0.41.0): before a title is cut, the block folds its trace, then its kind (`LaneRoom`
+   sets `data-fold`). A folded column takes no track; a folded kind stays in the lane's name, hidden from sight
+   only, and its tooltip says it. */
+.bui-lanes[data-fold~='trace'] {
+	--bui-lanes-trace: initial;
+}
+.bui-lanes[data-fold~='trace'] .bui-lanes-trace {
+	display: none;
+}
+.bui-lanes[data-fold~='kind'] {
+	--bui-lanes-kind: initial;
+}
+.bui-lanes[data-fold~='kind'] .bui-lanes-kind {
+	position: absolute;
+	grid-column: auto;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
 /* Narrow: two lines a lane, the title and the time, then the live line under the title and the facts */
 @container bui-lanes (width < 40rem) {
 	.bui-lanes-list {

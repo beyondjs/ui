@@ -6,6 +6,7 @@ import { Clock } from '../time/clock.js';
 import { Lane } from './lane.js';
 import { LaneAxis } from './axis.js';
 import { LaneKeys } from './keys.js';
+import { LaneRoom } from './room.js';
 import { LaneTree } from './tree.js';
 import { LaneWords } from './words.js';
 import { lanes as copy } from './labels.js';
@@ -28,7 +29,8 @@ const said = value => value !== null && value !== undefined && value !== '';
  *   the live lanes' times and bars, and the axis' span when it reaches its next step (`Lanes.steps`).
  * - **Geometry**: a lane is one line from 40rem of the block's width and two below it (title and time,
  *   then the live line and the facts; no kind and no trace), by a container query; a change of its words
- *   or times never changes its height, and a new lane takes its place in the order.
+ *   or times never changes its height, and a new lane takes its place in the order. Since 0.41.0 a title
+ *   gets its room first: before one is cut, the block folds its trace, then its kind (`LaneRoom`).
  * - **Keyboard**: one lane in the tab order; arrows, Home and End move; Enter and Space choose it, as a
  *   press does, by calling `choose(key, event)`; the product decides what choosing opens and marks that
  *   lane `current`. `update()` patches lanes by key, so the lane that holds focus keeps it.
@@ -52,6 +54,7 @@ export class Lanes extends Component {
 	#clock;
 	#choose;
 	#keyboard;
+	#room;
 	#release = null;
 
 	/**
@@ -71,6 +74,7 @@ export class Lanes extends Component {
 		this.#choose = typeof choose === 'function' ? choose : null;
 		this.#element = el('div', { class: 'bui-lanes', role: 'group' }, [this.#list]);
 		this.#keyboard = new LaneKeys(this.#list, { lanes: () => this.#sequence });
+		this.#room = new LaneRoom(this.#element, () => this.#sequence.some(lane => lane.cramped));
 		this.#list.addEventListener('click', event => this.#press(event));
 		this.update({ label, trace, lanes: [] });
 	}
@@ -96,6 +100,7 @@ export class Lanes extends Component {
 		if (given('label')) this.#element.setAttribute('aria-label', said(values.label) ? String(values.label) : this.#labels.text('group'));
 		if (given('trace')) this.#element.toggleAttribute('data-trace', values.trace !== false);
 		if (given('lanes')) this.#draw(values.lanes);
+		else if (given('trace')) this.#room.fit();
 		return this;
 	}
 
@@ -111,6 +116,7 @@ export class Lanes extends Component {
 	destroy() {
 		if (this.destroyed) return;
 		this.#follow(false);
+		this.#room.destroy();
 		for (const lane of this.#sequence) lane.destroy();
 		this.#lanes.clear();
 		this.#sequence = [];
@@ -132,6 +138,7 @@ export class Lanes extends Component {
 		this.#element.toggleAttribute('data-kind', items.some(item => said(item.kind)));
 		this.#element.toggleAttribute('data-facts', items.some(item => Array.isArray(item.facts) && item.facts.some(said)));
 		this.#measure();
+		this.#room.fit();
 		this.#keyboard.settle();
 		// The lane that held focus left: its place keeps the keyboard, so focus never falls to the page.
 		if (lost >= 0 && sequence.length) sequence[Math.min(lost, sequence.length - 1)].focus({ preventScroll: true });

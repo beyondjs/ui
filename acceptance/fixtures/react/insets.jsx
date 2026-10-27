@@ -1,18 +1,20 @@
 // The insets page of the React consumers (D184), in Spanish through the components' `labels.es`: the boxes
 // no other fixture page draws, each in a block of its own named by its id, as the DOM page draws them (since
-// 0.35.0 an editable CommandCard, an outage's line whose words wrap beside Try again and a command to copy),
+// 0.35.0 an editable CommandCard, an outage's line whose words wrap beside Try again and a command to copy, and
+// since 0.41.0 a DataTable in a raised section and in a product's own card),
 // and a toast with a detail shown by window.fixture.toast().
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Callout, Button, EmptyState, Checklist, Section, Field, Unavailable, TechnicalDetails, CommandCard, Recovery, RetryAction, AgainLine, CopyMessage, ChoiceChip, useToaster } from '@beyond-js/ui/react';
-import { words } from '../data/insets.js';
+import { Callout, Button, EmptyState, Checklist, Section, Field, Unavailable, TechnicalDetails, CommandCard, Recovery, RetryAction, AgainLine, CopyMessage, ChoiceChip, DataTable, useToaster } from '@beyond-js/ui/react';
+import { words, jobs } from '../data/insets.js';
 
 const copy = words.es;
 const time = Date.now() - 60_000;
 const reads = [{ key: 'project', title: copy.recovery.read, details: { request: 'req_insets_7Hq2', time, text: copy.recovery.said }, run: async () => false }];
+const table = jobs(copy);
 const outage = { ...RetryAction.labels.es, ...AgainLine.labels.es, ...TechnicalDetails.labels.es };
 
 function App() {
@@ -59,6 +61,16 @@ function App() {
 			</div>
 			<div id="effort">
 				<ChoiceChip label={copy.effort.label} options={copy.effort.options} value="medium" labels={ChoiceChip.labels.es} />
+			</div>
+			<div id="table-raised">
+				<Section title={copy.jobs.label} raised>
+					<DataTable {...table} search={false} labels={DataTable.labels.es} />
+				</Section>
+			</div>
+			<div id="table-card">
+				<div className="insets-card">
+					<DataTable {...table} search={false} framed labels={DataTable.labels.es} />
+				</div>
 			</div>
 		</main>
 	);

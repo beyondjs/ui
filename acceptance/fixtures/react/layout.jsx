@@ -1,6 +1,7 @@
 // The page system of the React consumers, in Spanish: the family bar with "Idioma y apariencia", the
 // Sidebar (or ProductNav) and one Page whose template, width, side panel and arrival line the address chooses;
-// since 0.38.0 its side panel may be pinned, its main column long and its header compact.
+// since 0.38.0 its side panel may be pinned, its main column long and its header compact, and since 0.41.0 its
+// header may hold a lead.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
@@ -16,7 +17,7 @@ const preferences = new Preferences({ key: 'beyond-layout', fallback: { appearan
 window.fixture = { preferences, ready: false };
 
 function View() {
-	const header = <PageHeader title={words.title} crumbs={[{ label: 'Entornos', href: '#/environments' }]} kind="Estándar" status={<Status label="Listo" tone="success" />} facts={words.facts} actions={<><Button label="Empezar una conversación" variant="primary" /><Button label="Detener el entorno" /><Button label="Más acciones" /></>} tabs={<Tabs items={['Resumen', 'Conversaciones', 'Repositorios', 'Motores de IA', 'Acceso', 'Ejecución'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 }))} />} compact={shape.compact} />;
+	const header = <PageHeader title={words.title} crumbs={[{ label: 'Entornos', href: '#/environments' }]} kind="Estándar" status={<Status label="Listo" tone="success" />} facts={words.facts} lead={shape.lead ? words.lead.es : null} actions={<><Button label="Empezar una conversación" variant="primary" /><Button label="Detener el entorno" /><Button label="Más acciones" /></>} tabs={<Tabs items={['Resumen', 'Conversaciones', 'Repositorios', 'Motores de IA', 'Acceso', 'Ejecución'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 }))} />} compact={shape.compact} />;
 	// Start an application (0.38.0): the page's action first in the raised panel, beside a long list of components
 	const start = words.start.es;
 	const action = shape.long ? (

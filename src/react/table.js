@@ -16,7 +16,7 @@ const none = Object.freeze([]);
  * nothing (no text, no element) is empty, as the DOM table reads a value: a narrow line leaves out its
  * label and its separator (0.35.0).
  */
-export function DataTable({ label, columns, rows = none, rowKey = null, search = true, filters = [], tools = 'compact', toolsTarget = null, group = null, state = null, onChange = null, size = 50, link = null, onOpen = null, empty = null, status = 'ready', onRetry = null, labels }) {
+export function DataTable({ label, columns, rows = none, rowKey = null, search = true, filters = [], tools = 'compact', toolsTarget = null, group = null, state = null, onChange = null, size = 50, link = null, onOpen = null, empty = null, status = 'ready', onRetry = null, framed = false, labels }) {
 	const cells = useRef([]);
 	const applied = useRef(null);
 	const [portals, setPortals] = useState([]);
@@ -45,6 +45,9 @@ export function DataTable({ label, columns, rows = none, rowKey = null, search =
 		[label, String(search), JSON.stringify(filters), tools, size, labels, Boolean(link), Boolean(onOpen), Boolean(onRetry), Boolean(group), columns.map(column => column.key).join('|')]
 	);
 	useTools(table, toolsTarget, tools);
+	useLayoutEffect(() => {
+		if (table && !table.destroyed) table.framed = framed;
+	}, [table, Boolean(framed)]);
 	// What each drawn cell rendered decides whether it is empty, by the DOM table's rule (`CellContent`), read
 	// again for the cells whose content changed
 	useLayoutEffect(() => {

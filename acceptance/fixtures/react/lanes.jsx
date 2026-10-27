@@ -1,18 +1,20 @@
 // The lanes page of the React consumers, in Spanish (0.27.0): the same crew as the DOM page through the
 // React Lanes with Lanes.labels.es, a box under 40rem and every state once; choosing a lane makes it
-// current. window.fixture moves the clock, changes a live line, appends a lane and ends the crew.
+// current; since 0.41.0 a crew with long titles in a block as wide as a thread's turn, and a cramped one. window.fixture moves the clock, changes a live line, appends a lane and ends the crew.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Lanes, Clock, Button } from '@beyond-js/ui/react';
-import { start, crew, late, states } from '../data/lanes.js';
+import { start, crew, late, states, roomy, cramped } from '../data/lanes.js';
 
 let now = start + 102_000;
 const clock = new Clock({ now: () => now });
 const labels = Lanes.labels.es;
 const chosen = [];
+const long = roomy('es');
+const tight = cramped('es');
 let change = () => undefined;
 
 function Page() {
@@ -36,6 +38,12 @@ function Page() {
 			</section>
 			<section className="fixture-marks">
 				<Lanes label="Cada estado" lanes={states} clock={clock} locale="es" labels={labels} trace={false} />
+			</section>
+			<section className="fixture-room">
+				<Lanes label="Subagentes con títulos largos" lanes={long} clock={clock} locale="es" labels={labels} />
+			</section>
+			<section className="fixture-cramped">
+				<Lanes label="Subagentes en un bloque estrecho" lanes={tight} clock={clock} locale="es" labels={labels} />
 			</section>
 		</main>
 	);

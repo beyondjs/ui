@@ -7,10 +7,9 @@
  * words, a last row that is the product's own); an empty `sides` measures a box for the record only, a box
  * that cannot keep one inset without a design decision. A right side a short line does not reach is free room
  * by itself (the measurement's `free`). `touch` gives what a box keeps instead on a touch screen (0.35.0), where
- * every target is 44 px tall: a menu's `even` sides (an action menu's, a choice's), since its entries' height decides its inset; a
- * notification row measured for the record, since its last line's targets grow it and hanging them past its edge
- * would cover the next row's (a design decision, `family-touch-notification-rows`); the notification panel,
- * whose taller rows scroll it by design.
+ * every target is 44 px tall: a menu's `even` sides (an action menu's, a choice's), since its entries' height decides its inset;
+ * the notification panel, whose taller rows scroll it by design. Since 0.41.0 (D192) a notification row keeps its
+ * inset there too: its controls' targets rise over the row's own padding and words (`checks/touching.mjs`).
  */
 const es = consumer => consumer.name !== 'dom';
 const closed = async page => (await page.keyboard.press('Escape'), page.waitForFunction(() => !document.querySelector('dialog.bui-dialog[open]')));
@@ -43,6 +42,35 @@ const holder = async page => {
 	if (faces.holder === faces.box || faces.copy === faces.box || faces.lines === 'pre' || faces.scroll !== 'visible') throw new Error(`a command's holder takes its code box's face or lines: ${JSON.stringify(faces)}`);
 };
 
+/**
+ * A DataTable in a framed box (0.41.0): the package's raised section, its title first, and a product's own 20 px
+ * card with the table `framed` at its top. Its words keep the box's inset; its rows' fills hang into the box's
+ * padding as a menu's entries do, so a row under the pointer is a flat row, measured by its words. Its last row
+ * keeps its own padding, so the bottom is free room.
+ */
+const tables = [
+	{ name: 'a DataTable in a raised section', box: '#table-raised .bui-section', inset: '--bui-raised-inset', flat: ['.bui-data tbody tr'], free: ['bottom'] },
+	{ name: 'a framed DataTable in a product\'s card', box: '#table-card .insets-card', inset: 20, flat: ['.bui-data tbody tr'], free: ['bottom'] }
+];
+
+/**
+ * Points at a table's first row, and holds its fill inside the box, hanging into the box's padding no further than
+ * a menu's entries hang into theirs: at least 2 px from the border, at most the box's inset (0.41.0).
+ */
+const pointed = async (page, block) => {
+	const row = page.locator(`${block} tbody tr`).first();
+	await row.hover();
+	const placed = await row.evaluate((node, block) => {
+		const box = document.querySelector(block).querySelector('.bui-section, .insets-card');
+		const style = getComputedStyle(box);
+		const outer = box.getBoundingClientRect();
+		const fill = node.getBoundingClientRect();
+		return { color: getComputedStyle(node).backgroundColor, left: fill.left - outer.left - parseFloat(style.borderLeftWidth), right: outer.right - parseFloat(style.borderRightWidth) - fill.right, inset: parseFloat(style.paddingLeft) };
+	}, block);
+	const sides = [placed.left, placed.right];
+	if (placed.color === 'rgba(0, 0, 0, 0)' || sides.some(side => side < 2 || side > placed.inset + 0.5)) throw new Error(`a table's row fill hangs into its box no further than a menu's: ${JSON.stringify(placed)}`);
+};
+
 export const pages = {
 	notices: [
 		{
@@ -61,7 +89,10 @@ export const pages = {
 				] },
 				{ open: page => page.locator('#callout-details summary').click(), boxes: [{ name: 'callout ending in open technical details', box: '#callout-details .bui-callout', inset: '--bui-callout-inset' }] },
 				{ open: async page => (await page.evaluate(() => window.fixture.toast()), page.waitForSelector('.bui-toast')), boxes: [{ name: 'toast with a detail', box: '.bui-toast', inset: '--bui-toast-inset' }] },
-				{ open: holder, boxes: [{ name: 'CopyMessage of a command', box: '#copy-command .bui-copy-text', inset: '--bui-text-inset' }] }
+				{ open: holder, boxes: [{ name: 'CopyMessage of a command', box: '#copy-command .bui-copy-text', inset: '--bui-text-inset' }] },
+				{ boxes: tables },
+				{ open: page => pointed(page, '#table-card'), boxes: tables.slice(1).map(box => ({ ...box, name: `${box.name}, a row under the pointer` })) },
+				{ open: page => pointed(page, '#table-raised'), boxes: tables.slice(0, 1).map(box => ({ ...box, name: `${box.name}, a row under the pointer` })) }
 			]
 		},
 		{ file: 'hold.html', steps: [{ boxes: [{ name: 'Unavailable for an outage, with Try again', box: '.bui-unavailable', inset: '--bui-unavailable-inset' }] }] },
@@ -106,7 +137,7 @@ export const pages = {
 			{ open: (page, consumer) => page.getByRole('menuitem', { name: es(consumer) ? 'Aviso' : 'Toast' }).click(), boxes: [{ name: 'toast', box: '.bui-toast', inset: '--bui-toast-inset' }] },
 			{ open: (page, consumer) => page.getByRole('button', { name: es(consumer) ? 'Ayuda: Identificador del proyecto' : 'Help: Project identifier' }).click(), boxes: [{ name: 'help', box: '#helping .bui-help-panel', inset: '--bui-text-inset' }] },
 			{ open: page => point(page, page.locator('#helping button').filter({ hasText: /Copy address|Copiar dirección/ })), boxes: [{ name: 'Tooltip', box: '[role="tooltip"]:not([hidden])', inset: 8 }] },
-			{ open: async page => (await page.locator('.bui-notify > button').click(), await page.waitForSelector('.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice'), page.locator('.bui-notify .bui-notice').first().hover()), boxes: [{ name: 'a notification row under the pointer', box: '.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice', inset: '--bui-notice-inset', touch: { sides: record } }, { name: 'notification panel', box: '.bui-notify .bui-disclosure-panel:not([hidden])', flat: ['.bui-notice', '.bui-notify-all'], inset: 16, sides: record, touch: { scrolls: true } }] }
+			{ open: async page => (await page.locator('.bui-notify > button').click(), await page.waitForSelector('.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice'), page.locator('.bui-notify .bui-notice').first().hover()), boxes: [{ name: 'a notification row under the pointer', box: '.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice', inset: '--bui-notice-inset' }, { name: 'notification panel', box: '.bui-notify .bui-disclosure-panel:not([hidden])', flat: ['.bui-notice', '.bui-notify-all'], inset: 16, sides: record, touch: { scrolls: true } }] }
 		] },
 		{ file: 'choosing.html', steps: [
 			{ boxes: [{ name: 'CopyMessage', box: '.bui-copy-text', inset: '--bui-text-inset' }] },

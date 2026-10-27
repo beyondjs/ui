@@ -130,8 +130,10 @@ export interface PageHeaderOptions {
 	kind?: string | Node | { element: Node } | null;
 	/** One status (`status()`): the H1 object's own state, never another object's. */
 	status?: Node | null;
-	/** One muted line of facts. */
+	/** One muted line of the object's properties (D160), never a sentence. */
 	facts?: string | Node | Array<string | Node> | null;
+	/** The page's lead sentence or short paragraph under the facts line, muted at the reading measure (0.41.0, D191). */
+	lead?: string | Node | Array<string | Node> | null;
 	/** The title line's actions: one primary button, then an `ActionMenu`. */
 	actions?: Array<Node | { element: Node } | null>;
 	/** The page's `Tabs`. */
@@ -141,7 +143,7 @@ export interface PageHeaderOptions {
 	compact?: boolean | { actions?: Array<Node | { element: Node } | null> } | null;
 }
 
-/** A page's one header: crumbs, the H1, one status, facts, the line's actions and the tabs. */
+/** A page's one header: crumbs, the H1, one status, facts, a lead, the line's actions and the tabs. */
 export class PageHeader extends Component {
 	/** The copy in English and Spanish (0.7.2). */
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
@@ -154,6 +156,8 @@ export class PageHeader extends Component {
 	kind: string | Node | { element: Node } | null;
 	status: Node | null;
 	facts: string | Node | Array<string | Node> | null;
+	/** The page's lead sentence under the facts line (0.41.0, D191). */
+	lead: string | Node | Array<string | Node> | null;
 	actions: Array<Node | { element: Node } | null>;
 	tabs: Part;
 	/** Moves focus to the H1 without scrolling. */

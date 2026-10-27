@@ -6,7 +6,10 @@ import { expect, overflow } from '../support/browser.mjs';
  * in Spanish): the columns align across lanes in both themes, one line a lane from 40rem of the block and
  * two below it (kind and trace gone), marks told apart by shape and never moving, a tick that moves only
  * the live bars' ends, a live line or a new lane that moves no other lane, no sideways scroll at 320 px,
- * and the keyboard (Tab to one lane, real arrows, Home, End, Enter and Space). With `BEYOND_UI_SHOTS`
+ * and the keyboard (Tab to one lane, real arrows, Home, End, Enter and Space). Since 0.41.0 a title gets its
+ * room first: at 1280 and 1440 px a block of six long titles as wide as a thread's turn folds its trace,
+ * then its kind, only as far as its titles need, and a title no fold frees is shown whole on hover and focus
+ * (D44). With `BEYOND_UI_SHOTS`
  * naming a directory outside the repository, each geometry check saves its screenshots there.
  */
 const words = {
@@ -43,15 +46,15 @@ const shoot = async (page, browser, consumer, name) => {
 	if (process.env.BEYOND_UI_SHOTS) await page.screenshot({ path: join(process.env.BEYOND_UI_SHOTS, `lanes-${browser.engine}-${consumer.name}-${name}.png`), fullPage: true });
 };
 
-/** One line a lane, its columns aligned across the block. */
-function wide(found, at) {
+/** One line a lane, its columns aligned across the block; a folded column (0.41.0) is not measured. */
+function wide(found, at, folded = []) {
 	expect(found.length >= 6, `${at}: the crew's lanes are drawn: ${found.length}`);
 	for (const part of ['head']) expect(same(found.map(lane => lane[part].left)), `${at}: every head starts on one edge`);
-	for (const part of ['kind', 'now', 'trace']) {
+	for (const part of ['kind', 'now', 'trace'].filter(part => !folded.includes(part))) {
 		const drawn = found.filter(lane => lane[part]);
 		expect(drawn.length && same(drawn.map(lane => lane[part].left)), `${at}: the ${part} column starts on one edge: ${JSON.stringify(drawn.map(lane => lane[part].left))}`);
 	}
-	for (const part of ['time', 'facts', 'trace']) expect(same(found.filter(lane => lane[part]).map(lane => lane[part].right)), `${at}: the ${part} column ends on one edge`);
+	for (const part of ['time', 'facts', 'trace'].filter(part => !folded.includes(part))) expect(same(found.filter(lane => lane[part]).map(lane => lane[part].right)), `${at}: the ${part} column ends on one edge`);
 	expect(same(found.map(lane => lane.lane.height)), `${at}: every lane is as tall as the others: ${found.map(lane => lane.lane.height)}`);
 	for (const lane of found) {
 		const tops = ['title', 'now', 'time', 'facts'].filter(part => lane[part]).map(part => lane[part].top);
@@ -76,7 +79,71 @@ function narrow(found, at) {
 	expect(found.every(lane => lane.lane.height >= 2 * lane.line), `${at}: two lines high`);
 }
 
+/** A block's fold, its titles' room, which titles are cut, and which would be with one fold fewer. */
+const room = (page, selector) =>
+	page.evaluate(selector => {
+		const block = document.querySelector(`${selector} .bui-lanes`);
+		const titles = [...block.querySelectorAll('.bui-lanes-title')];
+		const cut = () => titles.filter(title => title.scrollWidth > title.clientWidth + 0.5).map(title => title.textContent.replace(/^, /, ''));
+		const fold = block.dataset.fold ?? '';
+		const now = cut();
+		const room = Math.round(Math.min(...titles.map(title => title.clientWidth)));
+		const steps = fold.split(' ').filter(Boolean);
+		if (steps.length) block.dataset.fold = steps.slice(0, -1).join(' ');
+		const fewer = steps.length ? cut() : [];
+		if (steps.length) block.dataset.fold = fold;
+		const kinds = [...block.querySelectorAll('.bui-lanes-kind:not([hidden])')].map(kind => ({ drawn: kind.getBoundingClientRect().width > 1, said: kind.closest('.bui-lanes-lane').textContent.includes(kind.textContent) }));
+		const traces = [...block.querySelectorAll('.bui-lanes-trace')].filter(trace => getComputedStyle(trace).display !== 'none').length;
+		return { fold, cut: now, room, fewer, kinds, traces };
+	}, selector);
+
 export const checks = [
+	{
+		name: 'lanes: a title\'s room first, six long titles at 1280 and 1440 px: the trace folds, then the kind, only as far as the titles need (0.41.0)',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			for (const scheme of ['light', 'dark']) {
+				for (const width of [1280, 1440]) {
+					const { page } = await open(browser, consumer, { colorScheme: scheme, viewport: { width, height: 900 } });
+					const at = `${scheme} ${width} px`;
+					const found = await room(page, '.fixture-room');
+					const said = `${at}: ${JSON.stringify(found)}`;
+					expect(found.cut.length === 0, `${said}: every title shows whole`);
+					if (found.fold) expect(found.fewer.length > 0, `${said}: one fold fewer would cut a title, so nothing folds that need not`);
+					expect(found.fold === '' || found.fold === 'trace' || found.fold === 'trace kind', `${said}: the trace folds before the kind`);
+					expect(found.traces === (found.fold.includes('trace') ? 0 : 6), `${said}: a folded trace takes no cell`);
+					expect(found.kinds.every(kind => kind.drawn === !found.fold.includes('kind') && kind.said), `${said}: a folded kind is not drawn and stays in the lane's name`);
+					wide(await lanes(page, '.fixture-room'), `${at}, long titles`, found.fold.split(' '));
+					expect(!(await overflow(page)), `${at}: no sideways scroll`);
+					await shoot(page, browser, consumer, `room-${scheme}-${width}`);
+					await page.close();
+				}
+			}
+		}
+	},
+	{
+		name: 'lanes: a title no fold frees is cut last and shown whole, with its folded kind, on hover and on focus (0.41.0, D44)',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			const { page } = await open(browser, consumer, { viewport: { width: 1440, height: 900 } });
+			const found = await room(page, '.fixture-cramped');
+			expect(found.fold === 'trace kind' && found.cut.length >= 1, `the cramped block folds both before it cuts a title: ${JSON.stringify(found)}`);
+			const lane = page.locator('.fixture-cramped .bui-lanes-lane').first();
+			const whole = await lane.evaluate(node => [node.querySelector('.bui-lanes-title').textContent.replace(/^, /, ''), node.querySelector('.bui-lanes-kind').textContent.replace(/^, /, '')].join(' · '));
+			const tip = page.locator('.bui-tooltip:not([hidden])');
+			await lane.locator('.bui-lanes-title').hover();
+			await tip.waitFor();
+			expect((await tip.textContent()) === whole, `on hover: ${await tip.textContent()} / ${whole}`);
+			await page.mouse.move(0, 0);
+			await tip.waitFor({ state: 'hidden' });
+			await lane.focus();
+			await tip.waitFor();
+			expect((await tip.textContent()) === whole, `on focus: ${await tip.textContent()}`);
+			const box = await tip.evaluate(node => node.getBoundingClientRect().toJSON());
+			expect(box.left >= 0 && box.right <= 1440, 'inside the viewport');
+			await page.close();
+		}
+	},
 	{
 		name: 'lanes: columns aligned across lanes at 1440 and 1024 px in both themes, one line each, the box under 40rem two lines, marks by shape and still',
 		consumers: ['dom', 'react19'],

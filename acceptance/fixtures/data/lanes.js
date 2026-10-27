@@ -29,3 +29,20 @@ export function late(language = 'en') {
 
 /** Every state once, for the marks. */
 export const states = ['running', 'waiting', 'done', 'failed', 'stopped', 'unknown'].map((state, index) => ({ key: state, state, title: state, since: start + index * 1000, until: ['done', 'failed', 'stopped'].includes(state) ? start + 60_000 : null }));
+
+/**
+ * A crew whose titles want their room (0.41.0): six subagents titled as a coding agent titles them, long enough
+ * that a thread's block at 1280 px cuts them while its trace and kind take their columns. The cramped block
+ * gives one title more than any fold frees, so it is cut and shown whole on hover and focus (D44).
+ */
+const long = {
+	en: ['Explore how the session lease is renewed', 'Map every caller of the payments API', 'Review the database migration plan', 'Check which queries use the new index', 'Fix the flaky checkout test on CI', 'Benchmark the cache under realistic load'],
+	es: ['Explorar cómo se renueva la sesión', 'Mapear cada llamada a la API de pagos', 'Revisar el plan de migración de la base', 'Comprobar qué consultas usan el índice', 'Arreglar la prueba inestable de la caja', 'Medir la caché bajo una carga realista']
+};
+export function roomy(language = 'en') {
+	return crew(language).map((lane, index) => ({ ...lane, key: `room-${lane.key}`, title: long[language][index], kind: lane.kind ?? (index === 4 ? 'general-purpose' : null) }));
+}
+export function cramped(language = 'en') {
+	const title = language === 'es' ? 'Recorrer cada módulo del servicio de facturación y anotar qué rutas llaman todavía al cliente antiguo de pagos' : 'Walk every module of the billing service and note which routes still call the old payments client directly';
+	return roomy(language).map((lane, index) => ({ ...lane, key: `cramped-${index}`, ...(index === 0 ? { title } : {}) }));
+}

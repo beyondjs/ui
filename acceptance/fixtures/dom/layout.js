@@ -1,6 +1,7 @@
 // The page system of the plain DOM consumer: the family bar with "Language and appearance", the
 // Sidebar (or ProductNav) and one Page whose template, width, side panel and arrival line the address
-// chooses; since 0.38.0 its side panel may be pinned, its main column long and its header compact.
+// chooses; since 0.38.0 its side panel may be pinned, its main column long and its header compact, and since 0.41.0
+// its header may hold a lead.
 // window.fixture exposes the preferences and a teardown.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
@@ -16,7 +17,7 @@ const shell = root.appendChild(el('div', { class: shape.nav === 'sidebar' ? 'bui
 const nav = shape.nav === 'sidebar' ? new Sidebar({ product: 'Conduict', groups, context: { label: 'Project', name: 'Storefront' } }).mount(shell) : new ProductNav({ items: groups[0].items }).mount(shell);
 const main = shell.appendChild(el('main', { id: 'main' }));
 const tabs = new Tabs({ items: ['Overview', 'Conversations', 'Repositories', 'AI engines', 'Access', 'Runtime'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 })) });
-const header = new PageHeader({ title: words.title, crumbs: [{ label: 'Environments', href: '#/environments' }], kind: words.kind, status: status('Ready', 'success'), facts: words.facts, actions: [new Button({ label: 'Start a conversation', variant: 'primary' }), new Button({ label: 'Stop the environment' }), new Button({ label: 'More actions' })], tabs, compact: shape.compact });
+const header = new PageHeader({ title: words.title, crumbs: [{ label: 'Environments', href: '#/environments' }], kind: words.kind, status: status('Ready', 'success'), facts: words.facts, lead: shape.lead ? words.lead.en : null, actions: [new Button({ label: 'Start a conversation', variant: 'primary' }), new Button({ label: 'Stop the environment' }), new Button({ label: 'More actions' })], tabs, compact: shape.compact });
 const arrival = shape.arrival ? new Arrival({ product: 'Conduict', href: '#/back', ondismiss: () => {} }) : null;
 // The last row holds a list of its own, as a repository's copies are listed under it: it never reaches past the page
 const rows = words.rows.map((row, index) =>

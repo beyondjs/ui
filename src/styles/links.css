@@ -12,12 +12,12 @@
 	text-decoration: underline;
 	text-underline-offset: 2px;
 }
-:is(.bui-link-button, .bui-composer-status a, .bui-navmenu-notice a, .bui-reading a, .bui-callout-text a, .bui-unavailable-reason a) {
+:is(.bui-link-button, .bui-composer-status a, .bui-navmenu-notice a, .bui-reading a, .bui-callout-text a, .bui-unavailable-reason a, .bui-preferences-note a, .bui-page-lead a) {
 	text-decoration-line: underline;
 	text-decoration-color: var(--color-border-strong);
 	text-underline-offset: 2px;
 }
-:is(.bui-link-button, .bui-composer-status a, .bui-navmenu-notice a, .bui-reading a, .bui-callout-text a, .bui-unavailable-reason a):hover {
+:is(.bui-link-button, .bui-composer-status a, .bui-navmenu-notice a, .bui-reading a, .bui-callout-text a, .bui-unavailable-reason a, .bui-preferences-note a, .bui-page-lead a):hover {
 	text-decoration-color: currentColor;
 }
 

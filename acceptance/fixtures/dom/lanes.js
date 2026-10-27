@@ -1,12 +1,12 @@
 // The lanes page of the plain DOM consumer (0.27.0): a crew of subagents as one block of Lanes on an
 // injected clock, the same crew in a box under 40rem (its two-line form at any window width), and every
-// state once. Choosing a lane makes it current, as a product opening its detail would. window.fixture
+// state once; since 0.41.0 a crew with long titles in a block as wide as a thread's turn, and a cramped one. Choosing a lane makes it current, as a product opening its detail would. window.fixture
 // moves the clock, changes a live line, appends a lane, ends the crew and records what was chosen.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { Lanes, Clock, Button, el } from '@beyond-js/ui';
-import { start, crew, late, states } from '../data/lanes.js';
+import { start, crew, late, states, roomy, cramped } from '../data/lanes.js';
 
 let now = start + 102_000;
 let lanes = crew('en');
@@ -26,10 +26,14 @@ const choose = key => {
 const wide = new Lanes({ label: 'Subagents of this turn', clock, locale: 'en', choose });
 const narrow = new Lanes({ label: 'Subagents in a narrow box', clock, locale: 'en', choose });
 const marks = new Lanes({ label: 'Every state', clock, locale: 'en', trace: false });
+const room = new Lanes({ label: 'Subagents with long titles', clock, locale: 'en' });
+const tight = new Lanes({ label: 'Subagents in a cramped block', clock, locale: 'en' });
+room.update({ lanes: roomy('en') });
+tight.update({ lanes: cramped('en') });
 draw();
 marks.update({ lanes: states });
 document.getElementById('root').append(
-	el('main', {}, [el('h1', { text: 'Lanes' }), new Button({ label: 'Before the lanes' }).element, el('section', { class: 'fixture-wide' }, [wide.element]), el('section', { class: 'fixture-narrow' }, [narrow.element]), el('section', { class: 'fixture-marks' }, [marks.element])])
+	el('main', {}, [el('h1', { text: 'Lanes' }), new Button({ label: 'Before the lanes' }).element, el('section', { class: 'fixture-wide' }, [wide.element]), el('section', { class: 'fixture-narrow' }, [narrow.element]), el('section', { class: 'fixture-marks' }, [marks.element]), el('section', { class: 'fixture-room' }, [room.element]), el('section', { class: 'fixture-cramped' }, [tight.element])])
 );
 window.fixture = {
 	start,
@@ -50,6 +54,6 @@ window.fixture = {
 		lanes = lanes.map(lane => (lane.state === 'running' || lane.state === 'waiting' ? { ...lane, state: 'done', until: now } : lane));
 		draw();
 	},
-	destroy: () => [wide, narrow, marks].forEach(block => block.destroy()),
+	destroy: () => [wide, narrow, marks, room, tight].forEach(block => block.destroy()),
 	ready: true
 };

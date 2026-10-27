@@ -100,6 +100,10 @@ const heading = new PageHeader({ title: 'web', crumbs: [{ label: 'Environments',
 const region = new Page({ template: 'detail', width: 'standard', header: heading, arrival: new Arrival({ product: 'Conduict', href: '/back', ondismiss: () => {} }), children: [new Section({ title: 'Repositories' }).element] });
 region.aside = [document.createElement('p')];
 region.width = 'form';
+heading.lead = ['Choose which repositories it may read. ', document.createElement('a')];
+heading.lead = null;
+// @ts-expect-error a lead is words or nodes
+heading.lead = 3;
 heading.focus();
 const settings = new Preferences({ key: 'beyond-types', fallback: { appearance: 'system', locale: 'en' } });
 const asked = new PreferencesDialog({ preferences: settings, everywhere: () => '/account' });

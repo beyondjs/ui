@@ -1,6 +1,7 @@
 // The fictional words of the insets fixtures (D184): boxes no other page draws, each long enough to wrap so
 // its content reaches the box's end. English for the DOM page, Spanish for the React pages. Since 0.35.0 an
-// editable request's command, an outage whose words wrap beside Try again and a choice of one-line entries.
+// editable request's command, an outage whose words wrap beside Try again and a choice of one-line entries;
+// since 0.41.0 a table of jobs, drawn in a framed box.
 export const words = {
 	en: {
 		info: { title: 'Machines sleep after 30 minutes without work', body: 'A machine that sleeps keeps its disk and wakes up when a conversation needs it, so nothing you started is lost while it waits.', action: 'Change the idle time', other: 'Keep it awake' },
@@ -15,7 +16,8 @@ export const words = {
 		command: { title: 'Claude Code asks to run a command', text: 'npm run build && npm test -- --coverage' },
 		recovery: { cause: 'Beyond Accounts did not answer', read: 'The project', said: 'Beyond Accounts is unavailable (UNAVAILABLE)' },
 		copy: { label: 'Run this on the machine', command: 'npm run dev -- --port 4317' },
-		effort: { label: 'Effort', options: [{ value: 'low', label: 'Low' }, { value: 'medium', label: 'Medium' }, { value: 'high', label: 'High' }] }
+		effort: { label: 'Effort', options: [{ value: 'low', label: 'Low' }, { value: 'medium', label: 'Medium' }, { value: 'high', label: 'High' }] },
+		jobs: { label: 'Jobs', columns: { job: 'Job', state: 'State', organization: 'Organization', started: 'Started' }, rows: [['Prepare storefront', 'Running', 'Nimbus Studio', '10:42'], ['Deliver release 14', 'Finished', 'Quartz Collective', '10:31'], ['Prepare docs', 'Failed', 'Nimbus Studio', '09:58'], ['Purge old outputs', 'Finished', 'Quartz Collective', '09:12']] }
 	},
 	es: {
 		info: { title: 'Las máquinas se duermen tras 30 minutos sin trabajo', body: 'Una máquina que duerme conserva su disco y se despierta cuando una conversación la necesita, así que no se pierde nada de lo que empezaste mientras espera.', action: 'Cambiar el tiempo de espera', other: 'Mantenerla despierta' },
@@ -30,6 +32,14 @@ export const words = {
 		command: { title: 'Claude Code pide ejecutar un comando', text: 'npm run build && npm test -- --coverage' },
 		recovery: { cause: 'Beyond Accounts no respondió', read: 'El proyecto', said: 'Beyond Accounts no está disponible (UNAVAILABLE)' },
 		copy: { label: 'Ejecuta esto en la máquina', command: 'npm run dev -- --port 4317' },
-		effort: { label: 'Esfuerzo', options: [{ value: 'low', label: 'Bajo' }, { value: 'medium', label: 'Medio' }, { value: 'high', label: 'Alto' }] }
+		effort: { label: 'Esfuerzo', options: [{ value: 'low', label: 'Bajo' }, { value: 'medium', label: 'Medio' }, { value: 'high', label: 'Alto' }] },
+		jobs: { label: 'Trabajos', columns: { job: 'Trabajo', state: 'Estado', organization: 'Organización', started: 'Empezó' }, rows: [['Preparar storefront', 'En curso', 'Nimbus Studio', '10:42'], ['Entregar la versión 14', 'Terminó', 'Quartz Collective', '10:31'], ['Preparar la documentación', 'Falló', 'Nimbus Studio', '09:58'], ['Purgar salidas antiguas', 'Terminó', 'Quartz Collective', '09:12']] }
 	}
 };
+
+/** A table of jobs as `DataTable` takes it (0.41.0): its columns and rows, each row opening its job. */
+export function jobs(copy) {
+	const columns = Object.entries(copy.jobs.columns).map(([key, label], index) => ({ key, label, ...(index === 0 ? { primary: true } : {}) }));
+	const rows = copy.jobs.rows.map(([job, state, organization, started], index) => ({ id: `job_${index}`, job, state, organization, started }));
+	return { label: copy.jobs.label, columns, rows, link: row => `#/jobs/${row.id}` };
+}

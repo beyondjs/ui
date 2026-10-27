@@ -25,6 +25,8 @@ export function DataTable<Row = any>(props: {
 	empty?: { title: string; text?: string | null; action?: { label: string; href?: string | null } | null } | null;
 	status?: 'loading' | 'ready' | { failed: string | null };
 	onRetry?: (() => void) | null;
+	/** Drawn at the top of a framed box: its first capitals at the box's inset (0.41.0, D184) */
+	framed?: boolean;
 	/** Memoize: a new object creates a new table */
 	labels?: Copy;
 }): ReactElement;
