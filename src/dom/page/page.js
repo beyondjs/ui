@@ -5,6 +5,7 @@ import { PageDock } from './dock.js';
 import { Primaries } from '../core/primaries.js';
 import { Hierarchy } from '../core/hierarchy.js';
 import { Ellipses } from '../core/ellipses.js';
+import { Focus } from '../core/focusing.js';
 
 const templates = Object.freeze(['overview', 'list', 'detail', 'settings', 'task', 'tool', 'thread']);
 const widths = Object.freeze(['fluid', 'standard', 'form', 'reading', 'thread']);
@@ -64,6 +65,7 @@ export class Page extends Component {
 	#primaries = null;
 	#hierarchy = null;
 	#ellipses = null;
+	#focus = null;
 
 	/**
 	 * @param {object} [options]
@@ -107,6 +109,8 @@ export class Page extends Component {
 		if (Hierarchy.enabled) this.#hierarchy = new Hierarchy({ root: this.#element });
 		// A visible action is named whole, its "…" only inside a menu, warned in a development build (0.28.0, D179)
 		if (Ellipses.enabled) this.#ellipses = new Ellipses({ root: this.#element });
+		// Focus says what the keys do there, followed over the page's document in a development build (0.44.0, D187)
+		if (Focus.enabled) this.#focus = new Focus({ root: this.#element.ownerDocument });
 	}
 
 	/** The panel kept in view (`PagePanel`), when the page was made with `panel`; null otherwise. */
@@ -199,6 +203,7 @@ export class Page extends Component {
 		this.#primaries?.destroy();
 		this.#hierarchy?.destroy();
 		this.#ellipses?.destroy();
+		this.#focus?.destroy();
 		this.#panel?.destroy();
 		this.#dock?.destroy();
 		super.destroy();

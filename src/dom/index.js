@@ -110,3 +110,4 @@ export { ChoiceCards } from './choice/cards.js';
 export { Primaries } from './core/primaries.js';
 export { Hierarchy } from './core/hierarchy.js';
 export { Ellipses } from './core/ellipses.js';
+export { Focus } from './core/focusing.js';

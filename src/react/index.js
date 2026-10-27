@@ -58,4 +58,5 @@ export { CommandPalette, ChoiceCards } from './command.js';
 export { Primaries } from '../dom/core/primaries.js';
 export { Hierarchy } from '../dom/core/hierarchy.js';
 export { Ellipses } from '../dom/core/ellipses.js';
+export { Focus } from '../dom/core/focusing.js';
 export { Floating } from '../dom/core/floating.js';

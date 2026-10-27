@@ -5,6 +5,7 @@ import { PagePanel } from '../dom/page/panel.js';
 import { Primaries } from '../dom/core/primaries.js';
 import { Hierarchy } from '../dom/core/hierarchy.js';
 import { Ellipses } from '../dom/core/ellipses.js';
+import { Focus } from '../dom/core/focusing.js';
 import { PageDock } from '../dom/page/dock.js';
 import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
@@ -87,6 +88,12 @@ export function Page({ template = 'detail', width = null, arrival = null, header
 	useLayoutEffect(() => {
 		if (!Ellipses.enabled || !frame.current) return undefined;
 		const watched = new Ellipses({ root: frame.current });
+		return () => watched.destroy();
+	}, []);
+	// Focus says what the keys do there, followed over the page's document in a development build (0.44.0, D187)
+	useLayoutEffect(() => {
+		if (!Focus.enabled || !frame.current) return undefined;
+		const watched = new Focus({ root: frame.current.ownerDocument });
 		return () => watched.destroy();
 	}, []);
 	useLayoutEffect(() => {
