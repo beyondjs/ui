@@ -98,6 +98,8 @@ export { RowKeys } from './list/keys.js';
 export { EndLine } from './list/end.js';
 export { Matches } from './list/matches.js';
 export { Recency } from './collection/recency.js';
+export { Period } from './collection/period.js';
+export { Differ } from './list/differ.js';
 export { CopyValue } from './list/value.js';
 export { Checklist } from './checklist/checklist.js';
 export { EmptyState } from './checklist/empty.js';

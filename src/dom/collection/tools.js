@@ -4,10 +4,15 @@ import { Labels } from '../core/labels.js';
 import { CollectionSearch } from './search.js';
 import { CollectionFilters } from './filters.js';
 import { words } from './tools-labels.js';
+import { Period } from './period.js';
 
-/** Shared tools for collections, supplied-row tables and product-owned object lists. */
+/**
+ * Shared tools for collections, supplied-row tables and product-owned object lists. A filter of
+ * `kind: 'period'` (0.44.0) chooses a period; `CollectionTools.Period.range(value)` reads its range.
+ */
 export class CollectionTools extends Component {
 	static labels = words;
+	static Period = Period;
 	#element;
 	#search = null;
 	#filters = null;

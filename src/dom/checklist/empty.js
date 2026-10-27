@@ -3,6 +3,7 @@ import { el, content } from '../core/element.js';
 import { glyph } from '../core/icons.js';
 import { Labels } from '../core/labels.js';
 import { Checklist } from './checklist.js';
+import { EmptyAction } from './action.js';
 
 const defaults = { clear: 'Clear the filter', outage: 'Not available right now' };
 const marks = { empty: 'box', match: 'search', context: 'folder', outage: 'globe' };
@@ -53,7 +54,7 @@ export class EmptyState extends Component {
 		}
 		frame ??= !outage;
 		this.#checklist = outage ? null : checklist instanceof Checklist ? checklist : checklist ? new Checklist(checklist) : null;
-		const actions = outage ? [] : [EmptyState.#action(action), type === 'match' && clear ? el('button', { type: 'button', class: 'bui-button bui-button-quiet bui-button-small', onclick: () => clear() }, [el('span', { text: words.text('clear') })]) : null].filter(Boolean);
+		const actions = outage ? [] : [EmptyAction.draw(action), type === 'match' && clear ? el('button', { type: 'button', class: 'bui-button bui-button-quiet bui-button-small', onclick: () => clear() }, [el('span', { text: words.text('clear') })]) : null].filter(Boolean);
 		this.#element = el('div', { class: `bui-empty bui-empty-${type}${frame ? '' : ' bui-empty-unframed'}`, 'data-kind': type }, [
 			el('span', { class: 'bui-empty-mark', 'aria-hidden': 'true' }, [glyph(mark ?? marks[type])]),
 			el('p', { class: 'bui-empty-title' }, [content(title ?? (outage ? words.text('outage') : ''))]),
@@ -75,15 +76,5 @@ export class EmptyState extends Component {
 	destroy() {
 		this.#checklist?.destroy();
 		super.destroy();
-	}
-
-	static #action(action) {
-		if (!action) return null;
-		if (typeof action.nodeType === 'number') return action;
-		const { label, href = null, run = null } = action;
-		const node = href ? el('a', { class: 'bui-button bui-button-primary', href }) : el('button', { type: 'button', class: 'bui-button bui-button-primary' });
-		node.append(el('span', { text: label }));
-		if (run) node.addEventListener('click', event => run(event));
-		return node;
 	}
 }

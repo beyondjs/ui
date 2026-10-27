@@ -4,6 +4,7 @@ import { Collection as List } from '../dom/collection/collection.js';
 import { h, useInstance, useLatest, useSync } from './hooks.js';
 import { useTools } from './collection-tools.js';
 import { HeldNotice } from './held.js';
+import { EmptyRead } from './empty-read.js';
 
 const { useEffect, useRef, useState } = React;
 
@@ -14,11 +15,13 @@ const { useEffect, useRef, useState } = React;
  * changes. `link(row)` makes rows open their detail; `onOpen(row, event)` takes over the navigation.
  * Since 0.24.0 (D163) `recovery` (a notice from `useRecovery`), `outage(error)` and `details(error)` let a
  * read that did not answer join the page's notice and say "Not available right now" in its place.
+ * Since 0.44.0 `empty.action` is the empty list's one action, as `EmptyState`'s: `{ label, href, onSelect }`
+ * or React content (the section's own button), and `empty` is read from the latest props on each draw.
  */
 export function Collection({ label, columns, source, link = null, onOpen = null, search = true, filters = [], tools = 'compact', toolsTarget = null, state = null, onState = null, limit = 20, empty = null, explain = null, labels, presentation = 'table', row = null, group = null, end = true, recovery = null, outage = null, details = null }) {
 	const cells = useRef([]);
 	const [portals, setPortals] = useState([]);
-	const latest = useLatest({ source, onOpen, onState, explain, columns, link, row, group, end, recovery, outage, details });
+	const latest = useLatest({ source, onOpen, onState, explain, columns, link, row, group, end, recovery, outage, details, empty });
 	const [waiting] = useState(() => new HeldNotice(latest));
 	useEffect(() => waiting.flush(), [waiting, recovery]);
 	const [host, list] = useInstance(
@@ -27,7 +30,7 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 				label,
 				presentation,
 				// The list's own row options and groups (0.21.1) read the latest props
-				row: row ? item => latest.current.row?.(item) ?? {} : null,
+				row: row ? (item, context) => latest.current.row?.(item, context) ?? {} : null,
 				group: group ? item => latest.current.group(item) : null,
 				// A function reads the latest props; words and switches are read when the list is made
 				end: typeof end === 'function' ? list => latest.current.end(list) : end,
@@ -35,7 +38,8 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 				filters,
 				tools,
 				limit,
-				empty,
+				// Read on each draw: its words and its one action follow the latest props (0.44.0)
+				empty: new EmptyRead(latest, cells),
 				labels,
 				state: state ?? {},
 				source: request => latest.current.source(request),
