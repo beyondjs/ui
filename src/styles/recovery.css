@@ -197,14 +197,19 @@
    not answer and, under the words, when it last tried; its way on after them, on their first line. */
 .bui-navmenu-notice[data-tone='warning'] {
 	flex-wrap: nowrap;
-	align-items: flex-start;
 	background: var(--color-warning-surface);
 }
+/* One line tall with a baseline of its own, so the row's baseline sets it on the words' first line */
 .bui-navmenu-notice-mark {
 	display: inline-flex;
 	flex: none;
-	margin-top: calc((1lh - 16px) / 2);
+	align-items: center;
+	height: 1lh;
 	color: var(--color-warning);
+}
+.bui-navmenu-notice-mark::before {
+	content: '\200b';
+	width: 0;
 }
 .bui-navmenu-notice-mark > .bui-icon {
 	width: 16px;

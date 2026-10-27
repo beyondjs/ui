@@ -1,10 +1,12 @@
 // The family bar page of the plain DOM consumer, in English (the package defaults): FamilyBar with the
 // descriptor `?family=` names, ProductNav, the lockup at every height from 18 to 40 px, Unavailable and
-// a confirmation with its consequence. window.fixture exposes the bar, a log and a teardown.
+// a confirmation with its consequence; `?notice=outage` gives the project menu an outage's notice (0.44.0).
+// window.fixture exposes the bar, a log and a teardown.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { FamilyBar, ProductNav, Sidebar, NotificationEntry, Unavailable, Button, confirm, lockup, badge, availability } from '@beyond-js/ui';
+import { outage } from '../data/notice.js';
 import { Notices } from '../data/notices.js';
 import { chosen, descriptors, fallback, product, sidebar, sections } from '../data/family.js';
 
@@ -20,7 +22,8 @@ const bar = new FamilyBar({
 	fallback,
 	notifications: entry.element,
 	account: { signout: () => log.push('signout'), items: [{ label: 'Delegate settings', href: '#/settings' }] },
-	onnavigate: item => log.push(`navigate:${item.href}`)
+	onnavigate: item => log.push(`navigate:${item.href}`),
+	notice: outage('en', () => log.push('again'))
 }).mount(root);
 // With `?sidebar=<cut>` the page has the product's sections in a shell; otherwise the product navigation row.
 const shell = sidebar ? root.appendChild(Object.assign(document.createElement('div'), { className: 'bui-shell' })) : root;
