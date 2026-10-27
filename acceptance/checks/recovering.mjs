@@ -136,5 +136,28 @@ export const checks = [
 				await context.close();
 			}
 		}
+	},
+	{
+		name: 'recovery: a part not drawn leaves no gap: offline at 390 px its evidence follows its words as online it follows Try again (0.44.0)',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			const { page, context } = await browser.open(consumer, { file: 'recovery.html', viewport: { width: 390, height: 900 } });
+			try {
+				await page.evaluate(() => document.fonts.ready);
+				await page.locator('.bui-recovery:not([hidden]) .bui-again').waitFor();
+				const gap = above =>
+					page.evaluate(above => {
+						const notice = document.querySelector('.bui-recovery');
+						return notice.querySelector(':scope > .bui-details').getBoundingClientRect().top - notice.querySelector(above).getBoundingClientRect().bottom;
+					}, above);
+				const online = await gap('.bui-recovery-actions');
+				await context.setOffline(true);
+				await page.waitForSelector('.bui-recovery[data-offline]:not([hidden])');
+				const offline = await gap('.bui-recovery-words');
+				expect(online > 0 && Math.abs(online - offline) <= 0.5, `one gap above the evidence, whatever is drawn before it: ${JSON.stringify({ online, offline })}`);
+			} finally {
+				await context.close();
+			}
+		}
 	}
 ];

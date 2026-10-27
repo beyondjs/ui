@@ -109,6 +109,21 @@ test('FamilyBar applies its notice prop and calls the latest action', async () =
 	assert.equal(line(), null);
 });
 
+test('FamilyBar passes its notice\'s outage and redraws when its moments change (0.44.0)', async () => {
+	const last = Date.parse('2026-10-27T12:04:00');
+	const view = moments => h(ui.FamilyBar, { product: 'delegate', brand, descriptor: annotated, notice: { text: 'Beyond Projects did not answer.', outage: { moments: { ...moments, now: () => undefined }, locale: 'en' } }, account: { signout: () => {} } });
+	await render(view({ active: true, trying: false, last, next: null }));
+	const bar = document.querySelector('.bui-family');
+	const line = () => bar.querySelector('.bui-family-wide [data-part="project"] .bui-navmenu-notice');
+	assert.equal(line().dataset.tone, 'warning');
+	assert.match(line().querySelector('.bui-again').textContent, /^Last tried /);
+	const drawn = line();
+	await render(view({ active: true, trying: false, last, next: 5000 }));
+	assert.equal(line(), drawn, 'moments the line does not read redraw nothing');
+	await render(view({ active: true, trying: true, last, next: null }));
+	assert.equal(line().querySelector('.bui-again').textContent, 'Trying again…');
+});
+
 test('Sidebar renders its groups, follows its props and opens its drawer below the cut', async () => {
 	const seen = [];
 	const groups = current => [{ heading: 'Project', items: [{ label: 'Requests', href: '/requests', current: current === 0 }, { label: 'Versions', href: '/versions', current: current === 1 }] }];

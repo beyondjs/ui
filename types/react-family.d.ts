@@ -18,7 +18,7 @@ export interface FamilyBarProps {
 	onNavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null;
 	advisory?: string[];
 	/** One line at the top of the project menu (0.4.0); its action's `onSelect` is called with the latest props. */
-	notice?: { text: string; href?: string | null; action?: { label: string; href?: string | null; onSelect?: (() => void) | null } | null } | null;
+	notice?: { text: string; href?: string | null; action?: { label: string; href?: string | null; onSelect?: (() => void) | null } | null; /** An outage, in the warning tone with its last try (0.44.0, D132). */ outage?: true | import('./family.js').FamilyOutage | null } | null;
 	/** The product's own dialog markers, left out of the address Accounts returns to (0.4.0). */
 	transient?: string[];
 	/** Memoize: a new object creates a new bar */

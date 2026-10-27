@@ -89,6 +89,15 @@ export interface FamilyNotice {
 	text: string;
 	href?: string | null;
 	action?: { label: string; href?: string | null; run?: (() => void) | null } | null;
+	/** The notice says an outage (0.44.0, D132): the warning tone and the outage's mark, and with `moments` (from `Again` or React's `useAgain`) "Last tried {time}" under its words. */
+	outage?: true | FamilyOutage | null;
+}
+
+/** When an outage the bar's notice says last tried (0.44.0): `AgainLine`'s words in `locale`, `labels` its `AgainLine.labels.es` for Spanish. */
+export interface FamilyOutage {
+	moments?: Pick<import('./again.js').AgainMoments, 'active' | 'trying' | 'last' | 'offline'> | null;
+	locale?: string;
+	labels?: import('./notifications.js').Copy;
 }
 
 export interface FamilyNavigation {

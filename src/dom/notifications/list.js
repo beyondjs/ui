@@ -1,6 +1,9 @@
 import { el, content } from '../core/element.js';
 import { Ids } from '../core/ids.js';
-import { callout, hidden } from '../feedback.js';
+import { glyph } from '../core/icons.js';
+import { hidden } from '../feedback.js';
+import { CauseName } from '../family/cause.js';
+import { names } from '../family/labels.js';
 
 /**
  * Draws notification items for the entry panel and the inbox.
@@ -67,13 +70,17 @@ export class NoticeList {
 	}
 
 	/**
-	 * The warning that some products could not be reached, naming each by its display name (the id
-	 * when the product gave none); null when every product answered.
+	 * Who did not answer, when some products could not be reached (0.44.0, D163): one line per product in the
+	 * family's catalog of causes ("Beyond CDN did not answer", `CauseName`; a product outside the family by its
+	 * display name, else its id), then that their notifications are not listed; null when every product answered.
 	 */
 	partial(missing) {
 		if (!missing.length) return null;
-		const products = missing.map(id => this.#products[id] ?? id).join(', ');
-		return callout({ tone: 'warning', title: this.#labels.text('partial', { products }) });
+		const lines = missing.map(id => el('li', { class: 'bui-callout-title', text: this.#labels.text('silent', { product: names[id] ? CauseName.of(id) : (this.#products[id] ?? id) }) }));
+		return el('div', { class: 'bui-callout bui-callout-warning bui-notify-partial' }, [
+			glyph('globe'),
+			el('div', { class: 'bui-callout-body' }, [el('ul', { class: 'bui-notify-silent' }, lines), el('p', { class: 'bui-callout-text', text: this.#labels.text('unlisted', { count: missing.length }) })])
+		]);
 	}
 
 	/**

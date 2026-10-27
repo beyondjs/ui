@@ -57,7 +57,9 @@
 	grid-area: details;
 	margin-top: var(--space-1);
 }
-/* A narrow region: Try again under the words, on their edge. */
+/* A narrow region: Try again under the words, on their edge. Its rows keep no gap of their own: each part that is
+   drawn keeps its room above it, so a line offline (no Try again) or with no Technical details ends at its words or
+   its action, never one empty row's gap further (0.44.0). */
 @media (max-width: 480px) {
 	.bui-recovery {
 		grid-template-columns: auto minmax(0, 1fr);
@@ -66,11 +68,21 @@
 			'. action'
 			'. details';
 		align-items: start;
-		row-gap: var(--space-2);
+		row-gap: 0;
+	}
+	.bui-recovery-actions {
+		margin-top: var(--space-2);
+	}
+	.bui-recovery > .bui-details {
+		margin-top: calc(var(--space-2) + var(--space-1));
 	}
 	.bui-recovery-mark {
 		margin-top: calc((1lh - 18px) / 2);
 	}
+}
+/* Offline there is no Try again (0.33.0): its row takes no room in any form (0.44.0). */
+.bui-recovery[data-offline] > .bui-recovery-actions {
+	display: none;
 }
 
 /* The page form: nothing on the page could be read, so the outage is the page's body, as `Unavailable` draws one. */
@@ -81,7 +93,7 @@
 		'. action'
 		'. details';
 	align-items: start;
-	row-gap: var(--space-2);
+	row-gap: 0;
 	max-width: 44rem;
 	padding: var(--space-6);
 	border-left-width: 1px;
@@ -108,8 +120,12 @@
 	font-size: var(--text-title-2);
 	line-height: var(--leading-title-2);
 }
+/* Each part keeps its room above it, so a part that is not drawn leaves no gap (0.44.0) */
 .bui-recovery[data-recovery='page'] .bui-recovery-actions {
-	margin-top: var(--space-2);
+	margin-top: var(--space-4);
+}
+.bui-recovery[data-recovery='page'] > .bui-details {
+	margin-top: calc(var(--space-2) + var(--space-1));
 }
 @media (max-width: 480px) {
 	.bui-recovery[data-recovery='page'] {
@@ -175,4 +191,42 @@
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
 	font-variant-numeric: tabular-nums;
+}
+
+/* The family bar's notice when it says an outage (0.44.0, D132): the warning tone with the outage's mark, who did
+   not answer and, under the words, when it last tried; its way on after them, on their first line. */
+.bui-navmenu-notice[data-tone='warning'] {
+	flex-wrap: nowrap;
+	align-items: flex-start;
+	background: var(--color-warning-surface);
+}
+.bui-navmenu-notice-mark {
+	display: inline-flex;
+	flex: none;
+	margin-top: calc((1lh - 16px) / 2);
+	color: var(--color-warning);
+}
+.bui-navmenu-notice-mark > .bui-icon {
+	width: 16px;
+	height: 16px;
+}
+.bui-navmenu-notice-words {
+	display: grid;
+	flex: 1;
+	gap: 2px;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.bui-navmenu-notice-action {
+	flex: none;
+}
+
+/* Who did not answer among the products a list of notifications reads (0.44.0, D163): one line each, then what is
+   not listed. */
+.bui-notify-silent {
+	display: grid;
+	gap: 2px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }

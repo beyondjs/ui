@@ -33,6 +33,10 @@ export interface DetailsRecord {
 	time?: Moment | null;
 	/** The reads one incident affected, a row each under one disclosure (0.24.0, D163). */
 	entries?: DetailsEntry[];
+	/** The language of the shown time (0.44.0; the DOM `TechnicalDetails` always took it). */
+	locale?: string;
+	/** "Technical details" and its rows' words, `TechnicalDetails.labels.es` for Spanish (0.44.0). */
+	labels?: Copy;
 }
 
 /** One read an incident affected, in its Technical details (0.24.0). */

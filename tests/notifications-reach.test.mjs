@@ -16,25 +16,32 @@ beforeEach(() => page.reset());
 const products = { delegate: 'Delegate', cdn: 'CDN', projects: 'Projects' };
 const badge = entry => entry.element.querySelector('.bui-count');
 const partial = root => root.querySelector('.bui-callout-warning')?.textContent ?? '';
+const lines = root => [...root.querySelectorAll('.bui-notify-silent > li')].map(line => line.textContent);
 
 async function opened(entry) {
 	entry.button.click();
 	await page.until(() => entry.panel.querySelector('.bui-notice'));
 }
 
-test('partial results name unreachable products by their display names, falling back to the id', async () => {
+test('partial results say one line per product that did not answer, in the catalog of causes, else its display name or id (0.44.0)', async () => {
 	const notices = new Notices();
 	notices.missing = ['cdn'];
 	const named = new NotificationEntry({ adapter: notices.adapter, products }).mount(document.body);
 	await opened(named);
-	assert.match(partial(named.panel), /No response from CDN/);
-	assert.doesNotMatch(partial(named.panel), /No response from cdn/);
-	const unnamed = new NotificationEntry({ adapter: notices.adapter, products: { delegate: 'Delegate' } }).mount(document.body);
+	assert.deepEqual(lines(named.panel), ['Beyond CDN did not answer']);
+	assert.match(partial(named.panel), /Its notifications are not listed\.$/);
+	assert.equal(named.panel.querySelector('.bui-notify-partial').getAttribute('role'), null, 'drawn with the list, never announced as an alert');
+	notices.missing = ['acme'];
+	const outside = new NotificationEntry({ adapter: notices.adapter, products: { acme: 'Acme Billing' } }).mount(document.body);
+	await opened(outside);
+	assert.deepEqual(lines(outside.panel), ['Acme Billing did not answer'], 'a product outside the family by its display name');
+	const unnamed = new NotificationEntry({ adapter: notices.adapter, products: {} }).mount(document.body);
 	await opened(unnamed);
-	assert.match(partial(unnamed.panel), /No response from cdn/, 'an id without a display name is shown as it is');
+	assert.deepEqual(lines(unnamed.panel), ['acme did not answer'], 'an id without a display name is said as it is');
+	notices.missing = ['cdn'];
 	const inbox = new NotificationInbox({ adapter: notices.adapter, products, state: { state: 'all' } }).mount(document.body);
 	await page.until(() => inbox.element.querySelector('.bui-notice'));
-	assert.match(partial(inbox.element), /CDN/);
+	assert.deepEqual(lines(inbox.element), ['Beyond CDN did not answer']);
 });
 
 test('sources with state unavailable are the partial signal in lists; available sources are not', async () => {
@@ -46,10 +53,12 @@ test('sources with state unavailable are the partial signal in lists; available 
 	entry.close();
 	notices.missing = ['cdn', 'projects'];
 	await opened(entry);
-	assert.match(partial(entry.panel), /CDN, Projects/);
-	const inbox = new NotificationInbox({ adapter: notices.adapter, products, state: { state: 'all' } }).mount(document.body);
+	assert.deepEqual(lines(entry.panel), ['Beyond CDN did not answer', 'Beyond Projects did not answer'], 'one line each, never one sentence listing them');
+	assert.match(partial(entry.panel), /Their notifications are not listed\.$/);
+	const inbox = new NotificationInbox({ adapter: notices.adapter, products, state: { state: 'all' }, locale: 'es', labels: NotificationInbox.labels.es }).mount(document.body);
 	await page.until(() => inbox.element.querySelector('.bui-notice'));
-	assert.match(partial(inbox.element), /CDN, Projects/);
+	assert.deepEqual(lines(inbox.element), ['Beyond CDN no respondió', 'Beyond Projects no respondió']);
+	assert.match(partial(inbox.element), /Sus notificaciones no aparecen en la lista\.$/);
 });
 
 test('a bounded summary shows N+ for any N; an unbounded one keeps 99+ past 99', async () => {
@@ -101,7 +110,8 @@ test('the new copy is replaced through labels', async () => {
 	const labels = {
 		button: ({ count, more }) => (count === null ? 'Notificaciones' : `Notificaciones, ${count}${more ? ' o más' : ''} sin leer`),
 		badge: ({ count, more }) => (more ? `${count} o más` : String(count)),
-		partial: 'Algunos productos no respondieron ({products}).'
+		silent: '{product} no contestó',
+		unlisted: 'Faltan sus avisos.'
 	};
 	const entry = new NotificationEntry({ adapter: notices.adapter, products, labels }).mount(document.body);
 	await page.until(() => entry.count === 2);
@@ -112,7 +122,7 @@ test('the new copy is replaced through labels', async () => {
 	assert.equal(entry.button.getAttribute('aria-label'), 'Notificaciones, 2 o más sin leer');
 	notices.missing = ['projects'];
 	await opened(entry);
-	assert.equal(partial(entry.panel), 'Algunos productos no respondieron (Projects).');
+	assert.equal(partial(entry.panel), 'Beyond Projects no contestóFaltan sus avisos.');
 });
 
 test('View all with onview closes the panel, returns focus to the bell and hands over', async () => {

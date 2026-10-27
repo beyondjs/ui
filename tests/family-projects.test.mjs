@@ -159,6 +159,31 @@ test('the product\'s notice: one line at the top of the project menu, its action
 	bar.destroy();
 });
 
+test('a notice that says an outage: the warning tone, the outage\'s mark and when it last tried (0.44.0, D132)', () => {
+	const last = Date.parse('2026-10-27T12:04:00');
+	const notice = { text: 'Beyond Projects did not answer. Only this project is shown.', action: { label: 'Try again', run: () => {} }, outage: { moments: { active: true, trying: false, last, offline: false }, locale: 'en' } };
+	const bar = make({ descriptor: { unavailable: true }, fallback: { organization: 'Northwind', project: 'Storefront' }, notice });
+	const line = () => menu(bar, 'project').querySelector('.bui-navmenu-notice');
+	assert.equal(line().dataset.tone, 'warning');
+	assert.ok(line().querySelector('.bui-navmenu-notice-mark .bui-icon'), 'the outage\'s mark');
+	assert.equal(line().querySelector('.bui-navmenu-notice-words > span').textContent, notice.text);
+	assert.equal(line().querySelector('.bui-again').textContent, ui.AgainLine.say(notice.outage.moments, { locale: 'en', now: last }));
+	assert.match(line().querySelector('.bui-again').textContent, /^Last tried /);
+	assert.equal(line().querySelector('.bui-navmenu-notice-words + .bui-navmenu-notice-action').textContent, 'Try again', 'its way on after the words');
+	bar.notice = { ...notice, outage: { moments: { active: true, trying: true, last, offline: false } } };
+	assert.equal(line().querySelector('.bui-again').textContent, 'Trying again…');
+	bar.notice = { text: 'You’re offline. Only this project is shown.', outage: { moments: { active: true, trying: false, last, offline: true }, labels: ui.AgainLine.labels.es } };
+	assert.match(line().querySelector('.bui-again').textContent, /^Último intento .* en cuanto vuelvas a tener conexión$/);
+	assert.equal(line().querySelector('.bui-navmenu-notice-action'), null, 'offline the product offers nothing that cannot work');
+	bar.notice = { text: 'Beyond Projects did not answer.', outage: true };
+	assert.equal(line().dataset.tone, 'warning');
+	assert.equal(line().querySelector('.bui-again'), null, 'no moments: no last-tried line');
+	bar.notice = { text: "Delegate isn't set up for Northwind" };
+	assert.equal(line().dataset.tone, undefined, 'a notice that is no outage keeps its information tone');
+	assert.equal(line().querySelector('.bui-navmenu-notice-mark'), null);
+	bar.destroy();
+});
+
 test('unavailable with a notice: the project menu says so, keeps the project in view and all projects', () => {
 	const notice = { text: "Beyond Projects didn't answer. Projects not yet in Delegate may be missing.", action: { label: 'Try again', run: () => {} } };
 	const fallback = { organization: 'Northwind', project: 'Storefront', organizations: standing, links: { projects: '/delegate/projects' } };

@@ -108,7 +108,16 @@ export const pages = {
 			// Offline (0.33.0) the line says so with no Try again: its words alone set it (0.35.0)
 			{ open: async page => (await page.context().setOffline(true), page.waitForSelector('.bui-recovery[data-offline]:not([hidden])')), boxes: [{ name: 'Recovery offline, with no Try again', box: '.bui-recovery[data-offline]', inset: '--bui-recovery-inset' }] }
 		] },
-		{ file: 'recovery.html', query: '?whole=1', steps: [{ boxes: [{ name: 'Recovery as the page', box: '.bui-recovery', inset: '--bui-recovery-inset' }] }] }
+		{ file: 'recovery.html', query: '?whole=1', steps: [{ boxes: [{ name: 'Recovery as the page', box: '.bui-recovery', inset: '--bui-recovery-inset' }] }] },
+		// With no Technical details (0.44.0): the line ends at Try again, or offline at its words, never an empty row's gap further
+		{ file: 'recovery.html', query: '?bare=1', steps: [
+			{ boxes: [{ name: 'Recovery line with no Technical details', box: '.bui-recovery', inset: '--bui-recovery-inset' }] },
+			{ open: async page => (await page.context().setOffline(true), page.waitForSelector('.bui-recovery[data-offline]:not([hidden])')), boxes: [{ name: 'Recovery offline with no Technical details', box: '.bui-recovery[data-offline]', inset: '--bui-recovery-inset' }] }
+		] },
+		{ file: 'recovery.html', query: '?whole=1&bare=1', steps: [
+			{ boxes: [{ name: 'Recovery as the page with no Technical details', box: '.bui-recovery', inset: '--bui-recovery-inset' }] },
+			{ open: async page => (await page.context().setOffline(true), page.waitForSelector('.bui-recovery[data-offline]:not([hidden])')), boxes: [{ name: 'Recovery as the page offline with no Technical details', box: '.bui-recovery[data-offline]', inset: '--bui-recovery-inset' }] }
+		] }
 	],
 	cards: [
 		{ file: 'insets.html', steps: [

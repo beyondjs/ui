@@ -27,8 +27,8 @@ export const words = {
 	}
 };
 
-/** The page's language and form from its address: `?lang=es`, `?whole=1`. */
+/** The page's language and form from its address: `?lang=es`, `?whole=1`, and `?bare=1` for reads with no evidence (0.44.0). */
 export function shape(search = location.search) {
 	const query = new URLSearchParams(search);
-	return { language: query.get('lang') === 'es' ? 'es' : 'en', whole: query.has('whole') };
+	return { language: query.get('lang') === 'es' ? 'es' : 'en', whole: query.has('whole'), bare: query.has('bare') };
 }
