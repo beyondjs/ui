@@ -53,8 +53,9 @@ export const checks = [
 				const panel = document.querySelector('.bui-page-panel');
 				panel.scrollTop = panel.scrollHeight;
 			});
-			// A new gesture once the panel is at its end: engines latch a wheel gesture to the box it started in
-			await tall.page.waitForTimeout(400);
+			// A new gesture once the panel is at its end: engines latch a wheel gesture to the box it started in, Firefox
+			// for its wheel transaction (1.5 s since the last wheel event, `mousewheel.transaction.timeout`)
+			await tall.page.waitForTimeout(1700);
 			const end = await read(tall.page);
 			await tall.page.mouse.wheel(0, 300);
 			expect(await settles(tall.page, y => scrollY > y + 50, end.y), `a panel that scrolls, at its end: the next wheel scrolls the page from ${end.y}px (overscroll ${end.contain}, now ${(await read(tall.page)).y}px)`);
