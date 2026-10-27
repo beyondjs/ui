@@ -44,28 +44,24 @@ const audit = page =>
 /**
  * A checklist's own words (0.42.0): in the widest checklist, 40rem first in a page's main column as the Packages
  * interface's arrival draws it, each step's detail and a blocked step's reason are held at the reading measure.
- * Each part keeps its own words within 80 characters a line, then a long paragraph given to it does too, and no
- * line of it is wider than the measure resolved at its own size. Before 0.42.0 a detail took the checklist's
- * width: the arrival's longest detail ran to 81 characters on one line from 1024 px.
+ * Each part's measure is 54ch at its own size, its own words stay within 80 characters a line, and a long
+ * paragraph given to it does too. Before 0.42.0 a detail took the checklist's width: the arrival's longest
+ * detail ran to 81 characters on one line from 1024 px.
  */
 const steps = (page, text) =>
 	page.evaluate(text => {
 		const range = document.createRange();
-		/** The characters of each rendered line, and the widest line's width in pixels. */
+		/** The characters of each rendered line, and how many lines. */
 		const measure = node => {
 			const lines = new Map();
-			let right = -Infinity;
-			let left = Infinity;
 			for (let index = 0; index < node.firstChild.length; index++) {
 				range.setStart(node.firstChild, index);
 				range.setEnd(node.firstChild, index + 1);
 				const box = range.getClientRects()[0];
 				if (!box) continue;
 				lines.set(Math.round(box.top), (lines.get(Math.round(box.top)) ?? 0) + 1);
-				right = Math.max(right, box.right);
-				left = Math.min(left, box.left);
 			}
-			return { longest: Math.max(0, ...lines.values()), lines: lines.size, width: right - left };
+			return { longest: Math.max(0, ...lines.values()), lines: lines.size };
 		};
 		const list = document.querySelector('.bui-checklist');
 		const parts = [...document.querySelectorAll('.bui-checklist-detail, .bui-checklist-reason')];
@@ -80,11 +76,17 @@ const steps = (page, text) =>
 			const long = measure(node);
 			node.textContent = before;
 			const room = parseFloat(cap);
+			// The reading measure at the part's own size: 54 zeros in its font, as `54ch` resolves there
+			const zeros = node.appendChild(document.createElement('span'));
+			zeros.style.cssText = 'position: absolute; white-space: pre; visibility: hidden';
+			zeros.textContent = '0'.repeat(54);
+			const expected = zeros.getBoundingClientRect().width;
+			zeros.remove();
 			if (!Number.isFinite(room)) found.push(`${step} ${name}: no measure (max-width ${cap})`);
+			else if (Math.abs(room - expected) > 1) found.push(`${step} ${name}: a measure of ${room.toFixed(1)} px, not 54ch at its own size (${expected.toFixed(1)} px)`);
 			if (own.longest > 80) found.push(`${step} ${name}: its own words run to ${own.longest} characters a line`);
 			if (long.longest > 80) found.push(`${step} ${name}: a long paragraph runs to ${long.longest} characters a line`);
 			if (long.lines < 3) found.push(`${step} ${name}: a long paragraph took ${long.lines} lines`);
-			if (Number.isFinite(room) && long.width > room + 1) found.push(`${step} ${name}: a line ${long.width.toFixed(1)} px wide past its measure of ${room.toFixed(1)} px`);
 		}
 		const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
 		return { width: list.getBoundingClientRect().width, form: 40 * rem, parts: parts.map(node => node.className), found };

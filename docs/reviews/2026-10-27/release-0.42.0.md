@@ -1,6 +1,6 @@
 # Local UI 0.42.0: a checklist's words at the reading measure
 
-Evidence baseline: UI `cb0f08c` (0.41.0) on `feature/next` plus this change, made on 2026-10-27 for the round `measured`. It resolves the suite's pending `packages-ui-first-steps-line-measure`, for which the owner chose to give `Checklist`'s detail the family's reading measure rather than shorten the Packages interface's words.
+Evidence baseline: UI `cb0f08c` (0.41.0) on `feature/next` plus this change, made on 2026-10-27 for the round `measured`. It is the package's part of the suite's pending `packages-ui-first-steps-line-measure`: the owner chose to give `Checklist`'s detail the family's reading measure rather than shorten the Packages interface's words. The pending closes once the Packages interface vendors 0.42.0 and the family `frame` phase passes its arrival.
 
 ## Why
 
@@ -8,7 +8,7 @@ The family `frame` phase fails a page with a line of prose longer than 80 charac
 
 ## What changed
 
-- **`prose.css`** holds a `Checklist` step's detail (`.bui-checklist-detail`) and a blocked step's reason (`.bui-checklist-reason`) at `--layout-measure` (54ch), as a page's lead and every other part that holds a product's sentences. At the detail's 13 px, 54ch is narrower than the room a 40rem checklist gives its words: before the change a long paragraph there ran to 89 characters a line.
+- **`prose.css`** holds a `Checklist` step's detail (`.bui-checklist-detail`) and a blocked step's reason (`.bui-checklist-reason`) at `--layout-measure` (54ch), as a page's lead and every other part that holds a product's sentences. At the detail's 13 px, 54ch is narrower than the room a 40rem checklist gives its words: before the change a long paragraph there ran to 89 characters a line (Chrome 156, the new check on `layout.html?first=1` at 1024, 1440 and 1920 px, run against 0.41.0's stylesheet).
 - **Unchanged:** the checklist's own width (`--layout-form`), its head and progress, its steps' titles (names, not prose) and its actions.
 - **Documentation:** README, AGENTS.md, the catalog (Reading width, `Checklist`), architecture, validation and the acceptance README.
 

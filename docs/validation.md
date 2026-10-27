@@ -181,8 +181,8 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 
 ## UI 0.42.0: a checklist's words at the reading measure
 
-- **Unit.** `tests/checklist.test.mjs` holds the built stylesheet: `.bui-checklist-detail` and `.bui-checklist-reason` at `max-width: var(--layout-measure)`, with no later rule widening them, as `.bui-page-lead`; the checklist keeps `--layout-form` and a step's title takes no measure.
-- **Browser.** `checks/prose.mjs` opens the plain DOM `layout.html` page with `?first=1`, a checklist of first steps first in the main column as the Packages interface's arrival draws it, at 1024, 1440 and 1920 px. The checklist is at its widest (40rem). Each of three details and a blocked step's reason keeps its own words within 80 characters a line, and a long paragraph given to it does too, over three lines or more, with no line wider than the measure resolved at its own size. Without the change, the arrival's longest detail runs to 81 characters on one line. Run `npm run acceptance -- "prose:"`, then with `BEYOND_UI_BROWSER=firefox` and `BEYOND_UI_BROWSER=webkit`.
+- **Unit.** `tests/checklist.test.mjs` holds the built stylesheet: `.bui-checklist-detail` and `.bui-checklist-reason` at `max-width: var(--layout-measure)`, and no other rule that reaches them setting a width, as `.bui-page-lead`; the checklist keeps `--layout-form` and a step's title takes no measure.
+- **Browser.** `checks/prose.mjs` opens the plain DOM `layout.html` page with `?first=1`, a checklist of first steps first in the main column as the Packages interface's arrival draws it, at 1024, 1440 and 1920 px. The checklist is at its widest (40rem). Each of three details and a blocked step's reason has a measure of 54ch at its own size (54 zeros in its font), keeps its own words within 80 characters a line, and a long paragraph given to it does too, over three lines or more. Without the change, the arrival's longest detail runs to 81 characters on one line. Run `npm run acceptance -- "prose:"`, then with `BEYOND_UI_BROWSER=firefox` and `BEYOND_UI_BROWSER=webkit`.
 
   See [the release evidence](reviews/2026-10-27/release-0.42.0.md).
 

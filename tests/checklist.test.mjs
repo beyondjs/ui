@@ -101,7 +101,11 @@ test('the built stylesheet: a step\'s detail and a blocked step\'s reason stop a
 		[...sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, selectors]) => selectors.split(',').map(item => item.trim()).includes(selector)).map(([, , body]) => body);
 	const widths = selector => rules(selector).flatMap(body => [...body.matchAll(/max-width:\s*([^;]+)/g)].map(([, value]) => value.trim()));
 	for (const part of ['.bui-checklist-detail', '.bui-checklist-reason']) {
-		assert.deepEqual(widths(part), ['var(--layout-measure)'], `${part} is held at the reading measure, and nothing widens it again`);
+		assert.deepEqual(widths(part), ['var(--layout-measure)'], `${part} is held at the reading measure`);
+		// Any other rule whose selector ends in the part, however it is reached (`.bui-checklist-step ${part}`), sets no width of its own
+		const names = new RegExp(`\\${part}(?![\\w-])`);
+		const others = [...sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, selectors]) => !selectors.split(',').map(item => item.trim()).includes(part) && selectors.split(',').some(item => names.test(item.trim().split(/\s|>|\+|~/).at(-1))));
+		assert.deepEqual(others.filter(([, , body]) => /(^|;)\s*(max-)?width\s*:/.test(body)).map(([, selectors]) => selectors.trim()), [], `no other rule widens ${part}`);
 	}
 	assert.deepEqual(widths('.bui-page-lead'), ['var(--layout-measure)'], 'the same measure as a page\'s lead');
 	assert.deepEqual(widths('.bui-checklist'), ['var(--layout-form)'], 'the checklist itself keeps the form tier');
