@@ -43,9 +43,9 @@ export const checks = [
 				await page.locator('.bui-page-header .bui-list-tools').waitFor({ state: 'attached' });
 				await choose(page, '2026-09');
 				const shown = await measure(page);
-				const offered = spanish ? ['Cualquier fecha', 'Últimos 7 días', 'Últimos 30 días', 'octubre de 2026', 'septiembre de 2026', 'agosto de 2026'] : ['Any time', 'Last 7 days', 'Last 30 days', 'October 2026', 'September 2026', 'August 2026'];
+				const offered = spanish ? ['Cualquier fecha', 'Últimos 7 días', 'Últimos 30 días', 'Octubre de 2026', 'Septiembre de 2026', 'Agosto de 2026'] : ['Any time', 'Last 7 days', 'Last 30 days', 'October 2026', 'September 2026', 'August 2026'];
 				expect(JSON.stringify(shown.options) === JSON.stringify(offered), `${width}px: the periods offered: ${JSON.stringify(shown.options)}`);
-				expect(shown.chip === (spanish ? 'Periodo: septiembre de 2026' : 'Period: September 2026'), `${width}px: the chip names the period: ${shown.chip}`);
+				expect(shown.chip === (spanish ? 'Periodo: Septiembre de 2026' : 'Period: September 2026'), `${width}px: the chip names the period: ${shown.chip}`);
 				expect(shown.cut === false, `${width}px: the chip's words are whole`);
 				expect(!shown.sideways, `${width}px: the toolbar never widens the page`);
 				if (spanish) {

@@ -96,7 +96,7 @@ test('<CollectionTools> draws where it is rendered, with a period filter, and it
 	const period = { name: 'period', label: 'Period', kind: 'period', months: 2, now: clock };
 	await render(h('header', null, h(ui.CollectionTools, { ref: handle, label: 'Usage', filters: [period], labels: ui.CollectionTools.labels.es, onChange: state => changes.push(state) })));
 	await act(() => page.until(() => host.querySelector('header .bui-list-tools select')));
-	assert.deepEqual([...host.querySelectorAll('option')].map(option => option.textContent), ['Cualquier fecha', 'Últimos 7 días', 'Últimos 30 días', 'octubre de 2026', 'septiembre de 2026']);
+	assert.deepEqual([...host.querySelectorAll('option')].map(option => option.textContent), ['Cualquier fecha', 'Últimos 7 días', 'Últimos 30 días', 'Octubre de 2026', 'Septiembre de 2026']);
 	await choose(host.querySelector('select'), '2026-09');
 	assert.deepEqual(changes.at(-1), { query: '', filters: { period: '2026-09' } });
 	assert.equal(ui.Period.range(changes.at(-1).filters.period).start.toISOString(), '2026-09-01T00:00:00.000Z');

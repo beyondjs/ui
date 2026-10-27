@@ -201,25 +201,25 @@
    at times (a "Last updated" over kept rows) leaves it in place and a product sets `framed` once; a narrow table's
    sort line above its rows leaves it in place too. */
 @supports (padding-top: calc(1lh - 1cap)) {
-	.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template) ~ *) > *, :has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-table {
+	.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template, .bui-host:empty, .bui-host:has(> [hidden]:only-child)) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template, .bui-host:empty, .bui-host:has(> [hidden]:only-child)) ~ *) > *, :has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-table {
 		margin-block-start: calc((1cap - var(--bui-row)) / 2);
 	}
 	@container bui-data (max-width: 36rem) {
 		.bui-data-table[data-framed] > .bui-data-body {
 			overflow: visible;
 		}
-		.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template) ~ *) > *, :has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-table {
+		.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template, .bui-host:empty, .bui-host:has(> [hidden]:only-child)) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template, .bui-host:empty, .bui-host:has(> [hidden]:only-child)) ~ *) > *, :has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-table {
 			margin-block-start: 0;
 		}
-		.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template) ~ *) > *, :has(> .bui-data-tools:not([hidden])), :has(> .bui-data-order:not([hidden]))) > .bui-data-body .bui-data tbody > tr:first-child {
+		.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template, .bui-host:empty, .bui-host:has(> [hidden]:only-child)) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template, .bui-host:empty, .bui-host:has(> [hidden]:only-child)) ~ *) > *, :has(> .bui-data-tools:not([hidden])), :has(> .bui-data-order:not([hidden]))) > .bui-data-body .bui-data tbody > tr:first-child {
 			margin-block-start: calc(-1 * var(--space-2) - (1lh - 1cap) / 2);
 		}
 		/* A grouped table starts with its first group's heading: none of a group's room above it there, and its
 		   half-leading taken off in the heading's own size, as a label's */
-		.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template) ~ *) > *, :has(> .bui-data-tools:not([hidden])), :has(> .bui-data-order:not([hidden]))) > .bui-data-body .bui-data tbody > tr.bui-data-group:first-child {
+		.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template, .bui-host:empty, .bui-host:has(> [hidden]:only-child)) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template, .bui-host:empty, .bui-host:has(> [hidden]:only-child)) ~ *) > *, :has(> .bui-data-tools:not([hidden])), :has(> .bui-data-order:not([hidden]))) > .bui-data-body .bui-data tbody > tr.bui-data-group:first-child {
 			margin-block-start: calc(-1 * var(--space-2));
 		}
-		.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template) ~ *) > *, :has(> .bui-data-tools:not([hidden])), :has(> .bui-data-order:not([hidden]))) > .bui-data-body .bui-data tbody > tr.bui-data-group:first-child > th {
+		.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template, .bui-host:empty, .bui-host:has(> [hidden]:only-child)) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template, .bui-host:empty, .bui-host:has(> [hidden]:only-child)) ~ *) > *, :has(> .bui-data-tools:not([hidden])), :has(> .bui-data-order:not([hidden]))) > .bui-data-body .bui-data tbody > tr.bui-data-group:first-child > th {
 			padding-top: 0;
 			margin-block-start: calc((1cap - 1lh) / 2);
 		}

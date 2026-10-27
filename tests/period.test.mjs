@@ -31,7 +31,7 @@ test('the chooser names its periods in the words\' language', () => {
 	const english = new Period({ days: [1, 7], months: 2, now: clock });
 	assert.deepEqual(english.options, [{ value: 'P1D', label: 'Today' }, { value: 'P7D', label: 'Last 7 days' }, { value: '2026-10', label: 'October 2026' }, { value: '2026-09', label: 'September 2026' }]);
 	const spanish = new Period({ days: [30], months: 1, now: clock }, Collection.Tools.labels.es);
-	assert.deepEqual(spanish.options.map(option => option.label), ['Últimos 30 días', 'octubre de 2026']);
+	assert.deepEqual(spanish.options.map(option => option.label), ['Últimos 30 días', 'Octubre de 2026']);
 	assert.equal(english.option('2026-09-01/2026-09-15').label, 'Sep 1, 2026 – Sep 15, 2026');
 	assert.equal(english.option('nonsense'), null);
 	assert.deepEqual(new Period({ days: [], months: 0 }).options, [], 'a filter may offer no generated period');
@@ -92,7 +92,7 @@ test('a collection sends the chosen period to its source, which reads its range,
 
 test('Spanish tools name no period and the periods in Spanish', () => {
 	const tools = new Collection.Tools({ label: 'Uso', search: false, filters: [{ ...filter, label: 'Periodo', days: [1] }], labels: Collection.Tools.labels.es, state: { filters: { period: '2026-10' } } }).mount(document.body);
-	assert.deepEqual([...tools.element.querySelectorAll('option')].slice(0, 3).map(option => option.textContent), ['Cualquier fecha', 'Hoy', 'octubre de 2026']);
-	assert.equal(tools.element.querySelector('.bui-list-restriction:not([hidden])').getAttribute('aria-label'), 'Quitar Periodo: octubre de 2026');
+	assert.deepEqual([...tools.element.querySelectorAll('option')].slice(0, 3).map(option => option.textContent), ['Cualquier fecha', 'Hoy', 'Octubre de 2026']);
+	assert.equal(tools.element.querySelector('.bui-list-restriction:not([hidden])').getAttribute('aria-label'), 'Quitar Periodo: Octubre de 2026');
 	tools.destroy();
 });

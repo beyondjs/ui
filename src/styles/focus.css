@@ -35,9 +35,11 @@
 /* A product's reset that rings focus in no cascade layer outranks a rule of no specificity: Tailwind 3's preflight
    ships `:-moz-focusring { outline: auto; }` (0,1,0), which only Firefox applies. There the ring is restated one type
    selector above it (0,1,1), under every component's own rule on a pseudo-class (0,2,0), so a product keeps no focus
-   rule of its own (0.44.0). A box that takes typing is left to its edge, so it never takes the ring from here.
+   rule of its own (0.44.0). A box that takes typing (a field, an editable region, a textbox, a search box or a
+   combobox) is left to its edge, so it never takes the ring from here. In Firefox it also outranks a product's own
+   rule of one class (0,1,0) that takes a control's outline off: such a rule is written on `:focus-visible`.
    Chromium and WebKit drop the rule, which they cannot parse. */
-:is(:not(input, textarea, select), input:where([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file'], [type='button'], [type='submit'], [type='reset'], [type='image'])):-moz-focusring {
+:is(:not(input, textarea, select, :where([contenteditable]:not([contenteditable='false']), [role='textbox'], [role='searchbox'], [role='combobox'])), input:where([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file'], [type='button'], [type='submit'], [type='reset'], [type='image'])):-moz-focusring {
 	outline: 2px solid var(--color-focus);
 }
 @keyframes bui-ring {

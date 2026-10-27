@@ -26,6 +26,19 @@ export class Language {
 		return Language.of(globalThis.document?.documentElement?.getAttribute?.('lang'));
 	}
 
+	/**
+	 * The tag `Intl` formats dates and numbers in (0.44.0): the component's own `locale`; else the page's
+	 * `<html lang>` when its language is not the runtime's, so a Spanish page in an English browser says its
+	 * dates in Spanish beside its Spanish words; else none, and `Intl` keeps the runtime's own regional form.
+	 */
+	static tag(locale = undefined) {
+		if (locale) return locale;
+		const page = globalThis.document?.documentElement?.getAttribute?.('lang')?.trim();
+		if (!page) return undefined;
+		const runtime = new Intl.DateTimeFormat().resolvedOptions().locale;
+		return Language.of(page) === Language.of(runtime) ? undefined : page;
+	}
+
 	/** The language among `known` (a set's languages) this component speaks now; `en` when none fits. */
 	choose(known) {
 		const own = Language.of(this.#locale);
