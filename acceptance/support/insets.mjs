@@ -22,6 +22,15 @@
  * `extra` shapes drawn inside it from outside its element (a select's chevron), `flat` rows whose surface
  * shows only under the pointer or focus (a menu's entries, measured at rest by their words) and `field`
  * for a box that is itself a single-line control. Values are CSS pixels, rounded to tenths.
+ *
+ * Since 0.41.0, from CDN's copy of the round `landed`: the walk goes into an element drawn as its children
+ * alone (`display: contents`, a definition list's groups), which `checkVisibility()` calls not shown since
+ * it has no box of its own, and whose empty box never says a line stops short; and `scrolls` counts what a
+ * box or a holder inside it hides (`overflow: hidden` or `clip`) as well as what it scrolls, so a trim that
+ * hides a box's last line never passes for none. What is hidden on purpose is left out: a caption a clip
+ * hides from sight (one only a screen reader reads) and a text a line clamp ends with its ellipsis (a
+ * turn's preview). A background whose every layer is a line 2 px thin or less (a table's row dividers) is a
+ * divider, never a fill. Products copy this file; `checks/measuring.mjs` holds it.
  */
 export class Insets {
 	/** Installs `window.fixtureInsets(spec)` in every page of a context before it loads. */
@@ -65,6 +74,8 @@ export class Insets {
 			};
 			const shown = node => node.checkVisibility?.({ visibilityProperty: true, opacityProperty: true }) ?? node.getClientRects().length > 0;
 			const clipped = style => style.position === 'absolute' && (style.clip !== 'auto' || style.clipPath !== 'none');
+			/** A text a line clamp ends on purpose, saying it is cut with its ellipsis. */
+			const clamped = style => Boolean(style.webkitLineClamp) && style.webkitLineClamp !== 'none';
 			/** The colour behind a node: its nearest ancestor's fill. */
 			const behind = node => {
 				for (let item = node.parentElement; item; item = item.parentElement) {
@@ -77,10 +88,12 @@ export class Insets {
 			/** A field that shows text: a select, a textarea or an input that is not a mark of its own (a radio, a checkbox). */
 			const typed = node => node.localName !== 'input' || !['checkbox', 'radio', 'range', 'color', 'file', 'image', 'hidden'].includes(node.type);
 			const pictures = new Set(['img', 'video', 'canvas', 'progress', 'meter']);
+			/** Whether every layer of a background is a line 2 px thin or less: a divider drawn as a background (a table's rows), never a fill. */
+			const lined = style => style.backgroundSize.split(/,(?![^(]*\))/).every(layer => layer.trim().split(/\s+(?![^(]*\))/).some(size => /^\d+(\.\d+)?px$/.test(size) && parseFloat(size) <= 2));
 			/** Whether a node draws its own box: a fill unlike what is behind it, or a border on every side. */
 			const boxed = node => {
 				const style = getComputedStyle(node);
-				if (style.backgroundImage !== 'none' && !fields.has(node.localName)) return true;
+				if (style.backgroundImage !== 'none' && !fields.has(node.localName) && !lined(style)) return true;
 				if (alpha(style.backgroundColor) > 0 && style.backgroundColor !== behind(node)) return true;
 				return ['Top', 'Right', 'Bottom', 'Left'].every(side => parseFloat(style[`border${side}Width`]) > 0 && !['none', 'hidden'].includes(style[`border${side}Style`]) && alpha(style[`border${side}Color`]) > 0);
 			};
@@ -110,6 +123,8 @@ export class Insets {
 				if (row && box.contains(row)) return { right: Math.max(content(item).right, content(row).right), free: false };
 				let free = false;
 				for (let node = item; node !== box && !free; node = node.parentElement) {
+					// A group drawn as its children alone has no box to stop short of (0.41.0)
+					if (getComputedStyle(node).display === 'contents') continue;
 					if (followed(node)) break;
 					free = node.getBoundingClientRect().right + (parseFloat(getComputedStyle(node).marginRight) || 0) < content(node.parentElement).right - 0.5;
 				}
@@ -159,6 +174,11 @@ export class Insets {
 							if (child.textContent.trim()) found.push(...lines(child, node, box, flat));
 							continue;
 						}
+						// An element drawn as its children alone has no box of its own to show: its children are what it draws
+						if (child.nodeType === 1 && getComputedStyle(child).display === 'contents') {
+							walk(child);
+							continue;
+						}
 						if (child.nodeType !== 1 || !shown(child) || clipped(getComputedStyle(child))) continue;
 						const area = child.getBoundingClientRect();
 						if (area.width <= 1.5 && area.height <= 1.5) continue;
@@ -190,8 +210,12 @@ export class Insets {
 				const start = found.reduce((a, b) => (a.left <= b.left ? a : b));
 				const finish = found.reduce((a, b) => (a.right >= b.right ? a : b));
 				const said = (item, side) => (item.kind === 'text' ? `${side} of "${item.what}"` : item.what);
-				// A trim inside a scroller turns what it took off into overflow: the box, or a holder inside it, would scroll
-				const scrollers = [node, ...node.querySelectorAll('*')].filter(item => /auto|scroll/.test(getComputedStyle(item).overflowY));
+				// A trim inside a scroller turns what it took off into overflow: the box, or a holder inside it, would scroll,
+				// or hide it where it hides its overflow; what is hidden on purpose (a caption for a screen reader, a clamped text) is not
+				const scrollers = [node, ...node.querySelectorAll('*')].filter(item => {
+					const style = getComputedStyle(item);
+					return /auto|scroll|hidden|clip/.test(style.overflowY) && !clipped(style) && !clamped(style);
+				});
 				const scrolls = scrollers.reduce((most, item) => Math.max(most, item.scrollHeight - item.clientHeight), 0);
 				return {
 					scrolls,

@@ -1,0 +1,71 @@
+/* The measure fixture (0.41.0): boxes of known geometry for the inset measurer's own check. Each box keeps a
+   16 px padding inside a 1 px border; the trimmed ones are 40 px tall, so their lines go past their end. */
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	background: var(--color-canvas);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+	font-size: var(--text-body);
+	line-height: var(--leading-body);
+}
+.measure-page {
+	display: grid;
+	gap: var(--space-6);
+	max-width: 24rem;
+	padding: var(--space-6) var(--space-4);
+}
+.measure-box {
+	position: relative;
+	padding: 16px;
+	border: 1px solid var(--color-border-control);
+}
+.measure-box p,
+.measure-box dl,
+.measure-box dd {
+	margin: 0;
+}
+.measure-box dl {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 4px 16px;
+}
+.measure-group {
+	display: contents;
+}
+#hidden,
+#clip {
+	height: 40px;
+	overflow: hidden;
+}
+#clip {
+	overflow: clip;
+}
+/* A caption only a screen reader reads, as products clip one: absolute, one pixel, its overflow hidden */
+.measure-caption {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+/* A text ended on purpose by a line clamp, with its ellipsis, as a turn's preview ends its message */
+.measure-clamp {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	overflow: hidden;
+}
+/* A row whose background is a divider only, as a table's cells draw theirs, and one whose background fills it */
+.measure-lined,
+.measure-filled {
+	padding: 8px;
+	background: linear-gradient(var(--color-border-strong), var(--color-border-strong)) no-repeat left top / 100% 1px;
+}
+.measure-filled {
+	background-size: 100% 100%;
+}
