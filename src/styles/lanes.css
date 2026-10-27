@@ -28,7 +28,7 @@
 /* The rows hang their padding into the gutter, so the marks keep the content's edge (P5) */
 .bui-lanes-list {
 	display: grid;
-	grid-template-columns: [head] minmax(0, 6fr) var(--bui-lanes-kind,) [now] minmax(0, 6fr) [time] minmax(5rem, max-content) var(--bui-lanes-facts,) var(--bui-lanes-trace,);
+	grid-template-columns: [head] minmax(0, var(--bui-lanes-head-share, 6fr)) var(--bui-lanes-kind,) [now] minmax(0, var(--bui-lanes-now-share, 6fr)) [time] minmax(5rem, max-content) var(--bui-lanes-facts,) var(--bui-lanes-trace,);
 	column-gap: var(--bui-lanes-gap);
 	margin-inline: calc(-1 * var(--bui-lanes-pad));
 }
@@ -244,6 +244,13 @@
 	overflow: hidden;
 	clip: rect(0 0 0 0);
 	white-space: nowrap;
+}
+/* The last fold (0.44.0): with the trace and the kind folded and a title still cut, the live line gives the
+   title three quarters of the room they share; the live line is cut first, and says itself whole in the
+   lane's sheet. */
+.bui-lanes[data-fold~='now'] {
+	--bui-lanes-head-share: 9fr;
+	--bui-lanes-now-share: 3fr;
 }
 /* Narrow: two lines a lane, the title and the time, then the live line under the title and the facts */
 @container bui-lanes (width < 40rem) {

@@ -45,7 +45,7 @@ test('folds the kind after the trace while a title is still cut, and keeps the l
 	assert.equal(element.dataset.fold, 'trace kind');
 	const always = block();
 	always.room.fit();
-	assert.equal(always.element.dataset.fold, 'trace kind', 'a title cut whatever folds: both columns folded, the title cut last');
+	assert.equal(always.element.dataset.fold, 'trace kind now', 'a title cut whatever folds: both columns folded, the live line\'s room given, the title cut last (0.44.0)');
 	room.destroy();
 	always.room.destroy();
 });
@@ -59,10 +59,10 @@ test('folds nothing while every title shows whole, under 40rem, or for a column 
 	assert.equal(narrow.element.hasAttribute('data-fold'), false, 'under 40rem the block has neither column');
 	const kindless = block({ columns: ['trace'] });
 	kindless.room.fit();
-	assert.equal(kindless.element.dataset.fold, 'trace', 'no kind column to fold');
+	assert.equal(kindless.element.dataset.fold, 'trace now', 'no kind column to fold: the trace, then the live line\'s room');
 	const bare = block({ columns: [] });
 	bare.room.fit();
-	assert.equal(bare.element.hasAttribute('data-fold'), false, 'nothing to fold');
+	assert.equal(bare.element.dataset.fold, 'now', 'no column to fold: only the live line gives way');
 	for (const item of [whole, narrow, kindless, bare]) item.room.destroy();
 });
 
@@ -77,18 +77,18 @@ test('measures again when the width or the words change, or once asked, and only
 	element.getBoundingClientRect = () => ({ width, height: 40 });
 	const room = new LaneRoom(element, { cut: () => (asked++, cut), said: () => words });
 	room.fit();
-	assert.equal(element.dataset.fold, 'trace kind');
+	assert.equal(element.dataset.fold, 'trace kind now');
 	const first = asked;
 	cut = false;
 	room.fit();
-	assert.deepEqual([element.dataset.fold, asked], ['trace kind', first], 'nothing changed: nothing measured, the fold kept');
+	assert.deepEqual([element.dataset.fold, asked], ['trace kind now', first], 'nothing changed: nothing measured, the fold kept');
 	width = 960.5;
 	room.fit();
 	assert.equal(element.hasAttribute('data-fold'), false, 'a wider block, a fractional width: measured from nothing folded');
 	cut = true;
 	words = 'Explore how the session lease is renewed|Explore';
 	room.fit();
-	assert.equal(element.dataset.fold, 'trace kind', 'new words: measured again');
+	assert.equal(element.dataset.fold, 'trace kind now', 'new words: measured again');
 	cut = false;
 	room.fit(true);
 	assert.equal(element.hasAttribute('data-fold'), false, 'asked again, as when the fonts arrive');
@@ -113,7 +113,7 @@ test('measures again when a column comes or what a lane says beyond its title ch
 	cut = true;
 	element.setAttribute('data-facts', '');
 	room.fit();
-	assert.equal(element.dataset.fold, 'trace kind', 'a facts column arrived: measured again');
+	assert.equal(element.dataset.fold, 'trace kind now', 'a facts column arrived: measured again');
 	cut = false;
 	said = 'explore|0|Explore the auth module|Explore|48k tokens';
 	room.fit();
@@ -121,7 +121,7 @@ test('measures again when a column comes or what a lane says beyond its title ch
 	cut = true;
 	said = 'explore|1|Explore the auth module|Explore|48k tokens';
 	room.fit();
-	assert.equal(element.dataset.fold, 'trace kind', 'only the depth changed: measured again');
+	assert.equal(element.dataset.fold, 'trace kind now', 'only the depth changed: measured again');
 	room.destroy();
 	element.remove();
 });
@@ -164,4 +164,7 @@ test('the built stylesheet: a folded trace and kind take no track, and a folded 
 	assert.match(kind, /position:\s*absolute/);
 	assert.match(kind, /clip:\s*rect\(0 0 0 0\)/);
 	assert.doesNotMatch(kind, /display:\s*none/, 'still in the lane\'s name');
+	// The last fold (0.44.0): the title takes three quarters of the room it shares with the live line
+	assert.match(sheet, /\.bui-lanes\[data-fold~='now'\]\s*\{\s*--bui-lanes-head-share:\s*9fr;\s*--bui-lanes-now-share:\s*3fr;/);
+	assert.match(sheet, /\[head\] minmax\(0, var\(--bui-lanes-head-share, 6fr\)\)/);
 });
