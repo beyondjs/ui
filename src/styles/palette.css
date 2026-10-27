@@ -41,6 +41,11 @@
 	font-size: var(--text-title-3);
 	outline: none;
 }
+/* It draws no ring on the state that draws one (0,2,0), so a product's unlayered reset (Tailwind 3's
+   `:-moz-focusring`) cannot draw its own (0.44.0, D187) */
+.bui-palette-field:focus-visible {
+	outline: none;
+}
 .bui-palette-list {
 	flex: 1 1 auto;
 	min-height: 0;

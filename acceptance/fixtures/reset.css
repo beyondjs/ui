@@ -1,0 +1,6 @@
+/* A product's unlayered reset, loaded after the package's styles as a product's theme is: Tailwind 3's preflight
+   ships this rule (specificity 0,1,0, in no cascade layer), and Firefox applies it to every focused control. The
+   reset page (dom/reset.html) loads it, or leaves it out with `?reset=off`, and keeps no focus rule of its own. */
+:-moz-focusring {
+	outline: auto;
+}

@@ -1,0 +1,24 @@
+/* A product's own rules against D187, on the reset page's last two elements only, for `Focus` to name in a real
+   engine: a ring on a heading the product focuses for reading, and a coral border on a field of its own. */
+.fixture-ringed:focus {
+	outline: 2px solid var(--color-focus);
+}
+.fixture-coral {
+	border: 1px solid var(--color-border-control);
+}
+.fixture-coral:focus {
+	border-color: var(--color-focus);
+}
+.fixture-box {
+	display: flex;
+	padding: var(--space-2);
+	border: 1px solid var(--color-border-control);
+	border-radius: var(--radius-control);
+}
+.fixture-box input {
+	flex: 1;
+	border: 0;
+	background: transparent;
+	font: inherit;
+	color: inherit;
+}
