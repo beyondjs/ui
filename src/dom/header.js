@@ -47,7 +47,7 @@ export class Header extends Component {
 	constructor({ brand, context = null, nav = null, notifications = null, account = null, toggle = null, onnavigate = null, labels = {} }) {
 		super();
 		this.#onnavigate = onnavigate;
-		this.#labels = new Labels(defaults, labels);
+		this.#labels = new Labels(Header.labels, labels);
 		const id = Ids.next('bui-header');
 		this.#controls = toggle?.controls ?? `${id}-nav`;
 		this.#expanded = toggle?.expanded ?? false;

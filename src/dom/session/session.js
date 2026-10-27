@@ -55,7 +55,7 @@ export class Session extends Component {
 	constructor({ product, read, start, person = null, expires = null, other = null, accounts = null, delegate = null, signin = null, onrenewed = null, onchanged = null, silent = true, pause = 60_000, bound = 8_000, wait = 10_000, interval = 2_000, document = globalThis.document, source = 'accounts', labels = {} }) {
 		super();
 		this.#element = document.createElement('span');
-		this.#labels = new Labels(words.en, labels);
+		this.#labels = new Labels(words, labels);
 		this.#person = person;
 		this.#options = { product, start, delegate, signin, onrenewed, onchanged, silent, pause, document };
 		this.#reader = new Reader(read, bound, source);

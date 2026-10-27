@@ -68,8 +68,8 @@ export class Unavailable extends Component {
 		super();
 		const type = glyphs[kind] ? kind : 'access';
 		const id = Ids.next('bui-unavailable');
-		const text = new Labels(defaults, labels);
-		this.#details = details ? new TechnicalDetails(details) : null;
+		const text = new Labels(Unavailable.labels, labels, locale);
+		this.#details = details ? new TechnicalDetails({ locale, ...details }) : null;
 		if (type === 'outage' && again) {
 			this.#again = new Again(typeof again === 'function' ? { run: again } : again);
 			this.#line = new AgainLine({ again: this.#again, locale, labels, now: typeof again === 'function' ? undefined : again.now });

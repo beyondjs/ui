@@ -20,7 +20,7 @@ export class CollectionTools extends Component {
 		super();
 		this.#change = onchange;
 		this.#delay = delay;
-		const words = new Labels(CollectionTools.labels.en, labels);
+		const words = new Labels(CollectionTools.labels, labels);
 		if (search) this.#search = new CollectionSearch({ label, labels: words, compact, onchange: (query, immediate) => this.#query(query, immediate), onclose: () => this.#flush() });
 		if (filters.length) this.#filters = new CollectionFilters({ filters, labels: words, onchange: filters => {
 			this.#state.filters = filters;

@@ -23,8 +23,18 @@ export class Component {
 	destroy(): void;
 }
 
+/**
+ * A component's words. `defaults` is its set, one entry list per language (`{ en, es }`), or one plain
+ * entry list. Since 0.44.0 the set's language is chosen by one rule: `locale` when the set has its
+ * language, else `<html lang>` (which `Preferences` sets, D07), else English; `given` entries win and the
+ * keys they leave out come from the chosen language.
+ */
 export class Labels {
-	constructor(defaults: Copy, given?: Copy);
+	constructor(defaults: Copy | { readonly en: Readonly<Copy>; readonly [language: string]: Readonly<Copy> }, given?: Copy, locale?: string);
+	/** The language these words speak now (0.44.0): `en`, `es`… */
+	readonly language: string;
+	/** Every entry in that language, the given ones applied (0.44.0). */
+	readonly entries: Copy;
 	text(key: string, values?: Record<string, unknown>): string;
 	with(given: Copy): Labels;
 }
@@ -259,7 +269,7 @@ export function loading(label?: string): HTMLElement;
 export namespace loading {
 	const labels: { readonly en: string; readonly es: string };
 	const names: { readonly en: Readonly<Record<'loading' | 'opening' | 'reading', string>>; readonly es: Readonly<Record<'loading' | 'opening' | 'reading', string>> };
-	function text(options: { name: string; kind?: 'loading' | 'opening' | 'reading'; language?: 'en' | 'es' }): string; function step(options: { step: 'session' | 'signin' | 'projects'; language?: 'en' | 'es' }): string; const steps: readonly ['session', 'signin', 'projects'];
+	/** `language` omitted: the language in effect (0.44.0). */ function text(options: { name: string; kind?: 'loading' | 'opening' | 'reading'; language?: 'en' | 'es' }): string; function step(options: { step: 'session' | 'signin' | 'projects'; language?: 'en' | 'es' }): string; const steps: readonly ['session', 'signin', 'projects'];
 }
 /** `skeleton(3)`, or since 0.15.0 `skeleton({ rows, kind })` in the shape of what comes. */
 export function skeleton(shape?: number | { rows?: number; kind?: 'lines' | 'list' | 'table' }): HTMLElement;

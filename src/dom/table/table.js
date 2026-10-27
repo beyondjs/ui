@@ -75,7 +75,7 @@ export class DataTable extends Component {
 		super();
 		const { label, columns, rows = [], search = true, group = null, state = {}, size = 50, labels = {} } = options;
 		this.#options = options;
-		this.#labels = new Labels(words.en, labels);
+		this.#labels = new Labels(words, labels);
 		this.#query = new DataQuery({ columns, group, match: typeof search === 'object' ? (search.match ?? null) : null, size });
 		this.#view = new DataTableView({ label, columns, key: options.key, link: options.link ?? null, onopen: options.onopen ?? null, labels: this.#labels, onsort: column => this.#sort(column) });
 		this.#state = DataTable.#clean(state, Boolean(options.filters?.length));

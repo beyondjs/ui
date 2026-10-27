@@ -2,6 +2,7 @@ import { el, content } from './core/element.js';
 import { glyph } from './core/icons.js';
 import { steps, words } from '../opening/words.js';
 import { Labels } from './core/labels.js';
+import { Language } from './core/language.js';
 import { TechnicalDetails } from './operations/details.js';
 
 /**
@@ -42,8 +43,9 @@ export function callout({ tone = 'info', title, body = null, actions = [], live 
 	]);
 }
 
-/** An announced loading indicator with a visible label; `loading.labels` (0.7.2) holds the default in English and Spanish. */
-export function loading(label = loading.labels.en) {
+/** An announced loading indicator with a visible label; `loading.labels` (0.7.2) holds the default in English and Spanish, said in the language in effect when no label is given (0.44.0). */
+export function loading(label = undefined) {
+	if (label === undefined) label = loading.labels[new Language().choose(['en', 'es'])];
 	return el('div', { class: 'bui-loading', role: 'status' }, [
 		el('span', { class: 'bui-spinner', 'aria-hidden': 'true' }),
 		el('span', { text: label })
@@ -70,12 +72,12 @@ export function skeleton(shape = 3) {
  * A region's wait (0.23.0, LOAD-01): what Conduict's Home drew first, for every product. The region keeps
  * its heading and actions; in its body one visible, announced "Loading…" line and placeholders in the
  * shape of what comes, on the raised frame the region's content will take. `frame: false` inside a region
- * that is already framed. `label` names the wait (`loading.text`), else `language` picks the default.
+ * that is already framed. `label` names the wait (`loading.text`), else `language` picks the default (the language in effect when omitted, 0.44.0).
  */
 export function waiting(shape = {}) {
-	const { label = null, language = 'en', rows = 1, kind = 'list', frame = true } = typeof shape === 'number' ? { rows: shape } : (shape ?? {});
+	const { label = null, language = undefined, rows = 1, kind = 'list', frame = true } = typeof shape === 'number' ? { rows: shape } : (shape ?? {});
 	return el('div', { class: 'bui-waiting', 'data-frame': frame ? '' : null }, [
-		el('p', { class: 'bui-waiting-label', role: 'status', text: label ?? loading.labels[language] ?? loading.labels.en }),
+		el('p', { class: 'bui-waiting-label', role: 'status', text: label ?? loading.labels[new Language(language).choose(['en', 'es'])] }),
 		skeleton({ rows, kind })
 	]);
 }
@@ -97,9 +99,9 @@ loading.names = Object.freeze({
 });
 
 /** The text of a named loading line: `loading(loading.text({ name, kind, language }))`; `kind` defaults to `loading`. */
-loading.text = ({ name, kind = 'loading', language = 'en' }) => {
-	const names = loading.names[language] ?? loading.names.en;
-	return new Labels(names).text(kind in names ? kind : 'loading', { name });
+loading.text = ({ name, kind = 'loading', language = undefined }) => {
+	const named = new Labels(loading.names, {}, language);
+	return named.text(kind in loading.names.en ? kind : 'loading', { name });
 };
 
 /**
@@ -108,5 +110,8 @@ loading.text = ({ name, kind = 'loading', language = 'en' }) => {
  * ("Connecting Beyond Projects…"). A product's initial waiting element names its step with
  * `data-bui-opening-wait="<step>"` and shows these words.
  */
-loading.step = ({ step, language = 'en' }) => (steps.includes(step) ? `${words[language === 'es' ? 'es' : 'en'][step]}…` : (loading.labels[language] ?? loading.labels.en));
+loading.step = ({ step, language = undefined }) => {
+	const spoken = new Language(language).choose(['en', 'es']);
+	return steps.includes(step) ? `${words[spoken][step]}…` : loading.labels[spoken];
+};
 loading.steps = steps;

@@ -77,7 +77,7 @@ export class Collection extends Component {
 		super();
 		const { label, source, search = true, filters = [], state = {}, labels = {} } = options;
 		this.#options = options;
-		this.#labels = new Labels(defaults, labels);
+		this.#labels = new Labels(Collection.labels, labels);
 		this.#outage = new OutageRead({ recovery: options.recovery ?? null, outage: options.outage ?? null, details: options.details ?? null, title: typeof label === 'string' ? label : this.#labels.text('outage'), words: this.#labels.text('outage') });
 		this.#loader = new Loader(source);
 		this.#state = { query: state.query ?? '', filters: { ...(state.filters ?? {}) }, page: Math.max(1, Number(state.page) || 1) };

@@ -49,7 +49,7 @@ export class ProjectPicker extends Component {
 	 */
 	constructor({ projects = [], product, value = null, label = null, only = null, actions = [], name = null, onchange = null, labels = {} }) {
 		super();
-		this.#labels = new Labels(words.en, labels);
+		this.#labels = new Labels(words, labels);
 		this.#product = product;
 		this.#only = only;
 		const id = Ids.next('bui-project');

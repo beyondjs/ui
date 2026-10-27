@@ -73,7 +73,7 @@ export class PagePanel extends Component {
 		this.#onchange = onchange;
 		this.#element = el('aside', { id: Ids.next('bui-panel'), class: 'bui-page-aside bui-page-panel', 'aria-label': label, hidden: true }, [this.#slot]);
 		this.#motion = new Motion(this.#element, (work, delay) => this.later(work, delay));
-		const copy = new Labels(PagePanel.labels.en, labels);
+		const copy = new Labels(PagePanel.labels, labels);
 		if (head) {
 			this.#head = new PanelHead({ title: title ?? label ?? '', labels: copy, onhide: () => this.close() });
 			this.#element.prepend(this.#head.element);

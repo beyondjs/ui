@@ -49,7 +49,7 @@ export class AwaitedLine extends Component {
 	 */
 	constructor({ title, since = null, expected = null, reason = null, check = null, bound = Bound.limit, onend = null, clock = Clock.system, locale = undefined, labels = {} }) {
 		super();
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels, locale);
 		this.#words = new TimeWords(this.#labels, locale);
 		this.#clock = clock;
 		this.#options = { title, since, expected, reason, check, bound, onend };

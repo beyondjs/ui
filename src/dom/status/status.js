@@ -37,7 +37,7 @@ export class Status extends Component {
 	 */
 	constructor({ state, label = null, variant = 'dot', live = false, labels = {} }) {
 		super();
-		this.#labels = new Labels(words.en, labels);
+		this.#labels = new Labels(words, labels);
 		this.#element = el('span', { class: `bui-status${variant === 'badge' ? ' bui-status-badge' : ''}`, role: live ? 'status' : null }, [el('span', { class: 'bui-status-dot', 'aria-hidden': 'true' }), this.#text]);
 		this.#label = label;
 		this.state = state;

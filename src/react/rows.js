@@ -1,6 +1,7 @@
 import React from 'react';
 import { RowKeys } from '../dom/list/keys.js';
 import { EndLine as Line } from '../dom/list/end.js';
+import { Labels } from '../dom/core/labels.js';
 
 const { useCallback, useRef } = React;
 const h = React.createElement;
@@ -25,7 +26,7 @@ export function useRowKeys() {
  * as `EndLine.labels.es`.
  */
 export function EndLine({ text = null, keys = false, labels = {} }) {
-	const words = { ...Line.labels.en, ...labels };
+	const words = new Labels(Line.labels, labels).entries;
 	return h('p', { className: 'bui-rows-end' }, h('span', null, text ?? words.end), keys ? h('span', { className: 'bui-keys bui-rows-keys' }, words.keys) : null);
 }
 

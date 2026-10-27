@@ -3,6 +3,7 @@ import { h } from './hooks.js';
 import { Mark } from './simple.js';
 import { Select as Choice } from '../dom/select.js';
 import { Field as Labelled } from '../dom/field.js';
+import { Labels } from '../dom/core/labels.js';
 import { single } from '../dom/core/statement.js';
 import { Suggestion } from '../dom/core/suggestion.js';
 import { Required } from '../dom/core/required.js';
@@ -42,10 +43,11 @@ export function Field({ label, hint = null, error = null, optional = false, sugg
 			})
 		: children;
 	const target = isValidElement(children) ? (children.props.id ?? id) : undefined;
+	const words = new Labels(Labelled.labels, labels);
 	return h(
 		'div',
 		{ ref: host, className: `bui-field${error ? ' bui-field-invalid' : ''}` },
-		h('label', { htmlFor: target, className: 'bui-field-label' }, label, optional ? h('span', { className: 'bui-field-optional' }, ` ${labels.optional ?? '(optional)'}`) : null, suggested ? [' ', h('span', { key: 'suggested', className: 'bui-field-suggested' }, labels.suggested ?? 'Suggested')] : null),
+		h('label', { htmlFor: target, className: 'bui-field-label' }, label, optional ? h('span', { className: 'bui-field-optional' }, ` ${words.text('optional')}`) : null, suggested ? [' ', h('span', { key: 'suggested', className: 'bui-field-suggested' }, words.text('suggested'))] : null),
 		hint ? h('p', { id: `${id}-hint`, className: 'bui-field-hint' }, hint) : null,
 		control,
 		h('p', { id: `${id}-error`, className: 'bui-field-error', hidden: !error }, error ? [h(Mark, { key: 'icon', name: 'alert' }), h('span', { key: 'text' }, error)] : null)

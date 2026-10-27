@@ -9,6 +9,7 @@ import { PageDock } from '../dom/page/dock.js';
 import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
 import { PageHeader as Heading } from '../dom/page/header.js';
+import { Labels } from '../dom/core/labels.js';
 import { Waiting } from './simple.js';
 import { EmptyState } from './patterns.js';
 import { LastUpdate } from './again.js';
@@ -169,7 +170,7 @@ export function PageHeader({ title, crumbs = [], kind = null, status = null, fac
 		'header',
 		{ className: 'bui-page-header' },
 		levels.length
-			? h('nav', { className: 'bui-crumbs', 'aria-label': labels.crumbs ?? 'Breadcrumb' }, h('ol', null, levels.map((level, index) => h('li', { key: index }, level.href ? h('a', { href: level.href }, level.label) : h('span', null, level.label)))))
+			? h('nav', { className: 'bui-crumbs', 'aria-label': new Labels(Heading.labels, labels).text('crumbs') }, h('ol', null, levels.map((level, index) => h('li', { key: index }, level.href ? h('a', { href: level.href }, level.label) : h('span', null, level.label)))))
 			: null,
 		h('div', { ref: line, className: 'bui-page-title' }, h('h1', { id, className: 'bui-page-heading', tabIndex: -1, ref: headingRef }, title), kind ? h('span', { className: 'bui-page-kind' }, typeof kind === 'string' ? h('span', { className: 'bui-page-tag' }, kind) : kind) : null, status ? h('span', { className: 'bui-page-status' }, status) : null, actions ? h('div', { className: 'bui-page-actions' }, actions) : null),
 		facts ? h('p', { className: 'bui-page-facts' }, facts) : null,

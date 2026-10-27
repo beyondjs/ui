@@ -72,7 +72,7 @@ export class Recovery extends Component {
 	constructor({ title, labels = {}, locale = undefined, again = {}, focus = null, whole = false, level = 2, local = false }) {
 		super();
 		this.#labels = labels;
-		this.#words = new Labels(copy.en, labels);
+		this.#words = new Labels(copy, labels, locale);
 		this.#cause = String(title ?? '');
 		this.#local = Boolean(local);
 		this.#locale = locale;
@@ -80,7 +80,7 @@ export class Recovery extends Component {
 		this.#focus = focus;
 		this.#again = new Again({ ...again, run: () => this.#read(this.#manual) });
 		this.#line = new AgainLine({ again: this.#again, labels, locale, now: again.now });
-		this.#action = new RetryAction({ labels, run: () => this.now() });
+		this.#action = new RetryAction({ labels, locale, run: () => this.now() });
 		const id = Ids.next('bui-recovery');
 		this.#title = el('p', { id, class: 'bui-recovery-title', text: this.#cause });
 		this.#status = el('p', { class: 'bui-hidden', role: 'status' });

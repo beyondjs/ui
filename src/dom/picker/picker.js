@@ -84,7 +84,7 @@ export class Picker extends Component {
 	 */
 	constructor({ label, source, multiple = true, selected = [], filters = [], name = null, hint = null, limit = 20, delay = 250, bound = 20000, all = false, accounts = null, gate = null, footer = null, recognize = null, onrecognize = null, explain = null, onchange = null, recovery = null, outage = null, details = null, labels = {} }) {
 		super();
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels);
 		this.#onchange = onchange;
 		this.#onrecognize = onrecognize;
 		this.#explain = explain;

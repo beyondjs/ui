@@ -1,6 +1,6 @@
 # Component catalog
 
-Every component of `@beyond-js/ui` 0.27.0: what it is for, its variants and main options, the states it states in words, and its consumers. DOM names come from `@beyond-js/ui` (or `/dom`); React names from `@beyond-js/ui/react`. Every component takes `labels` for its copy (strings with `{placeholders}` or functions of the values) and every DOM class has `mount(parent)` and `destroy()`. Type declarations in `types/` list every option.
+Every component of `@beyond-js/ui` 0.27.0: what it is for, its variants and main options, the states it states in words, and its consumers. DOM names come from `@beyond-js/ui` (or `/dom`); React names from `@beyond-js/ui/react`. Every component takes `labels` for its copy (strings with `{placeholders}` or functions of the values), and since 0.44.0 chooses the language of the rest by [one rule](#language-0440); every DOM class has `mount(parent)` and `destroy()`. Type declarations in `types/` list every option.
 
 **Consumers** (each product vendors the tarball in its own `tools/` and records its adoption, residual copies and evidence in its own repository; the family reference catalogs them component by component in `branding/src/family/components/consumers.js`): the coordinated consumers vendor 0.20.2 since 2026-10-22: Beyond Home (plain DOM, including its windowed host at `/windows/`), the Delegate application (React, the whole application), Branding (plain DOM), the Conduict interface and its surface for the windowed host (plain DOM), the Projects interface (plain DOM served by its service), the Packages interface, the Snapshots and Accounts frontends and the retained Workspace client (React), the CDN administration and backoffice (React), Labs and Docs Site. Installation and final browser acceptance are recorded separately in [the release evidence](reviews/2026-10-22/release-0.20.2.md). Conduict vendors 0.21.1 for its All conversations. A product that passes its own `labels` to `Collection` adds `end` and `keys`, or their words fall back to English.; no other consumer has vendored them ([0.21.1](reviews/2026-10-23/release-0.21.1.md)). Every product that names itself beside the wordmark uses `Lockup`.
 
@@ -632,6 +632,19 @@ function Settings() {
 	return <a href={accountsPage}>{Preferences.labels[locale].everywhere}</a>;
 }
 ```
+
+## Language (0.44.0)
+
+Every component chooses its words from its own set (`X.labels.en`, `.es`) by one rule, in the DOM and in React (`Labels`, `src/dom/core/labels.js`):
+
+1. **The given `labels` win**, and the keys they leave out come from the chosen language, not from English; a key that language lacks comes from English.
+2. **The component's `locale`**, when it has one and the set has its language: `es`, `es-AR` and `ES_es` choose `.es`, `en-US` chooses `.en`.
+3. **The page's language**, `<html lang>`, read at each draw, when the set has it.
+4. **English** last.
+
+Reading `<html lang>` follows D07: the language travels from Accounts, `Preferences` applies it and sets `lang`, and a product never writes it otherwise. So the page's language is the language in effect, and a product that applies its preferences needs to pass no words to get Spanish. An English-only product (`locales: ['en']`) keeps `lang="en"` and stays English.
+
+A product that passes `labels: X.labels.es` keeps its Spanish, whatever the page says; it can stop passing them once its pages carry `lang`. `locale` still sets the format of times and numbers. React draws with the language in effect at its render: a product that changes `lang` re-renders, as it does after any `Preferences` change (`usePreferences`). `new Labels(set, given, locale)` is public, with `language` (`en`, `es`) and `entries`; a plain entry list, the earlier form, is used as it is. `loading()`, `waiting()`, `loading.text()` and `loading.step()` and React `Loading` and `Waiting` say their default in the language in effect when no `label` or `language` is given.
 
 ## Diff (0.11.2)
 

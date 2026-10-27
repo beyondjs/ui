@@ -71,7 +71,7 @@ export class Field extends Component {
 		labels = {}
 	}) {
 		super();
-		this.#labels = new Labels(defaults, labels);
+		this.#labels = new Labels(Field.labels, labels);
 		this.#messages = messages;
 		this.#validate = validate;
 		const holder = control && !control.nodeType ? control.element : control;

@@ -87,7 +87,7 @@ export class FamilyBar extends Component {
 		super();
 		this.#options = { product, brand, notifications, account, onnavigate, advisory, transient, projects: projects !== false, bound };
 		this.#notice = notice;
-		this.#labels = new Labels(defaults, labels);
+		this.#labels = new Labels(FamilyBar.labels, labels);
 		this.#names = { ...names, ...products };
 		this.#descriptor = descriptor;
 		this.#given.keep(descriptor);

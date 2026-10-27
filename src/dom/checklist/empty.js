@@ -45,7 +45,7 @@ export class EmptyState extends Component {
 	constructor({ kind = 'empty', title = null, text = null, action = null, clear = null, checklist = null, glyph: mark = null, frame = null, inline = false, labels = {} }) {
 		super();
 		const type = Object.hasOwn(marks, kind) ? kind : 'empty';
-		const words = new Labels(defaults, labels);
+		const words = new Labels(EmptyState.labels, labels);
 		const outage = type === 'outage';
 		if (outage && inline) {
 			this.#element = el('span', { class: 'bui-empty-inline', 'data-kind': type }, [el('span', { class: 'bui-empty-mark', 'aria-hidden': 'true' }, [glyph(mark ?? marks[type])]), el('span', { class: 'bui-empty-said' }, [content(title ?? words.text('outage'))])]);

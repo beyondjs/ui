@@ -46,7 +46,7 @@ export class Facts extends Component {
 	 */
 	constructor({ head = null, rows = [], label = null, labels = {} } = {}) {
 		super();
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels);
 		this.#label = label;
 		this.#element = el('div', { class: 'bui-facts', role: 'group' }, [this.#head, this.#list]);
 		this.head = head;

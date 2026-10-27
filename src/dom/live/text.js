@@ -54,7 +54,7 @@ export class LiveText extends Component {
 	 */
 	constructor({ text = '', render = null, bound = LiveText.bound, labels = {} } = {}) {
 		super();
-		this.#labels = new Labels(words.en, labels);
+		this.#labels = new Labels(words, labels);
 		this.#render = typeof render === 'function' ? render : null;
 		this.#bound = Number.isFinite(bound) && bound > 0 ? bound : LiveText.bound;
 		this.#body = el('div', { class: 'bui-live-body' });

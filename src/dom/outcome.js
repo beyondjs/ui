@@ -43,7 +43,7 @@ export class ChangeOutcome {
 	 * @param {object} [labels] the words (`ChangeOutcome.labels.es`)
 	 */
 	static draw({ outcome, cause = null, check = null, details = null, again = null }, labels = {}) {
-		const words = labels instanceof Labels ? labels : new Labels(copy.en, labels);
+		const words = labels instanceof Labels ? labels : new Labels(copy, labels);
 		if (outcome === 'unavailable') return callout({ tone: 'warning', title: cause ?? words.text('unchanged'), body: cause ? words.text('unchanged') : null, actions: [ChangeOutcome.#again(again, words)].filter(Boolean), live: true, details });
 		const body = [cause ? `${String(cause).replace(/\.$/, '')}. ` : '', words.text('check')].join('');
 		return callout({ tone: 'warning', title: words.text('maybe'), body, actions: [ChangeOutcome.#way(check)].filter(Boolean), live: true, details });

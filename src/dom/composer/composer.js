@@ -53,7 +53,7 @@ export class Composer extends Component {
 	constructor({ label, onsubmit, placeholder = null, status = null, tools = [], extras = [], actions = null, stop = null, disabled = null, busy = false, submit = 'enter', value = '', min = 1, max = 12, name = null, onchange = null, explain = undefined, labels = {}, settings = [], attach = null, attachments = [], onsuggest = null, suggest = null, locale = undefined, compact = true, summary = null, tray = [], commands = null, recall = null, dictation = null, step = null, add = [], live = false }) {
 		super();
 		if (typeof onsubmit !== 'function') throw new TypeError('A composer sends through onsubmit');
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels, locale);
 		this.#keys = new ComposerKeys({ submit, view: document.defaultView ?? null });
 		this.#onchange = onchange;
 		this.#field = new ComposerField({ label, placeholder, value, min, max, name });

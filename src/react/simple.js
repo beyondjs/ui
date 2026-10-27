@@ -1,6 +1,8 @@
 import React from 'react';
 import { Glyph } from '../dom/core/icons.js';
 import { loading } from '../dom/feedback.js';
+import { Labels } from '../dom/core/labels.js';
+import { Language } from '../dom/core/language.js';
 import { h } from './hooks.js';
 import { TechnicalDetails } from './operations.js';
 import { Status as Shape } from '../dom/status/status.js';
@@ -101,7 +103,7 @@ export function Status({ label = null, tone = 'neutral', state = null, variant =
 	if (!state) return h('span', { className: `bui-status bui-status-${tone}` }, h('span', { className: 'bui-status-dot', 'aria-hidden': 'true' }), label);
 	const known = Object.hasOwn(tones, state) ? state : 'unknown';
 	const shape = Shape.tone(known);
-	const words = label ?? (labels ?? Shape.labels.en)[known];
+	const words = label ?? new Labels(Shape.labels, labels ?? {}).text(known);
 	return h('span', { className: `bui-status${variant === 'badge' ? ' bui-status-badge' : ''} bui-status-${shape}`, 'data-state': known, 'data-tone': shape }, h('span', { className: 'bui-status-dot', 'aria-hidden': 'true' }), h('span', { className: 'bui-status-label' }, words));
 }
 
@@ -139,8 +141,8 @@ export function Callout({ tone = 'info', title, body = null, actions = null, liv
 	);
 }
 
-export function Loading({ label = Loading.labels.en }) {
-	return h('div', { className: 'bui-loading', role: 'status' }, h('span', { className: 'bui-spinner', 'aria-hidden': 'true' }), h('span', null, label));
+export function Loading({ label = null }) {
+	return h('div', { className: 'bui-loading', role: 'status' }, h('span', { className: 'bui-spinner', 'aria-hidden': 'true' }), h('span', null, label ?? Loading.labels[new Language().choose(['en', 'es'])]));
 }
 
 /** Placeholders in the shape of what comes (`kind`: `lines`, `list` or `table`, 0.15.0), as the DOM `skeleton`. */
@@ -154,9 +156,9 @@ export function Skeleton({ lines = 3, rows = lines, kind = 'lines' }) {
 	return h('div', { className: `bui-skeleton${type === 'lines' ? '' : ` bui-skeleton-${type}`}`, 'aria-hidden': 'true' }, Array.from({ length: rows }, (_, index) => (type === 'lines' ? line(index) : row(index))));
 }
 
-/** A region's wait (0.23.0, LOAD-01), as the DOM `waiting`: an announced "Loading…" line and row-shaped placeholders on the region's raised frame. */
-export function Waiting({ label = null, language = 'en', rows = 1, kind = 'list', frame = true }) {
-	return h('div', { className: 'bui-waiting', 'data-frame': frame ? '' : undefined }, h('p', { className: 'bui-waiting-label', role: 'status' }, label ?? Loading.labels[language] ?? Loading.labels.en), h(Skeleton, { rows, kind }));
+/** A region's wait (0.23.0, LOAD-01), as the DOM `waiting`: an announced "Loading…" line and row-shaped placeholders on the region's raised frame; `language` the default's, else the language in effect (0.44.0). */
+export function Waiting({ label = null, language = undefined, rows = 1, kind = 'list', frame = true }) {
+	return h('div', { className: 'bui-waiting', 'data-frame': frame ? '' : undefined }, h('p', { className: 'bui-waiting-label', role: 'status' }, label ?? Loading.labels[new Language(language).choose(['en', 'es'])]), h(Skeleton, { rows, kind }));
 }
 
 // The default label in English and Spanish, and the named lines (0.7.6), as the DOM `loading` builder's.

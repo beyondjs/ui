@@ -65,7 +65,7 @@ export class TurnIndex extends Component {
 	 */
 	constructor({ label = null, labels = {}, choose = null, onview = null, keys = true } = {}) {
 		super();
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels);
 		this.#choose = typeof choose === 'function' ? choose : null;
 		this.#onview = typeof onview === 'function' ? onview : null;
 		this.#element = el('nav', { class: 'bui-turns', hidden: true }, [this.#list]);

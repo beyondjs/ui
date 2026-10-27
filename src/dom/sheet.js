@@ -77,7 +77,7 @@ export class SideSheet extends Component {
 	constructor({ title, label = null, description = null, children = [], actions = [], width = 'form', backdrop = true, guard = null, restore = null, onclose = null, labels = {} }) {
 		super();
 		if (!widths.includes(width)) throw new TypeError(`A side sheet's width is one of ${widths.join(', ')}`);
-		const text = new Labels(SideSheet.labels.en, labels);
+		const text = new Labels(SideSheet.labels, labels);
 		this.#restore = restore;
 		this.#guard = guard;
 		this.#onclose = onclose;

@@ -64,7 +64,7 @@ export class ActivityRow extends Component {
 	 */
 	constructor({ glyph = 'box', title, meta = null, state = 'done', since = null, until = null, duration = null, tail = null, body = null, open = false, clock = Clock.system, locale = undefined, labels = {} }) {
 		super();
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels, locale);
 		this.#words = new TimeWords(this.#labels, locale);
 		this.#clock = clock;
 		this.#body = el('div', { id: Ids.next('bui-activity'), class: 'bui-activity-body', hidden: true }, [this.#whole, this.#content]);

@@ -44,7 +44,7 @@ export class ActivityGroup extends Component {
 	constructor({ glyph = 'layers', title, meta = null, rows = [], open = false, labels = {} }) {
 		super();
 		const id = Ids.next('bui-activity-group');
-		this.#head = new ActivityHead({ controls: id, labels: new Labels(copy.en, labels) });
+		this.#head = new ActivityHead({ controls: id, labels: new Labels(copy, labels) });
 		this.#head.element.addEventListener('click', () => this.toggle());
 		this.#list = el('ul', { id, class: 'bui-activity-list', hidden: true });
 		this.#order = new KeyedList(this.#list);

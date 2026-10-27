@@ -74,7 +74,7 @@ export class PageHeader extends Component {
 	 */
 	constructor({ title, crumbs = [], kind = null, status = null, facts = null, lead = null, actions = [], tabs = null, labels = {}, compact = null }) {
 		super();
-		this.#labels = new Labels(defaults, labels);
+		this.#labels = new Labels(PageHeader.labels, labels);
 		const id = Ids.next('bui-page-title');
 		this.#heading = el('h1', { class: 'bui-page-heading', id, tabindex: '-1' });
 		this.#kind = el('span', { class: 'bui-page-kind' });

@@ -73,7 +73,7 @@ export class ChoiceMenu extends Component {
 	constructor({ label, options, value = null, placeholder = null, actions = [], disabled = false, align = 'start', placement = 'auto', search = 'auto', statement = true, name = null, onchange = null, labels = {}, face = null, waiting = false, place = null }) {
 		super();
 		this.#label = label;
-		this.#labels = new Labels(copy.en, placeholder ? { ...labels, placeholder } : labels);
+		this.#labels = new Labels(copy, placeholder ? { ...labels, placeholder } : labels);
 		this.#settings = { search, statement, name, face };
 		if (face) face.slot = !(placeholder ?? labels.placeholder);
 		this.#onchange = onchange;

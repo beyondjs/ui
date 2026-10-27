@@ -61,7 +61,7 @@ export class ListRow extends Component {
 	 */
 	constructor(options) {
 		super();
-		this.#labels = new Labels(defaults, options.labels ?? {});
+		this.#labels = new Labels(ListRow.labels, options.labels ?? {});
 		this.#actions.element.querySelector('.bui-action-line-actions').classList.add('bui-row-actions');
 		this.#element = el(options.tag === 'div' ? 'div' : 'li', { class: 'bui-row' }, [this.#lead, this.#main, this.#end]);
 		this.update(options);

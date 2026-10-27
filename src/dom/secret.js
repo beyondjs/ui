@@ -63,7 +63,7 @@ export class SecretField extends Component {
 	 */
 	constructor({ label, connect = null, credential = 'token', stored = false, hint = null, name = null, required = false, labels = {} }) {
 		super();
-		this.#labels = new Labels(words.en, labels);
+		this.#labels = new Labels(words, labels);
 		this.#options = { connect, credential, name, required: Boolean(required) };
 		this.#stored = Boolean(stored);
 		const id = Ids.next('bui-secret');

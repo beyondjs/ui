@@ -65,7 +65,7 @@ export class RefChooser extends Component {
 	 */
 	constructor({ label = null, refs = [], value = null, loading = false, unavailable = null, escape = true, validate = null, layout = 'field', name = null, onchange = null, labels = {}, waiting = false, place = null } = {}) {
 		super();
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels);
 		this.#label = label ?? this.#labels.text('label');
 		this.#value = value;
 		this.#loading = loading;

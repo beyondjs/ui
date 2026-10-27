@@ -39,7 +39,7 @@ export class Question {
 
 	constructor(kind, options) {
 		this.#options = options;
-		this.#labels = new Labels(defaults, { ...options.labels, ...pick(options, ['accept', 'cancel', 'ok']) });
+		this.#labels = new Labels(Question.labels, { ...options.labels, ...pick(options, ['accept', 'cancel', 'ok']) });
 		const danger = options.tone === 'danger';
 		const cancel = kind === 'alert' ? null : new Button({ label: this.#labels.text('cancel'), onclick: () => this.#dialog.dismiss() });
 		this.#accept = new Button({

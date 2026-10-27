@@ -5,6 +5,7 @@ import { Recovery as Notice } from '../dom/again/recovery.js';
 import { LastUpdate as Update } from '../dom/again/update.js';
 import { Button, useBusy } from './simple.js';
 import { RetryAction as Action } from '../dom/again/action.js';
+import { Labels } from '../dom/core/labels.js';
 import { h, living, useLatest, useSync } from './hooks.js';
 
 const { useEffect, useLayoutEffect, useMemo, useRef, useState } = React;
@@ -40,10 +41,10 @@ export function AgainLine({ moments, locale = undefined, labels = {} }) {
 
 AgainLine.labels = Line.labels;
 
-/** The same recovery action as the DOM component, with the refresh glyph and secondary style. */
-export function RetryAction({ onClick, labels = {}, busy = false, small = true, name = null }) {
+/** The same recovery action as the DOM component, with the refresh glyph and secondary style; its word in the language in effect (0.44.0). */
+export function RetryAction({ onClick, labels = {}, busy = false, small = true, name = null, locale = undefined }) {
 	const [working, run] = useBusy();
-	return h(Button, { label: labels.retry ?? Action.labels.en.retry, glyph: 'refresh', variant: 'secondary', small, name, labels, busy: busy || working, onClick: event => void run(() => onClick?.(event)).catch(() => {}) });
+	return h(Button, { label: new Labels(Action.labels, labels, locale).text('retry'), glyph: 'refresh', variant: 'secondary', small, name, labels, busy: busy || working, onClick: event => void run(() => onClick?.(event)).catch(() => {}) });
 }
 RetryAction.labels = Action.labels;
 

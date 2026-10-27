@@ -23,7 +23,7 @@ export class Help extends Disclosure {
 	 * @param {string|Node|Array<string|Node>} options.text the explanation
 	 */
 	constructor({ topic, text, labels = {}, onchange = null }) {
-		const words = new Labels(defaults, labels);
+		const words = new Labels(Help.labels, labels);
 		const body = [].concat(text).map(part => (typeof part === 'string' ? el('p', { text: part }) : content(part)));
 		super({ outside: false, label: glyph('help'), name: words.text('name', { topic }), children: body, variant: 'help', class: 'bui-help', hint: true, onchange });
 		this.panel.classList.add('bui-help-panel');

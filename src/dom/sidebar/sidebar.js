@@ -84,7 +84,7 @@ export class Sidebar extends Component {
 	 */
 	constructor({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onnavigate = null, labels = {}, shortcut = false, rail = null }) {
 		super();
-		this.#labels = new Labels(words.en, labels);
+		this.#labels = new Labels(words, labels);
 		this.#cut = Number.isFinite(cut) && cut > 0 ? cut : 1024;
 		this.#onnavigate = onnavigate;
 		this.#product = product;
