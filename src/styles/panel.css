@@ -27,8 +27,10 @@
 	position: sticky;
 	top: var(--bui-page-sticky, calc(var(--layout-family) + var(--space-6)));
 	max-height: calc(100dvh - var(--bui-page-sticky, calc(var(--layout-family) + var(--space-6))) - var(--space-6));
+	/* It never holds the wheel (0.44.0): in Chrome a scroll container that contains its overscroll keeps the page
+	   still under the pointer even with nothing to scroll, and a panel kept in view usually fits. A panel that
+	   scrolls still takes the wheel first; once it has nothing left, the next wheel goes on to the page. */
 	overflow-y: auto;
-	overscroll-behavior: contain;
 }
 /* A header that turns compact on scroll keeps its line above the panel. */
 .bui-page:has(> .bui-page-frame > .bui-page-compact) .bui-page-panel {
