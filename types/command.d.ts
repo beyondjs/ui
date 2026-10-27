@@ -1,4 +1,4 @@
-/** Types of 0.16.0's `CommandPalette`, `ChoiceCards` and `Primaries`, 0.19.0's `Hierarchy` and 0.28.0's `Ellipses`, re-exported by `@beyond-js/ui/dom`. */
+/** Types of 0.16.0's `CommandPalette`, `ChoiceCards` and `Primaries`, 0.19.0's `Hierarchy`, 0.28.0's `Ellipses` and 0.44.0's `Focus`, re-exported by `@beyond-js/ui/dom`. */
 import type { Copy } from './notifications.js';
 import type { Component } from './dom.js';
 
@@ -80,6 +80,34 @@ export class Ellipses {
 	static words(node: Element): string;
 	constructor(options: { root: Element; warn?: ((message: string, action: Element) => void) | null });
 	check(): Array<{ action: Element; text: string }>;
+	destroy(): void;
+}
+
+/** What a focused element draws, as its computed style says it (0.44.0's `Focus`). */
+export interface FocusPaint {
+	/** Its `outline-style`. */
+	outline: string;
+	/** Its outline's width in pixels. */
+	width: number;
+	/** Its outline's colour. */
+	color: string;
+	/** The colours of the borders it draws. */
+	borders: string[];
+	/** Its `box-shadow`. */
+	shadow: string;
+	/** `--color-focus` where it is. */
+	focus: string;
+	/** `--color-danger` where it is. */
+	danger: string;
+}
+
+/** Focus says what the keys do there (0.44.0, D187), warned while a product is developed. */
+export class Focus {
+	static controls: string;
+	static fields: string;
+	static enabled: boolean;
+	constructor(options: { root: Document | Element; warn?: ((message: string, node: Element) => void) | null; measure?: ((node: Element) => FocusPaint) | null });
+	check(node: Element): { node: Element; reason: 'reading' | 'field'; drawn: Array<'outline' | 'ring' | 'focus' | 'danger'> } | null;
 	destroy(): void;
 }
 
