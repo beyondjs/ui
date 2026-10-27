@@ -4,8 +4,10 @@ import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { Cut, NameTip } from '../core/cut.js';
 import { PageCompact } from './compact.js';
+import { hidden } from '../feedback.js';
+import { HeldFocus } from './held.js';
 
-const defaults = { crumbs: 'Breadcrumb' };
+const defaults = { crumbs: 'Breadcrumb', loading: 'Loading…' };
 /** What a lead says (0.41.0): a node, a number or words; nothing, a boolean or empty words say nothing, as in React. */
 const said = value => value !== null && value !== undefined && typeof value !== 'boolean' && value !== '';
 
@@ -37,10 +39,18 @@ const said = value => value !== null && value !== undefined && typeof value !== 
  * in view that the product names (`subject`, such as the message of the turn being read in a thread),
  * as written, on up to two lines, in place of the title. Pressing it goes to that part (`href`); like the
  * title it is hidden from assistive technology and out of the tab order, since the page says it in place.
+ *
+ * Since 0.44.0 (LOAD-01) a header drawn before its object's read waits for its title (`waiting`, `wait()`):
+ * the H1 holds one placeholder line at the title's height, named "Loading…" for assistive technology, busy
+ * and out of focus, and a focus asked of it meanwhile lands once the title does (`HeldFocus`), so the page
+ * is never named "Loading…". The placeholder is a shared wait: the opening sees it and it is seen only past
+ * the wait's grace. Setting `title` ends it, with the title line, the facts and the tabs where they were.
+ * An action whose permission is known only after the read holds its place with `reserved()`, and the facts
+ * line is a block, so it may hold a control such as a `ChoiceMenu`.
  */
 export class PageHeader extends Component {
 	/** The copy in English and Spanish (0.7.2). */
-	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ crumbs: 'Ruta de navegación' }) });
+	static labels = Object.freeze({ en: Object.freeze({ ...defaults }), es: Object.freeze({ crumbs: 'Ruta de navegación', loading: 'Cargando…' }) });
 
 	#element;
 	#heading;
@@ -58,6 +68,7 @@ export class PageHeader extends Component {
 	#watch = null;
 	#tip = null;
 	#subject = null;
+	#held;
 
 	/**
 	 * @param {object} options
@@ -69,18 +80,21 @@ export class PageHeader extends Component {
 	 * @param {string|Node|Array<string|Node>|null} [options.lead] the page's lead sentence, at the reading measure (0.41.0, D191)
 	 * @param {Node[]} [options.actions] the title line's actions: one primary button, then an `ActionMenu`
 	 * @param {Node|{element: Node}|null} [options.tabs] the page's `Tabs`
-	 * @param {{crumbs?: string}} [options.labels]
 	 * @param {boolean|{actions?: Array<Node|{element: Node}>}|null} [options.compact] the compact line on scroll (0.11.0)
+	 * @param {boolean} [options.waiting] the title waits for the object's read (`wait()`, 0.44.0)
+	 * @param {{crumbs?: string, loading?: string}} [options.labels]
 	 */
-	constructor({ title, crumbs = [], kind = null, status = null, facts = null, lead = null, actions = [], tabs = null, labels = {}, compact = null }) {
+	constructor({ title = null, crumbs = [], kind = null, status = null, facts = null, lead = null, actions = [], tabs = null, labels = {}, compact = null, waiting = false }) {
 		super();
 		this.#labels = new Labels(PageHeader.labels, labels);
 		const id = Ids.next('bui-page-title');
 		this.#heading = el('h1', { class: 'bui-page-heading', id, tabindex: '-1' });
+		this.#held = new HeldFocus(this.#heading);
 		this.#kind = el('span', { class: 'bui-page-kind' });
 		this.#status = el('span', { class: 'bui-page-status' });
 		this.#actions = el('div', { class: 'bui-page-actions' });
-		this.#facts = el('p', { class: 'bui-page-facts' });
+		// A block, so the facts may hold a control such as a `ChoiceMenu` (0.44.0); it looks as the line it was
+		this.#facts = el('div', { class: 'bui-page-facts' });
 		this.#lead = el('p', { class: 'bui-page-lead' });
 		this.#crumbs = el('nav', { class: 'bui-crumbs', 'aria-label': this.#labels.text('crumbs') });
 		this.#tabs = el('div', { class: 'bui-page-tabs' });
@@ -96,6 +110,7 @@ export class PageHeader extends Component {
 		this.lead = lead;
 		this.actions = actions;
 		this.tabs = tabs;
+		if (waiting) this.wait();
 	}
 
 	get element() {
@@ -117,9 +132,28 @@ export class PageHeader extends Component {
 		return this.#watch?.shown ?? false;
 	}
 
+	/** Names the object in view, ending a wait for it; a focus asked for while it waited lands now. */
 	set title(title) {
+		this.#heading.removeAttribute('aria-busy');
 		fill(this.#heading, [content(title)]);
 		if (this.#line) fill(this.#line.title, [this.#heading.textContent]);
+		this.#held.release();
+	}
+
+	/** Whether the title waits for the object's read (0.44.0). */
+	get waiting() {
+		return this.#held.held;
+	}
+
+	/**
+	 * Waits for the object's read (0.44.0, LOAD-01): the H1 holds one placeholder line at the title's height,
+	 * named "Loading…" for assistive technology, busy and out of focus, until `title` is set.
+	 */
+	wait() {
+		this.#heading.setAttribute('aria-busy', 'true');
+		fill(this.#heading, [hidden(this.#labels.text('loading')), el('span', { class: 'bui-skeleton bui-page-pending', 'aria-hidden': 'true' }, [el('span', { class: 'bui-skeleton-line' })])]);
+		if (this.#line) fill(this.#line.title, []);
+		this.#held.hold();
 	}
 
 	/** The levels above the page; none, or a single section root, shows no breadcrumb. */
@@ -172,7 +206,7 @@ export class PageHeader extends Component {
 		this.#tabs.hidden = !tabs;
 	}
 
-	/** Moves focus to the H1 without scrolling, after a navigation. */
+	/** Moves focus to the H1 without scrolling, after a navigation; while the title waits, once it lands (0.44.0). */
 	focus() {
 		this.#heading.focus({ preventScroll: true });
 	}
@@ -202,6 +236,7 @@ export class PageHeader extends Component {
 	}
 
 	destroy() {
+		this.#held.drop();
 		this.#watch?.destroy();
 		this.#tip?.destroy();
 		this.#bar?.remove();

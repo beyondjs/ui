@@ -1,5 +1,5 @@
 /** Types of the helpers a React product reuses (0.11.1; `Bytes` and `CopyButton` since 0.11.2), re-exported by `@beyond-js/ui/react`. */
-import type { ReactElement, RefObject } from 'react';
+import type { ReactElement, ReactNode, RefObject } from 'react';
 import type { Copy } from './notifications.js';
 import type { WaitingShape } from './dom.js';
 export { Age, Hint, Bytes, Highlighter, ComposerDictation, PageDock, Required, Quiet } from './dom.js';
@@ -38,3 +38,8 @@ export function Waiting(props: WaitingShape): ReactElement;
  * the browser's own message and takes the focus, and `onSubmit` does not run.
  */
 export const Form: import('react').ForwardRefExoticComponent<import('react').FormHTMLAttributes<HTMLFormElement> & { report?: boolean } & import('react').RefAttributes<HTMLFormElement>>;
+
+/** Holds the place of an action known only after the object's read, as the DOM `reserved()`: laid out where it will be, unseen, inert and hidden from assistive technology (0.44.0, LOAD-01). */
+export function Reserved(props: { children?: ReactNode }): ReactElement;
+/** One part of a `Section`'s body that waits for its own read while the rest is drawn, the section busy while it waits (0.44.0, LOAD-01). */
+export function SectionPart(props: { waiting?: boolean | WaitingShape | null; children?: ReactNode }): ReactElement;

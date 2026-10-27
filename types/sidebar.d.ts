@@ -79,9 +79,11 @@ export interface SidebarObject {
 	action?: (SidebarAction & { row?: boolean }) | null;
 	/** Drawn as the `search` icon that expands into the field over the heading line. */
 	search?: SidebarSearchOptions | null;
-	groups: Array<SidebarEntries | null | false>;
+	groups?: Array<SidebarEntries | null | false>;
 	/** The objects' `more` link ("All conversations"). */
 	more?: { label: string; href: string } | null;
+	/** Their first read runs: the shared wait in the groups' place, the group busy (0.44.0, LOAD-01); `rows` placeholder lines, 3 by default. */
+	waiting?: boolean | { rows?: number } | null;
 }
 /** Which groups the person folded, per device and product (`bui-sidebar:{product}:{group}` in `localStorage`; 0.14.0). */
 export interface SidebarFolds {

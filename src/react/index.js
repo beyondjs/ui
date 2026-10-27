@@ -39,7 +39,7 @@ export { icons, unlabeled } from '../dom/core/icons.js';
 export { Preferences } from '../dom/preferences/preferences.js';
 export { usePreferences } from './preferences.js';
 export { PreferencesDialog } from '../dom/preferences/dialog.js';
-export { Page, PageHeader, Section, Arrival, Tabs, ListDetail, PanelToggle } from './page.js';
+export { Page, PageHeader, Reserved, Section, SectionPart, Arrival, Tabs, ListDetail, PanelToggle } from './page.js';
 export { PagePanel } from '../dom/page/panel.js';
 export { PageDock } from '../dom/page/dock.js';
 export { Composer, ComposerChip, LiveText, ActivityRow, ActivityGroup } from './conversation.js';

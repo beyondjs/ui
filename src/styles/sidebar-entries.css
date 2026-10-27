@@ -237,6 +237,15 @@
 	gap: var(--space-3);
 	min-width: 0;
 }
+/* Objects whose first read runs wait in the groups' place (0.44.0, LOAD-01), the "Loading…" line and the
+   placeholder lines on the entries' text edge; a typed query's results take its place as they take the groups'. */
+.bui-sidebar-object > .bui-waiting {
+	padding: var(--space-1) var(--space-2);
+	font-size: var(--text-small);
+}
+.bui-sidebar-object:has(> .bui-sidebar-object-groups[hidden]) > .bui-waiting {
+	display: none;
+}
 /* Below the cut the objects' action may end the product row (SB-07). */
 .bui-sidebar-start {
 	flex: none;

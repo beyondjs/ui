@@ -40,3 +40,28 @@
 	background: linear-gradient(var(--color-accent), var(--color-accent)) no-repeat left bottom / 100% 2px;
 	background-origin: content-box;
 }
+
+/* A title that waits for its object's read (0.44.0, LOAD-01): one placeholder line at the title's own line
+   height, so the title's line, the facts and the tabs are where they will be. A shared wait: its grace is
+   feedback.css's, and it is drawn in the divider role, as every placeholder is. */
+.bui-page-heading > .bui-page-pending {
+	display: flex;
+	align-items: center;
+	width: 16rem;
+	max-width: 100%;
+	/* The heading's own line, the token's where `lh` is not known */
+	height: calc(var(--text-title-1) * var(--leading-title-1));
+	height: 1lh;
+	padding: 0;
+}
+.bui-page-pending > .bui-skeleton-line {
+	width: 100%;
+	height: 0.6em;
+}
+
+/* An action whose place is held until the read says whether it is offered (0.44.0, LOAD-01): laid out as it
+   will be, unseen, inert and hidden from assistive technology. */
+.bui-reserved {
+	display: contents;
+	visibility: hidden;
+}

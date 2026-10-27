@@ -2,6 +2,7 @@ import { el, fill, content } from '../core/element.js';
 import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { KeyedList } from '../core/keyed.js';
+import { waiting } from '../feedback.js';
 import { SidebarGroup } from './group.js';
 import { SidebarSeek } from './seek.js';
 
@@ -11,6 +12,10 @@ import { SidebarSeek } from './seek.js';
  * glyph, "New") and the search as its icon (`SidebarSeek`), then their groups of entries (each a
  * disclosure, `SidebarGroup`), then their `more` link ("All conversations"). Patched by keys, so a live
  * change never moves focus; while a query is typed the results take the groups' place.
+ *
+ * Since 0.44.0 (LOAD-01) objects whose first read runs wait in place (`waiting`: true or `{ rows }`): the
+ * heading line with its action and search stays, the shared wait ("Loading…" above placeholder lines) takes
+ * the groups' place and the group is `aria-busy` until the product gives its groups without `waiting`.
  */
 export class SidebarObject {
 	#element;
@@ -22,6 +27,7 @@ export class SidebarObject {
 	#order = new KeyedList(this.#groups);
 	#views = new Map();
 	#more = null;
+	#wait = null;
 	#labels;
 	#folds;
 	#shortcut;
@@ -60,14 +66,15 @@ export class SidebarObject {
 	}
 
 	/**
-	 * @param {{heading: string|Node, action?: {label: string, href: string, glyph?: string}|null, search?: import('./search.js').SidebarSearch|null, groups?: object[], more?: {label: string, href: string}|null}} object
+	 * @param {{heading: string|Node, action?: {label: string, href: string, glyph?: string}|null, search?: import('./search.js').SidebarSearch|null, groups?: object[], more?: {label: string, href: string}|null, waiting?: boolean|{rows?: number}|null}} object
 	 */
-	update({ heading, action = null, search = null, groups = [], more = null }) {
+	update({ heading, action = null, search = null, groups = [], more = null, waiting: shape = null }) {
 		if (typeof heading !== 'string' || this.#title.textContent !== heading) fill(this.#title, [content(heading)]);
 		this.#act(action);
 		this.#find(search);
+		this.#hold(shape);
 		const next = new Map();
-		(Array.isArray(groups) ? groups : []).forEach((group, index) => {
+		(Array.isArray(groups) && !shape ? groups : []).forEach((group, index) => {
 			if (!group || !Array.isArray(group.items) || !group.items.some(Boolean)) return;
 			const key = String(group.key ?? (typeof group.heading === 'string' && group.heading ? group.heading : `#${index}`));
 			const view = this.#views.get(key) ?? new SidebarGroup({ kind: 'entries', labels: this.#labels, folds: this.#folds });
@@ -104,6 +111,25 @@ export class SidebarObject {
 			fill(this.#action, [glyph(name), el('span', { class: 'bui-sidebar-label' }, [content(action.label)])]);
 			this.#action.dataset.glyph = name;
 		}
+	}
+
+	/** The shared wait in the groups' place while the objects' first read runs, the group busy (0.44.0). */
+	#hold(shape) {
+		if (!shape) {
+			this.#wait?.remove();
+			this.#wait = null;
+			this.#element.removeAttribute('aria-busy');
+			return;
+		}
+		const rows = Number.isInteger(shape.rows) && shape.rows > 0 ? shape.rows : 3;
+		if (Number(this.#wait?.dataset.rows) !== rows) {
+			const wait = waiting({ rows, kind: 'lines', frame: false, label: this.#labels.text('loading') });
+			wait.dataset.rows = String(rows);
+			if (this.#wait) this.#wait.replaceWith(wait);
+			else this.#groups.before(wait);
+			this.#wait = wait;
+		}
+		this.#element.setAttribute('aria-busy', 'true');
 	}
 
 	#find(search) {

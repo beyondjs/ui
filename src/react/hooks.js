@@ -52,4 +52,10 @@ export function useSync(instance, apply, deps) {
 	}, [instance, ...deps]);
 }
 
+/** Gives a ref (an object or a function) its value. */
+export function assign(ref, value) {
+	if (typeof ref === 'function') ref(value);
+	else if (ref) ref.current = value;
+}
+
 export const h = React.createElement;
