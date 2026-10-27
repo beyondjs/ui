@@ -25,7 +25,7 @@ Through the machine's test queue, on the change over `53a1de3`:
 - `npm run types` compiles, and `npm test` passes 995 of 995, React 18 included.
 - From the packed archive: the whole acceptance in Chrome 155, 447 of 447, the new inbox check in the `dom` and `react19` consumers included.
 - `node acceptance/run.mjs 'inbox|grouped list'` in Firefox 155 and in WebKit 26.6, 14 of 14 each: the inbox's checks (the new filtered empty among them) and `Collection`'s grouped list, whose end line is now drawn by `EndLine`.
-- The archive: ARCHIVE
+- The archive: `dist-pack/beyond-ui-0.39.0.tgz`, packed at `4eefb97`, integrity `sha512-KH3u9wEwdSfMUCXYiNYwXi6a5S1oo3pC9UTqRdQkKINCZ2FdVQdDI6RzPA9BlTZ91Ft0cfzCNtB17oS8J5Yiwg==`. Products vendor it when each one adopts it.
 
 ## Limits
 
