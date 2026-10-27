@@ -49,7 +49,11 @@ export class Period {
 		if (!shape) return null;
 		const locale = this.#labels.text('locale');
 		if (shape.kind === 'days') return { value, label: this.#labels.text('days', { count: shape.count }) };
-		if (shape.kind === 'month') return { value, label: new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(shape.start) };
+		if (shape.kind === 'month') {
+			// In sentence case, whatever the language writes a month's name with, as `Recency` says it
+			const month = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(shape.start);
+			return { value, label: month.charAt(0).toLocaleUpperCase(locale) + month.slice(1) };
+		}
 		const day = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 		return { value, label: this.#labels.text('span', { start: day.format(shape.start), end: day.format(shape.last) }) };
 	}

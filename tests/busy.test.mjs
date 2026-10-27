@@ -28,3 +28,13 @@ test('a product\'s own busy words get the label without its ellipsis, and a node
 	const drawn = new ui.Button({ label: node, busy: true }).mount(document.body);
 	assert.equal(said(drawn), 'Ready…');
 });
+
+test('React\'s Button keeps one ellipsis too (0.44.0)', async () => {
+	const React = (await import('react')).default;
+	const { renderToStaticMarkup } = await import('react-dom/server');
+	const { Button } = await import('@beyond-js/ui/react');
+	const drawn = renderToStaticMarkup(React.createElement(Button, { label: 'Disconnect Claude Code…', busy: true }));
+	assert.match(drawn, /Disconnect Claude Code…</);
+	assert.doesNotMatch(drawn, /……/);
+	assert.match(renderToStaticMarkup(React.createElement(Button, { label: 'Save', busy: true })), /Save…</);
+});

@@ -1,3 +1,4 @@
+import { Language } from '../core/language.js';
 /**
  * Durations and moments in a person's words, for the components that measure operations.
  *
@@ -21,13 +22,14 @@ export class TimeWords {
 
 	/**
 	 * @param {import('../core/labels.js').Labels} labels the component's labels, holding the units
-	 * @param {string} [locale] a BCP 47 tag for `Intl` (the page's language when omitted)
+	 * @param {string} [locale] a BCP 47 tag for `Intl` (when omitted, the page's `<html lang>` if its language is not the runtime's, else the runtime's; 0.44.0)
 	 */
 	constructor(labels, locale = undefined) {
 		this.#labels = labels;
 		this.#locale = locale;
-		this.#time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-		this.#day = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+		const tag = Language.tag(locale);
+		this.#time = new Intl.DateTimeFormat(tag, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+		this.#day = new Intl.DateTimeFormat(tag, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 	}
 
 	get locale() {

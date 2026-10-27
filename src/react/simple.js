@@ -44,7 +44,8 @@ function svg(glyph) {
 export function Button({ label, children, variant = 'secondary', glyph = null, href = null, onClick = null, disabled = false, busy = false, waiting = false, place = null, type = 'button', small = false, name, labels = {}, ...rest }) {
 	const className = `bui-button bui-button-${variant}${small ? ' bui-button-small' : ''}${rest.className ? ` ${rest.className}` : ''}`;
 	const text = label ?? children;
-	const shown = busy && typeof text === 'string' ? (labels.busy ?? '{label}…').replace('{label}', text) : text;
+	// A label that already ends in an ellipsis keeps one while busy (0.44.0), as the DOM button's
+	const shown = busy && typeof text === 'string' ? (labels.busy ?? '{label}…').replace('{label}', text.replace(/(?:…|\.\.\.)\s*$/u, '')) : text;
 	const inner = [busy ? h('span', { key: 'mark', className: 'bui-spinner', 'aria-hidden': 'true' }) : glyph ? h(Mark, { key: 'mark', name: glyph }) : null, h('span', { key: 'text' }, shown)];
 	const press = event => {
 		if (busy || waiting) {

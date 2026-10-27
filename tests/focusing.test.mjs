@@ -164,8 +164,8 @@ test("a product's unlayered reset draws nothing of its own in Firefox: the ring 
 	const rules = [...sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(([, selector, body]) => ({ selector: selector.trim().replace(/\s+/g, ' '), body }));
 	const raised = rules.filter(rule => rule.selector.includes(':-moz-focusring'));
 	assert.equal(raised.length, 1, 'one rule, which Chromium and WebKit drop');
-	// One type selector above Tailwind 3's `:-moz-focusring` (0,1,1), under a component's rule on a pseudo-class (0,2,0); a box that takes typing is left to its edge
-	assert.equal(raised[0].selector, ":is(:not(input, textarea, select), input:where([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file'], [type='button'], [type='submit'], [type='reset'], [type='image'])):-moz-focusring");
+	// One type selector above Tailwind 3's `:-moz-focusring` (0,1,1), under a component's rule on a pseudo-class (0,2,0); a box that takes typing (a field, an editable region, a textbox, a search box, a combobox) is left to its edge, at no added specificity
+	assert.equal(raised[0].selector, ":is(:not(input, textarea, select, :where([contenteditable]:not([contenteditable='false']), [role='textbox'], [role='searchbox'], [role='combobox'])), input:where([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file'], [type='button'], [type='submit'], [type='reset'], [type='image'])):-moz-focusring");
 	assert.match(raised[0].body, /^\s*outline: 2px solid var\(--color-focus\);\s*$/, 'it restates the ring alone: the offset and the settling stay the ring rule\'s');
 	assert.ok(rules.some(rule => rule.selector === '.bui-palette-field:focus-visible' && /outline: none/.test(rule.body)), "the palette's field draws no ring at 0,2,0");
 	assert.ok(rules.some(rule => rule.selector === ':is(.bui-edge, .bui-navmenu-search, .bui-composer-box) :is(input, textarea, select):focus-visible' && /outline: none/.test(rule.body)), "the bar's search field draws none at 0,2,1");

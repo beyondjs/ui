@@ -47,8 +47,9 @@ test('React DataTable: framed follows the prop', async () => {
 
 test('the built stylesheet: a framed table lifts its first capitals only while it leads its box, with no tools or sort line above its rows (0.44.0)', () => {
 	const sheet = readFileSync(new URL('../dist/styles.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
-	// Nothing shown stands before the table, or before React's host of it; a hidden element, a line for screen readers, a script or a style does not count
-	const shown = ':not([hidden], .bui-hidden, script, style, template)';
+	// Nothing shown stands before the table, or before React's host of it; a hidden element, a line for screen readers, a script, a style, or a React host
+	// holding nothing or only a hidden part (a page's Recovery with nothing to say) does not count
+	const shown = ':not([hidden], .bui-hidden, script, style, template, .bui-host:empty, .bui-host:has(> [hidden]:only-child))';
 	const lead = `:not(${shown} ~ *, .bui-host:is(${shown} ~ *) > *, :has(> .bui-data-tools:not([hidden]))`;
 	assert.ok(sheet.includes(`.bui-data-table[data-framed]${lead}) > .bui-data-body .bui-table {\n\t\tmargin-block-start: calc((1cap - var(--bui-row)) / 2);`), 'a wide table rises by its header row\'s room above the capitals');
 	assert.ok(sheet.includes(`.bui-data-table[data-framed]${lead}) > .bui-data-body .bui-table {\n\t\t\tmargin-block-start: 0;`), 'a narrow one does not, whatever stands above its rows');

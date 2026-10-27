@@ -1,3 +1,4 @@
+import { Language } from '../core/language.js';
 import { Labels } from '../core/labels.js';
 import { TimeWords } from './words.js';
 
@@ -28,16 +29,17 @@ export class Age {
 
 	/**
 	 * @param {object} [options]
-	 * @param {string} [options.locale] a BCP 47 tag for the dates (the runtime's when omitted)
+	 * @param {string} [options.locale] a BCP 47 tag for the dates (when omitted, the page's `<html lang>` if its language is not the runtime's, else the runtime's; 0.44.0)
 	 * @param {object|Labels} [options.labels] the units; by default those of the language in effect (`locale`'s, else `<html lang>`, else English, 0.44.0)
 	 * @param {() => number} [options.now] the time to measure against (the clock's now)
 	 */
 	constructor({ locale = undefined, labels = null, now = () => Date.now() } = {}) {
 		this.#labels = labels instanceof Labels ? labels : new Labels(words, labels ?? {}, locale);
 		this.#now = typeof now === 'function' ? now : () => Date.now();
-		this.#full = new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short', hourCycle: 'h23' });
-		this.#day = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' });
-		this.#year = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+		const tag = Language.tag(locale);
+		this.#full = new Intl.DateTimeFormat(tag, { dateStyle: 'full', timeStyle: 'short', hourCycle: 'h23' });
+		this.#day = new Intl.DateTimeFormat(tag, { day: 'numeric', month: 'short' });
+		this.#year = new Intl.DateTimeFormat(tag, { day: 'numeric', month: 'short', year: 'numeric' });
 	}
 
 	/** A moment as milliseconds from a Date, a number or an ISO string; null for anything unreadable. */
