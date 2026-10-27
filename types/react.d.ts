@@ -78,6 +78,8 @@ export const SecretField: ForwardRefExoticComponent<{ label: string; connect?: {
 export function CopyMessage(props: { text: string; kind?: 'message' | 'command' | 'link'; label?: string | null; labels?: Copy }): ReactElement;
 export namespace CopyMessage { const labels: Copies; }
 /** One thing with one state (0.7.0); `action` is React content, `more` items take `onSelect`. */
+/** An organization's mark (D195, 0.40.0), with the DOM `OrganizationMark`'s markup. */
+export function OrganizationMark(props: { name: string; logo?: string | null }): ReactElement;
 export function StatusRow(props: { title: string; kind?: string | null; state: StatusRowState; reason?: string | null; owner?: string | null; facts?: string[]; action?: ReactNode; more?: Array<ReactChoiceAction | null | false>; level?: 2 | 3 | 4 | 5 | 6; clock?: Clock; locale?: string; labels?: Copy }): ReactElement;
 export namespace StatusRow { const labels: Copies; }
 /** A provider's window followed until the server says how it ended (0.7.0). */

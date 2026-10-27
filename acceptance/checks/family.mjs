@@ -185,6 +185,33 @@ export const checks = [
 		}
 	},
 	{
+		name: 'family bar organization menu: a mark on every row once one has a logo, the labels on one edge, a shared name told apart by its short name (D195)',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			for (const width of [1440, 390]) {
+				const { page, context } = await open(browser, consumer, { width, family: 'twins' });
+				const at = `${width}px`;
+				// The organization menu, or on a phone the location menu that carries it
+				const part = width > 480 ? 'organization' : 'location';
+				await page.locator(`.bui-family [data-part="${part}"]:visible .bui-navmenu-button`).click();
+				const rows = page.locator(`.bui-family [data-part="${part}"]:visible .bui-navmenu-panel .bui-navmenu-item`).filter({ has: page.locator('.bui-organization-mark') });
+				await page.waitForFunction(() => document.querySelector('.bui-organization-mark[data-picture]'));
+				const found = await rows.evaluateAll(items => items.map(item => {
+					const mark = item.querySelector('.bui-organization-mark').getBoundingClientRect();
+					return { label: item.querySelector('.bui-navmenu-label').textContent, meta: item.querySelector('.bui-navmenu-meta')?.textContent, start: item.querySelector('.bui-navmenu-text').getBoundingClientRect().left, mark: [mark.width, mark.height], picture: item.querySelector('.bui-organization-mark').hasAttribute('data-picture') };
+				}));
+				expect(found.length === 3, `${at}: three organizations, each with its mark: ${JSON.stringify(found)}`);
+				expect(found.every(row => Math.abs(row.mark[0] - 20) < 0.5 && Math.abs(row.mark[1] - 20) < 0.5), `${at}: 20 px marks: ${JSON.stringify(found)}`);
+				expect(found.every(row => Math.abs(row.start - found[0].start) < 0.5), `${at}: the names start on one edge: ${JSON.stringify(found)}`);
+				expect(found[0].picture && !found[1].picture, `${at}: the logo over the first mark only: ${JSON.stringify(found)}`);
+				// The role and "Opens in Beyond Projects" follow in the page's language (React's page is in Spanish)
+				expect(found[0].meta.startsWith('northwind-studio · ') && found[1].meta.startsWith('northwind-studio-2 · ') && !found[2].meta.includes('southwind'), `${at}: a shared name says its short name first, another does not: ${JSON.stringify(found)}`);
+				expect(!(await overflow(page)), `${at}: no sideways scroll`);
+				await context.close();
+			}
+		}
+	},
+	{
 		name: 'family bar menus stay inside the viewport at 390 and 320 px',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {

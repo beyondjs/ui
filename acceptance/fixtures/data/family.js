@@ -1,6 +1,7 @@
 // Fictional `beyond-family/1` descriptors for the family bar page, selected by `?family=`:
-// `inside` (a project), `outside` (an organization), `loading` (null), `unavailable`, and `long` and
-// `nandu`, whose long names share the location's width (`nandu` is the Projects adoption's case).
+// `inside` (a project), `outside` (an organization), `loading` (null), `unavailable`, `long` and
+// `nandu`, whose long names share the location's width (`nandu` is the Projects adoption's case), and
+// `twins`, two organizations with one name and a logo (0.40.0).
 // Projects is on the page's own origin so `onnavigate` takes its links over.
 const projects = `${location.origin}/projects/`;
 
@@ -87,7 +88,19 @@ const annotated = {
 const names = ['Atlas', 'Beacon', 'Comet', 'Delta', 'Échelle', 'Forge', 'Garnet', 'Harbor', 'Iris', 'Juniper', 'Kestrel', 'Lumen'];
 const many = { ...annotated, project: null, products: outside.products, projects: names.map((name, index) => ({ id: `prj_${index}`, name, here: { mapped: index % 3 ? 1 : 0, url: here(`prj_${index}`) } })) };
 
-export const descriptors = { inside, outside, loading: null, unavailable: { unavailable: true }, long, nandu, annotated, many };
+// Two organizations with one name, told apart by their short names, and one logo, which gives every
+// row its mark (D195, 0.40.0). The logo is an image `data:` address, so nothing is fetched.
+const logo = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+const twins = {
+	...inside,
+	organizations: [
+		{ ...inside.organizations[0], slug: 'northwind-studio', logo },
+		{ id: 'org_twin', name: 'Northwind Studio', role: 'developer', current: false, slug: 'northwind-studio-2' },
+		{ ...inside.organizations[1], slug: 'southwind' }
+	]
+};
+
+export const descriptors = { inside, outside, loading: null, unavailable: { unavailable: true }, long, nandu, annotated, many, twins };
 
 /** The product the bar is in, named by `?product=` (`delegate` by default), to measure other product names. */
 export const product = new URLSearchParams(location.search).get('product') ?? 'delegate';

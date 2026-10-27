@@ -4,7 +4,7 @@
  * simple elements are rendered by React with identical markup and classes. Import the styles once:
  * `@beyond-js/ui/tokens.css` and `@beyond-js/ui/styles.css`.
  */
-export { Icon, Button, useBusy, Lockup, Status, Badge, Callout, Loading, Skeleton, Waiting } from './simple.js';
+export { Icon, Button, useBusy, Lockup, Status, Badge, Callout, Loading, Skeleton, Waiting, OrganizationMark } from './simple.js';
 export { Field, Select, Choices, useSuggestion } from './fields.js';
 export { ChoiceMenu, ChoiceChip, RefChooser, ProjectPicker, SecretField, CopyMessage, CopyButton, StatusRow, ProviderWindow } from './choose.js';
 export { Bytes } from '../dom/core/bytes.js';

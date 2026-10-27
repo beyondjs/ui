@@ -5,12 +5,15 @@ import { h } from './hooks.js';
 import { TechnicalDetails } from './operations.js';
 import { Status as Shape } from '../dom/status/status.js';
 import { tones } from '../dom/status/labels.js';
+import { OrganizationMark as Square } from '../dom/family/mark.js';
+import { Picture } from '../dom/family/picture.js';
 
 const { useCallback, useRef, useState, useEffect } = React;
 
 /**
  * Elements React renders itself, with exactly the markup and classes of the DOM builders:
- * `Icon`, `Button`, `Lockup`, `Status`, `Badge`, `Callout`, `Loading` and `Skeleton`, plus `useBusy`.
+ * `Icon`, `Button`, `Lockup`, `Status`, `Badge`, `Callout`, `Loading`, `Skeleton` and `OrganizationMark`,
+ * plus `useBusy`.
  */
 
 /**
@@ -100,6 +103,24 @@ export function Status({ label = null, tone = 'neutral', state = null, variant =
 	const shape = Shape.tone(known);
 	const words = label ?? (labels ?? Shape.labels.en)[known];
 	return h('span', { className: `bui-status${variant === 'badge' ? ' bui-status-badge' : ''} bui-status-${shape}`, 'data-state': known, 'data-tone': shape }, h('span', { className: 'bui-status-dot', 'aria-hidden': 'true' }), h('span', { className: 'bui-status-label' }, words));
+}
+
+/**
+ * An organization's mark (D195, 0.40.0), as the DOM `OrganizationMark` builds it: the initial of its
+ * name, with its logo laid over it once it loads and removed when it fails.
+ */
+export function OrganizationMark({ name, logo = null }) {
+	const [failed, setFailed] = useState(false);
+	const [loaded, setLoaded] = useState(false);
+	const source = failed ? null : Picture.source(logo);
+	useEffect(() => {
+		setFailed(false);
+		setLoaded(false);
+	}, [logo]);
+	const picture = source
+		? h('img', { className: 'bui-family-picture', alt: '', src: source, referrerPolicy: 'no-referrer', decoding: 'async', onLoad: () => setLoaded(true), onError: () => setFailed(true) })
+		: null;
+	return h('span', { className: 'bui-organization-mark', 'aria-hidden': 'true', 'data-picture': loaded && source ? '' : undefined }, Square.initial(name), picture);
 }
 
 export function Badge({ label, tone = 'neutral' }) {

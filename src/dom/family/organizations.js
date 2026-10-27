@@ -1,3 +1,4 @@
+import { OrganizationMark } from './mark.js';
 import { entry } from './menu.js';
 
 /**
@@ -10,12 +11,19 @@ import { entry } from './menu.js';
  * "Organizations", each row with its role. A row goes to `url`, the product's own arrival for that
  * organization, when the product declared one; otherwise to the organization in Projects, and the
  * row says "Opens in Beyond Projects". With no organization in view there is no location at all.
+ *
+ * Telling organizations apart (D195, 0.40.0): when one of them has a logo (`logo`), every row starts
+ * with its mark, the logo or the initial of its name, so the rows keep one left edge; and a name two
+ * of them share gets its short name (`slug`) before the role on its row's second line. Other names
+ * are enough on their own.
  */
 export class Organizations {
 	#list;
 	#current;
 	#places;
 	#labels;
+	#marked;
+	#shared;
 
 	/**
 	 * @param {object} options
@@ -30,6 +38,8 @@ export class Organizations {
 		const source = descriptor ? descriptor.organizations : fallback?.organizations;
 		this.#list = (Array.isArray(source) ? source : []).filter(item => item && item.id && item.name);
 		this.#current = descriptor ? Organizations.#view(descriptor.organization, this.#list) : Organizations.#guess(fallback, this.#list);
+		this.#marked = this.#list.some(item => OrganizationMark.shows(item.logo));
+		this.#shared = Organizations.#twins(this.#list);
 	}
 
 	/** The organization in view (`{ id?, name, role? }`), or null. */
@@ -60,8 +70,27 @@ export class Organizations {
 		const labels = this.#labels;
 		const role = item.role ? labels.text('role', { role: item.role }) : null;
 		const own = typeof item.url === 'string' && item.url;
-		const meta = own ? role : [role, labels.text('beyond')].filter(Boolean).join(' · ');
-		return entry({ label: item.name, meta: meta || null, href: own ? item.url : this.#places.organization(item.id), current: current ? 'true' : null });
+		const slug = this.#shared.has(Organizations.#key(item.name)) && typeof item.slug === 'string' && item.slug ? item.slug : null;
+		const meta = [slug, role, own ? null : labels.text('beyond')].filter(Boolean).join(' · ');
+		const mark = this.#marked ? new OrganizationMark({ name: item.name, picture: item.logo }).element : null;
+		return entry({ label: item.name, meta: meta || null, mark, href: own ? item.url : this.#places.organization(item.id), current: current ? 'true' : null });
+	}
+
+	/** A name as two organizations would share it: trimmed, ignoring case. */
+	static #key(name) {
+		return String(name).trim().toLocaleLowerCase();
+	}
+
+	/** The names more than one of the person's organizations has. */
+	static #twins(list) {
+		const seen = new Set();
+		const shared = new Set();
+		for (const item of list) {
+			const key = Organizations.#key(item.name);
+			if (seen.has(key)) shared.add(key);
+			seen.add(key);
+		}
+		return shared;
 	}
 
 	/** The descriptor's organization in view, with its role from the list when it lacks one. */

@@ -267,6 +267,7 @@ export function hidden(text: string): HTMLElement;
 
 export * from './parts.js';
 export * from './family.js';
+export * from './organizations.js';
 export * from './again.js';
 export * from './icons.js';
 export * from './preferences.js';

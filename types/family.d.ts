@@ -1,5 +1,6 @@
 /** Types of the family patterns, re-exported by `@beyond-js/ui/dom`: FamilyBar, productNames (0.4.1), ProductNav, Unavailable and availability (`Sidebar` is in `sidebar.d.ts`). */
 import type { Component, Content, Copy, Tone } from './dom.js';
+import type { FamilyOrganization } from './organizations.js';
 
 /** Why a product entry is unavailable, as Beyond Projects reports it; other codes read "Not available". */
 export type FamilyReason = 'UNCONFIGURED' | 'NOT_ADMITTED' | 'ARCHIVED' | (string & {});
@@ -28,15 +29,6 @@ export interface FamilyHere {
 	url?: string;
 	/** Written by the product before passing the descriptor to the bar. */
 	state?: FamilyProjectState;
-}
-
-/** One organization of the person; `url` (0.4.0) is the product's own arrival for it. */
-export interface FamilyOrganization {
-	id: string;
-	name: string;
-	role?: string;
-	current?: boolean;
-	url?: string;
 }
 
 /** Accounts' management addresses (0.4.0), without `product` or `return`: the bar completes them. */

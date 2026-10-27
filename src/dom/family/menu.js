@@ -161,10 +161,12 @@ export class NavigationMenu extends Component {
  * One entry of a navigation menu: a link, a button (`run`) or, with neither, an unavailable entry
  * (`aria-disabled`, focusable, reachable by the arrow keys) that goes nowhere. `note` is a node after
  * the text, such as a badge with a reason; `state` is a short neutral text at the row's end that is
- * also part of its accessible name ("Handbook, Not set up in Delegate"); `current` is `aria-current`.
+ * also part of its accessible name ("Handbook, Not set up in Delegate"); `current` is `aria-current`;
+ * `mark` is a node before the text, hidden from the accessible name (an organization's logo, 0.40.0).
  */
-export function entry({ label, meta = null, href = null, run = null, current = null, note = null, state = null, class: extra = '' }) {
+export function entry({ label, meta = null, href = null, run = null, current = null, note = null, state = null, mark = null, class: extra = '' }) {
 	const children = [
+		mark,
 		el('span', { class: 'bui-navmenu-text' }, [el('span', { class: 'bui-navmenu-label' }, [content(label)]), meta ? el('span', { class: 'bui-navmenu-meta' }, [content(meta)]) : null]),
 		state ? el('span', { class: 'bui-navmenu-state' }, [hidden(', '), content(state)]) : null,
 		note
