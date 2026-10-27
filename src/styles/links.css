@@ -13,8 +13,10 @@
 	text-underline-offset: 2px;
 }
 /* A link among the package's words takes the text's colour on any page, with or without a base link rule, visited
-   or not (0.41.0) */
-:is(.bui-reading a, .bui-callout-text a, .bui-unavailable-reason a, .bui-preferences-note a, .bui-page-lead a) {
+   or not (0.41.0). A product's links passed into these parts keep their own class's colour: the rule weighs no
+   more than a base `a` rule. The Preferences dialog's own link, which no product styles, holds over a base rule. */
+:where(.bui-reading, .bui-callout-text, .bui-unavailable-reason, .bui-page-lead) a,
+.bui-preferences-note a {
 	color: var(--color-link);
 }
 :is(.bui-link-button, .bui-composer-status a, .bui-navmenu-notice a, .bui-reading a, .bui-callout-text a, .bui-unavailable-reason a, .bui-preferences-note a, .bui-page-lead a) {

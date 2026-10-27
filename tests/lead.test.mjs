@@ -126,4 +126,5 @@ test('the built stylesheet: "Change for all of Beyond" takes the text\'s colour 
 	const hover = [...sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].find(([, selectors]) => selectors.includes('.bui-preferences-note a') && selectors.includes(':hover'));
 	assert.match(hover?.[2] ?? '', /text-decoration-color:\s*currentColor/, 'full on hover');
 	assert.match(rules('.bui-page-lead a'), /text-decoration-color:\s*var\(--color-border-strong\)/, 'a link in a lead too');
+	assert.ok(sheet.includes(':where(.bui-reading, .bui-callout-text, .bui-unavailable-reason, .bui-page-lead) a,\n.bui-preferences-note a {\n\tcolor: var(--color-link);'), 'a product\'s links passed in keep their class\'s colour: the colour weighs as a base rule; the dialog\'s own link holds over one');
 });

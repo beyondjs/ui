@@ -27,10 +27,10 @@ Evidence baseline: UI `4062f48` (0.40.0, organizations told apart in the family 
 - **`PageHeader`'s `lead`** (D191; DOM option, getter and setter, React prop, `types/page.d.ts`, `types/react.d.ts`):
   - `p.bui-page-lead` under the facts line: body size, `--color-text-muted`, regular weight, within `prose.css`'s reading measure. The facts line is unchanged and keeps the header's width.
   - An empty lead draws nothing, by one rule in the DOM and React: nothing, a boolean, empty words, or an empty list or fragment. A number is said.
-- **Links among the package's words**: `.bui-preferences-note a` ("Change for all of Beyond"), and a link in a lead, a `bui-reading` paragraph, a callout's text or an `Unavailable`'s reason, take `--color-link` (visited or not) and the quiet underline, full on hover (`links.css`).
+- **Links among the package's words**: `.bui-preferences-note a` ("Change for all of Beyond"), and a link in a lead, a `bui-reading` paragraph, a callout's text or an `Unavailable`'s reason, take `--color-link` (visited or not) and the quiet underline, full on hover (`links.css`). The colour of links a product passes in (a lead, `bui-reading`, a callout, a reason) weighs as a base `a` rule (`:where`), so a product's own link class wins; the dialog's own link holds over a base rule.
 - **`Lanes`' room** (`lanes/room.js`, `LaneRoom`):
   - In the one-line form, while a title would be cut, the block folds its trace, then its kind (`data-fold`). It keeps the first fold that shows every title whole, or the last one.
-  - It measures again only when the block's drawn width (fractions included) or its lanes' titles and kinds change, and once the fonts arrive.
+  - It measures again only when the block's drawn width (fractions included), its columns or its lanes' depth, titles, kinds and facts change, and once the fonts arrive.
   - A folded column takes no track. A folded kind is hidden from sight only: it stays in the lane's name, and the name tooltip says it.
 - **`DataTable`'s `framed`** (option, setter, React prop, `types/table.d.ts`, `types/react-table.d.ts`): at the top of a framed box with no tools above it, the table's first capitals stand at the box's inset.
   - A wide table rises by its header row's room above the capitals. Its scroller clips only empty padding.
@@ -59,6 +59,13 @@ All eight corrections are in the commit that carries this record, with tests:
 8. This record cites the branch's own commits.
 
 `touching.mjs` now sweeps each line of a row's words with `elementFromPoint` and checks that no press there reaches a target. The earlier `.bui-notice` `min-height`, which mixed the row's `lh`/`cap` with the label's, is gone with the change of geometry.
+
+## The delta review (2026-10-27) and its corrections
+
+The delta review of `4ff9559` found two problems. Both are corrected in the commit that carries this paragraph, with tests:
+
+1. **The lanes regression.** `LaneRoom`'s key left out the facts column, each lane's facts and its depth. Token counts arriving after a lane started left the trace folded with every title cut at 51 of 141 widths. The key now holds them, and `lanes-room.test.mjs` changes only the facts, then only the depth.
+2. **The link colour.** The colour of links among the package's words outweighed a product's link class passed in. It now weighs as a base rule; `lead.test.mjs` and `leading.mjs` cover it with a product's class.
 
 ## Executed checks
 

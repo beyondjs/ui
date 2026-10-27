@@ -111,9 +111,10 @@ export class Lane {
 		return Cut.text(this.#title);
 	}
 
-	/** What decides its title's room: its title's and its kind's words (0.41.0). */
+	/** What decides its title's room (0.41.0): its depth, and its title's, kind's and facts' words. */
 	get said() {
-		return `${this.#title.textContent}|${this.#kind.hidden ? '' : this.#kind.textContent}`;
+		const words = [this.#title, this.#kind, this.#facts].map(cell => (cell.hidden ? '' : cell.textContent));
+		return [this.#element.dataset.depth ?? '', ...words].join('|');
 	}
 
 	/** Whether its title, or its kind, is shown cut now; a folded kind is cut (0.41.0). */

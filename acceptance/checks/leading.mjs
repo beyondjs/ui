@@ -116,6 +116,18 @@ export const checks = [
 					const text = await resolve(page, 'var(--color-link)');
 					const quiet = await resolve(page, 'var(--color-border-strong)');
 					expect(found.link?.color === text && found.link.line.includes('underline') && found.link.decoration === quiet, `${said}: its link in the text's colour ${text} with the quiet underline ${quiet}, with no base link rule`);
+					// A product's own link class in a lead keeps its colour: the package's weighs as a base `a` rule
+					const own = await page.evaluate(() => {
+						const style = document.head.appendChild(document.createElement('style'));
+						style.textContent = '.product-link { color: rgb(1, 2, 3); }';
+						const link = document.querySelector('.bui-page-lead a');
+						link.classList.add('product-link');
+						const color = getComputedStyle(link).color;
+						link.classList.remove('product-link');
+						style.remove();
+						return color;
+					});
+					expect(own === 'rgb(1, 2, 3)', `${said}: a product's link class keeps its colour in a lead: ${own}`);
 					expect(found.width <= found.measure + 1, `${said}: within the reading measure`);
 					expect(found.longest <= 80, `${said}: no line past 80 characters`);
 					if (width >= 1024) expect(found.lines >= 2 && found.header > found.measure + 100, `${said}: it wraps at the measure in a wider header`);

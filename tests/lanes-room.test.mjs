@@ -100,6 +100,52 @@ test('measures again when the width or the words change, or once asked, and only
 	room.destroy();
 });
 
+test('measures again when a column comes or what a lane says beyond its title changes: its facts, its depth', () => {
+	let cut = false;
+	let said = 'explore|0|Explore the auth module|Explore|';
+	const element = document.body.appendChild(document.createElement('div'));
+	element.setAttribute('data-trace', '');
+	element.setAttribute('data-kind', '');
+	element.getBoundingClientRect = () => ({ width: 900, height: 40 });
+	const room = new LaneRoom(element, { cut: () => cut, said: () => said });
+	room.fit();
+	assert.equal(element.hasAttribute('data-fold'), false);
+	cut = true;
+	element.setAttribute('data-facts', '');
+	room.fit();
+	assert.equal(element.dataset.fold, 'trace kind', 'a facts column arrived: measured again');
+	cut = false;
+	said = 'explore|0|Explore the auth module|Explore|48k tokens';
+	room.fit();
+	assert.equal(element.hasAttribute('data-fold'), false, 'only the facts changed: measured again');
+	cut = true;
+	said = 'explore|1|Explore the auth module|Explore|48k tokens';
+	room.fit();
+	assert.equal(element.dataset.fold, 'trace kind', 'only the depth changed: measured again');
+	room.destroy();
+	element.remove();
+});
+
+test('a lane says its depth and its title\'s, kind\'s and facts\' words; facts arriving change it', async () => {
+	const { Lane } = await import('../src/dom/lanes/lane.js');
+	const { Labels } = await import('../src/dom/core/labels.js');
+	const { LaneWords } = await import('../src/dom/lanes/words.js');
+	const labels = new Labels(ui.Lanes.labels.en, {});
+	const lane = new Lane('explore', { labels, words: new LaneWords(labels, 'en'), now: () => Date.now() });
+	const [first] = crew();
+	const place = { depth: 0, branch: null, through: [] };
+	lane.update({ ...first, facts: [] }, place);
+	const before = lane.said;
+	assert.match(before, /Explore the auth module/);
+	lane.update({ ...first, facts: [{ text: '48k', label: 'tokens' }] }, place);
+	assert.notEqual(lane.said, before, 'facts arriving change what it says');
+	assert.match(lane.said, /48k/);
+	const facted = lane.said;
+	lane.update({ ...first, facts: [{ text: '48k', label: 'tokens' }] }, { depth: 1, branch: 'last', through: [] });
+	assert.notEqual(lane.said, facted, 'a new depth changes what it says');
+	lane.destroy();
+});
+
 test('Lanes keeps its room: a lane says whether its title is cut, and destroying the block releases it', () => {
 	const lanes = new ui.Lanes({ label: 'Subagents of this turn' }).mount(document.body);
 	lanes.update({ lanes: crew() });
