@@ -41,7 +41,7 @@ export const dictation = freeze({
 		added: 'Texto añadido a tu mensaje',
 		stop: 'Detener',
 		cancel: 'Cancelar',
-		retry: 'Intentar de nuevo',
+		retry: 'Reintentar',
 		dismiss: 'Cerrar',
 		discard: 'Descartar',
 		transcribe: 'Transcribir lo grabado',

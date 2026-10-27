@@ -51,8 +51,8 @@ export const words = Object.freeze({
 		unavailable_body: 'No se pudo renovar tu sesión. Esta página reintenta automáticamente. Tu trabajo sigue aquí.',
 		offline: 'Estás sin conexión',
 		offline_body: 'Tu sesión se renueva en cuanto vuelvas a tener conexión. Tu trabajo sigue aquí.',
-		retry: 'Intentar de nuevo',
-		retrying: 'Intentando de nuevo…',
+		retry: 'Reintentar',
+		retrying: 'Reintentando…',
 		unsent: 'No se envió mientras no tenías sesión. Vuelve a intentarlo.'
 	})
 });

@@ -646,6 +646,8 @@ Reading `<html lang>` follows D07: the language travels from Accounts, `Preferen
 
 A product that passes `labels: X.labels.es` keeps its Spanish, whatever the page says; it can stop passing them once its pages carry `lang`. `locale` still sets the format of times and numbers. React draws with the language in effect at its render: a product that changes `lang` re-renders, as it does after any `Preferences` change (`usePreferences`). `new Labels(set, given, locale)` is public, with `language` (`en`, `es`) and `entries`; a plain entry list, the earlier form, is used as it is. `loading()`, `waiting()`, `loading.text()` and `loading.step()` and React `Loading` and `Waiting` say their default in the language in effect when no `label` or `language` is given.
 
+The Spanish retry word is **Reintentar** in every set that carries `retry` (`Session` and `ComposerDictation` said "Intentar de nuevo" until 0.43.0), and `Session`'s wait says **Reintentando…**; `tests/language.test.mjs` holds them to it.
+
 ## Diff (0.11.2)
 
 **Diff** (DOM `Diff`, React `Diff`). A change's files in a unified view a developer can trust, for a side panel such as Conduict's "View changes". It never invents a line: what the input does not carry is said, never offered, and what cannot be read is said while the rest shows.
