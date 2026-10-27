@@ -9,6 +9,7 @@ import { Table } from './table.js';
 import { CollectionRows } from './rows.js';
 import { ColumnFit } from './columns.js';
 import { OutageRead } from '../again/read.js';
+import { EndLine } from '../list/end.js';
 import { defaults, spanish } from './labels.js';
 
 /**
@@ -177,8 +178,7 @@ export class Collection extends Component {
 		// The keys open only rows that open: a list of names without a destination says no keys. They are said
 		// only where the focus can move (0.31.1): one row alone moves nowhere, unless a search's Down reaches it
 		const moves = shown > 1 || Boolean(this.#state.query);
-		const keys = this.#options.link && moves ? el('span', { class: 'bui-keys bui-rows-keys', text: this.#labels.text('keys') }) : null;
-		return el('p', { class: 'bui-rows-end' }, [el('span', {}, [content(said)]), keys]);
+		return new EndLine({ text: said, keys: Boolean(this.#options.link && moves), labels: { keys: this.#labels.text('keys') } }).element;
 	}
 
 	#change(part) {

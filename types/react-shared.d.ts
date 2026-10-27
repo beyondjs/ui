@@ -20,6 +20,13 @@ export function ActionLine(props: { facts?: Array<import('react').ReactNode>; la
 export * from './react-diff.js';
 export { Recency, Matches } from './parts.js';
 
+/** 0.39.0 (D162 L7): a callback ref that gives a product's own `ul.bui-rows` the arrow keys of `RowKeys`, released when it leaves. */
+export function useRowKeys(): (list: HTMLElement | null) => void;
+
+/** 0.39.0 (D162 L5): a complete list's end line after a product's own `ul.bui-rows`, the DOM `EndLine`'s markup. */
+export function EndLine(props: { text?: import('react').ReactNode; keys?: boolean; labels?: Partial<{ end: string; keys: string }> }): ReactElement;
+export namespace EndLine { const labels: { readonly en: Readonly<{ end: string; keys: string }>; readonly es: Readonly<{ end: string; keys: string }> }; }
+
 /** A region's wait (0.23.0, LOAD-01), as the DOM `waiting`. */
 export function Waiting(props: WaitingShape): ReactElement;
 

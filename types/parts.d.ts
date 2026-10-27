@@ -146,6 +146,12 @@ export class RowKeys {
 	first(): boolean;
 	destroy(): void;
 }
+/** A complete list's end line for a list a product draws itself (0.39.0, D162 L5): `p.bui-rows-end`, as `Collection`'s list draws it. */
+export class EndLine {
+	static readonly labels: { readonly en: Readonly<{ end: string; keys: string }>; readonly es: Readonly<{ end: string; keys: string }> };
+	constructor(options?: { text?: string | Node | null; keys?: boolean; labels?: Partial<{ end: string; keys: string }> });
+	readonly element: HTMLParagraphElement;
+}
 
 export class Toaster extends Component {
 	/** The copy in English and Spanish (0.7.1). */
@@ -217,11 +223,15 @@ export interface NotificationInboxOptions {
 	state?: Partial<InboxState>;
 	onstate?: ((state: InboxState) => void) | null;
 	labels?: Copy;
+	/** 0.39.0 (D162 L8): `external` leaves Unread/All, the product filter and Mark all as read to `tools.element`, for the page header's actions */
+	tools?: 'inline' | 'external';
 }
 export class NotificationInbox extends Component {
 	/** The copy in English and Spanish (0.7.2). */
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 	constructor(options: NotificationInboxOptions);
+	/** Its one toolbar, drawn in its body unless `tools` is `external` (0.39.0). */
+	readonly tools: { readonly element: HTMLElement };
 	state: InboxState;
 	load(): Promise<void>;
 }

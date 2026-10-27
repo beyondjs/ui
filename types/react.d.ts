@@ -268,15 +268,12 @@ export interface NotificationEntryProps {
 	labels?: Copy;
 }
 export const NotificationEntry: ForwardRefExoticComponent<NotificationEntryProps & RefAttributes<NotificationEntryHandle>> & { labels: Copies };
-export function NotificationInbox(props: {
-	adapter: NotificationAdapter;
-	onOpen?: ((destination: string, item: Notice) => void) | null;
-	products?: Record<string, string>;
-	locale?: string;
-	limit?: number;
+export function NotificationInbox(props: Pick<NotificationEntryProps, 'adapter' | 'onOpen' | 'products' | 'locale' | 'limit' | 'labels'> & {
 	state?: Partial<InboxState> | null;
 	onState?: ((state: InboxState) => void) | null;
-	labels?: Copy;
+	/** 0.39.0 (D162 L8): with `external`, the toolbar goes into `toolsTarget`, an empty element of the page header's actions */
+	tools?: 'inline' | 'external';
+	toolsTarget?: HTMLElement | null;
 }): ReactElement;
 export function useToaster(labels?: Copy): { show(message: string, options?: { tone?: 'success' | 'info' | 'warning' | 'danger'; detail?: string; duration?: number }): (() => void) | undefined; clear(): void };
 /** `[host, instance]`; `instance` is null until mounted and whenever the rendered instance is already destroyed. */

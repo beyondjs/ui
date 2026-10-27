@@ -3,6 +3,7 @@ import { NotificationEntry as Entry } from '../dom/notifications/entry.js';
 import { NotificationInbox as Inbox } from '../dom/notifications/inbox.js';
 import { Toaster } from '../dom/toaster.js';
 import { h, living, useInstance, useLatest, useSync } from './hooks.js';
+import { useTools } from './collection-tools.js';
 
 const { forwardRef, useImperativeHandle, useLayoutEffect, useMemo, useState } = React;
 
@@ -71,8 +72,10 @@ export const NotificationEntry = forwardRef(function NotificationEntry({ adapter
 /**
  * The full inbox, driven by the DOM `NotificationInbox` class. `state` (`{ state, product }`) is
  * applied when it changes, for example from the address; `onState` reports the person's changes.
+ * With `tools="external"` (0.39.0) its toolbar goes into `toolsTarget`, an empty element of the page's
+ * header actions, as `Collection`'s and `DataTable`'s do.
  */
-export function NotificationInbox({ adapter, onOpen = null, products = {}, locale, limit = 20, state = null, onState = null, labels }) {
+export function NotificationInbox({ adapter, onOpen = null, products = {}, locale, limit = 20, state = null, onState = null, labels, tools = 'inline', toolsTarget = null }) {
 	const stable = useAdapter(adapter);
 	const latest = useLatest({ onOpen, onState });
 	const [host, inbox] = useInstance(
@@ -83,12 +86,14 @@ export function NotificationInbox({ adapter, onOpen = null, products = {}, local
 				locale,
 				limit,
 				labels,
+				tools,
 				state: state ?? {},
 				onopen: onOpen ? (destination, item) => latest.current.onOpen?.(destination, item) : null,
 				onstate: next => latest.current.onState?.(next)
 			}),
-		[stable, JSON.stringify(products), locale, limit, labels, Boolean(onOpen)]
+		[stable, JSON.stringify(products), locale, limit, labels, Boolean(onOpen), tools]
 	);
+	useTools(inbox, toolsTarget, tools);
 	useSync(inbox, current => {
 		if (state && JSON.stringify(state) !== JSON.stringify(current.state)) current.state = state;
 	}, [JSON.stringify(state)]);

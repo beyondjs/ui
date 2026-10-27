@@ -28,6 +28,12 @@ import { Actions } from './actions.js';
  * browser is offline) is the page's body, as `Recovery`'s page form (`whole`): who did not answer, when it
  * last tried and one Try again, its read in the line's Technical details, and no filter that cannot work.
  * It reads again by itself and gives the page back once the relay answers. `locale` picks its language.
+ *
+ * Since 0.39.0 (D162, L8 and L10) its tools (Unread and All, the product filter and Mark all as read) can sit in
+ * the action region of the page's header: with `tools: 'external'` the inbox leaves them out of its body and
+ * `tools.element` is the one toolbar a product places there, as `Collection` and `DataTable` do. A product filter
+ * with nothing to show says so for that product ("Nothing unread from CDN.") with Show all products, never as an
+ * inbox with nothing at all.
  */
 export class NotificationInbox extends Component {
 	/** The copy in English and Spanish (0.7.2). */
@@ -48,6 +54,8 @@ export class NotificationInbox extends Component {
 	#options;
 	#state;
 	#tools;
+	#outlet;
+	#products;
 	#stamp = null;
 
 	/**
@@ -57,6 +65,7 @@ export class NotificationInbox extends Component {
 	 * @param {Record<string,string>} [options.products] display names by product id; offered in the product filter
 	 * @param {{state?: 'unread'|'all', product?: string}} [options.state]
 	 * @param {(state: {state: string, product: string}) => void} [options.onstate]
+	 * @param {'inline'|'external'} [options.tools] where its tools are drawn; `external` leaves them to `tools.element` (0.39.0)
 	 */
 	constructor(options) {
 		super();
@@ -65,6 +74,7 @@ export class NotificationInbox extends Component {
 		this.#adapter = adapter;
 		this.#labels = new Labels(defaults, labels);
 		this.#state = { state: state.state === 'all' ? 'all' : 'unread', product: state.product ?? '' };
+		this.#products = products;
 		this.#feed = new Feed(adapter);
 		this.#lang = String(locale ?? '').toLowerCase().startsWith('es') ? 'es' : 'en';
 		this.#recovery = new Recovery({ title: '', whole: true, locale, labels: { ...Recovery.labels[this.#lang], ...labels } });
@@ -85,12 +95,14 @@ export class NotificationInbox extends Component {
 		this.#status = el('p', { class: 'bui-notify-status', role: 'status' });
 		this.#body = el('div', { class: 'bui-inbox-body' });
 		this.#more = el('button', { type: 'button', class: 'bui-button bui-button-quiet', hidden: true, onclick: () => this.#page() }, [this.#labels.text('more')]);
+		this.#tools = el('div', { class: 'bui-inbox-tools' }, [
+			el('div', { class: 'bui-toggles', role: 'group', 'aria-label': this.#labels.text('show') }, this.#buttons),
+			Object.keys(products).length ? el('div', { class: 'bui-inbox-product' }, [el('label', { for: `${id}-product`, class: 'bui-field-label', text: this.#labels.text('product') }), this.#product.element]) : null,
+			this.#everything
+		]);
+		this.#outlet = Object.freeze({ element: this.#tools });
 		this.#element = el('section', { class: 'bui-inbox', 'aria-label': this.#labels.text('title') }, [
-			(this.#tools = el('div', { class: 'bui-inbox-tools' }, [
-				el('div', { class: 'bui-toggles', role: 'group', 'aria-label': this.#labels.text('show') }, this.#buttons),
-				Object.keys(products).length ? el('div', { class: 'bui-inbox-product' }, [el('label', { for: `${id}-product`, class: 'bui-field-label', text: this.#labels.text('product') }), this.#product.element]) : null,
-				this.#everything
-			])),
+			options.tools === 'external' ? null : this.#tools,
 			this.#status,
 			this.#body,
 			this.#more
@@ -100,6 +112,11 @@ export class NotificationInbox extends Component {
 
 	get element() {
 		return this.#element;
+	}
+
+	/** Its toolbar, `{ element }`, for a product to place in its header's action region with `tools: 'external'` (0.39.0). */
+	get tools() {
+		return this.#outlet;
 	}
 
 	get state() {
@@ -124,6 +141,7 @@ export class NotificationInbox extends Component {
 
 	destroy() {
 		this.#recovery.destroy();
+		this.#tools.remove();
 		this.#feed.clear();
 		this.#product.destroy();
 		super.destroy();
@@ -182,8 +200,24 @@ export class NotificationInbox extends Component {
 		// Items marked read stay listed until the next load, so "Mark as unread" can undo at once.
 		const items = feed.items;
 		const partial = this.#list.partial(feed.missing);
-		const empty = el('div', { class: 'bui-empty' }, [el('p', { class: 'bui-empty-title', text: words.text(this.#state.state === 'unread' ? 'caught' : 'empty') })]);
-		NoticeList.keep(this.#body, () => fill(this.#body, [partial, items.length ? this.#list.render(items) : empty]));
+		NoticeList.keep(this.#body, () => fill(this.#body, [partial, items.length ? this.#list.render(items) : this.#empty()]));
+	}
+
+	/** Nothing to show: for one product, said for it with the way back to every product (0.39.0, L10). */
+	#empty() {
+		const words = this.#labels;
+		const { state, product } = this.#state;
+		if (!product) return el('div', { class: 'bui-empty' }, [el('p', { class: 'bui-empty-title', text: words.text(state === 'unread' ? 'caught' : 'empty') })]);
+		const name = this.#products[product] ?? product;
+		const widen = el('button', { type: 'button', class: 'bui-button bui-button-secondary', onclick: () => this.#widen() }, [words.text('widen')]);
+		return el('div', { class: 'bui-empty', 'data-filtered': '' }, [el('p', { class: 'bui-empty-title', text: words.text(state === 'unread' ? 'cleared' : 'none', { product: name }) }), el('div', { class: 'bui-empty-actions' }, [widen])]);
+	}
+
+	#widen() {
+		this.#product.value = '';
+		this.#change({ product: '' });
+		// The button leaves with the empty: the focus goes to the filter it changed
+		this.#product.element.querySelector('select')?.focus();
 	}
 
 	/** An outage of the relay, or a read that failed while the browser is offline (0.33.0). */

@@ -146,6 +146,27 @@ export const checks = [
 		}
 	},
 	{
+		name: 'inbox: a product filter with nothing unread is said for that product, and Show all products clears it (0.39.0)',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			const { page } = await browser.open(consumer);
+			const spanish = consumer.language === 'es';
+			const inbox = page.locator('#inbox');
+			await inbox.locator('.bui-notice').first().waitFor();
+			await inbox.locator('select').selectOption('cdn');
+			await inbox.getByRole('button', { name: spanish ? 'Marcar todas como leídas' : 'Mark all as read' }).click();
+			const said = spanish ? 'Nada sin leer de CDN.' : 'Nothing unread from CDN.';
+			await inbox.getByText(said).waitFor();
+			expect(!(await inbox.textContent()).includes(spanish ? 'Estás al día' : 'caught up'), 'never said as an inbox with nothing at all');
+			await inbox.getByRole('button', { name: spanish ? 'Mostrar todos los productos' : 'Show all products' }).click();
+			await inbox.locator('.bui-notice').first().waitFor();
+			expect((await inbox.locator('select').inputValue()) === '', 'the filter shows every product');
+			expect(await page.evaluate(() => document.activeElement?.localName === 'select'), 'the focus is on the filter it changed');
+			const log = await page.evaluate(() => window.fixture.log);
+			expect(log.at(-1) === 'inbox:{"state":"unread","product":""}', `the cleared filter is reported for the address: ${log.at(-1)}`);
+		}
+	},
+	{
 		name: 'panel: an empty inbox offers no "View all"; a slow answer shows the indicator only after the delay, stays busy, animates the height and drops the indicator; a late answer after Escape is discarded',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {

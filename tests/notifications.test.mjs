@@ -140,7 +140,8 @@ test('the inbox filters unread and all by product, groups, pages and reports its
 	await page.until(() => titles(inbox.element).length === 1);
 	assert.deepEqual(states.at(-1), { state: 'all', product: 'cdn' });
 	inbox.state = { state: 'unread', product: 'cdn' };
-	await page.until(() => /You are all caught up/.test(inbox.element.textContent));
+	// Since 0.39.0 (L10) a product filter with nothing to show is said for that product
+	await page.until(() => /Nothing unread from CDN\./.test(inbox.element.textContent));
 });
 
 test('the inbox marks all read for its product filter and survives an unavailable aggregation', async () => {
@@ -149,7 +150,7 @@ test('the inbox marks all read for its product filter and survives an unavailabl
 	await page.until(() => inbox.element.querySelector('.bui-notice'));
 	const everything = inbox.element.querySelector('.bui-inbox-tools .bui-button');
 	everything.click();
-	await page.until(() => /caught up/.test(inbox.element.textContent));
+	await page.until(() => /Nothing unread from Delegate\./.test(inbox.element.textContent));
 	assert.equal(notices.calls.filter(([name]) => name === 'read').at(-1)[1].product, 'delegate');
 	assert.equal(notices.items.find(item => item.id === 'n4').read, null, 'another product stays unread');
 	notices.absent = true;

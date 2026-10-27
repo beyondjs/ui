@@ -94,6 +94,7 @@ export { Relayout } from './core/relayout.js';
 export { Status } from './status/status.js';
 export { ListRow } from './list/row.js';
 export { RowKeys } from './list/keys.js';
+export { EndLine } from './list/end.js';
 export { Matches } from './list/matches.js';
 export { Recency } from './collection/recency.js';
 export { CopyValue } from './list/value.js';
