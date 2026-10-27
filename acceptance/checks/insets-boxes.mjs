@@ -48,13 +48,35 @@ const holder = async page => {
  * card with the table `framed` at its top. Its words keep the box's inset; its rows' fills hang into the box's
  * padding as a menu's entries do, so a row under the pointer is a flat row, measured by its words; a grouped one
  * starts with its first group's heading at 390 px. Its last row
- * keeps its own padding, so the bottom is free room.
+ * keeps its own padding, so the bottom is free room. Since 0.44.0 a framed table lifts only while it leads its card:
+ * the card's line hidden before it leaves it leading, and a framed table after a line its card shows stays where
+ * it is drawn, the line's capitals at the inset.
  */
 const tables = [
 	{ name: 'a DataTable in a raised section', box: '#table-raised .bui-section', inset: '--bui-raised-inset', flat: ['.bui-data tbody tr'], free: ['bottom'] },
 	{ name: 'a framed DataTable in a product\'s card', box: '#table-card .insets-card', inset: 20, flat: ['.bui-data tbody tr'], free: ['bottom'] },
-	{ name: 'a framed, grouped DataTable in a product\'s card', box: '#table-grouped .insets-card', inset: 20, flat: ['.bui-data tbody tr'], free: ['bottom'] }
+	{ name: 'a framed, grouped DataTable in a product\'s card', box: '#table-grouped .insets-card', inset: 20, flat: ['.bui-data tbody tr'], free: ['bottom'] },
+	{ name: 'a framed DataTable after a line its card shows', box: '#table-after .insets-card', inset: 20, flat: ['.bui-data tbody tr'], free: ['bottom'] }
 ];
+
+/**
+ * Whether each framed table is lifted (0.44.0): the one that leads its card (a hidden line before it) is, by its
+ * table's margin on a wide table or its first row's on a narrow one; the one after a line its card shows is not,
+ * and its first line starts below the line's.
+ */
+const leading = async page => {
+	const found = await page.evaluate(() => {
+		const lift = block => {
+			const table = document.querySelector(`${block} .bui-table`);
+			const row = table.querySelector('tbody > tr');
+			return parseFloat(getComputedStyle(table).marginBlockStart) + parseFloat(getComputedStyle(row).marginBlockStart);
+		};
+		const line = document.querySelector('#table-after .insets-updated').getBoundingClientRect().bottom;
+		const shown = [...document.querySelectorAll('#table-after .bui-data :is(thead, tbody)')].find(part => part.getBoundingClientRect().height > 1);
+		return { card: lift('#table-card'), after: lift('#table-after'), line, below: shown.getBoundingClientRect().top };
+	});
+	if (!(found.card < -1) || Math.abs(found.after) > 0.01 || found.below < found.line) throw new Error(`a framed table lifts only while it leads its card: ${JSON.stringify(found)}`);
+};
 
 /**
  * Points at a table's first row, and holds its fill inside the box, hanging into the box's padding no further than
@@ -93,7 +115,7 @@ export const pages = {
 				{ open: page => page.locator('#callout-details summary').click(), boxes: [{ name: 'callout ending in open technical details', box: '#callout-details .bui-callout', inset: '--bui-callout-inset' }] },
 				{ open: async page => (await page.evaluate(() => window.fixture.toast()), page.waitForSelector('.bui-toast')), boxes: [{ name: 'toast with a detail', box: '.bui-toast', inset: '--bui-toast-inset' }] },
 				{ open: holder, boxes: [{ name: 'CopyMessage of a command', box: '#copy-command .bui-copy-text', inset: '--bui-text-inset' }] },
-				{ boxes: tables },
+				{ open: leading, boxes: tables },
 				{ open: page => pointed(page, '#table-card'), boxes: tables.slice(1, 2).map(box => ({ ...box, name: `${box.name}, a row under the pointer` })) },
 				{ open: page => pointed(page, '#table-raised'), boxes: tables.slice(0, 1).map(box => ({ ...box, name: `${box.name}, a row under the pointer` })) }
 			]

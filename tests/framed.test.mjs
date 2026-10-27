@@ -45,11 +45,14 @@ test('React DataTable: framed follows the prop', async () => {
 	await act(() => root.unmount());
 });
 
-test('the built stylesheet: a framed table lifts its first capitals only with no tools above it', () => {
+test('the built stylesheet: a framed table lifts its first capitals only while it leads its box, with no tools or sort line above its rows (0.44.0)', () => {
 	const sheet = readFileSync(new URL('../dist/styles.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
-	const tools = ':not(:has(> .bui-data-tools:not([hidden])))';
-	assert.ok(sheet.includes(`.bui-data-table[data-framed]${tools} > .bui-data-body .bui-table {\n\t\tmargin-block-start: calc((1cap - var(--bui-row)) / 2);`), 'a wide table rises by its header row\'s room above the capitals');
-	assert.ok(sheet.includes(`.bui-data-table[data-framed]${tools} > .bui-data-body .bui-data tbody > tr:first-child {\n\t\t\tmargin-block-start: calc(-1 * var(--space-2) - (1lh - 1cap) / 2);`), 'a narrow table lifts its first row');
+	// Nothing shown stands before the table, or before React's host of it; a hidden element, a line for screen readers, a script or a style does not count
+	const shown = ':not([hidden], .bui-hidden, script, style, template)';
+	const lead = `:not(${shown} ~ *, .bui-host:is(${shown} ~ *) > *, :has(> .bui-data-tools:not([hidden]))`;
+	assert.ok(sheet.includes(`.bui-data-table[data-framed]${lead}) > .bui-data-body .bui-table {\n\t\tmargin-block-start: calc((1cap - var(--bui-row)) / 2);`), 'a wide table rises by its header row\'s room above the capitals');
+	assert.ok(sheet.includes(`.bui-data-table[data-framed]${lead}) > .bui-data-body .bui-table {\n\t\t\tmargin-block-start: 0;`), 'a narrow one does not, whatever stands above its rows');
+	assert.ok(sheet.includes(`.bui-data-table[data-framed]${lead}, :has(> .bui-data-order:not([hidden]))) > .bui-data-body .bui-data tbody > tr:first-child {\n\t\t\tmargin-block-start: calc(-1 * var(--space-2) - (1lh - 1cap) / 2);`), 'a narrow table lifts its first row, unless its sort line stands above it');
 	assert.match(sheet, /\.bui-data-table\[data-framed\] > \.bui-data-body \{\s*overflow: visible;/, 'a narrow framed table clips nothing');
 	assert.doesNotMatch(sheet.replace(/\[data-framed\][^{]*\{[^}]*\}/g, ''), /margin-block-start: calc\(\(1cap - var\(--bui-row\)\) \/ 2\)/, 'no table outside a frame is lifted');
 });

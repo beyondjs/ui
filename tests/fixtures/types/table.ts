@@ -12,7 +12,9 @@ const table = new DataTable<Machine>({
 	onchange: (state: DataTableState) => state.page,
 	size: 25,
 	link: row => `/machines/${row.id}`,
-	empty: { title: 'No machine yet', action: { label: 'Create a machine', href: '/machines/new' } }
+	empty: { title: 'No machine yet', action: { label: 'Create a machine', href: '/machines/new' } },
+	// A row's actions in a menu column of its own (0.44.0)
+	menu: row => [{ label: `Rename ${row.name}`, run: () => undefined }, row.conversations ? null : { label: 'Delete', tone: 'danger' }]
 });
 table.rows = [];
 table.status = 'loading';

@@ -1,6 +1,7 @@
 /** Types of the React `DataTable` (0.15.0), re-exported by `@beyond-js/ui/react`. */
 import type { ReactElement, ReactNode } from 'react';
 import type { Copy } from './notifications.js';
+import type { MenuItem } from './dom.js';
 import type { DataTableFilter, DataTableState } from './table.js';
 import type { CollectionToolsMode } from './collection-tools.js';
 export type { DataTableColumn, DataTableFilter, DataTableState } from './table.js';
@@ -25,8 +26,10 @@ export function DataTable<Row = any>(props: {
 	empty?: { title: string; text?: string | null; action?: { label: string; href?: string | null } | null } | null;
 	status?: 'loading' | 'ready' | { failed: string | null };
 	onRetry?: (() => void) | null;
-	/** Drawn at the top of a framed box: its first capitals at the box's inset (0.41.0, D184) */
+	/** Drawn in a framed box: its first capitals at the box's inset while it leads it (0.41.0, D184; 0.44.0) */
 	framed?: boolean;
+	/** A row's actions, in a menu column of its own (0.44.0, L6); read again each time a menu opens */
+	menu?: ((row: Row) => Array<(Omit<MenuItem, 'run'> & { onSelect?: (event: MouseEvent) => void }) | null | false>) | null;
 	/** Memoize: a new object creates a new table */
 	labels?: Copy;
 }): ReactElement;

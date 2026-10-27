@@ -36,6 +36,17 @@ body {
    and its narrow form at 390 px */
 #table-raised,
 #table-card,
-#table-grouped {
+#table-grouped,
+#table-after {
 	width: min(48rem, calc(100vw - 2 * var(--space-4)));
+}
+/* The line a product draws above its table at times (0.44.0): a muted line, a gap above the table, as CDN's
+   backoffice says when its rows were read */
+.insets-card:has(> .insets-updated:not([hidden])) {
+	display: grid;
+	gap: var(--space-3);
+}
+.insets-updated {
+	color: var(--color-text-muted);
+	font-size: var(--text-small);
 }

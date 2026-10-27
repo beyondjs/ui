@@ -1,6 +1,6 @@
 /** Types of 0.15.0's `DataTable`, re-exported by `@beyond-js/ui/dom`. */
 import type { Copy } from './notifications.js';
-import type { Component } from './dom.js';
+import type { Component, MenuItem } from './dom.js';
 import type { CollectionFilter, CollectionTools, CollectionToolsMode } from './collection-tools.js';
 
 export interface DataTableFilter<Row = any> extends CollectionFilter {
@@ -55,8 +55,13 @@ export interface DataTableOptions<Row = any> {
 	onrender?: (() => void) | null;
 	/** Milliseconds after the last key before a search applies (200). */
 	delay?: number;
-	/** Drawn at the top of a framed box: with no tools above it, its first capitals at the box's inset (0.41.0, D184). */
+	/**
+	 * Drawn in a framed box: while it is the box's first part (nothing shown before it, 0.44.0) with no tools or sort
+	 * line above its rows, its first capitals at the box's inset (0.41.0, D184).
+	 */
 	framed?: boolean;
+	/** A row's actions, in a menu column of its own that shows where the pointer or focus is, always on touch (0.44.0, L6). */
+	menu?: ((row: Row) => Array<MenuItem | null | false>) | null;
 	labels?: Copy;
 }
 
@@ -70,6 +75,6 @@ export class DataTable<Row = any> extends Component {
 	rows: Row[];
 	get status(): 'loading' | 'ready' | 'failed';
 	set status(status: 'loading' | 'ready' | { failed: string | null });
-	/** Whether it is drawn at the top of a framed box (0.41.0). */
+	/** Whether it is drawn in a framed box, lifted while it leads it (0.41.0, 0.44.0). */
 	framed: boolean;
 }

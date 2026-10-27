@@ -31,7 +31,16 @@
  * hides from sight (one only a screen reader reads) and a text a line clamp ends with its ellipsis (a
  * turn's preview), and a line it hides is not drawn: a clamp's or a clip's hidden lines decide no side. A
  * background whose every layer is a line 2 px thin or less that does not repeat across it (a table's row
- * dividers) is a divider, never a fill. Products copy this file; `checks/measuring.mjs` holds it.
+ * dividers) is a divider, never a fill.
+ *
+ * Since 0.44.0, from CDN's `generated.mjs` of the round `tended`: words a stylesheet generates (`::before` and
+ * `::after` whose content is a string or `attr()`, such as a stacked `DataTable`'s `td[data-label]::before`
+ * labels) are read as text. A pseudo-element has no box a script reads, so for the measure only each one in the
+ * box is drawn as a `span` with its own computed style and words in its own place (first or last child) while the
+ * pseudo-element is turned off, then the page is put back before the measure returns. A mark it draws in flow by its
+ * fill or its border with no words (`content: ''`, a dot before a hint's words) is drawn so too, an empty span the
+ * measure reads as a shape; one positioned out of flow, hidden, or drawing nothing is left as it is. `generated:
+ * false` in a spec measures without them. Products copy this file; `checks/measuring.mjs` holds it.
  */
 export class Insets {
 	/** Installs `window.fixtureInsets(spec)` in every page of a context before it loads. */
@@ -225,9 +234,56 @@ export class Insets {
 				return found;
 			};
 			const beside = (glyph, texts) => texts.some(text => glyph.bottom > text.top && glyph.top < text.bottom);
-			window.fixtureInsets = ({ box, nth = 0, extra = [], flat = [], field: control = false }) => {
-				const node = typeof box === 'string' ? document.querySelectorAll(box)[nth] : box;
-				if (!node) return { missing: box };
+			/** A generated content's words: its strings and its `attr()` values, in order; an image, a counter or a quote is no words. */
+			const quoted = (value, node) => {
+				if (['none', 'normal', ''].includes(value) || /url\(|counter|quote/.test(value)) return '';
+				let words = '';
+				for (const [, double, single, name] of value.matchAll(/"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|attr\(\s*([\w-]+)\s*\)/g)) words += name ? (node.getAttribute(name) ?? '') : (double ?? single).replace(/\\(.)/g, '$1');
+				return words;
+			};
+			/**
+			 * Draws the words a stylesheet generates inside a box as spans with the pseudo-elements' own style, each pseudo-element
+			 * turned off meanwhile (0.44.0); answers the function that puts the page back.
+			 */
+			const generate = box => {
+				const found = [];
+				for (const node of [box, ...box.querySelectorAll('*')])
+					for (const side of ['before', 'after']) {
+						const style = getComputedStyle(node, `::${side}`);
+						const words = quoted(style.content, node);
+						// A mark drawn by its fill or its border with no words (a dot before a hint's words) is drawn as an empty span
+						const mark = !words.trim() && /^(""|'')$/.test(style.content) && (alpha(style.backgroundColor) > 0 || style.backgroundImage !== 'none' || parseFloat(style.borderTopWidth) > 0);
+						if ((words.trim() || mark) && style.display !== 'none' && !['absolute', 'fixed'].includes(style.position)) found.push({ node, side, words, style: [...style].filter(name => name !== 'content').map(name => [name, style.getPropertyValue(name)]) });
+					}
+				if (!found.length) return () => undefined;
+				const off = document.createElement('style');
+				off.textContent = '[data-inset-before]::before, [data-inset-after]::after { content: none !important; }';
+				document.head.append(off);
+				const made = found.map(({ node, side, words, style }) => {
+					const span = document.createElement('span');
+					for (const [name, value] of style) span.style.setProperty(name, value);
+					span.textContent = words;
+					span.setAttribute('aria-hidden', 'true');
+					node.setAttribute(`data-inset-${side}`, '');
+					side === 'before' ? node.prepend(span) : node.append(span);
+					return { node, side, span };
+				});
+				return () => {
+					for (const { node, side, span } of made) span.remove(), node.removeAttribute(`data-inset-${side}`);
+					off.remove();
+				};
+			};
+			window.fixtureInsets = spec => {
+				const node = typeof spec.box === 'string' ? document.querySelectorAll(spec.box)[spec.nth ?? 0] : spec.box;
+				if (!node) return { missing: spec.box };
+				const restore = spec.generated === false || spec.field ? () => undefined : generate(node);
+				try {
+					return inside(node, spec);
+				} finally {
+					restore();
+				}
+			};
+			const inside = (node, { extra = [], flat = [], field: control = false }) => {
 				const style = getComputedStyle(node);
 				const outer = node.getBoundingClientRect();
 				const inner = { top: outer.top + parseFloat(style.borderTopWidth), bottom: outer.bottom - parseFloat(style.borderBottomWidth), left: outer.left + parseFloat(style.borderLeftWidth), right: outer.right - parseFloat(style.borderRightWidth) };

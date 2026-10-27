@@ -70,6 +70,22 @@
 .bui-data .bui-mono {
 	font-family: var(--font-mono);
 }
+/* A narrow table's sort (0.44.0): "Sort by" and its select in a line above the rows, drawn only on the narrow
+   form, whose header with its sort buttons is hidden from sight */
+.bui-data-order {
+	display: none;
+}
+/* A row's menu (0.44.0, L6): a column of its own at the row's end, as narrow as its button, which keeps the row's
+   height; it shows where the pointer or the focus is (the list rules' reveal) */
+.bui-data .bui-data-menu {
+	width: 1%;
+	padding-block: 0;
+	text-align: end;
+	white-space: nowrap;
+}
+.bui-data td.bui-data-menu > .bui-menu-holder {
+	vertical-align: middle;
+}
 /* A narrow region: the name, then labeled values wrapping together in one muted line. */
 @container bui-data (max-width: 36rem) {
 	.bui-data thead {
@@ -135,33 +151,75 @@
 	.bui-data-group {
 		border-bottom: 0;
 	}
+	.bui-data-order:not([hidden]) {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-1) var(--space-2);
+		min-width: 0;
+	}
+	/* A row's menu stays beside its name (0.44.0, L6): the name and the menu share the first line, centred on it, and
+	   the values wrap below them (a break after the menu); a row with no actions leaves its name the whole line */
+	.bui-data tr:has(> .bui-data-menu) > th[scope='row'] {
+		flex: 1 1 0;
+		order: -2;
+		min-width: 0;
+	}
+	.bui-data tr:has(> .bui-data-menu)::after {
+		content: '';
+		flex-basis: 100%;
+		order: -1;
+	}
+	.bui-data td.bui-data-menu {
+		display: flex;
+		flex: none;
+		align-items: center;
+		order: -1;
+		width: auto;
+		color: inherit;
+		font-size: inherit;
+	}
+	.bui-data td.bui-data-menu[data-empty] {
+		display: none;
+	}
+	.bui-data tbody > tr > td.bui-data-menu:not([data-label])::before {
+		content: none;
+	}
+	/* Its button stands in the row's padding, never past it: centred on the name's line */
+	.bui-data td.bui-data-menu > .bui-menu-holder {
+		margin-block: max(calc((1lh - var(--bui-target)) / 2), calc(-1 * var(--space-2)));
+	}
 }
 
 /* A table at the top of a framed box (0.41.0, D184: `framed`, `data-framed`): with no tools above it, its first
    line's capitals stand at the box's inset. A wide table rises by its header row's room above the capitals (the
    label's capitals, within half a pixel of the table's own), which its scroller clips with nothing drawn there; a
    narrow one, which never scrolls sideways, lifts its first row's padding and half-leading, so that row's fill
-   hangs into the box's padding as its sides do; its first group's heading, when it is grouped, keeps no room above. */
+   hangs into the box's padding as its sides do; its first group's heading, when it is grouped, keeps no room above.
+   Since 0.44.0 only while it leads its box: nothing shown stands before it, or before React's host of it (a hidden
+   element, a line for screen readers, a script or a style does not count), so a line a product draws above it only
+   at times (a "Last updated" over kept rows) leaves it in place and a product sets `framed` once; a narrow table's
+   sort line above its rows leaves it in place too. */
 @supports (padding-top: calc(1lh - 1cap)) {
-	.bui-data-table[data-framed]:not(:has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-table {
+	.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template) ~ *) > *, :has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-table {
 		margin-block-start: calc((1cap - var(--bui-row)) / 2);
 	}
 	@container bui-data (max-width: 36rem) {
 		.bui-data-table[data-framed] > .bui-data-body {
 			overflow: visible;
 		}
-		.bui-data-table[data-framed]:not(:has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-table {
+		.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template) ~ *) > *, :has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-table {
 			margin-block-start: 0;
 		}
-		.bui-data-table[data-framed]:not(:has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-data tbody > tr:first-child {
+		.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template) ~ *) > *, :has(> .bui-data-tools:not([hidden])), :has(> .bui-data-order:not([hidden]))) > .bui-data-body .bui-data tbody > tr:first-child {
 			margin-block-start: calc(-1 * var(--space-2) - (1lh - 1cap) / 2);
 		}
 		/* A grouped table starts with its first group's heading: none of a group's room above it there, and its
 		   half-leading taken off in the heading's own size, as a label's */
-		.bui-data-table[data-framed]:not(:has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-data tbody > tr.bui-data-group:first-child {
+		.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template) ~ *) > *, :has(> .bui-data-tools:not([hidden])), :has(> .bui-data-order:not([hidden]))) > .bui-data-body .bui-data tbody > tr.bui-data-group:first-child {
 			margin-block-start: calc(-1 * var(--space-2));
 		}
-		.bui-data-table[data-framed]:not(:has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-data tbody > tr.bui-data-group:first-child > th {
+		.bui-data-table[data-framed]:not(:not([hidden], .bui-hidden, script, style, template) ~ *, .bui-host:is(:not([hidden], .bui-hidden, script, style, template) ~ *) > *, :has(> .bui-data-tools:not([hidden])), :has(> .bui-data-order:not([hidden]))) > .bui-data-body .bui-data tbody > tr.bui-data-group:first-child > th {
 			padding-top: 0;
 			margin-block-start: calc((1cap - 1lh) / 2);
 		}
