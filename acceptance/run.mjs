@@ -66,6 +66,7 @@ import { checks as sorting } from './checks/sorting.mjs';
 import { checks as tooling } from './checks/tooling.mjs';
 import { checks as tabling } from './checks/tabling.mjs';
 import { checks as wheeling } from './checks/wheeling.mjs';
+import { checks as reserving } from './checks/reserving.mjs';
 
 /**
  * Browser acceptance of the packed package: `npm pack` → three consumers installed from the tarball
@@ -75,7 +76,7 @@ import { checks as wheeling } from './checks/wheeling.mjs';
 class Acceptance {
 	#root = fileURLToPath(new URL('..', import.meta.url));
 	#consumers = [new Consumer('dom', 'dom'), new Consumer('react19', 'react', '19.3.0'), new Consumer('react18', 'react', '18.3.1')];
-	#checks = [...disclosure, ...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...pinning, ...choosing, ...icons, ...prose, ...session, ...composing, ...panels, ...thread, ...attaching, ...folding, ...fitting, ...diffing, ...railing, ...laning, ...turning, ...missing, ...ending, ...anchoring, ...moving, ...seeking, ...editing, ...auditing, ...commanding, ...holding, ...navigating, ...hierarchy, ...dismissal, ...sheets, ...dialogs, ...recovery, ...recovering, ...waiting, ...insets, ...settling, ...closing, ...focusing, ...pressing, ...revealing, ...targeting, ...hanging, ...measuring, ...leading, ...touching, ...sorting, ...tooling, ...tabling, ...resetting, ...wheeling];
+	#checks = [...disclosure, ...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...pinning, ...choosing, ...icons, ...prose, ...session, ...composing, ...panels, ...thread, ...attaching, ...folding, ...fitting, ...diffing, ...railing, ...laning, ...turning, ...missing, ...ending, ...anchoring, ...moving, ...seeking, ...editing, ...auditing, ...commanding, ...holding, ...navigating, ...hierarchy, ...dismissal, ...sheets, ...dialogs, ...recovery, ...recovering, ...waiting, ...insets, ...settling, ...closing, ...focusing, ...pressing, ...revealing, ...targeting, ...hanging, ...measuring, ...leading, ...touching, ...sorting, ...tooling, ...tabling, ...resetting, ...wheeling, ...reserving];
 	// Checks whose consumer and name hold the filter, or any of its parts separated by `|` (0.33.0)
 	#filters = (process.argv[2] ?? '').split('|').filter(Boolean);
 
