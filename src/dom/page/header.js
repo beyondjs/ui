@@ -6,6 +6,8 @@ import { Cut, NameTip } from '../core/cut.js';
 import { PageCompact } from './compact.js';
 
 const defaults = { crumbs: 'Breadcrumb' };
+/** What a lead says (0.41.0): a node, a number or words; nothing, a boolean or empty words say nothing, as in React. */
+const said = value => value !== null && value !== undefined && typeof value !== 'boolean' && value !== '';
 
 /**
  * A page's one header (LR-05, D160): a breadcrumb only from the second level down that says where the
@@ -46,6 +48,7 @@ export class PageHeader extends Component {
 	#status;
 	#facts;
 	#lead;
+	#given = null;
 	#actions;
 	#crumbs;
 	#tabs;
@@ -148,9 +151,14 @@ export class PageHeader extends Component {
 		this.#facts.hidden = !this.#facts.childNodes.length;
 	}
 
-	/** The page's lead sentence under the facts line (0.41.0, D191); none takes no room. */
+	/** The page's lead sentence under the facts line (0.41.0, D191), as given; none takes no room. */
+	get lead() {
+		return this.#given;
+	}
+
 	set lead(lead) {
-		fill(this.#lead, [].concat(lead ?? []).map(content));
+		this.#given = lead ?? null;
+		fill(this.#lead, [].concat(lead ?? []).filter(said).map(content));
 		this.#lead.hidden = !this.#lead.childNodes.length;
 	}
 

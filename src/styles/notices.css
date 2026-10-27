@@ -100,24 +100,24 @@
 	margin-block: -4px;
 	margin-block: min(-1px, calc((1lh - 26px) / 2));
 }
-/* On a touch screen (D192, 0.41.0) the row keeps its one inset: a control's 44 px target rises from its own
-   line over the row's padding and words above it, never below its line, so it stays inside the row and never
-   covers the next row's targets. A row shorter than a target and its end padding (a title and its details
-   alone) grows above its words, keeping its last line on its end padding. */
+/* On a touch screen (D192, 0.41.0) a control's 44 px target stays in the row's padding box and off the row's
+   words, so a press on the row's words always opens the matter (D79): it takes its own line and grows below its
+   words by what a target needs, never over the summary above or the line below. A row whose last line is a
+   control's gives that target its end padding, so it grows only by the rest. The row keeps its inset at its
+   top and sides; below a control's words the target's room stands, about 31 px instead of 8. */
 @media (pointer: coarse) {
-	.bui-notice {
-		min-height: calc(var(--bui-target) + var(--bui-notice-inset, var(--space-2)) - (1lh - 1cap) / 2);
-		align-content: end;
-	}
 	.bui-notice-mark,
 	.bui-notice-toggle {
 		min-height: 0;
-		padding-block: calc(var(--bui-target) - 1lh) 0;
-		margin-block: calc(1lh - var(--bui-target)) 0;
+		padding-block: 0 calc(var(--bui-target) - 1lh);
+		margin-block: 0;
 	}
 	/* Over the toggle's own spacing above it, which its base rule below gives */
 	.bui-notice .bui-notice-toggle {
-		margin-block-start: calc(1lh - var(--bui-target) + var(--space-1));
+		margin-block-start: var(--space-1);
+	}
+	.bui-notice:not(:has(> .bui-notice-text > :is(.bui-notice-earlier:not([hidden]), .bui-notice-count))) {
+		padding-block-end: 0;
 	}
 }
 .bui-notice-mark {

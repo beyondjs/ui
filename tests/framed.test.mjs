@@ -53,3 +53,24 @@ test('the built stylesheet: a framed table lifts its first capitals only with no
 	assert.match(sheet, /\.bui-data-table\[data-framed\] > \.bui-data-body \{\s*overflow: visible;/, 'a narrow framed table clips nothing');
 	assert.doesNotMatch(sheet.replace(/\[data-framed\][^{]*\{[^}]*\}/g, ''), /margin-block-start: calc\(\(1cap - var\(--bui-row\)\) \/ 2\)/, 'no table outside a frame is lifted');
 });
+
+test('DataHead: a narrow table\'s hidden header leaves the Tab order, a wide one\'s comes back, after every drawing too (0.41.0, D187)', async () => {
+	const { DataHead } = await import('../src/dom/table/head.js');
+	const sortable = columns.map(column => ({ ...column, sort: true }));
+	const table = new ui.DataTable({ label: 'Jobs', columns: sortable, rows, search: false }).mount(document.body);
+	let width = 390;
+	table.element.getBoundingClientRect = () => ({ width });
+	const head = new DataHead(table.element);
+	const indexes = () => [...table.element.querySelectorAll('thead button')].map(button => button.getAttribute('tabindex'));
+	head.measure();
+	assert.equal(head.narrow, true);
+	assert.deepEqual(indexes(), ['-1', '-1'], 'out of the Tab order, still in the header');
+	table.rows = [...rows, { id: 'b', job: 'Build', state: 'Done' }];
+	head.apply();
+	assert.deepEqual(indexes(), ['-1', '-1'], 'a drawing of the rows keeps them out');
+	width = 1024;
+	head.measure();
+	assert.deepEqual(indexes(), [null, null], 'a wide table gives them back');
+	head.destroy();
+	table.destroy();
+});

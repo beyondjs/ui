@@ -30,6 +30,8 @@ export const words = {
 		en: 'This machine runs the conversations of Storefront and keeps one working copy of each repository the project grants it. Its copies are read and pushed only through its Git gateway, and a copy keeps its changes while the machine sleeps.',
 		es: 'Esta máquina ejecuta las conversaciones de Storefront y guarda una copia de trabajo de cada repositorio que el proyecto le concede. Sus copias se leen y se suben solo a través de su pasarela de Git, y una copia conserva sus cambios mientras la máquina duerme.'
 	},
+	// The lead's link among its words (0.41.0): the text's colour and the quiet underline on a page with no base link rule
+	more: { en: 'How copies are pushed', es: 'Cómo se suben las copias', href: '#/gateway' },
 	branch: 'main',
 	rows: ['acme/web', 'acme/docs', 'acme/api'],
 	nested: ['acme/api · main', 'acme/api · feature/cart'],

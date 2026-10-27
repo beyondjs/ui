@@ -3,7 +3,8 @@ import { expect, overflow } from '../support/browser.mjs';
 /**
  * A page's lead (0.41.0, D191) in a real engine, on the layout page with `?lead=1`: under the facts line, on the
  * H1's edge, in the body's size and the muted colour, and no line past the reading measure at 390 to 1920 px in
- * both themes, while the facts line keeps the header's width. And the Preferences dialog's "Change for all of
+ * both themes, while the facts line keeps the header's width; its link in the text's colour with the quiet
+ * underline on a page with no base link rule. And the Preferences dialog's "Change for all of
  * Beyond" (0.41.0): in the text's colour with the quiet underline, full on hover, on a page with no base link
  * rule (as Beyond Home's window host) and on pages whose base rule colours links or takes their underline off.
  */
@@ -72,6 +73,11 @@ const lead = page =>
 			size: style.fontSize,
 			body: getComputedStyle(document.body).fontSize,
 			color: style.color,
+			link: (() => {
+				const link = node.querySelector('a');
+				const look = link && getComputedStyle(link);
+				return link ? { color: look.color, line: look.textDecorationLine, decoration: look.textDecorationColor } : null;
+			})(),
 			...characters(node)
 		};
 	});
@@ -107,6 +113,9 @@ export const checks = [
 					expect(Math.abs(found.start - found.heading) <= 1, `${said}: it starts on the H1's edge`);
 					expect(found.size === found.body, `${said}: in the body's size`);
 					expect(found.color === muted, `${said}: in the muted colour ${muted}`);
+					const text = await resolve(page, 'var(--color-link)');
+					const quiet = await resolve(page, 'var(--color-border-strong)');
+					expect(found.link?.color === text && found.link.line.includes('underline') && found.link.decoration === quiet, `${said}: its link in the text's colour ${text} with the quiet underline ${quiet}, with no base link rule`);
 					expect(found.width <= found.measure + 1, `${said}: within the reading measure`);
 					expect(found.longest <= 80, `${said}: no line past 80 characters`);
 					if (width >= 1024) expect(found.lines >= 2 && found.header > found.measure + 100, `${said}: it wraps at the measure in a wider header`);

@@ -15,6 +15,7 @@ const copy = words.es;
 const time = Date.now() - 60_000;
 const reads = [{ key: 'project', title: copy.recovery.read, details: { request: 'req_insets_7Hq2', time, text: copy.recovery.said }, run: async () => false }];
 const table = jobs(copy);
+const group = { by: row => row.organization };
 const outage = { ...RetryAction.labels.es, ...AgainLine.labels.es, ...TechnicalDetails.labels.es };
 
 function App() {
@@ -70,6 +71,11 @@ function App() {
 			<div id="table-card">
 				<div className="insets-card">
 					<DataTable {...table} search={false} framed labels={DataTable.labels.es} />
+				</div>
+			</div>
+			<div id="table-grouped">
+				<div className="insets-card">
+					<DataTable {...table} search={false} framed group={group} labels={DataTable.labels.es} />
 				</div>
 			</div>
 		</main>

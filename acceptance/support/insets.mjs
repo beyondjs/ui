@@ -29,8 +29,9 @@
  * box or a holder inside it hides (`overflow: hidden` or `clip`) as well as what it scrolls, so a trim that
  * hides a box's last line never passes for none. What is hidden on purpose is left out: a caption a clip
  * hides from sight (one only a screen reader reads) and a text a line clamp ends with its ellipsis (a
- * turn's preview). A background whose every layer is a line 2 px thin or less (a table's row dividers) is a
- * divider, never a fill. Products copy this file; `checks/measuring.mjs` holds it.
+ * turn's preview), and a line it hides is not drawn: a clamp's or a clip's hidden lines decide no side. A
+ * background whose every layer is a line 2 px thin or less that does not repeat across it (a table's row
+ * dividers) is a divider, never a fill. Products copy this file; `checks/measuring.mjs` holds it.
  */
 export class Insets {
 	/** Installs `window.fixtureInsets(spec)` in every page of a context before it loads. */
@@ -88,8 +89,24 @@ export class Insets {
 			/** A field that shows text: a select, a textarea or an input that is not a mark of its own (a radio, a checkbox). */
 			const typed = node => node.localName !== 'input' || !['checkbox', 'radio', 'range', 'color', 'file', 'image', 'hidden'].includes(node.type);
 			const pictures = new Set(['img', 'video', 'canvas', 'progress', 'meter']);
-			/** Whether every layer of a background is a line 2 px thin or less: a divider drawn as a background (a table's rows), never a fill. */
-			const lined = style => style.backgroundSize.split(/,(?![^(]*\))/).every(layer => layer.trim().split(/\s+(?![^(]*\))/).some(size => /^\d+(\.\d+)?px$/.test(size) && parseFloat(size) <= 2));
+			/** A computed list of layers, split at the commas outside parentheses. */
+			const layers = value => value.split(/,(?![^(]*\))/).map(layer => layer.trim().split(/\s+(?![^(]*\))/));
+			/** Whether a layer repeats along an axis (0 across, 1 down), from its computed `background-repeat`. */
+			const repeats = (repeat, axis) => {
+				if (repeat.length === 2) return repeat[axis] !== 'no-repeat';
+				if (repeat[0] === 'repeat-x') return axis === 0;
+				if (repeat[0] === 'repeat-y') return axis === 1;
+				return repeat[0] !== 'no-repeat';
+			};
+			/**
+			 * Whether every layer of a background is a line 2 px thin or less that does not repeat across its thin side:
+			 * a divider drawn as a background (a table's rows), never a fill. A thin layer that repeats tiles into a fill.
+			 */
+			const lined = style => {
+				const sizes = layers(style.backgroundSize);
+				const repeat = layers(style.backgroundRepeat);
+				return sizes.every((size, index) => size.some((length, axis) => /^\d+(\.\d+)?px$/.test(length) && parseFloat(length) <= 2 && !repeats(repeat[index % repeat.length], axis)));
+			};
 			/** Whether a node draws its own box: a fill unlike what is behind it, or a border on every side. */
 			const boxed = node => {
 				const style = getComputedStyle(node);
@@ -135,14 +152,28 @@ export class Insets {
 				for (let item = text.parentElement; item && item !== box; item = item.parentElement) if (getComputedStyle(item).overflowX !== 'visible') return content(item);
 				return null;
 			};
-			/** The lines of a text node, each with its capitals, baseline and content area. */
+			/** What clips a text's lines above and below: the padding box of its nearest holder, the box included, that hides or scrolls its overflow. */
+			const ceiling = (text, box) => {
+				for (let item = text.parentElement; item; item = item.parentElement) {
+					const style = getComputedStyle(item);
+					if (style.overflowY !== 'visible') {
+						const { top, bottom } = item.getBoundingClientRect();
+						return { top: top + parseFloat(style.borderTopWidth), bottom: bottom - parseFloat(style.borderBottomWidth) };
+					}
+					if (item === box) break;
+				}
+				return null;
+			};
+			/** The lines of a text node that show, each with its capitals, baseline and content area: a line a clamp or a clip hides is not drawn. */
 			const lines = (text, parent, box, flat) => {
 				const metrics = font(getComputedStyle(parent));
 				const range = document.createRange();
 				range.selectNodeContents(text);
 				const edge = end(text, box, flat);
 				const clip = scroller(text, box);
-				return [...range.getClientRects()].filter(area => area.width > 0.5).map(area => {
+				const held = ceiling(text, box);
+				const shows = area => !held || (area.top < held.bottom - 0.5 && area.bottom > held.top + 0.5);
+				return [...range.getClientRects()].filter(area => area.width > 0.5 && shows(area)).map(area => {
 					const baseline = area.top + metrics.ascent;
 					return { kind: 'text', top: area.top, bottom: area.bottom, caps: baseline - metrics.cap, baseline, left: Math.max(area.left, clip?.left ?? -Infinity), right: clip ? Math.min(edge.right, clip.right) : edge.right, free: edge.free, what: text.textContent.trim().slice(0, 24) };
 				});

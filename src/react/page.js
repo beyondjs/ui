@@ -17,7 +17,13 @@ import { Cut, NameTip } from '../dom/core/cut.js';
 import { Mark } from './simple.js';
 import { h, living, useInstance, useLatest, useSync } from './hooks.js';
 
-const { createContext, useContext, useId, useLayoutEffect, useRef, useState } = React;
+const { createContext, useContext, useId, useLayoutEffect, useRef, useState, Fragment, isValidElement } = React;
+/** Whether a lead says something (0.41.0), by the DOM header's rule: a node, a number or words, inside lists and fragments. */
+const told = node => {
+	if (Array.isArray(node)) return node.some(told);
+	if (isValidElement(node) && node.type === Fragment) return told(node.props.children);
+	return node !== null && node !== undefined && typeof node !== 'boolean' && node !== '';
+};
 const Panel = createContext(null);
 
 /**
@@ -167,7 +173,7 @@ export function PageHeader({ title, crumbs = [], kind = null, status = null, fac
 			: null,
 		h('div', { ref: line, className: 'bui-page-title' }, h('h1', { id, className: 'bui-page-heading', tabIndex: -1, ref: headingRef }, title), kind ? h('span', { className: 'bui-page-kind' }, typeof kind === 'string' ? h('span', { className: 'bui-page-tag' }, kind) : kind) : null, status ? h('span', { className: 'bui-page-status' }, status) : null, actions ? h('div', { className: 'bui-page-actions' }, actions) : null),
 		facts ? h('p', { className: 'bui-page-facts' }, facts) : null,
-		lead ? h('p', { className: 'bui-page-lead' }, lead) : null,
+		told(lead) ? h('p', { className: 'bui-page-lead' }, lead) : null,
 		tabs ? h('div', { className: 'bui-page-tabs' }, tabs) : null
 	);
 	return held ? h(React.Fragment, null, held, header) : header;

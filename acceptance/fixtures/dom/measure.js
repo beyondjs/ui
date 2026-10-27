@@ -3,7 +3,7 @@
 // groups as `display: contents` and the same list without them; boxes that hide a trimmed overflow
 // (`overflow: hidden`, `overflow: clip`) and one whose content fits; a box holding a caption only a screen reader
 // reads, clipped on purpose, and one whose text a line clamp ends on purpose; a row whose background draws only
-// a 1 px divider, and one whose background fills it.
+// a 1 px divider, one whose background fills it and one whose 1 px layer repeats into a fill.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
@@ -24,5 +24,6 @@ place('caption', [el('p', { text: 'Ready' }), el('span', { class: 'measure-capti
 place('clamped', [el('p', { class: 'measure-clamp', text: lines })]);
 place('lined', [el('p', { class: 'measure-lined', text: 'Prepare storefront' })]);
 place('filled', [el('p', { class: 'measure-filled', text: 'Prepare storefront' })]);
+place('repeated', [el('p', { class: 'measure-repeated', text: 'Prepare storefront' })]);
 
 window.fixture = { ready: true };

@@ -7,6 +7,7 @@ import { callout, skeleton } from '../feedback.js';
 import { EmptyState } from '../checklist/empty.js';
 import { DataQuery } from './query.js';
 import { DataTableView } from './view.js';
+import { DataHead } from './head.js';
 import { words } from './labels.js';
 
 /**
@@ -21,7 +22,8 @@ import { words } from './labels.js';
  * `ready`. With no row at all the tools remain reachable and the empty state is shown (the product's node,
  * or `{ title, text, action }`); a search that matches nothing says so with "Clear the search". What
  * fits on one page shows no range and no pager. On a narrow region (a container query on the table's
- * own width) each row is two short lines: the primary cell, then the others in one muted line.
+ * own width) each row is two short lines: the primary cell, then the others in one muted line; since 0.41.0 its
+ * hidden header's sort buttons leave the Tab order there (`DataHead`, D187).
  *
  * `framed` (0.41.0, D184) says the table is drawn at the top of a framed box (a raised section, a card): with no
  * tools above it, its first line's capitals stand at the box's inset (the header's, or a narrow table's first
@@ -47,6 +49,7 @@ export class DataTable extends Component {
 	#body = el('div', { class: 'bui-data-body' });
 	#pager;
 	#said = el('p', { class: 'bui-hidden', role: 'status' });
+	#head;
 
 	/**
 	 * @param {object} options
@@ -80,6 +83,7 @@ export class DataTable extends Component {
 		this.#tools.element.classList.add('bui-data-tools');
 		this.#pager = el('nav', { class: 'bui-pager', 'aria-label': this.#labels.text('pages', { label }) });
 		this.#element = el('section', { class: 'bui-data-table', 'aria-label': typeof label === 'string' ? label : null }, [options.tools === 'external' ? null : this.#tools.element, this.#said, this.#body, this.#pager]);
+		this.#head = new DataHead(this.#element);
 		this.framed = options.framed ?? false;
 		this.rows = rows;
 	}
@@ -136,6 +140,7 @@ export class DataTable extends Component {
 
 	destroy() {
 		this.#tools.destroy();
+		this.#head.destroy();
 		super.destroy();
 	}
 
@@ -169,6 +174,7 @@ export class DataTable extends Component {
 			return fill(this.#body, [none.element]);
 		}
 		fill(this.#body, [this.#view.draw(answer, this.#state)]);
+		this.#head.apply();
 		this.#paging(answer);
 		this.#said.textContent = this.#labels.text('shown', { count: answer.total });
 		this.#options.onrender?.();

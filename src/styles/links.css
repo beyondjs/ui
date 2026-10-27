@@ -12,6 +12,11 @@
 	text-decoration: underline;
 	text-underline-offset: 2px;
 }
+/* A link among the package's words takes the text's colour on any page, with or without a base link rule, visited
+   or not (0.41.0) */
+:is(.bui-reading a, .bui-callout-text a, .bui-unavailable-reason a, .bui-preferences-note a, .bui-page-lead a) {
+	color: var(--color-link);
+}
 :is(.bui-link-button, .bui-composer-status a, .bui-navmenu-notice a, .bui-reading a, .bui-callout-text a, .bui-unavailable-reason a, .bui-preferences-note a, .bui-page-lead a) {
 	text-decoration-line: underline;
 	text-decoration-color: var(--color-border-strong);

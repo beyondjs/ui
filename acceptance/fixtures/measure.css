@@ -69,3 +69,8 @@ body {
 .measure-filled {
 	background-size: 100% 100%;
 }
+/* A 1 px layer left to repeat, the default: it tiles down the row into a fill */
+.measure-repeated {
+	padding: 8px;
+	background: linear-gradient(var(--color-border-strong), var(--color-border-strong)) left top / 100% 1px;
+}

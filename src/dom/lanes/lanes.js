@@ -74,7 +74,7 @@ export class Lanes extends Component {
 		this.#choose = typeof choose === 'function' ? choose : null;
 		this.#element = el('div', { class: 'bui-lanes', role: 'group' }, [this.#list]);
 		this.#keyboard = new LaneKeys(this.#list, { lanes: () => this.#sequence });
-		this.#room = new LaneRoom(this.#element, () => this.#sequence.some(lane => lane.cramped));
+		this.#room = new LaneRoom(this.#element, { cut: () => this.#sequence.some(lane => lane.cramped), said: () => this.#sequence.map(lane => lane.said).join('\n') });
 		this.#list.addEventListener('click', event => this.#press(event));
 		this.update({ label, trace, lanes: [] });
 	}

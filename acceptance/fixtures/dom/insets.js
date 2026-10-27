@@ -44,6 +44,10 @@ const tables = [false, true].map(framed => new DataTable({ ...jobs(copy), search
 const raised = new Section({ title: copy.jobs.label, raised: true, children: [tables[0].element] });
 place('table-raised', raised.element);
 place('table-card', el('div', { class: 'insets-card' }, [tables[1].element]));
+// A grouped table framed at a card's top: at 390 px it starts with its first group's heading
+const grouped = new DataTable({ ...jobs(copy), search: false, framed: true, group: { by: row => row.organization } });
+tables.push(grouped);
+place('table-grouped', el('div', { class: 'insets-card' }, [grouped.element]));
 
 const toaster = new Toaster().mount(document.body);
 

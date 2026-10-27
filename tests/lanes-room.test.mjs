@@ -7,7 +7,8 @@ import { crew } from './fixtures/lanes.mjs';
 /**
  * A title's room first in `Lanes` (0.41.0): `LaneRoom` folds the block's trace, then its kind, only while a
  * title would be cut, keeps the first fold that lets every title show whole, folds nothing under 40rem or
- * for a column the block does not have, and starts again from nothing at every measure. happy-dom draws
+ * for a column the block does not have, and measures again from nothing only when the block's width (as drawn,
+ * fractions included) or its lanes' words change, or when asked. happy-dom draws
  * nothing, so the block's width and whether a title is cut are given here; the browser acceptance measures
  * them (`checks/laning.mjs`, "a title's room first").
  */
@@ -21,14 +22,14 @@ beforeEach(() => page.reset());
 function block({ width = 900, columns = ['trace', 'kind'], until = null } = {}) {
 	const element = document.body.appendChild(document.createElement('div'));
 	for (const column of columns) element.setAttribute(`data-${column}`, '');
-	Object.defineProperty(element, 'clientWidth', { get: () => width });
+	element.getBoundingClientRect = () => ({ width, height: 40, top: 0, left: 0, right: width, bottom: 40 });
 	const asked = [];
-	const titles = () => {
+	const cut = () => {
 		const fold = element.dataset.fold ?? '';
 		asked.push(fold);
 		return until === null ? fold !== 'never' : !fold.split(' ').includes(until);
 	};
-	return { element, asked, room: new LaneRoom(element, titles) };
+	return { element, asked, room: new LaneRoom(element, { cut, said: () => 'Explore the auth module|Explore' }) };
 }
 
 test('folds the trace first and stops once every title shows whole', () => {
@@ -65,20 +66,35 @@ test('folds nothing while every title shows whole, under 40rem, or for a column 
 	for (const item of [whole, narrow, kindless, bare]) item.room.destroy();
 });
 
-test('measures from nothing folded every time, so a block that widened unfolds', () => {
+test('measures again when the width or the words change, or once asked, and only then', () => {
 	let cut = true;
+	let width = 900;
+	let words = 'Explore the auth module|Explore';
+	let asked = 0;
 	const element = document.body.appendChild(document.createElement('div'));
 	element.setAttribute('data-trace', '');
 	element.setAttribute('data-kind', '');
-	Object.defineProperty(element, 'clientWidth', { get: () => 900 });
-	const room = new LaneRoom(element, () => cut);
+	element.getBoundingClientRect = () => ({ width, height: 40 });
+	const room = new LaneRoom(element, { cut: () => (asked++, cut), said: () => words });
 	room.fit();
 	assert.equal(element.dataset.fold, 'trace kind');
+	const first = asked;
 	cut = false;
 	room.fit();
-	assert.equal(element.hasAttribute('data-fold'), false);
+	assert.deepEqual([element.dataset.fold, asked], ['trace kind', first], 'nothing changed: nothing measured, the fold kept');
+	width = 960.5;
+	room.fit();
+	assert.equal(element.hasAttribute('data-fold'), false, 'a wider block, a fractional width: measured from nothing folded');
+	cut = true;
+	words = 'Explore how the session lease is renewed|Explore';
+	room.fit();
+	assert.equal(element.dataset.fold, 'trace kind', 'new words: measured again');
+	cut = false;
+	room.fit(true);
+	assert.equal(element.hasAttribute('data-fold'), false, 'asked again, as when the fonts arrive');
 	element.remove();
 	cut = true;
+	width = 1000;
 	room.fit();
 	assert.equal(element.hasAttribute('data-fold'), false, 'a block out of the document folds nothing');
 	room.destroy();

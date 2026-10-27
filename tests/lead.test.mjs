@@ -76,6 +76,37 @@ test('React PageHeader: the lead with the DOM class\'s markup, and none without 
 	await act(() => root.unmount());
 });
 
+test('PageHeader: the lead as given, and nothing, a boolean, empty words or an empty list say nothing', () => {
+	const header = new ui.PageHeader({ title: 'GitHub', lead: said });
+	const lead = header.element.querySelector('.bui-page-lead');
+	assert.equal(header.lead, said, 'the lead reads back as given');
+	for (const empty of [null, undefined, false, true, '', [], ['', null, false]]) {
+		header.lead = empty;
+		assert.equal(lead.hidden, true, `${JSON.stringify(empty)} takes no room`);
+		assert.equal(lead.childNodes.length, 0);
+	}
+	header.lead = undefined;
+	assert.equal(header.lead, null, 'no lead reads back as null');
+	header.lead = 0;
+	assert.equal(lead.hidden, false);
+	assert.equal(lead.textContent, '0', 'a number is said');
+	header.destroy();
+});
+
+test('React PageHeader: an empty lead draws nothing, as the DOM header; a number is said', async () => {
+	const host = document.body.appendChild(document.createElement('div'));
+	const root = createRoot(host);
+	for (const empty of [null, false, '', [], [null, false, ''], h(React.Fragment), h(React.Fragment, null, null, false)]) {
+		await act(() => root.render(h(StrictMode, null, h(react.PageHeader, { title: 'GitHub', lead: empty }))));
+		assert.equal(host.querySelector('.bui-page-lead'), null, 'nothing said, no paragraph');
+	}
+	await act(() => root.render(h(StrictMode, null, h(react.PageHeader, { title: 'GitHub', lead: 0 }))));
+	assert.equal(host.querySelector('.bui-page-lead')?.textContent, '0');
+	await act(() => root.render(h(StrictMode, null, h(react.PageHeader, { title: 'GitHub', lead: h(React.Fragment, null, 'Choose ', h('a', { href: '#how' }, 'how')) }))));
+	assert.equal(host.querySelector('.bui-page-lead')?.textContent, 'Choose how', 'a fragment with words is said');
+	await act(() => root.unmount());
+});
+
 test('the built stylesheet: the lead in the body\'s role, muted and at the reading measure; the facts line unchanged', () => {
 	const lead = rules('.bui-page-lead');
 	assert.match(lead, /color:\s*var\(--color-text-muted\)/);

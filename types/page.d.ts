@@ -156,8 +156,9 @@ export class PageHeader extends Component {
 	kind: string | Node | { element: Node } | null;
 	status: Node | null;
 	facts: string | Node | Array<string | Node> | null;
-	/** The page's lead sentence under the facts line (0.41.0, D191). */
-	lead: string | Node | Array<string | Node> | null;
+	/** The page's lead sentence under the facts line, as given (0.41.0, D191). */
+	get lead(): string | Node | Array<string | Node> | null;
+	set lead(lead: string | Node | Array<string | Node> | null | undefined);
 	actions: Array<Node | { element: Node } | null>;
 	tabs: Part;
 	/** Moves focus to the H1 without scrolling. */

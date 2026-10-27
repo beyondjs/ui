@@ -9,7 +9,8 @@
  * by itself (the measurement's `free`). `touch` gives what a box keeps instead on a touch screen (0.35.0), where
  * every target is 44 px tall: a menu's `even` sides (an action menu's, a choice's), since its entries' height decides its inset;
  * the notification panel, whose taller rows scroll it by design. Since 0.41.0 (D192) a notification row keeps its
- * inset there too: its controls' targets rise over the row's own padding and words (`checks/touching.mjs`).
+ * inset at its top and sides there; below its last line a control's 44 px target stands in the row's own
+ * padding, off its words, so its bottom is free room (`checks/touching.mjs`).
  */
 const es = consumer => consumer.name !== 'dom';
 const closed = async page => (await page.keyboard.press('Escape'), page.waitForFunction(() => !document.querySelector('dialog.bui-dialog[open]')));
@@ -45,12 +46,14 @@ const holder = async page => {
 /**
  * A DataTable in a framed box (0.41.0): the package's raised section, its title first, and a product's own 20 px
  * card with the table `framed` at its top. Its words keep the box's inset; its rows' fills hang into the box's
- * padding as a menu's entries do, so a row under the pointer is a flat row, measured by its words. Its last row
+ * padding as a menu's entries do, so a row under the pointer is a flat row, measured by its words; a grouped one
+ * starts with its first group's heading at 390 px. Its last row
  * keeps its own padding, so the bottom is free room.
  */
 const tables = [
 	{ name: 'a DataTable in a raised section', box: '#table-raised .bui-section', inset: '--bui-raised-inset', flat: ['.bui-data tbody tr'], free: ['bottom'] },
-	{ name: 'a framed DataTable in a product\'s card', box: '#table-card .insets-card', inset: 20, flat: ['.bui-data tbody tr'], free: ['bottom'] }
+	{ name: 'a framed DataTable in a product\'s card', box: '#table-card .insets-card', inset: 20, flat: ['.bui-data tbody tr'], free: ['bottom'] },
+	{ name: 'a framed, grouped DataTable in a product\'s card', box: '#table-grouped .insets-card', inset: 20, flat: ['.bui-data tbody tr'], free: ['bottom'] }
 ];
 
 /**
@@ -91,7 +94,7 @@ export const pages = {
 				{ open: async page => (await page.evaluate(() => window.fixture.toast()), page.waitForSelector('.bui-toast')), boxes: [{ name: 'toast with a detail', box: '.bui-toast', inset: '--bui-toast-inset' }] },
 				{ open: holder, boxes: [{ name: 'CopyMessage of a command', box: '#copy-command .bui-copy-text', inset: '--bui-text-inset' }] },
 				{ boxes: tables },
-				{ open: page => pointed(page, '#table-card'), boxes: tables.slice(1).map(box => ({ ...box, name: `${box.name}, a row under the pointer` })) },
+				{ open: page => pointed(page, '#table-card'), boxes: tables.slice(1, 2).map(box => ({ ...box, name: `${box.name}, a row under the pointer` })) },
 				{ open: page => pointed(page, '#table-raised'), boxes: tables.slice(0, 1).map(box => ({ ...box, name: `${box.name}, a row under the pointer` })) }
 			]
 		},
@@ -137,7 +140,7 @@ export const pages = {
 			{ open: (page, consumer) => page.getByRole('menuitem', { name: es(consumer) ? 'Aviso' : 'Toast' }).click(), boxes: [{ name: 'toast', box: '.bui-toast', inset: '--bui-toast-inset' }] },
 			{ open: (page, consumer) => page.getByRole('button', { name: es(consumer) ? 'Ayuda: Identificador del proyecto' : 'Help: Project identifier' }).click(), boxes: [{ name: 'help', box: '#helping .bui-help-panel', inset: '--bui-text-inset' }] },
 			{ open: page => point(page, page.locator('#helping button').filter({ hasText: /Copy address|Copiar dirección/ })), boxes: [{ name: 'Tooltip', box: '[role="tooltip"]:not([hidden])', inset: 8 }] },
-			{ open: async page => (await page.locator('.bui-notify > button').click(), await page.waitForSelector('.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice'), page.locator('.bui-notify .bui-notice').first().hover()), boxes: [{ name: 'a notification row under the pointer', box: '.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice', inset: '--bui-notice-inset' }, { name: 'notification panel', box: '.bui-notify .bui-disclosure-panel:not([hidden])', flat: ['.bui-notice', '.bui-notify-all'], inset: 16, sides: record, touch: { scrolls: true } }] }
+			{ open: async page => (await page.locator('.bui-notify > button').click(), await page.waitForSelector('.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice'), page.locator('.bui-notify .bui-notice').first().hover()), boxes: [{ name: 'a notification row under the pointer', box: '.bui-notify .bui-disclosure-panel:not([hidden]) .bui-notice', inset: '--bui-notice-inset', touch: { free: ['bottom'] } }, { name: 'notification panel', box: '.bui-notify .bui-disclosure-panel:not([hidden])', flat: ['.bui-notice', '.bui-notify-all'], inset: 16, sides: record, touch: { scrolls: true } }] }
 		] },
 		{ file: 'choosing.html', steps: [
 			{ boxes: [{ name: 'CopyMessage', box: '.bui-copy-text', inset: '--bui-text-inset' }] },

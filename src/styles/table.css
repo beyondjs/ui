@@ -141,7 +141,7 @@
    line's capitals stand at the box's inset. A wide table rises by its header row's room above the capitals (the
    label's capitals, within half a pixel of the table's own), which its scroller clips with nothing drawn there; a
    narrow one, which never scrolls sideways, lifts its first row's padding and half-leading, so that row's fill
-   hangs into the box's padding as its sides do. */
+   hangs into the box's padding as its sides do; its first group's heading, when it is grouped, keeps no room above. */
 @supports (padding-top: calc(1lh - 1cap)) {
 	.bui-data-table[data-framed]:not(:has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-table {
 		margin-block-start: calc((1cap - var(--bui-row)) / 2);
@@ -155,6 +155,15 @@
 		}
 		.bui-data-table[data-framed]:not(:has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-data tbody > tr:first-child {
 			margin-block-start: calc(-1 * var(--space-2) - (1lh - 1cap) / 2);
+		}
+		/* A grouped table starts with its first group's heading: none of a group's room above it there, and its
+		   half-leading taken off in the heading's own size, as a label's */
+		.bui-data-table[data-framed]:not(:has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-data tbody > tr.bui-data-group:first-child {
+			margin-block-start: calc(-1 * var(--space-2));
+		}
+		.bui-data-table[data-framed]:not(:has(> .bui-data-tools:not([hidden]))) > .bui-data-body .bui-data tbody > tr.bui-data-group:first-child > th {
+			padding-top: 0;
+			margin-block-start: calc((1cap - 1lh) / 2);
 		}
 	}
 }
