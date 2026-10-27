@@ -195,6 +195,8 @@ export interface ProviderWindowOptions {
 	follow?: number;
 	/** The same-origin `BroadcastChannel` a landing wakes it on (0.7.5; 'beyond-provider', null for none). */
 	channel?: string | null;
+	/** The window's name (0.44.0; 'beyond-provider'): a name per attempt keeps two trips from one page in two windows. */
+	name?: string;
 	clock?: Clock;
 	locale?: string;
 	labels?: Copy & { awaited?: Copy };
