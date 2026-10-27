@@ -42,7 +42,7 @@ Evidence baseline: UI `4062f48` (0.40.0, organizations told apart in the family 
 - **A notification row on a coarse pointer** (D192, `notices.css`, as the coordinator directed on review):
   - Mark as read's and the earlier updates' 44 px targets take their own line and grow below their words. They stay in the row's padding box and off its words, so a press on the row's words always opens the matter (D79).
   - A row whose last line is a control's gives that target its end padding, so the row grows only by the rest.
-  - The row keeps its 8 px inset at its top and sides. Below the last control's words stands the target's room: 31 px in Chrome 156 (TOUCH_ENGINES).
+  - The row keeps its 8 px inset at its top and sides. Below the last control's words stands the target's room: 31 px in Chrome 156, 30.8 px in Firefox 155 and 30.9 px in WebKit 26.6.
 - **Documentation**: the catalog (`PageHeader`, `DataTable`, `Lanes`, `PreferencesDialog` and the One inset table), architecture, validation, README and AGENTS.md.
 
 ## The independent review (2026-10-27) and its corrections
@@ -71,7 +71,15 @@ Through the machine's test queue, on 2026-10-27.
   - rows compared across scroll positions in `touching.mjs`;
   - a grouped narrow table's heading 1.1 px high.
 - **The candidate before the review** (`a203d79`): `npm test` 1016 of 1016, `npm run types`, and the whole acceptance 462 of 462 in each of Chrome 156, Firefox 155 and WebKit 26.6.
-- **The release** (packed at the commit that carries this record): RESULT_RELEASE
+- **The release** (0.41.0 at `b2e3352`; the commit that carries this record adds only this record's results and the sorting check's correction below, neither of them packed):
+  - `npm test`: 1019 of 1019, React 18 included; `npm run types` compiles.
+  - From the packed archive, the whole acceptance:
+    - Chrome 156: 464 of 464;
+    - Firefox 155: 464 of 464;
+    - WebKit 26.6: 462 of 464.
+  - WebKit's two failures were the new `sorting.mjs`: WebKit's Tab passes over buttons, as a Mac does without full keyboard access. The check now reads the buttons' Tab order there, and Tabs into the header from right before the table's body, after its search. It ran again from the same archive: 2 of 2 in each of Chrome, Firefox and WebKit.
+  - The coarse-pointer insets of a notification row: 7.8 to 8 px at its top, 8 px at its sides, and the target's room below of 31 px (Chrome), 30.8 px (Firefox) and 30.9 px (WebKit).
+  - The archive: `beyond-js-ui-0.41.0.tgz`, sha256 `71abd3beafa1bcdc9edb0ef7302bad55d8af27461ba3e7003f6a9efda34642ad`, integrity `sha512-Ve5MPVcChESrVArNkD2q5xRZ+L2koP7S7NoqQ0YvXw1NZgG0u1f8TN/KgNrfWyIBdxvh2sZ5NIWcB/3zf2fjCQ==`. Products vendor it when each one adopts it.
 
 ## Limits
 
