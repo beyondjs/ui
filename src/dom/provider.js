@@ -64,13 +64,14 @@ export class ProviderWindow extends Component {
 	 * @param {number} [options.interval] how often the attempt is read while the window is open, in ms (2500; 0 never)
 	 * @param {number} [options.follow] for how long it is read that way, in ms (15 min)
 	 * @param {string|null} [options.channel] the same-origin `BroadcastChannel` a landing wakes it on ('beyond-provider'; null for none)
+	 * @param {string} [options.name] the window's name ('beyond-provider'); a name per attempt keeps two trips from one page in two windows (0.44.0)
 	 * @param {Clock} [options.clock]
 	 */
-	constructor({ provider, href, read, origin = null, onend = null, same = 'auto', expected = { median: 120_000, p90: 600_000 }, bound = 20_000, poll = 500, interval = 2500, follow = 900_000, channel = 'beyond-provider', clock = Clock.system, locale = undefined, labels = {} }) {
+	constructor({ provider, href, read, origin = null, onend = null, same = 'auto', expected = { median: 120_000, p90: 600_000 }, bound = 20_000, poll = 500, interval = 2500, follow = 900_000, channel = 'beyond-provider', name = 'beyond-provider', clock = Clock.system, locale = undefined, labels = {} }) {
 		super();
 		const { awaited = {}, ...own } = labels ?? {};
 		this.#labels = new Labels(words, own, locale);
-		this.#options = { provider, href, read, origin, onend, same, expected, bound, poll, interval, follow, clock, locale, awaited };
+		this.#options = { provider, href, read, origin, onend, same, expected, bound, poll, interval, follow, name, clock, locale, awaited };
 		this.#element = el('div', { class: 'bui-provider' });
 		const view = this.#view;
 		if (view) this.listen(view, 'message', event => this.#message(event));
@@ -103,7 +104,7 @@ export class ProviderWindow extends Component {
 		// goes to the address: WebKit navigates a window `open()` returns afterwards, and refuses that
 		// navigation once the opener is gone (0.7.5). The outcome is read from the server (0.7.5: also while
 		// the window stays open), the window's closing polled every `poll` ms, and a message only wakes it.
-		let opened = view.open('', 'beyond-provider', features);
+		let opened = view.open('', this.#options.name, features);
 		if (!opened) return this.#go('blocked');
 		try {
 			opened.opener = null;
@@ -114,7 +115,7 @@ export class ProviderWindow extends Component {
 			opened.location.replace(this.#options.href);
 		} catch {
 			// A window of that name left on another origin: opened again by name, at the address
-			opened = view.open(this.#options.href, 'beyond-provider', features) ?? opened;
+			opened = view.open(this.#options.href, this.#options.name, features) ?? opened;
 		}
 		this.#window = opened;
 		this.#since = this.#options.clock.now;

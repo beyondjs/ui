@@ -84,7 +84,7 @@ export function Choosing() {
 			<SecretField ref={secret} label="Supabase access" connect={{ label: 'Connect Supabase', onSelect: () => undefined }} stored />
 			<CopyMessage text="Could you approve the Beyond app?" />
 			<StatusRow title="acme" state={{ label: 'Active', tone: 'success' }} action={<button>Check now</button>} more={[{ label: 'Disconnect', onSelect: () => undefined }]} />
-			<ProviderWindow provider="GitHub" href="/start" read={async () => ({ state: 'done' })} onEnd={outcome => void outcome} />
+			<ProviderWindow provider="GitHub" href="/start" name="beyond-provider-a1" read={async () => ({ state: 'done' })} onEnd={outcome => void outcome} />
 			<SideSheet open={false} title="Add repositories" busy={false} error={<p>Beyond Projects didn’t answer.</p>} onClose={value => void value}>
 				<p>Body</p>
 			</SideSheet>
