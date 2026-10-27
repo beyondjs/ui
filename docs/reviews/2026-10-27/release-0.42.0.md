@@ -14,7 +14,23 @@ The family `frame` phase fails a page with a line of prose longer than 80 charac
 
 ## Executed checks
 
-Results are added below as they run.
+Through the machine's test queue, on 2026-10-27. Its commits on this branch: `6d6ace5` (the change), `a1792f3` (the release, the archive's source), `bc3523b` (the review's corrections, none of them packed) and the commit that carries these results.
+
+- **During the work** (Chrome 156): the new `prose` check, run against 0.41.0's stylesheet, failed in every part at 1024, 1440 and 1920 px: no measure, the arrival's longest detail at 81 characters on one line, a blocked step's reason at 92, and a long paragraph at 89 characters a line. With the change it passed, and so did `layout`, `insets` and `hierarchy` (24 of 24). The unit test failed without the change and passed with it.
+- **The release** (0.42.0 at `a1792f3`):
+  - `npm test`: 1022 of 1022, React 18 included; `npm run types` compiles. Both ran again after the review's corrections, with the same counts.
+  - From the packed archive, the whole acceptance, each engine its own bounded queue run: Chrome 156 465 of 465, Firefox 155 465 of 465, WebKit 26.6 465 of 465. Firefox and WebKit ran the corrected `prose` check; Chrome ran it again from the same archive, 2 of 2.
+  - The archive: `beyond-js-ui-0.42.0.tgz`, sha256 `8d277291321d6c6c485a08d23a84b686ce14feb6349a23706f9ae0fc1ab1dc6b`, integrity `sha512-z62nBtoLjGZBKMEGbCrjDycldGpS8ROW8ltJnagXC6qCXltQXT/QJhUygFKCkLaFpvw36pDxa4nLEhpNVnzySw==`. It was packed again after the corrections with the same sha256.
+
+## The independent review (2026-10-27) and its corrections
+
+The review found nothing that had to be fixed in the change. Its points, each corrected in `bc3523b`:
+
+1. This record claimed to resolve the suite's pending; it is the package's part of it.
+2. The unit test read only rules naming the parts alone. It now fails on any rule whose selector ends in a part and sets a width.
+3. The browser check compared a line's width with the part's own `max-width`, which holds by construction. It now compares the measure with 54 zeros in the part's own font.
+4. The 89 characters named no run; they are named above.
+5. The runs were not yet recorded; they are above.
 
 ## Limits
 
