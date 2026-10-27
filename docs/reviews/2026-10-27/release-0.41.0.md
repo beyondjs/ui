@@ -7,7 +7,7 @@ Evidence baseline: UI `4062f48` (0.40.0, organizations told apart in the family 
 - `d85a5d1`: the release candidate;
 - `b2e3352` and `4ff9559`: the D192 correction and the independent review's corrections;
 - `0dd1fc8`: the delta review's corrections;
-- the commit that carries this record's last results.
+- `405b864` and the commit that carries this line: this record's last results, none of them packed.
 
 ## Why
 
@@ -92,7 +92,7 @@ Through the machine's test queue, on 2026-10-27.
 - **After the delta review** (0.41.0 at `0dd1fc8`, the archive products vendor):
   - `npm test`: 1021 of 1021; `npm run types` compiles.
   - From the packed archive, the affected checks: the lanes, the lead and its links, preferences, every insets check, the measurer, focus, prose, callouts and `Unavailable`. 152 of 152 in each of Chrome 156, Firefox 155 and WebKit 26.6.
-  - The rest of the package is unchanged since the whole runs above.
+  - From the same archive, the whole acceptance, each engine its own bounded queue run: Chrome 156 464 of 464, Firefox 155 464 of 464, WebKit 26.6 464 of 464.
   - The archive: `beyond-js-ui-0.41.0.tgz`, sha256 `a24405f1efd3907e8e96a606d6fc3d813dd7347b0ad163efe1b35b7217e1cf98`, integrity `sha512-SYHnx8f/7CUUwy+qdiZvyupVjWWYx9q10qQChKTJO6QhniBfEsm9RxibnMqK6M75ttIW/ITNEBLadvZ2Bcc0Wg==`. Products re-vendor it in place of the earlier 0.41.0 archive.
 
 ## Limits
