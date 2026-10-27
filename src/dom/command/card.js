@@ -53,7 +53,7 @@ export class CommandCard extends Component {
 	 */
 	constructor({ title, command, detail = null, scope = null, allow = null, deny = null, state = 'pending', labels = {}, decisions = null, ondecide = null, editable = false }) {
 		super();
-		this.#labels = new Labels(defaults, labels);
+		this.#labels = new Labels(CommandCard.labels, labels);
 		this.#handlers = { allow, deny, ondecide };
 		const id = Ids.next('bui-command');
 		this.#code = editable ? el('textarea', { class: 'bui-command-code bui-command-edit', rows: Math.min(8, String(command ?? '').split('\n').length + 1), spellcheck: 'false', 'aria-label': this.#labels.text('command') }) : null;

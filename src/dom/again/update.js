@@ -32,7 +32,7 @@ export class LastUpdate extends Component {
 	 */
 	constructor({ time = null, locale = undefined, labels = {}, now = () => Date.now() } = {}) {
 		super();
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels, locale);
 		this.#words = new TimeWords(this.#labels, locale);
 		this.#clock = now;
 		this.#element = el('p', { class: 'bui-last-update' });
@@ -61,7 +61,7 @@ export class LastUpdate extends Component {
 
 	/** The same words for `time` without a component: what React's `LastUpdate` draws too. */
 	static say(time, { labels = {}, locale = undefined, now = Date.now() } = {}) {
-		const words = new Labels(copy.en, labels);
+		const words = new Labels(copy, labels, locale);
 		const moment = TimeWords.moment(time);
 		return moment === null ? words.text('earlier') : words.text('updated', { time: new TimeWords(words, locale).at(moment, now) });
 	}

@@ -7,7 +7,7 @@ import type { ButtonProps } from './react.js';
 type Copies = { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
 
 /** Labelled secondary refresh action; `busy` tracks the owning read. */
-export function RetryAction(props: { onClick?: ButtonProps['onClick']; labels?: Copy; busy?: boolean; small?: boolean; name?: string | null }): ReactElement;
+export function RetryAction(props: { onClick?: ButtonProps['onClick']; labels?: Copy; busy?: boolean; small?: boolean; name?: string | null; /** 0.44.0 */ locale?: string }): ReactElement;
 export namespace RetryAction { const labels: Copies; }
 
 /** A read that did not answer, for `Recovery`'s `reads` (0.24.0). */

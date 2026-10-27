@@ -144,7 +144,7 @@ export class SidebarRail extends Component {
 		this.#foot ??= el('button', { type: 'button', class: 'bui-sidebar-rail-item bui-sidebar-rail-foot', 'data-bui-hint': '', 'aria-haspopup': 'dialog', onclick: () => this.#options?.foot?.onclick?.(this.#foot) });
 		const name = SidebarRail.#text(foot.label);
 		const state = foot.status?.state ?? null;
-		const said = foot.status ? SidebarRail.#text(foot.status.label ?? Status.labels.en[state] ?? '') : '';
+		const said = foot.status ? SidebarRail.#text(foot.status.label ?? new Labels(Status.labels).entries[state] ?? '') : '';
 		const mark = foot.glyph ?? 'box';
 		const tone = state ? Status.tone(state) : '';
 		if (this.#foot.dataset.glyph !== mark || this.#foot.dataset.tone !== tone) {

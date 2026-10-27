@@ -20,7 +20,7 @@ const es = { affected: 'Trabajo afectado', lost: 'Lo que se pierde', kept: 'Lo q
  * @returns {HTMLElement|null} the list, or null when nothing is stated
  */
 export function consequence(parts, labels = {}) {
-	const words = labels instanceof Labels ? labels : new Labels(en, labels);
+	const words = labels instanceof Labels ? labels : new Labels(consequence.labels, labels);
 	const given = order.filter(key => [].concat(parts?.[key] ?? []).filter(Boolean).length);
 	if (!given.length) return null;
 	const describe = value => (Array.isArray(value) ? el('ul', {}, value.filter(Boolean).map(line => el('li', {}, [content(line)]))) : content(value));

@@ -49,7 +49,7 @@ export class TechnicalDetails extends Component {
 	 */
 	constructor({ text = '', request = null, time = null, entries = [], open = false, locale = undefined, labels = {} } = {}) {
 		super();
-		this.#labels = new Labels(details.en, labels);
+		this.#labels = new Labels(details, labels, locale);
 		this.#locale = locale;
 		this.#content = el('div', { class: 'bui-details-content' });
 		this.#result = el('p', { class: 'bui-details-result', role: 'status' });

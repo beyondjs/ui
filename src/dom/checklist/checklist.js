@@ -34,7 +34,7 @@ export class Checklist extends Component {
 	 */
 	constructor({ title = null, steps = [], level = 3, labels = {} }) {
 		super();
-		this.#labels = new Labels(defaults, labels);
+		this.#labels = new Labels(Checklist.labels, labels);
 		const id = Ids.next('bui-checklist');
 		const heading = title ? el(`h${[2, 3, 4, 5, 6].includes(level) ? level : 3}`, { id, class: 'bui-checklist-title' }, [content(title)]) : null;
 		this.#element = el('section', { class: 'bui-checklist', 'aria-labelledby': heading ? id : null }, [el('div', { class: 'bui-checklist-head' }, [heading, this.#progress, this.#bar]), this.#list]);

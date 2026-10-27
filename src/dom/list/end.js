@@ -1,4 +1,5 @@
 import { el, content } from '../core/element.js';
+import { Labels } from '../core/labels.js';
 
 const english = Object.freeze({ end: 'Nothing more', keys: '↑ ↓ to move · Enter to open' });
 const spanish = Object.freeze({ end: 'No hay más', keys: '↑ ↓ para moverte · Enter para abrir' });
@@ -21,8 +22,8 @@ export class EndLine {
 	 * @param {{end?: string, keys?: string}} [options.labels] the copy, as `EndLine.labels.es`
 	 */
 	constructor({ text = null, keys = false, labels = {} } = {}) {
-		const words = { ...english, ...labels };
-		this.#element = el('p', { class: 'bui-rows-end' }, [el('span', {}, [content(text ?? words.end)]), keys ? el('span', { class: 'bui-keys bui-rows-keys', text: words.keys }) : null]);
+		const words = new Labels(EndLine.labels, labels);
+		this.#element = el('p', { class: 'bui-rows-end' }, [el('span', {}, [content(text ?? words.text('end'))]), keys ? el('span', { class: 'bui-keys bui-rows-keys', text: words.text('keys') }) : null]);
 	}
 
 	get element() {

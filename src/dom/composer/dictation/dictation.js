@@ -75,7 +75,7 @@ export class ComposerDictation {
 		this.#field = field;
 		this.#root = root;
 		this.#view = view;
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels);
 		this.#insert = insert;
 		this.#refocus = refocus ?? (() => field.focus());
 		this.#support = new DictationSupport(view);

@@ -59,7 +59,7 @@ export class CopyButton extends Component {
 	 */
 	constructor({ text, label = null, name = null, select = null, variant = 'quiet', small = true, onresult = null, labels = {}, bare = false, glyph: drawn = 'copy' }) {
 		super();
-		this.#labels = new Labels(words.en, labels);
+		this.#labels = new Labels(words, labels);
 		this.#text = text;
 		this.#label = label ?? this.#labels.text('copy');
 		this.#name = name;

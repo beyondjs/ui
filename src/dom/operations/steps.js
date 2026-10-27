@@ -53,7 +53,7 @@ export class Steps extends Component {
 	constructor({ label, steps = [], clock = Clock.system, locale = undefined, labels = {}, announce = true }) {
 		super();
 		const { details = {}, ...own } = labels ?? {};
-		this.#labels = new Labels(copy.en, own);
+		this.#labels = new Labels(copy, own, locale);
 		this.#details = details;
 		this.#words = new TimeWords(this.#labels, locale);
 		this.#clock = clock;

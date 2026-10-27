@@ -66,7 +66,7 @@ export class Awaited extends Component {
 	constructor({ title, since = null, expected = null, steps = null, reason = null, check = null, bound = Bound.limit, onend = null, clock = Clock.system, locale = undefined, level = 2, labels = {} }) {
 		super();
 		const { steps: words = {}, details = {}, ...own } = labels ?? {};
-		this.#labels = new Labels(copy.en, own);
+		this.#labels = new Labels(copy, own, locale);
 		this.#words = new TimeWords(this.#labels, locale);
 		this.#clock = clock;
 		this.#options = { title, since, expected, steps, reason, check, bound, onend, locale, words, details };

@@ -33,7 +33,7 @@ export class AgainLine extends Component {
 	 */
 	constructor({ again, locale = undefined, labels = {}, now = () => Date.now() }) {
 		super();
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels, locale);
 		this.#words = new TimeWords(this.#labels, locale);
 		this.#clock = now;
 		this.#element = el('p', { class: 'bui-again' });
@@ -63,7 +63,7 @@ export class AgainLine extends Component {
 	 * @param {{labels?: object, locale?: string, now?: number}} [options]
 	 */
 	static say(moments, { labels = {}, locale = undefined, now = Date.now() } = {}) {
-		const words = labels instanceof Labels ? labels : new Labels(copy.en, labels);
+		const words = labels instanceof Labels ? labels : new Labels(copy, labels, locale);
 		return AgainLine.#say(moments, words, new TimeWords(words, locale), now);
 	}
 

@@ -40,7 +40,7 @@ export class CopyMessage extends Component {
 	 */
 	constructor({ text, kind = 'message', label = null, labels = {} }) {
 		super();
-		this.#labels = new Labels(words.en, labels);
+		this.#labels = new Labels(words, labels);
 		this.#value = String(text ?? '');
 		this.#text = kind === 'command' ? el('pre', { class: 'bui-copy-text bui-copy-command' }, [el('code', { text: this.#value })]) : el('p', { class: 'bui-copy-text', text: this.#value });
 		this.#result = el('p', { class: 'bui-copy-result', role: 'status' });

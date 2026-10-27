@@ -24,10 +24,15 @@ export class Recency {
 	 * groups (`Recency.labels.es`); the month's name follows `locale`; `now`: the clock, read on each call,
 	 * so a page left open past midnight groups by the new day
 	 */
-	constructor({ locale = 'en', now = () => Date.now(), labels = {} } = {}) {
+	constructor({ locale = undefined, now = () => Date.now(), labels = {} } = {}) {
 		this.#now = now;
 		this.#locale = locale;
-		this.#labels = new Labels(words.en, labels);
+		this.#labels = new Labels(words, labels, locale);
+	}
+
+	/** The month names' language: the given `locale`, else the language the group words speak (0.44.0). */
+	get #language() {
+		return this.#locale ?? this.#labels.language;
 	}
 
 	/**
@@ -50,9 +55,9 @@ export class Recency {
 		if (days <= 7) return this.#named('week');
 		if (days <= 30) return this.#named('month');
 		const year = moment.getFullYear();
-		const label = new Intl.DateTimeFormat(this.#locale, year === today.getFullYear() ? { month: 'long' } : { month: 'long', year: 'numeric' }).format(moment);
+		const label = new Intl.DateTimeFormat(this.#language, year === today.getFullYear() ? { month: 'long' } : { month: 'long', year: 'numeric' }).format(moment);
 		// A label in sentence case, whatever the language writes a month's name with
-		return { key: `${year}-${moment.getMonth() + 1}`, label: label.charAt(0).toLocaleUpperCase(this.#locale) + label.slice(1) };
+		return { key: `${year}-${moment.getMonth() + 1}`, label: label.charAt(0).toLocaleUpperCase(this.#language) + label.slice(1) };
 	}
 
 	/**

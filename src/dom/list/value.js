@@ -34,7 +34,7 @@ export class CopyValue extends Component {
 	 */
 	constructor({ value, label = null, href = null, cut = 'end', labels = {} }) {
 		super();
-		const words = new Labels(CopyValue.labels.en, labels);
+		const words = new Labels(CopyValue.labels, labels);
 		this.#cut = cut === 'middle' ? 'middle' : 'end';
 		this.#text = el(href ? 'a' : 'span', { class: 'bui-copy-value-text', href, tabindex: href ? null : '0' });
 		this.#button = new CopyButton({ text: () => this.#value, name: label ? words.text('name', { label }) : null, select: () => this.#text, labels });

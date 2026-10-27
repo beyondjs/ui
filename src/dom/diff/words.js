@@ -16,7 +16,7 @@ export class DiffWords {
 	 * @param {string} [locale] a BCP 47 tag for the counts
 	 */
 	constructor(labels = {}, locale = undefined) {
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels, locale);
 		try {
 			this.#format = new Intl.NumberFormat(locale);
 		} catch {

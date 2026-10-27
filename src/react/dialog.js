@@ -4,6 +4,7 @@ import { Dialog as Modal } from '../dom/dialog.js';
 import { FocusedForm as Submission } from '../dom/form.js';
 import { Question, confirm, prompt, alert } from '../dom/questions.js';
 import { consequence as stated } from '../dom/consequence.js';
+import { Labels } from '../dom/core/labels.js';
 import { Required } from '../dom/core/required.js';
 import { h, living, useLatest } from './hooks.js';
 
@@ -158,7 +159,7 @@ FocusedForm.labels = Submission.labels;
  * React content or a list) and `labels` (`Consequence.labels.es`). Renders nothing when nothing is stated.
  */
 export function Consequence({ parts, labels = {} }) {
-	const words = { ...stated.labels.en, ...labels };
+	const words = new Labels(stated.labels, labels).entries;
 	const given = stated.order.filter(key => [].concat(parts?.[key] ?? []).filter(Boolean).length);
 	if (!given.length) return null;
 	const describe = value => (Array.isArray(value) ? h('ul', null, value.filter(Boolean).map((line, index) => h('li', { key: index }, line))) : value);

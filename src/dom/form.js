@@ -58,7 +58,7 @@ export class FocusedForm {
 		this.#submit = submit;
 		this.#explain = explain;
 		this.#onbusy = onbusy;
-		this.#labels = new Labels(defaults, labels);
+		this.#labels = new Labels(FocusedForm.labels, labels);
 		this.#problem = el('div', { class: 'bui-form-problem' });
 		form.noValidate = true;
 		form.append(this.#problem);

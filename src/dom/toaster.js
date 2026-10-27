@@ -26,7 +26,7 @@ export class Toaster extends Component {
 
 	constructor({ labels = {} } = {}) {
 		super();
-		this.#labels = new Labels(defaults, labels);
+		this.#labels = new Labels(Toaster.labels, labels);
 		// Live regions must exist before their content changes to be announced reliably.
 		this.#polite = el('div', { class: 'bui-toast-stack', role: 'status', 'aria-live': 'polite' });
 		this.#assertive = el('div', { class: 'bui-toast-stack', role: 'alert', 'aria-live': 'assertive' });

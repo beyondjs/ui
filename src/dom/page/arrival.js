@@ -32,7 +32,7 @@ export class Arrival extends Component {
 	 */
 	constructor({ product, href, ondismiss = null, onnavigate = null, labels = {} }) {
 		super();
-		const text = new Labels(Arrival.labels.en, labels);
+		const text = new Labels(Arrival.labels, labels);
 		const back = el('a', { class: 'bui-arrival-back', href, text: text.text('back', { product }) });
 		if (onnavigate) back.addEventListener('click', event => this.#navigate(event, onnavigate));
 		const dismiss = ondismiss

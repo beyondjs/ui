@@ -37,7 +37,7 @@ export class ProductNav extends Component {
 		super();
 		this.#onnavigate = onnavigate;
 		this.#list = el('ul', { class: 'bui-productnav-list' });
-		this.#element = el('nav', { class: `bui-productnav${sticky ? ' bui-productnav-sticky' : ''}`, 'aria-label': label ?? new Labels(defaults, labels).text('nav') }, [this.#list]);
+		this.#element = el('nav', { class: `bui-productnav${sticky ? ' bui-productnav-sticky' : ''}`, 'aria-label': label ?? new Labels(ProductNav.labels, labels).text('nav') }, [this.#list]);
 		this.#edges = new ScrollEdges(this.#element, this.#list);
 		this.items = items;
 	}

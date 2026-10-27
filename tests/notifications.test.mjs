@@ -45,7 +45,7 @@ test('the count shows when known and hides while unknown, failed or unavailable'
 
 test('the panel lists recent items with product and time, and forgets them when closed', async () => {
 	const notices = new Notices();
-	const entry = new NotificationEntry({ adapter: notices.adapter, href: '/notifications', products, limit: 3, locale: 'es' }).mount(document.body);
+	const entry = new NotificationEntry({ adapter: notices.adapter, href: '/notifications', products, limit: 3, locale: 'en-GB' }).mount(document.body);
 	await opened(entry);
 	assert.deepEqual(notices.calls.find(([name]) => name === 'list')[1], { state: 'all', product: null, cursor: null, limit: 50 }, 'a page wide enough for busy matters (0.13.1)');
 	assert.equal(titles(entry.panel).length, 3, 'three matters: the two comments on one request are one row');

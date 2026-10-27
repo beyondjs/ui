@@ -60,7 +60,8 @@ export class AgainLine extends Component {
 /** Labelled, secondary refresh action for a safe read or transport reconnect. */
 export class RetryAction extends Button {
 	static readonly labels: { readonly en: Readonly<Copy>; readonly es: Readonly<Copy> };
-	constructor(options: { run: () => unknown | Promise<unknown>; labels?: Copy; small?: boolean; name?: string | null });
+	/** `locale` (0.44.0) chooses the word's language before `<html lang>`. */
+	constructor(options: { run: () => unknown | Promise<unknown>; labels?: Copy; small?: boolean; name?: string | null; locale?: string });
 	busy: boolean;
 }
 

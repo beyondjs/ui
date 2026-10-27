@@ -65,7 +65,7 @@ export class Dialog extends Component {
 	 */
 	constructor({ title, description = null, children = [], actions = [], escape = true, backdrop = false, size = 'medium', restore = null, onclose = null, labels = {} }) {
 		super();
-		this.#labels = new Labels(defaults, labels);
+		this.#labels = new Labels(Dialog.labels, labels);
 		this.#escape = escape;
 		this.#backdrop = backdrop;
 		this.#restore = restore;

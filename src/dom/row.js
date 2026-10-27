@@ -53,7 +53,7 @@ export class StatusRow extends Component {
 	constructor({ title, kind = null, state, reason = null, owner = null, facts = [], action = null, more = [], level = 3, clock = Clock.system, locale = undefined, labels = {} }) {
 		super();
 		const { freshness = {}, ...own } = labels ?? {};
-		this.#labels = new Labels(words.en, own);
+		this.#labels = new Labels(words, own, locale);
 		this.#id = Ids.next('bui-statusrow');
 		this.#fresh = new Freshness({ label: state.label, tone: state.tone ?? 'neutral', checked: state.checked ?? null, connected: state.connected ?? true, clock, locale, labels: freshness });
 		this.#parts = {

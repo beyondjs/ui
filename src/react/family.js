@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { FamilyBar as Bar } from '../dom/family/bar.js';
 import { ProductNav as Row } from '../dom/nav.js';
 import { Unavailable as Missing, glyphs } from '../dom/unavailable.js';
+import { Labels } from '../dom/core/labels.js';
 import { Sidebar as Sections } from '../dom/sidebar/sidebar.js';
 import { Mark, Badge, Button } from './simple.js';
 import { TechnicalDetails } from './operations.js';
@@ -183,7 +184,8 @@ export function Unavailable({ title, reason, owner = null, action = null, second
 	const type = glyphs[kind] ? kind : 'access';
 	const outage = type === 'outage' && typeof again === 'function';
 	const moments = useAgain(outage, () => again?.());
-	if (outage) action ??= h(RetryAction, { labels: { retry: labels.retry ?? Missing.labels.en.retry }, busy: moments.trying, onClick: () => void moments.now() });
+	const words = new Labels(Missing.labels, labels, locale);
+	if (outage) action ??= h(RetryAction, { labels: { retry: words.text('retry') }, busy: moments.trying, onClick: () => void moments.now() });
 	return h(
 		'section',
 		{ className: `bui-unavailable bui-unavailable-${type}`, 'data-unavailable': type, 'aria-labelledby': id },
@@ -193,11 +195,11 @@ export function Unavailable({ title, reason, owner = null, action = null, second
 			{ className: 'bui-unavailable-body' },
 			h(`h${Missing.level(level)}`, { id, className: 'bui-unavailable-title' }, title),
 			h('p', { className: 'bui-unavailable-reason' }, reason),
-			owner ? h('p', { className: 'bui-unavailable-owner' }, h('span', { className: 'bui-unavailable-label' }, labels.owner ?? Missing.labels.en.owner), owner) : null,
+			owner ? h('p', { className: 'bui-unavailable-owner' }, h('span', { className: 'bui-unavailable-label' }, words.text('owner')), owner) : null,
 			code ? h('p', { className: 'bui-unavailable-code' }, h(Badge, { label: code, tone: 'neutral' })) : null,
 			outage ? h(AgainLine, { moments, locale, labels }) : null,
 			action || secondary ? h('div', { className: 'bui-unavailable-actions' }, action, secondary) : null,
-			details ? h(TechnicalDetails, details) : null
+			details ? h(TechnicalDetails, { locale, ...details }) : null
 		)
 	);
 }

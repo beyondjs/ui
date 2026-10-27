@@ -51,7 +51,7 @@ export class CommandPalette extends Component {
 	 */
 	constructor({ sources = [], recent = false, shortcut = false, onnavigate = null, delay = 120, bound = 4000, labels = {} }) {
 		super();
-		this.#labels = new Labels(words.en, labels);
+		this.#labels = new Labels(words, labels);
 		this.#options = { onnavigate, delay, bound };
 		this.#sources = sources;
 		this.#recent = recent ? new PaletteRecent(recent) : null;

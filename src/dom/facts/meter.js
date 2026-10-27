@@ -53,7 +53,7 @@ export class Meter extends Component {
 	 */
 	constructor({ label, value = null, reset = null, stale = null, thresholds = null, clock = Clock.system, locale = undefined, labels = {} }) {
 		super();
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels, locale);
 		this.#words = new TimeWords(this.#labels, locale);
 		this.#clock = clock;
 		this.#name.id = Ids.next('bui-meter');

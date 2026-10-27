@@ -40,7 +40,7 @@ export class Freshness extends Component {
 	 */
 	constructor({ label, tone = 'neutral', checked = null, connected = true, clock = Clock.system, locale = undefined, labels = {} }) {
 		super();
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels, locale);
 		this.#words = new TimeWords(this.#labels, locale);
 		this.#clock = clock;
 		this.#values = { label, tone, checked, connected };

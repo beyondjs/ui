@@ -5,7 +5,7 @@ import { Ids } from '../core/ids.js';
 import { Interaction } from '../core/interaction.js';
 import { Labels } from '../core/labels.js';
 import { loading } from '../feedback.js';
-import { Cause, defaults, copies } from './labels.js';
+import { Cause, copies } from './labels.js';
 import { Age } from '../time/age.js';
 import { Feed } from './feed.js';
 import { Recovery } from './recovery.js';
@@ -80,7 +80,7 @@ export class NotificationEntry extends Disclosure {
 	 * @param {number} [options.interval] milliseconds between count refreshes; 0 refreshes only on demand
 	 */
 	constructor({ adapter, href = null, onopen = null, onview = null, products = {}, locale = undefined, limit = 6, interval = 0, labels = {} }) {
-		const words = new Labels(defaults, labels);
+		const words = new Labels(copies, labels, locale);
 		const badge = el('span', { class: 'bui-count', 'aria-hidden': 'true', hidden: true });
 		super({ label: [el('span', { class: 'bui-bell' }, [glyph('bell'), badge])], name: words.text('button', { count: null }), align: 'end', variant: 'bell', class: 'bui-notify', hint: true, onchange: open => this.#toggled(open) });
 		this.#adapter = adapter;

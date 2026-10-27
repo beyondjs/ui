@@ -69,7 +69,7 @@ export class ProviderWindow extends Component {
 	constructor({ provider, href, read, origin = null, onend = null, same = 'auto', expected = { median: 120_000, p90: 600_000 }, bound = 20_000, poll = 500, interval = 2500, follow = 900_000, channel = 'beyond-provider', clock = Clock.system, locale = undefined, labels = {} }) {
 		super();
 		const { awaited = {}, ...own } = labels ?? {};
-		this.#labels = new Labels(words.en, own);
+		this.#labels = new Labels(words, own, locale);
 		this.#options = { provider, href, read, origin, onend, same, expected, bound, poll, interval, follow, clock, locale, awaited };
 		this.#element = el('div', { class: 'bui-provider' });
 		const view = this.#view;

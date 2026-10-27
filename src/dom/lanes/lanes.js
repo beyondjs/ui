@@ -68,7 +68,7 @@ export class Lanes extends Component {
 	 */
 	constructor({ label = null, clock = Clock.system, locale = undefined, labels = {}, trace = true, choose = null } = {}) {
 		super();
-		this.#labels = new Labels(copy.en, labels);
+		this.#labels = new Labels(copy, labels, locale);
 		this.#words = new LaneWords(this.#labels, locale);
 		this.#clock = clock;
 		this.#choose = typeof choose === 'function' ? choose : null;

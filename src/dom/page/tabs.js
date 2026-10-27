@@ -21,7 +21,7 @@ export class Tabs extends ProductNav {
 	 * @param {{nav?: string, named?: string}} [options.labels]
 	 */
 	constructor({ items = [], label = null, name = null, onnavigate = null, labels = {} }) {
-		const words = new Labels(defaults, labels);
+		const words = new Labels(Tabs.labels, labels);
 		super({ items, label: label ?? (name ? words.text('named', { name }) : words.text('nav')), onnavigate });
 		this.element.classList.add('bui-tabs');
 	}

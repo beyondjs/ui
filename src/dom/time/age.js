@@ -29,12 +29,11 @@ export class Age {
 	/**
 	 * @param {object} [options]
 	 * @param {string} [options.locale] a BCP 47 tag for the dates (the runtime's when omitted)
-	 * @param {object|Labels} [options.labels] the units; by default those of the locale's language (Spanish for `es`, else English)
+	 * @param {object|Labels} [options.labels] the units; by default those of the language in effect (`locale`'s, else `<html lang>`, else English, 0.44.0)
 	 * @param {() => number} [options.now] the time to measure against (the clock's now)
 	 */
 	constructor({ locale = undefined, labels = null, now = () => Date.now() } = {}) {
-		const language = String(locale ?? '').toLowerCase().split('-')[0];
-		this.#labels = labels instanceof Labels ? labels : new Labels(words.en, labels ?? words[language] ?? words.en);
+		this.#labels = labels instanceof Labels ? labels : new Labels(words, labels ?? {}, locale);
 		this.#now = typeof now === 'function' ? now : () => Date.now();
 		this.#full = new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short', hourCycle: 'h23' });
 		this.#day = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' });

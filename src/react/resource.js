@@ -2,6 +2,7 @@ import React from 'react';
 import { Facts as Rows } from '../dom/facts/facts.js';
 import { Meter as Gauge } from '../dom/facts/meter.js';
 import { Clock } from '../dom/time/clock.js';
+import { Labels } from '../dom/core/labels.js';
 import { h, useInstance, useSync } from './hooks.js';
 
 const { useId } = React;
@@ -24,7 +25,7 @@ export function Facts({ head = null, rows = [], label = null, labels = {} }) {
 	const heading = title ? h(`h${[2, 3, 4].includes(level) ? level : 3}`, { id: `${id}-title`, className: 'bui-facts-title' }, title) : null;
 	const parts = [heading, value !== null && value !== undefined && value !== '' ? h('span', { key: 'value', className: 'bui-facts-summary' }, value) : null, word ? h('span', { key: 'state', className: `bui-status bui-status-${word.tone} bui-facts-state` }, h('span', { className: 'bui-status-dot', 'aria-hidden': 'true' }), word.label) : null].filter(Boolean);
 	const shown = (rows ?? []).filter(Boolean);
-	const stale = row => (row.stale ? (typeof row.stale === 'string' ? row.stale : (labels.stale ?? Rows.labels.en.stale)) : null);
+	const stale = row => (row.stale ? (typeof row.stale === 'string' ? row.stale : new Labels(Rows.labels, labels).text('stale')) : null);
 	return h(
 		'div',
 		{ className: 'bui-facts', role: 'group', 'aria-labelledby': heading ? `${id}-title` : undefined, 'aria-label': heading ? undefined : (label ?? undefined) },
