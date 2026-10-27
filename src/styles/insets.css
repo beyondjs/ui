@@ -142,6 +142,14 @@
 			margin-top: calc((1cap - 18px) / 2);
 			font-size: var(--text-body);
 		}
+		/* Offline with no Technical details its words end the line (0.44.0): the last-tried line, in its own size,
+		   takes off what its line keeps below its baseline, as the title does above its capitals */
+		.bui-recovery[data-offline]:not([data-recovery='page'], :has(> .bui-details)) .bui-again:last-child {
+			margin-block-end: calc((1cap - 1lh) / 2);
+		}
+	}
+	.bui-recovery[data-recovery='page'][data-offline]:not(:has(> .bui-details)) .bui-again:last-child {
+		margin-block-end: calc((1cap - 1lh) / 2);
 	}
 	/* The awaited card: its head on the title's line, the title's capitals at the inset; its steps' marks,
 	   its bar or its actions end it at their edges */

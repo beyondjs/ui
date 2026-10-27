@@ -159,5 +159,54 @@ export const checks = [
 				await context.close();
 			}
 		}
+	},
+	{
+		name: 'family bar: a notice that says an outage, in the warning tone with its mark on its first line, when it last tried and Try again, inside its menu at 1280 and 390 px in both themes (0.44.0, D132)',
+		consumers: ['dom', 'react19'],
+		async run(browser, consumer) {
+			for (const [width, colorScheme] of [[1280, 'light'], [390, 'dark']]) {
+				const { page, context, errors } = await browser.open(consumer, { file: 'family.html', query: '?family=inside&notice=outage', viewport: { width, height: 800 }, colorScheme });
+				try {
+					await page.evaluate(() => document.fonts.ready);
+					// Below 720 px the organization and the project are one location menu
+					await page.locator(':is([data-part="project"], [data-part="location"]) > .bui-navmenu-button:visible').first().click();
+					await page.locator(':is([data-part="project"], [data-part="location"]) > .bui-navmenu-panel:not([hidden]) .bui-navmenu-notice').waitFor();
+					const found = await page.evaluate(() => {
+						const panel = [...document.querySelectorAll(':is([data-part="project"], [data-part="location"]) > .bui-navmenu-panel')].find(node => !node.hidden);
+						const line = panel.querySelector('.bui-navmenu-notice');
+						const words = line.querySelector('.bui-navmenu-notice-words > span');
+						const range = document.createRange();
+						range.selectNodeContents(words);
+						const first = range.getClientRects()[0];
+						const box = node => node.getBoundingClientRect();
+						const probe = document.body.appendChild(Object.assign(document.createElement('div'), { style: 'background: var(--color-warning-surface)' }));
+						const warning = getComputedStyle(probe).backgroundColor;
+						probe.remove();
+						const middle = rect => (rect.top + rect.bottom) / 2;
+						return {
+							tone: line.dataset.tone,
+							surface: getComputedStyle(line).backgroundColor === warning,
+							mark: middle(box(line.querySelector('.bui-navmenu-notice-mark'))) - middle(first),
+							again: line.querySelector('.bui-again')?.textContent ?? null,
+							under: box(line.querySelector('.bui-again')).top - first.bottom,
+							action: line.querySelector('.bui-navmenu-notice-action')?.textContent ?? null,
+							beside: middle(box(line.querySelector('.bui-navmenu-notice-action'))) - middle(first),
+							after: box(line.querySelector('.bui-navmenu-notice-action')).left - box(line.querySelector('.bui-navmenu-notice-words')).right,
+							inside: box(line).right <= box(panel).right + 0.5 && box(line).left >= box(panel).left - 0.5,
+							scroll: panel.scrollWidth - panel.clientWidth
+						};
+					});
+					const where = `${consumer.name} ${width} ${colorScheme}: ${JSON.stringify(found)}`;
+					expect(found.tone === 'warning' && found.surface, `the warning tone: ${where}`);
+					expect(Math.abs(found.mark) <= 1.5, `the outage's mark on the words' first line: ${where}`);
+					expect(/^(Last tried|Último intento) /.test(found.again ?? '') && found.under >= -0.5, `when it last tried, under the words: ${where}`);
+					expect(Boolean(found.action) && Math.abs(found.beside) <= 4 && found.after >= 0, `Try again after the words, on their first line: ${where}`);
+					expect(found.inside && found.scroll <= 0, `inside its menu, nothing scrolls sideways: ${where}`);
+					expect(errors.length === 0, `no page errors: ${errors.join(' | ')}`);
+				} finally {
+					await context.close();
+				}
+			}
+		}
 	}
 ];

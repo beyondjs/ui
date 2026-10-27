@@ -1,5 +1,6 @@
 // The family bar page of the React consumers, in Spanish passed through `labels`: FamilyBar with the
-// descriptor `?family=` names and a sidebar toggle, ProductNav, Unavailable and a confirmation with its consequence.
+// descriptor `?family=` names and a sidebar toggle, ProductNav, Unavailable and a confirmation with its consequence;
+// `?notice=outage` gives the project menu an outage's notice (0.44.0).
 // window.fixture.show(name) replaces the descriptor prop, as a product does when its relay answers.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
@@ -10,6 +11,7 @@ import { FamilyBar, ProductNav, Sidebar, NotificationEntry, Unavailable, Button,
 import { Notices } from '../data/notices.js';
 import { chosen, descriptors, fallback, product, sidebar, sections } from '../data/family.js';
 import { es } from './labels.js';
+import { outage } from '../data/notice.js';
 
 const log = [];
 const notices = new Notices(new URLSearchParams(location.search).get('notices') ?? 'ready');
@@ -33,6 +35,7 @@ function Page() {
 				notifications={<NotificationEntry adapter={adapter} href="#/notifications" locale="es" labels={es.notifications} />}
 				account={{ signout: () => log.push('signout'), items: [{ label: 'Ajustes de Delegate', href: '#/settings' }] }}
 				onNavigate={item => log.push(`navigate:${item.href}`)}
+				notice={outage('es', () => log.push('again'))}
 				toggle={sidebar ? null : { controls: 'sidebar', expanded: open, onChange: setOpen }}
 			/>
 			{sidebar ? null : (
