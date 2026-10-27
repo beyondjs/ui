@@ -1,13 +1,15 @@
 /*
  * Text keeps a readable measure wherever it sits (LR-02): no line past about 80 characters. Every part
  * that holds a product's sentences takes it, a hint, a reason, a description or a note alike, so a
- * product's own words stop there in a fluid page, a form or a list (0.7.8); `.bui-reading` gives a
- * product's own paragraph the same measure. Last in the cascade: a cap never widens anything.
+ * product's own words stop there in a fluid page, a form or a list (0.7.8), a checklist's step included (0.42.0);
+ * `.bui-reading` gives a product's own paragraph the same measure. Last in the cascade: a cap never widens anything.
  */
 .bui-reading,
 .bui-page-lead,
 .bui-callout-text,
 .bui-empty-body,
+.bui-checklist-detail,
+.bui-checklist-reason,
 .bui-section-description,
 .bui-field-hint,
 .bui-option-description,

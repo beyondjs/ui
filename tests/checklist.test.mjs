@@ -1,5 +1,6 @@
 import { test, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { Page } from './support/page.mjs';
 
 /** `Checklist` and `EmptyState` (0.15.0, DQ-17): setup steps in order with their progress, and an empty place that tells no data, no match and no context apart. */
@@ -91,4 +92,18 @@ test('React Checklist and EmptyState read actions from the latest props', async 
 	host.querySelector('.bui-empty .bui-button-quiet').click();
 	assert.deepEqual(calls, ['second', 'clear second']);
 	await React.act(() => root.unmount());
+});
+
+test('the built stylesheet: a step\'s detail and a blocked step\'s reason stop at the reading measure, as a page\'s lead (0.42.0)', () => {
+	const sheet = readFileSync(new URL('../dist/styles.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+	/** The declarations of the rules whose selector list names this selector exactly, in the order the sheet holds them. */
+	const rules = selector =>
+		[...sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, selectors]) => selectors.split(',').map(item => item.trim()).includes(selector)).map(([, , body]) => body);
+	const widths = selector => rules(selector).flatMap(body => [...body.matchAll(/max-width:\s*([^;]+)/g)].map(([, value]) => value.trim()));
+	for (const part of ['.bui-checklist-detail', '.bui-checklist-reason']) {
+		assert.deepEqual(widths(part), ['var(--layout-measure)'], `${part} is held at the reading measure, and nothing widens it again`);
+	}
+	assert.deepEqual(widths('.bui-page-lead'), ['var(--layout-measure)'], 'the same measure as a page\'s lead');
+	assert.deepEqual(widths('.bui-checklist'), ['var(--layout-form)'], 'the checklist itself keeps the form tier');
+	assert.deepEqual(widths('.bui-checklist-name'), [], 'a step\'s title is a name, not prose');
 });

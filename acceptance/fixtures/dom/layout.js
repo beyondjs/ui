@@ -1,12 +1,12 @@
 // The page system of the plain DOM consumer: the family bar with "Language and appearance", the
 // Sidebar (or ProductNav) and one Page whose template, width, side panel and arrival line the address
 // chooses; since 0.38.0 its side panel may be pinned, its main column long and its header compact, and since 0.41.0
-// its header may hold a lead.
+// its header may hold a lead, and since 0.42.0 its main column may start with a checklist of first steps.
 // window.fixture exposes the preferences and a teardown.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { FamilyBar, Sidebar, ProductNav, Page, PageHeader, Tabs, Section, Arrival, Button, ListRow, ActionLine, Preferences, status, el } from '@beyond-js/ui';
+import { FamilyBar, Sidebar, ProductNav, Page, PageHeader, Tabs, Section, Arrival, Button, ListRow, ActionLine, Checklist, Preferences, status, el } from '@beyond-js/ui';
 import { chosen, fallback, product } from '../data/family.js';
 import { shape, words, groups } from '../data/layout.js';
 
@@ -40,13 +40,15 @@ const start = words.start.en;
 const action = () => new Section({ title: start.title, children: [el('p', { text: start.text }), el('div', {}, [new Button({ label: start.action, variant: 'primary' }).element])] }).element;
 const components = new Section({ title: start.components, description: start.description, children: [el('ul', { class: 'bui-rows' }, words.components.map(({ name, meta }) => new ListRow({ title: name, meta, tag: 'li' }).element))] });
 const aside = shape.raised ? [...(shape.long ? [action()] : []), ...raised()] : shape.aside ? [el('h2', { text: 'About' }), el('ul', {}, words.facts2.map(fact => el('li', { text: fact })))] : null;
-const children = [repositories.element, access.element, ...(shape.long ? [components.element] : [])];
+// A first run's steps (0.42.0), first in the main column as the Packages interface's arrival draws them
+const first = shape.first ? new Checklist({ title: words.first.title, level: 2, steps: words.first.steps.map(step => (step.action ? { ...step, action: { ...step.action, run: () => {} } } : step)) }) : null;
+const children = [...(first ? [first.element] : []), repositories.element, access.element, ...(shape.long ? [components.element] : [])];
 const page = new Page({ template: shape.template, width: shape.width, arrival, header, children, aside, raised: shape.raised, pinned: shape.pinned, label: 'About this environment' }).mount(main);
 
 window.fixture = {
 	preferences,
 	destroy() {
-		for (const component of [page, nav, bar]) component.destroy();
+		for (const component of [page, nav, bar, ...(first ? [first] : [])]) component.destroy();
 	},
 	ready: true
 };

@@ -3,7 +3,9 @@
 // Since 0.38.0 (D189) `?pinned=1` asks for the side panel pinned beside the main column, `?long=1` makes the page
 // Start an application: a long main column of components and the page's action first in the side panel, and
 // `?compact=1` gives the header its compact line. Since 0.41.0 (D191) `?lead=1` gives the header a lead sentence
-// under its facts line, long enough to wrap at the reading measure.
+// under its facts line, long enough to wrap at the reading measure. Since 0.42.0 `?first=1` (the plain DOM page) starts
+// the main column with a checklist of first steps, as the Packages interface's arrival does: each detail and a blocked
+// step's reason in the widest checklist, held at the reading measure.
 const query = new URLSearchParams(location.search);
 
 export const shape = {
@@ -16,6 +18,7 @@ export const shape = {
 	compact: query.get('compact') === '1',
 	arrival: query.get('arrival') === '1',
 	lead: query.get('lead') === '1',
+	first: query.get('first') === '1',
 	nav: query.get('nav') ?? 'sidebar'
 };
 
@@ -40,6 +43,17 @@ export const words = {
 	copy: { machine: 'web', meta: ['Ready', 'main', '2 changes'], actions: ['Open files', 'Fetch'] },
 	// What a copy runs when it starts (0.38.0): sixteen components, each with its command and its port
 	components: ['web', 'api', 'worker', 'scheduler', 'mailer', 'search', 'billing', 'auth', 'storage', 'gateway', 'admin', 'reports', 'notifications', 'media', 'exports', 'docs'].map((name, index) => ({ name, meta: [`npm run dev:${name}`, `port ${3000 + index}`] })),
+	// A first run's steps (0.42.0): the Packages arrival's details, the longest 81 characters on one line in a checklist
+	// 40rem wide before the reading measure held them
+	first: {
+		title: 'First steps',
+		steps: [
+			{ key: 'install', title: 'Install the command line', state: 'done' },
+			{ key: 'workspace', title: 'Open a workspace', detail: 'The command line is in private preview: it’s installed from the Beyond toolchain.', action: { label: 'Copy the command' } },
+			{ key: 'application', title: 'Declare an application', detail: 'Declare one in the workspace’s beyond.json, or from Applications once connected.' },
+			{ key: 'connect', title: 'Connect Packages', state: 'blocked', detail: 'It prints a link that opens Packages already connected, with a pairing code.', reason: 'Open the link it prints, or choose where it runs below and enter its code; the code is good for ten minutes.' }
+		]
+	},
 	start: {
 		en: { title: 'Application', text: "Runs the copy's 16 components as they are now on web, with its 2 uncommitted changes.", action: 'Start application', components: 'Components', description: 'What the copy runs when it starts.' },
 		es: { title: 'Aplicación', text: 'Ejecuta los 16 componentes de la copia tal como están ahora en web, con sus 2 cambios sin confirmar.', action: 'Iniciar aplicación', components: 'Componentes', description: 'Lo que la copia ejecuta al iniciarse.' }
