@@ -14,13 +14,15 @@ const none = Object.freeze([]);
  * `status` are applied when they change; `onChange` reports the person's changes (write them to the
  * address); `onOpen` and `onRetry` are read from the latest props. A cell whose React content renders
  * nothing (no text, no element) is empty, as the DOM table reads a value: a narrow line leaves out its
- * label and its separator (0.35.0).
+ * label and its separator (0.35.0). `menu(row)` (0.44.0) gives each row a menu of the product's actions, items as
+ * React's `ActionMenu` takes them (`onSelect`), read from the latest props each time a menu opens. A narrow
+ * table's sort line reports through `onChange` as its header does.
  */
-export function DataTable({ label, columns, rows = none, rowKey = null, search = true, filters = [], tools = 'compact', toolsTarget = null, group = null, state = null, onChange = null, size = 50, link = null, onOpen = null, empty = null, status = 'ready', onRetry = null, framed = false, labels }) {
+export function DataTable({ label, columns, rows = none, rowKey = null, search = true, filters = [], tools = 'compact', toolsTarget = null, group = null, state = null, onChange = null, size = 50, link = null, onOpen = null, empty = null, status = 'ready', onRetry = null, framed = false, menu = null, labels }) {
 	const cells = useRef([]);
 	const applied = useRef(null);
 	const [portals, setPortals] = useState([]);
-	const latest = useLatest({ columns, onChange, onOpen, onRetry, link, group, rowKey, filters });
+	const latest = useLatest({ columns, onChange, onOpen, onRetry, link, group, rowKey, filters, menu });
 	const [host, table] = useInstance(
 		() =>
 			new Table({
@@ -39,10 +41,11 @@ export function DataTable({ label, columns, rows = none, rowKey = null, search =
 				onopen: onOpen ? (row, event) => latest.current.onOpen?.(row, event) : null,
 				onchange: next => latest.current.onChange?.(next),
 				onretry: onRetry ? () => latest.current.onRetry?.() : null,
+				menu: menu ? row => (latest.current.menu?.(row) ?? []).map(item => item && { ...item, run: event => item.onSelect?.(event) }) : null,
 				columns: columns.map((column, index) => ({ ...column, value: column.value ? row => latest.current.columns[index].value(row) : undefined, render: column.render ? row => cell(row, index) : undefined, sort: typeof column.sort === 'function' ? (a, b) => latest.current.columns[index].sort(a, b) : column.sort })),
 				onrender: () => setPortals(cells.current.splice(0))
 			}),
-		[label, String(search), JSON.stringify(filters), tools, size, labels, Boolean(link), Boolean(onOpen), Boolean(onRetry), Boolean(group), columns.map(column => column.key).join('|')]
+		[label, String(search), JSON.stringify(filters), tools, size, labels, Boolean(link), Boolean(onOpen), Boolean(onRetry), Boolean(menu), Boolean(group), columns.map(column => column.key).join('|')]
 	);
 	useTools(table, toolsTarget, tools);
 	useLayoutEffect(() => {

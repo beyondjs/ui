@@ -3,11 +3,13 @@
 // groups as `display: contents` and the same list without them; boxes that hide a trimmed overflow
 // (`overflow: hidden`, `overflow: clip`) and one whose content fits; a box holding a caption only a screen reader
 // reads, clipped on purpose, and one whose text a line clamp ends on purpose; a row whose background draws only
-// a 1 px divider, one whose background fills it and one whose 1 px layer repeats into a fill.
+// a 1 px divider, one whose background fills it and one whose 1 px layer repeats into a fill; since 0.44.0 words a
+// stylesheet generates: a stacked DataTable's labels (`td[data-label]::before`), a line whose words are all an
+// `::after`'s and a line whose words follow a dot a `::before` draws by its fill.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { el } from '@beyond-js/ui';
+import { DataTable, el } from '@beyond-js/ui';
 
 const main = document.getElementById('root').appendChild(el('main', { class: 'measure-page' }));
 const place = (id, children) => main.appendChild(el('div', { id, class: 'measure-box' }, children));
@@ -25,5 +27,10 @@ place('clamped', [el('p', { class: 'measure-clamp', text: lines })]);
 place('lined', [el('p', { class: 'measure-lined', text: 'Prepare storefront' })]);
 place('filled', [el('p', { class: 'measure-filled', text: 'Prepare storefront' })]);
 place('repeated', [el('p', { class: 'measure-repeated', text: 'Prepare storefront' })]);
+// The box is narrower than 36rem at every width, so the table is stacked: its values' labels are generated
+const stacked = new DataTable({ label: 'Jobs', columns: [{ key: 'job', label: 'Job', primary: true }, { key: 'state', label: 'State' }, { key: 'started', label: 'Started' }], rows: [{ id: 'job_0', job: 'Prepare storefront', state: 'Running', started: '10:42' }], search: false });
+place('stacked', [stacked.element]);
+place('said', [el('p', { class: 'measure-said', 'data-said': 'Last updated 2 min ago' })]);
+place('marked', [el('p', { class: 'measure-marked', text: 'Ready' })]);
 
-window.fixture = { ready: true };
+window.fixture = { destroy: () => stacked.destroy(), ready: true };

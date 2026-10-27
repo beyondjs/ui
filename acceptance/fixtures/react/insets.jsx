@@ -1,7 +1,8 @@
 // The insets page of the React consumers (D184), in Spanish through the components' `labels.es`: the boxes
 // no other fixture page draws, each in a block of its own named by its id, as the DOM page draws them (since
 // 0.35.0 an editable CommandCard, an outage's line whose words wrap beside Try again and a command to copy, and
-// since 0.41.0 a DataTable in a raised section and in a product's own card),
+// since 0.41.0 a DataTable in a raised section and in a product's own card, and since 0.44.0 a framed one after a
+// line its card shows),
 // and a toast with a detail shown by window.fixture.toast().
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
@@ -70,12 +71,19 @@ function App() {
 			</div>
 			<div id="table-card">
 				<div className="insets-card">
+					<p className="insets-updated" hidden>{copy.jobs.updated}</p>
 					<DataTable {...table} search={false} framed labels={DataTable.labels.es} />
 				</div>
 			</div>
 			<div id="table-grouped">
 				<div className="insets-card">
 					<DataTable {...table} search={false} framed group={group} labels={DataTable.labels.es} />
+				</div>
+			</div>
+			<div id="table-after">
+				<div className="insets-card">
+					<p className="insets-updated">{copy.jobs.updated}</p>
+					<DataTable {...table} search={false} framed labels={DataTable.labels.es} />
 				</div>
 			</div>
 		</main>

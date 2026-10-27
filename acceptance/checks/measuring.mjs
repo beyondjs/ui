@@ -8,7 +8,11 @@ import { Insets } from '../support/insets.mjs';
  * or `overflow: clip`, as it does for a scroller; and it says nothing scrolls in a box whose content fits, or whose
  * only overflow is hidden on purpose: a caption a clip hides, a text a line clamp ends, whose hidden lines decide
  * no side. A background that draws only a divider (a table's row lines) is no fill; one that fills its row, or a
- * thin layer that repeats into a fill, is. Products copy `support/insets.mjs`; this check holds it.
+ * thin layer that repeats into a fill, is. Since 0.44.0 it reads words a stylesheet generates: a stacked
+ * `DataTable`'s value starts where its generated label starts, a line whose words are all an `::after`'s is
+ * measured by them, a dot a `::before` draws by its fill is a mark, `generated: false` measures without them, and
+ * the page is put back after each measure.
+ * Products copy `support/insets.mjs`; this check holds it.
  */
 const widths = [1440, 390];
 
@@ -19,6 +23,36 @@ async function open(browser, consumer, width) {
 }
 
 export const checks = [
+	{
+		name: 'measure: what a stylesheet generates is read, a stacked DataTable\'s labels, an ::after\'s words and a ::before\'s dot, and the page is put back (0.44.0)',
+		consumers: ['dom'],
+		run: async (browser, consumer) => {
+			for (const width of widths) {
+				const { page } = await open(browser, consumer, width);
+				const cell = { box: '#stacked td[data-label]:not([data-empty])' };
+				const labelled = await Insets.measure(page, cell);
+				const bare = await Insets.measure(page, { ...cell, generated: false });
+				const said = await Insets.measure(page, { box: '#said' });
+				const none = await Insets.measure(page, { box: '#said', generated: false });
+				const fits = await Insets.measure(page, { box: '#fits' });
+				const marked = await Insets.measure(page, { box: '#marked' });
+				const unmarked = await Insets.measure(page, { box: '#marked', generated: false });
+				const back = await page.evaluate(() => {
+					const cell = document.querySelector('#stacked td[data-label]:not([data-empty])');
+					return { marked: document.querySelectorAll('[data-inset-before], [data-inset-after]').length, text: cell.textContent, before: getComputedStyle(cell, '::before').content, after: getComputedStyle(document.querySelector('#said p'), '::after').content };
+				});
+				const at = `${browser.engine} ${width}px: ${JSON.stringify({ labelled, bare, said, none, fits, marked, unmarked, back })}`;
+				expect(/State/.test(labelled.by.left) && Math.abs(labelled.left) <= 0.5, `${at}: a stacked value starts where its generated label does`);
+				expect(/Running/.test(bare.by.left) && bare.left > 10, `${at}: without them it starts at the value's own words`);
+				expect(!said.empty && /Last updated/.test(said.by.left) && Math.abs(said.left - 16) <= 0.5 && Math.abs(said.top - fits.top) <= 0.5, `${at}: a line of an ::after's words is measured by them, as a line of text`);
+				expect(none.empty, `${at}: without them the line is empty`);
+				expect(/^span/.test(marked.by.left) && Math.abs(marked.left - 16) <= 0.5, `${at}: a dot a ::before draws by its fill is a mark at the line's start`);
+				expect(/Ready/.test(unmarked.by.left) && Math.abs(unmarked.left - 30) <= 0.5, `${at}: without it the line starts at its words`);
+				expect(back.marked === 0 && back.text === 'Running' && back.before !== 'none' && back.after !== 'none', `${at}: the page is put back`);
+				await page.close();
+			}
+		}
+	},
 	{
 		name: 'measure: a background that draws only a divider is no fill; one that fills the row, or a thin layer that repeats, is',
 		consumers: ['dom'],
@@ -67,6 +101,8 @@ export const checks = [
 				expect(found.clamped <= 1, `${said}: a text a line clamp ends on purpose is not overflow`);
 				const clamped = await Insets.measure(page, { box: '#clamped' });
 				const fits = await Insets.measure(page, { box: '#fits' });
+				const marked = await Insets.measure(page, { box: '#marked' });
+				const unmarked = await Insets.measure(page, { box: '#marked', generated: false });
 				expect(Math.abs(clamped.top - fits.top) <= 0.5 && Math.abs(clamped.bottom - fits.bottom) <= 0.5, `${said}: a clamp's hidden lines decide no side, ${JSON.stringify({ clamped, fits })}`);
 			}
 		}

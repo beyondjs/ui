@@ -74,3 +74,18 @@ body {
 	padding: 8px;
 	background: linear-gradient(var(--color-border-strong), var(--color-border-strong)) left top / 100% 1px;
 }
+/* A line whose words are all generated (0.44.0), as a product writes a short state from an attribute */
+.measure-said::after {
+	content: attr(data-said);
+}
+/* A dot drawn by a `::before`'s fill before a line's words (0.44.0), as Beyond Home draws its first-use hint */
+.measure-marked::before {
+	content: '';
+	display: inline-block;
+	width: 6px;
+	height: 6px;
+	margin-inline-end: 8px;
+	border-radius: 50%;
+	background: var(--color-text-muted);
+	vertical-align: middle;
+}

@@ -2,16 +2,19 @@ import { el, content } from '../core/element.js';
 import { glyph } from '../core/icons.js';
 import { DataQuery } from './query.js';
 import { CellContent } from './cell.js';
+import { DataMenus } from './menus.js';
 
 /**
  * The table a `DataTable` draws (0.15.0): a caption for assistive technology, headers that sort (a
  * button in the header, `aria-sort` on the column sorted), group headings with their count, and rows
  * whose primary cell opens the row (a link whose target covers the row; `onopen` takes over plain
  * clicks). Cells take the column's `render` (text or a node), else its value; `mono` columns are drawn
- * in the monospace face and `align: 'end'` columns at the end in tabular figures.
+ * in the monospace face and `align: 'end'` columns at the end in tabular figures. With `menu` (0.44.0) each row
+ * ends in a column of its own holding its menu of actions (`DataMenus`).
  */
 export class DataTableView {
 	#options;
+	#menus;
 
 	/**
 	 * @param {object} options
@@ -22,19 +25,28 @@ export class DataTableView {
 	 * @param {((row: object, event: Event) => void)|null} [options.onopen]
 	 * @param {(column: object) => void} options.onsort
 	 * @param {import('../core/labels.js').Labels} options.labels
+	 * @param {((row: object) => Array<object|null|false>)|null} [options.menu] a row's actions, as `ActionMenu` items (0.44.0)
 	 */
 	constructor(options) {
 		this.#options = options;
+		this.#menus = options.menu ? new DataMenus({ menu: options.menu, labels: options.labels }) : null;
 	}
 
 	/** The table for one answer of `DataQuery.run`, sorted by `state.sort` in `state.direction`. */
 	draw(answer, state) {
 		const { label, columns, labels } = this.#options;
+		this.release();
+		const span = String(columns.length + (this.#menus ? 1 : 0));
 		return el('table', { class: `bui-table bui-data${this.#options.link || this.#options.onopen ? ' bui-table-links' : ''}` }, [
 			el('caption', { class: 'bui-hidden' }, [content(label)]),
-			el('thead', {}, [el('tr', {}, columns.map(column => this.#head(column, state)))]),
-			el('tbody', {}, answer.groups.flatMap(group => [group.key === null ? null : el('tr', { class: 'bui-data-group' }, [el('th', { scope: 'colgroup', colspan: String(columns.length) }, [labels.text('group', { name: group.label, count: group.count })])]), ...group.rows.map(row => this.#row(row))].filter(Boolean)))
+			el('thead', {}, [el('tr', {}, [...columns.map(column => this.#head(column, state)), this.#menus?.head()])]),
+			el('tbody', {}, answer.groups.flatMap(group => [group.key === null ? null : el('tr', { class: 'bui-data-group' }, [el('th', { scope: 'colgroup', colspan: span }, [labels.text('group', { name: group.label, count: group.count })])]), ...group.rows.map(row => this.#row(row))].filter(Boolean)))
 		]);
+	}
+
+	/** Releases what the last drawing made (its row menus). */
+	release() {
+		this.#menus?.release();
 	}
 
 	#head(column, state) {
@@ -52,7 +64,7 @@ export class DataTableView {
 	#row(row) {
 		const { columns, key = item => item.id } = this.#options;
 		const primary = columns.find(column => column.primary) ?? columns[0];
-		return el('tr', { 'data-key': key(row) ?? null, 'data-menu': columns.some(column => column.menu) ? '' : null }, columns.map(column => this.#cell(row, column, column === primary)));
+		return el('tr', { 'data-key': key(row) ?? null, 'data-menu': this.#menus || columns.some(column => column.menu) ? '' : null }, [...columns.map(column => this.#cell(row, column, column === primary)), this.#menus?.cell(row, primary)]);
 	}
 
 	#cell(row, column, primary) {

@@ -4,7 +4,8 @@
 // refusal with no action; since 0.35.0 a request whose command may be corrected (an editable CommandCard),
 // an outage's line in a narrow block, its words wrapping beside Try again, a command to copy
 // (CopyMessage's command form) and a choice whose entries are one line each (a composer's Effort); since 0.41.0 a
-// DataTable in a raised section and in a product's own card. window.fixture shows a toast with a detail and tears them down.
+// DataTable in a raised section and in a product's own card, and since 0.44.0 a framed one after a line its card
+// shows. window.fixture shows a toast with a detail and tears them down.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
@@ -43,11 +44,16 @@ place('effort', effort.element);
 const tables = [false, true].map(framed => new DataTable({ ...jobs(copy), search: false, framed }));
 const raised = new Section({ title: copy.jobs.label, raised: true, children: [tables[0].element] });
 place('table-raised', raised.element);
-place('table-card', el('div', { class: 'insets-card' }, [tables[1].element]));
+// A line drawn above it only at times, hidden now, leaves it leading its card (0.44.0)
+place('table-card', el('div', { class: 'insets-card' }, [el('p', { class: 'insets-updated', hidden: true, text: copy.jobs.updated }), tables[1].element]));
 // A grouped table framed at a card's top: at 390 px it starts with its first group's heading
 const grouped = new DataTable({ ...jobs(copy), search: false, framed: true, group: { by: row => row.organization } });
 tables.push(grouped);
 place('table-grouped', el('div', { class: 'insets-card' }, [grouped.element]));
+// A framed table after a line its card shows (0.44.0): it no longer leads the card, so it stays where it is drawn
+const after = new DataTable({ ...jobs(copy), search: false, framed: true });
+tables.push(after);
+place('table-after', el('div', { class: 'insets-card' }, [el('p', { class: 'insets-updated', text: copy.jobs.updated }), after.element]));
 
 const toaster = new Toaster().mount(document.body);
 

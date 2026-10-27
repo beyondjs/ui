@@ -10,9 +10,10 @@
 	margin-top: 0;
 }
 /* A row's menu shows on the row a pointer rests on, the row the focus is in and while it is open; a
-   touch screen always shows it (L6) */
+   touch screen always shows it (L6). A `DataTable`'s menu column too (0.44.0) */
 @media (hover: hover) and (pointer: fine) {
-	.bui-row:not(:hover, :focus-within) > .bui-row-end > .bui-menu-holder:not(:has([aria-expanded='true'])) {
+	.bui-row:not(:hover, :focus-within) > .bui-row-end > .bui-menu-holder:not(:has([aria-expanded='true'])),
+	.bui-data tbody > tr:not(:hover, :focus-within) > .bui-data-menu > .bui-menu-holder:not(:has([aria-expanded='true'])) {
 		opacity: 0;
 	}
 }

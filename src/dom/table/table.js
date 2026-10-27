@@ -8,6 +8,7 @@ import { EmptyState } from '../checklist/empty.js';
 import { DataQuery } from './query.js';
 import { DataTableView } from './view.js';
 import { DataHead } from './head.js';
+import { DataOrder } from './order.js';
 import { words } from './labels.js';
 
 /**
@@ -23,10 +24,13 @@ import { words } from './labels.js';
  * or `{ title, text, action }`); a search that matches nothing says so with "Clear the search". What
  * fits on one page shows no range and no pager. On a narrow region (a container query on the table's
  * own width) each row is two short lines: the primary cell, then the others in one muted line; since 0.41.0 its
- * hidden header's sort buttons leave the Tab order there (`DataHead`, D187).
+ * hidden header's sort buttons leave the Tab order there (`DataHead`, D187), and since 0.44.0 a line above the rows
+ * chooses the order instead (`DataOrder`: "Sort by", reported through `onchange` as the header's sort is).
+ * `menu(row)` (0.44.0, L6) gives each row a menu of the product's actions in a column of its own (`DataMenus`).
  *
- * `framed` (0.41.0, D184) says the table is drawn at the top of a framed box (a raised section, a card): with no
- * tools above it, its first line's capitals stand at the box's inset (the header's, or a narrow table's first
+ * `framed` (0.41.0, D184) says the table is drawn in a framed box (a raised section, a card): while it is the box's
+ * first part (since 0.44.0 the stylesheet reads it: nothing shown stands before it) and draws no tools or sort line
+ * above its rows, its first line's capitals stand at the box's inset (the header's, or a narrow table's first
  * row's), while its rows' fills hang into the box's padding as a list's rows hang into the gutter.
  *
  * Columns: `{ key, label, value?(row), render?(row) → string|Node, sort?: boolean|((a, b) => number),
@@ -50,6 +54,7 @@ export class DataTable extends Component {
 	#pager;
 	#said = el('p', { class: 'bui-hidden', role: 'status' });
 	#head;
+	#order;
 
 	/**
 	 * @param {object} options
@@ -69,7 +74,8 @@ export class DataTable extends Component {
 	 * @param {Node|{title: string|Node, text?: string|Node|null, action?: object|Node|null}|null} [options.empty] the table with no row
 	 * @param {(() => void)|null} [options.onretry] Try again after a failure
 	 * @param {(() => void)|null} [options.onrender] runs after each drawing of the rows (the React adapter fills cells then)
-	 * @param {boolean} [options.framed] drawn at the top of a framed box, its first capitals at the box's inset (0.41.0)
+	 * @param {boolean} [options.framed] drawn in a framed box, its first capitals at the box's inset while it leads it (0.41.0, 0.44.0)
+	 * @param {((row: object) => Array<object|null|false>)|null} [options.menu] a row's actions, as `ActionMenu` items (0.44.0)
 	 */
 	constructor(options) {
 		super();
@@ -77,12 +83,13 @@ export class DataTable extends Component {
 		this.#options = options;
 		this.#labels = new Labels(words, labels);
 		this.#query = new DataQuery({ columns, group, match: typeof search === 'object' ? (search.match ?? null) : null, size });
-		this.#view = new DataTableView({ label, columns, key: options.key, link: options.link ?? null, onopen: options.onopen ?? null, labels: this.#labels, onsort: column => this.#sort(column) });
+		this.#view = new DataTableView({ label, columns, key: options.key, link: options.link ?? null, onopen: options.onopen ?? null, labels: this.#labels, onsort: column => this.#sort(column), menu: options.menu ?? null });
+		this.#order = new DataOrder({ columns, labels: this.#labels, onchange: part => this.#change({ ...part, page: 1 }) });
 		this.#state = DataTable.#clean(state, Boolean(options.filters?.length));
 		this.#tools = new CollectionTools({ label, search, filters: options.filters ?? [], state: this.#state, labels, compact: options.tools !== 'expanded', delay: options.delay ?? 200, onchange: state => this.#change({ query: state.query, ...(options.filters?.length ? { filters: state.filters } : {}), page: 1 }) });
 		this.#tools.element.classList.add('bui-data-tools');
 		this.#pager = el('nav', { class: 'bui-pager', 'aria-label': this.#labels.text('pages', { label }) });
-		this.#element = el('section', { class: 'bui-data-table', 'aria-label': typeof label === 'string' ? label : null }, [options.tools === 'external' ? null : this.#tools.element, this.#said, this.#body, this.#pager]);
+		this.#element = el('section', { class: 'bui-data-table', 'aria-label': typeof label === 'string' ? label : null }, [options.tools === 'external' ? null : this.#tools.element, this.#order.offered ? this.#order.element : null, this.#said, this.#body, this.#pager]);
 		this.#head = new DataHead(this.#element);
 		this.framed = options.framed ?? false;
 		this.rows = rows;
@@ -141,12 +148,17 @@ export class DataTable extends Component {
 	destroy() {
 		this.#tools.destroy();
 		this.#head.destroy();
+		this.#order.destroy();
+		this.#view.release();
 		super.destroy();
 	}
 
 	#draw() {
 		const label = this.#options.label;
 		this.#element.dataset.status = this.#status;
+		this.#view.release();
+		this.#order.state = this.#state;
+		this.#order.shown = false;
 		if (this.#status === 'loading') {
 			fill(this.#pager, []);
 			this.#said.textContent = this.#labels.text('loading', { label });
@@ -174,6 +186,7 @@ export class DataTable extends Component {
 			return fill(this.#body, [none.element]);
 		}
 		fill(this.#body, [this.#view.draw(answer, this.#state)]);
+		this.#order.shown = true;
 		this.#head.apply();
 		this.#paging(answer);
 		this.#said.textContent = this.#labels.text('shown', { count: answer.total });
