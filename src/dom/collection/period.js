@@ -28,7 +28,7 @@ export class Period {
 	 */
 	constructor(filter, labels = {}) {
 		this.#filter = filter;
-		this.#labels = labels instanceof Labels ? labels : new Labels(words.en, labels);
+		this.#labels = labels instanceof Labels ? labels : new Labels(words, labels);
 	}
 
 	/** The choices the filter offers: its last days, then its months, the current one first. */
