@@ -91,10 +91,11 @@ const room = (page, selector) =>
 		const steps = fold.split(' ').filter(Boolean);
 		if (steps.length) block.dataset.fold = steps.slice(0, -1).join(' ');
 		const fewer = steps.length ? cut() : [];
+		const before = Math.round(Math.min(...titles.map(title => title.clientWidth)));
 		if (steps.length) block.dataset.fold = fold;
 		const kinds = [...block.querySelectorAll('.bui-lanes-kind:not([hidden])')].map(kind => ({ drawn: kind.getBoundingClientRect().width > 1, said: kind.closest('.bui-lanes-lane').textContent.includes(kind.textContent) }));
 		const traces = [...block.querySelectorAll('.bui-lanes-trace')].filter(trace => getComputedStyle(trace).display !== 'none').length;
-		return { fold, cut: now, room, fewer, kinds, traces };
+		return { fold, cut: now, room, before, fewer, kinds, traces };
 	}, selector);
 
 export const checks = [
@@ -110,7 +111,7 @@ export const checks = [
 					const said = `${at}: ${JSON.stringify(found)}`;
 					expect(found.cut.length === 0, `${said}: every title shows whole`);
 					if (found.fold) expect(found.fewer.length > 0, `${said}: one fold fewer would cut a title, so nothing folds that need not`);
-					expect(found.fold === '' || found.fold === 'trace' || found.fold === 'trace kind', `${said}: the trace folds before the kind`);
+					expect(['', 'trace', 'trace kind', 'trace kind now'].includes(found.fold), `${said}: the trace folds before the kind, and the live line's room last`);
 					expect(found.traces === (found.fold.includes('trace') ? 0 : 6), `${said}: a folded trace takes no cell`);
 					expect(found.kinds.every(kind => kind.drawn === !found.fold.includes('kind') && kind.said), `${said}: a folded kind is not drawn and stays in the lane's name`);
 					wide(await lanes(page, '.fixture-room'), `${at}, long titles`, found.fold.split(' '));
@@ -127,7 +128,9 @@ export const checks = [
 		async run(browser, consumer) {
 			const { page } = await open(browser, consumer, { viewport: { width: 1440, height: 900 } });
 			const found = await room(page, '.fixture-cramped');
-			expect(found.fold === 'trace kind' && found.cut.length >= 1, `the cramped block folds both before it cuts a title: ${JSON.stringify(found)}`);
+			// Since 0.44.0 a third fold gives the title three quarters of the room it shares with the live line
+			expect(found.fold === 'trace kind now' && found.cut.length >= 1, `the cramped block folds the trace, the kind and the live line's room before it cuts a title: ${JSON.stringify(found)}`);
+			expect(found.room > found.before, `the last fold gives the titles more room: ${found.before} → ${found.room} px`);
 			const lane = page.locator('.fixture-cramped .bui-lanes-lane').first();
 			const whole = await lane.evaluate(node => [node.querySelector('.bui-lanes-title').textContent.replace(/^, /, ''), node.querySelector('.bui-lanes-kind').textContent.replace(/^, /, '')].join(' · '));
 			const tip = page.locator('.bui-tooltip:not([hidden])');

@@ -1,7 +1,8 @@
 /**
  * The titles' room in a `Lanes` block (0.41.0): in its one-line form a lane's title is cut only once nothing
  * else can give way. When a title would be cut, the block folds its trace first, then its kind (`data-fold`
- * on the block: `trace`, then `trace kind`), and keeps the first fold that lets every title show whole, or
+ * on the block: `trace`, then `trace kind`), then since 0.44.0 the live line's room (`now`: the title takes
+ * three quarters of what the two share), and keeps the first fold that lets every title show whole, or
  * the last one. It measures again only when the block's width, its columns or what its lanes say (their
  * depth, titles, kinds and facts) has changed, and once the fonts arrive; folding changes only the columns
  * inside the block, never its width, so it never measures in a loop. Under 40rem the block has neither column, so nothing folds there. A folded kind stays in the
@@ -34,7 +35,8 @@ export class LaneRoom {
 		const block = this.#block;
 		if (!block.isConnected) return;
 		const width = block.getBoundingClientRect().width;
-		const columns = ['trace', 'kind'].filter(column => block.hasAttribute(`data-${column}`));
+		// The trace, then the kind, then the live line's room (0.44.0), which every block has
+		const columns = [...['trace', 'kind'].filter(column => block.hasAttribute(`data-${column}`)), 'now'];
 		// Every column the block has, its facts' included, takes room from the titles
 		const present = ['trace', 'kind', 'facts'].filter(column => block.hasAttribute(`data-${column}`));
 		const state = `${width}|${present.join(' ')}|${this.#said()}`;
