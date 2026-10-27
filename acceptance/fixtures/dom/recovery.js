@@ -1,6 +1,7 @@
 // The 0.24.0 page of the plain DOM consumer (D163): a project's Home whose four reads did not answer on one
 // cause, said once by the page's Recovery; each region says it in its own place and one keeps an earlier
-// read's content with its time. `?whole=1`: nothing on the page could be read, so the notice is its body.
+// read's content with its time. `?whole=1`: nothing on the page could be read, so the notice is its body;
+// `?bare=1`: the reads carry no evidence, so the line has no Technical details (0.44.0).
 // window.fixture answers the reads.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
@@ -8,7 +9,7 @@ import '@beyond-js/ui/fonts.css';
 import { Page, PageHeader, Section, Recovery, RetryAction, AgainLine, TechnicalDetails, EmptyState, LastUpdate, el } from '@beyond-js/ui';
 import { words as copy, shape } from '../data/recovery.js';
 
-const { language, whole } = shape();
+const { language, whole, bare } = shape();
 const words = copy[language];
 const spanish = language === 'es';
 document.documentElement.lang = language;
@@ -25,7 +26,7 @@ const said = Date.now() - 2000;
 for (const [key, title] of words.reads)
 	recovery.set(key, {
 		title,
-		details: { request: `req_${key}_7Hq2`, time: said, text: words.said },
+		details: bare ? null : { request: `req_${key}_7Hq2`, time: said, text: words.said },
 		run: async () => {
 			read.tries += 1;
 			if (!read.answer) return false;

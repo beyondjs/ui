@@ -7,7 +7,7 @@ import { glyph } from '../core/icons.js';
 import { Ids } from '../core/ids.js';
 import { Labels } from '../core/labels.js';
 import { Select } from '../select.js';
-import { callout, loading } from '../feedback.js';
+import { callout, loading, waiting } from '../feedback.js';
 import { Cause, copies } from './labels.js';
 import { Age } from '../time/age.js';
 import { Feed } from './feed.js';
@@ -56,6 +56,7 @@ export class NotificationInbox extends Component {
 	#outlet;
 	#products;
 	#stamp = null;
+	#arrived = false;
 
 	/**
 	 * @param {object} options
@@ -182,6 +183,7 @@ export class NotificationInbox extends Component {
 		this.#body.setAttribute('aria-busy', String(feed.state === 'loading' || feed.state === 'more'));
 		// The notice's own tries keep the page as it is; an answer gives it back
 		if (feed.state === 'loading' && this.#recovery.size) return;
+		if (feed.state !== 'loading') this.#arrived = true;
 		if (this.#outage()) return this.#unavailable();
 		this.#recovery.delete('inbox');
 		this.#tools.hidden = false;
@@ -189,7 +191,9 @@ export class NotificationInbox extends Component {
 		this.#more.toggleAttribute('data-busy', feed.state === 'more');
 		this.#everything.hidden = !(feed.state === 'ready' && feed.items.some(item => !item.read));
 		if (feed.state === 'more') return;
-		if (feed.state === 'loading') return fill(this.#body, [loading(words.text('loading'))]);
+		// The first read waits as a region's does (0.44.0, D185): the opening and the grace see it; a later read
+		// answers the person's own action (a filter, Try again, Mark all as read) and says so at once
+		if (feed.state === 'loading') return fill(this.#body, [this.#arrived ? loading(words.text('loading')) : waiting({ label: words.text('loading'), frame: false })]);
 		if (feed.state === 'unavailable') return fill(this.#body, [callout({ tone: 'info', title: Cause.text(words, feed.reason), actions: [new RetryAction({ labels: { retry: words.text('retry') }, run: () => this.#retry() }).element] })]);
 		if (feed.state === 'failed') {
 			const retry = new RetryAction({ labels: { retry: words.text('retry') }, run: () => this.#retry() }).element;

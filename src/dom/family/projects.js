@@ -1,4 +1,6 @@
 import { el, content } from '../core/element.js';
+import { glyph } from '../core/icons.js';
+import { AgainLine } from '../again/line.js';
 import { entry } from './menu.js';
 import { ProjectSearch } from './search.js';
 
@@ -29,7 +31,7 @@ export class ProjectList {
 	 * @param {Array<{id: string, name: string, here?: object}>} options.projects
 	 * @param {{id: string, name: string}|null} options.project the project in view
 	 * @param {string} options.product the product's display name
-	 * @param {{text: string, href?: string, action?: {label: string, href?: string, run?: () => void}}|null} options.notice
+	 * @param {{text: string, href?: string, action?: {label: string, href?: string, run?: () => void}, outage?: true|{moments?: object, locale?: string, labels?: object}}|null} options.notice
 	 * @param {import('./places.js').Places} options.places
 	 * @param {import('../core/labels.js').Labels} options.labels
 	 * @param {boolean} [options.stale] the descriptor did not answer: only the project in view, as text
@@ -82,13 +84,25 @@ export class ProjectList {
 		});
 	}
 
-	/** The product's one line at the top of the menu, with its action, or null. */
+	/**
+	 * The product's one line at the top of the menu, with its action, or null. An `outage` (0.44.0, D132) says
+	 * who did not answer: the warning tone with the outage's mark, and under the words when it last tried
+	 * (`AgainLine`'s words for `outage.moments`, from `Again` or React's `useAgain`).
+	 */
 	#notice() {
 		const notice = this.#options.notice;
 		if (!notice?.text) return null;
 		const text = notice.href ? el('a', { href: notice.href }, [content(notice.text)]) : el('span', {}, [content(notice.text)]);
 		const action = notice.action?.label ? ProjectList.#action(notice.action) : null;
-		return el('div', { class: 'bui-navmenu-notice', role: 'note' }, [text, action]);
+		if (!notice.outage) return el('div', { class: 'bui-navmenu-notice', role: 'note' }, [text, action]);
+		const { moments = null, locale = undefined, labels = {} } = notice.outage === true ? {} : notice.outage;
+		const said = moments ? AgainLine.say(moments, { locale, labels }) : '';
+		const line = said ? el('p', { class: 'bui-again', 'data-again': moments.trying ? 'trying' : moments.offline ? 'offline' : 'waiting', text: said }) : null;
+		return el('div', { class: 'bui-navmenu-notice', role: 'note', 'data-tone': 'warning' }, [
+			el('span', { class: 'bui-navmenu-notice-mark', 'aria-hidden': 'true' }, [glyph('globe')]),
+			el('div', { class: 'bui-navmenu-notice-words' }, [text, line]),
+			action
+		]);
 	}
 
 	static #action({ label, href = null, run = null }) {

@@ -70,7 +70,10 @@ export const checks = [
 			await view.page.locator('#inbox', { hasText: copy.partial }).waitFor();
 			const inbox = await view.page.locator('#inbox').textContent();
 			expect(!inbox.includes('1.4.0'), 'hidden product items are not shown');
-			expect(inbox.includes(copy.named) && !inbox.includes('(cdn)'), `the unreachable product is named by its display name: ${inbox.slice(0, 200)}`);
+			expect(inbox.includes(copy.named) && !inbox.includes('(cdn)'), `the unreachable product is named by the catalog of causes: ${inbox.slice(0, 200)}`);
+			// One line per who did not answer (0.44.0, D163), never one sentence listing products
+			const lines = await view.page.locator('#inbox .bui-notify-silent > li').allTextContents();
+			expect(lines.length === 1 && lines[0].startsWith(copy.named), `one line for Beyond CDN: ${JSON.stringify(lines)}`);
 			await bell(view.page).click();
 			await panel(view.page).getByText(copy.partial).waitFor();
 			expect((await panel(view.page).textContent()).includes(copy.named), 'the panel names it too');

@@ -1,6 +1,6 @@
 // The 0.24.0 page of the React consumers (D163): the same Home as the DOM page, drawn with React's
 // Recovery from props, Section's `unavailable` and `updated`. `?whole=1`: nothing on the page could be
-// read, so the notice is its body. window.fixture answers the reads.
+// read, so the notice is its body; `?bare=1`: no Technical details (0.44.0). window.fixture answers the reads.
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
@@ -9,7 +9,7 @@ import { createRoot } from 'react-dom/client';
 import { Page, PageHeader, Section, Recovery, RetryAction, AgainLine, TechnicalDetails, EmptyState, LastUpdate } from '@beyond-js/ui/react';
 import { words as copy, shape } from '../data/recovery.js';
 
-const { language, whole } = shape();
+const { language, whole, bare } = shape();
 const words = copy[language];
 const spanish = language === 'es';
 document.documentElement.lang = language;
@@ -26,7 +26,7 @@ function Home() {
 		read.tries += 1;
 		if (read.answer) setDown(false);
 	};
-	const reads = down ? words.reads.map(([key, title]) => ({ key, title, details: { request: `req_${key}_7Hq2`, time: said, text: words.said }, run })) : [];
+	const reads = down ? words.reads.map(([key, title]) => ({ key, title, details: bare ? null : { request: `req_${key}_7Hq2`, time: said, text: words.said }, run })) : [];
 	return (
 		<Page template="overview" width="fluid" header={<PageHeader title={words.title} facts={words.project} />}>
 			<Recovery title={words.cause} reads={reads} whole={whole} labels={labels} locale={language} />

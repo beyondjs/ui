@@ -78,7 +78,7 @@ export class FamilyBar extends Component {
 	 * @param {{controls: string, expanded: boolean, onchange: (expanded: boolean) => void}} [options.toggle] a sidebar of the product's own
 	 * @param {(item: {href: string, url: string, label: string}, event: MouseEvent) => void} [options.onnavigate] takes over plain clicks on same-origin links
 	 * @param {string[]} [options.advisory] reasons whose entries stay links when they have an address
-	 * @param {{text: string, href?: string, action?: {label: string, href?: string, run?: () => void}}|null} [options.notice] one line at the top of the project menu
+	 * @param {{text: string, href?: string, action?: {label: string, href?: string, run?: () => void}, outage?: true|{moments?: object, locale?: string, labels?: object}}|null} [options.notice] one line at the top of the project menu; `outage` says an outage (0.44.0)
 	 * @param {string[]} [options.transient] the product's own dialog markers, left out of the address Accounts returns to
 	 * @param {boolean} [options.projects] whether the product has projects (0.15.0); false shows no project crumb or chooser
 	 * @param {number} [options.bound] milliseconds a missing descriptor is drawn as loading before it is drawn as unavailable (0.15.0)

@@ -22,7 +22,8 @@ const { useId, useMemo, useState } = React;
  * or an inline function) never draws the bar again.
  * `onNavigate(item, event)` takes over plain clicks on the bar's same-origin links. `notice` is
  * applied when its text, address or action label change, and its `action.onSelect` is called with
- * the latest props. Since 0.17.1 `brand`, `account.label`, the sign-out's form, the account entries and
+ * the latest props; since 0.44.0 its `outage` (`true`, or `{ moments, locale, labels }` with `useAgain`'s moments) is applied
+ * when the moments `AgainLine` reads change. Since 0.17.1 `brand`, `account.label`, the sign-out's form, the account entries and
  * `account.preferences` are applied to the bar in place, keeping an open menu, and equal values change
  * nothing; a change of `product`, `products`, `labels` (memoize it), `advisory`, `transient`, `projects`,
  * `bound` or `toggle` creates a new bar.
@@ -68,7 +69,7 @@ export function FamilyBar({ product, brand, descriptor = null, fallback = null, 
 	}, [projects, bound, product, JSON.stringify(products), JSON.stringify(advisory), JSON.stringify(transient), labels, Boolean(toggle), toggle?.controls, Boolean(onNavigate)]);
 	useSync(bar, current => (current.brand = home), [home]);
 	useSync(bar, current => (current.account = options), [options]);
-	useSync(bar, current => (current.notice = relay(notice, latest)), [notice?.text, notice?.href, notice?.action?.label, notice?.action?.href]);
+	useSync(bar, current => (current.notice = relay(notice, latest)), [notice?.text, notice?.href, notice?.action?.label, notice?.action?.href, JSON.stringify(outage(notice))]);
 	useSync(bar, current => (current.descriptor = descriptor), [JSON.stringify(descriptor)]);
 	useSync(bar, current => (current.fallback = fallback ?? {}), [JSON.stringify(fallback)]);
 	useSync(bar, current => {
@@ -115,7 +116,17 @@ function leaving(signout, latest) {
 function relay(notice, latest) {
 	if (!notice?.text) return null;
 	const action = notice.action?.label ? { label: notice.action.label, href: notice.action.href ?? null, run: notice.action.href ? null : () => latest.current.notice?.action?.onSelect?.() } : null;
-	return { text: notice.text, href: notice.href ?? null, action };
+	const said = outage(notice);
+	return { text: notice.text, href: notice.href ?? null, action, ...(said ? { outage: said } : {}) };
+}
+
+/** The notice's outage (0.44.0) as the DOM notice takes it: only the moments `AgainLine` reads, so a new schedule object redraws nothing. */
+function outage(notice) {
+	const given = notice?.outage;
+	if (!given) return null;
+	if (given === true) return true;
+	const { active = false, trying = false, last = null, offline = false } = given.moments ?? {};
+	return { moments: given.moments ? { active, trying, last, offline } : null, locale: given.locale, labels: given.labels ?? {} };
 }
 
 /**

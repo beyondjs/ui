@@ -107,7 +107,7 @@ test('the panel states failure with retry, and partial results name the unreacha
 	notices.missing = ['cdn'];
 	entry.panel.querySelector('.bui-callout button').click();
 	await page.until(() => entry.panel.querySelector('.bui-notice'));
-	assert.match(entry.panel.textContent, /No response from cdn/);
+	assert.match(entry.panel.textContent, /Beyond CDN did not answer/);
 	assert.equal(titles(entry.panel).some(title => title.includes('Release 1.4.0')), false);
 });
 
