@@ -5,27 +5,17 @@ import { PagePanel } from '../dom/page/panel.js';
 import { Primaries } from '../dom/core/primaries.js';
 import { Hierarchy } from '../dom/core/hierarchy.js';
 import { Ellipses } from '../dom/core/ellipses.js';
-import { Focus } from '../dom/core/focusing.js';
 import { PageDock } from '../dom/page/dock.js';
 import { Arrival as Line } from '../dom/page/arrival.js';
 import { Tabs as Row } from '../dom/page/tabs.js';
-import { PageHeader as Heading } from '../dom/page/header.js';
-import { Labels } from '../dom/core/labels.js';
-import { Waiting } from './simple.js';
-import { EmptyState } from './patterns.js';
-import { LastUpdate } from './again.js';
-import { PageCompact } from '../dom/page/compact.js';
-import { Cut, NameTip } from '../dom/core/cut.js';
 import { Mark } from './simple.js';
-import { h, living, useInstance, useLatest, useSync } from './hooks.js';
+import { h, assign, living, useInstance, useLatest, useSync } from './hooks.js';
 
-const { createContext, useContext, useId, useLayoutEffect, useRef, useState, Fragment, isValidElement } = React;
-/** Whether a lead says something (0.41.0), by the DOM header's rule: a node, a number or words, inside lists and fragments. */
-const told = node => {
-	if (Array.isArray(node)) return node.some(told);
-	if (isValidElement(node) && node.type === Fragment) return told(node.props.children);
-	return node !== null && node !== undefined && typeof node !== 'boolean' && node !== '';
-};
+const { createContext, useContext, useLayoutEffect, useRef, useState } = React;
+// The header and the section live in their own modules (0.44.0); this one still gives every page name
+export { PageHeader, Reserved } from './header.js';
+export { Section, SectionPart } from './section.js';
+
 const Panel = createContext(null);
 
 /**
@@ -90,12 +80,6 @@ export function Page({ template = 'detail', width = null, arrival = null, header
 		const watched = new Ellipses({ root: frame.current });
 		return () => watched.destroy();
 	}, []);
-	// Focus says what the keys do there, followed over the page's document in a development build (0.44.0, D187)
-	useLayoutEffect(() => {
-		if (!Focus.enabled || !frame.current) return undefined;
-		const watched = new Focus({ root: frame.current.ownerDocument });
-		return () => watched.destroy();
-	}, []);
 	useLayoutEffect(() => {
 		if (!docking) return undefined;
 		const watched = new PageDock({ element: holder.current, end: end.current });
@@ -127,92 +111,13 @@ export function PanelToggle({ label, variant = 'quiet', glyph = null }) {
 	return h('button', { ref: button, type: 'button', className: `bui-button bui-button-${variant}` }, glyph ? h(Mark, { name: glyph }) : null, h('span', null, label));
 }
 
-/** Gives a ref (an object or a function) its value. */
-function assign(ref, value) {
-	if (typeof ref === 'function') ref(value);
-	else if (ref) ref.current = value;
-}
-
-/**
- * The page's one header: `crumbs` (`{ label, href? }`, the levels above, where the object lives), the
- * H1 `title`, its `kind` beside it (words or one control, 0.19.1), one `status`, a `facts` line of the
- * object's properties, the page's `lead` sentence at the reading measure (0.41.0, D191), the
- * title line's `actions` and the `tabs`. `headingRef` reaches the H1
- * for focus after a navigation. `compact` (`true` or `{ actions }`, 0.11.0) adds the sticky line that
- * shows the title and the status once the title has scrolled out, placed right before the header;
- * `subject` (`{ text, href }`, 0.29.0, D181) is what that line names in place of the title, such as the
- * message of the turn being read.
- */
-export function PageHeader({ title, crumbs = [], kind = null, status = null, facts = null, lead = null, actions = null, tabs = null, headingRef = null, labels = {}, compact = null, subject = null }) {
-	const id = `bui-page-title-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
-	const levels = (crumbs ?? []).filter(Boolean);
-	const bar = useRef(null);
-	const line = useRef(null);
-	const named = useRef(null);
-	useLayoutEffect(() => {
-		if (!compact || !bar.current || !line.current) return undefined;
-		const watch = new PageCompact({ header: line.current, bar: bar.current });
-		const tip = new NameTip(named.current, { text: () => named.current?.textContent ?? '', cut: () => Cut.text(named.current) });
-		return () => {
-			watch.destroy();
-			tip.destroy();
-		};
-	}, [Boolean(compact)]);
-	const tools = compact?.actions ?? null;
-	// The part in view, said in place of the title (0.29.0, D181): as written, without empty lines
-	const part = typeof subject?.text === 'string' ? subject.text.trim().replace(/[ \t]*\n\s*/g, '\n') : '';
-	const held = compact
-		? h(
-				'div',
-				{ ref: bar, className: 'bui-page-compact', 'data-subject': part ? '' : undefined },
-				h(
-					'div',
-					{ className: 'bui-page-compact-line' },
-					h('div', { className: 'bui-page-compact-text', 'aria-hidden': 'true' }, h('a', { className: 'bui-page-compact-subject', tabIndex: -1, href: (part && subject.href) || undefined, hidden: !part }, part), h('span', { ref: named, className: 'bui-page-compact-title', hidden: Boolean(part) }, title), h('span', { className: 'bui-page-compact-status' }, status)),
-					h('div', { className: 'bui-page-compact-actions', hidden: !tools }, tools)
-				)
-			)
-		: null;
-	const header = h(
-		'header',
-		{ className: 'bui-page-header' },
-		levels.length
-			? h('nav', { className: 'bui-crumbs', 'aria-label': new Labels(Heading.labels, labels).text('crumbs') }, h('ol', null, levels.map((level, index) => h('li', { key: index }, level.href ? h('a', { href: level.href }, level.label) : h('span', null, level.label)))))
-			: null,
-		h('div', { ref: line, className: 'bui-page-title' }, h('h1', { id, className: 'bui-page-heading', tabIndex: -1, ref: headingRef }, title), kind ? h('span', { className: 'bui-page-kind' }, typeof kind === 'string' ? h('span', { className: 'bui-page-tag' }, kind) : kind) : null, status ? h('span', { className: 'bui-page-status' }, status) : null, actions ? h('div', { className: 'bui-page-actions' }, actions) : null),
-		facts ? h('p', { className: 'bui-page-facts' }, facts) : null,
-		told(lead) ? h('p', { className: 'bui-page-lead' }, lead) : null,
-		tabs ? h('div', { className: 'bui-page-tabs' }, tabs) : null
-	);
-	return held ? h(React.Fragment, null, held, header) : header;
-}
-
-/**
- * A flat section: `title`, one `description` line, its `actions` and its content; `waiting` (true or a
- * shape, 0.23.0) holds its body in a `Waiting` while it reads. Since 0.24.0 (D163) `unavailable` (true or
- * `EmptyState`'s props) says in place that its read did not answer, and `updated` (a time, or `{ time,
- * locale, labels }`) says when the content it keeps from an earlier read was read.
- */
-export function Section({ title, description = null, actions = null, level = 2, raised = false, waiting = null, unavailable = null, updated = null, children }) {
-	const id = `bui-section-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
-	const kept = updated === null || updated === undefined ? null : typeof updated === 'object' && !(updated instanceof Date) ? updated : { time: updated };
-	const body = unavailable ? h(EmptyState, { ...(unavailable === true ? {} : unavailable), kind: 'outage' }) : waiting ? h(Waiting, waiting === true ? {} : waiting) : children;
-	return h(
-		'section',
-		{ className: 'bui-section', 'aria-labelledby': id, 'data-raised': raised ? '' : undefined, 'aria-busy': waiting && !unavailable ? 'true' : undefined },
-		h('div', { className: 'bui-section-head' }, h(level === 3 ? 'h3' : 'h2', { id, className: 'bui-section-title' }, title), actions ? h('div', { className: 'bui-section-actions' }, actions) : null),
-		description ? h('p', { className: 'bui-section-description' }, description) : null,
-		kept ? h(LastUpdate, kept) : null,
-		h('div', { className: 'bui-section-body' }, body)
-	);
-}
-
 /**
  * The arrival line (D54), driven by the DOM `Arrival` class: "Opened from {product} · Back to
  * {product}". `onDismiss` offers Dismiss; `onNavigate(item, event)` takes over a plain click on a
- * same-origin way back. Both are called with the latest props.
+ * same-origin way back. Both are called with the latest props. Since 0.44.0 (D185) `href={null}` holds
+ * the line's place, unseen and inert, until the way back is known.
  */
-export function Arrival({ product, href, onDismiss = null, onNavigate = null, labels }) {
+export function Arrival({ product, href = null, onDismiss = null, onNavigate = null, labels }) {
 	const latest = useLatest({ onDismiss, onNavigate });
 	const [host] = useInstance(
 		() =>
@@ -261,5 +166,4 @@ export function ListDetail({ list, detail = null, label = null, back = null }) {
 }
 
 // The copy in English and Spanish, as on the DOM classes (0.7.2).
-PageHeader.labels = Heading.labels;
 Tabs.labels = Row.labels;

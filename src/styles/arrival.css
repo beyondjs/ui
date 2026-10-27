@@ -31,3 +31,7 @@
 	margin-block: -4px;
 	margin-block: min(-1px, calc((1lh - 26px) / 2));
 }
+/* A line whose way back is not known yet holds its place, unseen and inert (0.44.0, D185). */
+.bui-arrival[data-held] {
+	visibility: hidden;
+}

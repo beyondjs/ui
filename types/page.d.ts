@@ -122,8 +122,8 @@ export interface PageCrumb {
 }
 
 export interface PageHeaderOptions {
-	/** What is in view: the resource's name, never the organization when a project is in view. */
-	title: string | Node;
+	/** What is in view: the resource's name, never the organization when a project is in view; null while `waiting` (0.44.0). */
+	title: string | Node | null;
 	/** The levels above, where the object lives; none, or a single section root, shows no breadcrumb. */
 	crumbs?: Array<PageCrumb | null | false>;
 	/** The object's kind or variant beside the H1: words drawn as a quiet tag, or one control that chooses among its siblings (0.19.1, D160). */
@@ -138,9 +138,11 @@ export interface PageHeaderOptions {
 	actions?: Array<Node | { element: Node } | null>;
 	/** The page's `Tabs`. */
 	tabs?: Part;
-	labels?: { crumbs?: string };
+	labels?: { crumbs?: string; /** The pending title's name for assistive technology (0.44.0) */ loading?: string };
 	/** The compact line once the title has scrolled out: the title and the status, and the product's own `actions` (0.11.0). */
 	compact?: boolean | { actions?: Array<Node | { element: Node } | null> } | null;
+	/** The title waits for the object's read (`wait()`, 0.44.0, LOAD-01). */
+	waiting?: boolean;
 }
 
 /** A page's one header: crumbs, the H1, one status, facts, a lead, the line's actions and the tabs. */
@@ -150,7 +152,12 @@ export class PageHeader extends Component {
 	constructor(options: PageHeaderOptions);
 	/** The H1, for focus after a navigation. */
 	readonly heading: HTMLHeadingElement;
-	title: string | Node;
+	/** Names the object in view, ending a wait for it; a focus asked for meanwhile lands now. */
+	title: string | Node | null;
+	/** Whether the title waits for the object's read (0.44.0). */
+	readonly waiting: boolean;
+	/** Waits for the object's read (0.44.0, LOAD-01): one placeholder line named "Loading…", busy and out of focus, a focus asked of the H1 meanwhile kept until `title` is set. */
+	wait(): void;
 	crumbs: Array<PageCrumb | null | false>;
 	/** The object's kind or variant beside the H1 (0.19.1). */
 	kind: string | Node | { element: Node } | null;
@@ -161,7 +168,7 @@ export class PageHeader extends Component {
 	set lead(lead: string | Node | Array<string | Node> | null | undefined);
 	actions: Array<Node | { element: Node } | null>;
 	tabs: Part;
-	/** Moves focus to the H1 without scrolling. */
+	/** Moves focus to the H1 without scrolling; while the title waits, once it lands (0.44.0). */
 	focus(): void;
 	/** The compact line's holder, placed right before the header (`Page` does it); null without `compact` (0.11.0). */
 	readonly bar: HTMLElement | null;
@@ -201,7 +208,23 @@ export class Section extends Component {
 	unavailable(options?: SectionOutage): void;
 	/** When the kept content was read, said above it; null while it is current (0.24.0). */
 	updated: SectionUpdate | null;
+	/** A part of the body that waits for its own read while the rest is drawn; place its `element` among `children` (0.44.0, LOAD-01). */
+	part(options?: { waiting?: true | number | WaitingShape | null; children?: Node[] }): SectionPart;
 }
+
+/** One part of a section's body that waits for its own read, the section busy while it waits (0.44.0, LOAD-01). */
+export class SectionPart {
+	readonly element: HTMLElement;
+	/** Whether the part waits for its read. */
+	readonly waiting: boolean;
+	/** Replaces the part's content, ending its wait. */
+	set children(children: Node[]);
+	/** Waits in place until `children` is set. */
+	wait(shape?: number | WaitingShape): void;
+}
+
+/** Holds the place of an action known only after the object's read: laid out where it will be, unseen, inert and hidden from assistive technology (0.44.0, LOAD-01). */
+export function reserved(action: Node | { element: Node }): HTMLElement;
 
 /** What a section whose read did not answer says (0.24.0): `EmptyState`'s title, sentence and words. */
 export interface SectionOutage {
@@ -236,7 +259,11 @@ export interface ArrivalLabels {
 /** The arrival line (D54): "Opened from {product} · Back to {product}". */
 export class Arrival extends Component {
 	static readonly labels: { readonly en: ArrivalLabels; readonly es: ArrivalLabels };
-	constructor(options: { product: string; href: string; ondismiss?: (() => void) | null; onnavigate?: ((item: { href: string; url: string }, event: MouseEvent) => void) | null; labels?: Partial<ArrivalLabels> });
+	/** `href: null` holds the line's place, unseen and inert, until the way back is known (0.44.0, D185). */
+	constructor(options: { product: string; href: string | null; ondismiss?: (() => void) | null; onnavigate?: ((item: { href: string; url: string }, event: MouseEvent) => void) | null; labels?: Partial<ArrivalLabels> });
+	/** The way back; null while it is not known and the line holds its place unseen (0.44.0). */
+	get href(): string | null;
+	set href(href: string | null);
 }
 
 export interface FamilyPreferences {

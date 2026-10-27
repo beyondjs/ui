@@ -4,6 +4,7 @@ import { Ids } from '../core/ids.js';
 import { waiting } from '../feedback.js';
 import { EmptyState } from '../checklist/empty.js';
 import { LastUpdate } from '../again/update.js';
+import { SectionPart } from './part.js';
 
 /**
  * A flat section of a page (LR-06, D10): a heading, one optional description at the reading width,
@@ -15,11 +16,16 @@ import { LastUpdate } from '../again/update.js';
  * Since 0.24.0 (D163) a section whose read did not answer says so in its own place (`unavailable`), and a
  * section that keeps an earlier read's content says when that was (`updated`); who did not answer and
  * Try again belong to the page's one `Recovery`.
+ *
+ * Since 0.44.0 (LOAD-01) one part of the body may wait while the rest is drawn (`part()`), such as a list
+ * beside an action of the body; the section is busy while its own wait or one of its parts' runs.
  */
 export class Section extends Component {
 	#element;
 	#body;
 	#update = null;
+	/** Whether the whole body waits (`wait()`) */
+	#own = false;
 
 	/**
 	 * @param {object} options
@@ -56,8 +62,9 @@ export class Section extends Component {
 
 	/** Replaces the section's content, ending a wait. */
 	set children(children) {
-		this.#element.removeAttribute('aria-busy');
+		this.#own = false;
 		fill(this.#body, children);
+		this.#mark();
 	}
 
 	/**
@@ -65,8 +72,19 @@ export class Section extends Component {
 	 * the body holds `waiting(shape)` and the section is `aria-busy` until `children` is set.
 	 */
 	wait(shape = {}) {
-		this.#element.setAttribute('aria-busy', 'true');
+		this.#own = true;
 		fill(this.#body, [waiting(shape)]);
+		this.#mark();
+	}
+
+	/**
+	 * A part of the body that waits for its own read while the rest is drawn (0.44.0, LOAD-01): place its
+	 * `element` among the section's `children`; the section is busy while it waits, until its `children` is set.
+	 * @param {{waiting?: object|number|boolean|null, children?: Node[]}} [options]
+	 * @returns {SectionPart}
+	 */
+	part({ waiting: shape = null, children = [] } = {}) {
+		return new SectionPart({ waiting: shape, children, onchange: () => this.#mark() });
 	}
 
 	/**
@@ -74,8 +92,9 @@ export class Section extends Component {
 	 * the body holds `EmptyState`'s `outage` ("Not available right now"), with no action of its own.
 	 */
 	unavailable(options = {}) {
-		this.#element.removeAttribute('aria-busy');
+		this.#own = false;
 		fill(this.#body, [new EmptyState({ ...options, kind: 'outage' }).element]);
+		this.#mark();
 	}
 
 	/** When the kept content was read, said above it (`LastUpdate`), or null while it is current. */
@@ -95,5 +114,12 @@ export class Section extends Component {
 			this.#update = new LastUpdate({ time: given.time ?? null, locale: given.locale, labels: given.labels });
 			this.#body.before(this.#update.element);
 		}
+	}
+
+	/** Busy while the body waits, or one of its own parts placed in it does (not a nested section's). */
+	#mark() {
+		const busy = this.#own || [...this.#body.querySelectorAll('.bui-section-part[data-waiting]')].some(part => part.closest('.bui-section') === this.#element);
+		if (busy) this.#element.setAttribute('aria-busy', 'true');
+		else this.#element.removeAttribute('aria-busy');
 	}
 }
