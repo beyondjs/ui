@@ -160,7 +160,8 @@ test('the product\'s notice: one line at the top of the project menu, its action
 });
 
 test('a notice that says an outage: the warning tone, the outage\'s mark and when it last tried (0.44.0, D132)', () => {
-	const last = Date.parse('2026-10-27T12:04:00');
+	// Today at 12:04, so the line says the time alone whatever day the suite runs
+	const last = new Date().setHours(12, 4, 0, 0);
 	const notice = { text: 'Beyond Projects did not answer. Only this project is shown.', action: { label: 'Try again', run: () => {} }, outage: { moments: { active: true, trying: false, last, offline: false }, locale: 'en' } };
 	const bar = make({ descriptor: { unavailable: true }, fallback: { organization: 'Northwind', project: 'Storefront' }, notice });
 	const line = () => menu(bar, 'project').querySelector('.bui-navmenu-notice');

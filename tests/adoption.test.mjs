@@ -37,7 +37,7 @@ test('a narrow DataTable leaves out empty cells and their separators', () => {
 	const cells = [...table.element.querySelectorAll('tbody td')];
 	assert.deepEqual(cells.map(cell => cell.hasAttribute('data-empty')), [true, true, false]);
 	assert.match(sheet, /\.bui-data td\[data-empty\]\s*\{[^}]*display:\s*none/);
-	assert.match(sheet, /\.bui-data td:not\(\[data-empty\]\) ~ td:not\(\[data-empty\]\)::before\s*\{[^}]*content:\s*'· '/);
+	assert.match(sheet, /\.bui-data td:not\(\[data-empty\], \.bui-data-menu\) ~ td:not\(\[data-empty\]\)::before\s*\{[^}]*content:\s*'· '/);
 	assert.doesNotMatch(sheet, /\.bui-data td:not\(:last-child\)::after/);
 	table.destroy();
 });

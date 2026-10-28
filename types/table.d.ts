@@ -23,7 +23,10 @@ export interface DataTableColumn<Row = any> {
 	primary?: boolean;
 	/** Content already names its meaning: omit the repeated narrow visual label. */
 	summary?: boolean;
-	/** One overflow menu; beside the name when the table stacks. */
+	/**
+	 * The column holds the product's own overflow menu (0.43.0): drawn as the table's menu column (0.44.0), its header
+	 * kept, revealed as a list row's menu and beside the name when the table stacks. Prefer the table's `menu(row)`.
+	 */
 	menu?: boolean;
 }
 
@@ -62,7 +65,10 @@ export interface DataTableOptions<Row = any> {
 	 * line above its rows, its first capitals at the box's inset (0.41.0, D184).
 	 */
 	framed?: boolean;
-	/** A row's actions, in a menu column of its own that shows where the pointer or focus is, always on touch (0.44.0, L6). */
+	/**
+	 * A row's actions, in a menu column of its own that shows where the pointer or focus is, always on touch, and beside
+	 * the name when the table stacks (0.44.0, L6). Give this or a column with `menu: true`, not both.
+	 */
 	menu?: ((row: Row) => Array<MenuItem | null | false>) | null;
 	labels?: Copy;
 }

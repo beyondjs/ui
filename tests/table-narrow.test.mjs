@@ -40,8 +40,8 @@ const rule = selector => {
 };
 const hidden = '.bui-data td[data-empty]';
 const labelled = ".bui-data td[data-label]:not([data-label=''], [data-summary])::before";
-const parted = '.bui-data td:not([data-empty]) ~ td:not([data-empty])::before';
-const both = ".bui-data td:not([data-empty]) ~ td[data-label]:not([data-empty], [data-label=''], [data-summary])::before";
+const parted = '.bui-data td:not([data-empty], .bui-data-menu) ~ td:not([data-empty])::before';
+const both = ".bui-data td:not([data-empty], .bui-data-menu) ~ td[data-label]:not([data-empty], [data-label=''], [data-summary])::before";
 assert.match(rule(hidden), /display:\s*none/);
 assert.match(rule(labelled), /content:\s*attr\(data-label\) ': '/);
 assert.match(rule(parted), /content:\s*'· '/);

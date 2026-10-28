@@ -162,3 +162,16 @@ test('an overflow-menu column keeps its column name and marks its row for a narr
 	assert.ok(row.querySelector('td[data-menu] button').getAttribute('aria-label').includes('web'));
 	table.destroy();
 });
+
+test('a product\'s menu column (0.43.0) and the table\'s menu(row) (0.44.0) draw one menu column', () => {
+	const own = make({ columns: [{ key: 'name', label: 'Name', primary: true }, { key: 'menu', label: 'Actions', menu: true, render: row => ui.el('button', { text: `More for ${row.name}` }) }, { key: 'size', label: 'Size' }] });
+	const cell = own.element.querySelector('tbody tr td[data-menu]');
+	assert.ok(cell.classList.contains('bui-data-menu'), 'a product\'s column is drawn as the menu column');
+	assert.equal(own.element.querySelectorAll('thead th').length, 3, 'its header stays the product\'s, with no column added');
+	assert.equal(own.element.querySelector('tbody td:last-child').classList.contains('bui-data-menu'), false, 'only the marked column');
+	own.destroy();
+	const drawn = make({ menu: () => [{ label: 'Rename…', run: () => {} }] });
+	const menu = drawn.element.querySelector('tbody tr[data-menu] > td.bui-data-menu');
+	assert.ok(menu.hasAttribute('data-menu'), 'the table\'s own menu cell carries the same mark');
+	drawn.destroy();
+});

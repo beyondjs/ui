@@ -5,13 +5,14 @@ import { expect } from '../support/browser.mjs';
  * table's content edge. With a fine pointer a row's menu is seen only where the pointer rests or the focus is, and
  * the keyboard opens it and chooses; on a touch screen it is always seen and a tap opens it. On a narrow table it
  * stays beside the row's name, centred on the name's line, inside the row, the values below; a row with no actions
- * draws none.
+ * draws none. With `?menu=column` the menus come from a column of the product's own (0.43.0's `menu: true`), which is
+ * drawn as the same one menu column, its header's name kept in sight on a wide table.
  */
 const menus = page =>
 	page.evaluate(() => {
 		const rows = [...document.querySelectorAll('.bui-data-table tbody tr')];
 		return rows.map(row => {
-			const holder = row.querySelector('.bui-data-menu > .bui-menu-holder');
+			const holder = row.querySelector('.bui-data-menu .bui-menu-holder');
 			const name = row.querySelector('th').getBoundingClientRect();
 			const box = row.getBoundingClientRect();
 			const button = holder?.querySelector('.bui-menu-button').getBoundingClientRect() ?? null;
@@ -29,14 +30,18 @@ const edge = page =>
 
 export const checks = [
 	{
-		name: 'table: a DataTable\'s row menus in a column of their own, seen where the pointer or the focus is, opened by keyboard, always seen and tapped on touch, beside the name on a narrow table (0.44.0, L6)',
+		name: 'table: a DataTable\'s row menus in a column of their own, seen where the pointer or the focus is, opened by keyboard, always seen and tapped on touch, beside the name on a narrow table, from menu(row) or a column of the product\'s own (0.43.0, 0.44.0, L6)',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const spanish = consumer.name !== 'dom';
 			const more = spanish ? 'Más acciones de web' : 'More actions for web';
-			for (const width of [1440, 390]) {
-				const at = `${browser.engine} ${width}px`;
-				const { page } = await browser.open(consumer, { file: 'audit.html', viewport: { width, height: 900 } });
+			for (const query of ['', '?menu=column']) for (const width of [1440, 390]) {
+				const at = `${browser.engine} ${width}px${query}`;
+				const { page } = await browser.open(consumer, { file: 'audit.html', query, viewport: { width, height: 900 } });
+				if (query && width === 1440) {
+					const head = await page.locator('.bui-data-table thead th').last().evaluate(cell => ({ text: cell.textContent, width: cell.getBoundingClientRect().width }));
+					expect(head.text === (spanish ? 'Acciones' : 'Actions') && head.width > 0, `${at}: a product's menu column keeps its header in sight: ${JSON.stringify(head)}`);
+				}
 				await page.mouse.move(0, 0);
 				let found = await menus(page);
 				const right = await edge(page);
@@ -69,15 +74,17 @@ export const checks = [
 				expect(log === 'delete:m0', `${at}: the keyboard chose the second action: ${log}`);
 			}
 			// A touch screen always shows the menus, and a tap opens one
-			const { page } = await browser.open(consumer, { file: 'audit.html', viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-			const found = await menus(page);
-			expect(found.filter(row => row.label).every(row => row.opacity === 1), `${browser.engine} touch: every menu is seen: ${JSON.stringify(found.map(row => row.opacity))}`);
-			await page.locator('.bui-data-table').getByRole('button', { name: more, exact: true }).tap();
-			const item = page.locator('.bui-menu:not([hidden]) [role="menuitem"]').first();
-			await item.waitFor({ state: 'visible' });
-			await item.tap();
-			const log = await page.evaluate(() => window.fixture.log.at(-1));
-			expect(log === 'rename:m0', `${browser.engine} touch: a tap chose the first action: ${log}`);
+			for (const query of ['', '?menu=column']) {
+				const { page } = await browser.open(consumer, { file: 'audit.html', query, viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+				const found = await menus(page);
+				expect(found.filter(row => row.label).every(row => row.opacity === 1), `${browser.engine} touch${query}: every menu is seen: ${JSON.stringify(found.map(row => row.opacity))}`);
+				await page.locator('.bui-data-table').getByRole('button', { name: more, exact: true }).tap();
+				const item = page.locator('.bui-menu:not([hidden]) [role="menuitem"]').first();
+				await item.waitFor({ state: 'visible' });
+				await item.tap();
+				const log = await page.evaluate(() => window.fixture.log.at(-1));
+				expect(log === 'rename:m0', `${browser.engine} touch${query}: a tap chose the first action: ${log}`);
+			}
 		}
 	}
 ];

@@ -75,15 +75,16 @@
 .bui-data-order {
 	display: none;
 }
-/* A row's menu (0.44.0, L6): a column of its own at the row's end, as narrow as its button, which keeps the row's
-   height; it shows where the pointer or the focus is (the list rules' reveal) */
+/* A row's menu (L6): a column of its own, as narrow as its button, which keeps the row's height; it shows where the
+   pointer or the focus is (the list rules' reveal). The table draws it from `menu(row)` (0.44.0), or a product's own
+   column marked `menu: true` (0.43.0) is drawn as it: one column, one geometry (`.bui-data-menu`, `data-menu`) */
 .bui-data .bui-data-menu {
 	width: 1%;
 	padding-block: 0;
 	text-align: end;
 	white-space: nowrap;
 }
-.bui-data td.bui-data-menu > .bui-menu-holder {
+.bui-data td.bui-data-menu .bui-menu-holder {
 	vertical-align: middle;
 }
 /* A narrow region: the name, then labeled values wrapping together in one muted line. */
@@ -142,10 +143,11 @@
 	.bui-data td[data-label]:not([data-label=''], [data-summary])::before {
 		content: attr(data-label) ': ';
 	}
-	.bui-data td:not([data-empty]) ~ td:not([data-empty])::before {
+	/* The menu cell, drawn first on the narrow line, starts no separator */
+	.bui-data td:not([data-empty], .bui-data-menu) ~ td:not([data-empty])::before {
 		content: '· ';
 	}
-	.bui-data td:not([data-empty]) ~ td[data-label]:not([data-empty], [data-label=''], [data-summary])::before {
+	.bui-data td:not([data-empty], .bui-data-menu) ~ td[data-label]:not([data-empty], [data-label=''], [data-summary])::before {
 		content: '· ' attr(data-label) ': ';
 	}
 	.bui-data-group {
@@ -158,8 +160,9 @@
 		gap: var(--space-1) var(--space-2);
 		min-width: 0;
 	}
-	/* A row's menu stays beside its name (0.44.0, L6): the name and the menu share the first line, centred on it, and
-	   the values wrap below them (a break after the menu); a row with no actions leaves its name the whole line */
+	/* A row's menu stays beside its name (L6): the name and the menu share the first line, centred on it, and the
+	   values wrap below them (a break after the menu), wherever the menu's column stands; no label is drawn before it,
+	   a product's column keeping its name in the header; a row with no actions leaves its name the whole line */
 	.bui-data tr:has(> .bui-data-menu) > th[scope='row'] {
 		flex: 1 1 0;
 		order: -2;
@@ -182,11 +185,11 @@
 	.bui-data td.bui-data-menu[data-empty] {
 		display: none;
 	}
-	.bui-data tbody > tr > td.bui-data-menu:not([data-label])::before {
+	.bui-data tbody > tr[data-menu] > td.bui-data-menu[data-menu]::before {
 		content: none;
 	}
 	/* Its button stands in the row's padding, never past it: centred on the name's line */
-	.bui-data td.bui-data-menu > .bui-menu-holder {
+	.bui-data td.bui-data-menu .bui-menu-holder {
 		margin-block: max(calc((1lh - var(--bui-target)) / 2), calc(-1 * var(--space-2)));
 	}
 }
@@ -223,23 +226,5 @@
 			padding-top: 0;
 			margin-block-start: calc((1cap - 1lh) / 2);
 		}
-	}
-}
-
-/* A comparison row's overflow menu is an action on its object, not another labeled value. The
-   opt-in column keeps its desktop header and accessible menu name; on a phone it sits beside the name. */
-@container bui-data (max-width: 36rem) {
-	.bui-data tr[data-menu] {
-		position: relative;
-		min-height: calc(var(--bui-target) + 2 * var(--space-2));
-		padding-inline-end: calc(var(--bui-target) + var(--space-3) + var(--space-2));
-	}
-	.bui-data tr > td[data-menu] {
-		position: absolute;
-		inset: var(--space-2) var(--space-3) auto auto;
-		max-width: var(--bui-target);
-	}
-	.bui-data tr[data-menu] > td[data-menu][data-label]::before {
-		content: none;
 	}
 }

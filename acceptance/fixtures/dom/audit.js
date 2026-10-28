@@ -7,7 +7,7 @@ import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { FamilyBar, Sidebar, ActionMenu, ChoiceChip, Composer, Status, ListRow, DataTable, Tabs, CommandCard, Collection, Recency, el } from '@beyond-js/ui';
 import { chosen, fallback, product } from '../data/family.js';
-import { machines, options, tones, command } from '../data/audit.js';
+import { machines, options, tones, command, shape } from '../data/audit.js';
 
 const log = [];
 const root = document.getElementById('root');
@@ -27,7 +27,9 @@ const list = el('ul', { class: 'bui-rows', id: 'rows' }, machines.map(machine =>
 main.append(list);
 // A row's menu (0.44.0): a busy machine has no action, so its row draws an empty cell
 const actions = machine => (machine.state === 'busy' ? [] : [{ label: 'Rename…', run: () => log.push(`rename:${machine.id}`) }, { label: 'Delete…', tone: 'danger', run: () => log.push(`delete:${machine.id}`) }]);
-const table = new DataTable({ label: 'Machines', columns: [{ key: 'name', label: 'Name', sort: true }, { key: 'size', label: 'Size' }, { key: 'conversations', label: 'Conversations', align: 'end', sort: true }, { key: 'id', label: 'Identifier', mono: true }], rows: machines, onchange: state => log.push(`table:${JSON.stringify(state)}`), menu: actions }).mount(main);
+// or, with `?menu=column`, a column of the product's own menus (0.43.0's `menu: true`), drawn as the same column
+const own = { key: 'actions', label: 'Actions', menu: true, align: 'end', value: () => '', render: machine => (actions(machine).length ? new ActionMenu({ label: null, name: `More actions for ${machine.name}`, items: actions(machine) }).element : '') };
+const table = new DataTable({ label: 'Machines', columns: [{ key: 'name', label: 'Name', sort: true }, { key: 'size', label: 'Size' }, { key: 'conversations', label: 'Conversations', align: 'end', sort: true }, { key: 'id', label: 'Identifier', mono: true }, ...(shape.column ? [own] : [])], rows: machines, onchange: state => log.push(`table:${JSON.stringify(state)}`), menu: shape.column ? null : actions }).mount(main);
 const hour = 3600000;
 const recent = machines.map((machine, index) => ({ ...machine, at: Date.now() - [1, 30, 200][index % 3] * hour })).sort((a, b) => b.at - a.at);
 const grouped = new Collection({ label: 'Recent machines', presentation: 'list', columns: [{ key: 'name', label: 'Name', primary: true }], source: Collection.local(recent), link: row => `#/machines/${row.id}`, row: row => ({ lead: { state: row.state }, meta: [row.size, '3 d'], menu: [{ label: 'Rename' }] }), group: new Recency().group(row => row.at), tools: 'external' }).mount(main);

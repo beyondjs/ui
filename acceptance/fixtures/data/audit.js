@@ -9,3 +9,7 @@ export const options = [
 export const tones = ['ready', 'busy', 'attention', 'failed', 'asleep', 'unknown'];
 
 export const command = 'npm run test -- --filter "addresses in the address bar" && git status --short';
+
+// `?menu=column`: the table's rows take their menus from a column of the product's own (0.43.0's `menu: true`)
+// instead of the table's `menu(row)`, drawn as the same one menu column (0.44.0)
+export const shape = { column: new URLSearchParams(location.search).get('menu') === 'column' };

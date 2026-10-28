@@ -157,7 +157,7 @@ test('the built stylesheet: the line shows only on the narrow form, a row\'s men
 	assert.match(sheet, /\.bui-data-order \{\s*display: none;/, 'hidden on the wide form');
 	const narrow = sheet.slice(sheet.indexOf('@container bui-data (max-width: 36rem)'));
 	assert.match(narrow, /\.bui-data-order:not\(\[hidden\]\) \{\s*display: flex;/, 'shown on the narrow form');
-	assert.match(sheet, /\.bui-row:not\(:hover, :focus-within\) > \.bui-row-end > \.bui-menu-holder:not\(:has\(\[aria-expanded='true'\]\)\),\s*\.bui-data tbody > tr:not\(:hover, :focus-within\) > \.bui-data-menu > \.bui-menu-holder:not\(:has\(\[aria-expanded='true'\]\)\) \{\s*opacity: 0;/, 'one reveal for a list row\'s menu and a table row\'s');
+	assert.match(sheet, /\.bui-row:not\(:hover, :focus-within\) > \.bui-row-end > \.bui-menu-holder:not\(:has\(\[aria-expanded='true'\]\)\),\s*\.bui-data tbody > tr:not\(:hover, :focus-within\) > \.bui-data-menu \.bui-menu-holder:not\(:has\(\[aria-expanded='true'\]\)\) \{\s*opacity: 0;/, 'one reveal for a list row\'s menu and a table row\'s');
 	assert.match(narrow, /\.bui-data tr:has\(> \.bui-data-menu\) > th\[scope='row'\] \{\s*flex: 1 1 0;\s*order: -2;/, 'the name first, sharing its line');
 	assert.match(narrow, /\.bui-data tr:has\(> \.bui-data-menu\)::after \{\s*content: '';\s*flex-basis: 100%;\s*order: -1;/, 'the values below the name and the menu');
 	assert.match(narrow, /\.bui-data td\.bui-data-menu \{[^}]*order: -1;/, 'the menu beside the name');

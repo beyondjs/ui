@@ -33,7 +33,7 @@ export class DataMenus {
 	/** A row's menu cell, named by the row's primary value. */
 	cell(row, primary) {
 		const items = this.#items(row);
-		if (!items.length) return el('td', { class: 'bui-data-menu', 'data-empty': '' });
+		if (!items.length) return el('td', { class: 'bui-data-menu', 'data-menu': '', 'data-empty': '' });
 		const name = String(DataQuery.value(row, primary));
 		const menu = new ActionMenu({ label: null, name: this.#labels.text('more', { name }), items });
 		this.#made.push(menu);
@@ -42,7 +42,7 @@ export class DataMenus {
 		};
 		menu.element.addEventListener('click', fresh, { capture: true });
 		menu.element.addEventListener('keydown', fresh, { capture: true });
-		return el('td', { class: 'bui-data-menu' }, [menu.element]);
+		return el('td', { class: 'bui-data-menu', 'data-menu': '' }, [menu.element]);
 	}
 
 	/** Destroys the menus of the last drawing. */

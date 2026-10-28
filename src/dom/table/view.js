@@ -72,7 +72,8 @@ export class DataTableView {
 		const value = column.render ? column.render(row) : DataQuery.value(row, column);
 		const opens = primary && (link || onopen);
 		const inner = opens ? el(link ? 'a' : 'button', { class: 'bui-row-link', href: link ? link(row) : null, type: link ? null : 'button', onclick: event => DataTableView.#open(event, row, onopen, Boolean(link)) }, [content(value)]) : content(value);
-		const classes = [column.align === 'end' ? 'bui-numeric' : null, column.mono ? 'bui-mono' : null].filter(Boolean).join(' ') || null;
+		// A column of the product's own overflow menu (0.43.0, `menu: true`) is drawn as the table's menu column (0.44.0)
+		const classes = [column.align === 'end' ? 'bui-numeric' : null, column.mono ? 'bui-mono' : null, !primary && column.menu ? 'bui-data-menu' : null].filter(Boolean).join(' ') || null;
 		// A React cell's holder (`bui-cell`) is filled after the drawing: never taken for empty here, React's
 		// DataTable marks it once it knows what it rendered, by the same rule (`CellContent`, 0.35.0)
 		const empty = !value?.classList?.contains('bui-cell') && CellContent.empty(value);

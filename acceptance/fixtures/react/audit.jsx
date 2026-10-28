@@ -6,13 +6,16 @@ import '@beyond-js/ui/fonts.css';
 import { createRoot } from 'react-dom/client';
 import { FamilyBar, Sidebar, ActionMenu, ChoiceChip, Status, ListRow, DataTable, Tabs, CommandCard } from '@beyond-js/ui/react';
 import { chosen, fallback, product } from '../data/family.js';
-import { machines, options, tones, command } from '../data/audit.js';
+import { machines, options, tones, command, shape } from '../data/audit.js';
 
 const log = [];
 const es = { ListRow: ListRow.labels.es, DataTable: DataTable.labels.es, CommandCard: CommandCard.labels.es };
 
 // A row's menu (0.44.0): a busy machine has no action, so its row draws an empty cell
 const actions = machine => (machine.state === 'busy' ? [] : [{ label: 'Renombrar…', onSelect: () => log.push(`rename:${machine.id}`) }, { label: 'Borrar…', tone: 'danger', onSelect: () => log.push(`delete:${machine.id}`) }]);
+
+// or, with `?menu=column`, a column of the product's own menus (0.43.0's `menu: true`), drawn as the same column
+const own = { key: 'actions', label: 'Acciones', menu: true, align: 'end', value: () => '', render: machine => (actions(machine).length ? <ActionMenu label={null} name={`Más acciones de ${machine.name}`} items={actions(machine)} /> : null) };
 
 function App() {
 	return (
@@ -39,7 +42,7 @@ function App() {
 							<ListRow key={machine.id} title={machine.name} href={`#/machines/${machine.id}`} meta={[machine.size, `${machine.conversations} conversaciones`]} lead={{ state: machine.state }} status={{ state: machine.state }} facts={['3 d']} actions={[{ label: 'Despertar', onSelect: () => log.push(`wake:${machine.id}`) }]} menu={[{ label: 'Borrar…', tone: 'danger' }]} labels={es.ListRow} />
 						))}
 					</ul>
-					<DataTable label="Máquinas" columns={[{ key: 'name', label: 'Nombre', sort: true }, { key: 'size', label: 'Tamaño' }, { key: 'conversations', label: 'Conversaciones', align: 'end', sort: true }, { key: 'id', label: 'Identificador', mono: true }]} rows={machines} onChange={state => log.push(`table:${JSON.stringify(state)}`)} menu={actions} labels={es.DataTable} />
+					<DataTable label="Máquinas" columns={[{ key: 'name', label: 'Nombre', sort: true }, { key: 'size', label: 'Tamaño' }, { key: 'conversations', label: 'Conversaciones', align: 'end', sort: true }, { key: 'id', label: 'Identificador', mono: true }, ...(shape.column ? [own] : [])]} rows={machines} onChange={state => log.push(`table:${JSON.stringify(state)}`)} menu={shape.column ? null : actions} labels={es.DataTable} />
 					<Tabs items={['Resumen', 'Conversaciones', 'Repositorios', 'Motores de IA', 'Acceso', 'Ejecución', 'Costos', 'Ajustes'].map((label, index) => ({ label, href: `#${index}`, current: index === 0 }))} />
 					<CommandCard title="Claude Code pide ejecutar un comando" command={command} scope={{ label: 'Permitir siempre comandos como este' }} onAllow={() => log.push('allow')} onDeny={() => log.push('deny')} labels={es.CommandCard} />
 				</main>

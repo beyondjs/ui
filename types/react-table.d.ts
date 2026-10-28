@@ -28,7 +28,7 @@ export function DataTable<Row = any>(props: {
 	onRetry?: (() => void) | null;
 	/** Drawn in a framed box: its first capitals at the box's inset while it leads it (0.41.0, D184; 0.44.0) */
 	framed?: boolean;
-	/** A row's actions, in a menu column of its own (0.44.0, L6); read again each time a menu opens */
+	/** A row's actions, in a menu column of its own (0.44.0, L6); read again each time a menu opens. This or a column's `menu: true`, not both */
 	menu?: ((row: Row) => Array<(Omit<MenuItem, 'run'> & { onSelect?: (event: MouseEvent) => void }) | null | false>) | null;
 	/** Memoize: a new object creates a new table */
 	labels?: Copy;
