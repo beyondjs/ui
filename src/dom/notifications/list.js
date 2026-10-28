@@ -23,6 +23,7 @@ export class NoticeList {
 	#actions;
 	#grouped;
 	#days;
+	#page;
 	#now;
 
 	/**
@@ -33,15 +34,17 @@ export class NoticeList {
 	 * @param {{open: (item: object) => void, mark: (items: object[], read: boolean) => void}} options.actions
 	 * @param {boolean} [options.grouped] one row per matter
 	 * @param {boolean} [options.days] "Today" and "Earlier" when the rows span both
+	 * @param {boolean} [options.page] full inbox rows with a visible opening action
 	 * @param {() => number} [options.now] the clock the days are told by
 	 */
-	constructor({ labels, age, products = {}, actions, grouped = false, days = false, now = () => Date.now() }) {
+	constructor({ labels, age, products = {}, actions, grouped = false, days = false, page = false, now = () => Date.now() }) {
 		this.#labels = labels;
 		this.#age = age;
 		this.#products = products;
 		this.#actions = actions;
 		this.#grouped = grouped;
 		this.#days = days;
+		this.#page = page;
 		this.#now = now;
 	}
 
@@ -139,13 +142,15 @@ export class NoticeList {
 		const unread = !item.resolved && members.some(member => !member.read || Number(member.updates?.unread) > 0);
 		const product = this.#products[item.product] ?? item.product;
 		const open = el('button', { type: 'button', class: 'bui-notice-open', 'data-control': 'open', onclick: () => this.#actions.open(item, members) }, [
-			content(item.title),
-			unread ? hidden(` (${this.#labels.text('unread')})`) : null
+			el('span', { class: 'bui-notice-title' }, [content(item.title)]),
+			unread ? hidden(` (${this.#labels.text('unread')})`) : null,
+			this.#page ? el('span', { class: 'bui-notice-view', text: this.#labels.text('view') }) : null
 		]);
+		if (this.#page) open.setAttribute('aria-label', `${this.#labels.text('view')}: ${item.title}${unread ? ` (${this.#labels.text('unread')})` : ''}`);
 		const mark = el('button', { type: 'button', class: 'bui-link-button bui-notice-mark', 'data-control': 'mark', onclick: () => this.#actions.mark(members, unread) }, [this.#labels.text(unread ? 'mark' : 'unmark')]);
 		const age = this.#age.of(item.occurred);
 		const when = age ? el('time', { datetime: age.datetime, title: age.title, text: age.label }) : null;
-		return el('li', { class: 'bui-notice', 'data-id': item.id, 'data-read': String(!unread), 'data-resolved': resolved ? '' : null }, [
+		return el('li', { class: `bui-notice${this.#page ? ' bui-notice-page' : ''}`, 'data-id': item.id, 'data-read': String(!unread), 'data-resolved': resolved ? '' : null }, [
 			el('span', { class: 'bui-notice-dot', 'aria-hidden': 'true' }),
 			el('div', { class: 'bui-notice-text' }, [
 				open,

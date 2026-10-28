@@ -167,3 +167,21 @@
 		}
 	}
 }
+
+/* A comparison row's overflow menu is an action on its object, not another labeled value. The
+   opt-in column keeps its desktop header and accessible menu name; on a phone it sits beside the name. */
+@container bui-data (max-width: 36rem) {
+	.bui-data tr[data-menu] {
+		position: relative;
+		min-height: calc(var(--bui-target) + 2 * var(--space-2));
+		padding-inline-end: calc(var(--bui-target) + var(--space-3) + var(--space-2));
+	}
+	.bui-data tr > td[data-menu] {
+		position: absolute;
+		inset: var(--space-2) var(--space-3) auto auto;
+		max-width: var(--bui-target);
+	}
+	.bui-data tr[data-menu] > td[data-menu][data-label]::before {
+		content: none;
+	}
+}

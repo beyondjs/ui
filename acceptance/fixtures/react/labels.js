@@ -1,6 +1,7 @@
 /** Spanish copy the React fixture passes, as a product localizes the shared components. */
 export const es = {
 	notifications: {
+		view: 'Ver',
 		title: 'Notificaciones',
 		button: ({ count, more }) => (count === null || count === undefined ? 'Notificaciones' : count === 0 ? 'Notificaciones, ninguna sin leer' : more ? `Notificaciones, ${count} o más sin leer` : `Notificaciones, ${count} sin leer`),
 		badge: ({ count, more }) => (more ? `${count}+` : count > 99 ? '99+' : String(count)),

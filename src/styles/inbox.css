@@ -1,0 +1,69 @@
+/* A full inbox gives each matter room to be read. The bell keeps its compact preview. Opening is
+   one target per row, named by its title and a visible View cue; reading and earlier updates remain
+   independent controls above that target. The list hangs its hover surface into the content gutter. */
+.bui-inbox .bui-notices:not(.bui-notice-earlier) {
+	gap: 0;
+	margin-inline: calc(-1 * var(--space-4));
+}
+.bui-notice.bui-notice-page {
+	--bui-notice-inset: var(--space-4);
+	padding: var(--space-4);
+	border-radius: 0;
+}
+.bui-notice-page + .bui-notice-page::before {
+	position: absolute;
+	inset: 0 var(--space-4) auto;
+	border-top: 1px solid var(--color-border-strong);
+	content: '';
+	pointer-events: none;
+}
+.bui-notice-page > .bui-notice-text {
+	gap: var(--space-2);
+	max-width: none;
+}
+.bui-notice-page > .bui-notice-text > .bui-notice-open {
+	display: flex;
+	align-items: baseline;
+	gap: var(--space-4);
+	width: 100%;
+	font-weight: var(--weight-medium);
+}
+.bui-notice-page .bui-notice-title {
+	min-width: 0;
+	flex: 1;
+}
+.bui-notice-view {
+	flex: none;
+	color: var(--color-link);
+	font-size: var(--text-small);
+	font-weight: var(--weight-regular);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	white-space: nowrap;
+}
+.bui-notice-page > .bui-notice-text > .bui-notice-summary {
+	max-width: var(--layout-measure);
+}
+.bui-notice-page .bui-notice-earlier {
+	margin-top: var(--space-2);
+}
+.bui-notice-page .bui-notice-earlier > .bui-notice-page {
+	padding-inline: var(--space-2);
+}
+.bui-inbox .bui-notice-day {
+	margin-block: var(--space-5) 0;
+	padding-inline: 0;
+}
+.bui-inbox .bui-notice-day:first-child {
+	margin-block-start: 0;
+}
+@media (pointer: coarse) {
+	/* The quiet control owns the remaining bottom inset, as in the preview (D192). */
+	.bui-notice-page:not(:has(> .bui-notice-text > :is(.bui-notice-earlier:not([hidden]), .bui-notice-count))) {
+		padding-block-end: 0;
+	}
+}
+/* Compact filter faces keep the two filters together on a 390 px phone, with whole labels. */
+.bui-inbox-tools .bui-toggle {
+	padding-inline: var(--space-3);
+}

@@ -23,6 +23,8 @@ export interface DataTableColumn<Row = any> {
 	primary?: boolean;
 	/** Content already names its meaning: omit the repeated narrow visual label. */
 	summary?: boolean;
+	/** One overflow menu; beside the name when the table stacks. */
+	menu?: boolean;
 }
 
 export interface DataTableState {

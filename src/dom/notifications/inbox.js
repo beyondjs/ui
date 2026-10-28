@@ -80,7 +80,7 @@ export class NotificationInbox extends Component {
 		this.#recovery = new Recovery({ title: '', whole: true, locale, labels: { ...Recovery.labels[this.#lang], ...labels } });
 		const go = onopen ?? (destination => this.#element.ownerDocument.defaultView.location.assign(destination));
 		const actions = new Actions({ adapter, feed: this.#feed, onopen: go, changed: () => this.#draw(), say: key => this.#say(this.#labels.text(key)) });
-		this.#list = new NoticeList({ labels: this.#labels, age: new Age({ locale }), products, actions, grouped: true, days: true });
+		this.#list = new NoticeList({ labels: this.#labels, age: new Age({ locale }), products, actions, grouped: true, days: true, page: true });
 		const id = Ids.next('bui-inbox');
 		this.#buttons = ['unread', 'all'].map(value =>
 			el('button', { type: 'button', class: 'bui-toggle', 'aria-pressed': 'false', onclick: () => this.#change({ state: value }) }, [this.#labels.text(value === 'all' ? 'every' : 'unread')])
@@ -97,7 +97,7 @@ export class NotificationInbox extends Component {
 		this.#more = el('button', { type: 'button', class: 'bui-button bui-button-quiet', hidden: true, onclick: () => this.#page() }, [this.#labels.text('more')]);
 		this.#tools = el('div', { class: 'bui-inbox-tools' }, [
 			el('div', { class: 'bui-toggles', role: 'group', 'aria-label': this.#labels.text('show') }, this.#buttons),
-			Object.keys(products).length ? el('div', { class: 'bui-inbox-product' }, [el('label', { for: `${id}-product`, class: 'bui-field-label', text: this.#labels.text('product') }), this.#product.element]) : null,
+			Object.keys(products).length ? el('div', { class: 'bui-inbox-product' }, [el('label', { for: `${id}-product`, class: 'bui-hidden', text: this.#labels.text('product') }), this.#product.element]) : null,
 			this.#everything
 		]);
 		this.#outlet = Object.freeze({ element: this.#tools });

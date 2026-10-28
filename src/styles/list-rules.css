@@ -64,3 +64,14 @@
 	background: var(--color-info-surface);
 	color: inherit;
 }
+
+/* Wrapped facts and controls continue the name's column, after its lead. A menu alone stays beside
+   the name. Comparison tables and compact pickers retain their own density. */
+@container bui-row (max-width: 30rem) {
+	.bui-row:has(> .bui-row-lead:not(:empty)) > .bui-row-end:not(:has(> .bui-menu-holder:only-child)) {
+		padding-inline-start: calc(9px + var(--space-3));
+	}
+	.bui-row:has(> .bui-row-lead > .bui-icon) > .bui-row-end:not(:has(> .bui-menu-holder:only-child)) {
+		padding-inline-start: calc(16px + var(--space-3));
+	}
+}

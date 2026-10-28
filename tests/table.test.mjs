@@ -154,3 +154,11 @@ test('React DataTable renders React cells, applies rows and state, and reports t
 	assert.equal(host.querySelector('thead th').getAttribute('aria-sort'), 'descending');
 	await React.act(() => root.unmount());
 });
+
+test('an overflow-menu column keeps its column name and marks its row for a narrow layout', () => {
+	const table = make({ columns: [{ key: 'name', label: 'Name', primary: true }, { key: 'menu', label: 'Actions', menu: true, render: row => ui.el('button', { 'aria-label': `More actions for ${row.name}`, text: 'More' }) }] });
+	assert.equal(table.element.querySelector('thead th:last-child').textContent, 'Actions');
+	const row = table.element.querySelector('tbody tr[data-menu]');
+	assert.ok(row.querySelector('td[data-menu] button').getAttribute('aria-label').includes('web'));
+	table.destroy();
+});

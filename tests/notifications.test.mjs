@@ -11,7 +11,7 @@ beforeEach(() => page.reset());
 const products = { delegate: 'Delegate', cdn: 'CDN', projects: 'Projects' };
 const bell = entry => entry.button;
 const badge = entry => entry.element.querySelector('.bui-count');
-const titles = root => [...root.querySelectorAll('.bui-notice-open')].filter(node => !node.closest('[hidden]')).map(node => node.textContent);
+const titles = root => [...root.querySelectorAll('.bui-notice-open')].filter(node => !node.closest('[hidden]')).map(node => node.querySelector('.bui-notice-title').textContent + (node.textContent.includes('(Unread)') ? ' (Unread)' : ''));
 
 /** Opens the panel and waits until its body is no longer busy (the answer arrived). */
 async function opened(entry) {

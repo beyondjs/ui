@@ -52,7 +52,7 @@ export class DataTableView {
 	#row(row) {
 		const { columns, key = item => item.id } = this.#options;
 		const primary = columns.find(column => column.primary) ?? columns[0];
-		return el('tr', { 'data-key': key(row) ?? null }, columns.map(column => this.#cell(row, column, column === primary)));
+		return el('tr', { 'data-key': key(row) ?? null, 'data-menu': columns.some(column => column.menu) ? '' : null }, columns.map(column => this.#cell(row, column, column === primary)));
 	}
 
 	#cell(row, column, primary) {
@@ -64,7 +64,7 @@ export class DataTableView {
 		// A React cell's holder (`bui-cell`) is filled after the drawing: never taken for empty here, React's
 		// DataTable marks it once it knows what it rendered, by the same rule (`CellContent`, 0.35.0)
 		const empty = !value?.classList?.contains('bui-cell') && CellContent.empty(value);
-		return el(primary ? 'th' : 'td', { class: classes, scope: primary ? 'row' : null, 'data-label': typeof column.label === 'string' ? column.label : column.label?.textContent || null, 'data-summary': !primary && column.summary ? '' : null, 'data-empty': !primary && empty ? '' : null }, [inner]);
+		return el(primary ? 'th' : 'td', { class: classes, scope: primary ? 'row' : null, 'data-label': typeof column.label === 'string' ? column.label : column.label?.textContent || null, 'data-summary': !primary && column.summary ? '' : null, 'data-menu': !primary && column.menu ? '' : null, 'data-empty': !primary && empty ? '' : null }, [inner]);
 	}
 
 	static #open(event, row, onopen, link) {

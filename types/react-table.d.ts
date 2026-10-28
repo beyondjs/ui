@@ -8,7 +8,7 @@ export type { DataTableColumn, DataTableFilter, DataTableState } from './table.j
 /** A table of rows the product holds, driven by the DOM `DataTable`; `render` may return React content. */
 export function DataTable<Row = any>(props: {
 	label: string;
-	columns: Array<{ key: string; label: string; value?: (row: Row) => string | number | null | undefined; render?: (row: Row) => ReactNode; sort?: boolean | ((a: Row, b: Row) => number); mono?: boolean; align?: 'start' | 'end'; primary?: boolean; summary?: boolean }>;
+	columns: Array<{ key: string; label: string; value?: (row: Row) => string | number | null | undefined; render?: (row: Row) => ReactNode; sort?: boolean | ((a: Row, b: Row) => number); mono?: boolean; align?: 'start' | 'end'; primary?: boolean; summary?: boolean; menu?: boolean }>;
 	rows?: Row[];
 	rowKey?: ((row: Row) => string) | null;
 	search?: boolean;

@@ -744,3 +744,14 @@ Since 0.34.0 the package draws the keyboard's place by what the keys do there, n
 - **The composer.** Its box lights while its field has the focus and rests while one of its controls has it, which is ringed. A press in the box where nothing answers it (its padding, the toolbar's gaps, the room under the words) puts the caret in the field without the focus leaving, so the edge never flickers. The live line runs 1 px inside the top edge, so a lit edge never hides it.
 
 `--color-focus-edge` holds 3:1 on the canvas, the surface and the raised surface (WCAG 1.4.11). From `--color-border-control` it changes by 3.6:1 in light and 2.3:1 on navy, where the halo and the caret add to it; WCAG 2.4.13, a AAA criterion, is not met on navy. Until 0.32.1 the composer's box drew a 2 px coral border with a glow inside it, and a field a coral ring 1 px outside its border. On a box, a coral border reads as its error: the dark coral (`#ffa385`) sits next to the dark danger (`#ff8a80`), and the light coral next to the light danger.
+
+### List presentation in 0.43.0
+
+`ListRow` uses 12 px vertical insets and a 4 px gap between title and metadata. On narrow rows a wrapped end
+continues the title's column after its state mark or icon. A menu alone stays beside the title. In `DataTable`,
+mark a column containing only one overflow menu with `menu: true` (DOM and React). Its desktop header remains;
+on narrow rows the menu stays beside the object name, without a secondary Actions label. Do not mark a data
+column or a group of actions as a menu. Choosers, activity and comparison tables retain their own formats. `NotificationInbox` separates matters and exposes View/Ver in
+the same button as the title, with an accessible name identifying the matter. The whole row still opens through
+the adapter's access check; marking and earlier updates remain separate. Its product filter keeps its accessible
+label without a second visible label above the toolbar. `NotificationEntry` retains compact preview rows.
