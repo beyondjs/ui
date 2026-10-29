@@ -75,6 +75,30 @@ test('Tab wraps inside the dialog in both directions', () => {
 	dialog.destroy();
 });
 
+test('Tab moves focus itself through every target, a radio group being one stop, so WebKit\'s Tab never leaves (0.45.1)', () => {
+	const make = (tag, attributes = {}) => Object.assign(document.createElement(tag), attributes);
+	const field = make('input', { type: 'text' });
+	const box = make('input', { type: 'checkbox' });
+	const radios = ['eu', 'us', 'ap'].map(value => make('input', { type: 'radio', name: 'region', value, checked: value === 'us' }));
+	const link = make('a', { href: '#terms', textContent: 'Terms' });
+	const details = make('details');
+	const summary = details.appendChild(make('summary', { textContent: 'Technical details' }));
+	const done = make('button', { textContent: 'Done' });
+	const dialog = new ui.Dialog({ title: 'Cycle', escape: false, children: [field, box, ...radios, link, details], actions: [done] });
+	dialog.open();
+	assert.equal(document.activeElement, field);
+	const order = [box, radios[1], link, summary, done, field];
+	for (const expected of order) {
+		assert.equal(page.key(document.activeElement, 'Tab').defaultPrevented, true, 'every Tab is answered, not only at the edges');
+		assert.equal(document.activeElement, expected);
+	}
+	for (const expected of order.slice(0, -1).reverse()) {
+		page.key(document.activeElement, 'Tab', { shiftKey: true });
+		assert.equal(document.activeElement, expected);
+	}
+	dialog.destroy();
+});
+
 test('destroy while open resolves null, restores focus and removes the element', async () => {
 	const origin = opener();
 	const dialog = new ui.Dialog({ title: 'Gone' });

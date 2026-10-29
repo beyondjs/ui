@@ -98,10 +98,18 @@ export const checks = [
 			const dialog = page.getByRole('dialog');
 			await dialog.waitFor();
 			expect(await page.evaluate(() => document.activeElement.tagName) === 'INPUT', 'the field takes focus');
-			for (let step = 0; step < 6; step++) await page.keyboard.press('Tab');
-			expect(await page.evaluate(() => Boolean(document.activeElement.closest('dialog'))), 'Tab stays inside the dialog');
+			// Plain Tab reaches every target in order and wraps, in WebKit too, whose own Tab skips buttons (0.45.1)
+			const targets = await dialog.evaluate(node => node.querySelectorAll('button, input').length);
+			const stops = [];
+			for (let step = 0; step < targets * 2; step++) {
+				await page.keyboard.press('Tab');
+				stops.push(await page.evaluate(() => (document.activeElement.closest('dialog') ? `${document.activeElement.tagName}|${document.activeElement.textContent.trim()}|${document.activeElement.getAttribute('aria-label') ?? ''}` : 'outside')));
+			}
+			expect(!stops.includes('outside'), `Tab stays inside the dialog: ${stops.join(', ')}`);
+			expect(new Set(stops).size === targets && stops.slice(0, targets).join() === stops.slice(targets).join(), `Tab reaches each of the ${targets} targets once a round: ${stops.join(', ')}`);
 			await page.keyboard.press('Shift+Tab');
 			expect(await page.evaluate(() => Boolean(document.activeElement.closest('dialog'))), 'Shift+Tab stays inside the dialog');
+			expect(`${await page.evaluate(() => `${document.activeElement.tagName}|${document.activeElement.textContent.trim()}|${document.activeElement.getAttribute('aria-label') ?? ''}`)}` === stops.at(-2), 'Shift+Tab goes back one target');
 			await page.keyboard.press('Escape');
 			await dialog.waitFor({ state: 'hidden' });
 			expect((await focused(page)).includes(copy.open), `focus returned to the opener, got ${await focused(page)}`);

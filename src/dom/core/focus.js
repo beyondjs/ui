@@ -10,7 +10,7 @@ const selector = [
 ].join(',');
 
 /**
- * Focus inside one container: the first sensible target and wrapping Tab at its edges.
+ * Focus inside one container: the first sensible target and Tab kept inside it.
  */
 export class Focus {
 	#container;
@@ -43,26 +43,9 @@ export class Focus {
 		return chosen;
 	}
 
-	/** Keeps Tab and Shift+Tab inside the container. */
-	wrap(event) {
-		const targets = this.targets;
-		if (!targets.length) {
-			event.preventDefault();
-			return;
-		}
-		const active = this.#container.ownerDocument.activeElement;
-		const [first, last] = [targets[0], targets.at(-1)];
-		if (event.shiftKey && (active === first || !this.#container.contains(active))) {
-			event.preventDefault();
-			last.focus();
-		} else if (!event.shiftKey && (active === last || !this.#container.contains(active))) {
-			event.preventDefault();
-			first.focus();
-		}
-	}
-	/** Keeps Tab inside, moving focus itself so WebKit's Tab, which skips links by default, never leaves for the page behind. */
+	/** Keeps Tab inside, moving focus itself so WebKit's Tab, which skips buttons, checkboxes and links by default, never leaves for the page behind. */
 	cycle(event) {
-		const targets = this.targets;
+		const targets = Focus.#stops(this.targets);
 		event.preventDefault();
 		if (!targets.length) return;
 		const document = this.#container.ownerDocument;
@@ -72,8 +55,22 @@ export class Focus {
 		for (let tried = 0; tried < targets.length; tried++) {
 			index = (index + step + targets.length) % targets.length;
 			targets[index].focus({ preventScroll: true });
-			if (document.activeElement === targets[index]) return;
+			if (document.activeElement !== targets[index]) continue;
+			// Into view inside a scrolling body, as the browser's own Tab brings it, and no further (0.45.1)
+			targets[index].scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+			return;
 		}
+	}
+
+	/** A named radio group is one stop, as the browser's own Tab makes it: its checked radio, or its first (0.45.1). */
+	static #stops(targets) {
+		const radio = node => node.tagName === 'INPUT' && node.type === 'radio' && node.name;
+		const group = node => targets.filter(other => radio(other) && other.name === node.name && other.form === node.form);
+		return targets.filter(node => {
+			if (!radio(node)) return true;
+			const members = group(node);
+			return node === (members.find(member => member.checked) ?? members[0]);
+		});
 	}
 
 	/**

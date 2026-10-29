@@ -372,3 +372,7 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 ## Shared composition, 0.45.0
 
 `acceptance/checks/composition.mjs` runs installed DOM and React 18/19 fixtures at 320, 390, 960 and 1920 CSS pixels in both themes. It checks contained rows, independent row/menu actions, measured notices, evidence inside the text column and overflow. `sidebar-navigation.mjs` checks the global preference, accessible landmarks, keyboard continuity and independent contextual panel. Run through the ordinary acceptance entry point with `BEYOND_UI_BROWSER=chrome|firefox|webkit`; a focused check name can be passed to `acceptance/run.mjs`. Consumer integrations keep their own executed evidence.
+
+## A dialog's Tab, 0.45.1
+
+`tests/dialog.test.mjs` holds that every Tab and Shift+Tab inside a `Dialog` is answered by the dialog itself, through a field, a checkbox, a radio group as one stop, a link, a disclosure's summary and the actions, in order and back. The browser check "dialog: focus moves in, Tab wraps…" in `acceptance/checks/keyboard.mjs` presses plain Tab two rounds and requires every stop inside the dialog, each target once a round and Shift+Tab one back, in the DOM, React 19 and React 18 consumers; in WebKit it fails on 0.45.0, whose third Tab left the dialog, and passes on 0.45.1. Run it in each engine with `BEYOND_UI_BROWSER=chrome|firefox|webkit node acceptance/run.mjs 'dialog: focus moves in'`.

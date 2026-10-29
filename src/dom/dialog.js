@@ -17,8 +17,9 @@ const defaults = { close: 'Close' };
  * Each instance is named by its own title (and described by its description). Opening remembers the
  * element that opened it (the focused element, or, where a click does not focus a button, as in
  * Safari, the element last pressed or typed on), makes the rest of the page inert (`showModal`), keeps
- * Tab and Shift+Tab inside the dialog and moves focus to `[data-autofocus]`, the first field or the
- * first action. Closing returns focus to that element, or to `restore` when it is gone or unknown;
+ * Tab and Shift+Tab inside the dialog by moving focus itself, so WebKit's Tab, which skips buttons,
+ * checkboxes and links by default, never leaves for the page behind (0.45.1), and moves focus to
+ * `[data-autofocus]`, the first field or the first action. Closing returns focus to that element, or to `restore` when it is gone or unknown;
  * never to the page's body.
  *
  * Dismissal policy: Escape and the close button dismiss unless `escape` is false; a press on the
@@ -209,7 +210,7 @@ export class Dialog extends Component {
 			event.preventDefault();
 			event.stopPropagation();
 			this.dismiss();
-		} else if (event.key === 'Tab') new Focus(this.#element).wrap(event);
+		} else if (event.key === 'Tab') new Focus(this.#element).cycle(event);
 	}
 
 	#press(event) {
