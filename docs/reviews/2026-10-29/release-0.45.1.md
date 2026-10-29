@@ -25,11 +25,13 @@ Through the machine's test queue, on 2026-10-29.
 - **The new browser check, before and after, in WebKit 26.6:**
   - **On 0.45.0** (Projects' vendored `beyond-ui-0.45.0.tgz`): it failed in the DOM, React 19 and React 18 consumers. The stops were outside, the dialog, the field, outside, and so on: the third Tab left the dialog.
   - **On this change** (packed from the working tree): it passed 3 of 3.
-- **Unit:** `tests/dialog.test.mjs`, `tests/focusing.test.mjs` and the sheet tests passed 30 of 30. The whole suite and `npm run types` are recorded below.
+- **Unit:** `tests/dialog.test.mjs`, `tests/focusing.test.mjs` and the sheet tests passed 30 of 30, then the whole `npm test` 1114 of 1114, React 18 included. `npm run types` compiles.
+- **The release** (0.45.1 at `fee82c3`, the archive's source): `beyond-ui-0.45.1.tgz`, sha256 `5e0a36107ffb158ff47bafb8d799787bf50e1dfd6010d9d215341ca139a56185`, integrity `sha512-bljKvw3BIzonYl7oHmhlaaXEMcGKxnjEdAjD5p0x1x609zHo7/FYBoc+vfgcPnSaXmCrT9htS5cf8yZS9lWj2A==`. The whole acceptance ran from that archive, one queue run per engine: Chrome 156 passed 504 of 504, Firefox 155 passed 504 of 504, and WebKit 26.6 passed 504 of 504.
+- **Projects** vendors it as `97e2798`. `adding.mjs` passes in WebKit with its Tab containment (16 checks). The whole browser suite passes in Chromium (33 journeys, 337 checks). In Firefox and WebKit, adding, adding-roles, catalog, github, reinstall and review pass (76 checks each).
 
 ## Limits
 
-- **Package evidence only.** Products take 0.45.1 with their next vendoring. Projects' `adding.mjs` in WebKit is the suite pending's other half.
+- **Package evidence only, and Projects.** Projects vendors 0.45.1; the other products and the reference take it with their next vendoring.
 - **Not changed:** native Tab outside modal parts. A page's own Tab order in Safari keeps the system's setting.
 
 ## Family reference synchronization
