@@ -88,6 +88,12 @@
 	gap: var(--space-2);
 	min-width: 0;
 }
+/* A header separates context from work; tabs already draw that boundary. Tool/thread layouts
+   retain their continuous work surface and their own compact header behavior. */
+.bui-page:not([data-template='tool']):not([data-template='thread']) .bui-page-header:not(:has(> .bui-page-tabs:not([hidden]))) {
+	padding-block-end: var(--space-4);
+	border-block-end: 1px solid var(--color-border);
+}
 .bui-crumbs ol {
 	display: flex;
 	flex-wrap: wrap;

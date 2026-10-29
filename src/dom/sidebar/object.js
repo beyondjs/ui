@@ -68,7 +68,8 @@ export class SidebarObject {
 	/**
 	 * @param {{heading: string|Node, action?: {label: string, href: string, glyph?: string}|null, search?: import('./search.js').SidebarSearch|null, groups?: object[], more?: {label: string, href: string}|null, waiting?: boolean|{rows?: number}|null}} object
 	 */
-	update({ heading, action = null, search = null, groups = [], more = null, waiting: shape = null }) {
+	update({ key = null, heading, action = null, search = null, groups = [], more = null, waiting: shape = null }) {
+		this.#element.dataset.key = String(key ?? heading ?? '');
 		if (typeof heading !== 'string' || this.#title.textContent !== heading) fill(this.#title, [content(heading)]);
 		this.#act(action);
 		this.#find(search);

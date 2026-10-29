@@ -38,7 +38,7 @@ export class RowContent {
 			select: select ? { ...select, onchange: checked => this.#latest.current.select?.onChange?.(checked) } : null
 		};
 		const key = JSON.stringify([
-			this.#identity(props.title), props.href, Boolean(run), props.current,
+			this.#identity(props.title), props.href, Boolean(run), props.current, props.inline,
 			options.meta.map(value => this.#identity(value)), options.facts.map(value => this.#identity(value)),
 			this.#identity(options.lead), this.#identity(options.status),
 			actions.map((action, index) => action ? [index, action.label, action.glyph, action.name] : null),

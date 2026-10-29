@@ -138,11 +138,13 @@ function outage(notice) {
  * `action` and `search` (its `source` and `all` read from the latest props too), and `shortcut` makes
  * ⌘K / Ctrl+K open the search.
  */
-export function Sidebar({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onNavigate = null, labels, shortcut = false, merge = false, rail = null }) {
-	const latest = useLatest({ onNavigate, search, groups, rail });
+export function Sidebar({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onNavigate = null, labels, shortcut = false, merge = false, rail = null, navigation = null }) {
+	const latest = useLatest({ onNavigate, search, groups, rail, navigation });
 	const objects = () => objected(groups, latest);
+	const navigating = () => navigation ? { ...navigation, onchange: collapsed => latest.current.navigation?.onChange?.(collapsed) } : null;
 	const railing = () => (rail ? { ...rail, foot: footing(rail.foot, latest), onchange: open => latest.current.rail?.onChange?.(open) } : null);
-	const [host, sidebar] = useInstance(() => new Sections({ product, groups: objects(), context, cut, section, action, search: finding(search, () => latest.current.search), labels, shortcut, rail: railing(), onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null }), [product, cut, labels, Boolean(onNavigate), Boolean(shortcut)]);
+	const [host, sidebar] = useInstance(() => new Sections({ product, groups: objects(), context, cut, section, action, search: finding(search, () => latest.current.search), labels, shortcut, rail: railing(), navigation: navigating(), onnavigate: onNavigate ? (item, event) => latest.current.onNavigate?.(item, event) : null }), [product, cut, labels, Boolean(onNavigate), Boolean(shortcut)]);
+	useSync(sidebar, current => (current.navigation = navigating()), [Boolean(navigation), navigation?.key, navigation?.storage, navigation?.collapsed]);
 	useSync(sidebar, current => (current.groups = objects()), [JSON.stringify(groups)]);
 	useSync(sidebar, current => (current.rail = railing()), [Boolean(rail), rail?.panel, rail?.open, JSON.stringify(rail?.order), JSON.stringify(rail?.foot ? { label: String(rail.foot.label ?? ''), glyph: rail.foot.glyph ?? null, status: rail.foot.status ?? null } : null)]);
 	useSync(sidebar, current => (current.context = context), [JSON.stringify(context)]);

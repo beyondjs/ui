@@ -1,3 +1,4 @@
+import { checks as global } from './sidebar-navigation.mjs';
 import { expect, overflow } from '../support/browser.mjs';
 
 /** The shared Sidebar at 1440, 390, 360 and 320 px in both themes: permanent, the product row and the modal drawer. */
@@ -27,6 +28,7 @@ const state = page =>
 	});
 
 export const checks = [
+	...global,
 	{
 		name: 'sidebar at 1440 px is permanent, flush under the bar, full height and sticky; at 390, 360 and 320 px a sticky product row opens a modal drawer, in both themes',
 		consumers: ['dom', 'react19'],

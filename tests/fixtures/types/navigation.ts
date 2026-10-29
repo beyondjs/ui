@@ -10,3 +10,8 @@ sidebar.rail = null;
 // @ts-expect-error The rail is configured, never a second free-form DOM navigation.
 sidebar.rail = true;
 export { sidebar };
+
+sidebar.navigation = { key: 'conduict', storage: null, onchange: collapsed => void collapsed };
+sidebar.collapsed = true;
+// @ts-expect-error a stable product key is required
+sidebar.navigation = { collapsed: false };

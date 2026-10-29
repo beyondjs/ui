@@ -52,3 +52,19 @@ test('React rail foot reads the latest press and patches its state in place (0.1
 	await act(() => control.click());
 	assert.deepEqual(calls, ['second'], 'the latest handler is used');
 });
+
+test('React global navigation preserves its uncontrolled choice and reads the newest callback', async () => {
+ page.window.localStorage.clear();
+ const calls = [];
+ const render = (name, collapsed) => React.createElement(React.StrictMode, null, React.createElement(ui.Sidebar, { product: 'Conduict', groups, navigation: { key: 'react', ...(collapsed === undefined ? {} : { collapsed }), onChange: value => calls.push(`${name}:${value}`) } }));
+ await act(() => root.render(render('first')));
+ const control = host.querySelector('.bui-sidebar-global-toggle');
+ await act(() => control.click());
+ await act(() => root.render(render('second')));
+ assert.equal(control.getAttribute('aria-expanded'), 'false');
+ await act(() => control.click());
+ assert.deepEqual(calls, ['first:true', 'second:false']);
+ await act(() => root.render(render('third', true)));
+ assert.equal(control.getAttribute('aria-expanded'), 'false');
+ assert.ok(host.querySelector('.bui-sidebar-global-toggle') === control);
+});

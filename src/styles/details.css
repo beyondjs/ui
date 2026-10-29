@@ -27,6 +27,11 @@
 	font-size: var(--text-small);
 	font-weight: var(--weight-regular);
 }
+/* Evidence inside a notice belongs to its text column, not a second form-width region. */
+.bui-callout-body > .bui-details,
+.bui-callout-body > .bui-host > .bui-details {
+	max-width: none;
+}
 /* The family's one disclosure affordance (0.11.2): a `<summary class="bui-summary">` with the chevron
    glyph before its words, turned toward the words while closed and down while open, in the text color,
    so it never reads as a link. A product's own `<details>` uses the same class and glyph. */

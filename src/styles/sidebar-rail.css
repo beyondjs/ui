@@ -116,3 +116,103 @@
 @keyframes bui-sidebar-context-out {
 	to { opacity: 0; transform: translateX(calc(-1 * var(--space-6))); }
 }
+
+/* Global presentation is independent from the contextual panel's data-panel state. */
+.bui-sidebar[data-navigation] { --bui-sidebar-global: var(--layout-sidebar); }
+.bui-sidebar[data-navigation][data-collapsed] { --bui-sidebar-global: var(--space-16); }
+.bui-sidebar[data-mode='permanent'][data-navigation] { width: var(--bui-sidebar-global); }
+.bui-sidebar[data-mode='permanent'][data-navigation][data-panel] { width: calc(var(--bui-sidebar-global) + var(--layout-sidebar)); }
+.bui-sidebar[data-mode='permanent'][data-navigation] > .bui-sidebar-rail {
+	flex-basis: var(--bui-sidebar-global);
+	align-items: stretch;
+	gap: var(--space-1);
+	padding: var(--space-3) var(--space-2);
+}
+.bui-sidebar-global-head { display: grid; gap: var(--space-2); min-width: 0; }
+.bui-sidebar-global-head > .bui-sidebar-nav { padding: 0; gap: var(--space-3); }
+.bui-sidebar-global-head .bui-sidebar-groups:empty { display: none; }
+.bui-sidebar-global-toggle,
+.bui-sidebar-global-search {
+	display: inline-grid;
+	place-items: center;
+	width: max(var(--bui-target), var(--space-10));
+	height: max(var(--bui-target), var(--space-10));
+	border: 0;
+	border-radius: var(--radius-control);
+	background: transparent;
+	color: var(--color-text);
+	cursor: pointer;
+}
+.bui-sidebar-global-toggle:hover,
+.bui-sidebar-global-search:hover { background: var(--color-sidebar-hover); }
+.bui-sidebar-global-search,
+.bui-sidebar-global-search[hidden] { display: none; }
+.bui-sidebar-global-toggle > .bui-icon,
+.bui-sidebar-global-search > .bui-icon { width: 20px; height: 20px; }
+.bui-sidebar-rail[data-global] > .bui-sidebar-rail-item {
+	display: flex;
+	gap: var(--space-2);
+	width: 100%;
+	height: auto;
+	min-height: max(var(--bui-target), var(--space-10));
+	padding: var(--space-2);
+	text-decoration: none;
+	font: inherit;
+	text-align: start;
+}
+.bui-sidebar-rail[data-global] .bui-sidebar-rail-item > .bui-icon { flex: none; }
+.bui-sidebar-global-label { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.bui-sidebar-rail[data-global] > .bui-sidebar-rail-item[aria-current='page'] {
+	background: var(--color-surface-selected);
+	border-color: transparent;
+	box-shadow: inset 2px 0 0 var(--color-accent);
+	font-weight: var(--weight-medium);
+}
+.bui-sidebar-rail[data-global] > .bui-sidebar-rail-item[aria-disabled='true'] { color: var(--color-text-muted); cursor: default; }
+.bui-sidebar-rail[data-global] .bui-sidebar-rail-meta { position: static; flex: none; }
+.bui-sidebar-global-heading { padding-top: var(--space-3); }
+.bui-sidebar-rail[data-global][data-collapsed] { align-items: center; }
+.bui-sidebar-rail[data-global][data-collapsed] > .bui-sidebar-rail-item { width: 100%; justify-content: center; padding-inline: 0; }
+.bui-sidebar-rail[data-global][data-collapsed] .bui-sidebar-global-label,
+.bui-sidebar-rail[data-global][data-collapsed] .bui-sidebar-rail-meta,
+.bui-sidebar-global-head[data-collapsed] .bui-sidebar-context,
+.bui-sidebar-global-head[data-collapsed] .bui-sidebar-action .bui-sidebar-label,
+.bui-sidebar-global-head[data-collapsed] .bui-sidebar-search { display: none; }
+/* Group boundaries remain visible in the rail; their accessible headings remain available. */
+.bui-sidebar-rail[data-global][data-collapsed] .bui-sidebar-global-heading {
+	font-size: 0;
+	padding: 0;
+	margin: var(--space-2) var(--space-1);
+	border-top: 1px solid var(--color-border);
+}
+.bui-sidebar-global-head[data-collapsed] .bui-sidebar-global-search:not([hidden]) { display: inline-grid; }
+.bui-sidebar-global-head[data-collapsed] .bui-sidebar-action { justify-content: center; }
+.bui-sidebar-item > .bui-icon { flex: none; width: 20px; height: 20px; }
+.bui-sidebar-item:has(> .bui-icon) > .bui-sidebar-label { flex: 1 1 auto; min-width: 0; }
+/* Without an explicit contextual rail the expanded pane is the original complete navigation.
+   Object groups, their search, folds and more remain here, never in a second column. */
+.bui-sidebar[data-mode='permanent'][data-navigation][data-inline] { display: flex; flex-direction: column; }
+.bui-sidebar[data-mode='permanent'][data-navigation][data-inline] > .bui-sidebar-rail { flex: none; height: auto; }
+.bui-sidebar[data-mode='permanent'][data-navigation][data-inline] > .bui-sidebar-panel { height: auto; flex: 1 1 auto; min-height: 0; }
+.bui-sidebar[data-mode='permanent'][data-navigation][data-inline]:not([data-collapsed]) > .bui-sidebar-rail > :not(.bui-sidebar-global-head),
+.bui-sidebar[data-mode='permanent'][data-navigation][data-inline]:not([data-collapsed]) .bui-sidebar-global-head > :not(.bui-sidebar-global-toggle) { display: none; }
+.bui-sidebar[data-mode='permanent'][data-navigation][data-inline][data-collapsed] > .bui-sidebar-rail { height: 100%; }
+.bui-sidebar[data-mode='permanent'][data-navigation][data-inline][data-collapsed] > .bui-sidebar-panel { display: none; }
+.bui-sidebar[data-mode='permanent'][data-navigation][data-inline] > .bui-sidebar-rail {
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	border-right: 1px solid var(--color-border);
+	background: var(--color-sidebar);
+}
+.bui-sidebar[data-navigation][data-inline] .bui-sidebar-panel .bui-sidebar-item[aria-current='page'] {
+	background: var(--color-surface-selected);
+	box-shadow: inset 2px 0 0 var(--color-accent);
+}
+
+.bui-sidebar-global-head[data-collapsed] > .bui-sidebar-global-toggle,
+.bui-sidebar-global-head[data-collapsed] > .bui-sidebar-global-search { justify-self: center; }
+.bui-sidebar[data-navigation][data-inline] .bui-sidebar-panel .bui-sidebar-item:not(.bui-sidebar-entry) { min-height: max(var(--bui-target), var(--space-10)); }
+.bui-sidebar-rail[data-global]:not([data-collapsed]) .bui-sidebar-rail-foot .bui-sidebar-rail-state { right: auto; left: var(--space-5); }

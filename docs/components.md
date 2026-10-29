@@ -1,5 +1,7 @@
 # Component catalog
 
+The [composition guide](composition.md) defines the 0.45.0 page boundary, measured notices, embedded evidence and contained object lists in DOM and React.
+
 Every component of `@beyond-js/ui` 0.27.0: what it is for, its variants and main options, the states it states in words, and its consumers. DOM names come from `@beyond-js/ui` (or `/dom`); React names from `@beyond-js/ui/react`. Every component takes `labels` for its copy (strings with `{placeholders}` or functions of the values), and since 0.44.0 chooses the language of the rest by [one rule](#language-0440); every DOM class has `mount(parent)` and `destroy()`. Type declarations in `types/` list every option.
 
 **Consumers** (each product vendors the tarball in its own `tools/` and records its adoption, residual copies and evidence in its own repository; the family reference catalogs them component by component in `branding/src/family/components/consumers.js`): the coordinated consumers vendor 0.20.2 since 2026-10-22: Beyond Home (plain DOM, including its windowed host at `/windows/`), the Delegate application (React, the whole application), Branding (plain DOM), the Conduict interface and its surface for the windowed host (plain DOM), the Projects interface (plain DOM served by its service), the Packages interface, the Snapshots and Accounts frontends and the retained Workspace client (React), the CDN administration and backoffice (React), Labs and Docs Site. Installation and final browser acceptance are recorded separately in [the release evidence](reviews/2026-10-22/release-0.20.2.md). Conduict vendors 0.21.1 for its All conversations. A product that passes its own `labels` to `Collection` adds `end` and `keys`, or their words fall back to English.; no other consumer has vendored them ([0.21.1](reviews/2026-10-23/release-0.21.1.md)). Every product that names itself beside the wordmark uses `Lockup`.
@@ -769,7 +771,7 @@ Since 0.34.0 the package draws the keyboard's place by what the keys do there, n
 `ListRow` uses 12 px vertical insets and a 4 px gap between title and metadata. On narrow rows a wrapped end
 continues the title's column after its state mark or icon. A menu alone stays beside the title. In `DataTable`,
 mark a column containing only one overflow menu with `menu: true` (DOM and React). Its desktop header remains;
-on narrow rows the menu stays beside the object name, without a secondary Actions label. Do not mark a data
+on narrow rows the menu stays beside the object name, without a secondary Actions label. The next line starts below the full menu target, including on touch screens. Do not mark a data
 column or a group of actions as a menu. Since 0.44.0 that column is drawn as the table's one menu column, and
 the table's own `menu(row)` is preferred ([DataTable](#collections-and-feedback), "One menu column"). Choosers, activity and comparison tables retain their own formats. `NotificationInbox` separates matters and exposes View/Ver in
 the same button as the title, with an accessible name identifying the matter. The whole row still opens through

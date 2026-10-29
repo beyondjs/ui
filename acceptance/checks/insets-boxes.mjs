@@ -103,6 +103,7 @@ export const pages = {
 			steps: [
 				{ boxes: [
 					{ name: 'callout ending in actions', box: '#callout-actions .bui-callout', inset: '--bui-callout-inset' },
+					{ name: 'callout ending in a copyable value', box: '#callout-copy .bui-callout', inset: '--bui-callout-inset' },
 					{ name: 'callout ending in text', box: '#callout-text .bui-callout', inset: '--bui-callout-inset' },
 					{ name: 'callout ending in folded technical details', box: '#callout-details .bui-callout', inset: '--bui-callout-inset' },
 					{ name: 'framed empty state', box: '#empty .bui-empty', inset: '--bui-empty-inset' },

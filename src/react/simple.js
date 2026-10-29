@@ -138,7 +138,7 @@ export function Callout({ tone = 'info', title, body = null, actions = null, liv
 		'div',
 		{ className: `bui-callout bui-callout-${tone}`, role: live ? (tone === 'danger' ? 'alert' : 'status') : undefined },
 		h(Mark, { name: glyphs[tone] ?? 'info' }),
-		h('div', { className: 'bui-callout-body' }, h('p', { className: 'bui-callout-title' }, title), body ? h('p', { className: 'bui-callout-text' }, body) : null, children, actions ? h('div', { className: 'bui-callout-actions' }, actions) : null, details ? h(TechnicalDetails, details) : null)
+		h('div', { className: 'bui-callout-body' }, title !== undefined && title !== null && title !== '' ? h('p', { className: 'bui-callout-title' }, title) : null, body ? h('p', { className: 'bui-callout-text' }, body) : null, children, actions ? h('div', { className: 'bui-callout-actions' }, actions) : null, details ? h(TechnicalDetails, details) : null)
 	);
 }
 

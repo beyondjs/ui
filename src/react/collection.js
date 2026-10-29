@@ -18,7 +18,7 @@ const { useEffect, useRef, useState } = React;
  * Since 0.44.0 `empty.action` is the empty list's one action, as `EmptyState`'s: `{ label, href, onSelect }`
  * or React content (the section's own button), and `empty` is read from the latest props on each draw.
  */
-export function Collection({ label, columns, source, link = null, onOpen = null, search = true, filters = [], tools = 'compact', toolsTarget = null, state = null, onState = null, limit = 20, empty = null, explain = null, labels, presentation = 'table', row = null, group = null, end = true, recovery = null, outage = null, details = null }) {
+export function Collection({ label, columns, source, link = null, onOpen = null, search = true, filters = [], tools = 'compact', toolsTarget = null, state = null, onState = null, limit = 20, empty = null, explain = null, labels, presentation = 'table', framed = false, row = null, group = null, end = true, recovery = null, outage = null, details = null }) {
 	const cells = useRef([]);
 	const [portals, setPortals] = useState([]);
 	const latest = useLatest({ source, onOpen, onState, explain, columns, link, row, group, end, recovery, outage, details, empty });
@@ -29,6 +29,7 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 			new List({
 				label,
 				presentation,
+				framed,
 				// The list's own row options and groups (0.21.1) read the latest props
 				row: row ? (item, context) => latest.current.row?.(item, context) ?? {} : null,
 				group: group ? item => latest.current.group(item) : null,
@@ -54,7 +55,7 @@ export function Collection({ label, columns, source, link = null, onOpen = null,
 				columns: columns.map((column, index) => ({ ...column, render: undefined, value: row => cell(row, index) })),
 				onrender: () => setPortals(cells.current.splice(0))
 			}),
-		[label, presentation, search, JSON.stringify(filters), tools, limit, labels, Boolean(link), Boolean(onOpen), columns.length, Boolean(row), Boolean(group), typeof end === 'string' ? end : typeof end === 'function' ? 'function' : Boolean(end)]
+		[label, presentation, framed, search, JSON.stringify(filters), tools, limit, labels, Boolean(link), Boolean(onOpen), columns.length, Boolean(row), Boolean(group), typeof end === 'string' ? end : typeof end === 'function' ? 'function' : Boolean(end)]
 	);
 	useTools(list, toolsTarget, tools);
 	// Each drawn cell asks the latest column definition for its content.

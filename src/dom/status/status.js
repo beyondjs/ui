@@ -7,7 +7,7 @@ import { words, tones } from './labels.js';
  * A state in words with a mark whose **shape** says it as well as its hue (0.15.0, decision C2 and the
  * audit's DQ-04): one component for the dot beside a name and the badge in a row. The states are a
  * closed set (`Status.states`, each to its tone): `ready`, `busy`, `waking`, `asleep`, `attention`,
- * `failed`, `unknown`, `success`, `running`, `idle`, `pending`, `stopped` and `done`. A product maps its
+ * `unavailable` (warning, not a request for action), `failed`, `unknown`, `success`, `running`, `idle`, `pending`, `stopped` and `done`. A product maps its
  * own states to them and may give its own words (`label`); otherwise the family's words are used
  * (`Status.labels`). The words always carry the meaning; the mark is hidden from assistive technology.
  *

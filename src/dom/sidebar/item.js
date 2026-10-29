@@ -1,6 +1,7 @@
 import { el, fill, content } from '../core/element.js';
 import { Cut, NameTip } from '../core/cut.js';
 import { hidden } from '../feedback.js';
+import { glyph } from '../core/icons.js';
 import { EntryAge } from './age.js';
 
 const tones = Object.freeze(['neutral', 'success', 'warning', 'danger', 'info', 'progress']);
@@ -30,6 +31,7 @@ export class SidebarItem {
 	#age = el('time', { class: 'bui-sidebar-age' });
 	#when = '';
 	#labels;
+	#glyph = null;
 
 	/**
 	 * @param {{entry: boolean, labels?: import('../core/labels.js').Labels|null}} options whether it is an
@@ -54,10 +56,14 @@ export class SidebarItem {
 	}
 
 	/** @param {{label: string|Node, href?: string|null, current?: boolean, meta?: string|number|null, mark?: {label: string, tone?: string}|null, age?: unknown}} item */
-	update({ label, href = null, current = false, meta = null, mark = null, age = null }) {
+	update({ label, href = null, current = false, meta = null, mark = null, age = null, glyph: markname = null }) {
 		const link = Boolean(href);
 		if (!this.#node || (this.#node.tagName === 'A') !== link) this.#make(link);
 		if (link && this.#node.getAttribute('href') !== href) this.#node.setAttribute('href', href);
+		if (!this.#entry && this.#glyph?.dataset.icon !== markname) {
+			this.#glyph?.remove(); this.#glyph = markname ? glyph(markname) : null;
+			if (this.#glyph) this.#node.prepend(this.#glyph);
+		}
 		if (current) this.#node.setAttribute('aria-current', 'page');
 		else this.#node.removeAttribute('aria-current');
 		// A folded group still lists its current item (0.14.0)
@@ -80,7 +86,7 @@ export class SidebarItem {
 		const focused = old && old === old.ownerDocument.activeElement;
 		const kind = `bui-sidebar-item${this.#entry ? ' bui-sidebar-entry' : ''}`;
 		this.#node = link ? el('a', { class: kind }) : el('span', { class: kind, 'aria-disabled': 'true' });
-		this.#node.append(this.#label, this.#end);
+		this.#node.append(...(this.#glyph ? [this.#glyph] : []), this.#label, this.#end);
 		this.#tip?.destroy();
 		const whole = () => [Cut.text(this.#label) ? this.#label.textContent : null, this.#when || null].filter(Boolean).join(' · ');
 		const meta = () => this.#end.parentNode === this.#node && Cut.text(this.#end);

@@ -263,7 +263,7 @@ export class Help extends Disclosure {
 export function lockup(options: { src: string; name?: Content | null; alt?: string }): HTMLElement;
 export function status(label: Content, tone?: Tone | 'progress'): HTMLElement;
 export function badge(label: Content, tone?: Tone): HTMLElement;
-export function callout(options: { tone?: Exclude<Tone, 'neutral'>; title: Content; body?: Content | null; actions?: Node[]; live?: boolean; /** 0.15.0, D43 */ details?: import('./family.js').FailureDetails | null }): HTMLElement;
+export function callout(options: { tone?: Exclude<Tone, 'neutral'>; title?: Content; body?: Content | null; actions?: Node[]; live?: boolean; /** 0.15.0, D43 */ details?: import('./family.js').FailureDetails | null }): HTMLElement;
 export function loading(label?: string): HTMLElement;
 /** The default label in English and Spanish (0.7.2), the named lines (0.7.6) and a step of opening's words, as the document's opening says it, with the steps a product may name on its initial waiting element (0.21.0). */
 export namespace loading {

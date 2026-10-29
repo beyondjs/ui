@@ -5,7 +5,7 @@ import type { IconName } from './icons.js';
 
 /** One link of a product's sidebar. */
 export interface SidebarItem {
-	/** The rail's named glyph (0.18.0); ignored by the standard labeled sidebar. */
+	/** A catalog glyph in the rail, expanded navigation and mobile drawer. */
 	glyph?: IconName;
 	label: Content;
 	href?: string | null;
@@ -113,7 +113,20 @@ export interface SidebarSearchOptions {
 	/** The address of every result for a query ("See all results"; Enter in the field opens it). */
 	all?: ((query: string) => string | null) | null;
 }
+export interface SidebarNavigationOptions {
+	/** Stable product key, independent of its translated display name. */
+	key: string;
+	/** Default: this origin's localStorage; null keeps memory only. No account data is stored. */
+	storage?: Pick<Storage, 'getItem' | 'setItem'> | null;
+	/** Omit for the persisted preference (first visit expanded). */
+	collapsed?: boolean;
+	/** Explicit desktop changes only; mobile visibility and contextual panels never call it. */
+	onchange?: ((collapsed: boolean) => void) | null;
+}
+
 export interface SidebarOptions {
+	/** Shared global hamburger/rail, independent of the contextual rail.panel. */
+	navigation?: SidebarNavigationOptions | null;
 	/** Desktop rail over these same groups; null preserves the standard sidebar (0.18.0). */
 	rail?: SidebarRailOptions | null;
 	/** The product's display name: the drawer's heading and its name, "{product} sections". */
@@ -171,6 +184,9 @@ export class Sidebar extends Component {
 	readonly expanded: boolean;
 	/** Replace rail configuration without rebuilding navigation (0.18.0). */
 	rail: SidebarRailOptions | null;
+	navigation: SidebarNavigationOptions | null;
+	/** Global desktop presentation only; never changes the current destination. */
+	collapsed: boolean;
 	/** Patched by keys in both forms (0.10.0): focus stays where it is. */
 	set groups(value: Array<SidebarGroup | SidebarEntries | SidebarObject>);
 	set context(value: SidebarOptions['context']);

@@ -6,6 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { Consumer } from './support/consumer.mjs';
 import { Browser } from './support/browser.mjs';
+import { checks as composition } from './checks/composition.mjs';
 import { checks as disclosure } from './checks/disclosure-flow.mjs';
 import { checks as keyboard } from './checks/keyboard.mjs';
 import { checks as picker } from './checks/picker.mjs';
@@ -66,6 +67,7 @@ import { checks as listing } from './checks/listing.mjs';
 import { checks as sorting } from './checks/sorting.mjs';
 import { checks as tooling } from './checks/tooling.mjs';
 import { checks as tabling } from './checks/tabling.mjs';
+import { checks as clearance } from './checks/table-clearance.mjs';
 import { checks as wheeling } from './checks/wheeling.mjs';
 import { checks as reserving } from './checks/reserving.mjs';
 
@@ -77,7 +79,7 @@ import { checks as reserving } from './checks/reserving.mjs';
 class Acceptance {
 	#root = fileURLToPath(new URL('..', import.meta.url));
 	#consumers = [new Consumer('dom', 'dom'), new Consumer('react19', 'react', '19.3.0'), new Consumer('react18', 'react', '18.3.1')];
-	#checks = [...disclosure, ...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...pinning, ...choosing, ...icons, ...prose, ...session, ...composing, ...panels, ...thread, ...attaching, ...folding, ...fitting, ...diffing, ...railing, ...laning, ...turning, ...missing, ...ending, ...anchoring, ...moving, ...seeking, ...editing, ...auditing, ...commanding, ...holding, ...navigating, ...hierarchy, ...dismissal, ...sheets, ...dialogs, ...recovery, ...recovering, ...waiting, ...insets, ...settling, ...closing, ...focusing, ...pressing, ...revealing, ...targeting, ...hanging, ...measuring, ...leading, ...touching, ...sorting, ...listing, ...tooling, ...tabling, ...resetting, ...wheeling, ...reserving];
+	#checks = [...composition, ...disclosure, ...keyboard, ...picker, ...notifications, ...help, ...presentation, ...strict, ...family, ...navigation, ...sidebar, ...operations, ...layout, ...pinning, ...choosing, ...icons, ...prose, ...session, ...composing, ...panels, ...thread, ...attaching, ...folding, ...fitting, ...diffing, ...railing, ...laning, ...turning, ...missing, ...ending, ...anchoring, ...moving, ...seeking, ...editing, ...auditing, ...commanding, ...holding, ...navigating, ...hierarchy, ...dismissal, ...sheets, ...dialogs, ...recovery, ...recovering, ...waiting, ...insets, ...settling, ...closing, ...focusing, ...pressing, ...revealing, ...targeting, ...hanging, ...measuring, ...leading, ...touching, ...sorting, ...listing, ...tooling, ...tabling, ...clearance, ...resetting, ...wheeling, ...reserving];
 	// Checks whose consumer and name hold the filter, or any of its parts separated by `|` (0.33.0)
 	#filters = (process.argv[2] ?? '').split('|').filter(Boolean);
 

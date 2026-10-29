@@ -16,7 +16,7 @@ const sheet = readFileSync(new URL('../dist/styles.css', import.meta.url), 'utf8
 const rule = selector => [...sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, names]) => names.split(',').map(name => name.trim()).includes(selector)).map(([, , body]) => body).join('\n');
 
 test('every state has a tone, each tone its own shape, and the family words in English and Spanish', () => {
-	const names = ['ready', 'busy', 'waking', 'asleep', 'attention', 'failed', 'unknown', 'success', 'running', 'idle', 'pending', 'stopped', 'done'];
+	const names = ['ready', 'busy', 'waking', 'asleep', 'attention', 'unavailable', 'failed', 'unknown', 'success', 'running', 'idle', 'pending', 'stopped', 'done'];
 	assert.deepEqual(Object.keys(ui.Status.states).sort(), [...names].sort());
 	assert.deepEqual([...new Set(Object.values(ui.Status.states))].sort(), ['attention', 'failure', 'idle', 'progress', 'success', 'unknown']);
 	for (const name of names) assert.ok(ui.Status.labels.en[name] && ui.Status.labels.es[name], name);

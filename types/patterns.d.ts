@@ -3,7 +3,7 @@ import type { Copy } from './notifications.js';
 import type { Component, MenuItem } from './dom.js';
 
 /** A state of the closed set; each has its tone, which is its shape and its hue. */
-export type StatusState = 'ready' | 'busy' | 'waking' | 'asleep' | 'attention' | 'failed' | 'unknown' | 'success' | 'running' | 'idle' | 'pending' | 'stopped' | 'done';
+export type StatusState = 'ready' | 'busy' | 'waking' | 'asleep' | 'attention' | 'unavailable' | 'failed' | 'unknown' | 'success' | 'running' | 'idle' | 'pending' | 'stopped' | 'done';
 /** A filled circle, a half-filled circle, a diamond, a square, a hollow circle or a dashed circle. */
 export type StatusTone = 'success' | 'progress' | 'attention' | 'failure' | 'idle' | 'unknown';
 
@@ -39,6 +39,8 @@ export interface ListRowOptions {
 	/** The overflow menu's items. */
 	menu?: Array<MenuItem | null | false>;
 	select?: { checked?: boolean; disabled?: boolean; name?: string | null; value?: string | null; onchange?: (checked: boolean) => void } | null;
+	/** Short metadata beside the name, wrapping on narrow rows (0.45.0). */
+	inline?: boolean;
 	current?: boolean;
 	tag?: 'li' | 'div';
 	labels?: Copy;

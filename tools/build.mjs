@@ -14,7 +14,7 @@ import { tokens, TokenSheet } from '../src/foundations/index.js';
  * runs this through `prepack`, and the tests run it first, so a stale copy is never packed.
  */
 class Build {
-	static order = ['base', 'focus', 'icons', 'controls', 'choice', 'cards', 'forms', 'picker', 'choose', 'overlays', 'palette', 'session', 'sheet', 'feedback', 'recovery', 'signal', 'status', 'collection', 'list-tools', 'table', 'list', 'list-rules', 'checklist', 'command', 'header', 'notify', 'navigation', 'family', 'family-narrow', 'family-menu', 'sidebar', 'sidebar-entries', 'sidebar-rail', 'page', 'resource', 'anatomy', 'panel', 'compact', 'thread', 'facts', 'arrival', 'notices', 'inbox', 'operations', 'details', 'rows', 'composer', 'editor', 'dictation', 'attachments', 'composing', 'activity', 'rail', 'lanes', 'turns', 'diff', 'diff-lines', 'code', 'quiet', 'prose', 'motion', 'links', 'insets', 'insets-floating', 'floating'];
+	static order = ['base', 'focus', 'icons', 'controls', 'choice', 'cards', 'forms', 'picker', 'choose', 'overlays', 'palette', 'session', 'sheet', 'feedback', 'callout', 'recovery', 'signal', 'status', 'collection', 'list-tools', 'table', 'list', 'list-frame', 'list-rules', 'checklist', 'command', 'header', 'notify', 'navigation', 'family', 'family-narrow', 'family-menu', 'sidebar', 'sidebar-entries', 'sidebar-rail', 'page', 'resource', 'anatomy', 'panel', 'compact', 'thread', 'facts', 'arrival', 'notices', 'inbox', 'operations', 'details', 'rows', 'composer', 'editor', 'dictation', 'attachments', 'composing', 'activity', 'rail', 'lanes', 'turns', 'diff', 'diff-lines', 'code', 'quiet', 'prose', 'motion', 'links', 'insets', 'insets-floating', 'floating'];
 
 	#root = new URL('../', import.meta.url);
 

@@ -27,6 +27,8 @@ export function ListRow(props: {
 	actions?: Array<{ label: string; onSelect?: ((event: Event) => void) | null; glyph?: string | null; name?: string | null } | null | false>;
 	menu?: Array<(Omit<MenuItem, 'run'> & { onSelect?: ((event: Event) => void) | null }) | null | false>;
 	select?: { checked?: boolean; disabled?: boolean; name?: string | null; value?: string | null; onChange?: ((checked: boolean) => void) | null } | null;
+	/** Short metadata beside the name, wrapping on narrow rows (0.45.0). */
+	inline?: boolean;
 	current?: boolean;
 	tag?: 'li' | 'div';
 	/** Memoize: a new object creates a new row */

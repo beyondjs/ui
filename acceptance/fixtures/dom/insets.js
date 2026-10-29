@@ -9,7 +9,7 @@
 import '@beyond-js/ui/tokens.css';
 import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
-import { callout, Button, EmptyState, Checklist, Section, Field, Unavailable, Toaster, CommandCard, Recovery, CopyMessage, ChoiceChip, DataTable, el } from '@beyond-js/ui';
+import { callout, Button, EmptyState, Checklist, Section, Field, Unavailable, Toaster, CommandCard, Recovery, CopyMessage, CopyValue, ChoiceChip, DataTable, el } from '@beyond-js/ui';
 import { words, jobs } from '../data/insets.js';
 
 const copy = words.en;
@@ -19,6 +19,8 @@ const time = Date.now() - 60_000;
 
 const buttons = [new Button({ label: copy.info.action, variant: 'secondary' }), new Button({ label: copy.info.other, variant: 'quiet' })];
 place('callout-actions', callout({ tone: 'info', title: copy.info.title, body: copy.info.body, actions: buttons.map(button => button.element) }));
+const identifier = new CopyValue({ value: 'credit_example_123', label: 'Credit record' });
+place('callout-copy', callout({ tone: 'success', title: 'The credit was saved.', body: identifier.element }));
 place('callout-text', callout({ tone: 'warning', title: copy.warning.title, body: copy.warning.body }));
 place('callout-details', callout({ tone: 'danger', title: copy.danger.title, body: copy.danger.body, details: { ...copy.danger.details, time } }));
 const empty = new EmptyState({ kind: 'empty', title: copy.empty.title, text: copy.empty.text, action: { label: copy.empty.action, run: () => {} } });
@@ -60,7 +62,7 @@ const toaster = new Toaster().mount(document.body);
 window.fixture = {
 	toast: () => toaster.show(copy.toast.title, { detail: copy.toast.detail, duration: 600_000 }),
 	destroy() {
-		for (const component of [toaster, ...tables, raised, effort, copied, recovery, command, refusal, notes, section, checklist, empty, ...buttons]) component.destroy();
+		for (const component of [identifier, toaster, ...tables, raised, effort, copied, recovery, command, refusal, notes, section, checklist, empty, ...buttons]) component.destroy();
 		main.remove();
 	},
 	ready: true

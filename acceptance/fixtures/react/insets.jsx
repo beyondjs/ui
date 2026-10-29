@@ -9,7 +9,7 @@ import '@beyond-js/ui/styles.css';
 import '@beyond-js/ui/fonts.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Callout, Button, EmptyState, Checklist, Section, Field, Unavailable, TechnicalDetails, CommandCard, Recovery, RetryAction, AgainLine, CopyMessage, ChoiceChip, DataTable, useToaster } from '@beyond-js/ui/react';
+import { Callout, Button, EmptyState, Checklist, Section, Field, Unavailable, TechnicalDetails, CommandCard, Recovery, RetryAction, AgainLine, CopyMessage, CopyValue, ChoiceChip, DataTable, useToaster } from '@beyond-js/ui/react';
 import { words, jobs } from '../data/insets.js';
 
 const copy = words.es;
@@ -27,6 +27,7 @@ function App() {
 			<div id="callout-actions">
 				<Callout tone="info" title={copy.info.title} body={copy.info.body} actions={<><Button label={copy.info.action} variant="secondary" /><Button label={copy.info.other} variant="quiet" /></>} />
 			</div>
+			<div id="callout-copy"><Callout tone="success" title="El crédito se guardó."><CopyValue value="credit_example_123" label="Registro de crédito" /></Callout></div>
 			<div id="callout-text">
 				<Callout tone="warning" title={copy.warning.title} body={copy.warning.body} />
 			</div>

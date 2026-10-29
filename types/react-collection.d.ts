@@ -24,6 +24,8 @@ export interface CollectionProps<Row> {
 	explain?: ((error: unknown) => string) | null;
 	labels?: Copy;
 	/** `list` (0.15.0): rows as `ListRow`s */ presentation?: 'table' | 'list';
+	/** Contains object-list groups in the shared frame; table presentation is unchanged (0.45.0). */
+	framed?: boolean;
 	/** 0.21.1 (D162): the list's own `ListRow` options for a row, its groups and its end line */ row?: ((row: Row, context: { differ: import('./parts.js').Differ }) => Partial<import('./patterns.js').ListRowOptions>) | null; group?: ((row: Row) => { key: string; label: string }) | null; end?: boolean | string | ((list: { count: number }) => string);
 	/** 0.24.0 (D163): the page's notice from `useRecovery`; a failure `outage` names joins it and the list says "Not available right now" in place */ recovery?: import('./again.js').Recovery | null; outage?: ((error: unknown) => boolean) | null; details?: ((error: unknown) => DetailsRecord | null) | null;
 }

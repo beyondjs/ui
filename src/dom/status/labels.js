@@ -1,7 +1,7 @@
 /** The words of `Status`'s states in English and Spanish (0.15.0): the family's one vocabulary (D105's five conditions among them). */
 export const words = Object.freeze({
-	en: Object.freeze({ ready: 'Ready', busy: 'Busy', waking: 'Waking up', asleep: 'Asleep', attention: 'Needs attention', failed: 'Failed', unknown: 'Unknown', success: 'Done', running: 'Running', idle: 'Idle', pending: 'Waiting', stopped: 'Stopped', done: 'Done' }),
-	es: Object.freeze({ ready: 'Lista', busy: 'Ocupada', waking: 'Despertando', asleep: 'Dormida', attention: 'Requiere atención', failed: 'Falló', unknown: 'Desconocido', success: 'Hecho', running: 'En curso', idle: 'Inactiva', pending: 'En espera', stopped: 'Detenida', done: 'Hecho' })
+	en: Object.freeze({ ready: 'Ready', busy: 'Busy', waking: 'Waking up', asleep: 'Asleep', attention: 'Needs attention', unavailable: 'Not available right now', failed: 'Failed', unknown: 'Unknown', success: 'Done', running: 'Running', idle: 'Idle', pending: 'Waiting', stopped: 'Stopped', done: 'Done' }),
+	es: Object.freeze({ ready: 'Lista', busy: 'Ocupada', waking: 'Despertando', asleep: 'Dormida', attention: 'Requiere atención', unavailable: 'No disponible ahora', failed: 'Falló', unknown: 'Desconocido', success: 'Hecho', running: 'En curso', idle: 'Inactiva', pending: 'En espera', stopped: 'Detenida', done: 'Hecho' })
 });
 
 /**
@@ -18,6 +18,7 @@ export const tones = Object.freeze({
 	running: 'progress',
 	waking: 'progress',
 	attention: 'attention',
+	unavailable: 'attention',
 	pending: 'idle',
 	asleep: 'idle',
 	stopped: 'idle',

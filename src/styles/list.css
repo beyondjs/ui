@@ -26,7 +26,8 @@
 }
 /* A React row is hosted in an element of its own (`display: contents`). */
 .bui-rows > .bui-row:first-child::before,
-.bui-rows > :first-child > .bui-row::before {
+.bui-rows > :first-child > .bui-row::before,
+.bui-rows > :first-child > .bui-host:first-child > .bui-row::before {
 	content: none;
 }
 /* Under a row's name (0.30.0): what a list item holds after its row (its quiet actions, a fold, its

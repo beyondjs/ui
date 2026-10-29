@@ -56,6 +56,7 @@ export class ListRow extends Component {
 	 * @param {Array<{label: string, run: (event: Event) => unknown, glyph?: string|null, name?: string|null}>} [options.actions] quiet actions
 	 * @param {Array<object>} [options.menu] the overflow menu's items (`ActionMenu` items)
 	 * @param {{checked?: boolean, disabled?: boolean, name?: string|null, value?: string|null, onchange?: (checked: boolean) => void}|null} [options.select] a checkbox before the name
+	 * @param {boolean} [options.inline] short metadata beside the name, wrapping without losing facts
 	 * @param {boolean} [options.current] the object in view
 	 * @param {'li'|'div'} [options.tag] the row's element (`li` inside a list)
 	 */
@@ -82,6 +83,7 @@ export class ListRow extends Component {
 		const { title, href = null, run = null, meta = null, lead = null, status = null, facts = [], actions = [], menu = [], select = null, current = false } = options;
 		this.#title(title, href, run);
 		this.#element.toggleAttribute('data-current', Boolean(current));
+		this.#element.toggleAttribute('data-inline', Boolean(options.inline));
 		this.#element.toggleAttribute('data-open', Boolean(href || run));
 		this.#mark(lead);
 		const parts = [].concat(meta).filter(part => part !== null && part !== undefined && part !== '');

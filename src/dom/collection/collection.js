@@ -66,6 +66,7 @@ export class Collection extends Component {
 	 * @param {{title: string, body?: string, action?: Node|{label: string, href?: string|null, run?: (event: Event) => void}}} [options.empty]
 	 * the empty collection, read on each draw; its one action a node or, since 0.44.0, `{ label, href, run }` (`EmptyState`'s)
 	 * @param {() => void} [options.onrender] runs after each redraw of the rows (the React adapter fills cells then)
+	 * @param {boolean} [options.framed] contains each object-list group in the shared frame (0.45.0)
 	 * @param {(row: object, context: {differ: import('../list/differ.js').Differ}) => object} [options.row] the list
 	 * presentation's own `ListRow` options for a row (0.21.1), given a `Differ` of the page's rows (0.44.0, L3)
 	 * @param {(row: object) => {key: string, label: string}} [options.group] groups consecutive rows under a label (0.21.1, `Recency`)
@@ -166,8 +167,8 @@ export class Collection extends Component {
 	}
 
 	#table(rows) {
-		const { label, columns, link = null, onopen = null, key, presentation = 'table', row = null, group = null } = this.#options;
-		return presentation === 'list' ? new CollectionRows({ label, columns, rows, link, onopen, key, row, group, query: this.#state.query }) : new Table({ label, columns, rows, link, onopen, key });
+		const { label, columns, link = null, onopen = null, key, presentation = 'table', framed = false, row = null, group = null } = this.#options;
+		return presentation === 'list' ? new CollectionRows({ label, columns, rows, framed, link, onopen, key, row, group, query: this.#state.query }) : new Table({ label, columns, rows, link, onopen, key });
 	}
 
 	/**

@@ -12,6 +12,8 @@ import { Hint } from '../core/hint.js';
 import { words } from './labels.js';
 import { SidebarRail } from './rail.js';
 import { SidebarStart } from './start.js';
+import { Relayout } from '../core/relayout.js';
+import { SidebarViewport } from './viewport.js';
 import { SidebarContext } from './context.js';
 
 /**
@@ -56,10 +58,9 @@ export class Sidebar extends Component {
 	#merge = new SidebarMerge();
 	#sections;
 	#labels;
-	#cut;
+	#viewport;
 	#product;
 	#section = null;
-	#query = null;
 	#onnavigate;
 	#folds;
 	#shortcut;
@@ -80,12 +81,12 @@ export class Sidebar extends Component {
 	 * @param {(item: {href: string, url: string, label: string}, event: MouseEvent) => void} [options.onnavigate]
 	 * @param {object} [options.labels] replaces entries of `Sidebar.labels.en`
 	 * @param {boolean} [options.shortcut] ⌘K / Ctrl+K opens the search (0.14.0)
+	 * @param {{key: string, storage?: Storage|null, collapsed?: boolean, onchange?: Function}|null} [options.navigation] global navigation presentation, independent of the contextual panel
 	 * @param {{panel?: string|null, open?: boolean, order?: string[], onchange?: (open: boolean) => void}|null} [options.rail] opt-in desktop rail and contextual object group (0.18.0)
 	 */
-	constructor({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onnavigate = null, labels = {}, shortcut = false, rail = null }) {
+	constructor({ product, groups = [], context = null, cut = 1024, section = null, action = null, search = null, onnavigate = null, labels = {}, shortcut = false, rail = null, navigation = null }) {
 		super();
 		this.#labels = new Labels(words, labels);
-		this.#cut = Number.isFinite(cut) && cut > 0 ? cut : 1024;
 		this.#onnavigate = onnavigate;
 		this.#product = product;
 		const name = this.#labels.text('sections', { product });
@@ -96,7 +97,7 @@ export class Sidebar extends Component {
 		this.#sections = new SidebarSections({ name, labels: this.#labels, folds: this.#folds, shortcut: shortcut ? this.#shortcut.words : null });
 		this.#panel = el('div', { class: 'bui-sidebar-panel' }, [this.#sections.panel]);
 		this.#panel.id = Ids.next('bui-sidebar-panel');
-		this.#rail = new SidebarRail({ name, panel: this.#panel.id, labels: this.#labels, onchange: () => this.#layout() });
+		this.#rail = new SidebarRail({ name, panel: this.#panel.id, labels: this.#labels, onchange: active => this.#layout(active) });
 		this.#button = el('button', { type: 'button', class: 'bui-sidebar-button', 'aria-haspopup': 'dialog', 'aria-expanded': 'false', 'aria-controls': id, onclick: () => this.open() });
 		this.#row = el('div', { class: 'bui-sidebar-row' }, [this.#button]);
 		this.#start = new SidebarStart(this.#row);
@@ -109,28 +110,28 @@ export class Sidebar extends Component {
 		this.#sections.groups = groups;
 		this.#rail.groups = groups;
 		this.#rail.options = rail;
+		this.#rail.navigation.options = navigation;
+		this.#rail.navigation.place(() => !this.#rail.options ? this.#sections.seek('panel') : false);
+		this.#rail.navigation.context = context;
+		this.#rail.navigation.action = action;
+		this.#rail.refresh();
 		this.#start.groups = groups;
 		this.#sections.context = context;
 		this.#sections.action = action;
 		this.#sections.search = search;
+		this.#rail.navigation.search = this.#sections.search;
 		this.#section = section;
 		this.#draw();
-		this.#watch();
+		this.#viewport = new SidebarViewport({ element: this.#element, panel: this.#panel, row: this.#row, button: this.#button, drawer: this.#drawer, rail: this.#rail, merge: this.#merge, layout: () => this.#layout() }, cut);
 	}
 
-	get element() {
-		return this.#element;
-	}
+	get element() { return this.#element; }
 
 	/** `permanent` at or above the cut, `drawer` below it. */
-	get mode() {
-		return this.#element.dataset.mode;
-	}
+	get mode() { return this.#element.dataset.mode; }
 
 	/** Whether the drawer is open. */
-	get expanded() {
-		return this.#drawer.shown;
-	}
+	get expanded() { return this.#drawer.shown; }
 
 	/** Replaces the groups of links, patching both forms by keys (focus stays where it is). */
 	set groups(value) {
@@ -142,6 +143,12 @@ export class Sidebar extends Component {
 		this.#layout();
 		if (inside && this.#rail.enabled && !this.#rail.shown) this.#rail.return();
 	}
+
+	/** Global navigation preference; the contextual panel and mobile drawer stay independent. */
+	get navigation() { return this.#rail.navigation.options; }
+	set navigation(value) { this.#rail.navigation.options = value; this.#rail.refresh(); this.#layout(); }
+	get collapsed() { return this.#rail.navigation.collapsed; }
+	set collapsed(value) { this.#rail.navigation.set(value); }
 
 	/** Opt-in desktop rail. The drawer and merged family bar keep the full navigation. */
 	get rail() { return this.#rail.options; }
@@ -155,16 +162,19 @@ export class Sidebar extends Component {
 	/** Replaces the context block. */
 	set context(value) {
 		this.#sections.context = value;
+		this.#rail.navigation.context = value;
 	}
 
 	/** Replaces the top action link (`{ label, href, glyph? }`), or removes it with null (0.10.0). */
 	set action(value) {
 		this.#sections.action = value;
+		this.#rail.navigation.action = value;
 	}
 
 	/** Replaces the search (`{ label, source, … }`), or removes it with null; the same label keeps the query (0.10.0). */
 	set search(value) {
 		this.#sections.search = value;
+		this.#rail.navigation.search = this.#sections.search;
 	}
 
 	/** Replaces the row's text (null: the current item's label). */
@@ -197,8 +207,9 @@ export class Sidebar extends Component {
 			this.open();
 			return this.#sections.seek('drawer');
 		}
+		if (this.#rail.navigation.enabled && !this.#rail.options) this.collapsed = false;
 		this.#rail.open();
-		return this.#sections.seek('panel');
+		return this.#sections.seek('panel') || (this.#rail.navigation.enabled && this.#rail.navigation.seek());
 	}
 
 	/** Opens the drawer (below the cut only). */
@@ -225,6 +236,7 @@ export class Sidebar extends Component {
 	}
 
 	destroy() {
+		this.#viewport.destroy();
 		this.#context.destroy();
 		this.#start.destroy();
 		this.#rail.destroy();
@@ -244,42 +256,29 @@ export class Sidebar extends Component {
 		this.#button.replaceChildren(glyph('menu'), el('span', { class: 'bui-sidebar-section', text: label }));
 	}
 
-	/** Follows the viewport across the cut. */
-	#watch() {
-		const view = this.#element.ownerDocument.defaultView;
-		this.#query = view.matchMedia?.(`(min-width: ${this.#cut}px)`) ?? null;
-		this.#mode();
-		if (this.#query?.addEventListener) this.listen(this.#query, 'change', () => this.#mode());
-		this.listen(view, 'resize', () => this.#mode());
-	}
-
-	#mode() {
-		const view = this.#element.ownerDocument.defaultView;
-		const wide = this.#query ? this.#query.matches : view.innerWidth >= this.#cut;
-		const mode = wide ? 'permanent' : 'drawer';
-		if (this.#element.dataset.mode === mode) return;
-		this.#element.dataset.mode = mode;
-		this.#merge.mode(mode);
-		this.#layout();
-		this.#row.hidden = wide;
-		if (!wide || !this.#drawer.shown) return;
-		const inside = this.#drawer.element.contains(this.#element.ownerDocument.activeElement);
-		this.#drawer.close({ refocus: false });
-		const target = this.#rail.enabled ? this.#rail.element : this.#panel;
-		if (inside) (target.querySelector('[aria-current="page"]') ?? target.querySelector('a[href], button'))?.focus({ preventScroll: true });
-	}
-
-	#layout() {
+	#layout(active = this.#element.ownerDocument.activeElement) {
 		const wide = this.mode === 'permanent';
 		const enabled = this.#rail.enabled;
 		const shown = enabled && this.#rail.shown;
+		const inline = this.#rail.navigation.enabled && !this.#rail.options;
+		this.#element.toggleAttribute('data-inline', inline);
+		this.#element.toggleAttribute('data-navigation', this.#rail.navigation.enabled);
+		this.#element.toggleAttribute('data-collapsed', this.#rail.navigation.enabled && this.#rail.navigation.collapsed);
 		if (enabled && this.#rail.element.parentNode !== this.#element) this.#element.prepend(this.#rail.element);
 		if (!enabled) this.#rail.element.remove();
-		if (enabled && !shown && this.#panel.contains(this.#element.ownerDocument.activeElement)) this.#rail.return();
-		this.#sections.panel = enabled ? this.#rail.options.panel ?? '' : null;
-		this.#context.show({ wide, enabled, shown });
+		if (enabled && !shown && (!inline || this.collapsed) && this.#panel.contains(this.#element.ownerDocument.activeElement)) this.#rail.return();
+		this.#sections.panel = enabled && !inline ? this.#rail.options?.panel ?? '' : null;
+		this.#sections.panel.setAttribute('aria-label', this.#rail.navigation.enabled && shown && this.#rail.context ? this.#rail.context : this.#labels.text('sections', { product: this.#product }));
+		this.#context.show({ wide, enabled: enabled && !inline, shown });
+		if (inline) Relayout.hide(this.#panel, !wide || this.collapsed, this.#element);
+		if (this.#rail.navigation.enabled) Relayout.tell(this.#element);
 		this.#rail.element.hidden = !wide || !enabled;
-		const head = enabled ? this.#panel.querySelector('.bui-sidebar-object-head') : null;
+		if (inline && !this.collapsed && active?.classList.contains('bui-sidebar-rail-item')) {
+			const group = [...this.#panel.querySelectorAll('.bui-sidebar-object')].find(node => node.dataset.key === active.dataset.object);
+			const target = group?.querySelector('[aria-current], a[href], button') ?? [...this.#panel.querySelectorAll('a[href]')].find(node => node.getAttribute('href') === active.getAttribute('href'));
+			target?.focus({ preventScroll: true });
+		}
+		const head = enabled && !inline ? this.#panel.querySelector('.bui-sidebar-object-head') : null;
 		if (head && this.#rail.collapse.parentNode !== head) head.append(this.#rail.collapse);
 		if (!head) this.#rail.collapse.remove();
 	}

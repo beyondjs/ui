@@ -107,6 +107,8 @@ export interface CollectionOptions<Row> {
 	explain?: ((error: unknown) => string) | null;
 	/** `list` (0.15.0, DQ-12): rows as `ListRow`s, two short lines on a phone. */
 	presentation?: 'table' | 'list';
+	/** Contains object-list groups in the shared frame; table presentation is unchanged (0.45.0). */
+	framed?: boolean;
 	/** 0.21.1 (D162): the list presentation's own `ListRow` options for a row, over the columns' */
 	row?: ((row: Row, context: { differ: Differ }) => Partial<import('./patterns.js').ListRowOptions>) | null;
 	/** 0.21.1 (D162): consecutive rows under a label (`Recency` for a list ordered by activity) */

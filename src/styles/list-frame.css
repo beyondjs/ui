@@ -1,0 +1,45 @@
+/* Contained object collections (0.45.0). Opt in once on the list, not with product row CSS.
+   The frame takes the page edge; its shared inset holds identity, metadata and actions together. */
+.bui-rows[data-framed] {
+	--bui-rows-inset: var(--space-4);
+	--bui-row-axis: calc(var(--bui-rows-inset) + 9px + var(--space-3));
+	margin-inline: 0;
+	border: 1px solid var(--color-border-strong);
+	border-radius: var(--radius-base);
+	background: var(--color-surface);
+}
+.bui-rows[data-framed] .bui-row {
+	padding: var(--bui-rows-inset);
+}
+.bui-rows[data-framed] .bui-row::before {
+	inset-inline: var(--bui-rows-inset);
+}
+.bui-rows[data-framed] .bui-row-title {
+	font-weight: var(--weight-semibold);
+}
+.bui-rows[data-framed] > :first-child,
+.bui-rows[data-framed] > :first-child > .bui-row,
+.bui-rows[data-framed] > :first-child > .bui-host:first-child > .bui-row { border-start-start-radius: var(--radius-base); border-start-end-radius: var(--radius-base); }
+.bui-rows[data-framed] > :last-child,
+.bui-rows[data-framed] > :last-child > .bui-row,
+.bui-rows[data-framed] > :last-child > .bui-host:first-child > .bui-row { border-end-start-radius: var(--radius-base); border-end-end-radius: var(--radius-base); }
+.bui-row[data-inline] .bui-row-main {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--space-2) var(--space-3);
+}
+.bui-row[data-inline] .bui-row-title { max-width: 100%; }
+.bui-row[data-inline] .bui-row-meta { max-width: 100%; white-space: normal; }
+
+.bui-rows[data-framed] .bui-row-lead .bui-organization-mark {
+	width: var(--space-10);
+	height: var(--space-10);
+	font-size: var(--text-body);
+}
+
+/* The frame already closes the final row; the completeness text needs no second boundary. */
+.bui-rows[data-framed] + .bui-rows-end,
+.bui-rows-groups:has(> .bui-rows-group > .bui-rows[data-framed]) + .bui-rows-end {
+	border-top: 0;
+}

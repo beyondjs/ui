@@ -35,7 +35,7 @@ export function callout({ tone = 'info', title, body = null, actions = [], live 
 	return el('div', { class: `bui-callout bui-callout-${tone}`, role: live ? (tone === 'danger' ? 'alert' : 'status') : null }, [
 		glyph(glyphs[tone] ?? 'info'),
 		el('div', { class: 'bui-callout-body' }, [
-			el('p', { class: 'bui-callout-title' }, [content(title)]),
+			title !== undefined && title !== null && title !== '' ? el('p', { class: 'bui-callout-title' }, [content(title)]) : null,
 			body ? el('p', { class: 'bui-callout-text' }, [content(body)]) : null,
 			actions.length ? el('div', { class: 'bui-callout-actions' }, actions) : null,
 			details ? new TechnicalDetails(details).element : null

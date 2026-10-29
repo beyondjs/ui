@@ -22,7 +22,7 @@ export class CollectionRows {
 	#rows;
 	#keys;
 
-	constructor({ label, columns, rows, link = null, onopen = null, key = row => row.id, row: own = null, group = null, query = '' }) {
+	constructor({ label, columns, rows, link = null, onopen = null, key = row => row.id, row: own = null, group = null, query = '', framed = false }) {
 		const primary = columns.find(column => column.primary) ?? columns[0];
 		const value = (row, column) => (column.value ? column.value(row) : row[column.key]);
 		const named = text => (typeof text === 'string' && query ? Matches.mark(text, query) : text);
@@ -41,6 +41,10 @@ export class CollectionRows {
 		this.#rows.forEach((row, index) => (row.element.dataset.key = key(rows[index]) ?? ''));
 		const name = typeof label === 'string' ? label : null;
 		this.#element = group ? CollectionRows.#grouped(rows, this.#rows, group, name) : el('ul', { class: 'bui-rows bui-collection-rows', 'aria-label': name }, this.#rows.map(row => row.element));
+		if (framed) {
+			const lists = group ? this.#element.querySelectorAll('.bui-rows') : [this.#element];
+			for (const list of lists) list.setAttribute('data-framed', '');
+		}
 		this.#keys = new RowKeys(this.#element);
 	}
 

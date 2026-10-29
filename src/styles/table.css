@@ -173,6 +173,10 @@
 		flex-basis: 100%;
 		order: -1;
 	}
+	/* The menu's lower half extends past its flex line. Reserve that room before the values. */
+	.bui-data tr:has(> .bui-data-menu:not([data-empty]))::after {
+		block-size: max(0px, min(calc((var(--bui-target) - 1lh) / 2), var(--space-2)));
+	}
 	.bui-data td.bui-data-menu {
 		display: flex;
 		flex: none;
