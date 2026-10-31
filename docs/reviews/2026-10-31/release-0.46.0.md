@@ -25,7 +25,11 @@ Beyond Accounts' consent for an AI app's permissions asks a person to choose sev
 
 Through the machine's test queue, on 2026-10-31, from the worktree of `claude/permissions-20261031`.
 
-RESULTS
+- `npm test`: 1120 tests, 1120 passed, 0 failed (`tests/choices-framed.test.mjs` among them).
+- `npm run types`: no error; the typed fixtures compile `framed` and React content in a hint.
+- `BEYOND_UI_BROWSER=<engine> node acceptance/run.mjs 'framed choices|the cards keep'`: 9 checks, 9 passed, in each of chrome 156.0.8078.80, firefox 155.0 and webkit 26.6.
+
+Accounts' adoption (same request) ran its interface suite on the archive (44 files, 301 tests passed) and its browser drivers in Chromium; those are Accounts' evidence.
 
 ## Limits
 
