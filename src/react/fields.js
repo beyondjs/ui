@@ -109,8 +109,8 @@ function Statement({ id, name, option, value = undefined, report = null }) {
 }
 
 /** A state with its dot, as the DOM `status` builder draws it. */
-function State({ status }) {
-	return h('span', { className: `bui-status bui-status-${status[1] ?? 'neutral'}` }, h('span', { className: 'bui-status-dot', 'aria-hidden': 'true' }), status[0]);
+function State({ status, id = undefined, badge = false }) {
+	return h('span', { id, className: `bui-status${badge ? ' bui-status-badge' : ''} bui-status-${status[1] ?? 'neutral'}` }, h('span', { className: 'bui-status-dot', 'aria-hidden': 'true' }), status[0]);
 }
 
 /**
@@ -150,8 +150,10 @@ function Native({ options, className, ...rest }) {
  * Checkboxes or radio buttons in a fieldset. `value` is an array for checkboxes and a string for
  * radios; `onChange` receives the next value. Disabled options show their `reason`. A radio group
  * with one option that can be chosen is stated as text (0.7.0, D56) unless `statement` is false.
+ * `framed` (0.46.0) draws the DOM `Choices`' framed rows: the whole row the control's, the hint under the title
+ * and the state as a tag at the row's end; a hint or a reason may be React content.
  */
-export function Choices({ legend, type = 'checkbox', name, options, value, onChange, hint = null, error = null, statement = true }) {
+export function Choices({ legend, type = 'checkbox', name, options, value, onChange, hint = null, error = null, statement = true, framed = false }) {
 	const id = useId();
 	const one = statement && type === 'radio' ? single(options) : null;
 	if (one) {
@@ -172,7 +174,7 @@ export function Choices({ legend, type = 'checkbox', name, options, value, onCha
 	};
 	return h(
 		'fieldset',
-		{ className: `bui-choices bui-choices-${type}${error ? ' bui-field-invalid' : ''}`, 'aria-describedby': described },
+		{ className: `bui-choices bui-choices-${type}${error ? ' bui-field-invalid' : ''}`, 'aria-describedby': described, 'data-framed': framed ? '' : undefined },
 		h('legend', { className: 'bui-field-label' }, legend),
 		hint ? h('p', { id: `${id}-hint`, className: 'bui-field-hint' }, hint) : null,
 		h(
@@ -181,13 +183,12 @@ export function Choices({ legend, type = 'checkbox', name, options, value, onCha
 			options.map((option, index) => {
 				const input = `${id}-${index}`;
 				const note = option.hint || option.reason ? `${input}-note` : undefined;
-				return h(
-					'div',
-					{ key: option.value, className: `bui-choice${option.disabled ? ' bui-choice-disabled' : ''}` },
-					h('input', { id: input, type, name: name ?? id, value: option.value, checked: chosen.has(option.value), disabled: option.disabled, 'aria-describedby': note, onChange: event => change(option, event.target.checked) }),
-					h('label', { htmlFor: input }, option.label, option.status?.[0] ? [' ', h(State, { key: 'state', status: option.status })] : null),
-					note ? h('p', { id: note, className: 'bui-choice-note' }, option.reason ?? option.hint) : null
-				);
+				const state = framed && option.status?.[0] ? `${input}-state` : undefined;
+				const control = h('input', { id: input, type, name: name ?? id, value: option.value, checked: chosen.has(option.value), disabled: option.disabled, 'aria-describedby': [note, state].filter(Boolean).join(' ') || undefined, onChange: event => change(option, event.target.checked) });
+				const said = note ? h('p', { id: note, className: 'bui-choice-note' }, option.reason ?? option.hint) : null;
+				const kind = `bui-choice${option.disabled ? ' bui-choice-disabled' : ''}`;
+				if (framed) return h('div', { key: option.value, className: kind }, control, h('label', { htmlFor: input, className: 'bui-choice-title' }, option.label), said, state ? h(State, { id: state, status: option.status, badge: true }) : null);
+				return h('div', { key: option.value, className: kind }, control, h('label', { htmlFor: input }, option.label, option.status?.[0] ? [' ', h(State, { key: 'state', status: option.status })] : null), said);
 			})
 		),
 		h('p', { id: `${id}-error`, className: 'bui-field-error', hidden: !error }, error ? [h(Mark, { key: 'icon', name: 'alert' }), h('span', { key: 'text' }, error)] : null)

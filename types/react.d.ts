@@ -60,7 +60,9 @@ export function Field(props: { label: ReactNode; hint?: ReactNode; error?: React
 /** A suggested value that follows `suggestion` until the person edits it (0.7.0). */
 export function useSuggestion(suggestion: string | null): { value: string; onChange: (event: { target: { value: string } } | string) => void; onBlur: (event: { target: { value: string } }) => void; suggested: boolean; follow: () => void };
 export function Select(props: SelectHTMLAttributes<HTMLSelectElement> & { options: SelectOption[]; /** One option is stated as text (default true; 0.7.0) */ statement?: boolean }): ReactElement;
-export function Choices(props: { legend: ReactNode; type?: 'checkbox' | 'radio'; name?: string; options: ChoiceOption[]; value: string | string[] | null; onChange?: (value: any) => void; hint?: ReactNode; error?: ReactNode; statement?: boolean }): ReactElement;
+/** A choice's option in React: its label, hint and reason may be React content. */
+export interface ReactChoiceOption extends Omit<ChoiceOption, 'label' | 'hint' | 'reason'> { label: ReactNode; hint?: ReactNode; reason?: ReactNode }
+export function Choices(props: { legend: ReactNode; type?: 'checkbox' | 'radio'; name?: string; options: ReactChoiceOption[]; value: string | string[] | null; onChange?: (value: any) => void; hint?: ReactNode; error?: ReactNode; statement?: boolean; /** One framed box of rows: the whole row the control's, the hint under the title, the state as a tag at the row's end (0.46.0) */ framed?: boolean }): ReactElement;
 
 /** Actions with `onSelect` read from the latest props. */
 export interface ReactChoiceAction { label: string; onSelect?: (() => void) | null; disabled?: boolean; reason?: string | null }

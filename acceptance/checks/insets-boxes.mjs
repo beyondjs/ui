@@ -162,6 +162,12 @@ export const pages = {
 		] },
 		{ file: 'conversation.html', steps: [{ open: page => page.locator('.bui-rail > .bui-activity > .bui-activity-head, .bui-rail > .bui-host > .bui-activity > .bui-activity-head').first().click(), boxes: [{ name: 'activity exchange', box: '.bui-rail .bui-activity-exchange', inset: 12, sides: record }] }] },
 		{ file: 'pressing.html', steps: [{ boxes: [{ name: 'ComposerChip', box: '.bui-composer-tray .bui-composer-chip', inset: 12, sides: record }] }] },
+		// Framed choices (0.46.0): the box and each row hold one inset: a row with a hint and a tag, the chosen one, a
+		// disabled one ending in its reason, one with no hint; at 390 px each tag under its hint ends its row
+		{ file: 'framing.html', steps: [{ boxes: [
+			{ name: 'framed choices', box: '#permissions .bui-choices-list', flat: ['.bui-choice'], inset: '--bui-choices-inset' },
+			...['a framed choice with a hint and a tag', 'the chosen framed choice', 'a disabled framed choice ending in its reason', 'a framed choice with no hint'].map((name, nth) => ({ name, box: '#permissions .bui-choice', nth, inset: '--bui-choices-inset' }))
+		] }] },
 		{ file: 'conversation.html', widths: [1440], steps: [{ open: query, boxes: [{ name: 'the sidebar\'s search field', box: '.bui-sidebar-panel .bui-sidebar-query', field: true, inset: 'even', sides: record }] }] }
 	],
 	overlays: [

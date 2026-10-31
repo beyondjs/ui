@@ -58,7 +58,8 @@ test('every box names its inset as a step of the spacing scale', () => {
 		['.bui-menu', '--bui-menu-inset', 'var(--space-4)'],
 		['.bui-notice', '--bui-notice-inset', 'var(--space-2)'],
 		['.bui-turns-preview', '--bui-preview-inset', 'var(--space-3)'],
-		['.bui-palette', '--bui-palette-inset', 'var(--space-4)']
+		['.bui-palette', '--bui-palette-inset', 'var(--space-4)'],
+		['.bui-choices[data-framed]', '--bui-choices-inset', 'var(--space-4)']
 	];
 	for (const [selector, name, value] of named) assert.match(sheet, rule(sheet, selector, `${name}: ${value}`), `${selector} names ${name}`);
 	assert.match(sheet, /\.bui-raised,\s*\.bui-section\[data-raised\]\s*\{\s*--bui-raised-inset:\s*var\(--space-4\)/);

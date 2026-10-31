@@ -1,0 +1,103 @@
+/* Choices drawn framed (0.46.0): several options, each described with what it gives or costs, in one framed box
+   drawn as a framed list's rows (`ul.bui-rows[data-framed]`): one border, dividers between rows on the rows'
+   inset, the pointer's row lifted. A row is its checkbox or radio, its title with its hint under it at the reading
+   measure, and its state as a tag at the row's end, under the hint on a narrow row (30rem, as a list row's end).
+   The title's target covers the row, so the whole row is its control's. The chosen row sits on the selection's
+   surface, from the input's own state; nothing moves on a press. The inset is `--bui-choices-inset` (insets.css).
+   Tokens only. */
+.bui-choices[data-framed] {
+	/* The control's size, and the height of a row's first line: the title and the tag are centred on it */
+	--bui-choices-mark: 18px;
+}
+.bui-choices[data-framed] > .bui-choices-list {
+	gap: 0;
+	border: 1px solid var(--color-border-strong);
+	border-radius: var(--radius-base);
+	background: var(--color-surface);
+}
+.bui-choices[data-framed] .bui-choice {
+	container: bui-choice / inline-size;
+	position: relative;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	grid-template-areas: 'check title state' '. note .';
+	align-content: start;
+	align-items: start;
+	gap: 0;
+	/* Its control and one inset each side make it taller than a target: no least height that would stretch its lines */
+	min-height: 0;
+	padding: var(--bui-choices-inset);
+	border-radius: 0;
+	color: var(--color-text);
+}
+.bui-choices[data-framed] .bui-choice + .bui-choice::before {
+	position: absolute;
+	inset: 0 var(--bui-choices-inset) auto;
+	border-top: 1px solid var(--color-border-strong);
+	content: '';
+	pointer-events: none;
+}
+.bui-choices[data-framed] .bui-choice:first-child {
+	border-start-start-radius: var(--radius-base);
+	border-start-end-radius: var(--radius-base);
+}
+.bui-choices[data-framed] .bui-choice:last-child {
+	border-end-start-radius: var(--radius-base);
+	border-end-end-radius: var(--radius-base);
+}
+.bui-choices[data-framed] .bui-choice:not(.bui-choice-disabled, :has(> input:checked)):hover {
+	background: var(--overlay-lift);
+}
+.bui-choices[data-framed] .bui-choice:not(.bui-choice-disabled, :has(> input:checked)):active {
+	background: var(--color-surface-sunken);
+}
+.bui-choices[data-framed] .bui-choice:has(> input:checked) {
+	background: var(--color-surface-selected);
+}
+.bui-choices[data-framed] .bui-choice > input {
+	grid-area: check;
+	width: var(--bui-choices-mark);
+	height: var(--bui-choices-mark);
+	margin: 0;
+	margin-inline-end: var(--space-3);
+}
+/* The title's first line is centred on the control: its line keeps no more room above and below than the control */
+.bui-choices[data-framed] .bui-choice-title {
+	grid-area: title;
+	min-width: 0;
+	margin-block: calc((var(--bui-choices-mark) - var(--text-body) * var(--leading-body)) / 2);
+	font-size: var(--text-body);
+	font-weight: var(--weight-medium);
+	line-height: var(--leading-body);
+	overflow-wrap: anywhere;
+}
+/* The title's target covers the row: a press anywhere on it, the hint and the tag included, is the control's */
+.bui-choices[data-framed] .bui-choice-title::after {
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	content: '';
+}
+.bui-choices[data-framed] .bui-choice-note {
+	grid-area: note;
+	margin-block-start: var(--space-1);
+	line-height: var(--leading-small);
+}
+.bui-choices[data-framed] .bui-choice > .bui-status {
+	grid-area: state;
+	justify-self: end;
+	box-sizing: border-box;
+	height: var(--bui-choices-mark);
+	margin-inline-start: var(--space-3);
+	line-height: 1;
+}
+@container bui-choice (max-width: 30rem) {
+	.bui-choices[data-framed] .bui-choice > .bui-status {
+		grid-area: auto;
+		grid-column: 2;
+		grid-row: 3;
+		justify-self: start;
+		margin-inline-start: 0;
+		margin-block-start: var(--space-2);
+	}
+}

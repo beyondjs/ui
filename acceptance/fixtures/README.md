@@ -7,3 +7,5 @@ The composition examples enter through `dom/composition.html` / `dom/composition
 Other fixture groups remain described by `docs/validation.md`, their consuming check and any local README.
 
 `dom/table-clearance.html` and `react/table-clearance.html` draw framed comparison tables with fictional members. They cover `menu(row)`, a product-owned menu column (React content through its portal), long names and rows without actions. `checks/table-clearance.mjs` checks painted target clearance, name alignment, containment and activation at 320/390 px with fine/coarse input in both themes; each menu stays wholly above the metadata line.
+
+`dom/framing.html` and `react/framing.html` draw framed choices (0.46.0) with fictional permissions from `data/framing.js`: one with a hint and a tag, a chosen one, a disabled one with its reason, one with no hint, and a framed radio group; the React page draws one hint as React content. `checks/framing.mjs` and the insets check's cards exercise them.

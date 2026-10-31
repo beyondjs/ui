@@ -131,3 +131,8 @@ export function Signed({ person }: { person: { id: string; name: string } | null
 	void session?.check().then(state => state === 'signed');
 	return <Bar product="delegate" brand={{ src: '/w.svg', href: '/' }} />;
 }
+
+// 0.46.0 in React: framed choices whose hint is React content.
+export function Permissions() {
+	return <Group legend="Permissions" framed options={[{ value: 'read', label: 'Read your projects', hint: <span>See projects <Badge label="Read only" /></span>, status: ['Read only', 'neutral'] }, { value: 'run', label: 'Start machines', reason: <em>Only an owner</em>, disabled: true }]} value={['read']} onChange={() => undefined} />;
+}

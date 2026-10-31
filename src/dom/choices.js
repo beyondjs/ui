@@ -16,6 +16,12 @@ import { statement, single, said } from './core/statement.js';
  * radio). A single checkbox stays a checkbox: it is a yes or no, not a choice among options. The
  * statement keeps the option's `hint` and its `status` (`[label, tone]`, also drawn beside an option's
  * label in the group; 0.7.1).
+ *
+ * `framed` (0.46.0) draws the options as one framed box of rows, as a framed list's (`ul.bui-rows[data-framed]`),
+ * for several options each described with a consequence: the checkbox or radio first, the option's label as the
+ * row's title with its `hint` (or `reason`) under it, and its `status` as a tag at the row's end, under the hint
+ * on a narrow row. The label's target covers the row, so the whole row is the control's; a chosen row sits on the
+ * selection's surface (drawn from the input's own `checked`). The hint and the state describe the control.
  */
 export class Choices extends Component {
 	#element;
@@ -30,10 +36,11 @@ export class Choices extends Component {
 	 * @param {object} options
 	 * @param {string|Node} options.legend
 	 * @param {'checkbox'|'radio'} [options.type]
-	 * @param {Array<{value: string, label: string|Node, hint?: string, disabled?: boolean, reason?: string}>} options.options
+	 * @param {Array<{value: string, label: string|Node, hint?: string|Node, disabled?: boolean, reason?: string|Node, status?: [string, string]}>} options.options
 	 * @param {string|string[]} [options.value]
+	 * @param {boolean} [options.framed] one framed box of rows (0.46.0)
 	 */
-	constructor({ legend, type = 'checkbox', name = null, options, value = null, hint = null, error = null, required = false, onchange = null, statement: stating = true }) {
+	constructor({ legend, type = 'checkbox', name = null, options, value = null, hint = null, error = null, required = false, onchange = null, statement: stating = true, framed = false }) {
 		super();
 		this.#type = type;
 		this.#onchange = onchange;
@@ -54,6 +61,7 @@ export class Choices extends Component {
 		const rows = options.map((option, index) => {
 			const control = `${id}-${index}`;
 			const note = option.hint || option.reason ? `${control}-note` : null;
+			const state = framed && option.status?.[0] ? `${control}-state` : null;
 			const input = el('input', {
 				id: control,
 				type,
@@ -62,23 +70,38 @@ export class Choices extends Component {
 				checked: chosen.has(option.value),
 				disabled: option.disabled,
 				required: required && type === 'radio',
-				'aria-describedby': note,
+				'aria-describedby': [note, state].filter(Boolean).join(' ') || null,
 				onchange: () => this.#onchange?.(this.value)
 			});
 			this.#inputs.push(input);
-			return el('div', { class: `bui-choice${option.disabled ? ' bui-choice-disabled' : ''}` }, [
+			const kind = `bui-choice${option.disabled ? ' bui-choice-disabled' : ''}`;
+			if (framed) return Choices.#framed(kind, input, option, note, state);
+			return el('div', { class: kind }, [
 				input,
 				el('label', { for: control }, [content(option.label), option.status?.[0] ? [' ', el('span', { class: `bui-status bui-status-${option.status[1] ?? 'neutral'}` }, [el('span', { class: 'bui-status-dot', 'aria-hidden': 'true' }), option.status[0]])] : null]),
-				note ? el('p', { id: note, class: 'bui-choice-note', text: option.reason ?? option.hint }) : null
+				note ? el('p', { id: note, class: 'bui-choice-note' }, [content(option.reason ?? option.hint)]) : null
 			]);
 		});
-		this.#element = el('fieldset', { class: `bui-choices bui-choices-${type}`, 'aria-describedby': this.#hint?.id }, [
+		this.#element = el('fieldset', { class: `bui-choices bui-choices-${type}`, 'aria-describedby': this.#hint?.id, 'data-framed': framed }, [
 			el('legend', { class: 'bui-field-label' }, [content(legend)]),
 			this.#hint,
 			el('div', { class: 'bui-choices-list' }, rows),
 			this.#error
 		]);
 		this.error = error;
+	}
+
+	/**
+	 * A framed row (0.46.0): the control, its title (the label, whose target covers the row), its note and its
+	 * state as a tag, each placed by the stylesheet.
+	 */
+	static #framed(kind, input, option, note, state) {
+		return el('div', { class: kind }, [
+			input,
+			el('label', { for: input.id, class: 'bui-choice-title' }, [content(option.label)]),
+			note ? el('p', { id: note, class: 'bui-choice-note' }, [content(option.reason ?? option.hint)]) : null,
+			state ? el('span', { id: state, class: `bui-status bui-status-badge bui-status-${option.status[1] ?? 'neutral'}` }, [el('span', { class: 'bui-status-dot', 'aria-hidden': 'true' }), option.status[0]]) : null
+		]);
 	}
 
 	get element() {

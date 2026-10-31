@@ -191,3 +191,6 @@ const state090: Promise<'signed' | 'renewing' | 'asking' | 'ended'> = session.ch
 void state090;
 const message080: string = new Landing(window).message.outcome;
 void [again080, message080, session.state, session.subscribe(event => event.type)];
+// 0.46.0: framed choices, a hint or a reason that is a node.
+const framedHint: Node = document.createElement('span');
+void new Group({ legend: 'Permissions', framed: true, options: [{ value: 'read', label: 'Read your projects', hint: framedHint, status: ['Read only', 'neutral'] }, { value: 'run', label: 'Start machines', disabled: true, reason: 'Only an owner can allow this.', status: ['Can incur costs', 'warning'] }], value: ['read'] });

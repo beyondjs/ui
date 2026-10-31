@@ -121,9 +121,9 @@ export class Field extends Component {
 	focus(): void;
 }
 
-export interface ChoiceOption { value: string; label: Content; hint?: string; disabled?: boolean; reason?: string; /** The option's state, beside its label and in its statement (0.7.1) */ status?: [string, Tone | 'progress'] | null }
+export interface ChoiceOption { value: string; label: Content; /** Text or, since 0.46.0, a node */ hint?: Content; disabled?: boolean; /** Text or, since 0.46.0, a node */ reason?: Content; /** The option's state, beside its label and in its statement (0.7.1) */ status?: [string, Tone | 'progress'] | null }
 export class Choices extends Component {
-	constructor(options: { legend: Content; type?: 'checkbox' | 'radio'; name?: string | null; options: ChoiceOption[]; value?: string | string[] | null; hint?: Content | null; error?: string | null; required?: boolean; onchange?: ((value: string | string[] | null) => void) | null; /** A radio group's one option is stated as text (default true; 0.7.0) */ statement?: boolean });
+	constructor(options: { legend: Content; type?: 'checkbox' | 'radio'; name?: string | null; options: ChoiceOption[]; value?: string | string[] | null; hint?: Content | null; error?: string | null; required?: boolean; onchange?: ((value: string | string[] | null) => void) | null; /** A radio group's one option is stated as text (default true; 0.7.0) */ statement?: boolean; /** One framed box of rows: the whole row the control's, the hint under the title, the state as a tag at the row's end (0.46.0) */ framed?: boolean });
 	/** Whether the one option is stated as text (0.7.0). */
 	readonly stated: boolean;
 	value: string | string[] | null;

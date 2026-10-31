@@ -37,6 +37,10 @@
 .bui-checklist {
 	--bui-checklist-inset: var(--space-4);
 }
+/* Framed choices (0.46.0): each row's control, title and tag one inset from its edges, as a framed list's rows */
+.bui-choices[data-framed] {
+	--bui-choices-inset: var(--space-4);
+}
 .bui-raised,
 .bui-section[data-raised] {
 	--bui-raised-inset: var(--space-4);
@@ -169,6 +173,15 @@
 	.bui-checklist-head:has(> .bui-checklist-title) {
 		margin-block-start: calc((1cap - 1lh) / 2);
 		font-size: var(--text-title-3);
+	}
+	/* A framed choice's hint that ends its row ends it on its baseline (0.46.0); on a narrow row its tag ends it */
+	.bui-choices[data-framed] .bui-choice-note {
+		margin-block-end: calc((1cap - 1lh) / 2);
+	}
+	@container bui-choice (max-width: 30rem) {
+		.bui-choices[data-framed] .bui-choice:has(> .bui-status) > .bui-choice-note {
+			margin-block-end: 0;
+		}
 	}
 	/* A choice card: the head's title and the radio at the inset, the last line one inset from the border */
 	.bui-card-choice {
