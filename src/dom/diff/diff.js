@@ -9,6 +9,7 @@ import { DiffFileView } from './file.js';
 import { DiffJump } from './jump.js';
 import { DiffKeys } from './keys.js';
 import { labels as copy } from './labels.js';
+import { Stillness } from '../core/stillness.js';
 
 /**
  * A change a developer can trust (0.11.2): the files of a unified patch (`patch`, git's format or a
@@ -132,7 +133,7 @@ export class Diff extends Component {
 		if (!view) return false;
 		view.open();
 		const window = this.#element.ownerDocument.defaultView;
-		const still = Boolean(window?.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+		const still = Stillness.asked(window);
 		view.element.scrollIntoView?.({ behavior: still ? 'auto' : 'smooth', block: 'start' });
 		view.toggle.focus({ preventScroll: true });
 		return true;

@@ -6,7 +6,8 @@ import assert from 'node:assert/strict';
  * covering its structure while that read runs and saying no steps meanwhile; a read slower than the
  * budget is shown at the budget with its wait in place; an opening that already said its steps hands over
  * at the structure; and with motion, the identity lands on a bar that shows nothing through it, even drawn
- * again during the landing.
+ * again during the landing. A product's own Reduced (`data-motion="reduced"` on the root, Beyond Home's choice on
+ * the device) hands over with no Web Animation while the system asks for full motion.
  */
 export class OpeningArrival {
 	#open;
@@ -22,7 +23,7 @@ export class OpeningArrival {
 
 	/** The checks, each returning when it passed */
 	get checks() {
-		return [() => this.#complete(), () => this.#budget(), () => this.#said(), () => this.#landing()];
+		return [() => this.#complete(), () => this.#budget(), () => this.#said(), () => this.#landing(), () => this.#chosen()];
 	}
 
 	/** Whether the opening still covers the product, and what it says */
@@ -110,6 +111,32 @@ export class OpeningArrival {
 			await page.locator('#bui-opening').waitFor({ state: 'detached', timeout: 2000 });
 			await page.waitForFunction(() => !('buiLanding' in document.querySelector('.bui-family').dataset));
 			assert.deepEqual(await OpeningArrival.#bar(page), { landing: null, mark: 'visible', names: ['visible'], separator: '1', chevron: '1' }, 'on landing the bar’s own parts show where the moving ones arrived');
+			assert.equal(await page.locator('#content').textContent(), 'Two projects', 'the complete page');
+		} finally {
+			await context.close();
+		}
+	}
+
+	/** A product's chosen Reduced with the system asking for full motion: the opening hands over at once, nothing scripted moves */
+	async #chosen() {
+		const prepare = context =>
+			context.addInitScript(() => {
+				document.documentElement.dataset.motion = 'reduced';
+				const animate = Element.prototype.animate;
+				window.__animated = [];
+				Element.prototype.animate = function (...args) {
+					window.__animated.push(this.className);
+					return animate.apply(this, args);
+				};
+			});
+		const { context, page, release } = await this.#open({ width: 1280, motion: 'no-preference', clock: false, hold: '**/content', path: '/?regions', prepare });
+		try {
+			await page.waitForFunction(() => document.querySelector('#root h1'));
+			release();
+			await page.locator('#bui-opening').waitFor({ state: 'detached', timeout: 2000 });
+			await page.waitForFunction(() => document.documentElement.hasAttribute('data-bui-opened'), null, { timeout: 2000 });
+			assert.deepEqual(await page.evaluate(() => window.__animated), [], 'no Web Animation ran in the hand-over');
+			assert.equal(await page.evaluate(() => 'buiLanding' in document.querySelector('.bui-family').dataset), false, 'nothing waits on the bar');
 			assert.equal(await page.locator('#content').textContent(), 'Two projects', 'the complete page');
 		} finally {
 			await context.close();

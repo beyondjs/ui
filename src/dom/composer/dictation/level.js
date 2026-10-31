@@ -1,4 +1,5 @@
 import { el } from '../../core/element.js';
+import { Stillness } from '../../core/stillness.js';
 
 /**
  * The decorative level meter of a recording: a few bars, hidden from assistive technology, that follow
@@ -44,7 +45,7 @@ export class DictationLevel {
 	start(stream) {
 		this.stop();
 		const Context = this.#view.AudioContext ?? this.#view.webkitAudioContext;
-		const still = this.#view.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
+		const still = Stillness.asked(this.#view);
 		if (typeof Context !== 'function' || still || !stream || typeof this.#view.requestAnimationFrame !== 'function') return;
 		try {
 			this.#context = new Context();

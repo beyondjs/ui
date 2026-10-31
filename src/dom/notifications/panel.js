@@ -1,6 +1,7 @@
 import { RetryAction } from '../again/action.js';
 import { el, fill, content } from '../core/element.js';
 import { callout } from '../feedback.js';
+import { Stillness } from '../core/stillness.js';
 
 /**
  * The frame of the notification entry's panel: a head with the title and "Mark all as read",
@@ -120,7 +121,7 @@ export class Panel {
 		const shown = this.#body.isConnected && this.#body.getClientRects?.().length > 0;
 		const before = shown ? this.#body.getBoundingClientRect().height : null;
 		change();
-		if (before === null || typeof this.#body.animate !== 'function' || view?.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+		if (before === null || typeof this.#body.animate !== 'function' || Stillness.asked(view)) return;
 		const after = this.#body.getBoundingClientRect().height;
 		if (Math.abs(after - before) < 1) return;
 		const duration = Number.parseFloat(view.getComputedStyle(this.#body).getPropertyValue('--motion-standard')) || 200;

@@ -1,3 +1,5 @@
+import { Stillness } from './stillness.js';
+
 /**
  * The picture of a surface that just closed (0.1.5 for disclosures; 0.14.0, D95, for menus and side
  * sheets): the surface itself is hidden at once, so nothing in it can be reached after its `close()`
@@ -32,7 +34,7 @@ export class Leaving {
 	 */
 	static play(node, { host = node.parentNode, tag = null, swap = null, floating = true, veil = null } = {}) {
 		const view = node.ownerDocument.defaultView;
-		if (!node.isConnected || !host || view?.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return null;
+		if (!node.isConnected || !host || Stillness.asked(view)) return null;
 		if (floating) {
 			const position = view?.getComputedStyle?.(node).position;
 			if (position !== 'absolute' && position !== 'fixed') return null;

@@ -1,6 +1,7 @@
 import { el } from './element.js';
 import { glyph } from './icons.js';
 import { RowClearance } from './clearance.js';
+import { Stillness } from './stillness.js';
 
 /**
  * The cue that a row scrolling sideways holds more than it shows (0.15.0, X-15 and PKG-19): at each end
@@ -152,7 +153,7 @@ export class ScrollEdges {
 		// Pressing a cue moves the row for the person: their position stays until the tabs change
 		this.#moved = true;
 		const view = this.#row.ownerDocument.defaultView;
-		const still = view?.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+		const still = Stillness.asked(view);
 		const left = direction * Math.max(40, Math.round(this.#row.clientWidth * 0.8));
 		if (typeof this.#row.scrollBy === 'function') this.#row.scrollBy({ left, behavior: still ? 'auto' : 'smooth' });
 		else this.#row.scrollLeft += left;

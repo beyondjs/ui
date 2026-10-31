@@ -1,3 +1,5 @@
+import { Stillness } from '../dom/core/stillness.js';
+
 /**
  * The opening's hand-over to the product (0.21.0). The product is shown and usable from the first frame:
  * the presentation stops taking the pointer and its surface fades, while the wordmark and the product's
@@ -58,7 +60,7 @@ export class OpeningExit {
 
 	/** Whether this browser and this person's settings allow the motion */
 	get moving() {
-		return typeof this.#element.animate === 'function' && !globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+		return typeof this.#element.animate === 'function' && !Stillness.asked(this.#element.ownerDocument?.defaultView ?? globalThis);
 	}
 
 	/** Resolves once the hand-over has run and the identity has landed, the bar's landing mark gone; without a flight, as it ends */
