@@ -114,7 +114,7 @@ Validate local links and anchors, English and portability, the thin `CLAUDE.md` 
 
 ## Opening document
 
-The [opening guide](opening.md#verification) names the public adapter checks (`opening.test.mjs`, since 0.21.0 `opening-steps.test.mjs`, and since 0.25.0 `opening-recovery.test.mjs`, which also runs a development server's adapter over an installed copy in a scratch `node_modules`) and `npm run acceptance:opening` in Chrome, Firefox and WebKit (19 checks each since 0.25.0, with `acceptance/opening-failures.mjs`; 24 since 0.31.0 with `acceptance/opening-arrival.mjs`, and 27 since 0.35.0 with `acceptance/opening-focusing.mjs`). Its static fixture is independent of the application module, including a module that holds DOMContentLoaded. These checks do not establish product integration.
+The [opening guide](opening.md#verification) names the public adapter checks (`opening.test.mjs`, since 0.21.0 `opening-steps.test.mjs`, and since 0.25.0 `opening-recovery.test.mjs`, which also runs a development server's adapter over an installed copy in a scratch `node_modules`) and `npm run acceptance:opening` in Chrome, Firefox and WebKit (19 checks each since 0.25.0, with `acceptance/opening-failures.mjs`; 24 since 0.31.0 with `acceptance/opening-arrival.mjs`, and 27 since 0.35.0 with `acceptance/opening-focusing.mjs`; 29 on the unreleased work after 0.46.0, with `OpeningArrival`'s chosen Reduced). Its static fixture is independent of the application module, including a module that holds DOMContentLoaded. These checks do not establish product integration.
 
 ## UI 0.18.1: shared hierarchy and contextual destinations
 

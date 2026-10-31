@@ -121,9 +121,11 @@ export class OpeningArrival {
 	async #chosen() {
 		const prepare = context =>
 			context.addInitScript(() => {
-				document.documentElement.dataset.motion = 'reduced';
-				const animate = Element.prototype.animate;
 				window.__animated = [];
+				// The root's choice as a product writes it; Chrome and WebKit run this before the root exists
+				const mark = () => Boolean(document.documentElement) && Boolean((document.documentElement.dataset.motion = 'reduced'));
+				if (!mark()) new MutationObserver((changes, observer) => mark() && observer.disconnect()).observe(document, { childList: true });
+				const animate = Element.prototype.animate;
 				Element.prototype.animate = function (...args) {
 					window.__animated.push(this.className);
 					return animate.apply(this, args);
@@ -132,6 +134,7 @@ export class OpeningArrival {
 		const { context, page, release } = await this.#open({ width: 1280, motion: 'no-preference', clock: false, hold: '**/content', path: '/?regions', prepare });
 		try {
 			await page.waitForFunction(() => document.querySelector('#root h1'));
+			assert.equal(await page.evaluate(() => document.documentElement.dataset.motion), 'reduced', 'the product chose Reduced on its root');
 			release();
 			await page.locator('#bui-opening').waitFor({ state: 'detached', timeout: 2000 });
 			await page.waitForFunction(() => document.documentElement.hasAttribute('data-bui-opened'), null, { timeout: 2000 });

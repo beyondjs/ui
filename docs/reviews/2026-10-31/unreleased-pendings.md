@@ -38,4 +38,8 @@ Through the machine's test queue, on 2026-10-31. Evidence of each run is added b
   - with the change, the settling checks (the four narrowings, the panel hidden and shown, the race) five times: 40 of 40 passed, the panel check 10 of 10;
   - "sidebar search:": 2 of 2 passed;
   - `node acceptance/opening.mjs`: 29 opening checks passed.
+- **Chrome 156 and WebKit 26.6, one heavy run** (each packing the working tree): "settling:" and "sidebar search:" passed 10 of 10 in each engine. The opening acceptance then stopped at the new chosen-Reduced check in both: its setup wrote `data-motion` before the document root existed there, which Firefox allows. The setup now writes it once the root exists and asserts it before the hand-over.
+- **The opening acceptance, one heavy run after that repair:** Chrome, WebKit and Firefox 29 of 29 each.
+- **Negative control, Chrome:** with the exit before `Stillness` (`ce16336`) built into `dist/opening.js`, which the opening acceptance serves, the chosen-Reduced check fails: the hand-over animates `bui-opening-wordmark`, `bui-opening-name`, `bui-opening-veil` and the rest, as the pending found in Beyond Home. A first attempt without rebuilding served the current `dist/opening.js` and passed, so it proved nothing; run `node tools/build.mjs` before `npm run acceptance:opening` after changing `src/opening/`.
+- **The whole unit suite** (`npm test`, in the same heavy run as Chrome and WebKit): 1119 of 1119, none skipped.
 - **Unit, affected files** (light): 31 files, 197 of 197 passed (`entries`, `stillness`, the opening's, notifications', sidebars', diff's, dictation's, `quiet`, `spanish`, React's sidebar and round). `npm run types` compiles.
