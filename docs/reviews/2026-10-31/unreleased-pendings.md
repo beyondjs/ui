@@ -10,6 +10,17 @@ The suite's pending `ui-opening-exit-motion-choice` (Beyond Home's DK83): with R
 - **Every scripted motion reads it:** the opening's hand-over (`OpeningExit.moving`), a closed surface's picture (`Leaving.play`), the notification panel's height, a tab row's scroll cue (`edges.js`), a diff's reveal and dictation's level.
 - **Checks:** `tests/stillness.test.mjs` (the guard's cases; the hand-over runs no Web Animation and lands nothing on the bar under the root's Reduced, and does with motion allowed; a closed surface leaves a picture with motion allowed and none under the root's Reduced). The opening's browser acceptance adds `OpeningArrival`'s chosen-Reduced check (`acceptance/opening-arrival.mjs`): the system at `no-preference`, `data-motion="reduced"` written before any script, `Element.prototype.animate` counted, and the hand-over ends with no call and `html[data-bui-opened]` set.
 
+## The sidebar's search results against the list rules
+
+The last open part of the suite's pending `ui-list-rules-gaps`, gap 10. The results were checked against D162's L1–L10 ([list tools](../../list-tools.md#the-sidebars-search-results-unreleased)); what applies is now done:
+
+- **L8:** the query's words are marked in result names given as text (`Matches`).
+- **L7:** Down from the field reaches the first result; Up, Down, Home and End move between the results' links, "See all results" last; Up from the first returns to the field (`SidebarResultKeys`, `src/dom/sidebar/keys.js`).
+- **L10:** no match offers **Clear search** («Borrar búsqueda»), which puts the caret back in the empty field; an outage asks again by itself on `Again`'s schedule (`search.again`, its options but `run`; React passes it through) and says when it last tried with `AgainLine`, with **Try again**. Its words no longer restate the button: "Search did not respond." («La búsqueda no respondió.»).
+- **A fix found on the way:** a request that a newer query, `clear()` or `destroy()` stopped could still say "Search did not respond." when its source rejected as it aborted; every stop now makes its late answer ignored.
+- The other rules are the sidebar's own (navigation is outside D162's scope): its entries are one line each with a mark and an age, with no menu, at the sidebar's width; the results are a preview that ends with "See all results".
+- **Checks:** `tests/entries.test.mjs` (two new tests: marks, keys and modifiers; Clear search, the tries' line, the words kept while trying, the tries ending with an answer and stopping on a new query), the typed fixture `tests/fixtures/types/conversation.ts` (`again`, and `run` refused), and the browser check "sidebar search:" (`acceptance/checks/panels.mjs`) extended with the marks, Down and Up, Clear search and the tries' line.
+
 ## Executed checks
 
 Through the machine's test queue, on 2026-10-31. Evidence of each run is added below as it ends.

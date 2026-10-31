@@ -166,7 +166,7 @@ function footing(foot, latest) {
 /** The DOM search for a `search` prop: its `source` and `all` are read from `now()`, the latest props, when asked. */
 function finding(search, now) {
 	if (!search?.label) return null;
-	return { label: search.label, placeholder: search.placeholder ?? null, bound: search.bound, delay: search.delay, source: request => now()?.source?.(request), all: search.all ? query => now()?.all?.(query) ?? null : null };
+	return { label: search.label, placeholder: search.placeholder ?? null, bound: search.bound, delay: search.delay, again: search.again ?? null, source: request => now()?.source?.(request), all: search.all ? query => now()?.all?.(query) ?? null : null };
 }
 
 /** The groups with each object's search read from the latest props (0.14.0). */

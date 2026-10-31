@@ -131,7 +131,7 @@ test('search: no match, a failure and a source past its bound say so with Try ag
 	mode = 'fail';
 	type('zebras');
 	await page.until(() => !nav.querySelector('.bui-sidebar-retry').hidden);
-	assert.equal(nav.querySelector('.bui-sidebar-line').textContent, 'Search did not respond. Try again.');
+	assert.equal(nav.querySelector('.bui-sidebar-line').textContent, 'Search did not respond.', 'the words never restate the button');
 	mode = 'silent';
 	nav.querySelector('.bui-sidebar-retry').click();
 	assert.equal(nav.querySelector('.bui-sidebar-line').textContent, 'Searching…');
@@ -167,6 +167,85 @@ test('Enter opens every result and the action is routed like any destination, cl
 	assert.deepEqual(seen, ['#/new', '#/all?q=redirect']);
 	sidebar.destroy();
 	assert.equal(sidebar.listeners.size, 0);
+});
+
+test('search results follow the list rules: matched words marked, Down from the field and the arrows between results, Up back to the field', async () => {
+	const sidebar = scene({ search: { label: 'Search conversations', delay: 1, source: async () => [entry('c7', 'Fix the Checkout redirect'), entry('c8', 'Checkout tests'), { label: 'Archived checkout' }], all: query => `#/all?q=${query}` } });
+	const nav = panel(sidebar);
+	const field = nav.querySelector('input[type="search"]');
+	field.focus();
+	assert.equal(page.key(field, 'ArrowDown').defaultPrevented, false, 'with no results the field keeps Down');
+	field.value = 'checkout';
+	field.dispatchEvent(new Event('input'));
+	await page.until(() => nav.querySelector('.bui-sidebar-results .bui-sidebar-entry'));
+	const results = nav.querySelector('.bui-sidebar-results');
+	assert.deepEqual([...results.querySelectorAll('.bui-match')].map(mark => mark.textContent), ['Checkout', 'Checkout', 'checkout'], 'each name marks the words, in its own case');
+	assert.equal(link(nav, 'Fix the Checkout redirect').querySelector('.bui-sidebar-label').textContent, 'Fix the Checkout redirect', 'the name reads whole');
+	const links = [...results.querySelectorAll('a[href]')];
+	assert.equal(links.length, 3, 'two results that open and See all results; the one without an address is not reached');
+	assert.equal(page.key(field, 'ArrowUp').defaultPrevented, false, 'the field keeps its other keys');
+	assert.equal(page.key(field, 'ArrowDown').defaultPrevented, true);
+	assert.ok(document.activeElement === links[0], 'Down from the field reaches the first result');
+	page.key(links[0], 'ArrowDown');
+	assert.ok(document.activeElement === links[1]);
+	page.key(links[1], 'End');
+	assert.ok(document.activeElement === links[2], 'End reaches See all results');
+	page.key(links[2], 'ArrowDown');
+	assert.ok(document.activeElement === links[2], 'nothing past the last');
+	page.key(links[2], 'Home');
+	assert.ok(document.activeElement === links[0]);
+	assert.equal(page.key(links[0], 'ArrowDown', { metaKey: true }).defaultPrevented, false, 'a key with a modifier keeps its meaning');
+	page.key(links[0], 'ArrowUp');
+	assert.ok(document.activeElement === field, 'Up from the first result returns to the field');
+	sidebar.destroy();
+});
+
+test('search: no match offers Clear search; an outage tries again by itself, says when it last tried, and stops on a new query', async () => {
+	let mode = 'none';
+	let asked = 0;
+	const sidebar = scene({ search: { label: 'Search conversations', delay: 1, again: { steps: [20] }, source: async () => {
+		asked += 1;
+		if (mode === 'none') return [];
+		if (mode === 'fail') throw new Error('down');
+		return [entry('c5', 'Zebra crossing')];
+	} } });
+	const nav = panel(sidebar);
+	const field = nav.querySelector('input[type="search"]');
+	const type = text => ((field.value = text), field.dispatchEvent(new Event('input')));
+	const clear = nav.querySelector('.bui-sidebar-clear');
+	const tries = nav.querySelector('.bui-sidebar-tries');
+	assert.equal(clear.hidden, true);
+	type('zebra');
+	await page.until(() => !clear.hidden);
+	assert.equal(clear.textContent, 'Clear search');
+	assert.equal(nav.querySelector('.bui-sidebar-retry').hidden, true, 'no match is an answer: nothing to try again');
+	clear.click();
+	assert.equal(field.value, '');
+	assert.ok(document.activeElement === field, 'the caret is back in the empty field');
+	assert.equal(nav.querySelector('.bui-sidebar-groups').hidden, false, 'the groups come back');
+	mode = 'fail';
+	type('zebra');
+	await page.until(() => !nav.querySelector('.bui-sidebar-retry').hidden);
+	assert.equal(clear.hidden, true);
+	assert.match(tries.textContent, /^Last tried \d{1,2}:\d{2}.* · trying again by itself$/, 'says when it last tried');
+	const before = asked;
+	await page.until(() => asked > before);
+	assert.equal(nav.querySelector('.bui-sidebar-line').textContent, 'Search did not respond.', 'its words stay while it tries');
+	mode = 'answer';
+	await page.until(() => nav.querySelector('.bui-sidebar-results .bui-sidebar-entry'));
+	assert.equal(tries.hidden, true, 'the tries end with the answer');
+	assert.equal(nav.querySelector('.bui-sidebar-retry').hidden, true);
+	mode = 'fail';
+	type('zebras');
+	await page.until(() => !nav.querySelector('.bui-sidebar-retry').hidden);
+	mode = 'none';
+	type('zebu');
+	await page.until(() => !clear.hidden);
+	const settled = asked;
+	await settle(60);
+	assert.equal(asked, settled, 'a new query stops the tries of the one before');
+	assert.equal(tries.hidden, true);
+	sidebar.destroy();
 });
 
 test('Spanish search words, and a search replaced or removed', () => {

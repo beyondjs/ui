@@ -9,8 +9,8 @@ import { unlabeled } from '../support/unlabeled.mjs';
  * below; and the page at 320 to 1440 px in both themes with its icon-only controls named.
  */
 const words = {
-	en: { needs: 'Needs you', recent: 'Recent', long: 'Upgrade the build to the latest toolchain and explain every warning it prints along the way', count: '1 result', none: 'Nothing matches “zzz”.', unavailable: 'Search did not respond. Try again.', retry: 'Try again', details: 'Details', action: 'New conversation', searching: 'Searching…' },
-	es: { needs: 'Te espera', recent: 'Recientes', long: 'Upgrade the build to the latest toolchain and explain every warning it prints along the way', count: '1 resultado', none: 'Nada coincide con «zzz».', unavailable: 'La búsqueda no respondió. Reintenta.', retry: 'Reintentar', details: 'Detalles', action: 'Nueva conversación', searching: 'Buscando…' }
+	en: { needs: 'Needs you', recent: 'Recent', long: 'Upgrade the build to the latest toolchain and explain every warning it prints along the way', count: '1 result', none: 'Nothing matches “zzz”.', unavailable: 'Search did not respond.', retry: 'Try again', clear: 'Clear search', tried: 'Last tried', details: 'Details', action: 'New conversation', searching: 'Searching…' },
+	es: { needs: 'Te espera', recent: 'Recientes', long: 'Upgrade the build to the latest toolchain and explain every warning it prints along the way', count: '1 resultado', none: 'Nada coincide con «zzz».', unavailable: 'La búsqueda no respondió.', retry: 'Reintentar', clear: 'Borrar búsqueda', tried: 'Último intento', details: 'Detalles', action: 'Nueva conversación', searching: 'Buscando…' }
 };
 
 async function open(browser, consumer, { width = 1440, height = 900, query = '', ...options } = {}) {
@@ -59,7 +59,7 @@ export const checks = [
 		}
 	},
 	{
-		name: 'sidebar search: searching, results with a polite count, no match, unavailable with Try again and past its bound, Escape clears, Enter opens all results',
+		name: 'sidebar search: searching, results with a polite count and their words marked, Down to the first result, no match with Clear search, unavailable trying again by itself with Try again and past its bound, Escape clears, Enter opens all results',
 		consumers: ['dom', 'react19'],
 		async run(browser, consumer) {
 			const copy = words[consumer.language];
@@ -70,18 +70,31 @@ export const checks = [
 			expect(await nav.locator('.bui-sidebar-groups').isHidden(), 'the results take the groups\' place');
 			expect((await nav.locator('.bui-announcer').textContent()) === copy.count, `a polite count: ${await nav.locator('.bui-announcer').textContent()}`);
 			expect((await nav.locator('.bui-announcer').getAttribute('aria-live')) === 'polite', 'polite');
+			// The list rules where they meet the results (unreleased, after 0.46.0): the words marked (L8), Down from the field
+			const marks = await nav.locator('.bui-sidebar-results .bui-match').allTextContents();
+			expect(marks.length > 0 && marks.every(mark => mark.toLowerCase() === 'check'), `the query's words marked in the names: ${marks}`);
+			await field.press('ArrowDown');
+			const first = await page.evaluate(() => document.activeElement === document.querySelector('.bui-sidebar-panel .bui-sidebar-results a[href]'));
+			await page.keyboard.press('ArrowUp');
+			const back = await page.evaluate(() => document.activeElement?.matches('.bui-sidebar-panel input[type="search"]'));
+			expect(first && back, `Down from the field reaches the first result, Up from it returns: ${first}, ${back}`);
 			await field.press('Enter');
 			await page.waitForFunction(() => window.fixture.log.includes('navigate:#/conversations?q=check'));
 			await field.press('Escape');
 			expect((await field.inputValue()) === '' && (await nav.locator('.bui-sidebar-groups').isVisible()), 'Escape clears and the groups come back');
 			await search(page, 'zzz');
 			await nav.locator('.bui-sidebar-line', { hasText: copy.none }).waitFor();
+			await nav.getByRole('button', { name: copy.clear, exact: true }).click();
+			const cleared = await page.evaluate(() => ({ value: document.activeElement?.value, field: document.activeElement?.matches('.bui-sidebar-panel input[type="search"]') }));
+			expect(cleared.field && cleared.value === '' && (await nav.locator('.bui-sidebar-groups').isVisible()), `no match offers Clear search, back in the empty field: ${JSON.stringify(cleared)}`);
 			for (const mode of ['fail', 'slow']) {
 				const view = await open(browser, consumer, { query: `?search=${mode}` });
 				await search(view.page, 'check');
 				if (mode === 'slow') await view.page.locator('.bui-sidebar-panel .bui-sidebar-line', { hasText: copy.searching }).waitFor({ timeout: 1000 });
 				await view.page.locator('.bui-sidebar-panel .bui-sidebar-line', { hasText: copy.unavailable }).waitFor({ timeout: 4000 });
 				expect(await view.page.locator('.bui-sidebar-panel .bui-sidebar-retry').isVisible(), `${mode}: Try again`);
+				const tries = (await view.page.locator('.bui-sidebar-panel .bui-sidebar-tries').textContent()) ?? '';
+				expect(tries.startsWith(copy.tried), `${mode}: says when it last tried while it tries again by itself: ${tries}`);
 				await view.page.locator('.bui-sidebar-panel .bui-sidebar-retry').click();
 				await view.page.waitForFunction(() => window.fixture.log.filter(entry => entry === 'search:check').length === 2);
 				await view.page.locator('.bui-sidebar-panel .bui-sidebar-line', { hasText: copy.unavailable }).waitFor({ timeout: 4000 });

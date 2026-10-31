@@ -1,3 +1,5 @@
+import { Again } from '../again/again.js';
+
 /**
  * The search of a sidebar's entries, shared by the permanent sidebar and its drawer: what the person
  * typed, the bounded request to the product's `source({ query, signal })` and its answer, which the
@@ -8,6 +10,11 @@
  * failure, makes the search `unavailable` (never "nothing matches"); `retry()` asks again at once. The
  * source answers `{ items, more? }` or an array of entries. The states are `idle` (no query),
  * `searching`, `results`, `none` and `unavailable`.
+ *
+ * Unreleased (after 0.46.0, D132 by the list rule L10): an unavailable search asks again by itself on `Again`'s
+ * schedule (`again`, its options but `run`), keeping the words of the outage while it tries, until the source
+ * answers or the query changes; `retry()` asks at once. A newer query, `clear()` and `destroy()` stop it, and the
+ * late answer of a request they stopped is ignored even when the source rejects as it aborts.
  */
 export class SidebarSearch {
 	#config;
@@ -18,9 +25,10 @@ export class SidebarSearch {
 	#controller = null;
 	#sequence = 0;
 	#listeners = new Set();
+	#again = null;
 
 	/**
-	 * @param {{label: string, source: (request: {query: string, signal: AbortSignal}) => Promise<unknown>, bound?: number, delay?: number, all?: ((query: string) => string|null)|null, placeholder?: string|null}} config
+	 * @param {{label: string, source: (request: {query: string, signal: AbortSignal}) => Promise<unknown>, bound?: number, delay?: number, all?: ((query: string) => string|null)|null, placeholder?: string|null, again?: object|null}} config
 	 */
 	constructor(config) {
 		this.config = config;
@@ -35,7 +43,13 @@ export class SidebarSearch {
 		if (typeof value?.source !== 'function') throw new TypeError("A sidebar's search asks its source({ query, signal })");
 		// An option given as undefined keeps its default
 		const given = Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== undefined));
-		this.#config = { bound: 20_000, delay: 250, all: null, placeholder: null, ...given };
+		this.#config = { bound: 20_000, delay: 250, all: null, placeholder: null, again: null, ...given };
+	}
+
+	/** What asks again by itself while the search is unavailable (D132); created at the first outage. */
+	get again() {
+		this.#again ??= new Again({ ...this.#config.again, run: () => this.#ask() });
+		return this.#again;
 	}
 
 	get query() {
@@ -85,13 +99,12 @@ export class SidebarSearch {
 		this.#cancel();
 		this.#state = 'searching';
 		this.#notify();
-		this.#ask();
+		void this.#ask();
 	}
 
 	/** Ends the search: the groups come back. */
 	clear() {
 		this.#cancel();
-		this.#sequence += 1;
 		const changed = this.#state !== 'idle';
 		this.#query = '';
 		this.#state = 'idle';
@@ -104,6 +117,7 @@ export class SidebarSearch {
 		this.#listeners.clear();
 	}
 
+	/** Asks the source for the query; resolves whether it answered (an answer for an older query counts as one). */
 	async #ask() {
 		this.#timer = null;
 		const sequence = ++this.#sequence;
@@ -118,25 +132,31 @@ export class SidebarSearch {
 		});
 		try {
 			const answer = await Promise.race([Promise.resolve().then(() => this.#config.source({ query: this.#query, signal: controller.signal })), late]);
-			if (sequence !== this.#sequence) return;
+			if (sequence !== this.#sequence) return true;
 			this.#items = (Array.isArray(answer) ? answer : (answer?.items ?? [])).filter(Boolean);
 			this.#state = this.#items.length ? 'results' : 'none';
 		} catch {
-			if (sequence !== this.#sequence) return;
+			if (sequence !== this.#sequence) return true;
 			this.#items = [];
 			this.#state = 'unavailable';
 		} finally {
 			clearTimeout(bound);
 			if (this.#controller === controller) this.#controller = null;
 		}
+		const answered = this.#state !== 'unavailable';
+		if (!answered) this.again.start();
 		this.#notify();
+		return answered;
 	}
 
+	/** Stops what is pending: the typing's wait, the request, whose late answer is then ignored, and the tries again. */
 	#cancel() {
 		clearTimeout(this.#timer);
 		this.#timer = null;
+		this.#sequence += 1;
 		this.#controller?.abort();
 		this.#controller = null;
+		this.#again?.stop();
 	}
 
 	#notify() {

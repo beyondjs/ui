@@ -52,9 +52,14 @@
 	color: var(--color-text-muted);
 	overflow-wrap: anywhere;
 }
-.bui-sidebar-retry {
+.bui-sidebar-retry,
+.bui-sidebar-clear {
 	justify-self: start;
 	margin-inline-start: var(--space-2);
+}
+/* An outage's tries, under its words on the same edge (D132) */
+.bui-sidebar-tries {
+	padding: 0 var(--space-2);
 }
 /* An entry's title stays on one line, cut only while a tooltip shows it whole (D44). */
 .bui-sidebar-entry .bui-sidebar-label {

@@ -1,7 +1,10 @@
 import { el } from '../core/element.js';
 import { glyph } from '../core/icons.js';
 import { Announcer } from '../operations/announcer.js';
+import { AgainLine } from '../again/line.js';
+import { Matches } from '../list/matches.js';
 import { SidebarGroup } from './group.js';
+import { SidebarResultKeys } from './keys.js';
 
 /**
  * The search as one copy of a sidebar draws it: a search field named by the product's label, and while
@@ -13,6 +16,12 @@ import { SidebarGroup } from './group.js';
  * Escape in the field clears it and brings the groups back (an empty field lets Escape through, to
  * close the drawer); Enter opens every result when the product gives that address. A field drawn in place
  * of its search icon (0.14.0, `escape`) hands every Escape to that callback after clearing the query.
+ *
+ * Unreleased (after 0.46.0), the list rules where they meet a search's results (D162): the words a query matched
+ * are marked in the results' names (L8, `Matches`, names given as text); Down from the field reaches the first
+ * result and the arrows move between them (L7, `SidebarResultKeys`); no match offers Clear search, which puts the
+ * caret back in the empty field (L10); an outage says when it last tried while the search asks again by itself
+ * (L10, D132, `AgainLine`), with Try again.
  */
 export class SidebarFinder {
 	#search;
@@ -22,6 +31,9 @@ export class SidebarFinder {
 	#field;
 	#line = el('p', { class: 'bui-sidebar-line' });
 	#retry;
+	#erase;
+	#tries;
+	#arrows;
 	#list;
 	#results;
 	#announcer = new Announcer();
@@ -49,7 +61,11 @@ export class SidebarFinder {
 		this.#input.addEventListener('keydown', event => this.#keys(event));
 		this.#field = el('div', { class: 'bui-sidebar-search', role: 'search' }, [glyph('search'), this.#input, this.#announcer.element]);
 		this.#retry = el('button', { type: 'button', class: 'bui-link-button bui-sidebar-retry', text: labels.text('retry'), onclick: () => search.retry() });
-		this.#results = el('div', { class: 'bui-sidebar-results', hidden: true }, [this.#line, this.#retry, this.#list.element]);
+		this.#erase = el('button', { type: 'button', class: 'bui-link-button bui-sidebar-clear', text: labels.text('clear'), onclick: () => this.#clear() });
+		this.#tries = new AgainLine({ again: search.again, labels: labels.entries, locale: this.#input.ownerDocument.documentElement.lang || undefined });
+		this.#tries.element.classList.add('bui-sidebar-tries');
+		this.#results = el('div', { class: 'bui-sidebar-results', hidden: true }, [this.#line, this.#tries.element, this.#retry, this.#erase, this.#list.element]);
+		this.#arrows = new SidebarResultKeys({ input: this.#input, results: this.#results });
 		this.#release = search.subscribe(() => this.#draw());
 		this.#draw();
 	}
@@ -80,6 +96,8 @@ export class SidebarFinder {
 
 	destroy() {
 		this.#release();
+		this.#arrows.destroy();
+		this.#tries.destroy();
 		this.#list.destroy();
 		this.#field.remove();
 		this.#results.remove();
@@ -104,6 +122,21 @@ export class SidebarFinder {
 		}
 	}
 
+	/** Clear search: the groups come back and the caret is in the empty field. */
+	#clear() {
+		this.#input.value = '';
+		this.#search.clear();
+		this.focus();
+	}
+
+	/** An entry whose name is text, with the query's words marked in it (L8). */
+	#marked(item, query) {
+		if (typeof item?.label !== 'string') return item;
+		const name = this.#input.ownerDocument.createDocumentFragment();
+		name.append(...Matches.mark(item.label, query));
+		return { ...item, key: item.key ?? item.href ?? item.label, label: name };
+	}
+
 	#draw() {
 		const { query, state, items } = this.#search;
 		const document = this.#input.ownerDocument;
@@ -116,8 +149,10 @@ export class SidebarFinder {
 		this.#line.textContent = words;
 		this.#line.hidden = !words;
 		this.#retry.hidden = state !== 'unavailable';
+		this.#erase.hidden = state !== 'none';
 		const all = query ? this.#search.all : null;
-		this.#list.update({ heading: state === 'results' ? labels.text('results') : null, items: state === 'results' ? items : [], more: all && state !== 'unavailable' ? { label: labels.text('all'), href: all } : null });
+		const found = state === 'results' ? items.map(item => this.#marked(item, query)) : [];
+		this.#list.update({ heading: state === 'results' ? labels.text('results') : null, items: found, more: all && state !== 'unavailable' ? { label: labels.text('all'), href: all } : null });
 		// Each answer is said once: the count, or the sentence that replaces the results
 		if (state !== this.#state || state === 'results') {
 			if (state === 'results') this.#announcer.say(labels.text('count', { count: items.length }));
