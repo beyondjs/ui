@@ -7,7 +7,9 @@
  * read a layout no frame painted (the viewport changed in between) and says so (`painted: false`). The recorder
  * stops by itself once `span` milliseconds of frames at the new width are read, or after `bound` milliseconds.
  * A change that keeps the window's width (a panel hidden beside) is found by a mark instead: the page sets
- * `window.__frames.marked` in the task that makes the change, and the first frame begun after it lands it.
+ * `window.__frames.marked` in the task that makes the change, and the first frame begun after it lands it. A task
+ * that finds the mark set after its frame began (the change ran between the frame and its read, as Playwright's
+ * evaluate can) read a layout no frame painted either, and says so the same way (unreleased, after 0.46.0).
  */
 export class Frames {
 	#page;
@@ -148,7 +150,9 @@ function record({ selectors, width, span, bound }) {
 	const channel = new MessageChannel();
 	channel.port1.onmessage = () => {
 		const now = performance.now();
-		const painted = innerWidth === began;
+		// A change made after the frame began and before this read (the page's mark set by a task between them) is
+		// not that frame's: the read is of a layout no frame painted yet
+		const painted = innerWidth === began && state.marked === marked;
 		if (painted && landed === null && (width === null ? marked : began === width)) landed = now;
 		state.samples.push({ frame: state.frame, at: Math.round(now - begun), width: began, painted, marked, composers: selectors.map(read) });
 		if ((landed !== null && now - landed >= span) || now - begun >= bound) state.done = true;

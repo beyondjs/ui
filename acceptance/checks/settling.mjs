@@ -108,4 +108,52 @@ const panel = {
 	}
 };
 
-export const checks = [...narrowing, panel];
+/**
+ * The recorder's own guard (0.47.0 candidate): a change made after a frame began and before that frame's read (a
+ * task between them, as Playwright's evaluate can run) must not be read as that frame. Firefox once read the panel
+ * already shown as the frame before the press (710 → 710 px, ui's pending `ui-firefox-panel-settling-check`). A
+ * loop started before the recorder posts, from each frame, a task queued ahead of the recorder's; armed, that task
+ * presses Details. The frame it lands between is read as not painted, and the frame before keeps the width before.
+ */
+const race = {
+	name: "settling: a change made between a frame and its read is never read as that frame's",
+	consumers: ['dom', 'react19'],
+	async run(browser, consumer) {
+		const label = consumer.name === 'dom' ? 'Details' : 'Detalles';
+		const { page, context } = await open(browser, consumer, '', 1440);
+		await page.evaluate(text => {
+			const button = [...document.querySelectorAll('.bui-page-header button')].find(item => item.textContent.trim() === text);
+			const channel = new MessageChannel();
+			const race = { armed: false, pressed: false };
+			window.__race = race;
+			channel.port1.onmessage = () => {
+				// Only between the recorder's frame and its read: a frame already read waits for the next
+				const frames = window.__frames;
+				if (!race.armed || race.pressed || frames.samples.at(-1)?.frame === frames.frame) return;
+				race.pressed = true;
+				window.__frames.marked = true;
+				button.click();
+			};
+			const tick = () => {
+				if (race.pressed) return;
+				channel.port2.postMessage(null);
+				requestAnimationFrame(tick);
+			};
+			requestAnimationFrame(tick);
+		}, label);
+		const frames = new Frames(page);
+		await frames.start(['.bui-composer']);
+		await page.waitForTimeout(50);
+		await page.evaluate(() => (window.__race.armed = true));
+		const samples = await frames.read();
+		const settling = new Settling(samples, null);
+		const [settled] = settling.settled;
+		const [before] = settling.before;
+		const stale = samples.filter(sample => !sample.painted && !sample.marked);
+		expect(stale.length === 1, `the frame the press landed between is read as not painted: ${stale.length}`);
+		expect(settled && before && Math.abs(settled.width - before.width) > 1, `the frame before keeps the width before: ${before?.width} → ${settled?.width}`);
+		await context.close();
+	}
+};
+
+export const checks = [...narrowing, panel, race];

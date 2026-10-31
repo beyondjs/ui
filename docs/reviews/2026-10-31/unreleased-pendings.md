@@ -21,8 +21,21 @@ The last open part of the suite's pending `ui-list-rules-gaps`, gap 10. The resu
 - The other rules are the sidebar's own (navigation is outside D162's scope): its entries are one line each with a mark and an age, with no menu, at the sidebar's width; the results are a preview that ends with "See all results".
 - **Checks:** `tests/entries.test.mjs` (two new tests: marks, keys and modifiers; Clear search, the tries' line, the words kept while trying, the tries ending with an answer and stopping on a new query), the typed fixture `tests/fixtures/types/conversation.ts` (`again`, and `run` refused), and the browser check "sidebar search:" (`acceptance/checks/panels.mjs`) extended with the marks, Down and Up, Clear search and the tries' line.
 
+## The settling check's frame read after the change
+
+The suite's pending `ui-firefox-panel-settling-check`: in 0.44.0's whole acceptance Firefox once failed React's "a composer docked in a thread… panel hidden or shown", the frame before the press already at the new width (710 → 710 px).
+
+- **Cause, established by a check that makes it happen:** the recorder (`acceptance/support/frames.mjs`) notes the mark when a frame begins and reads the composer in a task the frame posts. The press comes from a Playwright evaluate, a task of its own. When that task ran after a frame began and before the frame's read, the read saw the new layout while its frame was unmarked, so `Settling.before` took the new width.
+- **Change:** a read that finds the mark set after its frame began is not painted, as a read after a resize already was. The frame before keeps the width before; the first frame begun after the press lands it, as before.
+- **Check:** "settling: a change made between a frame and its read is never read as that frame's" (`acceptance/checks/settling.mjs`) runs a loop started before the recorder, whose task is queued ahead of the recorder's in each frame, and presses Details there, only before that frame's read. It requires the frame the press landed between to be read as not painted and the frame before to keep the width before. On the recorder before the change it fails in Firefox in both consumers (no frame read as not painted).
+
 ## Executed checks
 
 Through the machine's test queue, on 2026-10-31. Evidence of each run is added below as it ends.
 
+- **Firefox 155, one heavy run** (`BEYOND_UI_BROWSER=firefox`, one archive of the working tree for every run, `DEBUG=1`):
+  - the new race check on the recorder before the change: 0 of 2 passed (DOM and React 19: "read as not painted: 0"), the failure reproduced;
+  - with the change, the settling checks (the four narrowings, the panel hidden and shown, the race) five times: 40 of 40 passed, the panel check 10 of 10;
+  - "sidebar search:": 2 of 2 passed;
+  - `node acceptance/opening.mjs`: 29 opening checks passed.
 - **Unit, affected files** (light): 31 files, 197 of 197 passed (`entries`, `stillness`, the opening's, notifications', sidebars', diff's, dictation's, `quiet`, `spanish`, React's sidebar and round). `npm run types` compiles.
