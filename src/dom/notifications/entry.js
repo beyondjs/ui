@@ -67,6 +67,7 @@ export class NotificationEntry extends Disclosure {
 	#stamp = null;
 	#waiting = null;
 	#arriving = false;
+	#owed = false;
 
 	/**
 	 * @param {object} options
@@ -77,7 +78,8 @@ export class NotificationEntry extends Disclosure {
 	 * @param {Record<string,string>} [options.products] display names by product id
 	 * @param {string} [options.locale] language of relative times
 	 * @param {number} [options.limit] items in the panel (default 6)
-	 * @param {number} [options.interval] milliseconds between count refreshes; 0 refreshes only on demand
+	 * @param {number} [options.interval] milliseconds between count refreshes; 0 refreshes only on demand.
+	 *   Since 0.47.0 a refresh that falls due while the page is hidden waits, and runs once when it is shown
 	 */
 	constructor({ adapter, href = null, onopen = null, onview = null, products = {}, locale = undefined, limit = 6, interval = 0, labels = {} }) {
 		const words = new Labels(copies, labels, locale);
@@ -156,9 +158,27 @@ export class NotificationEntry extends Disclosure {
 
 	#poll(interval) {
 		this.later(() => {
-			this.refresh();
+			if (this.#hidden) this.#owe();
+			else this.refresh();
 			this.#poll(interval);
 		}, interval);
+	}
+
+	get #hidden() {
+		return this.element.ownerDocument.visibilityState === 'hidden';
+	}
+
+	/** A hidden page is not read for nobody: the count is read once when it is shown again */
+	#owe() {
+		if (this.#owed) return;
+		this.#owed = true;
+		const document = this.element.ownerDocument;
+		const release = this.listen(document, 'visibilitychange', () => {
+			if (this.#hidden) return;
+			release();
+			this.#owed = false;
+			this.refresh();
+		});
 	}
 
 	#toggled(open) {

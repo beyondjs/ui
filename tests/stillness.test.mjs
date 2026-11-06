@@ -6,7 +6,7 @@ import { Leaving } from '../src/dom/core/leaving.js';
 import { OpeningExit } from '../src/opening/exit.js';
 
 /**
- * A product's chosen Reduced holds in the package's scripted motion (unreleased, after 0.46.0): with
+ * A product's chosen Reduced holds in the package's scripted motion (since 0.47.0): with
  * `data-motion="reduced"` on the document root and the system asking for full motion, the opening hands over with
  * no animation and a closed surface leaves no picture, as under the system's setting (D95). happy-dom lays out
  * nothing, so the flight's boxes are given; the browser acceptance's opening check measures it in each engine.

@@ -70,7 +70,7 @@ export const checks = [
 			expect(await nav.locator('.bui-sidebar-groups').isHidden(), 'the results take the groups\' place');
 			expect((await nav.locator('.bui-announcer').textContent()) === copy.count, `a polite count: ${await nav.locator('.bui-announcer').textContent()}`);
 			expect((await nav.locator('.bui-announcer').getAttribute('aria-live')) === 'polite', 'polite');
-			// The list rules where they meet the results (unreleased, after 0.46.0): the words marked (L8), Down from the field
+			// The list rules where they meet the results (since 0.47.0): the words marked (L8), Down from the field
 			const marks = await nav.locator('.bui-sidebar-results .bui-match').allTextContents();
 			expect(marks.length > 0 && marks.every(mark => mark.toLowerCase() === 'check'), `the query's words marked in the names: ${marks}`);
 			await field.press('ArrowDown');

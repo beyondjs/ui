@@ -11,7 +11,7 @@ import { Again } from '../again/again.js';
  * source answers `{ items, more? }` or an array of entries. The states are `idle` (no query),
  * `searching`, `results`, `none` and `unavailable`.
  *
- * Unreleased (after 0.46.0, D132 by the list rule L10): an unavailable search asks again by itself on `Again`'s
+ * Since 0.47.0 (D132 by the list rule L10): an unavailable search asks again by itself on `Again`'s
  * schedule (`again`, its options but `run`), keeping the words of the outage while it tries, until the source
  * answers or the query changes; `retry()` asks at once. A newer query, `clear()` and `destroy()` stop it, and the
  * late answer of a request they stopped is ignored even when the source rejects as it aborts.

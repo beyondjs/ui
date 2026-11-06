@@ -17,7 +17,7 @@ import { SidebarResultKeys } from './keys.js';
  * close the drawer); Enter opens every result when the product gives that address. A field drawn in place
  * of its search icon (0.14.0, `escape`) hands every Escape to that callback after clearing the query.
  *
- * Unreleased (after 0.46.0), the list rules where they meet a search's results (D162): the words a query matched
+ * Since 0.47.0, the list rules where they meet a search's results (D162): the words a query matched
  * are marked in the results' names (L8, `Matches`, names given as text); Down from the field reaches the first
  * result and the arrows move between them (L7, `SidebarResultKeys`); no match offers Clear search, which puts the
  * caret back in the empty field (L10); an outage says when it last tried while the search asks again by itself

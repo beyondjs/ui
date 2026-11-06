@@ -6,15 +6,19 @@
  * this tab) and only then goes to the address, as `ProviderWindow` does (0.7.4, 0.7.5). While the window
  * is open the product's `read()` is asked every `interval`, one read at a time, and at once when the
  * landing says so on the `beyond-session` channel. `ondone(answer)` ends it; a window closed before the
- * read says signed calls `onclosed()`; a blocked window `onblocked()`.
+ * read says signed calls `onclosed()`; a blocked window `onblocked()`. Since 0.47.0 the reads every
+ * `interval` last at most `follow` ms (15 min), as `ProviderWindow`'s do: a window left open is then only
+ * watched for closing, and read when its landing speaks or once it closed.
  */
 export class Trip {
 	#document;
 	#read;
 	#interval;
+	#follow;
 	#window = null;
 	#timer = null;
 	#reading = false;
+	#started = 0;
 	#hooks;
 
 	/**
@@ -22,12 +26,14 @@ export class Trip {
 	 * @param {Document} options.document
 	 * @param {() => Promise<{state: string}>} options.read the product's read of its own session
 	 * @param {number} [options.interval] how often the session is read while the window is open (2000)
+	 * @param {number} [options.follow] for how long it is read that way, in ms (900000)
 	 * @param {{ondone: (answer: object) => void, onclosed: () => void, onblocked: () => void}} options.hooks
 	 */
-	constructor({ document, read, interval = 2000, hooks }) {
+	constructor({ document, read, interval = 2000, follow = 900_000, hooks }) {
 		this.#document = document;
 		this.#read = read;
 		this.#interval = interval;
+		this.#follow = follow;
 		this.#hooks = hooks;
 	}
 
@@ -54,7 +60,8 @@ export class Trip {
 			opened = view.open(address, 'beyond-session', features) ?? opened;
 		}
 		this.#window = opened;
-		this.#follow();
+		this.#started = Date.now();
+		this.#next();
 	}
 
 	/** Brings the window forward, or opens it again when it is gone. */
@@ -65,7 +72,7 @@ export class Trip {
 
 	/** The landing said something: read now. */
 	wake() {
-		if (this.#window) void this.#check();
+		if (this.#window) void this.#check(true);
 	}
 
 	/** Stops following; a window still on this origin is closed, one elsewhere closes itself. */
@@ -83,13 +90,15 @@ export class Trip {
 		}
 	}
 
-	#follow() {
+	#next() {
 		clearTimeout(this.#timer);
-		this.#timer = setTimeout(() => this.#check(), this.#interval);
+		this.#timer = setTimeout(() => this.#check(Date.now() - this.#started <= this.#follow), this.#interval);
 	}
 
-	async #check() {
+	/** @param {boolean} reading whether the session is read while the window stays open, or only once it closed */
+	async #check(reading) {
 		if (this.#reading || !this.#window) return;
+		if (!reading && !this.#window.closed) return this.#next();
 		this.#reading = true;
 		const closed = this.#window.closed;
 		let answer = null;
@@ -105,11 +114,13 @@ export class Trip {
 			this.stop();
 			return this.#hooks.ondone(answer);
 		}
-		if (closed || this.#window.closed) {
-			this.#window = null;
-			clearTimeout(this.#timer);
-			return this.#hooks.onclosed();
-		}
-		this.#follow();
+		if (closed || this.#window.closed) return this.#closed();
+		this.#next();
+	}
+
+	#closed() {
+		this.#window = null;
+		clearTimeout(this.#timer);
+		this.#hooks.onclosed();
 	}
 }

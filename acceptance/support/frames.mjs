@@ -9,7 +9,7 @@
  * A change that keeps the window's width (a panel hidden beside) is found by a mark instead: the page sets
  * `window.__frames.marked` in the task that makes the change, and the first frame begun after it lands it. A task
  * that finds the mark set after its frame began (the change ran between the frame and its read, as Playwright's
- * evaluate can) read a layout no frame painted either, and says so the same way (unreleased, after 0.46.0).
+ * evaluate can) read a layout no frame painted either, and says so the same way (since 0.47.0).
  */
 export class Frames {
 	#page;

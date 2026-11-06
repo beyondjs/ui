@@ -47,7 +47,7 @@ const sidebar = new Sidebar({ product: 'Conduict', groups: [{ items: [{ label: '
 sidebar.groups = [recent];
 sidebar.action = null;
 sidebar.search = null;
-// Unreleased (after 0.46.0): an unavailable search asks again by itself on a schedule of the product's
+// Since 0.47.0: an unavailable search asks again by itself on a schedule of the product's
 sidebar.search = { ...search, again: { steps: [5000, 15000] } };
 // @ts-expect-error the search's run is its own
 sidebar.search = { ...search, again: { run: async () => true } };

@@ -1,5 +1,5 @@
 /**
- * The arrow keys of a sidebar's search results (unreleased, after 0.46.0; the list rule L7 as a search reaches its
+ * The arrow keys of a sidebar's search results (since 0.47.0; the list rule L7 as a search reaches its
  * results): Down from the field reaches the first result; Up and Down move between the results' links, "See all
  * results" last, and Home and End reach the first and the last; Up from the first returns to the field. Enter
  * follows the link in focus, as a link does, and Tab still leaves. Keys with a modifier keep their own meaning, and

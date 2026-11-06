@@ -2,6 +2,8 @@
 
 Made on 2026-10-31 on the branch `claude/pendings-20261031`, from `feature/next` at 0.45.1 (`ce16336`). The package's version is unchanged: 0.46.0 is taken by another branch ("framed choices"), so the coordinator numbers the release that carries this work (0.47.0 or later) after checking collisions. Nothing here is packed, vendored, published or accepted.
 
+Released in 0.47.0 on 2026-11-06 ([its evidence](../2026-11-06/release-0.47.0.md)), which carries this work unchanged.
+
 ## A product's own Reduced in the package's scripted motion
 
 The suite's pending `ui-opening-exit-motion-choice` (Beyond Home's DK83): with Reduced chosen on the device (`data-motion="reduced"` on the document root) and the system asking for full motion, the opening's hand-over still ran six Web Animations, since `OpeningExit` read only `prefers-reduced-motion` and a stylesheet cannot reach scripted animations.
@@ -12,7 +14,7 @@ The suite's pending `ui-opening-exit-motion-choice` (Beyond Home's DK83): with R
 
 ## The sidebar's search results against the list rules
 
-The last open part of the suite's pending `ui-list-rules-gaps`, gap 10. The results were checked against D162's L1–L10 ([list tools](../../list-tools.md#the-sidebars-search-results-unreleased)); what applies is now done:
+The last open part of the suite's pending `ui-list-rules-gaps`, gap 10. The results were checked against D162's L1–L10 ([list tools](../../list-tools.md#the-sidebars-search-results-0470)); what applies is now done:
 
 - **L8:** the query's words are marked in result names given as text (`Matches`).
 - **L7:** Down from the field reaches the first result; Up, Down, Home and End move between the results' links, "See all results" last; Up from the first returns to the field (`SidebarResultKeys`, `src/dom/sidebar/keys.js`).

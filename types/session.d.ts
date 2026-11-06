@@ -46,8 +46,10 @@ export interface SessionOptions {
 	bound?: number;
 	/** Milliseconds a silent renewal may take before the dialog (10000). */
 	wait?: number;
-	/** How often the session is read while the sign-in window is open, in ms (2000). */
+	/** How often the session is read while the sign-in window is open, in ms (2000), for at most 15 minutes (0.47.0). */
 	interval?: number;
+	/** How long a `signed` answer stands for `check()`, in ms (15000; 0.47.0). Looks share one read either way. */
+	fresh?: number;
 	document?: Document;
 	/**
 	 * Who the product's `read()` reaches (0.33.0): a product id (`accounts`, `projects`, `conduict`…) or a name,
@@ -67,8 +69,13 @@ export class Session extends Component {
 	readonly kind: SessionKind | null;
 	readonly notice: { readonly shown: boolean; readonly kind: SessionKind | null; readonly phase: string; readonly element: HTMLDialogElement | null; /** who did not answer (0.33.0) */ readonly source: string | null };
 	text(key: string, values?: Record<string, unknown>): string;
+	/**
+	 * A request came back unauthenticated: resolves whether to send it again. Since 0.47.0, refused again within `pause`
+	 * of a renewal while the session still reads signed, it resolves false with `state` still `signed`: the refusal was
+	 * not the session's, so say it in place and never call `lost()` again for that request.
+	 */
 	lost(lost?: { reason?: string | null; replay?: SessionReplay }): Promise<boolean>;
-	/** Looks at the session now and resolves with the state after looking: a live transport speaks only while `signed`. */
+	/** Looks at the session now and resolves with the state after looking: a live transport speaks only while `signed`. Looks share one read, and a `signed` answer younger than `fresh` stands (0.47.0). */
 	check(): Promise<SessionState>;
 	subscribe(listener: (event: SessionEvent) => void): () => void;
 }

@@ -205,6 +205,7 @@ export interface NotificationEntryOptions {
 	products?: Record<string, string>;
 	locale?: string;
 	limit?: number;
+	/** Milliseconds between count refreshes (0: only on demand); a refresh due while the page is hidden runs once when it is shown (0.47.0). */
 	interval?: number;
 	labels?: Copy;
 }

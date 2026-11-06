@@ -112,7 +112,7 @@ export interface SidebarSearchOptions {
 	delay?: number;
 	/** The address of every result for a query ("See all results"; Enter in the field opens it). */
 	all?: ((query: string) => string | null) | null;
-	/** Unreleased (after 0.46.0): how an unavailable search asks again by itself (D132), `Again`'s options but `run`; its schedule by default. Read when the search is made. */
+	/** Since 0.47.0: how an unavailable search asks again by itself (D132), `Again`'s options but `run`; its schedule by default. Read when the search is made. */
 	again?: Omit<import('./again.js').AgainOptions, 'run'> | null;
 }
 export interface SidebarNavigationOptions {
@@ -143,7 +143,7 @@ export interface SidebarOptions {
 	action?: SidebarAction | null;
 	search?: SidebarSearchOptions | null;
 	onnavigate?: ((item: FamilyNavigation, event: MouseEvent) => void) | null;
-	/** `sections`, `close`, and since 0.10.0 the search's `searching`, `none`, `unavailable`, `retry`, `results`, `all`, `count`; unreleased (after 0.46.0) `clear` and `AgainLine`'s `tried`, `trying` and `away`. */
+	/** `sections`, `close`, and since 0.10.0 the search's `searching`, `none`, `unavailable`, `retry`, `results`, `all`, `count`; since 0.47.0 `clear` and `AgainLine`'s `tried`, `trying` and `away`. */
 	labels?: Copy;
 	/** ⌘K / Ctrl+K opens the search (0.14.0): an option a product enables; off by default. */
 	shortcut?: boolean;

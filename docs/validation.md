@@ -114,7 +114,7 @@ Validate local links and anchors, English and portability, the thin `CLAUDE.md` 
 
 ## Opening document
 
-The [opening guide](opening.md#verification) names the public adapter checks (`opening.test.mjs`, since 0.21.0 `opening-steps.test.mjs`, and since 0.25.0 `opening-recovery.test.mjs`, which also runs a development server's adapter over an installed copy in a scratch `node_modules`) and `npm run acceptance:opening` in Chrome, Firefox and WebKit (19 checks each since 0.25.0, with `acceptance/opening-failures.mjs`; 24 since 0.31.0 with `acceptance/opening-arrival.mjs`, and 27 since 0.35.0 with `acceptance/opening-focusing.mjs`; 29 on the unreleased work after 0.46.0, with `OpeningArrival`'s chosen Reduced). Its static fixture is independent of the application module, including a module that holds DOMContentLoaded. These checks do not establish product integration.
+The [opening guide](opening.md#verification) names the public adapter checks (`opening.test.mjs`, since 0.21.0 `opening-steps.test.mjs`, and since 0.25.0 `opening-recovery.test.mjs`, which also runs a development server's adapter over an installed copy in a scratch `node_modules`) and `npm run acceptance:opening` in Chrome, Firefox and WebKit (19 checks each since 0.25.0, with `acceptance/opening-failures.mjs`; 24 since 0.31.0 with `acceptance/opening-arrival.mjs`, and 27 since 0.35.0 with `acceptance/opening-focusing.mjs`; 29 since 0.47.0, with `OpeningArrival`'s chosen Reduced). Its static fixture is independent of the application module, including a module that holds DOMContentLoaded. These checks do not establish product integration.
 
 ## UI 0.18.1: shared hierarchy and contextual destinations
 
@@ -376,6 +376,10 @@ Run `npm run acceptance -- "lanes:"` for `checks/laning.mjs` on the `lanes.html`
 ## A dialog's Tab, 0.45.1
 
 `tests/dialog.test.mjs` holds that every Tab and Shift+Tab inside a `Dialog` is answered by the dialog itself, through a field, a checkbox, a radio group as one stop, a link, a disclosure's summary and the actions, in order and back. The browser check "dialog: focus moves in, Tab wraps…" in `acceptance/checks/keyboard.mjs` presses plain Tab two rounds and requires every stop inside the dialog, each target once a round and Shift+Tab one back, in the DOM, React 19 and React 18 consumers; in WebKit it fails on 0.45.0, whose third Tab left the dialog, and passes on 0.45.1. Run it in each engine with `BEYOND_UI_BROWSER=chrome|firefox|webkit node acceptance/run.mjs 'dialog: focus moves in'`.
+
+## Session reads, 0.47.0
+
+`tests/session-reads.test.mjs` holds that `Session` never reads in a loop and that nothing of the package reads for a hidden page: three looks while one read runs make one read and a `signed` answer younger than `fresh` answers the next (`fresh: 0` reads each time); a session whose read answers the same expiry within its last minute is read once; a product that sends a refused request again while `lost()` says so sends it zero times after a renewal, with one read, one renewal announced and no frame, and three refusals together share one read; a session that ended soon after a renewal is still read and asked for, and what waited is sent once renewed; `Watch` looks neither on the network's return nor before expiry while hidden, looks once when shown, waits for its spacing before the look before expiry, and looks once per expiry; a session retry due while hidden runs once when shown and never after `reset()`; and `NotificationEntry`'s `interval` refreshes nothing while hidden and once when shown. On the source before 0.47.0 seven of its eight tests fail (117 reads for the last minute, 50 sends of a refused request); the eighth guards the recovery that must stay. Run it with `node --test tests/session-reads.test.mjs`, beside `tests/session.test.mjs`, `tests/session-host.test.mjs` and `tests/react-session.test.mjs`.
 
 ## Framed choices, 0.46.0
 

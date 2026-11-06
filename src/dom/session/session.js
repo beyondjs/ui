@@ -9,6 +9,7 @@ import { Held } from './held.js';
 import { Reader } from './reader.js';
 import { Retry } from './retry.js';
 import { Channel } from './channel.js';
+import { Doubt } from './doubt.js';
 
 /**
  * A session that ends while the person works, answered the same way in every Beyond product (D63,
@@ -19,7 +20,7 @@ import { Channel } from './channel.js';
  * amended on 2026-10-07): there is no state in which the page is open without a session, so what the
  * page asks for meanwhile waits behind it. Someone else signing in calls `onchanged`; tabs follow each
  * other. `lost({ replay })` resolves true for `read` once renewed, for `write` once renewed while it
- * waited, never for `false`.
+ * waited, never for `false`. Since 0.47.0 it never reads in a loop (`Reader`, `Watch`, `Doubt`).
  */
 export class Session extends Component {
 	/** The copy in English and Spanish. */
@@ -34,6 +35,7 @@ export class Session extends Component {
 	#kind = null;
 	#held = new Held();
 	#attempted = 0;
+	#doubt;
 	#retry;
 	#host;
 	#reader;
@@ -50,31 +52,27 @@ export class Session extends Component {
 	 * its hand-off `start(mode)` for `silent`, `window` and `tab`; who is signed in (`person`,
 	 * `expires`); "Use another account" (`other`), Beyond Accounts' address for a suspended account
 	 * (`accounts`), a host that asks the person itself (`delegate`, the Desktop), the product's own
-	 * sign-in behind Continue (`signin`, 0.8.2), `onrenewed` / `onchanged`, and `source` (0.33.0), who its read reaches.
+	 * sign-in behind Continue (`signin`, 0.8.2), `onrenewed` / `onchanged`, `source` (0.33.0) and `fresh` (0.47.0).
 	 */
-	constructor({ product, read, start, person = null, expires = null, other = null, accounts = null, delegate = null, signin = null, onrenewed = null, onchanged = null, silent = true, pause = 60_000, bound = 8_000, wait = 10_000, interval = 2_000, document = globalThis.document, source = 'accounts', labels = {} }) {
+	constructor({ product, read, start, person = null, expires = null, other = null, accounts = null, delegate = null, signin = null, onrenewed = null, onchanged = null, silent = true, pause = 60_000, bound = 8_000, wait = 10_000, interval = 2_000, fresh = 15_000, document = globalThis.document, source = 'accounts', labels = {} }) {
 		super();
 		this.#element = document.createElement('span');
 		this.#labels = new Labels(words, labels);
 		this.#person = person;
-		this.#options = { product, start, delegate, signin, onrenewed, onchanged, silent, pause, document };
+		this.#options = { product, start, delegate, signin, onrenewed, onchanged, silent, pause, fresh, document };
 		this.#reader = new Reader(read, bound, source);
-		this.#retry = new Retry(() => this.#again());
+		this.#doubt = new Doubt({ reader: this.#reader, held: this.#held, pause, hooks: { signed: () => !this.destroyed && this.#state === 'signed', recover: reason => void this.#recover(reason), known: answer => this.#known(answer) } });
+		this.#retry = new Retry(() => this.#again(), document);
 		// A host that did not answer is asked again by itself, on the same steps as Beyond Accounts
-		this.#host = new Retry(() => void this.#hand());
+		this.#host = new Retry(() => void this.#hand(), document);
 		const hooks = {
-			continue: () => this.#continue(),
-			other: other ? () => other() : null,
-			reopen: () => this.#trip.show(start('window')),
-			cancel: () => void (this.#trip.stop(), (this.#notice.phase = 'idle')),
-			tab: () => this.#tab(),
-			retry: () => this.#again()
+			continue: () => this.#continue(), other: other ? () => other() : null, reopen: () => this.#trip.show(start('window')),
+			cancel: () => void (this.#trip.stop(), (this.#notice.phase = 'idle')), tab: () => this.#tab(), retry: () => this.#again()
 		};
 		this.#notice = new SessionNotice({ labels: this.#labels, accounts, hooks, view: document.defaultView });
-		this.#watch = new Watch({ document, check: () => void this.check() });
-		this.#watch.expires = expires;
+		this.#watch = new Watch({ document, expires, check: () => void this.check() });
 		this.#silent = new Silent({ document, bound: wait });
-		this.#trip = new Trip({ document, read: () => this.#reader.read(), interval, hooks: { ondone: answer => this.#renewed(answer, true), onclosed: () => (this.#notice.phase = 'idle'), onblocked: () => (this.#notice.phase = 'blocked') } });
+		this.#trip = new Trip({ document, read: () => this.#reader.read(Date.now()), interval, hooks: { ondone: answer => this.#renewed(answer, true), onclosed: () => (this.#notice.phase = 'idle'), onblocked: () => (this.#notice.phase = 'blocked') } });
 		this.#channel = new Channel(document.defaultView, product, () => void this.#heard());
 	}
 
@@ -108,13 +106,13 @@ export class Session extends Component {
 
 	/**
 	 * A request came back `UNAUTHENTICATED` (or `ACCOUNT_SUSPENDED`): resolves with whether to send it again.
+	 * Signed, it recovers, unless it was refused again soon after a renewal (`Doubt`).
 	 * @param {{reason?: string|null, replay?: 'read'|'write'|false}} [lost]
 	 */
 	lost({ reason = null, replay = 'read' } = {}) {
 		if (this.#state === 'ended' || this.destroyed) return Promise.resolve(false);
 		const held = this.#held.add(replay);
-		// Signed means no recovery runs: the last one ended in a renewal
-		if (this.#state === 'signed') void this.#recover(reason);
+		if (this.#state === 'signed') void (this.#doubt.near ? this.#doubt.run(reason) : this.#recover(reason));
 		return held;
 	}
 
@@ -126,10 +124,10 @@ export class Session extends Component {
 	 */
 	async check() {
 		if (this.#state !== 'signed' || this.destroyed) return this.#state;
-		const answer = await this.#reader.read();
+		const answer = await this.#reader.recent(this.#options.fresh);
 		if (this.#state === 'signed' && !this.destroyed) {
 			if (answer.state === 'signed') this.#known(answer);
-			else if (answer.state === 'ended') void this.lost({ reason: answer.reason ?? null, replay: false });
+			else if (answer.state === 'ended') void this.#recover(answer.reason ?? null);
 		}
 		return this.#state;
 	}
@@ -142,9 +140,7 @@ export class Session extends Component {
 
 	destroy() {
 		this.#held.settle(false);
-		this.#retry.reset();
-		this.#host.reset();
-		this.#trip.stop();
+		this.#halt();
 		this.#watch.destroy();
 		this.#notice.destroy();
 		this.#channel.close();
@@ -162,7 +158,7 @@ export class Session extends Component {
 			const { outcome, ended } = await this.#silent.attempt(address);
 			said = outcome === 'unavailable' ? 'unavailable' : ended;
 		}
-		const answer = await this.#reader.read();
+		const answer = await this.#reader.read(Date.now());
 		if (this.destroyed) return;
 		if (answer.state === 'signed') return this.#renewed(answer, false);
 		if (answer.state === 'unavailable' || said === 'unavailable') return this.#ask('unavailable', said === 'unavailable' ? 'accounts' : answer.source);
@@ -195,7 +191,7 @@ export class Session extends Component {
 		const done = await Promise.resolve().then(() => this.#options.delegate(request)).catch(() => null);
 		if (this.destroyed || this.#state !== 'asking') return;
 		if (done === false) return this.#end();
-		const answer = done ? await this.#reader.read() : null;
+		const answer = done ? await this.#reader.read(Date.now()) : null;
 		if (this.destroyed || this.#state !== 'asking') return;
 		if (answer?.state === 'signed') return this.#renewed(answer, true);
 		this.#host.schedule();
@@ -213,7 +209,7 @@ export class Session extends Component {
 		this.#notice.phase = 'waiting';
 		const done = await Promise.resolve().then(signin).catch(() => false);
 		if (this.destroyed || this.#state !== 'asking') return;
-		const answer = done ? await this.#reader.read() : null;
+		const answer = done ? await this.#reader.read(Date.now()) : null;
 		if (answer?.state === 'signed') return this.#renewed(answer, true);
 		this.#notice.phase = 'idle';
 	}
@@ -234,9 +230,7 @@ export class Session extends Component {
 
 	/** A host's no: nothing held is sent and nothing is shown, since the window is closing. */
 	#end() {
-		this.#retry.reset();
-		this.#host.reset();
-		this.#trip.stop();
+		this.#halt();
 		this.#held.settle(false);
 		this.#go('ended');
 	}
@@ -247,10 +241,9 @@ export class Session extends Component {
 		if (this.#person?.id && person?.id && person.id !== this.#person.id) return this.#changed(person);
 		this.#person = person ?? this.#person;
 		this.#watch.expires = answer.expires ?? null;
-		this.#retry.reset();
-		this.#host.reset();
+		this.#doubt.confirm();
+		this.#halt();
 		this.#kind = null;
-		this.#trip.stop();
 		this.#notice.hide();
 		this.#held.settle(true);
 		this.#go('signed');
@@ -262,9 +255,7 @@ export class Session extends Component {
 	/** Someone else signed in: nothing held is sent, and the product starts again for them. */
 	#changed(person) {
 		this.#held.settle(false);
-		this.#retry.reset();
-		this.#host.reset();
-		this.#trip.stop();
+		this.#halt();
 		this.#notice.hide();
 		this.#person = person;
 		this.#kind = null;
@@ -272,6 +263,13 @@ export class Session extends Component {
 		this.#emit({ type: 'changed' });
 		if (this.#options.onchanged) return this.#options.onchanged(person);
 		this.#options.document.defaultView?.location.assign('/');
+	}
+
+	/** No try again by itself, and no sign-in window followed. */
+	#halt() {
+		this.#retry.reset();
+		this.#host.reset();
+		this.#trip.stop();
 	}
 
 	#known(answer) {
@@ -284,7 +282,7 @@ export class Session extends Component {
 	async #heard() {
 		if (this.#trip.open) return this.#trip.wake();
 		if (this.#state !== 'asking') return;
-		const answer = await this.#reader.read();
+		const answer = await this.#reader.read(Date.now());
 		if (answer.state === 'signed' && this.#state !== 'signed') this.#renewed(answer, true);
 	}
 
