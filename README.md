@@ -82,6 +82,6 @@ Read [AGENTS.md](AGENTS.md), [architecture](docs/architecture.md), [coding stand
 
 UI is a library: it has no development server, no port and no suite selector service. The acceptance pages under `acceptance/fixtures/` are a test harness, not an application.
 
-Maintained guides belong in `docs/`, dated evidence in `docs/reviews/`, and temporary assignments in [docs-temp](docs-temp/README.md).
+Maintained guides belong in `docs/` and dated evidence in `docs/reviews/`.
 
 - [Dialog motion correction and verification](docs/reviews/2026-10-22/dialog-motion.md).
